@@ -106,8 +106,10 @@
     //TODO:use labkey roles instead of hard coding the group names.
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group complianceGroup = GroupManager.getGroup(getContainer(), "compliance (LDAP)", GroupEnumType.SITE);
+    Group animalCare = GroupManager.getGroup(getContainer(),"animalcare (LDAP)",GroupEnumType.SITE);
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
+    boolean isAnimalCare = getUser().isInGroup(animalCare.getUserId());
 
     //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "husbandry_frequency"));
 
@@ -241,11 +243,15 @@
                         <dt>Time of day:        </dt> <dd>{{displaytimeofday}}</dd>
                     </dl>
 
+                    <!-- ko if:  !isAnimalCare() -->
+
                     <button class="btn btn-default" data-bind="click: $root.requestTableClickAction" data-toggle="collapse" data-target="#waterExceptionPanel"
                                           id="waterInfo" params="" disabled>Enter Single Day Water</button>
 
                     <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
                             id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
+
+                    <!-- /ko -->
 
                     <!--  Modal Definition -->
                     <div class="modal fade" id="myModal" role="dialog">
@@ -406,6 +412,7 @@
                                     </label>
                                 </div>
                             </div>
+
                             <div style="text-align: right;">
                                 <button class="btn btn-default" data-bind="click: $root.collapseSingleWater" data-toggle="collapse" >Cancel</button>
                                 <%--<button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>--%>
@@ -417,9 +424,8 @@
                                 <button id ="submitNewWater" class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Insert Single Day Water</button>
 
                                 <!-- /ko -->
-
-
                             </div>
+
                         </form>
 
                     </div>
@@ -527,6 +533,7 @@
         let isAdmin = <%=isAdmin%>;
         let complianceStaff = <%=isCompliance%>;
         let isVet = <%=isVet%>;
+        let isAnimalCare = <%=isAnimalCare%>;
 
         if (isAdmin || complianceStaff || isVet){
             isSuperUser = true;
@@ -571,7 +578,7 @@
 
                             if ($animalId == 'undefined' || $animalId == "null"){
                                 let queryConfig ={};
-                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser);
+                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser,isAnimalCare);
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data)
                                 {
@@ -620,7 +627,7 @@
                             //Display panel in the animal history
                             else{
                                 let queryConfig ={};
-                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser, $animalId);
+                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser, isAnimalCare, $animalId);
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
@@ -705,6 +712,7 @@
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
+                            "TotalWater~isnonblank":true,
                             "animalId~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
@@ -924,7 +932,8 @@
                 frequencyCoalesced:         ko.observable(),
                 frequencyMeaningCoalesced:  ko.observable(),
                 displaytimeofday:           ko.observable(),
-                rawDate:                    ko.observable()
+                rawDate:                    ko.observable(),
+                isAnimalCare:               ko.observable(isAnimalCare),
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -939,6 +948,7 @@
                 volumeForm:                 new Item("Volume:", ""),
                 provideFruitForm:           new Item("Provide Fruit:","none"),
                 assignedToForm:             new Item("Assigned To:","researchstaff")
+             //   isAnimalCare:               ko.observable(isAnimalCare)
 
             },
 
@@ -1212,6 +1222,10 @@
             }*/
         });
 
+        WebUtils.VM.taskDetails.isAnimalCare = ko.pureComputed(function (){
+            return isAnimalCare;
+        });
+
         //Updating all the records of the form with data coming from the taskDeatils panel
         //These records are not supposed to be change by the end users when adding or updating
         //a waterAmount record.
@@ -1229,10 +1243,6 @@
 
         WebUtils.VM.form.projectForm = ko.pureComputed(function (){
                 return WebUtils.VM.taskDetails.projectCoalesced();
-        });
-
-        WebUtils.VM.form.dataSourceForm = ko.pureComputed(function(){
-            return WebUtils.VM.taskDetails.dataSource();
         });
 
         WebUtils.VM.form.objectIdForm = ko.pureComputed(function(){
@@ -1449,7 +1459,7 @@
 
 
 
-    function queryConfigFunc (fetchInfo, isSuperUser, animalId){
+    function queryConfigFunc (fetchInfo, isSuperUser, isAnimalCare, animalId){
         let date = new Date();
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
@@ -1459,7 +1469,7 @@
         };
 
 
-        if (isSuperUser){
+        if (isSuperUser || isAnimalCare){
             if (animalId){
                 configObject["animalid~in"]= animalId;
             }

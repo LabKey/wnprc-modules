@@ -1,10 +1,11 @@
 #!/bin/bash
 
-FB_IDENTIFIER="w_fb_"
+TAG_IDENTIFIER="docker/21.3_"
 
-if [[ $SOURCE_BRANCH == *$FB_IDENTIFIER* ]];
+if [[ $DOCKER_TAG == $TAG_IDENTIFIER* ]];
 then
-        SHORT_BRANCH_NAME=${SOURCE_BRANCH#*$FB_IDENTIFIER}
+        SHORT_BRANCH_NAME=${DOCKER_TAG#$TAG_IDENTIFIER}
+        echo $SHORT_BRANCH_NAME
 else
         SHORT_BRANCH_NAME="master"
 fi

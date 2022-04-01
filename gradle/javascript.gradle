@@ -21,7 +21,7 @@ if (file("${project.projectDir}/src/java").exists())
     }
 }
 
-if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) 
+if (file("$projectDir/webpack.config.js").exists())
 {
     task('webpack', group: 'JavaScript', type: NodeTask, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {

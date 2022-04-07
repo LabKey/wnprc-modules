@@ -1321,6 +1321,7 @@
 
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 var taskid = LABKEY.Utils.generateUUID();
+                var taskInsertSuccess = false;
                 //var date = form.date.format("Y-m-d H:i:s");
 
                 var insertDate = new Date(form.dateForm);
@@ -1338,34 +1339,52 @@
                 }
 
                 if (form.dataSourceForm === "waterOrders"){
-                    WebUtils.API.insertRows('study', 'waterAmount', [{
-                        taskid:                 taskid,
-                        Id:                     form.animalIdForm,
-                        date:                   insertDate.getTime(),
-                        project:                form.projectForm,
-                        volume:                 form.volumeForm.value,
-                        provideFruit:           form.provideFruitForm.value,
-                        assignedTo:             form.assignedToForm.value,
-                        frequency:              form.frequencyForm.value,
-                        waterOrderObjectId:     form.waterOrderObjectId,
-                        recordSource:           "WaterCalendar",
-                        waterSource:            "regulated",
-                        qcstate:                10 //Schedule
-                    }]);
+
                     WebUtils.API.insertRows('ehr', 'tasks', [{
                         taskid:     taskid,
                         title:      "Enter Water Daily Amount",
                         category:   "task",
                         qcstate:    1, //Complete
                         formType:   "Enter Water Daily Amount"
-                       // assignedTo:
-                    }])
-                    WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                    WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                    WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                    WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                    $('#waterExceptionPanel').unblock();
-                    calendar.refetchEvents();
+                        // assignedTo:
+                    }]).then(function(insertTask){
+                        if (insertTask){
+                            taskInsertSuccess = true;
+                        }
+                    }).then(function (){
+                        return Promise.all([ (taskInsertSuccess) ?
+                            WebUtils.API.insertRows('study', 'waterAmount', [{
+                                taskid:                 taskid,
+                                Id:                     form.animalIdForm,
+                                date:                   insertDate.getTime(),
+                                project:                form.projectForm,
+                                volume:                 form.volumeForm.value,
+                                provideFruit:           form.provideFruitForm.value,
+                                assignedTo:             form.assignedToForm.value,
+                                frequency:              form.frequencyForm.value,
+                                waterOrderObjectId:     form.waterOrderObjectId,
+                                recordSource:           "WaterCalendar",
+                                waterSource:            "regulated",
+                                qcstate:                10 //Schedule
+                            }]) : Promise.resolve()
+                        ]);
+                    }).then(function(){
+                        WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                        WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                        WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                        WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+                        $('#waterExceptionPanel').unblock();
+                        calendar.refetchEvents();
+                    }).catch(function(e){
+                        if (taskInsertSuccess){
+                            alert("Failed to assigned water amount to newly created task");
+                        }else {
+                            alert("Task was not created");
+                        }
+                    });
+
+
+
 
 
                 } else if (form.dataSourceForm === "waterAmount"){

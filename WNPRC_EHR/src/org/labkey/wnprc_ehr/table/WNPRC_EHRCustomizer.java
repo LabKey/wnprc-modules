@@ -225,12 +225,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             super.renderGridCellContents(ctx, out);
                         }
                     }
-
-                    @Override
-                    public Object getDisplayValue(RenderContext ctx)
-                    {
-                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
-                    }
                 });
             }
         }

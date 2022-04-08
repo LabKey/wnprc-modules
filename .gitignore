@@ -27,5 +27,6 @@ wnprc_billing/resources/credits/jars.txt
 .storybook-out/
 
 # generated artifacts from @labkey/build
+*/resources/web/gen/
 */resources/web/*/gen/
 */resources/views/gen/

@@ -2205,6 +2205,9 @@ public class WNPRC_EHRController extends SpringActionController
 
     }
 
+    /* TODO: This is an API to clean up an inconsistency in the performed by column of study.obs dataset. Once the
+     underlying issue is resolved, this API can be deleted.
+     */
     @RequiresPermission(AdminPermission.class)
     public class CorrectObsUserIdsAction extends MutatingApiAction<Object>
     {

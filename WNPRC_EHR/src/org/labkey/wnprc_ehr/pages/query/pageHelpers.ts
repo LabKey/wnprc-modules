@@ -11,21 +11,36 @@ import {
     TaskValuesType,
     WaterAmountValuesType
 } from "../typings/main";
+import {InsertValuesWithCommand, RowObj} from "../../../../../weight/typings/main";
 
-export const setupWaterAmountValues = (values: Array<any>, QCStateLabel: string, taskId: string): Array<WaterAmountValuesType> => {
+export const setupWaterAmountValues = (values: Object, QCStateLabel: string, taskId: string): Array<WaterAmountValuesType> => {
     let valuesToInsert: Array<WaterAmountValuesType> = [];
-    for (let value of values){
+
+
         valuesToInsert.push({
-            Id: value.animalid.value,
+
+            Id: values["Id"],
+            QCStateLabel: QCStateLabel,
+            date: values["date"],
+            project: values["project"],
+            volume: values["volume"],
+            provideFruit: values["provideFruit"],
+            assignedTo: values["assignedTo"],
+            frequency: values["frequency"],
+            waterOrderObjectId: values["waterOrderObjectId"],
+            recordSource: values["recordSource"],
+            waterSource: values["waterSource"],
+            taskid: taskId
+
+           /* Id: value.animalid.value,
             QCStateLabel: QCStateLabel,
             date: value.date.value,
-            weight: value.weight.value,
-            remark: value.remark.value,
-            taskid: taskId,
-            objectid: value.objectid.value
+
+            taskid: taskId,*/
+
             //lsid: value.lsid.value || ""
         })
-    }
+
     return valuesToInsert;
 };
 
@@ -39,6 +54,18 @@ export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: num
         formType: "Enter Water Daily Amount",
         QCStateLabel: QCStateLabel
     }];
+};
+
+export const groupCommands = (values: Array<RowObj>): DataRowsPerCommandType => {
+
+    return values.reduce((acc: object, item: RowObj) => {
+        if (!acc[item.command.value.toString()]) {
+            acc[item.command.value.toString()] = [];
+        }
+
+        acc[item.command.value.toString()].push(item);
+        return acc;
+    }, {} as InsertValuesWithCommand) as DataRowsPerCommandType;
 };
 
 export const setupJsonData = (values: DataRowsPerCommandType, QCState: string, taskId: string, reviewer: number, date: string, command: CommandType): Commands => {

@@ -30,6 +30,7 @@
         dependencies.add("clientapi/ext4");
         dependencies.add("fullcalendar");
         dependencies.add("/webutils/lib/webutils_core/api.js");
+        dependencies.add("/wnprc_ehr/gen/waterMonitoringSystem.js");
 
         dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");
         dependencies.add("https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js");
@@ -1339,8 +1340,53 @@
                 }
 
                 if (form.dataSourceForm === "waterOrders"){
+                    let waterAmountRecord = {
+                                                taskid:                 taskid,
+                                                Id:                     form.animalIdForm,
+                                                date:                   insertDate.getTime(),
+                                                project:                form.projectForm,
+                                                volume:                 form.volumeForm.value,
+                                                provideFruit:           form.provideFruitForm.value,
+                                                assignedTo:             form.assignedToForm.value,
+                                                frequency:              form.frequencyForm.value,
+                                                waterOrderObjectId:     form.waterOrderObjectId,
+                                                recordSource:           "WaterCalendar",
+                                                waterSource:            "regulated",
+                                                qcstate:                10 //Schedule
+                    };
 
-                    WebUtils.API.insertRows('ehr', 'tasks', [{
+                    let returnObject = {};
+                    //var saveSuccess = saveWaterHelper(waterAmountRecord,"insert",userId);
+                    waterMonitoringSystem.saveWaterAmount(waterAmountRecord,"insert",userId, returnObject).then(  response => {
+                        debugger;
+                        console.log('Received response: ${response.status}');
+                        console.log('returnObject ' + returnObject);
+                        console.log(returnObject.success);
+                        if( response.ok ){
+                            WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                            WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                            WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                            WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+                            $('#waterExceptionPanel').unblock();
+                            calendar.refetchEvents();
+                        } else {
+                            console.log ('promise did not return');
+                        }
+
+                    });
+
+                    /*if (saveSuccess.success){
+                        WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                        WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                        WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                        WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+                        $('#waterExceptionPanel').unblock();
+                        calendar.refetchEvents();
+                    }else{
+                        console.log(saveSuccess.message);
+                    }*/
+
+                    /*WebUtils.API.insertRows('ehr', 'tasks', [{
                         taskid:     taskid,
                         title:      "Enter Water Daily Amount",
                         category:   "task",
@@ -1381,7 +1427,7 @@
                         }else {
                             alert("Task was not created");
                         }
-                    });
+                    });*/
 
 
 
@@ -1564,6 +1610,12 @@
         }else{
             return row.objectIdCoalesced
         }
+    }
+     function saveWaterHelper(waterAmountRecord,command,userId){
+        let returnObj =  waterMonitoringSystem.saveWaterAmount(waterAmountRecord,command,userId);
+        console.log(returnObj);
+        return returnObj;
+
     }
 
 

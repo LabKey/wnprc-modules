@@ -1,5 +1,7 @@
 require("ehr/triggers").initScript(this);
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
+let LABKEY = require("labkey");
+let triggerHelper = new org.labkey.wnprc_ehr.TriggerScriptHelper.create(LABKEY.Security.currentUser.id, LABKEY.Security.currentContainer.id);
 let allowUsersMap = {};
 
 function onInit(event, helper){
@@ -152,15 +154,57 @@ function onUpdate(helper, scriptErrors, row, oldRow){
     if (row && row.project){
         let currentUser = LABKEY.Security.currentUser.id;
         let allowProjects = allowUsersMap[currentUser];
-        allowProjects.forEach(function (project){
-            if (row.project === project){
-                waterOrdersAdmin = true;
-            }
-        })
+        if (allowProjects){
+            allowProjects.forEach(function (project){
+                if (row.project === project){
+                    waterOrdersAdmin = true;
+                }
+            })
+        }
+
         if (!waterOrdersAdmin){
             EHR.Server.Utils.addError(scriptErrors,'project','User does not have permission to edit water order','ERROR');
             console.error("Water System error, user: "+ currentUser + "trying to modify water order for project: "+ row.project +" and they do not have permissions");
 
         }
+    }
+    console.log ("value of triggerHelper admin "+ triggerHelper.isDataAdmin());
+
+    if (!triggerHelper.isDataAdmin()){
+        let errorField = null;
+        if(oldRow){
+            console.log(oldRow);
+            //console.log(oldRow.)
+            console.log(row);
+
+            var tempKeys = Object.keys(oldRow);
+            for (var i = 0; i <= tempKeys.length; i++){
+                var key = tempKeys[i];
+                console.log(key);
+                console.log (oldRow[key]);
+            }
+            /*for (const key in oldRow){
+                console.log(`${key}: ${oldRow[key]}`);
+            }*/
+            /*for(const [key,value] of Object.keys(oldRow)){
+                console.log("rowItem value "+ value);
+                console.log("rowItem label "+ key);
+            }*/
+            // Object.entries(oldRow).forEach(([key, value]) => {
+            //     if (value){
+            //         console.log("rowItem value "+ value);
+            //         console.log("rowItem label "+ key);
+            //     }
+            //
+            // });
+        }
+
+
+        if (row.id !== oldRow.id || row.date !== oldRow.date || row.volume !== oldRow.volume)
+        {
+            //EHR.Server.Utils.addError(scriptErrors,'date');
+
+        }
+
     }
 }

@@ -9,6 +9,10 @@ export interface ConfigProps {
     filterArray?: Array<any>;
 }
 
+export interface ContextProviderProps{
+    setFormDataInAppContext: (formData: Array<any>) => void;
+}
+
 export type DataRowsPerCommandType = {
     CommandType: Array<RowObj>;
 }
@@ -39,10 +43,15 @@ export type WaterAmountValuesType = {
     Id: string;
     QCStateLabel: string;
     date: string;
-    weight: number;
-    remark: string;
+    project: number;
+    volume: number;
+    provideFruit: string;
+    assignedTo: string;
+    frequency: string;
+    waterOrderObjectId: string;
+    recordSource: string;
+    waterSource: string;
     taskid: string;
-    objectid: string;
 }
 
 export type TaskValuesType = {

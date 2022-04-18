@@ -1,3 +1,4 @@
+const path = require('path');
 module.exports = function wp(env) {
     const base = {
         entry: './src/ts/primateid.ts',
@@ -24,7 +25,7 @@ module.exports = function wp(env) {
             output: {
                 ...base.output,
                 libraryTarget: 'commonjs',
-                path: `${env.PROJECT_DIR}/resources/scripts/primateid`
+                path: path.resolve(__dirname, `resources/scripts/primateid`)
             }
         },
         {   // create a configuration for the client side (in 'web')
@@ -32,7 +33,7 @@ module.exports = function wp(env) {
             output: {
                 ...base.output,
                 libraryTarget: 'var',
-                path: `${env.PROJECT_DIR}/resources/web/primateid`
+                path: path.resolve(__dirname, `resources/web/primateid`)
             }
         },
     ];

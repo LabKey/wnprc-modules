@@ -6,9 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node_modules/.bin/better-npm-run build",
-    "build-prod": "node_modules/.bin/better-npm-run build-prod",
-    "storybook": "node_modules/.bin/start-storybook",
-    "build-storybook": "node_modules/.bin/build-storybook -c .storybook -o .storybook-out"
+    "build-prod": "node_modules/.bin/better-npm-run build-prod"
   },
   "repository": {
     "type": "git",
@@ -25,7 +23,6 @@
   },
   "homepage": "https://github.com/WNPRC-EHR-Services/wnprc-modules#readme",
   "devDependencies": {
-    "@storybook/react": "^5.3.19",
     "@types/extjs": "^4.2.32",
     "@types/knockout": "^3.4.54",
     "@types/knockout.mapping": "^2.0.33",

@@ -26,7 +26,9 @@
     "react-datepicker": "3.8.0",
     "react-dom": "16.14.0",
     "react-select": "3.2.0",
-    "react-tabs": "1.1.0"
+    "react-tabs": "1.1.0",
+    "@labkey/api": "1.0.0",
+    "rsvp": "~3.3.0"
   },
   "devDependencies": {
     "@babel/core": "7.9.6",

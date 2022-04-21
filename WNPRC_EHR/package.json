@@ -18,6 +18,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dayjs": "^1.8.24",
+    "jquery": "^3.5.0",
     "react": "16.14.0",
     "react-bootstrap": "1.0.1",
     "react-bootstrap-typeahead": "2.6.0",
@@ -28,16 +30,21 @@
     "react-select": "3.2.0",
     "react-tabs": "1.1.0",
     "@labkey/api": "1.0.0",
-    "rsvp": "~3.3.0"
+    "rsvp": "~3.3.0",
+    "typescript": "^3.8.3",
+    "ts-loader": "^6.2.2",
+    "urijs": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.9.6",
     "@types/react": "16.14.21",
     "@types/react-bootstrap": "1.0.1",
+    "css-loader": "^3.5.2",
     "@types/react-data-grid": "2.0.19",
     "@types/react-dom": "16.9.14",
     "@types/react-tabs": "1.0.5",
     "better-npm-run": "0.1.1",
+    "style-loader": "^1.1.4",
     "webpack": "4.42.1",
     "webpack-cli": "3.3.11"
   },

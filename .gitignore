@@ -25,4 +25,5 @@ docker/nginx/key.pem
 
 # generated artifacts from @labkey/build
 */resources/web/*/gen/
+*/resources/web/gen/
 */resources/views/gen/

@@ -116,7 +116,7 @@ public class WNPRC_PurchasingManager
         }
     }
 
-    public List<ValidationException> submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
+    public List<ValidationException> submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm) throws Exception
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
         boolean isNewRequest = null == requestForm.getRowId();
@@ -333,10 +333,9 @@ public class WNPRC_PurchasingManager
         }
         catch (Exception e)
         {
-            List<ValidationException> rowErrors = new ArrayList<>();
-            rowErrors.add(new ValidationException().addError(new SimpleValidationError(e.getMessage())));
-            return rowErrors;
+            throw new Exception(e.getMessage(), e);// is there a less generic exception to use to capture exceptions from insertRows, updateRows, and deleteRows in addition to other exceptions (like IllegalStateException)?
         }
+
         return validationErrors;
     }
 

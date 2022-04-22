@@ -116,7 +116,7 @@ public class WNPRC_PurchasingManager
         }
     }
 
-    public List<ValidationException> submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
+    public List<ValidationException> submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm) throws Exception
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
         boolean isNewRequest = null == requestForm.getRowId();
@@ -331,12 +331,7 @@ public class WNPRC_PurchasingManager
 
             transaction.commit();
         }
-        catch (Exception e)
-        {
-            List<ValidationException> rowErrors = new ArrayList<>();
-            rowErrors.add(new ValidationException().addError(new SimpleValidationError(e.getMessage())));
-            return rowErrors;
-        }
+
         return validationErrors;
     }
 

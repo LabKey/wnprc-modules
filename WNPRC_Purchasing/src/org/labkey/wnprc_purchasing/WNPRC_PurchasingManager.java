@@ -331,10 +331,6 @@ public class WNPRC_PurchasingManager
 
             transaction.commit();
         }
-        catch (Exception e)
-        {
-            throw new Exception(e.getMessage(), e);// is there a less generic exception to use to capture exceptions from insertRows, updateRows, and deleteRows in addition to other exceptions (like IllegalStateException)?
-        }
 
         return validationErrors;
     }

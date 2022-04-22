@@ -6,25 +6,6 @@
 
 require("ehr/triggers").initScript(this);
 var LABKEY = require("labkey");
-//create a user id to displayname map to convert userid to displayname for the performedby field.
-var userIdCache = {};
-var userIdSelectConfig = {
-    schemaName: 'core',
-    queryName: 'users',
-    success: function (response) {
-
-        var result = response.rows;
-        for (i = 0; i < result.length-1; i++) {
-            userIdCache[result[i].UserId] = result[i].DisplayName
-        }
-    },
-    failure: function (f) {
-        console.log('obs.js failed to get core users data');
-    }
-}
-
-LABKEY.Query.selectRows(userIdSelectConfig);
-
 function onUpsert(helper, scriptErrors, row, oldRow){
 
     //for compatability with the ETL
@@ -32,24 +13,20 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         row.performedby = row.userid;
 
     //set the performed by to the user's display name
-    if (Object.keys(userIdCache).length) {
-        if (userIdCache[row.performedby]) {
-            row.performedby = userIdCache[row.performedby];
-        } else {
-            var getUserDisplayNameConfig = {
-                schemaName: 'core',
-                queryName: 'users',
-                filterArray: [LABKEY.Filter.create('userid', row.performedby, LABKEY.Filter.Types.EQUALS)],
-                success: function(data) {
-                    var rows = data.rows;
-                    if (rows[0]) {
-                        row.performedby = rows[0].DisplayName;
-                    }
-                }
+    var getUserDisplayNameConfig = {
+        schemaName: 'core',
+        queryName: 'users',
+        filterArray: [LABKEY.Filter.create('userid', row.performedby, LABKEY.Filter.Types.EQUALS)],
+        success: function(data) {
+            var rows = data.rows;
+            if (rows[0]) {
+                row.performedby = rows[0].DisplayName;
             }
-
-            LABKEY.Query.selectRows(getUserDisplayNameConfig);
         }
+    }
+
+    if (!isNaN(row.performedby)){
+        LABKEY.Query.selectRows(getUserDisplayNameConfig);
     }
 
     if (

@@ -14,7 +14,7 @@ import { Command, CommandType } from "@labkey/api/dist/labkey/query/Rows";
 
 //const waterMonitoringSystem: any
 
-export const saveWaterAmount = async (waterRecordCalendar, command, userid, returnObject) =>
+export const saveWaterAmount = (waterRecordCalendar, command, userid, returnObject) =>
 {
     returnObject = {success:false, message:"null"};
     let taskCommand = null;

@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
 <%@ page import="static java.lang.Integer.parseInt" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -111,6 +112,7 @@
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isAnimalCare = getUser().isInGroup(animalCare.getUserId());
+    String container = getContainer().getEncodedPath();
 
     //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "husbandry_frequency"));
 
@@ -532,6 +534,7 @@
         let complianceStaff = <%=isCompliance%>;
         let isVet = <%=isVet%>;
         let isAnimalCare = <%=isAnimalCare%>;
+        let container = "<%= h(container.toString())%>";
 
         if (isAdmin || complianceStaff || isVet){
             isSuperUser = true;
@@ -1340,7 +1343,62 @@
                 }
 
                 if (form.dataSourceForm === "waterOrders"){
-                    let waterAmountRecord = {
+                    LABKEY.Query.saveRows({
+                        method: 'POST',
+                        containerPath: container,
+                        commands:[{
+                            command: 'insert',
+                            containerPath: container,
+                            schemaName: 'study',
+                            queryName: 'waterAmount',
+                            rows:[{
+                                taskid:                 taskid,
+                                Id:                     form.animalIdForm,
+                                date:                   insertDate.getTime(),
+                                project:                form.projectForm,
+                                volume:                 form.volumeForm.value,
+                                provideFruit:           form.provideFruitForm.value,
+                                assignedTo:             form.assignedToForm.value,
+                                frequency:              form.frequencyForm.value,
+                                waterOrderObjectId:     form.waterOrderObjectId,
+                                recordSource:           "WaterCalendar",
+                                waterSource:            "regulated",
+                                qcstate:                10 //Schedule
+                            }]
+                        },{
+                            command: 'insert',
+                            containerPath: container,
+                            schemaName: 'ehr',
+                            queryName: 'tasks',
+                            rows:[{
+                                taskid:     taskid,
+                                title:      "Enter Water Daily Amount",
+                                category:   "task",
+                                qcstate:    1, //Complete
+                                formType:   "Enter Water Daily Amount"
+                            }]
+                        }],
+                        timeout: 999999,
+                        scope: this,
+                        failure: function(e){
+                            console.log('Error saving water amount and task' + e);
+                            // Refresh the calendar view.
+                            calendar.refetchEvents();
+                            //Unblock calendar
+                            $('#water-calendar').unblock();
+                        },
+                        success: function(){
+                            WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                            WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                            WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                            WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+                            $('#waterExceptionPanel').unblock();
+                            calendar.refetchEvents();
+                        }
+
+                    });
+
+                   /* let waterAmountRecord = {
                                                 taskid:                 taskid,
                                                 Id:                     form.animalIdForm,
                                                 date:                   insertDate.getTime(),
@@ -1359,7 +1417,7 @@
                     //var saveSuccess = saveWaterHelper(waterAmountRecord,"insert",userId);
                     waterMonitoringSystem.saveWaterAmount(waterAmountRecord,"insert",userId, returnObject).then(  response => {
                         debugger;
-                        console.log('Received response: ${response.status}');
+
                         console.log('returnObject ' + returnObject);
                         console.log(returnObject.success);
                         if( response.ok ){
@@ -1375,7 +1433,7 @@
 
                     });
 
-                    /*if (saveSuccess.success){
+                    if (saveSuccess.success){
                         WebUtils.VM.form.volumeForm.dirtyFlag.reset();
                         WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
                         WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
@@ -1385,53 +1443,6 @@
                     }else{
                         console.log(saveSuccess.message);
                     }*/
-
-                    /*WebUtils.API.insertRows('ehr', 'tasks', [{
-                        taskid:     taskid,
-                        title:      "Enter Water Daily Amount",
-                        category:   "task",
-                        qcstate:    1, //Complete
-                        formType:   "Enter Water Daily Amount"
-                        // assignedTo:
-                    }]).then(function(insertTask){
-                        if (insertTask){
-                            taskInsertSuccess = true;
-                        }
-                    }).then(function (){
-                        return Promise.all([ (taskInsertSuccess) ?
-                            WebUtils.API.insertRows('study', 'waterAmount', [{
-                                taskid:                 taskid,
-                                Id:                     form.animalIdForm,
-                                date:                   insertDate.getTime(),
-                                project:                form.projectForm,
-                                volume:                 form.volumeForm.value,
-                                provideFruit:           form.provideFruitForm.value,
-                                assignedTo:             form.assignedToForm.value,
-                                frequency:              form.frequencyForm.value,
-                                waterOrderObjectId:     form.waterOrderObjectId,
-                                recordSource:           "WaterCalendar",
-                                waterSource:            "regulated",
-                                qcstate:                10 //Schedule
-                            }]) : Promise.resolve()
-                        ]);
-                    }).then(function(){
-                        WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                        WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                        WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                        WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                        $('#waterExceptionPanel').unblock();
-                        calendar.refetchEvents();
-                    }).catch(function(e){
-                        if (taskInsertSuccess){
-                            alert("Failed to assigned water amount to newly created task");
-                        }else {
-                            alert("Task was not created");
-                        }
-                    });*/
-
-
-
-
 
                 } else if (form.dataSourceForm === "waterAmount"){
 
@@ -1464,6 +1475,10 @@
                                 WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
 
                                 $('#waterExceptionPanel').unblock();
+                                // Refresh the calendar view.
+                                calendar.refetchEvents();
+                                //Unblock calendar
+                                $('#water-calendar').unblock();
 
                             } else {
                                 alert('Water cannot be closed')
@@ -1481,11 +1496,6 @@
                 if (hideEditPanel){
                     $('#waterExceptionPanel').collapse('hide')
                 }
-
-                // Refresh the calendar view.
-                calendar.refetchEvents();
-                //Unblock calendar
-                $('#water-calendar').unblock();
 
             },
             editMultiple: function (){
@@ -1612,6 +1622,7 @@
         }
     }
      function saveWaterHelper(waterAmountRecord,command,userId){
+        debugger;
         let returnObj =  waterMonitoringSystem.saveWaterAmount(waterAmountRecord,command,userId);
         console.log(returnObj);
         return returnObj;

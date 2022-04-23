@@ -16,7 +16,7 @@ SELECT wtbd.id as animalId,
        wtbd.currentWaterCondition,
        waterScheduledAnimalsOuter.condition AS conditionAtTime,
        CAST(waterScheduledAnimalsOuter.mlsperKg AS NUMERIC) AS InnerMlsPerKg,
-       wtbd.project,
+       waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,
        wtbd.qcstate
 FROM study.waterTotalByDate wtbd
@@ -47,6 +47,7 @@ JOIN
           wsa.id,
           wsa.condition,
           wsa.mlsperKg,
+          wsa.project,
           CAST (wsa.date AS DATE) AS startDate,
           COALESCE(
                   CAST((SELECT wsa2.date FROM study.waterScheduledAnimals wsa2

@@ -15,7 +15,6 @@
  */
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;

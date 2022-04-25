@@ -70,7 +70,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
     @Override
     public String getScheduleDescription()
     {
-        return "every day at 1PM";
+        return "every day at 3PM and 7 PM";
     }
 
     public String getDescription()
@@ -143,14 +143,15 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
                     LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-                     mlsPerKg = ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class);
-                     totalWater = ConvertHelper.convert(mapItem.get("TotalWater"),String.class);
+                     mlsPerKg = ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class);
+                     totalWater = ConvertHelper.convert(mapItem.get("TotalWater"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("TotalWater"),String.class);
 
                     msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("animalId"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + mlsPerKg == null ? " "  : mlsPerKg
-                            + "</td><td style='padding: 5px; text-align: center;'> " + totalWater == null ? " " : totalWater +"</td></tr>" );
+                            + "</td><td style='padding: 5px; text-align: center;'> " + mlsPerKg
+                            + "</td><td style='padding: 5px; text-align: center;'> " + totalWater
+                            +"</td></tr>" );
 
                 }
             }

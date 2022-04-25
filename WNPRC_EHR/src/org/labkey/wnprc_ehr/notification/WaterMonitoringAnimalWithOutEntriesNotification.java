@@ -106,7 +106,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
         filter.addClause(orClause);
 
-        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("id","date","mlsPerKg","TotalWater"), filter, null);
+        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("animalId","date","mlsPerKg","TotalWater"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
@@ -122,7 +122,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
                 LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-                msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("id"),String.class)
+                msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("animalId"),String.class)
                         + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
                         + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class)
                         + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("TotalWater"),String.class) +"</td></tr>" );

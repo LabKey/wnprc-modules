@@ -194,6 +194,41 @@ var weightConfig = function wp(env) {
     };
 };
 
+let waterMonitoringConfig = function wp(env) {
+
+    return {
+        devtool: 'source-map',
+        entry: './src/ts/waterMonitoringSystem.ts',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+            LABKEY: 'LABKEY'
+        },
+        mode: process.env.NODE_ENV,
+        module: {
+            rules: [
+                {
+                    loader: 'ts-loader',
+                    test: /\.tsx?$/},
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader']
+                },
+            ],
+        },
+        output: {
+            filename: 'waterMonitoringSystem.js',
+            library: 'waterMonitoringSystem',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
+        },
+    };
+};
+
 module.exports = [
-    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig
+    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig, waterMonitoringConfig
 ];

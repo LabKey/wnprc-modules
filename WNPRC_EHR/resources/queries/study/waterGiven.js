@@ -91,19 +91,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }*/
 
     if (row.QCStateLabel == 'Scheduled'){
-        console.log ("value of date given "+ row.date);
         EHR.Server.Validation.verifyDate(row, scriptErrors, helper);
-
-        /*if(row.QCStateLabel == 'Scheduled'){
-            //TODO: add special condition for water given
-            currentTimeRounded.setHours(13,30,0,0);
-            console.log ('RowTime at 1:30 PM '+currentTimeRounded);
-            console.log ('Rowtime '+ date);
-            if (date>currentTimeRounded){
-                EHR.Server.Utils.addError(errors, 'date', 'Cannot schedule water after 13:30 PM', 'ERROR');
-            }
-
-        }*/
     }
 
         if (row.Id && row.date)
@@ -145,13 +133,8 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                     EHR.Server.Utils.addError(scriptErrors, 'performedby', "Must add Performed By", errorQC)
             }
 
-            //TODO: move validation to water amount to make sure not PN waters are requested after 1:30PM
-            /*var msg = WNPRC.Utils.getJavaHelper().checkScheduledWaterTask(waters);
-            if (msg != null){
-                EHR.Server.Utils.addError(scriptErrors, 'date', msg, errorQC);
-                //EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, errorQC);
-            }*/
 
+            //TODO: Troubleshoot this function to determine if the animal has not gotten enough water for the last three days.
             /*if (row.volume)
                 {
                     var msg = WNPRC.Utils.getJavaHelper().waterLastThreeDays(row.Id, row.date, waters);
@@ -223,7 +206,6 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
 
         //EHR.Server.Validation.checkRestraint(row, scriptErrors);
-
 
 }
 function addWaterGivenDescription(row, waters){

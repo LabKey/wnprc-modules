@@ -12,12 +12,8 @@
 
                     </column>
                     <column columnName="date">
-                        <columntitle>Start Date</columntitle>
+                        <columnTitle>Date</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
-                    </column>
-                    <column columnName="enddate">
-                        <columntitle>End Date</columntitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="condition">
                         <columnTitle>Condition</columnTitle>
@@ -25,7 +21,7 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
             </columns>

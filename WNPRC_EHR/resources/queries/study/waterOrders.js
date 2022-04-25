@@ -1,15 +1,42 @@
 require("ehr/triggers").initScript(this);
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
+let LABKEY = require("labkey");
+let triggerHelper = new org.labkey.wnprc_ehr.TriggerScriptHelper.create(LABKEY.Security.currentUser.id, LABKEY.Security.currentContainer.id);
+let allowUsersMap = {};
 
 function onInit(event, helper){
     helper.setScriptOptions({
         allowFutureDates: true,
         allowDatesInDistantPast: true
     });
+    LABKEY.Query.selectRows({
+        requiredVersion: 9.1,
+        schemaName: 'wnprc',
+        queryName: 'watermonitoring_access',
+        columns:['alloweduser/UserId,project'],
+        scope: this,
+        success: function(results) {
+            var rows = results.rows;
+            for(var i=0; i<rows.length; i++){
+                var row = rows[i];
+                if (allowUsersMap[row["alloweduser/UserId"]["value"]] === undefined){
+                    let projectArray = [row["project"]["value"]];
+                    allowUsersMap[row["alloweduser/UserId"]["value"]]=projectArray;
+                }else{
+                    var tempItem = allowUsersMap[row["alloweduser/UserId"]["value"]];
+                    tempItem.push(row["project"]["value"]);
+                    allowUsersMap[row["alloweduser/UserId"]["value"]]=tempItem;
+                }
+            }
+        },
+        failure: function (error) {
+            console.log("Error getting data from wnprc.watermonitoring_access while uploading water orders data: " + error);
+        }
+    });
 }
 
+
 function onUpsert(helper, scriptErrors, row, oldRow){
-    console.log("print oldRow "+ oldRow);
 
     if (row.Id){
         EHR.Server.Utils.findDemographics({
@@ -20,6 +47,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 if(data){
                     if(!row.project){
                         EHR.Server.Utils.addError(scriptErrors, 'project', 'Must enter a project for all center animals.', 'WARN');
+
                     }
                 }
             }
@@ -35,18 +63,13 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     }
 
+
     var today = new Date();
-    //console.log("Value of date " + row.date);
-    //console.log("Value of start date " + row.startdate);
     today.setHours(0,0,0,0);
 
     var rowDate = new Date(row.date);
     rowDate.setHours(0,0,0,0);
     EHR.Server.Utils.removeTimeFromDate(row,scriptErrors,"date");
-
-    //console.log("Value of date " + rowDate + " "+ rowDate.getTime());
-    //console.log("Value of start date " + row.startdate);
-    //console.log("Value of today "+ today+ " "+ today.getTime());
 
 
     //TODO: allow updates of existing records.
@@ -106,7 +129,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message, errorObject.severity);
 
             }
-            console.log(" Printing Extra Context" + jsonExtraContext);
             if (jsonExtraContext != null){
                 for (var i = 0; i < jsonExtraContext.length; i++){
                     let extraContextObject = jsonExtraContext[i];
@@ -114,7 +136,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                     let dateOnly = new Date(date.getTime());
                     dateOnly = dateOnly.getFullYear()+ "-" +dateOnly.getMonth()+ "-" + dateOnly.getDate();
                     let infoMessage = "Water Order for "+ row.Id + " started on " + dateOnly + " with frequency of " + extraContextObject.frequency + " and volume of " + extraContextObject.volume + "ml will close.";
-                    //console.log(infoMessage);
                     EHR.Server.Utils.addError(scriptErrors,"waterSource",infoMessage,"INFO")
 
                 }
@@ -124,6 +145,66 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         }
     }
 
+}
+
+function onUpdate(helper, scriptErrors, row, oldRow){
+
+    let waterOrdersAdmin = false;
+
+    if (row && row.project){
+        let currentUser = LABKEY.Security.currentUser.id;
+        let allowProjects = allowUsersMap[currentUser];
+        if (allowProjects){
+            allowProjects.forEach(function (project){
+                if (row.project === project){
+                    waterOrdersAdmin = true;
+                }
+            })
+        }
+
+        if (!waterOrdersAdmin){
+            EHR.Server.Utils.addError(scriptErrors,'project','User does not have permission to edit water order','ERROR');
+            console.error("Water System error, user: "+ currentUser + "trying to modify water order for project: "+ row.project +" and they do not have permissions");
+
+        }
+    }
+    console.log ("value of triggerHelper admin "+ triggerHelper.isDataAdmin());
+
+    if (!triggerHelper.isDataAdmin()){
+        let errorField = null;
+        if(oldRow){
+            console.log(oldRow);
+            //console.log(oldRow.)
+            console.log(row);
+
+            var tempKeys = Object.keys(oldRow);
+            for (var i = 0; i <= tempKeys.length; i++){
+                var key = tempKeys[i];
+                console.log(key);
+                console.log (oldRow[key]);
+            }
+            /*for (const key in oldRow){
+                console.log(`${key}: ${oldRow[key]}`);
+            }*/
+            /*for(const [key,value] of Object.keys(oldRow)){
+                console.log("rowItem value "+ value);
+                console.log("rowItem label "+ key);
+            }*/
+            // Object.entries(oldRow).forEach(([key, value]) => {
+            //     if (value){
+            //         console.log("rowItem value "+ value);
+            //         console.log("rowItem label "+ key);
+            //     }
+            //
+            // });
+        }
 
 
+        if (row.id !== oldRow.id || row.date !== oldRow.date || row.volume !== oldRow.volume)
+        {
+            //EHR.Server.Utils.addError(scriptErrors,'date');
+
+        }
+
+    }
 }

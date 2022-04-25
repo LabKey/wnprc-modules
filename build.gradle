@@ -60,7 +60,6 @@ import org.labkey.gradle.util.BuildUtils
  **********************************************************************************************************************/
 
 // using this to manage our node_modules and package.json in the base directory rather than module by module
-apply plugin: 'org.labkey.npmRun'
 
 // using this to ignore the node_modules and other "base" folders in IntelliJ IDEA
 apply plugin: 'idea'
@@ -100,7 +99,6 @@ configure(modules) {
     } else {
         apply plugin: 'org.labkey.fileModule'
     }
-    apply from: "${wnprcDir}/gradle/javascript.gradle"
 }
 
 task ("cleanModules",    group: "Build",  dependsOn: modules.collect { "${it.path}:cleanModule" },

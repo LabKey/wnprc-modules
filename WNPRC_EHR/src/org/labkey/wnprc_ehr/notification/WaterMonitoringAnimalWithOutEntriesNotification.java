@@ -32,8 +32,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -58,7 +61,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
     }
 
     @Override
-    public String getCronString() { return "0 0 13 * * ?"; }
+    public String getCronString() { return "0 0 15,19 * * ?"; }
 
     public String getCategory(){
         return "Husbandry";
@@ -67,7 +70,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
     @Override
     public String getScheduleDescription()
     {
-        return "every day at 1PM";
+        return "every day at 3PM and 7 PM";
     }
 
     public String getDescription()
@@ -106,28 +109,56 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
         filter.addClause(orClause);
 
-        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("id","date","mlsPerKg","TotalWater"), filter, null);
+        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("animalId","date","mlsPerKg","TotalWater","project"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
             msg.append("<b>WARNING: There are " + count + " animals that have remaining water for today.</b><br>\n");
             Map<String,Object>[] totalWaterForDay = ts.getMapArray();
             msg.append("<table border=1 style='border-collapse: collapse;'>");
-            msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
+            msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>" +
+                    "<td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>mlsPerKg</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Total Water Given</strong></td></tr>\n");
 
+            Map<Integer, List<Map<String,Object>>> projectMap = new HashMap<>();
             for(Map<String,Object> mapItem : totalWaterForDay){
-                LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-                msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("id"),String.class)
-                        + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
-                        + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class)
-                        + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("TotalWater"),String.class) +"</td></tr>" );
-
+                int projectNum = ConvertHelper.convert(mapItem.get("project"),Integer.class);
+                List<Map<String,Object>> waterTotalsFromDb;
+                if (!projectMap.containsKey(projectNum)){
+                    waterTotalsFromDb = new ArrayList<>();
+                    projectMap.put(projectNum,waterTotalsFromDb);
+                }else{
+                    waterTotalsFromDb = projectMap.get(projectNum);
+                }
+                waterTotalsFromDb.add(mapItem);
             }
+
+            for (Map.Entry<Integer,List<Map<String,Object>>> entry : projectMap.entrySet()){
+                List<Map<String,Object>> totalWaterByProject = entry.getValue();
+                String mlsPerKg;
+                String totalWater;
+                for(Map<String,Object> mapItem : totalWaterByProject){
+                    LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                     mlsPerKg = ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class);
+                     totalWater = ConvertHelper.convert(mapItem.get("TotalWater"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("TotalWater"),String.class);
+
+                    msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("animalId"),String.class)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + mlsPerKg
+                            + "</td><td style='padding: 5px; text-align: center;'> " + totalWater
+                            +"</td></tr>" );
+
+                }
+            }
+
+
+
+
             msg.append("</table>");
             msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "waterTotalByDateWithWeight", null) + "&query.date~dateeq=" + AbstractEHRNotification._dateFormat.format(cal.getTime()) +"&query.mlsPerKg~lt=20'>Click here to view them</a><br>\n\n");
             msg.append("<hr>\n\n");
@@ -147,7 +178,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
             parameters.put("CheckDate", date);
 
             TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("waterScheduledAnimalWithOutEntries");
-            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id"), null, null);
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","project"), null, null);
             ts.setNamedParameters(parameters);
 
             long total = ts.getRowCount();
@@ -162,7 +193,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
                 Map<String, Object>[] animalsWithOutEntries = ts.getMapArray();
                 for (Map<String, Object> mapItem : animalsWithOutEntries)
                 {
-                    msg.append(ConvertHelper.convert(mapItem.get("id"), String.class) + "<br>");
+                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("id"), String.class) + "<br>");
 
                 }
                 msg.append("<br>");

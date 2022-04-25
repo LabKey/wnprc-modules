@@ -3,6 +3,12 @@ SELECT
 wsa.id,
 wsa.MostRecentWaterConditionDate,
 (
+    SELECT wsainner.project
+    FROM study.waterScheduledAnimals wsainner
+    WHERE wsa.id = wsainner.id AND wsa.MostRecentWaterConditionDate = wsainner.date
+
+)  AS project,
+(
       SELECT wsainner.mlsperKg
       FROM study.waterScheduledAnimals wsainner
       WHERE wsa.id = wsainner.id AND wsa.MostRecentWaterConditionDate = wsainner.date

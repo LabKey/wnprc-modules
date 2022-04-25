@@ -28,4 +28,5 @@ wnprc_billing/resources/credits/jars.txt
 
 # generated artifacts from @labkey/build
 */resources/web/*/gen/
+*/resources/web/gen/
 */resources/views/gen/

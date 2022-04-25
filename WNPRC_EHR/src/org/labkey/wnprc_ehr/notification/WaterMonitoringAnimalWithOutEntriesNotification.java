@@ -62,7 +62,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
     }
 
     @Override
-    public String getCronString() { return "0 0 13 * * ?"; }
+    public String getCronString() { return "0 0 15,19 * * ?"; }
 
     public String getCategory(){
         return "Husbandry";

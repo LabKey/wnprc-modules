@@ -70,7 +70,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
     @Override
     public String getScheduleDescription()
     {
-        return "every day at 1PM";
+        return "every day at 3PM and 7 PM";
     }
 
     public String getDescription()

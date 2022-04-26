@@ -11,9 +11,9 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
             scope: this,
             focus: function() {
                 if(this.fieldLabel){
-                    filterArray = filterFunction(this);
+                    filterArray = filterFunction(this, true);
                 }else{
-                    filterArray = filterFunction(this)
+                    filterArray = filterFunction(this, false)
                 }
                 if (filterArray){
                     this.store.filterArray = filterArray;
@@ -25,24 +25,35 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
                 //for bulk edit window
                 //field only gets a label when is displayed inside the bulk upload window
                 if(field.fieldLabel){
-                    filterArray = filterFunction(field);
+                    filterArray = filterFunction(field, true);
                     this.store.filterArray = filterArray;
                     field.store.load();
                 }
             },
             select: function (combo, recs) {
-                var filterArray = [];
 
                 if (recs && recs[0] && recs[0].data) {
 
                     var chargeId = recs[0].data.rowid;
+                    var chargeDateValue = undefined;
+
                     var form = this.up("form") ? this.up("form").getForm() : undefined;
-                    filterArray = filterFunction(combo, chargeId);
+
+                    if (form) {
+                        chargeDateValue = form.findField("date").value;
+                    }
+                    else {
+                        chargeDateValue = EHR.DataEntryUtils.getSiblingValue(combo, "date");
+                    }
 
                     LABKEY.Query.selectRows({
                         schemaName: 'ehr_billing_public',
                         queryName: 'chargeRates',
-                        filterArray: filterArray,
+                        filterArray: [
+                            LABKEY.Filter.create('chargeId', chargeId, LABKEY.Filter.Types.EQUAL),
+                            LABKEY.Filter.create('startDate', chargeDateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL),
+                            LABKEY.Filter.create('endDate', chargeDateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL)
+                        ],
                         columns: 'chargeId, unitCost',
                         failure: LDK.Utils.getErrorCallback(),
                         scope: this,
@@ -88,28 +99,31 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
     }
 });
 
-function filterFunction(object,chargeId){
+function filterFunction(object,fieldBulk){
+    var form;
     var chargeGroup;
     var dateValue;
     var returnFilter = [];
 
+    form = object.up("form") ? object.up("form").getForm() : undefined;
+
     if (object.up("grid")) {
         chargeGroup = EHR.DataEntryUtils.getSiblingValue(object, "chargeGroup");
         dateValue = EHR.DataEntryUtils.getSiblingValue(object, "date");
-    }else if (object.up("form")) {
-        var form = object.up("form").getForm();
+    }else if (fieldBulk) {
         chargeGroup = form.findField("chargeGroup").value;
         dateValue = form.findField("date").value;
+    }else if(form){
+        //filter charge items based on chargeGroup selection
+        chargeGroup = form.findField("chargeGroup");
+        dateValue = form.findField("date");
+    }else{
+        return null
     }
-    if (arguments.length === 2 && chargeId != null){
-        returnFilter.push(LABKEY.Filter.create('chargeId', chargeId, LABKEY.Filter.Types.EQUAL));
-    }
-    if(chargeGroup){
-        returnFilter.push(LABKEY.Filter.create('departmentCode', chargeGroup, LABKEY.Filter.Types.EQUAL));
-    }
-    if (dateValue){
-        returnFilter.push(LABKEY.Filter.create('startDate', dateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
-        returnFilter.push(LABKEY.Filter.create('endDate', dateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
-    }
+
+    returnFilter.push(LABKEY.Filter.create('departmentCode', chargeGroup, LABKEY.Filter.Types.EQUAL));
+    returnFilter.push(LABKEY.Filter.create('startDate', dateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
+    returnFilter.push(LABKEY.Filter.create('endDate', dateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+
     return returnFilter;
 }

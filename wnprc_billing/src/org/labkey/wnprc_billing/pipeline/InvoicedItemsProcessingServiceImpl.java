@@ -1,9 +1,12 @@
 package org.labkey.wnprc_billing.pipeline;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.ehr_billing.pipeline.BillingPipelineJobProcess;
 import org.labkey.api.ehr_billing.pipeline.BillingPipelineJobSupport;
 import org.labkey.api.ehr_billing.pipeline.InvoicedItemsProcessingService;
+import org.labkey.api.security.User;
 import org.labkey.wnprc_billing.WNPRC_BillingSchema;
 
 import java.text.SimpleDateFormat;
@@ -133,4 +136,11 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         }
         return dateStr + debitedAcct.trim().toUpperCase();
     }
+
+    @Override
+    public void performAdditionalProcessing(String invoiceId, User user, Container container)
+    {
+
+    }
+
 }

@@ -6,7 +6,7 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 ARG WNPRC_BRANCH=master
-ARG LABKEY_VERSION=18.3
+ARG LABKEY_VERSION=21.3
 ARG LABKEY_IS_PREMIUM=true
 
 WORKDIR /tmp/labkey
@@ -18,16 +18,17 @@ RUN apk update \
 
 RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
  && if [ "$LABKEY_VERSION" = 18.3 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \
+            LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \
+            LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+            LABKEY_DISTRIBUTION="wisc" ; \
+            LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+    elif [ "$LABKEY_VERSION" = 21.3 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_213Release_External_Wnprc_Installers" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
-    elif [ "$LABKEY_VERSION" = 20.7 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_207Release_Premium_SnapshotInstallers" ; \
-        LABKEY_SNAPSHOT="-Beta-" ; \
-        LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     fi \
+
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
@@ -39,7 +40,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
 
-FROM wnprcehr/tomcat:18.3
+FROM wnprcehr/tomcat:21.3
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

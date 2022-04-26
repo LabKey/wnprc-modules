@@ -16,43 +16,50 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-//import com.google.common.base.MoreObjects;
-import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.Marshal;
-import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.ReadOnlyApiAction;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
+import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.resource.FileResource;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.resource.DirectoryResource;
+import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
@@ -63,20 +70,22 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.dbutils.api.SimpleQuery;
-import org.labkey.dbutils.api.SimpleQueryFactory;
+import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
 import org.labkey.googledrive.api.GoogleDriveService;
 import org.labkey.security.xml.GroupEnumType;
+import org.labkey.study.StudySchema;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
@@ -94,10 +103,11 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
+import org.labkey.wnprc_ehr.email.EmailMessageUtils;
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
-import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
+import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
 
@@ -107,6 +117,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -114,7 +125,6 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,6 +132,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -373,7 +384,7 @@ public class WNPRC_EHRController extends SpringActionController
 
         public Date getSentDate()
         {
-            DateFormat df = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss", Locale.ENGLISH);
+            DateFormat df = new SimpleDateFormat(EmailMessageUtils.VIROLOGY_DATE_FORMAT, Locale.ENGLISH);
             Date result;
             try
             {
@@ -483,7 +494,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public static class ReleaseAnimalFromBehaviorAssignmentAction extends ApiAction<ReleaseAnimalFromBehaviorAssignmentForm>
+    public static class ReleaseAnimalFromBehaviorAssignmentAction extends MutatingApiAction<ReleaseAnimalFromBehaviorAssignmentForm>
     {
 
         @Override
@@ -521,7 +532,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public static class ValidateAnimalIdAction extends ApiAction<ValidateAnimalIdForm>
+    public static class ValidateAnimalIdAction extends ReadOnlyApiAction<ValidateAnimalIdForm>
     {
         @Override
         public Object execute(ValidateAnimalIdForm form, BindException errors)
@@ -592,7 +603,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin
     @ActionNames("checkIfAnimalIsAssigned")
-    public static class CheckIfAnimalIsAssigned extends ApiAction<CheckAnimalAssignment>
+    public static class CheckIfAnimalIsAssigned extends ReadOnlyApiAction<CheckAnimalAssignment>
     {
         @Override
         public Object execute(CheckAnimalAssignment form, BindException errors)
@@ -642,9 +653,10 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
     @CSRF(CSRF.Method.POST)
-    public class GetChangeLists extends ApiAction<Void>
+    public class GetChangeLists extends ReadOnlyApiAction<Object>
     {
-        public ApiResponse execute(Void form, BindException errors) throws Exception
+        @Override
+        public ApiResponse execute(Object form, BindException errors) throws Exception
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -686,9 +698,10 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @RequiresLogin
     @ActionNames("getColonyPopulationPerMonth")
-    public class GetPopulationPerMonth extends ApiAction<Void>
+    public class GetPopulationPerMonth extends ReadOnlyApiAction<Object>
     {
-        public ApiResponse execute(Void form, BindException errors)
+        @Override
+        public ApiResponse execute(Object form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
             Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
@@ -704,6 +717,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("getPopulationChangeEventsOverPeriod")
     public class GetPopulationEventsOverPeriod extends MutatingApiAction<PopulationEventsOverPeriodForm>
     {
+        @Override
         public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors)
         {
             DateTime start = new DateTime(form.getStartdate());
@@ -723,6 +737,7 @@ public class WNPRC_EHRController extends SpringActionController
     @CSRF(CSRF.Method.POST)
     public class GetAnimalDemographicsForRoomAction extends MutatingApiAction<GetAnimalDemographicsForRoomForm>
     {
+        @Override
         public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors)
         {
             Map<String, Object> props = new HashMap<>();
@@ -790,7 +805,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin()
     @ActionNames("billablePerDiems")
-    public class BillablePerDiemsAction extends ApiAction<BillablePerDiemsForm>
+    public class BillablePerDiemsAction extends ReadOnlyApiAction<BillablePerDiemsForm>
     {
         @Override
         public Object execute(BillablePerDiemsForm form, BindException errors)
@@ -897,7 +912,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresNoPermission()
-    public class ExampleEmailAction extends ApiAction<EmailForm>
+    public class ExampleEmailAction extends MutatingApiAction<EmailForm>
     {
         @Override
         public ApiResponse execute(EmailForm form, BindException errors) throws Exception
@@ -921,7 +936,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("listEmails")
     @RequiresNoPermission()
-    public class ListEmailsAction extends ApiAction<EmailServerForm>
+    public class ListEmailsAction extends ReadOnlyApiAction<EmailServerForm>
     {
         @Override
         public ApiResponse execute(EmailServerForm form, BindException errors) throws Exception
@@ -932,7 +947,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("getVirologyResultsFromEmail")
     @RequiresNoPermission()
-    public class GetVirologyResultsFromEmailAction extends ApiAction<VirologyResultsForm>
+    public class GetVirologyResultsFromEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -948,7 +963,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("deleteEmail")
     @RequiresNoPermission()
-    public class deleteEmailAction extends ApiAction<VirologyResultsForm>
+    public class deleteEmailAction extends MutatingApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -963,7 +978,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("previewEmailExcelAttachment")
     @RequiresNoPermission()
-    public class previewEmailAction extends ApiAction<VirologyResultsForm>
+    public class previewEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -1012,7 +1027,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("FetchOnCallScheduleGoogleEvents")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class FetchOnCallScheduleGoogleEventsAction extends ApiAction<DateRangeEvent>
+    public class FetchOnCallScheduleGoogleEventsAction extends ReadOnlyApiAction<DateRangeEvent>
     {
         @Override
         public Object execute(DateRangeEvent event, BindException errors)
@@ -1358,7 +1373,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public class AddBehaviorAssignmentAction extends ApiAction<AddBehaviorAssignmentForm>
+    public class AddBehaviorAssignmentAction extends MutatingApiAction<AddBehaviorAssignmentForm>
     {
 
         @Override
@@ -1378,10 +1393,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UploadBCReports")
-    public class uploadBCReportAction extends ApiAction<Void>
+    public class uploadBCReportAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors) throws NotFoundException
+        public Object execute(Object form, BindException errors) throws NotFoundException
         {
             BCReportManager manager = new BCReportManager(getUser(), getContainer());
             manager.uploadReports();
@@ -1392,7 +1407,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("MakeUserWriterForBCReports")
-    public class ShareBCReportsWithUserAction extends ApiAction<UserForm>
+    public class ShareBCReportsWithUserAction extends MutatingApiAction<UserForm>
     {
         @Override
         public Object execute(UserForm form, BindException errors) throws Exception
@@ -1411,10 +1426,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("ScheduleBCReports")
-    public class ScheduleBCReportsAction extends ApiAction<Void>
+    public class ScheduleBCReportsAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             BCReportRunner.schedule();
             return new JSONObject();
@@ -1423,10 +1438,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UnscheduleBCReports")
-    public class UnscheduleBCReportsAction extends ApiAction<Void>
+    public class UnscheduleBCReportsAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             BCReportRunner.unschedule();
             return new JSONObject();
@@ -1440,7 +1455,7 @@ public class WNPRC_EHRController extends SpringActionController
     @SuppressWarnings("unused")
     @RequiresLogin
     @ActionNames("manageWnprcTask")
-    public class ManageWnprcTaskAction extends RedirectAction<java.lang.Void>
+    public class ManageWnprcTaskAction extends SimpleRedirectAction<Object>
     {
         // these constants are here to hopefully prevent us from mistyping the capitalization
         // later in the method. also, they should be different enough to avoid one-off typos
@@ -1449,7 +1464,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public URLHelper getSuccessURL(java.lang.Void aVoid)
+        public @Nullable URLHelper getRedirectURL(Object aVoid)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;
@@ -1458,7 +1473,9 @@ public class WNPRC_EHRController extends SpringActionController
             // (it _should_ be all lowercase, but we should check anyway)
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
             formType = formType != null ? formType.toLowerCase() : null;
-            
+
+            //TODO: change the switch statement to use form_framework_types instread of hard coding the names of the new forms
+
             switch (formType)
             {
 
@@ -1476,6 +1493,11 @@ public class WNPRC_EHRController extends SpringActionController
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "necropsy":
                 case "breeding encounter":
+                case "enter water orders":
+                case "enter lab water":
+                case "enter treatments - water":
+                case "enter water daily amount":
+                case "research ultrasounds":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));
                     // the ExtJS 4 data entry form expects "formType" with a capital 'T'
@@ -1498,32 +1520,733 @@ public class WNPRC_EHRController extends SpringActionController
             return newUrl;
         }
 
-        @Override
-        public boolean doAction(java.lang.Void aVoid, BindException errors)
-        {
-            return true;
-        }
     }
 
     public String getVLStatus(User user, Container container, Integer status) throws SQLException
     {
+      SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+      QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
 
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
-        QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+      // Define columns to get
+      List<FieldKey> columns = new ArrayList<>();
+      columns.add(FieldKey.fromString("Key"));
+      columns.add(FieldKey.fromString("Status"));
+      // Execute the query
+      String thestatus = null;
+      try ( Results rs = viralLoadQuery.select(columns, filter) )
+      {
+          if (rs.next()){
+              thestatus = rs.getString(FieldKey.fromString("Status"));
+          }
+      }
+      return thestatus;
+    }
 
-        // Define columns to get
-        List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("Key"));
-        columns.add(FieldKey.fromString("Status"));
-
-        // Execute the query
-        String thestatus = null;
-        try ( Results rs = viralLoadQuery.select(columns, filter) )
+    /**
+     * Action definition to import historical/test data for the breeding datasets. Called from the web application,
+     * not from Java.
+     */
+    @SuppressWarnings("unused")
+    @RequiresPermission(AdminPermission.class)
+    public static class ImportDatasetDataAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object aVoid, BindException errors)
         {
-            if (rs.next()){
-                thestatus = rs.getString(FieldKey.fromString("Status"));
+            // TODO: create, parse, and load some test data
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresPermission(AdminPermission.class)
+    public static class ImportDatasetMetadataAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object aVoid, BindException errors) throws Exception
+        {
+            Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+            assert module != null;
+
+            File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(),
+                    "study.xml");
+            DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    @ActionNames("WaterCalendar")
+    @RequiresLogin()
+    public class WaterCalendarAction extends WNPRCJspPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/husbandry/WaterCalendar.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Water Calendar";
+        }
+    }
+
+    @ActionNames("UpdateWaterAmount")
+    @RequiresLogin
+    public class UpdateWaterAmountAction extends MutatingApiAction<WaterOrderRecord>
+    {
+        @Override
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
+
+            List<Map<String, Object>> WaterAmountRows = getWaterAmountRecord(event.getObjectId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service = null;
+            List<Map<String, Object>> rowToUpdate = null;
+
+            if (event.getDataSource().equals("waterAmount"))
+            {
+                ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterAmount");
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+
+                    if (event.getAction().equals("update"))
+                    {
+                        for (Map<String, Object> woRow : WaterAmountRows)
+                        {
+                            JSONObject waterAmountRecord = new JSONObject();
+                            waterAmountRecord.put("taskid", woRow.get("taskid"));
+                            waterAmountRecord.put("objectid", event.getObjectId());
+                            waterAmountRecord.put("volume", event.getVolume());
+                            waterAmountRecord.put("provideFruit", event.getProvideFruit());
+                            waterAmountRecord.put("date", event.getDate());
+                            waterAmountRecord.put("assignedTo", event.getAssignedTo());
+                            waterAmountRecord.put("frequency", event.getFrequency());
+                            waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
+                            rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
+
+
+                            service = ti.getUpdateService();
+
+                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                            if (updatedRows.size() != rowToUpdate.size())
+                            {
+                                throw new QueryUpdateServiceException("Not all rows updated properly");
+                            }
+
+                        }
+                    }
+                    if ("delete".equals(event.getAction()))
+                    {
+                        _log.error("Deleting waterAmount with objectId "+ event.getObjectId());
+
+                        SimpleQueryUpdater waterAmountTable = new SimpleQueryUpdater(getUser(),getContainer(),"study", "waterAmount");
+                        JSONObject rowToDelete = new JSONObject();
+                        rowToDelete.put("objectId", event.getObjectId());
+                        waterAmountTable.delete(rowToDelete);
+
+                        
+
+                    }
+
+                    transaction.commit();
+                    response.put("success", true);
+
+                }
+                catch (Exception e)
+                {
+
+                    response.put("success", false);
+
+                }
+                finally
+                {
+
+                }
+            }
+
+            return response;
+
+        }
+
+    }
+
+
+
+    @ActionNames("CloseWaterOrder")
+    @RequiresLogin
+    public class CloseWaterOrderAction extends MutatingApiAction<WaterOrderRecord>
+    {
+        @Override
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
+
+            List<Map<String, Object>> WaterOrdersRows = getWaterOrderRecord(event.getObjectId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service = null;
+            List<Map<String, Object>> rowToUpdate = null;
+
+            if (event.getDataSource().equals("waterOrders"))
+            {
+                Map <String,Object> extraContext = new HashMap<>();
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+
+                    for (Map<String, Object> woRow : WaterOrdersRows)
+                    {
+                        JSONObject waterOrderRecord = new JSONObject();
+                        waterOrderRecord.put("taskid", woRow.get("taskid"));
+                        waterOrderRecord.put("objectid", event.getObjectId());
+                        waterOrderRecord.put("enddate", event.getEndDate());
+                        if (event.isSkipWaterRegulationCheck()){
+                            waterOrderRecord.put("skipWaterRegulationCheck", true);
+                        }
+                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
+
+                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
+                        service = ti.getUpdateService();
+
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, extraContext);
+                        if (updatedRows.size() != rowToUpdate.size())
+                        {
+                            throw new QueryUpdateServiceException("Not all rows updated properly");
+                        }
+
+                    }
+
+                    transaction.commit();
+                    response.put("success", true);
+
+                }
+                catch (BatchValidationException e){
+                    response.put("success", false);
+
+                    response.put("errors", createResponseWriter().getJSON(e).get("errors"));
+                    response.put("extraContext", extraContext);
+
+                }
+                catch (Exception e)
+                {
+
+                    response.put("success", false);
+
+
+                }
+
+                finally
+                {
+
+                }
+            }
+
+            return response;
+
+        }
+
+    }
+    //Starts a new water order one day after the end of the currently selected water order
+    // This method is used on the WaterCalendar to easily modify existing water orders.
+    @ActionNames("EnterNewWaterOrder")
+    @RequiresLogin
+    public class EnterNewWaterOrderAction extends MutatingApiAction<WaterOrderRecord>
+    {
+        @Override
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
+
+            List<Map<String, Object>> WaterOrdersRows = getWaterOrderRecord(event.getObjectId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service = null;
+            List<Map<String, Object>> rowToUpdate = null;
+
+            if (event.getDataSource().equals("waterOrders"))
+            {
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+
+                    for (Map<String, Object> woRow : WaterOrdersRows)
+                    {
+                        JSONObject waterOrderRecord = new JSONObject();
+                        waterOrderRecord.put("taskid", woRow.get("taskid"));
+                        waterOrderRecord.put("objectid", event.getObjectId());
+                        waterOrderRecord.put("enddate", event.getEndDate());
+                        waterOrderRecord.put("skipWaterRegulationCheck", true);
+                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
+
+                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
+                        service = ti.getUpdateService();
+
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                        if (updatedRows.size() != rowToUpdate.size())
+                        {
+                            throw new QueryUpdateServiceException("Not all rows updated properly");
+                        }
+
+                    }
+
+                    //Start new water order
+                    List<Map<String, Object>> rowToInsert = null;
+                    List<Map<String, Object>> taskToInsert = null;
+                    JSONObject taskRecord = new JSONObject();
+                    JSONObject waterOrderRow = new JSONObject();
+
+                    String taskId = UUID.randomUUID().toString();
+                    taskRecord.put("taskid", taskId);
+                    taskRecord.put("title", "Enter Water Orders");
+                    taskRecord.put("category", "task");
+                    taskRecord.put("qcstate", EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId());
+                    taskRecord.put("formType","Enter Water Orders");
+                    taskRecord.put("assignedTo",getUser().getUserId());
+
+
+
+                    taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
+
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+                    service = ti.getUpdateService();
+
+                    BatchValidationException validationTaskException = new BatchValidationException();
+                    List<Map<String, Object>> insertedTask = service.insertRows(getUser(), getContainer(), taskToInsert, validationTaskException, null, null);
+
+                    java.util.Calendar StartDate = java.util.Calendar.getInstance();
+                    StartDate.setTime(event.getEndDate());
+                    StartDate.add(java.util.Calendar.DATE, 1);
+
+                    waterOrderRow.put("taskid", taskId);
+                    waterOrderRow.put("date",StartDate.getTime());
+                    waterOrderRow.put("id",event.getAnimalId());
+                    waterOrderRow.put("project",event.getProject());
+                    waterOrderRow.put("frequency", event.getFrequency());
+                    waterOrderRow.put("volume", event.getVolume());
+                    waterOrderRow.put("assignedTo", event.getAssignedTo());
+                    waterOrderRow.put("waterSource","regulated");
+
+                    rowToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRow);
+
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
+                    service = ti.getUpdateService();
+
+                    BatchValidationException validationException = new BatchValidationException();
+                    List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowToInsert, validationException, null, null);
+
+                    if (validationException.hasErrors())
+                    {
+                        throw validationException;
+                    }
+
+                    if (taskToInsert.size() != insertedTask.size() || rowToInsert.size() != insertedRows.size()){
+                        throw new QueryUpdateServiceException("Task record or water record not inserted");
+                    }
+
+
+
+
+
+                    transaction.commit();
+                    //TODO: return JSON string with taskid and success
+
+                    //JSONObject returnJSON = new JSONObject();
+                    response.put("success", true);
+                    response.put("taskId", taskId);
+
+
+                    //response.put(returnJSON);
+
+                }
+                catch (Exception e)
+                {
+
+                    response.put("success", false);
+
+                }
+                finally
+                {
+
+                }
+            }
+
+            return response;
+
+        }
+
+    }
+
+    // TODO: consolidate the water order and water amount class to have only a WaterInfo that can handle
+    // the two different scenarios
+
+    public static class WaterOrderRecord {
+
+
+        private String taskId;
+        private String objectId;
+        private String animalId;
+        private String project;
+        private Date date;
+        private Date endDate;
+        private long dateInMillis;
+        private Double volume;
+        private String provideFruit;
+        private String dataSource;
+        private String waterSource;
+        private String frequency;
+        private String assignedTo;
+        private String action;
+        private boolean skipWaterRegulationCheck;
+
+
+        public void setTaskId(String taskId)
+        {
+            this.taskId = taskId;
+        }
+
+        public void setObjectId(String objectId)
+        {
+            this.objectId = objectId;
+        }
+
+        public void setAnimalId(String animalId)
+        {
+            this.animalId = animalId;
+        }
+
+        public void setDate(Date date)
+        {
+            this.date = date;
+        }
+        public void setDate(String date)
+        {
+            //DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+            long miliseconds = Long.parseLong(date);
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            calendar.setTimeInMillis(miliseconds);
+            this.date = calendar.getTime();
+        }
+        public void setDateInMillis(long dateInMillis)
+        {
+            if (dateInMillis>0)
+            {
+                java.util.Calendar calendar = java.util.Calendar.getInstance();
+                calendar.setTimeInMillis(dateInMillis);
+                this.date = calendar.getTime();
+            }
+            this.dateInMillis = dateInMillis;
+        }
+
+        public long getDateInMillis()
+        {
+            return dateInMillis;
+        }
+
+        public void setProject(String project)
+        {
+            this.project = project;
+        }
+
+        public void setEndDate(Date endDate)
+        {
+            this.endDate = endDate;
+        }
+
+        public void setDataSource(String dataSource)
+        {
+            this.dataSource = dataSource;
+        }
+
+        public void setWaterSource(String waterSource)
+        {
+            this.waterSource = waterSource;
+        }
+
+        public void setFrequency(String frequency)
+        {
+            this.frequency = frequency;
+        }
+
+        public void setVolume(Double volume)
+        {
+            this.volume = volume;
+        }
+
+        public void setProvideFruit(String provideFruit)
+        {
+            this.provideFruit = provideFruit;
+        }
+
+        public void setAssignedTo(String assignedTo)
+        {
+            this.assignedTo = assignedTo;
+        }
+
+        public void setAction(String action)
+        {
+            this.action = action;
+        }
+
+        public String getTaskId()
+        {
+            return taskId;
+        }
+
+        public String getObjectId()
+        {
+            return objectId;
+        }
+
+        public String getAnimalId()
+        {
+            return animalId;
+        }
+
+        public Date getDate()
+        {
+            return date;
+        }
+
+        public Date getEndDate()
+        {
+            return endDate;
+        }
+
+        public String getDataSource()
+        {
+            return dataSource;
+        }
+
+        public String getWaterSource()
+        {
+            return waterSource;
+        }
+
+        public String getProject()
+        {
+            return project;
+        }
+
+        public String getFrequency()
+        {
+            return frequency;
+        }
+
+        public Double getVolume()
+        {
+            return volume;
+        }
+
+        public String getProvideFruit()
+        {
+            return provideFruit;
+        }
+
+        public String getAssignedTo()
+        {
+            return assignedTo;
+        }
+
+        public String getAction()
+        {
+            return action;
+        }
+
+        public boolean isSkipWaterRegulationCheck()
+        {
+            return skipWaterRegulationCheck;
+        }
+
+        public void setSkipWaterRegulationCheck(boolean skipWaterRegulationCheck)
+        {
+            this.skipWaterRegulationCheck = skipWaterRegulationCheck;
+        }
+
+
+    }
+
+    private List<Map<String, Object>> getWaterOrderRecord (String objectId) throws java.sql.SQLException{
+        List<FieldKey> columns = new ArrayList<>();
+
+        columns.add(FieldKey.fromString("id"));
+        columns.add(FieldKey.fromString("objectid"));
+        columns.add(FieldKey.fromString("taskid"));
+        columns.add(FieldKey.fromString("date"));
+        columns.add(FieldKey.fromString("enddate"));
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("objectid"), objectId);
+        QueryHelper waterOrderQuery = new QueryHelper(getContainer(), getUser(), "study","waterOrders");
+        List<Map<String, Object>> woRows = new ArrayList<>();
+        try (Results rs = waterOrderQuery.select(columns, filter))
+        {
+            while (rs.next())
+            {
+                woRows.add(rs.getRowMap());
             }
         }
-        return thestatus;
+        return woRows;
+    }
+
+    /*public static class WaterAmountRecord {
+
+        private String taskId;
+        private String objectId;
+        private String animalId;
+        private Date date;
+        private Double volume;
+        private String dataSource;
+        private String frequency;
+        private String assignedTo;
+
+        public void setTaskId(String taskId)
+        {
+            this.taskId = taskId;
+        }
+
+        public void setObjectId(String objectId)
+        {
+            this.objectId = objectId;
+        }
+
+        public void setAnimalId(String animalId)
+        {
+            this.animalId = animalId;
+        }
+
+        public void setDate(Date endDate)
+        {
+            this.date = date;
+        }
+
+        public void setDataSource(String dataSource)
+        {
+            this.dataSource = dataSource;
+        }
+
+        public void setVolume(Double volume)
+        {
+            this.volume = volume;
+        }
+
+        public void setFrequency(String frequency)
+        {
+            this.frequency = frequency;
+        }
+
+        public void setAssignedTo(String assignedTo)
+        {
+            this.assignedTo = assignedTo;
+        }
+
+        public String getFrequency()
+        {
+            return frequency;
+        }
+
+        public String getAssignedTo()
+        {
+            return assignedTo;
+        }
+
+        public String getTaskId()
+        {
+            return taskId;
+        }
+
+        public String getObjectId()
+        {
+            return objectId;
+        }
+
+        public String getAnimalId()
+        {
+            return animalId;
+        }
+
+        public Date getDate()
+        {
+            return date;
+        }
+
+        public String getDataSource()
+        {
+            return dataSource;
+        }
+
+        public Double getVolume()
+        {
+            return volume;
+        }
+
+    }*/
+
+    private List<Map<String, Object>> getWaterAmountRecord (String objectId) throws java.sql.SQLException{
+        List<FieldKey> columns = new ArrayList<>();
+
+        columns.add(FieldKey.fromString("id"));
+        columns.add(FieldKey.fromString("objectid"));
+        columns.add(FieldKey.fromString("taskid"));
+        columns.add(FieldKey.fromString("date"));
+
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("objectid"), objectId);
+        QueryHelper waterOrderQuery = new QueryHelper(getContainer(), getUser(), "study","waterAmount");
+        Results rs = waterOrderQuery.select(columns, filter);
+
+        List<Map<String, Object>> woRows = new ArrayList<>();
+        while (rs.next())
+        {
+            woRows.add(rs.getRowMap());
+        }
+        rs.close();
+        return woRows;
+
+    }
+
+    /* TODO: This is an API to clean up an inconsistency in the performed by column of study.obs dataset. Once the
+     underlying issue is resolved, this API can be deleted.
+     */
+    @RequiresPermission(AdminPermission.class)
+    public class CorrectObsUserIdsAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            DbSchema studySchema = StudySchema.getInstance().getSchema();
+            Dataset obsDataset = StudyService.get().getStudy(getContainer()).getDatasetByName("obs");
+//            TableInfo obsTable = studySchema.getTable("obs");
+
+            if (null == obsDataset)
+            {
+                errors.reject(ERROR_MSG, "study.obs dataset not found. Ensure you are in the right folder.");
+                return false;
+            }
+
+            Domain obsDomain = obsDataset.getTableInfo(getUser()).getDomain();
+            if (null == obsDomain)
+            {
+                errors.reject(ERROR_MSG, "study.obs domain not found.");
+                return false;
+            }
+
+            SQLFragment sql = new SQLFragment("UPDATE studydataset.").append(obsDomain.getStorageTableName()).append(" o SET performedBy = s.performedBy FROM (\n ")
+                    .append("SELECT ob.lsid, COALESCE(ud.displayname, ob.performedBy) as performedBy FROM ").append(obsDataset.getTableInfo(getUser()), "ob").append("\n")
+                    .append("LEFT JOIN ").append(CoreSchema.getInstance().getTableInfoUsersData(),"ud").append(" ON CAST(ud.userid AS VARCHAR) = ob.performedBy\n")
+                    .append(") s WHERE s.lsid = o.lsid");
+
+            new SqlExecutor(studySchema).execute(sql);
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            return response;
+        }
     }
 }

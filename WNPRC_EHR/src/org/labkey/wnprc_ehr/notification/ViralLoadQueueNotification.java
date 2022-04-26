@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.labkey.api.search.SearchService._log;
-import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 
 public class ViralLoadQueueNotification extends AbstractEHRNotification
 {
@@ -77,7 +76,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             Integer val = emailsAndCount.get(email);
             val++;
             emailsAndCount.replace(email,val);
-        }else {
+        } else {
             emailsAndCount.put(email,1);
         }
     }
@@ -293,7 +292,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
             String recipientName = getUserFullName(recipientEmail);
 
-            sendMessage(getEmailSubject(container),getMessageBodyHTML(recipientName, count), subscribedRecipients, recipientEmail);
+            sendMessage(getEmailSubject(container),getMessageBodyHTML(recipientName, count), subscribedRecipients, recipientEmail,container);
         }
 
     }
@@ -303,13 +302,13 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         return NotificationService.get().getRecipients(this, container);
     }
 
-    public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, String recipient)
+    public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, String recipient,Container container)
     {
         _log.info("ViralLoadNotification.java: sending viral sample queue update email...");
         try
         {
             MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();
-            msg.setFrom(NotificationService.get().getReturnEmail(getContainer()));
+            msg.setFrom(NotificationService.get().getReturnEmail(container));
             msg.setSubject(subject);
 
             List<String> emails = new ArrayList<>();
@@ -337,7 +336,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             msg.setRecipients(Message.RecipientType.TO, StringUtils.join(emails, ","));
             msg.setEncodedHtmlContent(bodyHtml);
 
-            MailHelper.send(msg, currentUser, getContainer());
+            MailHelper.send(msg, currentUser, container);
         }
         catch (Exception e)
         {

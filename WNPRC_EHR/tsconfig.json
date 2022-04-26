@@ -13,7 +13,6 @@
   ],
   "files": [
     "src/ts/test.tsx",
-    "src/ts/breeding.ts",
-    "../primateid/src/ts/primateid.ts"
+    "src/ts/breeding.ts"
   ]
 }

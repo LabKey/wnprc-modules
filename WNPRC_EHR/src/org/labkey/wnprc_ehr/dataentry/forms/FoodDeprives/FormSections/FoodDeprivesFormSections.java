@@ -23,24 +23,25 @@ public class FoodDeprivesFormSections extends SimpleGridSection
         super("study", "foodDeprives", "Food Deprives", EHRService.FORM_SECTION_LOCATION.Body);
         this.addConfigSource("Task");
         setClientStoreClass("EHR.data.FoodDepriveClientStore");
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/FoodDepriveClientStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/data/FoodDepriveClientStore.js"));
 
         this.addConfigSource("Husbandry");
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
         _showLocation = true;
+        setTemplateMode(TEMPLATE_MODE.NONE);
         formName  = parentFormName;
     }
 
     public FoodDeprivesFormSections(boolean isRequest, EHRService.FORM_SECTION_LOCATION location)
     {
         super("study", "foodDeprives", "Food Deprives", location);
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
 
         _isRequest = isRequest;
     }
@@ -53,6 +54,7 @@ public class FoodDeprivesFormSections extends SimpleGridSection
 
         return defaultButtons;
     }
+    @Override
     public List<String> getTbarButtons()
     {
         List<String> defaultButtons = super.getTbarButtons();

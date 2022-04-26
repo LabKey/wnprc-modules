@@ -6,6 +6,7 @@
        <column name="remark" />
        <column name="type" />
        <column name="nhpbmd" />
+       <column name="billingComplete"/>
        <column name="grossdescription" />
        <column name="performedby" />
        <column name="veterinarian" />

@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="requestNum"/>
+        <column name="requestDate"/>
+        <column name="vendorId"/>
+        <column name="account"/>
+        <column name="totalCost"/>
+        <column name="requestStatus"/>
+        <column name="otherAccountAndInves"/>
+        <column name="requester"/>
+        <column name="attachments"/>
+    </columns>
+    <filters>
+        <filter column="requestStatus/Label" operator="eq" value="Order Complete" />
+    </filters>
+</customView>

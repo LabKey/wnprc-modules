@@ -1,0 +1,25 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="purchasingRequestsOverviewForAdmins" tableDbType="NOT_IN_DB" useColumnOrder="true">
+                <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
+                <tableTitle>Purchase Requests</tableTitle>
+                <columns>
+                    <column columnName="requestNum"/>
+                    <column columnName="vendorId">
+                        <columnTitle>Vendor</columnTitle>
+                    </column>
+                    <column columnName="account"/>
+                    <column columnName="otherAcctAndInves"/>
+                    <column columnName="requestStatus"/>
+                    <column columnName="requestDate"/>
+                    <column columnName="requester"/>
+                    <column columnName="orderDate"/>
+                    <column columnName="totalCost"/>
+                    <column columnName="assignedTo"/>
+                    <column columnName="attachments"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

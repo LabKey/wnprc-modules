@@ -43,9 +43,9 @@ public class ETLChemistryAnalyzerController extends SpringActionController
             return new JspView("/org/labkey/ETLChemistryAnalyzer/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 }

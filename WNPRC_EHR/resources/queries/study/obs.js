@@ -5,12 +5,29 @@
  */
 
 require("ehr/triggers").initScript(this);
-
+var LABKEY = require("labkey");
 function onUpsert(helper, scriptErrors, row, oldRow){
 
     //for compatability with the ETL
     if (!row.performedby)
         row.performedby = row.userid;
+
+    //set the performed by to the user's display name
+    var getUserDisplayNameConfig = {
+        schemaName: 'core',
+        queryName: 'users',
+        filterArray: [LABKEY.Filter.create('userid', row.performedby, LABKEY.Filter.Types.EQUALS)],
+        success: function(data) {
+            var rows = data.rows;
+            if (rows[0]) {
+                row.performedby = rows[0].DisplayName;
+            }
+        }
+    }
+
+    if (!isNaN(row.performedby)){
+        LABKEY.Query.selectRows(getUserDisplayNameConfig);
+    }
 
     if (
         row.feces ||

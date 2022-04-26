@@ -34,7 +34,7 @@ The following build arguments are available for use. The ones that have default 
 ```
 LABKEY_TEAMCITY_USERNAME
 LABKEY_TEAMCITY_PASSWORD
-LABKEY_VERSION=17.2
+LABKEY_VERSION=21.3
 LABKEY_IS_PREMIUM=false
 WNPRC_BRANCH=master
 ```

@@ -27,7 +27,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @TestWhen(TestWhen.When.DRT)
 public class DatasetImportHelperIntegrationTest extends Assert
@@ -67,12 +69,12 @@ public class DatasetImportHelperIntegrationTest extends Assert
 
         // ACT: load the dataset metadata from the reference study in the resources
         File file = new File(Paths.get(ModuleLoader.getInstance().getModule("WNPRC_EHR")
-                .getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+                .getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(), "study.xml");
         DatasetImportHelper.importDatasetMetadata(_user, _container, file);
 
         // ASSERT: make sure that the datasets we are expecting got created
         List<? extends Dataset> datasets = study.getDatasets();
-        Assert.assertArrayEquals(new String[]{"breeding_encounters", "pregnancies", "pregnancy_outcomes", "ultrasounds"},
-                datasets.stream().map(Dataset::getName).sorted().toArray());
+        Assert.assertEquals(Arrays.asList("breeding_encounters", "pregnancies", "pregnancy_outcomes", "ultrasounds"),
+                datasets.stream().map(Dataset::getName).sorted().collect(Collectors.toList()));
     }
 }

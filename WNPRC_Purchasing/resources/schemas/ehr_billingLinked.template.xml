@@ -1,0 +1,10 @@
+<!--Linked Schema named ehr_billingLinked with this template to be created in Purchasing Admin Folder-->
+
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                xmlns:dat="http://labkey.org/data/xml"
+                xmlns:cv="http://labkey.org/data/xml/queryCustomView"
+                sourceSchemaName="ehr_billing">
+    <tables>
+        <tableName>aliases</tableName>
+    </tables>
+</templateSchema>

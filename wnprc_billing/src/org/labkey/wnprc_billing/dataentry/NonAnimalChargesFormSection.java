@@ -22,7 +22,7 @@ public class NonAnimalChargesFormSection extends SimpleFormSection {
         super("ehr_billing", "miscCharges", "Misc. Charges", "ehr-gridpanel", location);
         _allowRowEditing = false;
 
-        addClientDependency(ClientDependency.fromPath("wnprc_billing/model/sources/NonAnimalCharges.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_billing/model/sources/NonAnimalCharges.js"));
 
         setConfigSources(Collections.singletonList("Task"));
     }

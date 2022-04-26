@@ -20,6 +20,7 @@ public class FileWrapperImpl extends ItemWrapperImpl implements FileWrapper {
         _file = _drive.files().get(id).execute();
     }
 
+    @Override
     public void updateContent(InputStream stream) throws IOException {
         InputStreamContent content = new InputStreamContent(_file.getMimeType(), stream);
         this._file = _drive.files().update(_id, null, content).execute();

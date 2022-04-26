@@ -13,6 +13,7 @@
                     </column>
                     <column columnName="restraintType">
                         <columnTitle>Restraint Type</columnTitle>
+                        <description>Restraint Type</description>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>restraint_type</fkTable>
@@ -20,6 +21,7 @@
                         </fk>
                     </column>
                 </columns>
+                <tableTitle>restraints</tableTitle>
             </table>
         </tables>
     </metadata>

@@ -29,6 +29,7 @@ public class PopulationInstant implements ConvertibleToJSON
         return getPopulation().toString();
     }
 
+    @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
 

@@ -243,13 +243,13 @@ $results = LabKey::Query::selectRows(
     -containerPath => $studyContainer,
     -schemaName => 'study',
     -queryName => 'BloodSchedule',
-    -columns => 'drawStatus,daterequested,project,date,project/protocol,taskid,projectStatus,tube_vol,tube_type,billedby,billedby/title,num_tubes,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,additionalServices,remark,Id,quantity,qcstate,qcstate/Label,requestid',
+    -columns => 'drawStatus,project,date,project/protocol,taskid,projectStatus,tube_vol,tube_type,billedby,billedby/title,num_tubes,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,additionalServices,remark,Id,quantity,qcstate,qcstate/Label,requestid',
     -filterArray => [
     	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
 		['date', 'dateeq', $datestr],
 		['qcstate', 'ne', 'Completed'],     			    	
     ],    
-    -sort => 'daterequested',
+    -sort => 'date',
     -requiredVersion => 8.3,
     #-debug => 1,
 );
@@ -320,14 +320,14 @@ else {
 						$email_html .= "<table border=1><tr><td>Time Requested</td><td>Id</td><td>Tube Vol</td><td>Tube Type</td><td># Tubes</td><td>Total Quantity</td><td>Additional Services</td><td>Assigned To</td></tr>\n";
 						
 						foreach my $rec (@{$$rooms{$room}{incompleteRecords}}){
-							$$rec{daterequested} =~ m/([0-9]{2}):([0-9]{2}):[0-9]{2}/;														
+							$$rec{date} =~ m/([0-9]{2}):([0-9]{2}):[0-9]{2}/;
 						
 							my $color;
 							if($tm->hour >= int($1) || ($tm->hour == int($1) && ($tm->min + 15) >= int($2))){
 								$color = 'yellow';
 							}
 							
-							$email_html .= "<tr><td".($color ? " style='background:$color;'" : "").">".$$rec{daterequested}."</td><td>".$$rec{Id}."</td><td>".($$rec{tube_vol} ? $$rec{tube_vol}.' mL' : '')."</td><td>".($$rec{tube_type} ? $$rec{tube_type} : '')."</td><td>".($$rec{num_tubes} ? $$rec{num_tubes} : '')."</td><td>".($$rec{quantity} ? $$rec{quantity}.' mL' : '')."</td><td>".($$rec{additionalServices} ? $$rec{additionalServices} : '')."</td><td>".($$rec{"billedby/title"} ? $$rec{"billedby/title"} : '')."</td></tr>\n";
+							$email_html .= "<tr><td".($color ? " style='background:$color;'" : "").">".$$rec{date}."</td><td>".$$rec{Id}."</td><td>".($$rec{tube_vol} ? $$rec{tube_vol}.' mL' : '')."</td><td>".($$rec{tube_type} ? $$rec{tube_type} : '')."</td><td>".($$rec{num_tubes} ? $$rec{num_tubes} : '')."</td><td>".($$rec{quantity} ? $$rec{quantity}.' mL' : '')."</td><td>".($$rec{additionalServices} ? $$rec{additionalServices} : '')."</td><td>".($$rec{"billedby/title"} ? $$rec{"billedby/title"} : '')."</td></tr>\n";
 						}
 						
 						$email_html .= "</table><p>\n";	    	
@@ -376,7 +376,7 @@ if(@{$results->{rows}}){
 		$smtp->attach(Type => 'text/html',
 		          Encoding => 'quoted-printable',
 		          Data	 => $email_html
-		);         
+		);
 		$smtp->send() || die;
 	}
 }

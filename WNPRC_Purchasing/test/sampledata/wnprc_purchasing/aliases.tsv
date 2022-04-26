@@ -1,0 +1,6 @@
+alias	isAcceptingCharges	isActive	groupName
+acct100	true	true	Assay Services
+acct101	true	true	Business Office
+acct102	true	true	Purchasing
+acct103	true	true	Immunology
+acct104	true	false	Surgery

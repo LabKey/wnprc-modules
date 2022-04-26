@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>arrival</name>
+    <description>WNPRC Marmoset Arrivals</description>
+    <transforms>
+        <transform type="RemoteQueryTransformStep" id="step1">
+            <description>Copy to target</description>
+            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="arrival">
+                <sourceColumns>
+                    <column>id</column>
+                    <column>date</column>
+                    <column>source</column>
+                    <column>vendor_id</column>
+                </sourceColumns>
+                <sourceFilters>
+                    <sourceFilter column="species/scientific_name" value="Callithrix jacchus" operator="eq"/>
+                </sourceFilters>
+            </source>
+            <destination schemaName="study" queryName="arrival" targetOption="merge"/>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 30 1 * * ?" />
+    </schedule>
+</etl>

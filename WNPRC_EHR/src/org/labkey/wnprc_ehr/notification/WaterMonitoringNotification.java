@@ -15,7 +15,8 @@
  */
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -51,12 +52,13 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         super(owner);
     }
 
+    @Override
     public String getName()
     {
         return "Water Monitoring";
     }
 
-    private static final Logger _log = Logger.getLogger(WaterMonitoringNotification.class);
+    private static final Logger _log = LogManager.getLogger(WaterMonitoringNotification.class);
 
     @Override
     public String getEmailSubject(Container c)
@@ -73,6 +75,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         return "every day at 1PM";
     }
 
+    @Override
     public String getDescription()
     {
         return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";

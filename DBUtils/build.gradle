@@ -1,6 +1,13 @@
+import org.labkey.gradle.util.BuildUtils
+
 dependencies {
-    apiCompile "com.google.guava:guava:${guavaVersion}"
-    compile project(":server:modules:query")
+
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: 'published', depExtension: 'module')
+
+    apiImplementation "com.google.guava:guava:${guavaVersion}"
+    implementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"))
     external "org.jooq:jooq:3.8.4"
     external "javax.xml.bind:jaxb-api:${jaxbVersion}"
 }

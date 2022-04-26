@@ -3,6 +3,7 @@ package org.labkey.wnprc_billing.query;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ldk.table.CustomPermissionsTable;
@@ -27,9 +28,9 @@ public class WNPRC_BillingUserSchema extends SimpleUserSchema
 
     @Override
     @Nullable
-    protected TableInfo createWrappedTable(String name, @NotNull TableInfo schematable)
+    protected TableInfo createWrappedTable(String name, @NotNull TableInfo schematable, ContainerFilter cf)
     {
-        CustomPermissionsTable ti = new CustomPermissionsTable(this, schematable).init();
+        CustomPermissionsTable ti = new CustomPermissionsTable(this, schematable, cf).init();
 
         ti.addPermissionMapping(InsertPermission.class, EHR_BillingAdminPermission.class);
         ti.addPermissionMapping(UpdatePermission.class, EHR_BillingAdminPermission.class);

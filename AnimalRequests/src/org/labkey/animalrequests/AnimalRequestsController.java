@@ -26,8 +26,10 @@ public class AnimalRequestsController extends SpringActionController
         {
             return new JspView<>("/org/labkey/animalrequests/view/begin.jsp");
         }
-        public NavTree appendNavTrail(NavTree root){
-            return root;
+
+        @Override
+        public void addNavTrail(NavTree root)
+        {
         }
     }
 

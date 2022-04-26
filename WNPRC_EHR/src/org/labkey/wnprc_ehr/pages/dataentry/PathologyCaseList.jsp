@@ -1,15 +1,14 @@
-<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="java.util.Date" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="java.util.Calendar" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
+<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
-<%@ page import="org.labkey.api.action.Action" %>
+<%@ page import="java.util.Calendar" %>
+<%@ page import="java.util.Date" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -87,8 +86,8 @@
 
 <script type="application/javascript">
     (function() {
-        var biopsies = <%= biopsies.toString() %>;
-        var necropsies = <%= necropsies.toString() %>;
+        var biopsies = <%=unsafe(biopsies.toString())%>;
+        var necropsies = <%=unsafe(necropsies.toString())%>;
 
         var makeRowMapFn = function(type) {
 
@@ -129,13 +128,13 @@
                 }
 
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>
-                var reportURL = (biopsy.type != "Necropsy") ? "" : LABKEY.ActionURL.buildURL('<%= necropsyReportURL.getController() %>', '<%= necropsyReportURL.getAction()%>', null, {
+                var reportURL = (biopsy.type != "Necropsy") ? "" : LABKEY.ActionURL.buildURL(<%=q(necropsyReportURL.getController())%>, <%=q(necropsyReportURL.getAction())%>, null, {
                     taskid: biopsyRow['taskid'],
                     reportMode: true
                 });
 
                 <% ActionURL collectionListURL = new ActionURL(WNPRC_EHRController.NecropsyCollectionListAction.class, getContainer()); %>
-                var collectionListURL = (biopsy.type != "Necropsy") ? "" : LABKEY.ActionURL.buildURL('<%= collectionListURL.getController() %>', '<%= collectionListURL.getAction() %>', null, {
+                var collectionListURL = (biopsy.type != "Necropsy") ? "" : LABKEY.ActionURL.buildURL(<%=q(collectionListURL.getController())%>, <%=q(collectionListURL.getAction())%>, null, {
                     taskid: biopsyRow['taskid'],
                     reportMode: true
                 });

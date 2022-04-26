@@ -61,6 +61,7 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
     @Override
     public void registerSchemas() {
         DefaultSchema.registerProvider(GoogleDriveSchema.NAME, new DefaultSchema.SchemaProvider(this) {
+            @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
                 return (QuerySchema) new GoogleDriveSchema(schema.getUser(), schema.getContainer());
             }

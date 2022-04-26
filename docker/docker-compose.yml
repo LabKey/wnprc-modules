@@ -8,6 +8,7 @@ services:
 
   postgres:
     image: postgres:11
+    shm_size: 4g
     restart: always
     volumes:
       - "${PG_CONF_FILE}:/conf/postgresql.conf"
@@ -48,13 +49,12 @@ services:
       - network1
 
   labkey:
-    image: wnprcehr/labkey:18.3
+    image: wnprcehr/labkeysnapshot:21.3
     depends_on:
       - "mailserver"
       - "postgres"
     volumes:
-      - "${LABKEY_FILES_DIR}:/backups/new_files_dir"
-      - "${LABKEY_NEW_FILES}:/space/ehr_files"
+      - "${LABKEY_FILES_DIR}:/space/files"
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
@@ -66,7 +66,8 @@ services:
       CATALINA_OPTS:
       JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
                   -Dmsql.user=${MSQL_USER} -Dmsql.pass=${MSQL_PASS} -Dmsql.url=\"${MSQL_URL}\" \
-                  -Dlabkey.masterEncryptionKey=${LABKEY_MASTER_ENCRYPTION_KEY}"
+                  -Dlabkey.masterEncryptionKey=${LABKEY_MASTER_ENCRYPTION_KEY} \
+                  -Dlog4j2.formatMsgNoLookups=true"
       LK_BACKGROUND_USER:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:

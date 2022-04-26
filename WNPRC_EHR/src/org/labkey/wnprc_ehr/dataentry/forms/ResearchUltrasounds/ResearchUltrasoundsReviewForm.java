@@ -36,10 +36,10 @@ public class ResearchUltrasoundsReviewForm extends SimpleTaskForm
         }
 
         setStoreCollectionClass("WNPRC.ext.data.ResearchUltrasoundsStoreCollection");
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/ResearchUltrasounds.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsServerStore.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsStoreCollection.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/fields/PregnancyIdField.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/ResearchUltrasounds.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsServerStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsStoreCollection.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/fields/PregnancyIdField.js"));
     }
 
     @Override

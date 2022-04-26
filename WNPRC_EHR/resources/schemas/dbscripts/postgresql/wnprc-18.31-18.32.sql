@@ -1,1 +1,0 @@
-ALTER TABLE ehr.supplemental_pedigree ADD species varchar(4000);

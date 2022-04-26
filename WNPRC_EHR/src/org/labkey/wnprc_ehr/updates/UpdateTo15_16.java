@@ -182,7 +182,7 @@ public class UpdateTo15_16 extends ModuleUpdate.ComparableUpdater
     public void onStartup(ModuleContext ctx, Module module)
     {
         EHRService es = EHRService.get();
-        File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+        File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(), "study.xml");
         getEHRContainers(module, es).forEach(c -> updateContainer(es.getEHRUser(c), c, file));
     }
 }

@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
-        <column name="rowid" ></column>
+        <column name="edit" ></column>
+        <column name="rowid"></column>
         <column name="date" ></column>
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>
@@ -10,6 +11,9 @@
         <column name="originneeded"></column>
         <column name="numberofanimals"></column>
         <column name="QCState"></column>
+        <column name="num_animals_assigned"></column>
+        <column name="animal_history_link"></column>
+        <column name="animalidstooffer"></column>
 
     </columns>
     <sorts>

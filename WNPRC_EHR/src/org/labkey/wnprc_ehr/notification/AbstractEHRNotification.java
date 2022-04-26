@@ -16,7 +16,8 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
@@ -42,7 +43,7 @@ import java.util.Map;
  */
 abstract public class AbstractEHRNotification extends AbstractNotification
 {
-    protected final static Logger log = Logger.getLogger(AbstractEHRNotification.class);
+    protected final static Logger log = LogManager.getLogger(AbstractEHRNotification.class);
     protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
     protected final static SimpleDateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     protected final static SimpleDateFormat _timeFormat = new SimpleDateFormat("kk:mm");
@@ -56,6 +57,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
 
     protected NotificationService _ns = NotificationService.get();
 
+    @Override
     public boolean isAvailable(Container c)
     {
         if (!super.isAvailable(c))
@@ -84,6 +86,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
         return StudyService.get().getStudy(c);
     }
 
+    @Override
     public String getCategory()
     {
         return "EHR";
@@ -94,6 +97,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
         return rs.getString(FieldKey.fromString(name)) == null ? "" : rs.getString(FieldKey.fromString(name));
     }
 
+    @Override
     public String getCronString()
     {
         return null;//"0 0/5 * * * ?";

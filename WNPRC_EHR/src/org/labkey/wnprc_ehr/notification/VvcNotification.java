@@ -18,8 +18,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.labkey.api.search.SearchService._log;
-import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
-
 
 public class VvcNotification extends AbstractEHRNotification
 {
@@ -46,16 +44,19 @@ public class VvcNotification extends AbstractEHRNotification
         return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class).getName();
     }
 
+    @Override
     public String getName()
     {
         return "VVC Notification";
     }
 
+    @Override
     public String getScheduleDescription()
     {
         return "As soon as VVC is submitted";
     }
 
+    @Override
     public String getDescription()
     {
         return "This notification gets send every time there is a new VVC request";
@@ -70,8 +71,7 @@ public class VvcNotification extends AbstractEHRNotification
     public void sendManually (Container container, User user)
     {
         Collection<UserPrincipal> recipients = getRecipients(container);
-        sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user);
-
+        sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user,container);
     }
 
     public Collection<UserPrincipal> getRecipients(Container container)
@@ -91,13 +91,13 @@ public class VvcNotification extends AbstractEHRNotification
         return msg.toString();
     }
 
-    public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, User currentUser)
+    public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, User currentUser, Container container)
     {
         _log.info("VVCNotification.java: sending VVC request email...");
         try
         {
             MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();
-            msg.setFrom(NotificationService.get().getReturnEmail(getContainer()));
+            msg.setFrom(NotificationService.get().getReturnEmail(container));
             msg.setSubject(subject);
 
             List<String> emails = new ArrayList<>();
@@ -123,7 +123,7 @@ public class VvcNotification extends AbstractEHRNotification
             msg.setRecipients(Message.RecipientType.TO, StringUtils.join(emails, ","));
             msg.setEncodedHtmlContent(bodyHtml);
 
-            MailHelper.send(msg, currentUser, getContainer());
+            MailHelper.send(msg, currentUser, container);
         }
         catch (Exception e)
         {

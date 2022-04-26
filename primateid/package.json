@@ -1,0 +1,53 @@
+{
+  "name": "@wnprc/primate-id-build",
+  "version": "1.0.0",
+  "description": "This repository contains the build for the primateid module.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "better-npm-run build",
+    "build-prod": "better-npm-run build-prod",
+    "clean": "rm -rf resources/web/primateid/primateid.webpack.js && rm -rf resources/scripts/primateid/primateid.webpack.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WNPRC-EHR-Services/wnprc-modules.git"
+  },
+  "author": "Clay Stevens <cstevens@primate.wisc.edu>",
+  "contributors": [
+    "F. Daniel Nicolalde <fdnicolalde@primate.wisc.edu>",
+    "Gabriel Gottfredsen <ggottfredsen@primate.wisc.edu>"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/WNPRC-EHR-Services/wnprc-modules/issues"
+  },
+  "homepage": "https://github.com/WNPRC-EHR-Services/wnprc-modules#readme",
+  "devDependencies": {
+    "typescript": "~2.5.2",
+    "ts-loader": "^6.2.2",
+    "better-npm-run": "0.1.1",
+    "webpack": "4.42.1",
+    "webpack-cli": "3.3.11"
+  },
+  "dependencies": {
+    "@wnprc/primate-id": "^1.1.7"
+  },
+  "optionalDependencies": {
+    "fsevents": "^1.2.4"
+  },
+  "betterScripts": {
+    "build": {
+      "command": "webpack --config webpack.config.js",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "build-prod": {
+      "command": "webpack --config webpack.config.js",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

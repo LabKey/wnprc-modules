@@ -32,7 +32,15 @@ EHR.Metadata.registerMetadata('Task', {
         ,'blood': {
             requestor:{xtype: 'displayfield'},
             performedby: {allowBlank: false},
-            billedby: {allowBlank: false},
+            billedby: {
+                allowBlank: false,
+                lookup: {
+                    schemaName: 'ehr_lookups',
+                    queryName: 'blood_billed_by',
+                    keyColumn: 'value',
+                    displayColumn: 'description'
+                }
+            },
             tube_type: {allowBlank: false},
             daterequested: {
                 hidden: false,

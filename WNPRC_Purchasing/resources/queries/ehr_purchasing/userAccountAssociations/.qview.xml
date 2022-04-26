@@ -1,0 +1,10 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="userId"/>
+        <column name="account"/>
+        <column name="accessToAllAccounts"/>
+    </columns>
+    <sorts>
+        <sort column="userId" descending="false" />
+    </sorts>
+</customView>

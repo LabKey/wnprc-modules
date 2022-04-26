@@ -33,45 +33,53 @@ const getNameOfField = (field:object) => {
 // create an array with two values per index
 // uses the 'metadata' property from LabKey selectRows() to build the data struct
 let constructArrayForTable = (animalInfo) => {
-  let arr = [];
+  let tableArr = [];
+  let filteredArr = [];
+
+  // filter the array to only include columns that aren't hidden
+  for (let i = 0; i < animalInfo["metaData"]["fields"].length; i++) {
+    if (!animalInfo["metaData"]["fields"][i].hidden) {
+      let fieldMetadata = animalInfo["metaData"]["fields"][i];
+      let key = getNameOfField(fieldMetadata);
+
+      let column = animalInfo["rows"][0][key];
+      //cover the case where column could be an array
+      if (Array.isArray(column) && column.length > 0) {
+        column = column[0];
+      }
+
+      let item = {
+        label: fieldMetadata["caption"],
+        displayValue: column["displayValue"],
+        url: column["url"],
+        value: column["value"]
+      };
+      filteredArr.push(item);
+    }
+  }
+
+  // if there are an odd number of items in the array then add
+  // a blank one so that the last (bottom right) cell in the
+  // abstract table is rendered as an empty cell
+  if (filteredArr.length % 2 != 0) {
+    filteredArr.push({
+      label: "",
+      displayValue: "",
+      url: "",
+      value: ""
+    });
+  }
+
   // each row in the abstract table will have 4 columns,
   // <tr>(<td>label</td> <td>value</td> | <td>label</td> <td>value</td>)</tr>
   // so here we construct an array, each row shows 2 values
   // and their respective labels
-  for (let i = 0; i < animalInfo["metaData"]["fields"].length-1; i+=2)
+  for (let i = 0; i < filteredArr.length; i += 2)
   {
-    let firstItemMetadata = animalInfo["metaData"]["fields"][i];
-    let secondItemMetadata = animalInfo["metaData"]["fields"][i + 1]
-    let firstKey = getNameOfField(firstItemMetadata);
-    let secondKey = getNameOfField(secondItemMetadata);
-    let firstItemVal = animalInfo["rows"][0][firstKey];
-    let secondItemVal = animalInfo["rows"][0][secondKey];
-
-    //cover the case where value could be an array
-    if (Array.isArray(firstItemVal) && firstItemVal.length > 0){
-      firstItemVal = firstItemVal[0];
-    }
-    if (Array.isArray(secondItemVal) && secondItemVal.length > 0){
-      secondItemVal = secondItemVal[0];
-    }
-
-    let items = [];
-    items[0] = {
-      'label': firstItemMetadata["caption"],
-      'displayValue': firstItemVal["displayValue"],
-      'url': firstItemVal["url"],
-      'value': firstItemVal["value"],
-    }
-    items[1] = {
-      'label': secondItemMetadata["caption"],
-      'displayValue': secondItemVal["displayValue"],
-      'value': secondItemVal["value"],
-      'url': secondItemVal["url"],
-    }
-    arr.push(items);
+    tableArr.push([filteredArr[i], filteredArr[i + 1]]);
   }
 
-  return arr;
+  return tableArr;
 }
 
 let constructColumns = (val:any,key:number) => {

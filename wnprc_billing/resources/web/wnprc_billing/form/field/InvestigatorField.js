@@ -42,7 +42,12 @@ Ext4.define('WNPRC_BILLING.form.field.InvestigatorField', {
                     }
                 }
 
-                this.store.filterArray = [filter];
+                var array = [];
+                if (filter) {
+                    array.push(filter);
+                }
+
+                this.store.filterArray = array;
                 this.store.load();
             }
         });

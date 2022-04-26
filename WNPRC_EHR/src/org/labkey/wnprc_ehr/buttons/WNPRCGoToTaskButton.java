@@ -32,6 +32,7 @@ public class WNPRCGoToTaskButton extends SimpleButtonConfigFactory
         super(owner, "Add Batch of Records", "window.location = LABKEY.ActionURL.buildURL('ehr', 'manageTask', null, {formtype: '" + formType +"'})");
     }
 
+    @Override
     public boolean isAvailable(TableInfo ti)
     {
         return super.isAvailable(ti) && ti.hasPermission(ti.getUserSchema().getUser(), EHRInProgressInsertPermission.class);

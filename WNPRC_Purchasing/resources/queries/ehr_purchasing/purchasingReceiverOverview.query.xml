@@ -1,0 +1,15 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB">
+                <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
+                <tableTitle>Line Items from Open Orders</tableTitle>
+                <columns>
+                    <column columnName="controlledSubstance">
+                        <formatString>Yes;No;</formatString>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

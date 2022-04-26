@@ -7,6 +7,7 @@
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.wnprc_ehr.TriggerScriptHelper" %>
 <%@ page import="org.labkey.wnprc_ehr.notification.PregnancyNotification" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JSONObject params = (JSONObject) getModelBean();
@@ -54,14 +55,14 @@
     <tr>
         <td>Animal ID:</td>
         <td>
-            <a href="<%= hrefForAnimalAbstract %>">
+            <a href="<%= h(hrefForAnimalAbstract) %>">
                 <%= h(Id) %>
             </a>
         </td>
     </tr>
     <tr>
         <td>Sex:</td>
-        <td><%= gender %></td>
+        <td><%= h(gender) %></td>
     </tr>
 </table>
 
@@ -78,15 +79,15 @@
 <table>
     <tr>
         <td>Date of Conception:</td>
-        <td><%= pregnancy.optString("date_conception", NONE_SPECIFIED) %></td>
+        <td><%= h(pregnancy.optString("date_conception", NONE_SPECIFIED)) %></td>
     </tr>
     <tr>
         <td>Estimated Due Date:</td>
-        <td><%= pregnancy.optString("date_due", NONE_SPECIFIED) %></td>
+        <td><%= h(pregnancy.optString("date_due", NONE_SPECIFIED)) %></td>
     </tr>
     <tr>
         <td>Sire:</td>
-        <td><%= pregnancy.optString("sireid", NONE_SPECIFIED) %></td>
+        <td><%= h(pregnancy.optString("sireid", NONE_SPECIFIED)) %></td>
     </tr>
 </table>
 <br/>

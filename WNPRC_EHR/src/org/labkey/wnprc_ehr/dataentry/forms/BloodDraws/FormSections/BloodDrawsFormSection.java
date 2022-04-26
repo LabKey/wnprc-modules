@@ -9,7 +9,7 @@ public class BloodDrawsFormSection extends SimpleFormSection {
 
         this.addConfigSource("Task");
         setClientStoreClass("EHR.data.BloodDrawClientStore");
-        addClientDependency(ClientDependency.fromPath("ehr/window/AddScheduledBloodDrawsWindow.js"));
-        addClientDependency(ClientDependency.fromPath("ehr/data/BloodDrawClientStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("ehr/window/AddScheduledBloodDrawsWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("ehr/data/BloodDrawClientStore.js"));
     }
 }

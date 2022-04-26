@@ -1,0 +1,37 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="userAccountAssociations" tableDbType="TABLE" useColumnOrder="true">
+                <tableTitle>User Account Associations</tableTitle>
+                <columns>
+                    <column columnName="userId">
+                        <columnTitle>User or Group</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>UsersAndGroups</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="DisplayName" operator="neq" value="Users"/>
+                                </filterGroup>
+                            </filters>
+                        </fk>
+                    </column>
+                    <column columnName="account">
+                        <fk>
+                            <fkDbSchema>ehr_billingLinked</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                            <fkDisplayColumnName>displayName</fkDisplayColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="isAcceptingCharges" operator="eq" value="true"/>
+                                </filterGroup>
+                            </filters>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

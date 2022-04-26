@@ -15,6 +15,9 @@
                   <column columnName="nhpbmd">
                       <columnTitle>NHPBMD</columnTitle>
                   </column>
+                  <column columnName="billingComplete">
+                      <columnTitle>Billing Complete</columnTitle>
+                  </column>
                   <column columnName="remark">
                       <columnTitle>Final Summary Comments</columnTitle>
                   </column>

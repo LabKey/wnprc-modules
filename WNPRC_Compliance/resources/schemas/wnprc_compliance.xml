@@ -106,6 +106,8 @@
       <column columnName="modified"/>
       <column columnName="archived_for_access_purposes"/>
       <column columnName="date_of_birth"/>
+      <column columnName="hold"/>
+      <column columnName="measles_required"/>
     </columns>
   </table>
   <table tableName="measles_clearances" tableDbType="TABLE">

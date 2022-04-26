@@ -17,42 +17,48 @@ package org.labkey.wnprc_ehr.table;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.ehr.EHRSchema;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
-
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: bimber
@@ -67,6 +73,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     }
 
+    @Override
     public void customize(TableInfo table)
     {
         if (table instanceof AbstractTableInfo)
@@ -93,13 +100,18 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeDemographicsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "tasks")) {
                 customizeTasksTable((AbstractTableInfo) table);
+            } else if (matches(table, "wnprc", "animal_requests")) {
+                customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
+            else if (table.getName().equalsIgnoreCase("waterOrders"))
+                appendEnddateFuture((AbstractTableInfo) table, "enddate");
+
         }
     }
 
     private void customizeColumns(AbstractTableInfo ti)
     {
-        ColumnInfo project = ti.getColumn("project");
+        var project = ti.getMutableColumn("project");
         if (project != null)
         {
             project.setFormat("00000000");
@@ -112,7 +124,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeRoomCol(AbstractTableInfo ti, String columnName)
     {
-        ColumnInfo room = ti.getColumn(columnName);
+        var room = ti.getMutableColumn(columnName);
         if (room != null)
         {
             if (!ti.getName().equalsIgnoreCase("rooms"))
@@ -125,7 +137,12 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     UserSchema us = getUserSchema(ti, "ehr_lookups", ehrContainer);
                     if (us != null)
                     {
-                        room.setFk(new QueryForeignKey(us, ehrContainer, "rooms", "room", "room", true));
+                        room.setFk(QueryForeignKey.from(us, ti.getContainerFilter())
+                                .container(ehrContainer)
+                                .table("rooms")
+                                .key("room")
+                                .display("room")
+                                .raw(true));
                     }
                 }
             }
@@ -134,16 +151,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeTasksTable(AbstractTableInfo ti)
     {
-//        DetailsURL detailsURL = DetailsURL.fromString("/ehr/dataEntryFormDetails.view?formType=${formtype}&taskid=${taskid}");
-//        ti.setDetailsURL(detailsURL);
-//
-//        if (rowIdCol != null)
-//        {
-//            rowIdCol.setURL(detailsURL);
-//        }
         UserSchema us = ti.getUserSchema();
 
-        ColumnInfo rowIdCol = ti.getColumn("rowid");
+        BaseColumnInfo rowIdCol = (BaseColumnInfo) ti.getColumn("rowid");
         if (rowIdCol != null && us != null)
         {
             rowIdCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
@@ -181,7 +191,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 }
             });
 
-            ColumnInfo updateTitleCol = ti.getColumn("updateTitle");
+            BaseColumnInfo updateTitleCol = (BaseColumnInfo) ti.getColumn("updateTitle");
             if (updateTitleCol != null && us != null)
             {
                 updateTitleCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
@@ -254,11 +264,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         GUID ehrEntityId = ehrContainer.getEntityId();
         ehrEntityId.toString();
         SQLFragment sql = new SQLFragment("(SELECT " +
-               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+               " (CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*" + invconv.toString() + ") || ' log')" +
                 "ELSE " +
                     " 'bad data'" +
@@ -270,14 +280,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         String chowLookup = "chowLookup";
         SQLFragment sql2 = new SQLFragment("(SELECT " +
-                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
-                "THEN (CAST (amount as text) || ' log')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
-                "THEN (CAST (amount as text) || ' log (gluten-free)')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
-                "THEN (CAST (amount as text) || ' flower')" +
+                " (CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (CAST (amount as text) || ' log')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (CAST (amount as text) || ' log (gluten-free)')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (CAST (amount as text) || ' flower')" +
                 "ELSE " +
-                " 'bad data'" +
+                    " 'bad data'" +
                 "END) as ChowLookup)");
         ExprColumn newCol2 = new ExprColumn(ti, chowLookup, sql2, JdbcType.VARCHAR);
         newCol2.setLabel("Chow Lookup");
@@ -287,14 +297,17 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeBirthTable(AbstractTableInfo ti)
     {
-        ColumnInfo cond = ti.getColumn("cond");
+        var cond = ti.getMutableColumn("cond");
         if (cond != null)
         {
             cond.setLabel("Housing Condition");
             UserSchema us = getUserSchema(ti, "ehr_lookups");
             if (us != null)
             {
-                cond.setFk(new QueryForeignKey(us, null, "housing_condition_codes", "value", "title"));
+                cond.setFk(QueryForeignKey.from(us, ti.getContainerFilter())
+                        .table("housing_condition_codes")
+                        .key("value")
+                        .display("title"));
             }
         }
 
@@ -312,72 +325,72 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (ds.getColumn("demographicsMHC") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, ds, "MHCtyping", "demographicsMHC");
+            BaseColumnInfo col = getWrappedIdCol(us, ds, "MHCtyping", "demographicsMHC");
             col.setLabel("MHC SSP Typing");
             col.setDescription("Summarizes MHC SSP typing results for the common alleles");
             ds.addColumn(col);
 
-            ColumnInfo col2 = getWrappedIdCol(us, ds, "ViralLoad", "demographicsVL");
+            BaseColumnInfo col2 = getWrappedIdCol(us, ds, "ViralLoad", "demographicsVL");
             col2.setLabel("Viral Loads");
             col2.setDescription("This field calculates the most recent viral load for this animal");
             ds.addColumn(col2);
 
-            ColumnInfo col3 = getWrappedIdCol(us, ds, "ViralStatus", "demographicsViralStatus");
+            BaseColumnInfo col3 = getWrappedIdCol(us, ds, "ViralStatus", "demographicsViralStatus");
             col3.setLabel("Viral Status");
             col3.setDescription("This calculates the viral status of the animal based on tracking project assignments");
             ds.addColumn(col3);
 
-            ColumnInfo col18 = getWrappedIdCol(us, ds, "Virology", "demographicsVirology");
+            BaseColumnInfo col18 = getWrappedIdCol(us, ds, "Virology", "demographicsVirology");
             col18.setLabel("Virology");
             col18.setDescription("This calculates the distinct pathogens listed as positive for this animal from the virology table");
             ds.addColumn(col18);
 
-            ColumnInfo col4 = getWrappedIdCol(us, ds, "IrregularObs", "demographicsObs");
+            BaseColumnInfo col4 = getWrappedIdCol(us, ds, "IrregularObs", "demographicsObs");
             col4.setLabel("Irregular Obs");
             col4.setDescription("Shows any irregular observations from each animal today or yesterday.");
             ds.addColumn(col4);
 
-            ColumnInfo col7 = getWrappedIdCol(us, ds, "activeAssignments", "demographicsAssignments");
+            BaseColumnInfo col7 = getWrappedIdCol(us, ds, "activeAssignments", "demographicsAssignments");
             col7.setLabel("Assignments - Active");
             col7.setDescription("Contains summaries of the assignments for each animal, including the project numbers, availability codes and a count");
             ds.addColumn(col7);
 
-            ColumnInfo col6 = getWrappedIdCol(us, ds, "totalAssignments", "demographicsAssignmentHistory");
+            BaseColumnInfo col6 = getWrappedIdCol(us, ds, "totalAssignments", "demographicsAssignmentHistory");
             col6.setLabel("Assignments - Total");
             col6.setDescription("Contains summaries of the total assignments this animal has ever had, including the project numbers and a count");
             ds.addColumn(col6);
 
-            ColumnInfo col5 = getWrappedIdCol(us, ds, "assignmentSummary", "demographicsAssignmentSummary");
+            BaseColumnInfo col5 = getWrappedIdCol(us, ds, "assignmentSummary", "demographicsAssignmentSummary");
             col5.setLabel("Assignments - Detailed");
             col5.setDescription("Contains more detailed summaries of the active assignments for each animal, including a breakdown between research, breeding, training, etc.");
             ds.addColumn(col5);
 
-            ColumnInfo col10 = getWrappedIdCol(us, ds, "DaysAlone", "demographicsDaysAlone");
+            BaseColumnInfo col10 = getWrappedIdCol(us, ds, "DaysAlone", "demographicsDaysAlone");
             col10.setLabel("Days Alone");
             col10.setDescription("Calculates the total number of days each animal has been single housed, if applicable.");
             ds.addColumn(col10);
 
-            ColumnInfo bloodCol = getWrappedIdCol(us, ds, "AvailBlood", "demographicsBloodSummary");
+            BaseColumnInfo bloodCol = getWrappedIdCol(us, ds, "AvailBlood", "demographicsBloodSummary");
             bloodCol.setLabel("Blood Remaining");
             bloodCol.setDescription("Calculates the total blood draw and remaining, which is determine by weight and blood drawn in the past 30 days.");
             ds.addColumn(bloodCol);
 
-            ColumnInfo col17 = getWrappedIdCol(us, ds, "MostRecentTB", "demographicsMostRecentTBDate");
+            BaseColumnInfo col17 = getWrappedIdCol(us, ds, "MostRecentTB", "demographicsMostRecentTBDate");
             col17.setLabel("TB Tests");
             col17.setDescription("Calculates the most recent TB date for this animal, time since TB and the last eye TB tested");
             ds.addColumn(col17);
 
-            ColumnInfo col16 = getWrappedIdCol(us, ds, "Surgery", "demographicsSurgery");
+            BaseColumnInfo col16 = getWrappedIdCol(us, ds, "Surgery", "demographicsSurgery");
             col16.setLabel("Surgical History");
             col16.setDescription("Calculates whether this animal has ever had any surgery or a surgery flagged as major");
             ds.addColumn(col16);
 
-            ColumnInfo col19 = getWrappedIdCol(us, ds, "CurrentBehavior", "CurrentBehaviorNotes");
+            BaseColumnInfo col19 = getWrappedIdCol(us, ds, "CurrentBehavior", "CurrentBehaviorNotes");
             col19.setLabel("Behavior - Current");
             col19.setDescription("This calculates the current behavior(s) for the animal, based on the behavior abstract table");
             ds.addColumn(col19);
 
-            ColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
+            BaseColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
             col20.setLabel("PrimateId");
             col20.setDescription("Unique PrimateID column to be shared across all datasets");
             ds.addColumn(col20);
@@ -385,7 +398,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (ds.getColumn("totalOffspring") == null)
         {
-            ColumnInfo col15 = getWrappedIdCol(us, ds, "totalOffspring", "demographicsTotalOffspring");
+            BaseColumnInfo col15 = getWrappedIdCol(us, ds, "totalOffspring", "demographicsTotalOffspring");
             col15.setLabel("Number of Offspring");
             col15.setDescription("Shows the total offspring of each animal");
             ds.addColumn(col15);
@@ -401,7 +414,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (table.getColumn("Feeding") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            BaseColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
             col.setLabel("Feeding");
             col.setDescription("Shows most recent feeding type and chow conversion.");
             table.addColumn(col);
@@ -450,7 +463,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
         if (table.getColumn("necropsyAbstractNotes") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
+            BaseColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
             col.setLabel("Necropsy Abstract Notes");
             col.setDescription("Returns the participant's necropsy abstract remarks and projects");
             table.addColumn(col);
@@ -633,6 +646,198 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));
             table.addColumn(newCol);
         }
+        if (table.getColumn("vendor_id") == null)
+        {
+            String vendorIdColumn = "vendor_id";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            String theQuery = "(" +
+                    "SELECT vendor_id FROM studydataset." + arrival.getName() + " w where w.participantid="
+                      + ExprColumn.STR_TABLE_ALIAS + ".participantid and w.vendor_id is not null LIMIT 1" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, vendorIdColumn, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Vendor ID");
+            newCol.setDescription("Returns the animal's original vendor id.");
+            table.addColumn(newCol);
+        }
+
+        if (table.getColumn("sire") == null)
+        {
+            String sire_new = "sire";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the sire of the animal
+            // For the given demographic animal id, it checks the arrival records to see if there is a matching sire
+            //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the sire as long as the species between the two are the same
+            //  if that is not the case, it will fall back on the arrival and birth records, and if still no sire found in arrival or births,
+            //  we fall back on the "old" data in the demographic table, called sire_old
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.sire) AND lower(a.vendor_id) != lower(a.participantid) " +
+                                " AND (SELECT x.species from studydataset." + demographics.getName() +" x WHERE x.participantid = a.participantid) =  " +
+                                " (SELECT y.species from studydataset." + demographics.getName() +" y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS sire " +
+                    ")";
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Sire");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
+                    "if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no sire is found there, it " +
+                    "then finally uses the historic demographic text field called 'sire_old' as the sire.");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("dam") == null)
+        {
+            String dam_new = "dam";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the dam of the animal
+            // For the given demographic animal id, it checks the arrival records to see if there is a matching dam
+            //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the dam, as long as the species between the two are the same
+            //  if that is not the case, it will fall back on the arrival and birth records, and if still no dam found in arrival or births,
+            //  we fall back on the "old" data in the demographic table, called dam_old
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.dam) AND lower(a.vendor_id) != lower(a.participantid) " +
+                                " AND (SELECT x.species from studydataset." + demographics.getName() +" x WHERE x.participantid = a.participantid) =  " +
+                                " (SELECT y.species from studydataset." + demographics.getName() +" y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS dam " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Dam");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found and the species of the animals are matching, " + 
+                    "if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no dam is found there, it " +
+                    "then finally uses the historic demographic text field called 'dam_old' as the dam.");
+            table.addColumn(newCol);
+        }
+
+        if (table.getColumn("mgapIds") == null)
+        {
+            String mgapIds = "mgapIds";
+
+            String theQuery  = "((" +
+                    "SELECT " +
+                    "STRING_AGG(DISTINCT m.mgap_id, ',') AS mgapIds " +
+                    "FROM wnprc.mgap_sequence_datasets m " +
+                    "WHERE LOWER(m.parsed_id) = LOWER(" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
+                    "))";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mgapIds, sql, JdbcType.VARCHAR);
+            newCol.setLabel("mGAP Id(s)");
+            newCol.setDescription("Shows an animal's mGAP Id(s) and links to the animal in mGAP (if available)");
+            newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/mgap/mGAP/genomeBrowser.view?sampleFilters=mgap:${mgapIds}"));
+
+            table.addColumn(newCol);
+        }
+
+        if (table.getColumn("mgapSequenceTypes") == null)
+        {
+            String mgapSequenceTypes = "mgapSequenceTypes";
+
+            String theQuery  = "((" +
+                    "SELECT " +
+                    "STRING_AGG(DISTINCT m.sequence_type, ', ') AS mgapSequenceTypes " +
+                    "FROM wnprc.mgap_sequence_datasets m " +
+                    "WHERE LOWER(m.parsed_id) = LOWER(" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
+                    "))";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mgapSequenceTypes, sql, JdbcType.VARCHAR);
+            newCol.setLabel("mGAP Sequence Type(s)");
+            newCol.setDescription("Shows the available Sequence Type(s) for this animal in mGAP");
+
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)
@@ -668,10 +873,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeProtocolTable(AbstractTableInfo table)
     {
-        ColumnInfo protocolCol = table.getColumn("protocol");
+        BaseColumnInfo protocolCol = (BaseColumnInfo) table.getColumn("protocol");
         if (protocolCol != null && table.getColumn("pdf") == null)
         {
-            ColumnInfo col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
+            var col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
             col.setLabel("PDF");
             col.setURL(StringExpressionFactory.create("/query/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Protocol_PDFs/executeQuery.view?schemaName=lists&query.queryName=ProtocolPDFs&query.protocol~eq=${pdf}", true));
         }
@@ -681,11 +886,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "totalProjects"));
+                var col2 = table.addColumn(new WrappedColumn(protocolCol, "totalProjects"));
                 col2.setLabel("Total Projects");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
-                col2.setFk(new QueryForeignKey(us, null, "protocolTotalProjects", "protocol", "protocol"));
+                col2.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                        .table("protocolTotalProjects")
+                        .key("protocol")
+                        .display("protocol"));
             }
         }
                 //TODO: Make this work with an Ext UI that  does not over write the values
@@ -703,7 +911,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
+                BaseColumnInfo col2 = (BaseColumnInfo) table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
                 col2.setLabel("Expiration Date");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
@@ -716,7 +924,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
+                BaseColumnInfo col2 = (BaseColumnInfo) table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
                 col2.setLabel("Max Animals Per Species");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
@@ -741,7 +949,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     private void customizeSireIdColumn(AbstractTableInfo ti) {
-        ColumnInfo sireid = ti.getColumn("sireid");
+        BaseColumnInfo sireid = (BaseColumnInfo) ti.getColumn("sireid");
         if (sireid != null)
         {
             UserSchema us = getUserSchema(ti, "study");
@@ -785,7 +993,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     private void customizeReasonForMoveColumn(AbstractTableInfo ti) {
-        ColumnInfo reason = ti.getColumn("reason");
+        BaseColumnInfo reason = (BaseColumnInfo)ti.getColumn("reason");
         if (reason != null)
         {
             UserSchema us = getUserSchema(ti, "study");
@@ -845,14 +1053,315 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
     }
 
-    private ColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
+    public static class AnimalIdsToOfferColumn extends DataColumn {
+        public AnimalIdsToOfferColumn(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+
+    }
+
+    public static class AnimalIdsToOfferColumnQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                out.write("");
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                super.renderGridCellContents(ctx, out);
+            }
+            else
+            {
+                out.write("");
+            }
+        }
+    }
+
+    public static class AnimalRequestsEditLinkConditional extends DataColumn
+    {
+        private User _currentUser;
+
+        public AnimalRequestsEditLinkConditional(ColumnInfo colInfo, User currentUser)
+        {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+            {
+                String edit;
+                if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+                {
+                    edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                            ctx.getViewContext().getContextPath() +
+                            "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                            ctx.get("rowid").toString() +
+                            "&update=1&returnUrl=" +
+                            ctx.getViewContext().getContextPath() +
+                            "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                }
+                else {
+                    edit = "";
+                }
+                return HtmlString.unsafe(edit);
+            }
+
+
+    }
+
+    public static class AnimalRequestsEditLinkShow extends DataColumn {
+        public AnimalRequestsEditLinkShow(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            String edit;
+            edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                    ctx.get("rowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+            return HtmlString.unsafe(edit);
+        }
+    }
+
+    public static class AnimalReportLink extends DataColumn {
+        public AnimalReportLink(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+    }
+
+    public static class AnimalReportLinkQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public AnimalReportLinkQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getDisplayValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            HtmlStringBuilder emptyString = HtmlStringBuilder.of();
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return emptyString.getHtmlString();
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getFormattedHtml(ctx);
+            }
+            else
+            {
+                return emptyString.getHtmlString();
+            }
+        }
+
+    }
+
+    private void customizeAnimalRequestsTable(AbstractTableInfo table)
+    {
+
+        UserSchema us = getStudyUserSchema(table);
+        if (us == null)
+        {
+            return;
+        }
+        User currentUser = us.getUser();
+
+        //Nail down individual fields for editing, unless user has permission
+        List<String> readOnlyFields = new ArrayList<>();
+        readOnlyFields.add("QCState");
+        readOnlyFields.add("dateapprovedordenied");
+        readOnlyFields.add("animalsorigin");
+        readOnlyFields.add("dateordered");
+        readOnlyFields.add("datearrival");
+        for (String item : readOnlyFields)
+        {
+            if (table.getColumn(item) != null)
+            {
+                BaseColumnInfo col = (BaseColumnInfo) table.getColumn(item);
+                if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                {
+                    col.setReadOnly(true);
+                }
+            }
+        }
+
+
+        if (table.getColumn("edit") == null){
+
+            String edit = "edit";
+
+            String theQuery  = "( " +
+                    "(SELECT 'edit')" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, edit, sql, JdbcType.VARCHAR);
+            table.addColumn(newCol);
+            newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                    {
+                        return new AnimalRequestsEditLinkShow(colInfo);
+                    }
+                    else
+                    {
+                        return new AnimalRequestsEditLinkConditional(colInfo, currentUser);
+                    }
+                }
+            });
+        }
+
+        //re-render animalidsoffer column
+        if (table.getColumn("animalidstooffer") != null)
+        {
+            BaseColumnInfo col = (BaseColumnInfo) table.getColumn("animalidstooffer");
+            col.setLabel("Animal Ids");
+            if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class)){
+                col.setDisplayColumnFactory(colInfo -> new AnimalIdsToOfferColumn(colInfo));
+            }
+            else{
+                col.setHidden(true);
+                col.setDisplayColumnFactory(colInfo -> new AnimalIdsToOfferColumnQCStateConditional(colInfo, currentUser));
+            }
+        }
+
+        //create animal history report link from a set of animal ids
+        if (table.getColumn("animal_history_link") == null)
+        {
+            String animal_history_link = "animal_history_link";
+
+                String theQuery  = "( " +
+                        "(SELECT " +
+                        " CASE WHEN a.animalidstooffer is not null " +
+                        "THEN 'Report Link' " +
+                        "ELSE '' " +
+                        " END AS animal_history_link " +
+                        " FROM wnprc.animal_requests a " +
+                        "WHERE a.rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid  LIMIT 1)  " +
+                        ")";
+
+                SQLFragment sql = new SQLFragment(theQuery);
+
+                ExprColumn newCol = new ExprColumn(table, animal_history_link, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Animal History Link");
+                newCol.setDescription("Provides a link to the animal history records given the animal ids that were selected.");
+                newCol.setURL(StringExpressionFactory.create("ehr-animalHistory.view?#subjects:${animalidstooffer}&inputType:multiSubject&showReport:0&activeReport:abstractReport"));
+                table.addColumn(newCol);
+                newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    @Override
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                        {
+                            return new AnimalReportLink(colInfo);
+                        }
+                        else
+                        {
+                            return new AnimalReportLinkQCStateConditional(colInfo, currentUser);
+                        }
+                    }
+                });
+
+        }
+
+        //column to report how many animals in this request were assigned to a project
+        if (table.getColumn("num_animals_assigned") == null) {
+            String num_animals_assigned = "num_animals_assigned";
+            TableInfo assignmentTable = getRealTableForDataset(table, "assignment");
+
+            String theQuery  = "( " +
+                    "(SELECT " +
+                    "(CASE WHEN COUNT(*) = 0 " +
+                    " THEN null " +
+                    " ELSE COUNT(*) " +
+                    " END) as num_animals_assigned " +
+                    " FROM studydataset." + assignmentTable.getName() + " a " +
+                    "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
+            newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
+            table.addColumn(newCol);
+
+        }
+    }
+
+    private BaseColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
     {
         String ID_COL = "Id";
         WrappedColumn col = new WrappedColumn(ds.getColumn(ID_COL), name);
         col.setReadOnly(true);
         col.setIsUnselectable(true);
         col.setUserEditable(false);
-        col.setFk(new QueryForeignKey(us, null, queryName, ID_COL, ID_COL));
+        col.setFk(QueryForeignKey.from(us, ds.getContainerFilter())
+                .table(queryName)
+                .key(ID_COL)
+                .display(ID_COL));
 
         return col;
     }
@@ -862,6 +1371,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         return getUserSchema(ds, "study");
     }
 
+    @Override
     public UserSchema getUserSchema(AbstractTableInfo ds, String name)
     {
         UserSchema us = ds.getUserSchema();
@@ -874,6 +1384,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         return null;
+    }
+
+    private  void appendEnddateFuture(AbstractTableInfo ti, String sourceColName)
+    {
+        ColumnInfo sourceCol = ti.getColumn(sourceColName);
+        if (sourceCol == null)
+        {
+            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            return;
+        }
+
+        String name = sourceCol.getName();
+        if (ti.getColumn(name + "CoalescedFuture") == null)
+        {
+            SQLFragment sql = new SQLFragment("CAST(COALESCE(").append(sourceCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append(",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
+            //SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn curdate()} + integer '365')  as date)");
+            ExprColumn col = new ExprColumn(ti, name + "CoalescedFuture", sql, JdbcType.DATE);
+            col.setCalculated(true);
+            col.setUserEditable(false);
+            col.setHidden(true);
+            col.setLabel(col.getLabel() + ", CoalescedFuture");
+
+            if (sourceCol.getFormat() != null)
+                col.setFormat(sourceCol.getFormat());
+
+            ti.addColumn(col);
+        }
+
     }
 
     //TODO: Look how to use another UI to allow for better support for virtual columns
@@ -940,7 +1478,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
        boolean isExt4Form = false;
 
        SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
-       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+       //TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable("form_framework_types");
        TableSelector ts = new TableSelector(ti, filter, null);
        String framework;
        if (ts.getMap() != null && ts.getMap().get("framework") != null)

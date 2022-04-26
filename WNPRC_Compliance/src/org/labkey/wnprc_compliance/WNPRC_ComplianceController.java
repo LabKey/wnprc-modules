@@ -196,6 +196,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
     public static class AddDataToExistingPersonForm {
         public String personid;
+        public boolean hold;
+        public boolean measles_required;
         public RequirementForm tbInfo;
         public RequirementForm measlesInfo;
     }
@@ -255,6 +257,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 String personId = service.newUser((NewUserForm) form);
+                //String hold = service.newUser((NewUserForm) form);
 
                 if (form.tbInfo != null) {
                     if (form.tbInfo.pending) {
@@ -270,6 +273,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 }
 
                 returnJSON.put("personid", personId);
+                returnJSON.put("hold", form.hold);
 
                 transaction.commit();
             }
@@ -308,7 +312,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
 
         @Override
-        protected String getResponse(Map files, FileUploadForm form) throws UploadException {
+        public String getResponse(FileUploadForm form, Map files) throws UploadException
+        {
             return "";
         }
     }
@@ -463,7 +468,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("getClearances")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
+    @CSRF(CSRF.Method.NONE)
     public class GetClearancesFromPerson extends ReadOnlyApiAction<SearchClearanceFromPersonForm> {
         public Object execute(SearchClearanceFromPersonForm form, BindException errors) throws Exception {
 
@@ -497,12 +502,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String last_name;
         public String middle_name;
         public String personid;
+        public boolean measles_required;
+        public boolean hold;
         @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         public Date date;
         public String id;
         public String _row;
         public String table_name;
-        public String required;
         public boolean mutated;
     }
     public static class Clearances {
@@ -513,7 +519,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("updateClearance")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
+    @CSRF(CSRF.Method.POST)
     public class UpdateClearanceAPI extends MutatingApiAction<Clearances> {
         @Override
         public Object execute(Clearances form, BindException errors) throws Exception {
@@ -528,7 +534,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     JSONObject tbClearance = new JSONObject();
                     tbClearance.put("id", tbform.id);
                     tbClearance.put("date", tbform.date);
-                    tbClearance.put("required", tbform.required);
                     tbClearance.put("container", getContainer().getId());
                     clearancesToUpdate.add(tbClearance);
                 }
@@ -546,7 +551,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("getMeaslesClearances")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
+    @CSRF(CSRF.Method.NONE)
     public class GetMeaslesClearanceFromPerson extends ReadOnlyApiAction<SearchPersonFromCardForm> {
         public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();

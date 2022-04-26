@@ -35,6 +35,7 @@ public class WebPart extends TagSupport {
         return EVAL_BODY_INCLUDE; // Process inner code
     }
 
+    @Override
     public int doEndTag() throws JspException {
         write("            </td>\n");
         write("         </tr>\n");

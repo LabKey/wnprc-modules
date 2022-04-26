@@ -1,7 +1,8 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.notification.Notification;
@@ -25,7 +26,7 @@ import java.util.Set;
  * Created by jon on 7/13/16.
  */
 abstract public class AbstractJspEmailNotification implements Notification {
-    protected static final Logger log = Logger.getLogger(AbstractJspEmailNotification.class);
+    protected static final Logger log = LogManager.getLogger(AbstractJspEmailNotification.class);
     protected final JSONObject params = new JSONObject();
 
     @Override
@@ -38,6 +39,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
         return null;
     }
 
+    @Override
     public String getMessageBodyHTML(Container c, User u) {
         WNPRC_EHREmail email = new WNPRC_EHREmail(getPathToJsp());
 
@@ -53,6 +55,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
         return emailContents;
     }
 
+    @Override
     public boolean isAvailable(Container c) {
         if (!c.getActiveModules().contains(ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class))) {
             return false;

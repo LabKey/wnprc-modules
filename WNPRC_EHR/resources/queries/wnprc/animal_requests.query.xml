@@ -3,14 +3,24 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="animal_requests" tableDbType="TABLE" useColumnOrder="true">
                 <tableTitle>Animal Requests</tableTitle>
-                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
+                <javaCustomizer class="org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer"/>
+                <updateUrl />
+
                 <columns>
+                    <column columnName="edit" >
+                        <columnTitle>Edit</columnTitle>
+                    </column>
+                    <column columnName="rowid" >
+                        <columnTitle>#</columnTitle>
+                    </column>
+
                     <column columnName="date" >
                         <columnTitle>Date Requested</columnTitle>
                         <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <isUserEditable>false</isUserEditable>
                     </column>
                     <column columnName="createdBy">
-                        <columnTitle>Create By</columnTitle>
+                        <columnTitle>Created By</columnTitle>
                     </column>
                     <column columnName="principalinvestigator">
                     <columnTitle>Principal Investigator</columnTitle>
@@ -22,14 +32,14 @@
                         </fk>
                     </column>
                     <column columnName="numberofanimals">
-                        <columnTitle># of Animals</columnTitle>
+                        <columnTitle># of Animals Needed</columnTitle>
                     </column>
                     <column columnName="speciesneeded">
-                        <columnTitle>Species</columnTitle>
+                        <columnTitle>Species Needed</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>animal_requests_species</fkTable>
-                            <fkColumnName>value</fkColumnName>
+                            <fkColumnName>common</fkColumnName>
                             <fkDisplayColumnName>Species</fkDisplayColumnName>
                         </fk>
                     </column>
@@ -71,8 +81,7 @@
                         <columnTitle>Disposition</columnTitle>
                         <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>animal_requests_disposition</fkTable>
-                            <fkColumnName>meaning</fkColumnName>
-                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
+                            <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="executivecommitteeapproval">
@@ -109,6 +118,9 @@
                         <columnTitle>Anticipated End Date</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
+                    <column columnName="num_animals_assigned">
+                        <columnTitle># Animals Assigned</columnTitle>
+                    </column>
                     <column columnName="QCState">
                         <columnTitle>Status</columnTitle>
                         <fk>
@@ -131,6 +143,9 @@
                     </column>
                     <column columnName="animalsorigin">
                         <columnTitle>Animal Origin</columnTitle>
+                    </column>
+                    <column columnName="animal_history_link">
+                        <columnTitle>Animal History</columnTitle>
                     </column>
 
                 </columns>

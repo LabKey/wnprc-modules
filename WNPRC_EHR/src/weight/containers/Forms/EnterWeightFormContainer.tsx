@@ -86,10 +86,18 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     const copyformdata: Array<RowObj> = [...formdata];
 
     copyformdata.forEach(item => {
-      item["weight"] = vals["weight"]["value"] != "" ? Object.assign({}, vals["weight"]) : Object.assign({}, item["weight"]);
-      item["date"] = vals["date"]["value"] != "" ? Object.assign({}, vals["date"]) : Object.assign({}, item["date"]);
-      item["restraint"] = vals["restraint"]["value"] != "" ? Object.assign({}, vals["restraint"]) : Object.assign({}, item["restraint"]);
-      item["remark"] = vals["remark"]["value"] != "" ? Object.assign({}, vals["remark"]) : Object.assign({}, item["remark"]);
+      if (vals["weight"]["value"]){
+        item["weight"]["value"] = vals["weight"]["value"];
+      }
+      if (vals["date"]["value"]){
+        item["date"]["value"] = vals["date"]["value"];
+      }
+      if (vals["restraint"]["value"]){
+        item["restraint"]["value"] = vals["restraint"]["value"];
+      }
+      if (vals["remark"]["value"]){
+        item["remark"]["value"] = vals["remark"]["value"];
+      }
     });
 
     setFormDataInAppContext(copyformdata);
@@ -97,7 +105,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setBulkEditUsedInAppContext();
   };
   const triggerIds = (ids: any) => {
-    setFormDataInAppContext([]);
     setIds(ids);
     setBatchAddUsedInAppContext();
   };
@@ -106,7 +113,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     if (location.length == 0) {
       return;
     }
-    let animaldata: Array<RowObj> = [];
+    let animaldata: Array<RowObj>;
+    if (formdata[0] && formdata[0].animalid.value != ""){
+      animaldata = [...formdata];
+    } else {
+      animaldata = [];
+    }
     setLocLoading(true);
     Promise.all(getlocations(location)).then(d => {
       d.forEach((promise, i) => {
@@ -458,10 +470,15 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   }, []);
 
   const setFormIds = () => {
-    let t: Array<RowObj> = [];
+    let copyformdata: Array<RowObj>;
+    if (formdata[0] && formdata[0].animalid.value != ""){
+      copyformdata = [...formdata]
+    } else {
+      copyformdata = []
+    }
     ids.forEach((id, i) => {
       let restraintObjectId = Utils.generateUUID().toUpperCase();
-      t.push({
+      copyformdata.push({
         animalid: { value: id, error: "" },
         date: { value: new Date(), error: "" },
         weight: { value: undefined, error: "" },
@@ -483,7 +500,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         validated: {value: false, error: ""}
       });
     });
-    setFormDataInAppContext(t);
+    setFormDataInAppContext(copyformdata);
   };
 
   const toggleCollapse = (item: RowObj, i) => {

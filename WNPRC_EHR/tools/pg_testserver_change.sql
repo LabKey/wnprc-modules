@@ -86,6 +86,15 @@ WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'ld
   AND p.Name = 'enabled'
 ;
 
+UPDATE    prop.Properties p
+SET       Value = 'false'
+WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'org.labkey.ldk.notifications.config'
+          AND p.Name = 'serviceEnabled'
+;
+
+DELETE FROM prop.properties p
+WHERE (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'org.labkey.ldk.notifications.status';
+
 UPDATE    ehr.module_properties p
 SET       stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu'
 WHERE     p.prop_name = 'site_email'
@@ -173,13 +182,6 @@ VALUES
 (26,	  'Colony Management Alerts',	 '29e3860b-02b5-102d-b524-493dbd27b599',	1005,	     '2011-09-27 13:09:46.475',	1005,	      '2011-09-27 13:09:46.475',	1975),
 (28,	  'Overdue Weight Alerts',	   '29e3860b-02b5-102d-b524-493dbd27b599',	1005,	     '2011-09-27 13:10:15.83',	1005,	      '2011-09-27 13:10:15.83',	  1975),
 (32,	  'Incomplete Treatments',	   '29e3860b-02b5-102d-b524-493dbd27b599',	1005,	     '2011-09-27 13:11:20.188',	1005,	      '2011-09-27 13:11:20.188',	1975)
-;
-
--- Switch to using non-ssl LDAP
-UPDATE    prop.Properties p
-SET       Value = 'ldap://ldap.primate.wisc.edu'
-WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'LDAPAuthentication'
-	      AND p.Name = 'Servers'
 ;
 
 -- We've left a bit of a mess, so it's best to vacuum before guests arrive.  (Deleting doesn't reclaim the space on it's own, and we just deleted 40-50GB)

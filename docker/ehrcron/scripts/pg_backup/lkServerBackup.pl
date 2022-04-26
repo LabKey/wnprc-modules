@@ -259,6 +259,8 @@ sub onExit {
     if ($msg) {
         $log->entry($msg);
         $log->commit;
+    } else {
+        $msg = 0;
     }
 
     # Insert a record into a labkey list

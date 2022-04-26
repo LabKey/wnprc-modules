@@ -1,5 +1,6 @@
 {table}
-Filename|Component|Version|Source|License|LabKey Dev|Purpose
+Filename|Component|Version|Source|License|Dev|Purpose
+commons-net-3.5.jar|Commons Net|3.3|{link:Apache|http://jakarta.apache.org/commons/net/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jeckels|FTPClient used to retrieve resources from other servers (e.g., GO annotations)
 java-fpdf-1.6.0.jar|Java-FPDF PDF generation library|1.6.0|{link:Java-FPDF|https://github.com/nkiraly/Java-FPDF}|{link:BSD 2|https://github.com/nkiraly/Java-FPDF/blob/master/LICENSE.md}|jeckels|Used to generate PDF invoices
 sanselan-0.97-incubator.jar|Apache Commons Imaging|0.97|{link:Sanselan|https://commons.apache.org/proper/commons-imaging/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jeckels|Required by Java-FPDF
 {table}

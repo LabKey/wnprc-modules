@@ -1,4 +1,3 @@
-<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <style>
@@ -34,7 +33,7 @@
         width: 2em; /* desired width of the image */
         height: 2em; /* unrelated to image height; this is so it gets snipped */
         background-repeat: no-repeat;
-        background-image: url('<%=AppProps.getInstance().getContextPath()%>/webutils/icons/warning_yellow.svg');
+        background-image: url('<%=getContextPath()%>/webutils/icons/warning_yellow.svg');
         background-size: 2em 1.5em;
         background-position: 0 .3em;
     }

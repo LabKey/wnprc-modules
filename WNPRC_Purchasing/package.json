@@ -1,0 +1,32 @@
+{
+  "name": "WNPRC_Purchasing",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm ci",
+    "build": "npm run build-dev",
+    "start": "cross-env NODE_ENV=development webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+    "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
+    "lint-fix": "eslint --fix --ext .tsx,.ts src/client/**"
+  },
+  "moduleFileExtensions": [
+    "js",
+    "ts",
+    "tsx"
+  ],
+  "dependencies": {
+    "@labkey/components": "2.146.0",
+    "@labkey/api": "1.10.0"
+  },
+  "devDependencies": {
+    "@labkey/build": "6.0.0",
+    "react-bootstrap": "0.33.1",
+    "immer": "7.0.7",
+    "immutable": "3.8.2",
+    "font-awesome": "4.7.0",
+    "@labkey/eslint-config-base": "0.0.8",
+    "@labkey/eslint-config-react": "0.0.8"
+  }
+}

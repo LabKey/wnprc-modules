@@ -31,7 +31,7 @@ public class FoodDeprivesRequestForm extends SimpleRequestForm
             section.addConfigSource("WNPRC_Request");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Request.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Request.js"));
 
     }
     @Override

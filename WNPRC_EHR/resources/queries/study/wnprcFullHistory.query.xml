@@ -1,0 +1,252 @@
+<query xmlns="http://labkey.org/data/xml/query">
+  <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="" tableDbType="TABLE">
+                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+                <pkColumnName>lsid</pkColumnName>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>true</isKeyField>
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                    </column>
+                    <column columnName="Id">
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+                        <url>/ehr/participantView.view?participantId=${id}</url>
+                    </column>
+                    <column columnName="remark">
+                        <isHidden>false</isHidden>
+                        <displayWidth>350</displayWidth>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+                    </column>
+                    <column columnName="description">
+                        <isHidden>false</isHidden>
+                        <displayWidth>300</displayWidth>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <propertyURI>urn:ehr.labkey.org/#Descrption</propertyURI>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>End Date</columnTitle>
+                        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="date">
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                            <!--<fkDisplayColumnName>name</fkDisplayColumnName>-->
+                        </fk>
+                        <!--<formatString>00000000</formatString>-->
+                        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                    </column>
+                    <column columnName="caseno">
+                        <columnTitle>Case Number</columnTitle>
+                    </column>
+                    <column columnName="caseid">
+                        <propertyURI>urn:ehr.labkey.org/#CaseId</propertyURI>
+                    </column>
+                    <column columnName="parentid">
+                        <isHidden>true</isHidden>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                    </column>
+                    <column columnName="account">
+                        <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+                    </column>
+                    <column columnName="userid">
+                        <displayWidth>100</displayWidth>
+                        <propertyURI>urn:ehr.labkey.org/#UserId</propertyURI>
+                    </column>
+                    <column columnName="taskid">
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
+                        <isHidden>false</isHidden>
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>
+                    </column>
+                    <column columnName="requestid">
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
+                        <isHidden>false</isHidden>
+                        <columnTitle>Request Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>requests</fkTable>
+                            <fkColumnName>requestid</fkColumnName>
+                        </fk>
+                        <url>/ehr/requestDetails.view?formtype=${requestid/formtype}&amp;requestid=${requestid}</url>
+                    </column>
+                    <column columnName="runid">
+                        <propertyURI>urn:ehr.labkey.org/#RunId</propertyURI>
+                    </column>
+                    <column columnName="formSort">
+                        <propertyURI>urn:ehr.labkey.org/#FormSort</propertyURI>
+                    </column>
+                    <column columnName="objectid">
+                        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+                    </column>
+                    <column columnName="performedby">
+                        <columnTitle>Performed By</columnTitle>
+                        <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+                    </column>
+                    <column columnName="datefinalized">
+                        <propertyURI>urn:ehr.labkey.org/#DateFinalized</propertyURI>
+                    </column>
+                    <column columnName="daterequested">
+                        <propertyURI>urn:ehr.labkey.org/#DateRequested</propertyURI>
+                    </column>
+                    <column columnName="problemid">
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                        <isHidden>false</isHidden>
+                        <columnTitle>Problem</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>Problem List</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>category</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="QCState">
+                        <isHidden>false</isHidden>
+                        <shownInDetailsView>true</shownInDetailsView>
+                        <columnTitle>Status</columnTitle>
+                        <displayWidth>50</displayWidth>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="In Progress"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Review Required"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Scheduled"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Delete Requested"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Approved"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Sample Delivered"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Denied"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Cancelled"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Pending"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="animalvisit">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="sequencenum">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="created">
+                        <isHidden>true</isHidden>
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="createdby">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="modified">
+                        <isHidden>true</isHidden>
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="modifiedby">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="ts">
+                    </column>
+                    <column columnName="ParticipantSequenceNum">
+                        <shownInInsertView>false</shownInInsertView>
+                    </column>
+                    <column columnName="_key">
+                        <shownInInsertView>false</shownInInsertView>
+                    </column>
+                </columns>
+                <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>ehr.context</includeScript>
+                    <includeScript>ehr/studyButtons.js</includeScript>
+                    <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Reports" suppressWarning="true">
+                        <originalText>Reports</originalText>
+                    </item>
+                    <item text="Charts" suppressWarning="true">
+                        <originalText>Charts</originalText>
+                    </item>
+                    <item text="Insert" suppressWarning="true">
+                        <originalText>Insert</originalText>
+                    </item>
+                    <item text="Insert New Row" suppressWarning="true">
+                        <originalText>Insert New Row</originalText>
+                    </item>
+                    <!--<item text="Cohorts">-->
+                        <!--<originalText>Cohorts</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="QCState">-->
+                        <!--<originalText>QC State</originalText>-->
+                    <!--</item>-->
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <item text="Import Bulk Data" suppressWarning="true">
+                        <originalText>Import Bulk Data</originalText>
+                    </item>
+                    <item text="Delete" suppressWarning="true">
+                        <originalText>Delete</originalText>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

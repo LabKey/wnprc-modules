@@ -38,7 +38,7 @@ public class SurgeryForm extends TaskForm {
             section.addConfigSource("Surgery");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Encounter.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Surgery.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Encounter.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Surgery.js"));
     }
 }

@@ -38,9 +38,9 @@ public class ETLChemistryAnalyzerModule extends DefaultModule
     }
 
     @Override
-    public double getVersion()
+    public Double getSchemaVersion()
     {
-        return 16.21;
+        return 20.001;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ETLChemistryAnalyzerModule extends DefaultModule
     @Override
     protected void init()
     {
-        addController(ETLChemistryAnalyzerController.NAME, ETLChemistryAnalyzerController.class);
+        addController(ETLChemistryAnalyzerController.NAME.toLowerCase(), ETLChemistryAnalyzerController.class);
     }
 
     @Override

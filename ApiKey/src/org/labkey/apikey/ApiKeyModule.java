@@ -17,14 +17,13 @@
 package org.labkey.apikey;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ldk.ExtendedSimpleModule;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.apikey.api.ApiKeyService;
-import org.labkey.apikey.api.JsonService;
 import org.labkey.apikey.api.JsonServiceManager;
 import org.labkey.apikey.service.ApiKeyServiceImpl;
 import org.labkey.apikey.service.JsonServiceManagerImpl;
@@ -44,7 +43,7 @@ public class ApiKeyModule extends ExtendedSimpleModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
         return 15.11;
     }

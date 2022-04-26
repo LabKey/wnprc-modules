@@ -1,1 +1,0 @@
-DROP TABLE wnprc_billing.chargeableItemCategories;

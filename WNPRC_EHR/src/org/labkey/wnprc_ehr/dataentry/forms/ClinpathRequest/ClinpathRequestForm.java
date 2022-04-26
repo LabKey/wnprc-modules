@@ -22,7 +22,7 @@ public class ClinpathRequestForm extends RequestForm {
                 new AnimalDetailsFormSection()
         ));
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Request.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Request.js"));
 
         // Add the "Request" config source to each page.
         for (FormSection section : this.getFormSections()) {

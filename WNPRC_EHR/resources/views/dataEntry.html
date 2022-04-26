@@ -3,180 +3,180 @@
     var webpartContext = <%=webpartContext%>;
 
     Ext4.define('WNPRC_EHR.panel.EnterDataPanel', {
-                extend: 'LABKEY.ext4.BootstrapTabPanel',
+        extend: 'LABKEY.ext4.BootstrapTabPanel',
 
-                border: false,
-                autoHeight: true,
-                layout: 'anchor',
-                width: '100%',
-                boxMinWidth: 1000,
+        border: false,
+        autoHeight: true,
+        layout: 'anchor',
+        width: '100%',
+        boxMinWidth: 1000,
 
-                clinpathUpdateURL: '',
-                clinpathInsertURL: '',
-                clinpathDeleteURL: '',
+        clinpathUpdateURL: '',
+        clinpathInsertURL: '',
+        clinpathDeleteURL: '',
 
-                bloodUpdateURL: '',
-                bloodInsertURL: '',
-                bloodDeleteURL: '',
+        bloodUpdateURL: '',
+        bloodInsertURL: '',
+        bloodDeleteURL: '',
 
-                vvcUpdateURL: '',
-                vvcDeleteURL: '',
+        vvcUpdateURL: '',
+        vvcDeleteURL: '',
 
-                animalRequestUpdateURL: '',
-                animalRequestDeleteURL: '',
+        animalRequestUpdateURL: '',
+        animalRequestDeleteURL: '',
 
-                initComponent: function() {
+        initComponent: function() {
 
 
-                    if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Clinpath Runs', schemaName: 'study'})){
-                        this.clinpathUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&key=${lsid}&update=1';
-                        this.clinpathInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&update=1';
-                        this.clinpathDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Clinpath Runs';
-                    }
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Clinpath Runs', schemaName: 'study'})){
+                this.clinpathUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&key=${lsid}&update=1';
+                this.clinpathInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&update=1';
+                this.clinpathDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Clinpath Runs';
+            }
 
-                    if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
-                        this.bloodUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&key=${lsid}&update=1';
-                        this.bloodInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&update=1';
-                        this.bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
-                    }
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
+                this.bloodUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&key=${lsid}&update=1';
+                this.bloodInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&update=1';
+                this.bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
+            }
 
-                    if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
-                        this.vvcUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
-                        this.vvcDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
-                    }
+            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+                this.vvcUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
+                this.vvcDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
+            }
 
-                    if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
-                        this.animalRequestUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}&update=1';
-                        this.animalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
-                    }
+            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+                this.animalRequestUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}&update=1';
+                this.animalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
+            }
 
-                    this.items = this.getItems();
+            this.items = this.getItems();
 
-                    this.callParent();
-                },
+            this.callParent();
+        },
 
-                loadTab: function (t) {
-                    if (this.parentTabPanel) {
-                        var topTab = this.parentTabPanel.getActiveTab();
-                        if (topTab) {
-                            var bottomTab = topTab.getActiveTab();
-                            if (bottomTab)
-                                Ext4.History.add('topTab:' + topTab.itemId + '&activeReport:' + bottomTab.itemId);
+        loadTab: function (t) {
+            if (this.parentTabPanel) {
+                var topTab = this.parentTabPanel.getActiveTab();
+                if (topTab) {
+                    var bottomTab = topTab.getActiveTab();
+                    if (bottomTab)
+                        Ext4.History.add('topTab:' + topTab.itemId + '&activeReport:' + bottomTab.itemId);
+                }
+            }
+        },
+        restoreFromUrl: function () {
+            if (document.location.hash) {
+                var token = document.location.hash.split('#');
+                if (token.length > 0) {
+                    // this.setActiveTab(token);
+                }
+            }
+        },
+
+        onSuccessResize: function (dr){
+            var width1 = Ext4.get(dr.domId).getSize().width + 50;
+            var width2 = Ext4.get(this.id).getSize().width;
+
+            if(width1 > width2){
+                console.log(width1+'/'+width2)
+                Ext4.get(webpartContext.wrapperDivId).setWidth(width1);
+                console.log('resizing')
+            }
+            else {
+                Ext4.get(webpartContext.wrapperDivId).setWidth('100%');
+            }
+        },
+
+        listeners: {
+            render: function (r) {
+                this.restoreFromUrl();
+            }
+        },
+        getItems: function() {
+            return [
+                {
+                    title: 'My Tasks',
+                    ref: 'MyTasks',
+                    items: [{
+                        itemId: 'MyTasks',
+                        xtype: 'ldk-querycmp',
+                        cls: 'my-tasks-marker',
+                        queryConfig: {
+                            schemaName: 'ehr',
+                            queryName: 'my_tasks',
+                            viewName: 'Active Tasks',
+                            scope: this,
+                            success: this.onSuccessResize
                         }
-                    }
+                    }]
                 },
-                restoreFromUrl: function () {
-                    if (document.location.hash) {
-                        var token = document.location.hash.split('#');
-                        if (token.length > 0) {
-                            // this.setActiveTab(token);
+                {
+                    title: 'All Tasks',
+                    ref: 'AllTasks',
+                    items: [{
+                        itemId: 'AllTasks',
+                        xtype: 'ldk-querycmp',
+                        cls: 'all-tasks-marker',
+                        queryConfig: {
+                            schemaName: 'ehr',
+                            queryName: 'Tasks_DataEntry',
+                            viewName: 'Active Tasks',
+                            scope: this,
+                            success: this.onSuccessResize
                         }
-                    }
+                    }]
                 },
-
-                onSuccessResize: function (dr){
-                    var width1 = Ext4.get(dr.domId).getSize().width + 50;
-                    var width2 = Ext4.get(this.id).getSize().width;
-
-                    if(width1 > width2){
-                        console.log(width1+'/'+width2)
-                        Ext4.get(webpartContext.wrapperDivId).setWidth(width1);
-                        console.log('resizing')
-                    }
-                    else {
-                        Ext4.get(webpartContext.wrapperDivId).setWidth('100%');
-                    }
+                {
+                    title: 'Tasks By Room',
+                    ref: 'TasksByRoom',
+                    items: [{
+                        itemId: 'TasksByRoom',
+                        xtype: 'ldk-querycmp',
+                        cls: 'room-tasks-marker',
+                        queryConfig: {
+                            schemaName: 'ehr',
+                            queryName: 'TasksByLocation_DataEntry',
+                            viewName: 'Active Tasks',
+                            scope: this,
+                            success: this.onSuccessResize
+                            //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                        }
+                    }]
                 },
-
-                listeners: {
-                    render: function (r) {
-                        this.restoreFromUrl();
-                    }
+                {
+                    title: 'Tasks By Id',
+                    ref: 'TasksById',
+                    items: [{
+                        itemId: 'TasksById',
+                        xtype: 'ldk-querycmp',
+                        cls: 'id-tasks-marker',
+                        queryConfig: {
+                            schemaName: 'ehr',
+                            queryName: 'TasksById_DataEntry',
+                            viewName: 'Active Tasks',
+                            scope: this,
+                            success: this.onSuccessResize
+                            //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                        }
+                    }]
                 },
-                getItems: function() {
-                    return [
-                        {
-                            title: 'My Tasks',
-                            ref: 'MyTasks',
-                            items: [{
-                                itemId: 'MyTasks',
-                                xtype: 'ldk-querycmp',
-                                cls: 'my-tasks-marker',
-                                queryConfig: {
-                                    schemaName: 'ehr',
-                                    queryName: 'my_tasks',
-                                    viewName: 'Active Tasks',
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                }
-                            }]
-                        },
-                        {
-                            title: 'All Tasks',
-                            ref: 'AllTasks',
-                            items: [{
-                                itemId: 'AllTasks',
-                                xtype: 'ldk-querycmp',
-                                cls: 'all-tasks-marker',
-                                queryConfig: {
-                                    schemaName: 'ehr',
-                                    queryName: 'Tasks_DataEntry',
-                                    viewName: 'Active Tasks',
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                }
-                            }]
-                        },
-                        {
-                            title: 'Tasks By Room',
-                            ref: 'TasksByRoom',
-                            items: [{
-                                itemId: 'TasksByRoom',
-                                xtype: 'ldk-querycmp',
-                                cls: 'room-tasks-marker',
-                                queryConfig: {
-                                    schemaName: 'ehr',
-                                    queryName: 'TasksByLocation_DataEntry',
-                                    viewName: 'Active Tasks',
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                    //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
-                                }
-                            }]
-                        },
-                        {
-                            title: 'Tasks By Id',
-                            ref: 'TasksById',
-                            items: [{
-                                itemId: 'TasksById',
-                                xtype: 'ldk-querycmp',
-                                cls: 'id-tasks-marker',
-                                queryConfig: {
-                                    schemaName: 'ehr',
-                                    queryName: 'TasksById_DataEntry',
-                                    viewName: 'Active Tasks',
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                    //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
-                                }
-                            }]
-                        },
-                        {
-                            title: 'Tasks Requiring Review',
-                            ref: 'ReviewRequired',
-                            items: [{
-                                itemId: 'ReviewRequired',
-                                xtype: 'ldk-querycmp',
-                                cls: 'review-requested-marker',
-                                queryConfig: {
-                                    schemaName: 'ehr',
-                                    queryName: 'Tasks_DataEntry',
-                                    viewName: 'Review Required',
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                }
-                            }]
-                        },
+                {
+                    title: 'Tasks Requiring Review',
+                    ref: 'ReviewRequired',
+                    items: [{
+                        itemId: 'ReviewRequired',
+                        xtype: 'ldk-querycmp',
+                        cls: 'review-requested-marker',
+                        queryConfig: {
+                            schemaName: 'ehr',
+                            queryName: 'Tasks_DataEntry',
+                            viewName: 'Review Required',
+                            scope: this,
+                            success: this.onSuccessResize
+                        }
+                    }]
+                },
 
                         {
                             title: 'Blood Draw Requests',
@@ -248,8 +248,7 @@
                                     schemaName: 'wnprc',
                                     queryName: 'animal_requests',
                                     viewName: 'Animal Requests',
-                                    updateURL: this.animalRequestUpdateURL,
-                                    deleteURL: this.animalRequestDeleteURL,
+                                    updateURL: '',
                                     scope: this,
                                     success: this.onSuccessResize
                                 }
@@ -451,6 +450,21 @@
                             url: makeExt4DataEntryURL("Research Ultrasounds"),
                             title: 'Enter Research Ultrasounds',
                             queries: ['research_ultrasounds']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Enter Water Orders"),
+                            title: 'Enter Water Orders',
+                            queries: ['waterOrders']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Enter Lab Water"),
+                            title: 'Enter Lab Water',
+                            queries: ['waterGiven']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Enter Treatments - Water"),
+                            title: 'Enter Treatments - Water',
+                            queries: ['waterGiven']
                         }
                     ]
                 },

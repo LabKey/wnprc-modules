@@ -19,6 +19,7 @@ public class SimplerFilter extends SimpleFilter {
         super(filter);
     }
 
+    @Override
     public SimplerFilter clone() {
         return new SimplerFilter((Filter) this);
     }

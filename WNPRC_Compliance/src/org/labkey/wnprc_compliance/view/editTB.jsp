@@ -7,7 +7,7 @@
     String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
 %>
 <div class="text-center" style="margin-bottom: 10px;">
-    <a class="btn btn-primary" href="<%= url %>">
+    <a class="btn btn-primary" href="<%=h(url)%>">
         <span class="glyphicon glyphicon-home"></span>
         TB Dashboard
     </a>
@@ -19,7 +19,7 @@
     <div class="panel-heading">Persons List</div>
 
     </div>
-    <lk-querytable params="schema: '<%= WNPRC_ComplianceSchema.NAME %>',
+        <lk-querytable params="schema: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                            query: 'personsList',
                                    rowsAreSelectable: false,
                                    rowsAreClickable: true,
@@ -27,7 +27,7 @@
                                    rowClickCallback: rowClicked,
                                    rowBackgroundColorClicked: '#78b0e0',
                                    cursor: 'pointer'"
-    ></lk-querytable>
+        ></lk-querytable>
     </div>
 
 
@@ -37,7 +37,7 @@
             <div class="panel-heading">TB Clearances</div>
             <div class="panel-body" data-bind="with: results">
 
-                <div data-bind="visible:loadingResults()"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+                <div data-bind="visible:loadingResults()"><img src="<%=h(getContextPath())%>/webutils/icons/loading.svg">Loading...</div>
                 <div id="person-results" data-bind="visible:!loadingResults()">
                     <!-- ko if: TBClearances().length == 0 -->
                     <div style="padding-bottom:10px"><strong>Please select a person.</strong></div>
@@ -72,7 +72,7 @@
                 <div class="panel-heading">Measles Clearances</div>
                 <div class="panel-body" data-bind="with: results">
 
-                    <div data-bind="visible:loadingResults()"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+                    <div data-bind="visible:loadingResults()"><img src="<%=h(getContextPath())%>/webutils/icons/loading.svg">Loading...</div>
                     <div id="person-results" data-bind="visible:!loadingResults()">
                         <!-- ko if: MeaslesClearances().length == 0 -->
                         <div style="padding-bottom:10px"><strong>Please select a person.</strong></div>
@@ -148,7 +148,7 @@
                 }
             });
 
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.UpdateClearanceAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON(<%=q(new ActionURL(WNPRC_ComplianceController.UpdateClearanceAPI.class, getContainer()))%>, {
                 clearances: WebUtils.VM.results.TBClearancesToUpdate(),
                 table_name: 'tb_clearances'
             }).then(function(d) {
@@ -166,11 +166,11 @@
                 }
             });
 
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.UpdateClearanceAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON(<%=q(new ActionURL(WNPRC_ComplianceController.UpdateClearanceAPI.class, getContainer()))%>, {
                 clearances: WebUtils.VM.results.MeaslesClearancesToUpdate(),
                 table_name: 'measles_clearances'
             }).then(function(d) {
-                toastr.success("Success!")
+                toastr.success("Success!");
             }).catch(function(e) {
                 toastr.error("Hit an error: " + e.message || e);
             });
@@ -194,7 +194,7 @@
                 ActionURL searchQuery = new ActionURL(WNPRC_ComplianceController.GetClearancesFromPerson.class, getContainer());
             %>
 
-            var tbUrl = LABKEY.ActionURL.buildURL('<%= searchQuery.getController() %>', '<%= searchQuery.getAction()%>', null, {
+            var tbUrl = LABKEY.ActionURL.buildURL(<%=q(searchQuery.getController()) %>, <%=q(searchQuery.getAction())%>, null, {
                 query: row.rowData[0],
                 table: "mapTBClearances"
             });
@@ -207,7 +207,7 @@
                     toastr.error("Hit an error: " + e.message || e);
                 });
 
-            var mUrl = LABKEY.ActionURL.buildURL('<%= searchQuery.getController() %>', '<%= searchQuery.getAction()%>', null, {
+            var mUrl = LABKEY.ActionURL.buildURL(<%=q(searchQuery.getController())%>, <%=q(searchQuery.getAction())%>, null, {
                 query: row.rowData[0],
                 table: "mapMeaslesClearances"
             });

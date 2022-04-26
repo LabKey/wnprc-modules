@@ -1,0 +1,7 @@
+label	description	PublicData
+Review Pending	Request is created, and its pending review	true
+Request Approved	Request is approved	true
+Request Rejected	Request is denied or rejected	true
+Order Placed	Order is placed	true
+Order Received	Requested order is received	true
+Order Complete	Request order is marked complete	true

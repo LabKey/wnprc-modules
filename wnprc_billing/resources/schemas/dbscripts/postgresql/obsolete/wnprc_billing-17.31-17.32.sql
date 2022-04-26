@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS wnprc_billing.chargeableItems;

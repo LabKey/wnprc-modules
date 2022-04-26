@@ -39,10 +39,15 @@ public class PrimateIdTest extends AbstractEHRTest
     }
 
     @Override
+    public String getModulePath()
+    {
+        return "/server/modules/wnprc-modules/WNPRC_EHR";
+    }
+
+    @Override
     protected void importStudy()
     {
-        goToManageStudy();
-        importStudyFromZip(STUDY_ZIP);
+        importStudyFromPath(1);
     }
 
     //endregion

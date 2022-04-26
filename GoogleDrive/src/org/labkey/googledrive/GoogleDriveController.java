@@ -2,7 +2,7 @@ package org.labkey.googledrive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -31,13 +31,14 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception {
             return new JspView("/org/labkey/googledrive/view/begin.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
@@ -77,7 +78,8 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("registerAccount")
-    public class AddAccount extends ApiAction<SimpleApiJsonForm> {
+    public class AddAccount extends MutatingApiAction<SimpleApiJsonForm>
+    {
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
@@ -119,7 +121,8 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("updateAccountDisplayName")
-    public class UpdateAccountDisplayName extends ApiAction<UpdateDisplayNameForm> {
+    public class UpdateAccountDisplayName extends MutatingApiAction<UpdateDisplayNameForm>
+    {
         @Override
         public Object execute(UpdateDisplayNameForm form, BindException errors) throws Exception {
             GoogleDriveService.get().updateDisplayNameForAccount(form.getId(), form.getDisplayName(), getUser());
@@ -129,7 +132,7 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("deleteAccount")
-    public class DeleteAccount extends ApiAction<AccountForm> {
+    public class DeleteAccount extends MutatingApiAction<AccountForm> {
         @Override
         public Object execute(AccountForm form, BindException errors) throws Exception {
             GoogleDriveService.get().deleteAccount(form.getId(), getUser());

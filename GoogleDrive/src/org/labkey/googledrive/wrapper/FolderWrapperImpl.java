@@ -51,14 +51,17 @@ public class FolderWrapperImpl extends ItemWrapperImpl implements FolderWrapper 
         return Collections.singletonList(_id);
     }
 
+    @Override
     public FileWrapper getFile(String name) throws NotFoundException, IOException {
         return (FileWrapper) new FileWrapperImpl(_drive, this._getItemId(name, false));
     }
 
+    @Override
     public FolderWrapper getFolder(String name) throws NotFoundException, IOException {
         return (FolderWrapper) new FolderWrapperImpl(_drive, this._getItemId(name, true));
     }
 
+    @Override
     public FolderWrapper createFolder(String name) throws IOException {
         // A folder is just a file with a special mime type.
         File fileMetadata = new File();
@@ -69,6 +72,7 @@ public class FolderWrapperImpl extends ItemWrapperImpl implements FolderWrapper 
         return new FolderWrapperImpl(_drive, file.getId());
     }
 
+    @Override
     public FileWrapper createFile(String name, String mimeType, InputStream fileContent) throws IOException {
         File fileMetadata = new File();
         fileMetadata.setName(name);

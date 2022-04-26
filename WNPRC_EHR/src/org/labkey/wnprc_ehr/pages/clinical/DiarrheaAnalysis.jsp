@@ -1,7 +1,7 @@
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
+<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -15,7 +15,7 @@
 %>
 
 <div class="text-center">
-    <h3>Diarrhea Analysis for <%= animalId %></h3>
+    <h3>Diarrhea Analysis for <%=h(animalId)%></h3>
 </div>
 
 
@@ -37,7 +37,7 @@
 
 <script type="application/javascript">
     (function() {
-        var diarrheaCounts = <%= diarrheaCounts.toString() %>;
+        var diarrheaCounts = <%=diarrheaCounts%>;
 
         var index = {};
         _.each(diarrheaCounts, function(obj) {
@@ -84,10 +84,10 @@
 
 <script type="application/javascript">
     (function() {
-        var diarrheaDetails = <%= diarrheaDetails.toString() %>;
+        var diarrheaDetails = <%=diarrheaDetails%>;
 
         var codeLookup = {};
-        var codes = <%= diarrheaCodes.toString() %>;
+        var codes = <%=diarrheaCodes%>;
         _.each(codes, function(codeObj) {
             codeLookup[codeObj.value] = codeObj.title;
         });

@@ -1,13 +1,15 @@
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.MarkCardExemptAPI" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
+    ActionURL url = urlFor(BeginAction.class);
 %>
 <div class="text-center" style="margin-bottom: 10px;">
-    <a class="btn btn-primary" href="<%= url %>">
+    <a class="btn btn-primary" href="<%=h(url)%>">
         <span class="glyphicon glyphicon-home"></span>
         TB Dashboard
     </a>
@@ -69,7 +71,7 @@
             <div class="panel-heading">Unidentified Cards</div>
 
             <div class="panel-body">
-            <lk-querytable params="schema: '<%= WNPRC_ComplianceSchema.NAME %>',
+            <lk-querytable params="schema: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                                    query: 'unidentifiedCards',
                                    rowsAreSelectable: false,
                                    rowsAreClickable: true,
@@ -215,7 +217,7 @@
         WebUtils.VM.submitMarkExempt = function() {
             $exemptDialog.modal('hide');
             var cardData = ko.mapping.toJS(WebUtils.VM.form);
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON(<%=q(urlFor(MarkCardExemptAPI.class))%>, {
                         cardId: cardData.selectedCard[0],
                         reason: cardData.notes
             }).then(function(d) {
@@ -234,7 +236,7 @@
 
             //TODO validate here...
             //TODO not sure how this $parent selectedPerson really works here?
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.LinkCardAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON(<%=q(urlFor(WNPRC_ComplianceController.LinkCardAPI.class))%>, {
                 cardId: cardData.selectedCard[0],
                 personId: personData.selectedPerson
             }).then(function(d) {
@@ -262,7 +264,7 @@
             %>
 
             //TODO allow the user to specify the filter
-            var url = LABKEY.ActionURL.buildURL('<%= searchQuery.getController() %>', '<%= searchQuery.getAction()%>', null, {
+            var url = LABKEY.ActionURL.buildURL(<%=q(searchQuery.getController())%>, <%=q(searchQuery.getAction())%>, null, {
                 query: row.rowData[1]
             });
 
@@ -283,7 +285,7 @@
                     } else {
                         // knockout wasn't playing nice here, using jQuery to force button to disabled
                         $(document).on('click', '#radio-person', function () {
-                            $('#link-card-button').removeProp('disabled');
+                            $('#link-card-button').prop('disabled', false);
                         });
                     }
                     WebUtils.VM.listPersons.userMatches((PERSONS in results) ? results[PERSONS] : []);

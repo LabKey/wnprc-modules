@@ -34,7 +34,7 @@
     "rsvp": "~3.3.0",
     "typescript": "^3.8.3",
     "ts-loader": "^6.2.2",
-    "urijs": "^1.0.0"
+    "urijs": "^1.19.11"
   },
   "devDependencies": {
     "@labkey/build": "6.0.0",

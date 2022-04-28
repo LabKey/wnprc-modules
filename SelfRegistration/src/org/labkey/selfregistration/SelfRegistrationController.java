@@ -238,7 +238,6 @@ public class SelfRegistrationController extends SpringActionController
             // get issue table and insert the issue row
             UserSchema userSchema = QueryService.get().getUserSchema(user, container, _schemaPath);
             TableInfo table = userSchema.getTable(form.getIssueDefName());
-            QueryService.get().getSelectSQL(table,null,null,null,100,0,false);
             QueryUpdateService qus = table.getUpdateService();
 
             BatchValidationException batchErrors = new BatchValidationException();

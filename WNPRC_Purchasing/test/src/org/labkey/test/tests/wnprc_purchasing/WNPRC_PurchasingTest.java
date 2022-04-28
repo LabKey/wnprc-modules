@@ -17,6 +17,7 @@
 package org.labkey.test.tests.wnprc_purchasing;
 
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,6 +63,7 @@ import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
 @Category({EHR.class, WNPRC_EHR.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 5)
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     //folders
@@ -292,11 +294,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     {
         log("Delete emails from dumbster");
         enableEmailRecorder();
-        goToModule("Dumbster");
 
         goToRequesterPage();
         impersonate(REQUESTER_USER_1);
-        clickButton("Create Request");
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
         log("Verifying the validation for mandatory fields");
@@ -319,8 +320,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Verifying the request created");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
-        checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
-        checker().verifyEquals("Invalid request status ", "Review Pending",
+        assertEquals("Invalid number of requests ", 1, table.getDataRowCount());
+        assertEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         String requestId = table.getDataAsText(0, "rowId");
         stopImpersonating();
@@ -389,6 +390,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendor"));
+        checker().screenShotIfNewError("other_vendor_request");
         stopImpersonating();
     }
 
@@ -404,7 +406,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Create new Request - START");
         goToRequesterPage();
         clickButton("Create Request");
-        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        final CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
         requestPage.setAccountsToCharge("acct100 - Assay Services")
                 .setVendor("Real Santa Claus")
@@ -429,6 +431,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         checker().verifyEquals("Invalid requester", requester1Name, table.getDataAsText(0, "requester"));
+        checker().screenShotIfNewError("requester_view_submitted");
         stopImpersonating();
 
         log("-----Update request as Purchasing Admin-----");
@@ -439,30 +442,33 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         DataRegionTable requestsQueryForAdmins = new DataRegionTable("query", getDriver());
         requestsQueryForAdmins.setFilter("requestNum", "Equals", requestID);
 
-        checker().verifyEquals("Admin is not seeing the request " + requestID, 1, requestsQueryForAdmins.getDataRowCount());
+        assertEquals("Admin is not seeing the request " + requestID, 1, requestsQueryForAdmins.getDataRowCount());
         clickAndWait(Locator.linkWithText(requestID));
 
-        requestPage = new CreateRequestPage(getDriver());
-        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage.getAccountsToCharge());
-        checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage.getVendor());
-        checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage.getBusinessPurpose());
-        checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage.getSpecialInstructions());
-        checker().verifyEquals("Invalid value for Shipping Destination", "456 Thompson lane (Math bldg)", requestPage.getShippingDestination());
-        checker().verifyEquals("Invalid value for Delivery Attention to ", "Mrs Claus", requestPage.getDeliveryAttentionTo());
-        checker().verifyEquals("Invalid value for Line Item ", "Pen", requestPage.getItemDesc());
-        checker().verifyEquals("Invalid value for Unit Input ", "CS", requestPage.getUnitInput());
-        checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage.getUnitCost());
-        checker().verifyEquals("Invalid value for Quantity ", "25", requestPage.getQuantity());
+        final CreateRequestPage requestPage2 = new CreateRequestPage(getDriver());
+        waitFor(() -> !requestPage2.getAccountsToCharge().equals("Select"), "Form didn't load existing values", 5_000);
+        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage2.getAccountsToCharge());
+        checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage2.getVendor());
+        checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage2.getBusinessPurpose());
+        checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage2.getSpecialInstructions());
+        checker().verifyEquals("Invalid value for Shipping Destination", "456 Thompson lane (Math bldg)", requestPage2.getShippingDestination());
+        checker().verifyEquals("Invalid value for Delivery Attention to ", "Mrs Claus", requestPage2.getDeliveryAttentionTo());
+        checker().verifyEquals("Invalid value for Line Item ", "Pen", requestPage2.getItemDesc());
+        checker().verifyEquals("Invalid value for Unit Input ", "CS", requestPage2.getUnitInput());
+        checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage2.getUnitCost());
+        checker().verifyEquals("Invalid value for Quantity ", "25", requestPage2.getQuantity());
+        checker().screenShotIfNewError("admin_view_submitted");
 
         log("Upload another attachment");
-        requestPage.addAttachment(pdfFile);
+        requestPage2.addAttachment(pdfFile);
 
         log("Verify Status in 'Purchase Admin' panel is 'Review Pending'");
-        checker().verifyEquals("Invalid Assigned to value ", "Select", requestPage.getAssignedTo());
-        checker().verifyEquals("Invalid Program value", "4", requestPage.getProgram());
-        checker().verifyEquals("Invalid status ", "Review Pending", requestPage.getStatus());
+        checker().verifyEquals("Invalid Assigned to value ", "Select", requestPage2.getAssignedTo());
+        checker().verifyEquals("Invalid Program value", "4", requestPage2.getProgram());
+        checker().verifyEquals("Invalid status ", "Review Pending", requestPage2.getStatus());
+        checker().screenShotIfNewError("status_review_pending");
 
-        requestPage.setStatus("Request Approved")
+        requestPage2.setStatus("Request Approved")
                 .setConfirmationNo("12345")
                 .submit();
 
@@ -509,12 +515,13 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToPurchaseAdminPage();
         checker().verifyTrue(REQUESTER_USER_1 + "user should not permission for admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
-                        .withText("You do not have the permissions required to access this page.")));
+                        .withText("User does not have permission to perform this operation.")));
+        checker().screenShotIfNewError("requester_view_restricted");
         goBack();
 
         log("Creating request as " + REQUESTER_USER_1);
         goToRequesterPage();
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requesterRequest = new HashMap<>();
         requesterRequest.put("Account to charge", "acct100 - Assay Services");
         requesterRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
@@ -553,6 +560,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 table.getColumnDataAsText("requestNum"));
         checker().verifyEquals("Incorrect requester's", Arrays.asList("purchaserequester1", "purchaseadmin"),
                 table.getColumnDataAsText("requester"));
+        checker().screenShotIfNewError("all_open_requests");
 
         log("Changing the assignment of the request");
         clickAndWait(Locator.linkWithText(requestId1));
@@ -572,6 +580,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 table.getDataAsText(0, "requestNum"));
         checker().verifyEquals("Incorrect status", "Request Approved",
                 table.getDataAsText(0, "requestStatus"));
+        checker().screenShotIfNewError("my_open_requests");
 
         log("Completing the order");
         goToPurchaseAdminPage();
@@ -586,19 +595,21 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 table.getDataAsText(0, "requestNum"));
         checker().verifyEquals("Incorrect status", "Order Complete",
                 table.getDataAsText(0, "requestStatus"));
+        checker().screenShotIfNewError("completed_requests");
 
         goToPurchaseAdminPage();
         clickAndWait(Locator.linkWithText("All Open Requests"));
         table = new DataRegionTable("query", getDriver());
         checker().verifyEquals("Completed order should not be present", Arrays.asList(requestId1),
                 table.getColumnDataAsText("requestNum"));
+        checker().screenShotIfNewError("requests_after_completing");
         stopImpersonating();
 
         log("Verifying the P-Card view");
         goToPurchaseAdminPage();
         clickAndWait(Locator.linkWithText("P-Card View"));
         table = new DataRegionTable("query", getDriver());
-        checker().verifyEquals("Incorrect number of rows in P-Card view", 2, table.getDataRowCount());
+        assertEquals("Incorrect number of rows in P-Card view", 2, table.getDataRowCount());
     }
 
     @Test
@@ -658,9 +669,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Testing as receiver");
         impersonate(RECEIVER_USER);
         goToPurchaseAdminPage();
-        checker().verifyTrue("Receiver should not have permission to access admin page",
+        Assert.assertTrue("Receiver should not have permission to access admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
-                        .withText("You do not have the permissions required to access this page.")));
+                        .withText("User does not have permission to perform this operation.")));
         goToReceiverPage();
         waitAndClickAndWait(Locator.linkWithText(requestId2));
         requestPage = new CreateRequestPage(getDriver());
@@ -669,7 +680,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         requestPage.submit();
 
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
-        checker().verifyEquals("The line item table should be empty", 0, table.getDataRowCount());
+        assertEquals("The line item table should be empty", 0, table.getDataRowCount());
         stopImpersonating();
 
         goToPurchaseAdminPage();
@@ -677,7 +688,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         table = new DataRegionTable("query", getDriver());
         table.setFilter("requestNum", "Equals One Of (example usage: a;b;c)", requestId1 + ";" + requestId2);
-        checker().verifyEquals("Incorrect order status", Arrays.asList("Order Received", "Order Received"), table.getColumnDataAsText("requestStatus"));
+        assertEquals("Incorrect order status", Arrays.asList("Order Received", "Order Received"), table.getColumnDataAsText("requestStatus"));
     }
 
     @Test
@@ -699,7 +710,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         emailApprovalRequest.put("Unit", "Term");
         emailApprovalRequest.put("Unit Cost", "500");
         emailApprovalRequest.put("Quantity", "10");
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 
@@ -714,6 +725,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("A new purchasing request # " + requestId + " by " + requester2Name + " was submitted on " + _dateTimeFormatter.format(today) + " for the total of $5,000.00."));
+        checker().screenShotIfNewError("request_submitted_email");
+
         log("Delete emails from dumbster");
         enableEmailRecorder();
 
@@ -733,6 +746,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $5,000.00 has been approved by the purchasing director."));
+        checker().screenShotIfNewError("request_approved_email");
     }
 
     @Test
@@ -752,7 +766,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         emailApprovalRequest.put("Unit", "Term");
         emailApprovalRequest.put("Unit Cost", "500");
         emailApprovalRequest.put("Quantity", "20");
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 
@@ -781,6 +795,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $10,000.00 has been rejected by the purchasing director."));
         checker().verifyTrue("Reason for rejection not found in the email body",
                 mailTable.getMessage(subject).getBody().contains(rejectReasonMsg));
+        checker().screenShotIfNewError("request_rejection_email");
     }
 
     @Test
@@ -805,7 +820,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         emailApprovalRequest.put("Unit", "Term");
         emailApprovalRequest.put("Unit Cost", "500");
         emailApprovalRequest.put("Quantity", "20");
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 
@@ -837,6 +852,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $7,500.00 has been ordered by the purchasing department."));
+        checker().screenShotIfNewError("custom_request_email");
 
 
         log("Delete emails from dumbster");
@@ -859,6 +875,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("All line items are received."));
+        checker().screenShotIfNewError("custom_request_email");
 
     }
 
@@ -891,7 +908,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         requestPage.submitForReview();
 
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
-        checker().verifyEquals("No new request created for reorder link", 2, table.getDataRowCount());
+        assertEquals("No new request created for reorder link", 2, table.getDataRowCount());
         stopImpersonating();
 
         log("verifying reorder by button");
@@ -907,7 +924,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         table = new DataRegionTable("query", getDriver());
         clickAndWait(Locator.linkWithText("All Requests"));
-        checker().verifyEquals("No new request created from reorder button", 3, table.getDataRowCount());
+        assertEquals("No new request created from reorder button", 3, table.getDataRowCount());
 
     }
 

@@ -39,7 +39,7 @@ public class WNPRC_BillingUserSchema extends SimpleUserSchema
     }
 
     @Override
-    protected boolean canReadSchema()
+    public boolean canReadSchema()
     {
         User user = getUser();
         if (user == null)

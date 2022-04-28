@@ -7,7 +7,7 @@ This repository includes all the custom LabKey modules developed by the WNPRC fo
 To build the WNPRC EHR modules for development:
 
   1. Follow the instructions to [set up a LabKey development machine](https://labkey.org/Documentation/wiki-page.view?name=devMachine).
-  1. From the **LabKey root directory**:      
+  1. From the **LabKey root directory**:
       1. Clone this repo into the external modules directory:
           ```bash
           git clone https://github.com/WNPRC-EHR-Services/wnprc-modules.git externalModules/wnprc-modules

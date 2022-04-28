@@ -7,7 +7,7 @@ networks:
 services:
 
   postgres:
-    image: postgres:11
+    image: postgres:12.3
     shm_size: 4g
     restart: always
     volumes:
@@ -49,7 +49,7 @@ services:
       - network1
 
   labkey:
-    image: wnprcehr/labkeysnapshot:21.3
+    image: wnprcehr/labkeysnapshot:21.11
     depends_on:
       - "mailserver"
       - "postgres"

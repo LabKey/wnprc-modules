@@ -32,8 +32,9 @@ public class GoogleDriveController extends SpringActionController {
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception {
-            return new JspView("/org/labkey/googledrive/view/begin.jsp");
+        public ModelAndView getView(Object o, BindException errors)
+        {
+            return new JspView<>("/org/labkey/googledrive/view/begin.jsp");
         }
 
         @Override
@@ -55,7 +56,7 @@ public class GoogleDriveController extends SpringActionController {
     public class AddAccountPage extends GoogleDrivePageAction {
         @Override
         public String getPathToJsp() {
-            return "view/RegisterServiceAccount.jsp";
+            return "/org/labkey/googledrive/view/RegisterServiceAccount.jsp";
         }
 
         @Override

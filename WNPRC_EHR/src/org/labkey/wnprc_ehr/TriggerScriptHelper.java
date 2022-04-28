@@ -1148,13 +1148,11 @@ public class TriggerScriptHelper {
                     //Calendar tempCalendar = Calendar.getInstance();
                     Calendar tempCalendar = (Calendar) limitTime.clone();
 
-
                     tempCalendar.add(Calendar.DATE, i);
-                    //initiating the total amount of water for a day with -1.0, this allow for including animals in the project
+                    //initiating the total amount of water for a day with -1.0, this allows for including animals in the project
                     WaterInfo tempWater = new WaterInfo(tempCalendar.getTime(), -1.0);
                     waterAmount.put(tempCalendar, tempWater);
                 }
-                Double avWeight = new Double (0);
 
                 TableInfo waterGiven = getTableInfo("study","WaterRecentWeight");
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
@@ -1168,9 +1166,8 @@ public class TriggerScriptHelper {
                 if (waterFromServer.length>0){
                     for (Map<String,Object> saveWater : waterFromServer){
                         WaterInfo waters = new WaterInfo(ConvertHelper.convert(saveWater.get("date"), Date.class), ConvertHelper.convert(saveWater.get("volume"), Double.class),ConvertHelper.convert(saveWater.get("InnerWeight"), Double.class));
-                        String waterId = new String(ConvertHelper.convert(saveWater.get("objectid"), String.class));
+                        String waterId = ConvertHelper.convert(saveWater.get("objectid"), String.class);
                         uniqueWater.put(waterId, waters);
-
                     }
                 }
 
@@ -1239,24 +1236,19 @@ public class TriggerScriptHelper {
                         return errorMsg.toString();
                     }
                 }
-
-
-            }catch(ConversionException e)
+            }
+            catch(ConversionException e)
             {
                 _log.error("TriggerScriptHelper.verifyBloodVolume was unable to parse date or qcstate", e);
                 throw e;
 
             }
 
-
-
-
-
-
-            if (waterdays>=2){
-
+            if (waterdays>=2)
+            {
                 return errorMsg.toString();
-            }else
+            }
+            else
             {
                 return null;
             }
@@ -1265,8 +1257,8 @@ public class TriggerScriptHelper {
 
     }
 
-    public void addWaterToDate (Hashtable<Calendar, WaterInfo> waterAmount, Calendar HashDate, Double volume, Double weight){
-
+    public void addWaterToDate (Hashtable<Calendar, WaterInfo> waterAmount, Calendar HashDate, Double volume, Double weight)
+    {
         HashDate.set(Calendar.MILLISECOND, 0);
         HashDate.set(Calendar.SECOND, 0);
         HashDate.set(Calendar.MINUTE, 0);

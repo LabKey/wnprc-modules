@@ -8,6 +8,7 @@ docker/dev_*/**
 docker/nginx/test-ehr*
 docker/nginx/cert.pem
 docker/nginx/key.pem
+docker/ehrcron/scripts/pg_backup/lkbackup.ini
 
 **/node_modules/
 **/build/

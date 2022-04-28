@@ -1,7 +1,6 @@
 package org.labkey.webutils.api.action;
 
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.webutils.api.WebUtilsService;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;

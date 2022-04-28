@@ -154,7 +154,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String CONTROLLER_NAME = "wnprc_ehr";
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
-        public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
+    public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
 
     /**
      * Logger for logging the logs
@@ -179,7 +179,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 21.003;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 21.004;
     }
 
     @Override

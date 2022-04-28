@@ -3,7 +3,7 @@
   was done due to performance reasons and to include the same records as waterTotalByDate. In the future
   there may be a need to limit to 90 days in the pass when this query becomes too slow.*/
 
-SELECT wtbd.id,
+SELECT wtbd.id as animalId,
        wtbd.date,
        weigthDates.weight,
        weigthDates.startDate,
@@ -16,7 +16,7 @@ SELECT wtbd.id,
        wtbd.currentWaterCondition,
        waterScheduledAnimalsOuter.condition AS conditionAtTime,
        CAST(waterScheduledAnimalsOuter.mlsperKg AS NUMERIC) AS InnerMlsPerKg,
-       wtbd.project,
+       waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,
        wtbd.qcstate
 FROM study.waterTotalByDate wtbd
@@ -47,6 +47,7 @@ JOIN
           wsa.id,
           wsa.condition,
           wsa.mlsperKg,
+          wsa.project,
           CAST (wsa.date AS DATE) AS startDate,
           COALESCE(
                   CAST((SELECT wsa2.date FROM study.waterScheduledAnimals wsa2

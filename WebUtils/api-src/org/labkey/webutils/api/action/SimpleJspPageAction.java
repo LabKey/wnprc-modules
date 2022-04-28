@@ -1,28 +1,30 @@
 package org.labkey.webutils.api.action;
 
 import org.labkey.api.view.JspView;
-import org.labkey.webutils.api.WebUtilsService;
 
 /**
  * Created by jon on 9/14/16.
  */
-public abstract class SimpleJspPageAction extends JspPageAction {
+public abstract class SimpleJspPageAction extends JspPageAction
+{
     @Override
-    public JspView getView() {
-        return new JspView(WebUtilsService.resolveJspPath(getPathToJsp(), getModule().getClass()), getModel());
+    public JspView<?> getView()
+    {
+        String path = getPathToJsp();
+        assert path.startsWith("/") && path.endsWith(".jsp") : "JSP paths must be absolute and end with .jsp";
+        return new JspView<>(path, getModel());
     }
 
+    // This is never overridden. TODO: Remove this method and switch to JspView(String jspPath) constructor above?
     public Object getModel() {
         return null;
     }
 
     /**
-     * Returns a path (relative or absolute) to the JSP.
+     * Returns an absolute path to the JSP, starting with "/org/labkey/..." and ending with ".jsp". Relative paths are
+     * NOT supported.
      *
-     * By default, relative paths (ones that don't start with "/") are resolved relative module class that
-     * registered the controller returned by getControllerName().
-     *
-     * @return a path to the JSP
+     * @return an absolute path to the JSP
      */
     public abstract String getPathToJsp();
 }

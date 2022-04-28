@@ -65,12 +65,30 @@
                 }
             }
         },
-        restoreFromUrl: function () {
-            if (document.location.hash) {
+
+        restoreFromUrl: function(){
+            if(document.location.hash){
                 var token = document.location.hash.split('#');
-                if (token.length > 0) {
-                    // this.setActiveTab(token);
+                token = token[1].split('&');
+                var topTab;
+                var activeReport;
+                for (var i=0;i<token.length;i++){
+                    var t = token[i].split(':');
+                    switch(t[0]){
+                        case 'activeReport':
+                            activeReport = t[1];
+                            break;
+                        case 'topTab':
+                            topTab = t[1];
+                            break;
+                    }
                 }
+            }
+
+            if(topTab){
+                this.setActiveTabByTabId(topTab);
+                if(activeReport && this[topTab])
+                    this[topTab].setActiveTabByTabId(activeReport);
             }
         },
 
@@ -88,8 +106,15 @@
             }
         },
 
+        changeHandler: function(tab) {
+            if (!tab) {
+                return;
+            }
+            location.replace("#topTab:" + tab.tabId);
+        },
+
         listeners: {
-            render: function (r) {
+            beforerender: function (r) {
                 this.restoreFromUrl();
             }
         },

@@ -1,2 +1,14 @@
 #!/bin/bash
-docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$branch --rm=true -t $IMAGE_NAME .
+echo "build ver 1.0"
+
+TAG_IDENTIFIER="docker/21.3_"
+
+if [[ $DOCKER_TAG == $TAG_IDENTIFIER* ]];
+then
+        SHORT_BRANCH_NAME=${DOCKER_TAG#$TAG_IDENTIFIER}
+        echo $SHORT_BRANCH_NAME
+else
+        SHORT_BRANCH_NAME="master"
+fi
+
+docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --rm=true -t $IMAGE_NAME .

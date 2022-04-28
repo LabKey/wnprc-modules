@@ -90,7 +90,7 @@ public class WebUtilsController extends SpringActionController
     {
         @Override
         public String getPathToJsp() {
-            return "view/TestPage.jsp";
+            return "/org/labkey/webutils/view/TestPage.jsp";
         }
 
         @Override

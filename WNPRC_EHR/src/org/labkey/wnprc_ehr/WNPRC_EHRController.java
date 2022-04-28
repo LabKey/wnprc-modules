@@ -35,16 +35,21 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
@@ -67,6 +72,8 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
@@ -78,6 +85,7 @@ import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
 import org.labkey.googledrive.api.GoogleDriveService;
 import org.labkey.security.xml.GroupEnumType;
+import org.labkey.study.StudySchema;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
@@ -682,7 +690,6 @@ public class WNPRC_EHRController extends SpringActionController
                     props.put(filename, fileInfo);
                 }
             }
-
             return new ApiSimpleResponse(props);
         }
     }
@@ -1201,7 +1208,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/NecropsySchedule.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/NecropsySchedule.jsp";
         }
 
         @Override
@@ -1218,7 +1225,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/PathologyCaseList.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/PathologyCaseList.jsp";
         }
 
         @Override
@@ -1235,7 +1242,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/NecropsyReport.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/NecropsyReport.jsp";
         }
 
         @Override
@@ -1252,7 +1259,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/NecropsyCollectionList.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/NecropsyCollectionList.jsp";
         }
 
         @Override
@@ -1269,7 +1276,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/calendars/OnCallCalendar.jsp";
+            return "/org/labkey/wnprc_ehr/pages/calendars/OnCallCalendar.jsp";
         }
 
         @Override
@@ -1286,7 +1293,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/calendars/OnCallCalendar.jsp";
+            return "/org/labkey/wnprc_ehr/pages/calendars/OnCallCalendar.jsp";
         }
 
         @Override
@@ -1303,7 +1310,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/population_management/ColonyCensus.jsp";
+            return "/org/labkey/wnprc_ehr/pages/population_management/ColonyCensus.jsp";
         }
 
         @Override
@@ -1320,7 +1327,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/population_management/PerDiems.jsp";
+            return "/org/labkey/wnprc_ehr/pages/population_management/PerDiems.jsp";
         }
 
         @Override
@@ -1337,7 +1344,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/behavior/AssignBehaviorProjects.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/behavior/AssignBehaviorProjects.jsp";
         }
 
         @Override
@@ -1354,7 +1361,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/clinical/DiarrheaAnalysis.jsp";
+            return "/org/labkey/wnprc_ehr/pages/clinical/DiarrheaAnalysis.jsp";
         }
 
         @Override
@@ -1367,7 +1374,6 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresLogin
     public class AddBehaviorAssignmentAction extends MutatingApiAction<AddBehaviorAssignmentForm>
     {
-
         @Override
         public Object execute(AddBehaviorAssignmentForm form, BindException errors) throws Exception
         {
@@ -1466,6 +1472,8 @@ public class WNPRC_EHRController extends SpringActionController
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
             formType = formType != null ? formType.toLowerCase() : null;
 
+            //TODO: change the switch statement to use form_framework_types instread of hard coding the names of the new forms
+
             switch (formType)
             {
 
@@ -1483,6 +1491,10 @@ public class WNPRC_EHRController extends SpringActionController
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "necropsy":
                 case "breeding encounter":
+                case "enter water orders":
+                case "enter lab water":
+                case "enter treatments - water":
+                case "enter water daily amount":
                 case "research ultrasounds":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));
@@ -1568,7 +1580,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/husbandry/WaterCalendar.jsp";
+            return "/org/labkey/wnprc_ehr/pages/husbandry/WaterCalendar.jsp";
         }
 
         @Override
@@ -2195,5 +2207,44 @@ public class WNPRC_EHRController extends SpringActionController
         rs.close();
         return woRows;
 
+    }
+
+    /* TODO: This is an API to clean up an inconsistency in the performed by column of study.obs dataset. Once the
+     underlying issue is resolved, this API can be deleted.
+     */
+    @RequiresPermission(AdminPermission.class)
+    public class CorrectObsUserIdsAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            DbSchema studySchema = StudySchema.getInstance().getSchema();
+            Dataset obsDataset = StudyService.get().getStudy(getContainer()).getDatasetByName("obs");
+//            TableInfo obsTable = studySchema.getTable("obs");
+
+            if (null == obsDataset)
+            {
+                errors.reject(ERROR_MSG, "study.obs dataset not found. Ensure you are in the right folder.");
+                return false;
+            }
+
+            Domain obsDomain = obsDataset.getTableInfo(getUser()).getDomain();
+            if (null == obsDomain)
+            {
+                errors.reject(ERROR_MSG, "study.obs domain not found.");
+                return false;
+            }
+
+            SQLFragment sql = new SQLFragment("UPDATE studydataset.").append(obsDomain.getStorageTableName()).append(" o SET performedBy = s.performedBy FROM (\n ")
+                    .append("SELECT ob.lsid, COALESCE(ud.displayname, ob.performedBy) as performedBy FROM ").append(obsDataset.getTableInfo(getUser()), "ob").append("\n")
+                    .append("LEFT JOIN ").append(CoreSchema.getInstance().getTableInfoUsersData(),"ud").append(" ON CAST(ud.userid AS VARCHAR) = ob.performedBy\n")
+                    .append(") s WHERE s.lsid = o.lsid");
+
+            new SqlExecutor(studySchema).execute(sql);
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            return response;
+        }
     }
 }

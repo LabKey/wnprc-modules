@@ -4,6 +4,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.components.html.Input;
 import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.pages.LabKeyPage;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -17,9 +18,17 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         super(driver);
     }
 
+    @Override
+    protected void waitForPage()
+    {
+        Locator.waitForAnyElement(shortWait(), Locator.tagWithClass("div", "panel-title").withText("Request Info"),
+                Locator.tagWithClass("div", "panel-title").withText("Requested Items"));
+    }
+
     public String getAccountsToCharge()
     {
-        return elementCache().accountToCharge.getFirstSelectedOption().getText();
+        return shortWait().ignoring(NoSuchElementException.class).until(wd ->
+                elementCache().accountToCharge.getFirstSelectedOption()).getText();
     }
 
     public CreateRequestPage setAccountsToCharge(String option)

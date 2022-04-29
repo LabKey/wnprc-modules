@@ -70,8 +70,8 @@ services:
                   -Dmsql.user=${MSQL_USER} -Dmsql.pass=${MSQL_PASS} -Dmsql.url=\"${MSQL_URL}\" \
                   -Dlabkey.masterEncryptionKey=${LABKEY_MASTER_ENCRYPTION_KEY} \
                   -Dlog4j2.formatMsgNoLookups=true"
-      LK_BACKGROUND_USER:
-      LK_BACKGROUND_USER_PASSWORD:
+      LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
+      LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
       LK_BASE_URL: ${LK_BASE_URL}
       PG_NAME:
       PG_PASS:

@@ -185,7 +185,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
 
             if (total == 0)
             {
-                msg.append("All regulated animals have at least one entries");
+                msg.append("All regulated animals have at least one entries for "+ date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
             }
             else
             {

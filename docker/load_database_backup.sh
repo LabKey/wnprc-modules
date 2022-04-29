@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
-        --dbname)     ## name of the target database
+        --dbname)     ## name of the target database (note: do not use upper and lower case)
             dbname="$2"
             shift
             shift
@@ -102,7 +102,6 @@ fi
 # then build a new postgresql configuration using the specified one as a base.
 #-------------------------------------------------------------------------------
 
-echo -n 'value of dock '$dock
 if [[ -z $dock ]]; then
   docker-compose -f docker-compose.prod.yml -f docker-compose.yml down -v
   if [[ ! -e .env ]]; then
@@ -161,6 +160,9 @@ if [[ -z $filepath ]]; then
     fi
     scp ${username}ehr.primate.wisc.edu:/space/backups/labkey_backup/database/daily/${filename} $tmpdir || exit 1
     filepath="$tmpdir/$filename"
+else
+  echo -n 'Using local backup file ... '
+  echo -n $filepath
 fi
 
 #-------------------------------------------------------------------------------

@@ -58,12 +58,9 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
 
     let columnCount = 8;
     if (canViewPricingInfo) {
-        columnCount++;
+        columnCount += 2;
     }
     if (hasRequestId && !isReorder) {
-        columnCount++;
-    }
-    if (canViewPricingInfo) {
         columnCount++;
     }
     const deleteColWidth = 12 - columnCount;

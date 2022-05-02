@@ -256,6 +256,11 @@ public class WNPRC_PurchasingManager
                 row = new CaseInsensitiveHashMap<>();
                 row.put("requestRowId", insertedPurchasingReq.get(0).get("rowId"));
 
+                if (null == lineItem.get("lineItemNumber")) {
+                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Line no.' not provided", "lineItemNumber"));
+                } else {
+                    row.put("lineItemNumber", lineItem.get("lineItemNumber"));
+                }
                 if (null == lineItem.get("item"))
                     lineItemErrors.addError(new PropertyValidationError("Required value for 'Part no./Item description' not provided", "item"));
                 else

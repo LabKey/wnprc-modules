@@ -23,10 +23,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     //sanity checks for date fields
     if (row.anticipatedstartdate > row.anticipatedenddate) {
-        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Anticipated end date is before anticipated start date.')
-    }
-    if (row.anticipatedstartdate < row.dateneeded ){
-        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Anticipated start date is before date needed.')
+        EHR.Server.Utils.addError(scriptErrors, 'anticipatedenddate', 'Anticipated end date is before anticipated start date.')
     }
 
     //sanitize 'animalidstooffer' field
@@ -38,7 +35,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     var subjectArray = WNPRC.Utils.splitIds(subjectArray);
     //after split, check if unique
     if (!WNPRC.Utils.unique(subjectArray))
-        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'Contains duplicate animal ids.', 'ERROR');
+        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'Contains duplicate animal ids.', 'INFO');
 
     for (var i = 0; i < subjectArray.length; i++) {
         var id = subjectArray[i];
@@ -49,7 +46,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             callback: function (data) {
                 if (data) {
                     if (data['calculated_status'] && data.calculated_status !== 'Alive') {
-                        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'WARN');
+                        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'INFO');
                     }
                     if (data['calculated_status'] == null) {
                         EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') does not exist', 'ERROR');

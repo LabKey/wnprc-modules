@@ -96,6 +96,7 @@
                         </fk>
                     </column>
                     <column columnName="dateneeded">
+                        <isHidden>true</isHidden>
                         <columnTitle>Date Needed</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
@@ -161,6 +162,12 @@
                     </column>
                     <column columnName="animal_history_link">
                         <columnTitle>Animal History</columnTitle>
+                    </column>
+                    <column columnName="externalthreadrowid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="internalthreadrowid">
+                        <isHidden>true</isHidden>
                     </column>
 
                 </columns>

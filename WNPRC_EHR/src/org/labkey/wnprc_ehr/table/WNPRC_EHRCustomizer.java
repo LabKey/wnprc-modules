@@ -1236,7 +1236,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             ctx.get("rowid").toString() +
                             "&update=1&returnUrl=" +
                             ctx.getViewContext().getContextPath() +
-                            "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                            "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view#topTab:AnimalRequestsTab'></a>";
                 }
                 else {
                     edit = "";
@@ -1262,7 +1262,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     ctx.get("rowid").toString() +
                     "&update=1&returnUrl=" +
                     ctx.getViewContext().getContextPath() +
-                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view#topTab:AnimalRequestsTab'></a>";
             return HtmlString.unsafe(edit);
         }
     }

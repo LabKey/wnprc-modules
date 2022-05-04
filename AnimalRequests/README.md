@@ -51,7 +51,7 @@ More information about how the entire form works can be found in the documentati
 * Added ability to navigate from a single animal request back to the animal request tab
 * Added "On Hold" QC status to dropdown (already in DB)
 * Tracking animal assignment rowids in the assignments database (already in DB)
-* Allow entry of dead animals and duplicate ids without having to "submit final"
+* Allow entry of dead animals and duplicate ids without having to "force submit" into a completed state
 
 ### 1.1.0
 (2020-11-23)

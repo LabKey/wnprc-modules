@@ -36,6 +36,22 @@ The `rowkey` prop is the key of the data row returned by LabKey server.
 More information about how the entire form works can be found in the documentation linked above. Also, another nice resource provided by react-final-form is its extensive [interactive examples](https://github.com/final-form/react-final-form#examples).
 
 ## Release Notes
+
+### 1.2.0
+
+#### Features
+* Automatically open 2 secure message board threads (1 "private", 1 "restricted") for each animal request
+
+### 1.1.1 (bundled with v1.2)
+
+#### Features
+* For marmosets, hide origin, MHC and viral status fields on insert form
+* Removed date needed field
+* Added comments field
+* Added ability to navigate from a single animal request back to the animal request tab
+* Added "On Hold" QC status to dropdown (already in DB)
+* Tracking animal assignment rowids in the assignments database (already in DB)
+
 ### 1.1.0
 (2020-11-23)
 

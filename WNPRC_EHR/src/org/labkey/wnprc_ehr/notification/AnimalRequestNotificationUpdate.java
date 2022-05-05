@@ -32,7 +32,7 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
     public String _hostName;
     public Map<String,Object> _row;
     public Map<String,Object> _oldrow;
-    Map<String, ArrayList<String>> _theDifferences;
+    public Map<String, ArrayList<String>> _theDifferences;
 
 
     public AnimalRequestNotificationUpdate(Module owner)

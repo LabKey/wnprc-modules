@@ -6,16 +6,6 @@
 
     <script type="text/javascript">
 
-        //TODO maybe just restructure the valArr so we don't have to iterate through it
-        function findValueGivenName(valArr,name){
-            for (const [key,val] of Object.entries(valArr)) {
-                if (name == key) {
-                    return getDisplayValue(val)
-                }
-            }
-
-        }
-
         function getDisplayValue(item) {
             let result = '';
             let val = '';
@@ -71,7 +61,7 @@
                     for (let i of viewData) {
                         htmlContent += '<tr>';
                         htmlContent += '<td class="column-label">' + i.caption +'</td>';
-                        htmlContent += '<td>' + findValueGivenName(animalRequestData,i.name) + '</td>';
+                        htmlContent += '<td>' + getDisplayValue(animalRequestData[i.name]) + '</td>';
                         htmlContent += '</tr>';
                     }
                     $('#render-area').html('<table>' + htmlContent + '</table>');

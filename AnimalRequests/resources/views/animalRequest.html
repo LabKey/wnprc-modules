@@ -1,0 +1,100 @@
+<html>
+
+    <style>
+        .column-label {font-weight: bold}
+    </style>
+
+    <script type="text/javascript">
+
+        function getDisplayValue(item) {
+            let result = '';
+            let val = '';
+            if (!item) {
+                return result;
+            }
+            if (item.displayValue) {
+                val = item.displayValue;
+            } else {
+                val = item.value;
+            }
+
+            if (val == null){
+                val = '';
+            }
+
+            if (item.url) {
+                result = '<a href="' + LABKEY.contextPath + item.url + '">' + val + '</a>';
+            } else {
+                result = val;
+            }
+            return result;
+        }
+
+        let url = new URL(window.location)
+        let threadId;
+        // covers the case where the rowId is actually in the returnUrl param (when user responds to thread)
+        if (url.searchParams.get("rowId")){
+            threadId = url.searchParams.get("rowId")
+        } else {
+            url = new URL(window.location.origin + "/" + LABKEY.ActionURL.getParameter("returnUrl"))
+            threadId = url.searchParams.get("rowId")
+        }
+
+
+        function displayAnimalRequest(animalRequestData){
+            let animalRequestQueryData = {
+                schemaName: 'wnprc',
+                queryName: 'animal_requests',
+                viewName: 'Animal Requests',
+                containerPath: '/WNPRC/EHR',
+                success: (data) => {
+                    console.log(data)
+                    let htmlContent = '';
+                    let viewName = 'Animal Requests';
+                    let viewData;
+                    for (let v of data.views){
+                        if (v.name == viewName){
+                            viewData = v.fields;
+                        }
+                    }
+                    htmlContent += '<tr>';
+                    for (let i of viewData) {
+                        htmlContent += '<tr>';
+                        htmlContent += '<td class="column-label">' + i.caption +'</td>';
+                        htmlContent += '<td>' + getDisplayValue(animalRequestData[i.name]) + '</td>';
+                        htmlContent += '</tr>';
+                    }
+                    $('#render-area').html('<table>' + htmlContent + '</table>');
+                }
+
+            }
+
+            LABKEY.Query.getQueryDetails(animalRequestQueryData);
+
+        }
+
+
+        let animalRequestConfig = {
+            containerPath: '/WNPRC/EHR',
+            schemaName: 'wnprc',
+            viewName: 'Animal Requests',
+            requiredVersion: 21.3,
+            sql: 'SELECT * FROM "animal_requests" WHERE "internalthreadrowid" = ' + threadId + ' OR "externalthreadrowid" = ' + threadId,
+            success: function (data) {
+                console.log(data);
+                if (!data.rows[0]){
+                    $('#render-area').html('<p>Request not found.</p>');
+                    return;
+                }
+                let row = data.rows[0].data;
+                displayAnimalRequest(row);
+            }
+        }
+
+        LABKEY.Query.executeSql(animalRequestConfig);
+
+    </script>
+
+    <div id="render-area"></div>
+
+</html>

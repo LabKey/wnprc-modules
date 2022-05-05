@@ -10,6 +10,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.announcements.api.Announcement;
+import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -794,7 +796,6 @@ public class TriggerScriptHelper {
         _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         AnimalRequestNotificationUpdate notification = new AnimalRequestNotificationUpdate(ehr, rowid, row, oldRow, user, hostName);
-        Maps.difference(row,oldRow);
         notification.sendManually(container, user);
     }
 
@@ -2324,6 +2325,27 @@ public class TriggerScriptHelper {
         return theDifferences;
     }
 
+    public Integer setUpMessageBoardThread(Map<String,Object> animalRequest, String containerPath)
+    {
+        Container c = ContainerManager.getForPath(containerPath);
+        String title = animalRequest.get("rowid") + ": " +
+                animalRequest.get("principalinvestigator").toString() +
+                " (" + animalRequest.get("protocol").toString() + ")";
+        String body =   "**Below is the animal request associated with this discussion:**\n" +
+                        "${labkey.webPart(partName='Animal Request', title='The Request', name='animalRequest', showFrame='false')}\n";
+        boolean sendEmail = false;
+        Announcement md = AnnouncementService.get().insertAnnouncement(c,user,title,body,sendEmail);
+        return md.getRowId();
+    }
+
+    // Updates the value of a field given a row, meant to be called from a trigger script
+    public void updateRow(Map<String, Object> animalRequest, Object value, String schemaName, String tableName, String fieldName) throws InvalidKeyException, QueryUpdateServiceException, SQLException, BatchValidationException
+    {
+        animalRequest.put(fieldName, value);
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schemaName, tableName);
+        queryUpdater.update(animalRequest);
+    }
+
     public boolean checkAnimalRequestExists(Integer rowid)
     {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
@@ -2331,7 +2353,6 @@ public class TriggerScriptHelper {
 
         JSONArray requests = queryFactory.selectRows("wnprc", "animal_requests", filter);
         return requests.length() > 0;
-
     }
 
     public Boolean checkIfUserIsWaterAdmin(int userId, int project, User currentUser)

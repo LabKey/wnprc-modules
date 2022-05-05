@@ -5,6 +5,7 @@
         <column name="date" ></column>
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>
+        <column name="comments"></column>
         <column name="project"></column>
         <column name="protocol"></column>
         <column name="speciesneeded"></column>
@@ -12,6 +13,8 @@
         <column name="numberofanimals"></column>
         <column name="QCState"></column>
         <column name="num_animals_assigned"></column>
+        <column name="internalthreadrowid"></column>
+        <column name="externalthreadrowid"></column>
         <column name="animal_history_link"></column>
         <column name="animalidstooffer"></column>
 

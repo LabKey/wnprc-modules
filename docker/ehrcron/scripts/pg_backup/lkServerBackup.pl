@@ -113,6 +113,8 @@ my $settings = new Config::Abstract::Ini(File::Spec->catfile($fileparse[1], 'lkb
 my %config = $settings->get_entry('general');
 my %lk_config = $settings->get_entry('lk_config');
 my %rotation = $settings->get_entry('file_rotation');
+my $dbname = $ENV{'BACKUP_PG_NAME'};
+my $pguser = $ENV{'BACKUP_PG_USER'};
 
 # Variables
 my ($path, $status);
@@ -133,13 +135,14 @@ my $log = Log::Rolling->new(
 
 $log->entry("Backup is starting");
 $log->entry("Current Working Dir: " . getcwd());
+$log->entry("Backup DB names ".$dbname);
 $log->commit;
 
 my $errors = [];
 
 #add postgres to path
-if ($config{pg_path}) {
-    $ENV{'PATH'} = $ENV{'PATH'} . ':' . $config{pg_path};
+if ($ENV{'PG_DUMP_DIR'}) {
+    $ENV{'PATH'} = $ENV{'PATH'} . ':' . $ENV{'PG_DUMP_DIR'};
 }
 
 if (!-e $config{backup_dest}) {
@@ -158,7 +161,7 @@ foreach (@required) {
 
 #the postgres backup
 checkFolder(File::Spec->catfile($config{backup_dest}, "database"));
-my @dbs = split(/\s/, $config{pg_dbname});
+my @dbs = split(/\s/, $dbname);
 foreach (@dbs) {
     runPgBackup($_);
 }
@@ -306,7 +309,7 @@ sub _pg_dump {
 
     # Postgres Backup
     my $cmd = "pg_dump -F " . ($config{pgdump_format} ? $config{pgdump_format} : 't') . " " . $pg_dbname . " -f " . $bkpostgresfile;
-    $cmd .= " -U " . $config{pg_user} if $config{pg_user};
+    $cmd .= " -U " . $pguser if $pguser;
     $cmd .= " -h " . $config{pg_host} if $config{pg_host};
 
     my $pgout = system($cmd);
@@ -335,7 +338,7 @@ sub _pg_dumpall {
 
     # Postgres Backup
     my $cmd = "pg_dumpall -g" . " -f " . $bkpostgresfile;
-    $cmd .= " -U " . $config{pg_user} if $config{pg_user};
+    $cmd .= " -U " . $pguser if $pguser;
     $cmd .= " -h " . $config{pg_host} if $config{pg_host};
     my $pgout = system($cmd);
     $log->entry($cmd);

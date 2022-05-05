@@ -1,3 +1,5 @@
+import {TaskValuesType} from "../org/labkey/wnprc_ehr/pages/typings/main";
+
 interface jsonDataType {
   commands: Array<any>;
 }
@@ -164,4 +166,38 @@ export const lookupAnimalInfo = (id:string) => {
       });
 
   });
+};
+
+export const insertTaskCommand = (taskid, title) => {
+  let taskObject = {
+
+    taskid:     taskid,
+    title:      title,
+    category:   "task",
+    qcstate:    1, //Complete
+    formType:   title
+    // assignedTo:
+  };
+  let taskCommand = {
+      schemaName: "ehr",
+      queryName: "tasks",
+      command: "insert",
+      rows: [taskObject]
+    };
+
+
+  return taskCommand;
+
+};
+
+export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: number, QCStateLabel: string): Array<TaskValuesType> => {
+  return [{
+    taskId: taskId,
+    duedate: dueDate,
+    assignedTo: assignedTo,
+    category: "task",
+    title: "Enter Water Daily Amount",
+    formType: "Enter Water Daily Amount",
+    QCStateLabel: QCStateLabel
+  }];
 };

@@ -15,11 +15,8 @@
 #---------------------------------------------------------------------------------------
 BACKUP_SCRIPT_DIR=/usr/local/labkey/pg_backup/
 MAIL_SERVER=mailserver
-LK_BASE_URL=https://ehr.primate.wisc.edu/
 #
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command
 #---------------------------------------------------------------------------------------
 0      1        *     *       *         root   $BACKUP_SCRIPT_DIR/lkServerBackup.pl > /dev/null
-
-

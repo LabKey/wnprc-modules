@@ -17,11 +17,16 @@ RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
 RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
- && if [ "$LABKEY_VERSION" = 21.7 ] ; then \
+ && if [ "$LABKEY_VERSION" = 21.3 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_213Release_External_Wnprc_Installers" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+    elif [ "$LABKEY_VERSION" = 21.7 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_217Release_External_Wnprc_Installers" ; \
-                LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
-                LABKEY_DISTRIBUTION="wisc" ; \
-                LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     elif [ "$LABKEY_VERSION" = 21.11 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_2111Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \

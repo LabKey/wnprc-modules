@@ -24,7 +24,7 @@
               type="javax.sql.DataSource"
               username="${msql.user}"
               password="${msql.pass}"
-              driverClassName="com.mysql.jdbc.Driver"
+              driverClassName="com.mysql.cj.jdbc.Driver"
               url="${msql.url}"
               maxTotal="15"
               maxIdle="7"

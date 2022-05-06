@@ -12,6 +12,7 @@
                     </column>
                     <column columnName="rowid" >
                         <columnTitle>#</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
                         <url></url>
                     </column>
 

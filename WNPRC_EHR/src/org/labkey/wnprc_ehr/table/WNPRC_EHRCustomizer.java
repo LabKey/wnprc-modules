@@ -1232,7 +1232,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 {
                     edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
                             ctx.getViewContext().getContextPath() +
-                            "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                            "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&viewName=Animal%20Request&title=Animal%20Request&keyField=rowid&key=" +
                             ctx.get("rowid").toString() +
                             "&update=1&returnUrl=" +
                             ctx.getViewContext().getContextPath() +
@@ -1258,7 +1258,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String edit;
             edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
                     ctx.getViewContext().getContextPath() +
-                    "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                    "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&viewName=Animal%20Request&title=Animal%20Request&keyField=rowid&key=" +
                     ctx.get("rowid").toString() +
                     "&update=1&returnUrl=" +
                     ctx.getViewContext().getContextPath() +
@@ -1378,7 +1378,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             SQLFragment sql = new SQLFragment(theQuery);
 
             ExprColumn newCol = new ExprColumn(table, edit, sql, JdbcType.VARCHAR);
-            String url = "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}";
+            String url = "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&viewName=Animal%20Request&title=Animal%20Request&keyField=rowid&key=${rowid}";
             newCol.setURL(StringExpressionFactory.createURL(url));
             table.addColumn(newCol);
             newCol.setDisplayColumnFactory(new DisplayColumnFactory()

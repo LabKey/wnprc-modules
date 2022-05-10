@@ -20,7 +20,7 @@ SELECT
   animal_ob.id.dataset.activehousing.cage as cage, --  |
   animal_ob.date,                                  --  |
   cast(animal_ob.date as DATE) as DateOnly,        --  |
-  animal_ob.performedby as userid,                 --  |
+  animal_ob.performedby as performedby,                 --  |
   animal_ob.feces,                                 --  |
   animal_ob.menses,                                --  |
   animal_ob.behavior,                              --  +-- Animal observations
@@ -46,7 +46,7 @@ SELECT
   cage_ob.cage as cage,                            --  |
   cage_ob.date,                                    --  |
   cast(cage_ob.date as DATE) as DateOnly,          --  |
-  cage_ob.userid as userid,                        --  |
+  cage_ob.userid as performedby,                        --  |
   cage_ob.feces as feces,                          --  |
   null as menses,                                  --  +-- Cage Observations
   null as behavior,                                --  |
@@ -72,7 +72,7 @@ SELECT
   null as cage,                                    --  |
   ok_room.date,                                    --  |
   cast(ok_room.date as DATE) as DateOnly,          --  |
-  ok_room.userid as userid,                        --  |
+  ok_room.userid as performedby,                        --  |
   null as feces,                                   --  |
   null as menses,                                  --  |
   null as behavior,                                --  +-- Rooms Marked as "Okay"

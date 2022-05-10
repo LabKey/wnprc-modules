@@ -149,8 +149,8 @@ export const App: FC = memo(() => {
                 const lineItemVals = await getData(
                     'ehr_purchasing',
                     'lineItems',
-                    'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, quantityReceived, unitCost, itemStatusId',
-                    undefined,
+                    'rowId, requestRowId, lineItemNumber, item, itemUnitId, controlledSubstance, quantity, quantityReceived, unitCost, itemStatusId',
+                    'lineItemNumber',
                     requestRowIdFilter
                 );
 
@@ -160,11 +160,12 @@ export const App: FC = memo(() => {
                         return LineItemModel.create({
                             rowId: val.rowId,
                             requestRowId: reqRowId,
+                            lineItemNumber: val.lineItemNumber,
                             item: val.item,
                             controlledSubstance: val.controlledSubstance,
                             itemUnit: val.itemUnitId,
                             quantity: val.quantity,
-                            quantityReceived: val.quantityReceived,
+                            quantityReceived: isReorder ? 0 : val.quantityReceived,
                             unitCost: val.unitCost,
                             status: val.itemStatusId,
                         });
@@ -189,7 +190,7 @@ export const App: FC = memo(() => {
                 const qcStateVals = await getData('core', 'qcState', 'RowId, Label');
                 const idx = qcStateVals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
                 setRequestOrderModel(RequestOrderModel.create({qcState: qcStateVals[idx].RowId}));
-                setLineItems([LineItemModel.create({qcState: qcStateVals[idx].RowId})]);
+                setLineItems([LineItemModel.create({qcState: qcStateVals[idx].RowId, lineItemNumber: 1})]);
                 setIsLoading(false);
             }
         })();

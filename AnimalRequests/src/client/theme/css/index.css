@@ -41,7 +41,7 @@
     padding-right: 15px;
 }
 
-#datepicker {
+.col-xs-5.datepicker-wrapper {
     padding-left: 0;
     padding-right: 0;
 }

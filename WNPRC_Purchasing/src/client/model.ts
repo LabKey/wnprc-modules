@@ -114,6 +114,7 @@ export class LineItemModel {
     readonly rowId?: number;
     readonly rowIndex?: number; // mainly to identify errors coming from the server
     readonly requestRowId?: number;
+    readonly lineItemNumber?: number = 0;
     readonly item: string;
     readonly controlledSubstance: boolean = false;
     readonly itemUnit: number; // rowId of ehr_purchasing.itemUnits

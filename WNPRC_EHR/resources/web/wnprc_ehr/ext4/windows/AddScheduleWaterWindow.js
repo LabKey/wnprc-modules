@@ -264,7 +264,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             var row = new LDK.SelectRowsRow(sr);
             let animalId = row.getValue('animalid');
             var dateCurrentTime = new Date();
-            var modelDate = new Date (row.getValue('date'));
+            var modelDate = new Date (row.getDateValue('date'));
             modelDate.setHours(dateCurrentTime.getHours());
             modelDate.setMinutes(dateCurrentTime.getMinutes());
 
@@ -305,7 +305,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     dataSource = row.getValue('dataSource');
                 }*/
                 //for water Orders I need to keep the date ordered from the waterschedule to change qc state
-                matchingDate = row.getValue('dateOrdered');
+                matchingDate = row.getDateValue('dateOrdered');
                 containsWaterOrder = true;
             }
 
@@ -340,7 +340,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     waterSource:        row.getValue('waterSource'),
                     treatmentId:        row.getValue('objectid'),
                     dataSource:         row.getValue('dataSource'),
-                    dateOrdered:        row.getValue('dateOrdered'),
+                    dateOrdered:        row.getDateValue('dateOrdered'),
                     model:              'fruitRecord'
 
                 });

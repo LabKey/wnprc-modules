@@ -6,3 +6,5 @@ WNPRC_EHR/resources/web/wnprc_ehr/model/sources/Encounter.js -text
 WNPRC_EHR/resources/views/help.html -text
 WNPRC_EHR/resources/views/userFeedback.html -text
 WNPRC_EHR/resources/views/wnprcLabs.html -text
+
+docker/tomcat/ROOT.xml -text

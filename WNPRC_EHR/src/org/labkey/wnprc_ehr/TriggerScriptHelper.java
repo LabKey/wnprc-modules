@@ -10,6 +10,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.announcements.api.Announcement;
+import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -25,6 +27,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.security.EHRDataAdminPermission;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
@@ -792,7 +795,6 @@ public class TriggerScriptHelper {
         _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         AnimalRequestNotificationUpdate notification = new AnimalRequestNotificationUpdate(ehr, rowid, row, oldRow, user, hostName);
-        Maps.difference(row,oldRow);
         notification.sendManually(container, user);
     }
 
@@ -802,63 +804,6 @@ public class TriggerScriptHelper {
         ProjectRequestNotification notification = new ProjectRequestNotification(ehr,key,user,hostName);
         Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
         notification.sendManually(ehrContainer,user);
-    }
-
-    //Method to check is an afternoon water 1:30 PM
-    //TODO: this method should be called from water amounts, when staff is requesting more water to be done by animal care in the PM
-    public String checkScheduledWaterTask(List<Map<String, Object>> recordsInTransaction)
-    {
-        int i=0;
-
-        if (recordsInTransaction != null)
-        {
-            Calendar currentTime = Calendar.getInstance();
-            Calendar limitTime = Calendar.getInstance();
-            limitTime.set(Calendar.HOUR_OF_DAY, 13);
-            limitTime.set(Calendar.MINUTE, 30);
-
-            for (Map<String, Object> origMap : recordsInTransaction)
-            {
-                Map<String, Object> map = new CaseInsensitiveHashMap<>(origMap);
-                if (!map.containsKey("date"))
-                {
-                    _log.warn("TriggerScriptHelper.checkScheduledWaterTask was passed a previous record lacking a date");
-                    continue;
-                }
-
-                try
-                {
-                    String objectId = ConvertHelper.convert(map.get("objectid"), String.class);
-                    if (objectId != null)
-                    {
-                        Date waterClientDate=ConvertHelper.convert(map.get("date"), Date.class);
-                        int qcState = ConvertHelper.convert(map.get("qcstate"), Integer.class);
-                        Calendar waterDate = Calendar.getInstance();
-                        waterDate.setTime(waterClientDate);
-                        //ConvertHelper.convert(map.get("qcstate"), Number.class);
-                        if (waterDate.after(limitTime) || currentTime.after(limitTime))
-                        {
-
-                            //Check the value for the schedule qcstate
-                            int tempOrdinal = EHRService.QCSTATES.Scheduled.ordinal();
-                            if (ConvertHelper.convert(map.get("assignedto"), String.class).equals("animalcare") && (qcState-1) == EHRService.QCSTATES.Scheduled.ordinal())
-                                i++;
-                        }
-                    }
-                }
-                catch (ConversionException e)
-                {
-                    _log.error("TriggerScriptHelper.checkScheduleWaterTask was unable to parse date or qcstate", e);
-                    throw e;
-                }
-            }
-        }
-        if (i>0)
-        {
-            return "At least one water is schedule after than 1:30 PM" ;
-        }
-
-        return null;
     }
 
     //Method to validate if a water order is assignedTo animalcare and is added after 1:30PM
@@ -953,10 +898,13 @@ public class TriggerScriptHelper {
                     String clientVolume = null;
                     for (String waterAmountObjectId : treatmentArray)
                     {
+                        waterAmountObjectId = waterAmountObjectId.trim();
                         for (Map extraContextRows : waterFromExtraContext)
                         {
+                            Object objectTreatmentId = extraContextRows.get("treatmentId");
 
-                            if (waterAmountObjectId.equals(extraContextRows.get("treatmentId")) )
+                            if (objectTreatmentId != null
+                                    && waterAmountObjectId.equals(objectTreatmentId.toString().trim()) )
                             {
                                 Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
                                 updateWaterAmount.put("objectid", waterAmountObjectId);
@@ -2363,6 +2311,27 @@ public class TriggerScriptHelper {
         return theDifferences;
     }
 
+    public Integer setUpMessageBoardThread(Map<String,Object> animalRequest, String containerPath)
+    {
+        Container c = ContainerManager.getForPath(containerPath);
+        String title = animalRequest.get("rowid") + ": " +
+                animalRequest.get("principalinvestigator").toString() +
+                " (" + animalRequest.get("protocol").toString() + ")";
+        String body =   "**Below is the animal request associated with this discussion:**\n" +
+                        "${labkey.webPart(partName='Animal Request', title='The Request', name='animalRequest', showFrame='false')}\n";
+        boolean sendEmail = false;
+        Announcement md = AnnouncementService.get().insertAnnouncement(c,user,title,body,sendEmail);
+        return md.getRowId();
+    }
+
+    // Updates the value of a field given a row, meant to be called from a trigger script
+    public void updateRow(Map<String, Object> animalRequest, Object value, String schemaName, String tableName, String fieldName) throws InvalidKeyException, QueryUpdateServiceException, SQLException, BatchValidationException
+    {
+        animalRequest.put(fieldName, value);
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schemaName, tableName);
+        queryUpdater.update(animalRequest);
+    }
+
     public boolean checkAnimalRequestExists(Integer rowid)
     {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
@@ -2370,7 +2339,33 @@ public class TriggerScriptHelper {
 
         JSONArray requests = queryFactory.selectRows("wnprc", "animal_requests", filter);
         return requests.length() > 0;
-
     }
+
+    public Boolean checkIfUserIsWaterAdmin(int userId, int project, User currentUser)
+    {
+        boolean returnCondition = false;
+
+
+        TableInfo waterOrdersAccess = getTableInfo("wnprc","watermonitoring_access");
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("alloweduser/UserId"), userId);
+        filter.addCondition(FieldKey.fromString("project"), project,CompareType.EQUAL);
+
+
+
+        TableSelector userList = new TableSelector(waterOrdersAccess, PageFlowUtil.set("date", "alloweduser", "project"),filter, null);
+        userList.setMaxRows(1);
+        Map<String, Object>[] userFromServer = userList.getMapArray();
+
+        //updating and adding waters from server, objectid will take are of any duplicates
+
+        if (userFromServer.length>0){
+            EHRSecurityEscalator.beginEscalation(currentUser,container,"Allowing user to modify Water Orders");
+
+            returnCondition = true;
+
+        }
+        return  returnCondition;
+    }
+    public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}
 
 }

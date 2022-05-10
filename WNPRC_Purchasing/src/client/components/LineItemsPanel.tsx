@@ -47,8 +47,10 @@ export const LineItemsPanel: FC<Props> = memo(props => {
     );
 
     const onClickAddRow = useCallback(()=> {
+        const nextLineItemNumber = Math.max(...lineItems.map(model => model.lineItemNumber), 0) + 1;
+
         const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel[]>) => {
-            draft.push(LineItemModel.create());
+            draft.push(LineItemModel.create({lineItemNumber: nextLineItemNumber}));
         });
         onChange(updatedLineItems);
     }, [lineItems]);
@@ -62,6 +64,8 @@ export const LineItemsPanel: FC<Props> = memo(props => {
             }, 0)
         )
     }, [lineItems]);
+
+    const calcTotalCol = (hasRequestId && !isReorder) ? 10 : 9;
 
     return (
         <>
@@ -80,6 +84,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                 </div>
                 <div>
                         <Row className="line-item-row-header">
+                            <Col xs={1}>Line no.</Col>
                             <Col xs={4}>Part no./Item description *</Col>
                             <Col xs={1}>Controlled substance</Col>
                             <Col xs={1}>Unit *</Col>
@@ -118,15 +123,11 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                             <>
                                 <div>
                                     <Row>
-                                        <Col xs={6}></Col>
-                                        {(hasRequestId && !isReorder) &&
-                                            <Col xs={1}></Col>
-                                        }
-                                        <Col xs={1}></Col>
-                                        <Col className="calc-total" xs={1}>
+                                        <Col className="calc-total" xs={calcTotalCol}>
                                             Total ($):
                                         </Col>
-                                        <Col className="calc-total-val" xs={1}>{getTotal}
+                                        <Col className="calc-total-val" xs={1}>
+                                            {getTotal}
                                         </Col>
                                     </Row>
                                 </div>

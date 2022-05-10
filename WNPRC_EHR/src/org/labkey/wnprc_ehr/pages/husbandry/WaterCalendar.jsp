@@ -879,16 +879,16 @@
 
                         var today = moment();
 
-                        if (waterTotal !== "totalWater" && key =="date" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isAdmin)){
+                        if (waterTotal !== "totalWater" && key =="date" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isSuperUser)){
                             $('#waterInfo').removeAttr('disabled');
 
                         }
 
-                        if(waterTotal !== "totalWater" && key == "dataSource" && value == "waterOrders" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isAdmin)){
+                        if(waterTotal !== "totalWater" && key == "dataSource" && value == "waterOrders" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isSuperUser)){
                             $('#enterWaterOrder').removeAttr('disabled');
                         }
 
-                        if(waterTotal !== "totalWater" && key == "dataSource" && value == "waterAmount" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isAdmin)){
+                        if(waterTotal !== "totalWater" && key == "dataSource" && value == "waterAmount" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isSuperUser)){
                             $('#waterInfo').text('Edit Single Day Water');
                         }
                     }
@@ -1537,7 +1537,7 @@
                 configObject["animalid~in"]= animalId;
             }
         }
-        else if (allowProjects !== ""){
+        if (allowProjects !== ""){
             configObject["projectCoalesced~in"] = allowProjects;
             if (animalId){
                 configObject["animalid~in"] = animalId;

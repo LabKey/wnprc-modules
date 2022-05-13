@@ -2,27 +2,40 @@ package org.labkey.wnprc_ehr.encryption;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.log4j.Logger;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 
 public class AES
 {
-    public static byte[] decrypt(String encryptedPassword, String keyString, String ivString) {
+    private static Logger _log = Logger.getLogger(AES.class);
+
+    public static byte[] decrypt(String encryptedPassword, String keyString, String ivString) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         return decrypt(encryptedPassword.getBytes(StandardCharsets.UTF_8), keyString.getBytes(StandardCharsets.UTF_8), ivString.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static byte[] decrypt(String[] bytes, byte[] keyBytes, byte[] ivBytes) {
+    public static byte[] decrypt(String[] bytes, byte[] keyBytes, byte[] ivBytes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         return decrypt(stringArrayToBytes(bytes), keyBytes, ivBytes);
     }
 
-    public static byte[] decrypt(byte[] password, byte[] keyBytes, byte[] ivBytes) {
+    public static byte[] decrypt(byte[] password, byte[] keyBytes, byte[] ivBytes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         int enc_len = password.length;
         byte[] decrypted = new byte[enc_len];
         try
@@ -35,25 +48,29 @@ public class AES
             int dec_len = cipher.update(password, 0, enc_len, decrypted, 0);
             dec_len += cipher.doFinal(decrypted, dec_len);
         } catch (Exception e) {
-            int x = 3;
-            //TODO add error handling
+            _log.error(e.getMessage());
+            throw e;
         }
         return decrypted;
     }
 
-    public static byte[] encrypt(String password, String keyString, String ivString) {
+    public static byte[] encrypt(String password, String keyString, String ivString) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         return encrypt(password.getBytes(StandardCharsets.UTF_8), keyString.getBytes(StandardCharsets.UTF_8), ivString.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static byte[] encrypt(char[] password, byte[] keyBytes, byte[] ivBytes) {
+    public static byte[] encrypt(char[] password, byte[] keyBytes, byte[] ivBytes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         return encrypt(charsToBytes(password), keyBytes, ivBytes);
     }
 
-    public static byte[] encrypt(String password, byte[] keyBytes, byte[] ivBytes) {
+    public static byte[] encrypt(String password, byte[] keyBytes, byte[] ivBytes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         return encrypt(password.getBytes(StandardCharsets.UTF_8), keyBytes, ivBytes);
     }
 
-    public static byte[] encrypt(byte[] password, byte[] keyBytes, byte[] ivBytes) {
+    public static byte[] encrypt(byte[] password, byte[] keyBytes, byte[] ivBytes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException
+    {
         byte[] encrypted = new byte[password.length];
         try {
             SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
@@ -65,8 +82,8 @@ public class AES
             int enc_len = cipher.update(password, 0, password.length, encrypted, 0);
             enc_len += cipher.doFinal(encrypted, enc_len);
         } catch (Exception e) {
-            int x = 3;
-            //TODO add error handling
+            _log.error(e.getMessage());
+            throw e;
         }
         return encrypted;
     }

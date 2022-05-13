@@ -61,6 +61,7 @@
                         <description>This is the volume or mass of the source material. If it is a batched sample enter the volume of a single sample (most likely 0.1mL).</description>
                         <measure>false</measure>
                         <dimension>false</dimension>
+                        <formatString>##.###</formatString>
                     </column>
                     <column columnName="dilutionFactor">
                         <columnTitle>Dilution Factor</columnTitle>

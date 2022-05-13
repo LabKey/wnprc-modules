@@ -1845,7 +1845,9 @@ public class WNPRC_EHRController extends SpringActionController
             }
             catch (Exception e)
             {
-                System.out.println(e);
+                _log.error(e.getMessage());
+                response.put("success", false);
+                response.put("error", "An error occurred while trying to duplicate the event.");
             }
 
             return response;
@@ -1873,7 +1875,9 @@ public class WNPRC_EHRController extends SpringActionController
                 calendar.updateUnmanagedEvent(event.getCalendarId(), updatedEvent, response);
                 response.put("success", true);
             } catch (Exception e) {
-                System.out.println(e);
+                _log.error(e.getMessage());
+                response.put("success", false);
+                response.put("error", "And error occurred while trying to update the event in Office365.");
             }
 
             return response;
@@ -1959,11 +1963,13 @@ public class WNPRC_EHRController extends SpringActionController
                         }
                         calendar.updateProcedureEvents(event.getCalendarId(), resetEvents, null, false);
                     } catch (Exception ex) {
+                        _log.error(ex.getMessage());
                         response.put("error", "There was an error. It's possible that only some of the events were updated in outlook. " +
                                 "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
                     }
                     if (response.getString("error") == null) {
-                        response.put("error", e.getMessage());
+                        _log.error(e.getMessage());
+                        response.put("error", "There was a problem trying to update the database record(s).");
                     }
                 }
 
@@ -2084,6 +2090,10 @@ public class WNPRC_EHRController extends SpringActionController
                 {
                     calendar.cancelEvent(event.getEventId());
                 }
+            } catch (Exception e) {
+                _log.error(e.getMessage());
+                response.put("success", false);
+                response.put("error", "An error occurred while trying to create the new event.");
             }
 
             return response;
@@ -2191,11 +2201,13 @@ public class WNPRC_EHRController extends SpringActionController
                             }
                         }
                     } catch (Exception ex) {
+                        _log.error(ex.getMessage());
                         response.put("error", "There was an error, but some of the events may have still been created in outlook. " +
                                 "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
                     }
                     if (response.getString("error") == null) {
-                        response.put("error", e.getMessage());
+                        _log.error(e.getMessage());
+                        response.put("error", "There was a problem trying to insert the record into the database.");
                     }
                 }
             }
@@ -2304,8 +2316,9 @@ public class WNPRC_EHRController extends SpringActionController
                         }
                         else
                         {
+                            _log.error("Surgery/Procedure event could not be cancelled because there is no eventId in the database.");
                             response.put("success", false);
-                            response.put("error", "There was an error updating the event in Office 365");
+                            response.put("error", "There was an error updating the event in Office 365 because there is no associated eventId in the database.");
                         }
                     }
                 }
@@ -2315,10 +2328,9 @@ public class WNPRC_EHRController extends SpringActionController
                     transaction.commit();
                 }
             } catch (Exception e) {
-                int x = 3;
-                //TODO nothing?
-            } finally {
-
+                _log.error(e.getMessage());
+                response.put("success", false);
+                response.put("error", "An error occurred while trying to update the event.");
             }
 
             return response;
@@ -2499,8 +2511,9 @@ public class WNPRC_EHRController extends SpringActionController
                 }
 
             } catch (Exception e) {
-                int x = 3;
-                //TODO add exception handling (is it necessary here?)
+                _log.error(e.getMessage());
+                response.put("success", false);
+                response.put("error", "There was a problem fetching the events from Office365.");
             }
 
             return response;
@@ -2566,10 +2579,9 @@ public class WNPRC_EHRController extends SpringActionController
             }
             catch (Exception e)
             {
-                //TODO add logging
+                _log.error(e.getMessage());
                 response.put("success", false);
-                response.put("error", e.toString());
-                e.printStackTrace();
+                response.put("error", "There was a problem fetching the events from Office365.");
             }
 
             return response;

@@ -28,11 +28,9 @@ import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
-import org.labkey.remoteapi.query.Sort;
-import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
+import org.labkey.remoteapi.query.Sort;
 import org.labkey.remoteapi.query.TruncateTableCommand;
-import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
@@ -65,14 +63,12 @@ import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
-import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 import java.io.IOException;
@@ -1322,13 +1318,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void attemptUploadWithBadData(File file, String... errors)
     {
-        click(Locator.id("uploadFileDiv2Expando"));
-        waitForText("Import Lookups by Alternate Key");
-
-        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
-        waitAndClick(Ext4Helper.Locators.ext4Button("Submit"));
-
-        waitForText("ERROR");
+        ImportDataPage importDataPage = new ImportDataPage(getDriver());
+        importDataPage.setFile(file);
+        importDataPage.submitExpectingError();
         assertTextPresent(errors);
     }
 

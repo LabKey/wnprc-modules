@@ -8,7 +8,7 @@
             <destination queryName="arrow_protocols" schemaName="wnprc" targetOption="truncate"/>
         </transform>
         <transform id="step2">
-            <description>Copy to ehr protocols</description>
+            <description>Copy to ehr.protocols</description>
             <source queryName="MaxSpeciesDistinct" schemaName="wnprc"/>
             <destination queryName="protocol" schemaName="ehr" targetOption="truncate">
                 <columnTransforms>
@@ -25,7 +25,7 @@
             </destination>
         </transform>
         <transform id="step3">
-            <description>Copy to ehr protocol_counts</description>
+            <description>Copy to ehr.protocol_counts</description>
             <source queryName="MaxSpeciesPlusSubSpecies" schemaName="wnprc"/>
             <destination queryName="protocol_counts" schemaName="ehr" targetOption="truncate">
                 <columnTransforms>

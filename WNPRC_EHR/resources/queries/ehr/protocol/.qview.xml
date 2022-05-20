@@ -4,7 +4,10 @@
        <column name="inves"/>
        <column name="approve"/>
        <column name="maxAnimals"/>
+       <column name="enddate"/>
+       <column name="usda_level"/>
        <column name="pdf"/>
+       <column name="modified"/>
    </columns>
    <sorts>
        <sort column="protocol" />

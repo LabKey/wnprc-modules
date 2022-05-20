@@ -1,0 +1,44 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>Copy arrow protocol data to wnprc/ehr schema at midnight</name>
+    <description>Truncates and copies data from arrow iacuc.wnprc_species_max table into wnprc.arrow_protocols table, and ehr.protocol and ehr_protocol_counts tables</description>
+    <transforms>
+        <transform id="step1">
+            <description>Copy to wnprc schema</description>
+            <source queryName="wnprc_species_max" schemaName="arrow"/>
+            <destination queryName="arrow_protocols" schemaName="wnprc" targetOption="truncate"/>
+        </transform>
+        <transform id="step2">
+            <description>Copy to ehr protocols</description>
+            <source queryName="MaxSpeciesDistinct" schemaName="wnprc"/>
+            <destination queryName="protocol" schemaName="ehr" targetOption="truncate">
+                <columnTransforms>
+                    <column source="protocol_id" target="protocol"/>
+                    <column source="protocol_title" target="title"/>
+                    <column source="pi_name" target="inves"/>
+                    <column source="date_approved" target="approve"/>
+                    <column source="sum_three_yr" target="maxAnimals"/>
+                    <column source="protocol_id" target="pdf"/>
+                    <column source="date_modified" target="modified"/>
+                    <column source="date_expiration" target="enddate"/>
+                    <column source="usda_code" target="usda_level"/>
+                </columnTransforms>
+            </destination>
+        </transform>
+        <transform id="step3">
+            <description>Copy to ehr protocol_counts</description>
+            <source queryName="MaxSpeciesPlusSubSpecies" schemaName="wnprc"/>
+            <destination queryName="protocol_counts" schemaName="ehr" targetOption="truncate">
+                <columnTransforms>
+                    <column source="protocol_id" target="protocol"/>
+                    <column source="allowed" target="allowed"/>
+                    <column source="species" target="species"/>
+                    <column source="date_modified" target="modified"/>
+                    <column source="date_expiration" target="enddate"/>
+                </columnTransforms>
+            </destination>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 0 * * * ?"/>
+    </schedule>
+</etl>

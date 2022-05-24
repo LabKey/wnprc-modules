@@ -8,6 +8,10 @@ function createNavMenu()
     Ext4.create('EHR.NavMenu', {
         renderTo: 'animalServices',
         sections: [
+            {header: 'All Staff Minutes',
+            items: [
+                {name:'Meeting Notes', url:'<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/begin.view?'}
+            ]},
             {header: 'Behavioral Management',
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/Issue_Tracker/start.view?'},
@@ -27,8 +31,6 @@ function createNavMenu()
             ]},
             {header: 'Compliance, Safety and Training',
             items: [
-                {name: 'Safety Issue Tracker', url: '<%=contextPath%>/issues/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Safety/Issue_Tracker/list.view?issueDefName=safetyissues'},
-                {name: 'Safety Wiki', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Safety/start.view?'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Issue_Tracker/start.view?'},
                 {name: 'Occ Health and Safety Plans', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/Occ_Health_and_Safety_Plans/begin.view'},
                 {name: 'Compliance Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/begin.view?'},

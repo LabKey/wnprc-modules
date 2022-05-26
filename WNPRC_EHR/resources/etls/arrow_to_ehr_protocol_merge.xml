@@ -11,6 +11,7 @@
                     <column source="protocol_title" target="title"/>
                     <column source="pi_name" target="inves"/>
                     <column source="date_approved" target="approve"/>
+                    <column source="date_expiration" target="enddate"/>
                     <column source="sum_three_yr" target="maxAnimals"/>
                     <column source="protocol_id" target="pdf"/>
                     <column source="date_modified" target="modified"/>

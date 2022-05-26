@@ -25,6 +25,6 @@
         <deletedRowsSource deletedSourceKeyColumnName="protocol_id" queryName="ArrowProtocolEHRDiffs" schemaName="wnprc" targetKeyColumnName="protocol" timestampColumnName="date_modified"/>
     </incrementalFilter>
     <schedule>
-        <cron expression="0 3 * * * ?"/>
+        <cron expression="0 0 3 * * ?"/>
     </schedule>
 </etl>

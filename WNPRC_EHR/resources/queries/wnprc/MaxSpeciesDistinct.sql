@@ -5,7 +5,8 @@ SELECT DISTINCT b.protocol_id,
                 b.date_expiration,
                 b.date_modified,
                 a.sum_three_yr,
-                b.usda_code
+                b.usda_code,
+                (SELECT contacts FROM ehr.protocol e WHERE lower(b.protocol_id) = lower(e.protocol)) AS contacts
 FROM arrow_protocols b
          INNER JOIN (
     SELECT protocol_id,

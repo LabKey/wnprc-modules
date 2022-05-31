@@ -1693,6 +1693,11 @@
                             // bootstrapFontAwesome: {
                             //     customCreateButton: "plus-square"
                             // },
+                            dateClick: function(info) {
+                                if (info.jsEvent.target.classList.contains("fc-daygrid-day-number")) {
+                                    calendar.changeView("timeGridDay", info.date);
+                                }
+                            },
                             eventDidMount: function(info) {
                                 let contentString = "<strong>Title:</strong> " + info.event.title;
                                 let roomString;

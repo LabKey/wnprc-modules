@@ -58,6 +58,7 @@ import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
@@ -2241,6 +2242,35 @@ public class WNPRC_EHRController extends SpringActionController
                     .append(") s WHERE s.lsid = o.lsid");
 
             new SqlExecutor(studySchema).execute(sql);
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            return response;
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class CorrectEHRCageObs extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+
+            UserSchema us = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr");
+            TableInfo ti = us.getTable("cage_observations");
+
+            if (null == ti)
+            {
+                errors.reject(ERROR_MSG, "ehr.cage_observations dataset not found. Ensure you are in the right folder.");
+                return false;
+            }
+
+            SQLFragment sql = new SQLFragment("UPDATE ehr.cage_observations o SET userid = s.userid FROM (\n ")
+                    .append("SELECT ob.objectid, COALESCE(ud.displayname, ob.userid) as userid FROM ehr.cage_observations ob").append("\n")
+                    .append("LEFT JOIN ").append(CoreSchema.getInstance().getTableInfoUsersData(),"ud").append(" ON CAST(ud.userid AS VARCHAR) = ob.userid\n")
+                    .append(") s WHERE s.objectid = o.objectid ");
+
+            new SqlExecutor(us.getDbSchema()).execute(sql);
 
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);

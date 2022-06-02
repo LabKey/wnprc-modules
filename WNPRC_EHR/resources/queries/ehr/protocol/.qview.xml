@@ -1,10 +1,15 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
    <columns>
        <column name="protocol"/>
+       <column name="title"/>
        <column name="inves"/>
        <column name="approve"/>
        <column name="maxAnimals"/>
+       <column name="enddate"/>
+       <column name="usda_level"/>
+       <column name="contacts"/>
        <column name="pdf"/>
+       <column name="modified"/>
    </columns>
    <sorts>
        <sort column="protocol" />

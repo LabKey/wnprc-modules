@@ -39,6 +39,17 @@
               mail.smtp.port="1025"
     />
 
+    <Resource name="jdbc/arrowDataSource" auth="Container"
+              type="javax.sql.DataSource"
+              username="${arrow.user}"
+              password="${arrow.pass}"
+              driverClassName="net.sourceforge.jtds.jdbc.Driver"
+              url="${arrow.url}"
+              maxTotal="20"
+              maxIdle="10"
+              accessToUnderlyingConnectionAllowed="true"
+              validationQuery="SELECT 1"/>
+
     <!-- ActiveMQ configuration. Previously (and perhaps in the future) used for pipeline jobs.
     <Resource name="jms/ConnectionFactory" auth="Container"
               type="org.apache.activemq.ActiveMQConnectionFactory"

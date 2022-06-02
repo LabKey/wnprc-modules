@@ -580,7 +580,7 @@ EHR.Metadata.registerMetadata('Request', {
             schemaName: 'core',
             queryName: 'Users',
             displayColumn: 'DisplayName',
-            keyColumn: 'UserId',
+            keyColumn: 'DisplayName',
             sort: 'Email'
         },
         formEditorConfig: {
@@ -589,7 +589,7 @@ EHR.Metadata.registerMetadata('Request', {
         editorConfig: {
             plugins: ['ehr-usereditablecombo']
         },
-        defaultValue: LABKEY.Security.currentUser.id,
+        defaultValue: LABKEY.Security.currentUser.displayName,
         shownInGrid: false
     };
 

@@ -8,10 +8,6 @@ function createNavMenu()
     Ext4.create('EHR.NavMenu', {
         renderTo: 'animalServices',
         sections: [
-            {header: 'All Staff Minutes',
-            items: [
-                {name:'Meeting Notes', url:'<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/begin.view?'}
-            ]},
             {header: 'Behavioral Management',
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/Issue_Tracker/start.view?'},
@@ -43,6 +39,7 @@ function createNavMenu()
                 {name: 'Read and Certify SOPs (PowerDMS)', url: 'https://go.wisc.edu/mkg850'},
                 {name: 'Request Training', url: 'https://go.wisc.edu/36i793'},
                 {name: 'CARE', url: 'https://uwprod.sharepoint.com/sites/CARE'},
+                {name: 'Training Submission Form', url: 'https://forms.gle/nSwc1LzBL6SjkSyU8'},
             ]},
             {header: 'Scientific Protocol Implementation',
             items: [
@@ -83,6 +80,7 @@ function createNavMenu()
             ]},
             {header: 'Grants Management',
             items: [
+                {name: 'Grants Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Private/begin.view?' },
                 {name: 'Per Diems Report', url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'PerDiems', LABKEY.moduleContext.ehr["EHRStudyContainer"]) },
                 {name: 'Animal Billable Days Report', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=animalBillableDaysReport'},
                 {name: 'P51 Base Grant 2016 Renewal', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/P51_Base_Grant_2016_Renewal/begin.view?'},
@@ -94,6 +92,13 @@ function createNavMenu()
                 {name: 'New User Request/Change Form', url: 'https://go.wisc.edu/hcvxa5'}
                 //{name: 'Travel Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/Issue_Tracker/start.view?'}
             ]},
+            {header: 'Informatics and Data Services',
+                items: [
+                    {name: 'IDS Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/begin.view?'},
+                    {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/start.view?'},
+                    {name: 'Version Testing', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/EHR_Version_Testing/begin.view?'}
+                ]
+            },
             {header: 'ITSS',
             items: [
                 {name: 'ITSS Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
@@ -128,14 +133,7 @@ function createNavMenu()
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Issue_Tracker/start.view?'},
                 {name: 'Virology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/begin.view?'}
-            ]},
-            {header: 'IDS Unit',
-                items: [
-                    {name: 'IDS Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/begin.view?'},
-                    {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/start.view?'},
-                    {name: 'Version Testing', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/EHR_Version_Testing/begin.view?'}
-                ]
-            }
+            ]}
         ]
     });
 

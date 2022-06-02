@@ -1,0 +1,60 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocol" tableDbType="TABLE">
+                <columns>
+                    <column columnName="maxAnimals">
+                        <columnTitle>Max Animals</columnTitle>
+                        <formatString>####</formatString>
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="protocol">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="title">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="inves">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="investigatorId">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="approve">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="lastAnnualReview">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="enddate">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="first_approval">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="project_type">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="external_id">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="ibc_approval_required">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="ibc_approval_num">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="usda_level">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
+                    <column columnName="last_modification">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="description">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

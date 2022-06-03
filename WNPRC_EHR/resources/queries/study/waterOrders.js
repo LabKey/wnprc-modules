@@ -162,9 +162,9 @@ function onUpdate(helper, scriptErrors, row, oldRow){
             })
         }
 
-        if (!waterOrdersAdmin){
-            EHR.Server.Utils.addError(scriptErrors,'project','User does not have permission to edit water order','ERROR');
-            console.error("Water System error, user: "+ currentUser + "trying to modify water order for project: "+ row.project +" and they do not have permissions");
+        if (!triggerHelper.isDataAdmin() && !waterOrdersAdmin ){
+            EHR.Server.Utils.addError(scriptErrors,'project','User does not have permission to edit water order under this project.','ERROR');
+            console.error("Water System error, user: "+ currentUser + " trying to modify water order for project: "+ row.project +" and they do not have permissions");
 
         }
     }
@@ -180,8 +180,45 @@ function onUpdate(helper, scriptErrors, row, oldRow){
             var tempKeys = Object.keys(oldRow);
             for (var i = 0; i <= tempKeys.length; i++){
                 var key = tempKeys[i];
-                console.log(key);
-                console.log (oldRow[key]);
+                console.log(key + '  ' +oldRow[key]);
+                console.log('new row  ' +key + ' ' + row[key]);
+                if (key !== 'enddate' && oldRow[key] != row[key]){
+                    console.log('field checked '+ key)
+                    switch (key){
+                        case "id":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                        case "date":
+                            var newDate = new Date(row[key]);
+                            var oldDate = new Date(oldRow[key]);
+                            console.log (newDate.getMilliseconds());
+                            console.log (oldDate.toString() + oldDate.getMilliseconds());
+                            if (new Date(oldRow[key]) !== new Date(row[key])){
+                                addErrorMessage('date', scriptErrors);
+                            }
+
+                            break;
+                        case "volume":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                        case "frequency":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                        case "assignedTo":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                        case "waterSource":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                        case "provideFruit":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                        case "project":
+                            addErrorMessage(key, scriptErrors);
+                            break;
+                    }
+
+                }
             }
             /*for (const key in oldRow){
                 console.log(`${key}: ${oldRow[key]}`);
@@ -207,4 +244,8 @@ function onUpdate(helper, scriptErrors, row, oldRow){
         }
 
     }
+}
+
+function addErrorMessage(key,scriptErrors){
+    EHR.Server.Utils.addError(scriptErrors, key, 'User does not have permission to modify this field.', 'ERROR');
 }

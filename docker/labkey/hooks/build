@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "build ver 1.0"
 
-TAG_IDENTIFIER="docker/21.3_"
+TAG_IDENTIFIER="docker/21.11_"
 
 if [[ $DOCKER_TAG == $TAG_IDENTIFIER* ]];
 then

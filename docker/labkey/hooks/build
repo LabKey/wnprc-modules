@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "build ver 1.0"
+echo "build ver 1.1"
 
 TAG_IDENTIFIER="docker/21.11_"
 
@@ -10,5 +10,7 @@ then
 else
         SHORT_BRANCH_NAME="master"
 fi
+
+echo $SHORT_BRANCH_NAME
 
 docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --rm=true -t $IMAGE_NAME .

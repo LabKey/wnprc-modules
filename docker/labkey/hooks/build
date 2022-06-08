@@ -3,6 +3,9 @@ echo "build ver 1.1"
 
 TAG_IDENTIFIER="docker/21.11_"
 
+echo "value of docker tag"
+echo $DOCKER_TAG
+
 if [[ $DOCKER_TAG == $TAG_IDENTIFIER* ]];
 then
         SHORT_BRANCH_NAME=${DOCKER_TAG#$TAG_IDENTIFIER}

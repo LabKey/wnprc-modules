@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "build ver 1.1"
 
-TAG_IDENTIFIER="docker/21.11_"
+TAG_IDENTIFIER="21.11_"
 
 echo "value of docker tag"
 echo $DOCKER_TAG

@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "better-npm-run build",
     "build-prod": "better-npm-run build-prod",
-    "clean": "rm -rf resources/web/primateid/primateid.webpack.js && rm -rf resources/scripts/primateid/primateid.webpack.js"
+    "clean": "rm -rf resources/web/primateid/gen/primateid.webpack.js && rm -rf resources/scripts/primateid/gen/primateid.webpack.js"
   },
   "repository": {
     "type": "git",

@@ -174,12 +174,9 @@ WNPRC_Virology.DatasetButtons = new function() {
             });
 
         },
-        downloadRecordsToCSV: function (dataRegionName) {
-            let dataRegion = LABKEY.DataRegions[dataRegionName];
-            let checked = dataRegion.getChecked();
-            let checkedJoin = checked.join(";");
+        downloadRecordsToCSV: function () {
             let filt = [];
-            filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
+            filt.push(LABKEY.Filter.create('status', '1;2;3', LABKEY.Filter.Types.EQUALS_ONE_OF));
 
             function replaceSampleTypeCasing(sampleType) {
                 switch(sampleType) {

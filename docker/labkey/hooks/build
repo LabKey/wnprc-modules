@@ -1,7 +1,8 @@
 #!/bin/bash
 echo "build ver 1.2"
 echo "Printing LabKey version"
-echo {\1}.{\2}
+echo ${\1}
+echo ${\2}
 
 TAG_IDENTIFIER="21.11_"
 

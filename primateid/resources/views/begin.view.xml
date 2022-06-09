@@ -5,7 +5,7 @@
     <dependencies>
         <dependency path="https://cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"/>
         <dependency path="/internal/jQuery"/>
-        <dependency path="/primateid/primateid.webpack.js"/>
+        <dependency path="/primateid/gen/primateid.webpack.js"/>
         <dependency path="/primateid/begin.js"/>
     </dependencies>
 </view>

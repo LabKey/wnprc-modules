@@ -1,19 +1,20 @@
 #!/bin/bash
-echo "build ver 1.1"
+echo "build ver 1.2"
+echo "Printing LabKey version from Github Tag"
+echo {\1}
+echo {\2}
 
 TAG_IDENTIFIER="21.11_"
 
-echo "value of docker tag"
-echo $DOCKER_TAG
+echo "Docker tag $DOCKER_TAG"
 
 if [[ $DOCKER_TAG == $TAG_IDENTIFIER* ]];
 then
         SHORT_BRANCH_NAME=${DOCKER_TAG#$TAG_IDENTIFIER}
-        echo $SHORT_BRANCH_NAME
 else
         SHORT_BRANCH_NAME="master"
 fi
 
-echo $SHORT_BRANCH_NAME
+echo "TeamCity Build $SHORT_BRANCH_NAME"
 
 docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --rm=true -t $IMAGE_NAME .

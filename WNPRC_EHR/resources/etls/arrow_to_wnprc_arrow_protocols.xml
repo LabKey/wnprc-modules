@@ -1,5 +1,5 @@
 <etl xmlns="http://labkey.org/etl/xml">
-    <name>Arrow ETL 1: Copy arrow iacuc protocol data to wnprc/ehr schema at midnight</name>
+    <name>Arrow ETL 1: Copy arrow iacuc protocol data to wnprc/ehr schema</name>
     <description>Truncates and copies data from arrow iacuc.wnprc_species_max table into wnprc.arrow_protocols table</description>
     <transforms>
         <transform id="step1">

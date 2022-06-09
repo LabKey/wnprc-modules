@@ -10,14 +10,15 @@ LK_VERSION=""
 
 if [[ $DOCKER_TAG =~ $FB_REGEX ]]
 then
-        LK_VERSION=${BASH_REMATCH[1]}
-        SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
+    LK_VERSION=${BASH_REMATCH[1]}
+    SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
+elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
+then
+    LK_VERSION=${BASH_REMATCH[1]}
+    SHORT_BRANCH_NAME="master"
 else
-        if [[ $DOCKER_TAG =~ $PROD_REGEX ]]
-        then
-                LK_VERSION=${BASH_REMATCH[1]}
-        fi
-        SHORT_BRANCH_NAME="master"
+    echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
+    exit 1
 fi
 
 # Some debugging info

@@ -1,6 +1,5 @@
 #!/bin/bash
-echo "post_push script"
-echo $DOCKER_TAG
+echo "Running post_push"
 
 GIT_HUB_TAG="docker/$DOCKER_TAG"
 

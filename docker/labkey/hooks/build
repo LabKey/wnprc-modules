@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "build ver 1.2"
-echo "Printing LabKey version"
+echo "Printing LabKey version from Github Tag"
 echo {\1}
 echo {\2}
 

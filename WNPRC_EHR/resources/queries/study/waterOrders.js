@@ -173,15 +173,15 @@ function onUpdate(helper, scriptErrors, row, oldRow){
     if (!triggerHelper.isDataAdmin()){
         let errorField = null;
         if(oldRow){
-            console.log(oldRow);
+            //console.log(oldRow);
             //console.log(oldRow.)
-            console.log(row);
+            //console.log(row);
 
             var tempKeys = Object.keys(oldRow);
             for (var i = 0; i <= tempKeys.length; i++){
                 var key = tempKeys[i];
-                console.log(key + '  ' +oldRow[key]);
-                console.log('new row  ' +key + ' ' + row[key]);
+                //console.log(key + '  ' +oldRow[key]);
+                //console.log('new row  ' +key + ' ' + row[key]);
                 if (key !== 'enddate' && oldRow[key] != row[key]){
                     console.log('field checked '+ key)
                     switch (key){
@@ -189,12 +189,16 @@ function onUpdate(helper, scriptErrors, row, oldRow){
                             addErrorMessage(key, scriptErrors);
                             break;
                         case "date":
-                            var newDate = new Date(row[key]);
-                            var oldDate = new Date(oldRow[key]);
-                            console.log (newDate.getMilliseconds());
-                            console.log (oldDate.toString() + oldDate.getMilliseconds());
-                            if (new Date(oldRow[key]) !== new Date(row[key])){
-                                addErrorMessage('date', scriptErrors);
+                            var newDate = EHR.Server.Utils.normalizeDate(row[key]);
+                            var oldDate = EHR.Server.Utils.normalizeDate(oldRow[key]);
+                            console.log (newDate);
+                            console.log (oldDate);
+                            if (newDate == oldDate){
+                                console.log("new date and oldDate equal "+ key);
+                            }else{
+                                console.log("new date and oldDate different "+ key);
+                                addErrorMessage(key, scriptErrors);
+
                             }
 
                             break;

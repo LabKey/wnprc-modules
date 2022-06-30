@@ -81,7 +81,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     endDate.setHours(0,0,0,0);
 
     //This does not get checked when the dataset if updated, only when using Ext4 form
-    if (rowDate.getTime() > endDate.getTime()){
+    if (rowDate.getTime() >= endDate.getTime()){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
 
@@ -189,18 +189,14 @@ function onUpdate(helper, scriptErrors, row, oldRow){
                             addErrorMessage(key, scriptErrors);
                             break;
                         case "date":
-                            var newDate = EHR.Server.Utils.normalizeDate(row[key]);
-                            var oldDate = EHR.Server.Utils.normalizeDate(oldRow[key]);
+                            var newDate = new Date(EHR.Server.Utils.normalizeDate(row[key]));
+                            var oldDate = new Date(EHR.Server.Utils.normalizeDate(oldRow[key]));
                             console.log (newDate);
                             console.log (oldDate);
-                            if (newDate == oldDate){
-                                console.log("new date and oldDate equal "+ key);
-                            }else{
+                            if (newDate.getTime() !== oldDate.getTime()){
                                 console.log("new date and oldDate different "+ key);
                                 addErrorMessage(key, scriptErrors);
-
                             }
-
                             break;
                         case "volume":
                             addErrorMessage(key, scriptErrors);

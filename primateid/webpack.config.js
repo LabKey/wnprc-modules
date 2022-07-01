@@ -25,7 +25,7 @@ module.exports = function wp(env) {
             output: {
                 ...base.output,
                 libraryTarget: 'commonjs',
-                path: path.resolve(__dirname, `resources/scripts/primateid`)
+                path: path.resolve(__dirname, `resources/scripts/primateid/gen`)
             }
         },
         {   // create a configuration for the client side (in 'web')
@@ -33,7 +33,7 @@ module.exports = function wp(env) {
             output: {
                 ...base.output,
                 libraryTarget: 'var',
-                path: path.resolve(__dirname, `resources/web/primateid`)
+                path: path.resolve(__dirname, `resources/web/primateid/gen`)
             }
         },
     ];

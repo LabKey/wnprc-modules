@@ -12,7 +12,7 @@
       </column>
       <column name="Id"/>
       <column name="date"/>
-      <column name="userid"/>
+      <column name="performedby"/>
       <column name="feces"/>
       <column name="menses"/>
       <column name="behavior"/>

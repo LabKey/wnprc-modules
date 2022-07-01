@@ -173,15 +173,10 @@ function onUpdate(helper, scriptErrors, row, oldRow){
     if (!triggerHelper.isDataAdmin()){
         let errorField = null;
         if(oldRow){
-            //console.log(oldRow);
-            //console.log(oldRow.)
-            //console.log(row);
-
+         
             var tempKeys = Object.keys(oldRow);
             for (var i = 0; i <= tempKeys.length; i++){
-                var key = tempKeys[i];
-                //console.log(key + '  ' +oldRow[key]);
-                //console.log('new row  ' +key + ' ' + row[key]);
+                var key = tempKeys[i];         
                 if (key !== 'enddate' && oldRow[key] != row[key]){
                     console.log('field checked '+ key)
                     switch (key){
@@ -190,11 +185,8 @@ function onUpdate(helper, scriptErrors, row, oldRow){
                             break;
                         case "date":
                             var newDate = new Date(EHR.Server.Utils.normalizeDate(row[key]));
-                            var oldDate = new Date(EHR.Server.Utils.normalizeDate(oldRow[key]));
-                            console.log (newDate);
-                            console.log (oldDate);
-                            if (newDate.getTime() !== oldDate.getTime()){
-                                console.log("new date and oldDate different "+ key);
+                            var oldDate = new Date(EHR.Server.Utils.normalizeDate(oldRow[key]));         
+                            if (newDate.getTime() !== oldDate.getTime()){                                
                                 addErrorMessage(key, scriptErrors);
                             }
                             break;
@@ -217,23 +209,8 @@ function onUpdate(helper, scriptErrors, row, oldRow){
                             addErrorMessage(key, scriptErrors);
                             break;
                     }
-
                 }
-            }
-            /*for (const key in oldRow){
-                console.log(`${key}: ${oldRow[key]}`);
-            }*/
-            /*for(const [key,value] of Object.keys(oldRow)){
-                console.log("rowItem value "+ value);
-                console.log("rowItem label "+ key);
-            }*/
-            // Object.entries(oldRow).forEach(([key, value]) => {
-            //     if (value){
-            //         console.log("rowItem value "+ value);
-            //         console.log("rowItem label "+ key);
-            //     }
-            //
-            // });
+            }            
         }
 
 

@@ -176,9 +176,9 @@ if [[ -z $dock ]]; then
   echo -e '\033[0;32mdone\033[0m'
 else
   echo -n 'Preparing database and roles ... '
-  ${pgpath}psql -U postgres -p "${pgport#*:}" -c "drop database if exists ${dbname};" &>/dev/null
-  ${pgpath}psql -U postgres -p "${pgport#*:}" -c "create database ${dbname};" &>/dev/null
-  ${pgpath}psql -U postgres -p "${pgport#*:}" -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
+  ${pgpath}psql -h localhost -U postgres -p "${pgport#*:}" -c "drop database if exists ${dbname};" &>/dev/null
+  ${pgpath}psql -h localhost -U postgres -p "${pgport#*:}" -c "create database ${dbname};" &>/dev/null
+  ${pgpath}psql -h localhost -U postgres -p "${pgport#*:}" -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
 
@@ -191,7 +191,7 @@ if [[ $tablespace ]]; then
   if [[ -z $dock ]]; then
     docker-compose exec postgres psql -U postgres -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
   else
-    ${pgpath}psql -U postgres -p "${pgport#*:}" -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
+    ${pgpath}psql -h localhost -U postgres -p "${pgport#*:}" -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
   fi
 fi
 

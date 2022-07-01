@@ -8,17 +8,17 @@
     "start": "cross-env NODE_ENV=development webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
     "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
     "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
-    "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
+    "clean": "rimraf resources/web/WNPRC_Purchasing/gen && rimraf resources/views/gen && rimraf resources/views/app.html && rimraf resources/views/app.view.xml",
     "lint-fix": "eslint --fix --ext .tsx,.ts src/client/**"
   },
   "moduleFileExtensions": [
-    "js",
+    "tsx",
     "ts",
-    "tsx"
+    "js"
   ],
   "dependencies": {
-    "@labkey/components": "2.146.0",
-    "@labkey/api": "1.10.0"
+    "@labkey/components": "2.115.1",
+    "@labkey/api": "1.7.2"
   },
   "devDependencies": {
     "@labkey/build": "6.0.0",

@@ -16,6 +16,8 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.google.api.client.http.FileContent;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
@@ -50,6 +52,7 @@ import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.files.FileContentService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
@@ -59,6 +62,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
@@ -76,10 +80,14 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.webdav.WebdavResource;
+import org.labkey.api.webdav.WebdavService;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
@@ -275,6 +283,20 @@ public class WNPRC_EHRController extends SpringActionController
         public void setEndDate(String endDate)
         {
             this.endDate = endDate;
+        }
+    }
+
+    public static class ConvertExcelToJSONForm
+    {
+        private String _name;
+        public String getName()
+        {
+            return _name;
+        }
+
+        public void setName(String name)
+        {
+            _name = name;
         }
     }
 
@@ -934,44 +956,33 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    @ActionNames("listEmails")
+    @ActionNames("getVirologyResultsFromFile")
     @RequiresNoPermission()
-    public class ListEmailsAction extends ReadOnlyApiAction<EmailServerForm>
+    public class GetVirologyResultsFromFileAction extends ReadOnlyApiAction<ConvertExcelToJSONForm>
     {
         @Override
-        public ApiResponse execute(EmailServerForm form, BindException errors) throws Exception
+        public ApiResponse execute(ConvertExcelToJSONForm form, BindException errors) throws Exception
         {
-            return new ApiSimpleResponse(form.getEmailServer(getUser(), getContainer()).getInboxMessages());
-        }
-    }
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/WNPRC/EHR/@files/" + form.getName())).getFile(),false);
+            JSONArray newArr = new JSONArray();
+            JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
+            for (int i = 1; i < ja.length(); i ++)
+            {
+                JSONObject jo = new JSONObject();
+                JSONArray jai = (JSONArray) ja.get(i);
+                jo.put("Id",jai.get(0));
+                jo.put("Date",jai.get(1));
+                jo.put("Sample Type",jai.get(2));
+                jo.put("Virus",jai.get(3));
+                jo.put("Method",jai.get(4));
+                jo.put("Result",jai.get(5));
+                jo.put("Qualifier",jai.get(6));
+                jo.put("Remark",jai.get(7));
+                newArr.put(jo);
 
-    @ActionNames("getVirologyResultsFromEmail")
-    @RequiresNoPermission()
-    public class GetVirologyResultsFromEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
-    {
-        @Override
-        public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
-        {
+            }
             JSONObject json = new JSONObject();
-
-            JSONArray rows = form.getEmailServer(getUser(), getContainer()).getExcelDataFromMessage(form.getMessageIdentifier());
-            json.put("rows", rows);
-
-            return new ApiSimpleResponse(json);
-        }
-    }
-
-    @ActionNames("deleteEmail")
-    @RequiresNoPermission()
-    public class deleteEmailAction extends MutatingApiAction<VirologyResultsForm>
-    {
-        @Override
-        public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
-        {
-            JSONObject json = new JSONObject();
-
-            form.getEmailServer(getUser(), getContainer()).deleteMessage(form.getMessageIdentifier());
-
+            json.put("rows", newArr);
             return new ApiSimpleResponse(json);
         }
     }

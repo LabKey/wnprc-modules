@@ -1065,51 +1065,59 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
             handler: function(btn) {
                 var files = [];
                 Ext.Msg.wait("Loading...");
-                var animalPortal =  new LABKEY.FileSystem.WebdavFileSystem({baseUrl: LABKEY.ActionURL.getBaseURL() + '_webdav/' + LABKEY.getModuleProperty("wnprc_ehr", "VirologyResultsUploadFolder") + '/@files/'});
-                animalPortal.listFiles({
+                var virologyResultsFolder =  new LABKEY.FileSystem.WebdavFileSystem({baseUrl: LABKEY.ActionURL.getBaseURL() + '_webdav/' + LABKEY.getModuleProperty("wnprc_ehr", "VirologyResultsUploadFolder") + '/@files/'});
+                virologyResultsFolder.listFiles({
                     path: "/",
-                    success: function (animalPortal, path, records) {
+                    success: function (virologyResultsFolder, path, records) {
                         Ext.Msg.hide();
                         importFromEmailWindow.show();
+                        var promises = [];
                         for (var i = 0; i < records.length; i++){
                             var record = records[i];
                             if (record && record.data.name){
                                 var extension = record.data.name.split('.').pop();
                                 if (extension === 'xlsx' || extension === 'xls') {
-                                    files.push({"name": record.data.name, "created": record.data.created})
+                                    // need to get the date it was uploaded,
+                                    // since 'record' only provides the date when the actual file was created
+                                    promises.push(getFileHistory(virologyResultsFolder, record.data.name).then((history) => {
+                                        files.push({"name": history[0], "uploaded": history[1][0].data.date})
+                                    }))
+
                                 }
                             }
                         }
+                        Promise.all(promises).then((res)=> {
+                            selectEmailPanel.removeAll();
+                            selectEmailPanel.add({
+                                xtype: 'panel',
+                                layout: 'table',
+                                defaults: {
+                                    bodyStyle: 'padding-left: 5px; padding-right: 5px;'
+                                },
+                                layoutConfig: {
+                                    columns: 4
+                                },
+                                hideLabel: true,
+                                items: [
+                                    {},
+                                    {
+                                        html: '<strong>Name</strong>'
+                                    },
+                                    {
+                                        html: '<strong>Date uploaded</strong>'
+                                    },
+                                    {}
+                                ].concat(files.map(parseFilesToItems))
+                            });
+
+                            // Update the window to display the file options, rather than the password
+                            // prompt
+                            importFromEmailWindow.removeAll();
+                            importFromEmailWindow.add(selectEmailPanel);
+                            importFromEmailWindow.doLayout();
+                        })
 
                         // Refresh the radio options on the select file panel.
-                        selectEmailPanel.removeAll();
-                        selectEmailPanel.add({
-                            xtype: 'panel',
-                            layout: 'table',
-                            defaults: {
-                                bodyStyle: 'padding-left: 5px; padding-right: 5px'
-                            },
-                            layoutConfig: {
-                                columns: 4
-                            },
-                            hideLabel: true,
-                            items: [
-                                {},
-                                {
-                                    html: '<strong>Name</strong>'
-                                },
-                                {
-                                    html: '<strong>Uploaded</strong>'
-                                },
-                                {}
-                            ].concat(files.map(parseFilesToItems))
-                        });
-
-                        // Update the window to display the file options, rather than the password
-                        // prompt
-                        importFromEmailWindow.removeAll();
-                        importFromEmailWindow.add(selectEmailPanel);
-                        importFromEmailWindow.doLayout();
                     },
                     failure: function (f){
                         importFromEmailWindow.hide();
@@ -1124,6 +1132,19 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                         errorWindow.show()
                     }
                 });
+                function getFileHistory(fileSystem, filename) {
+                    return new Promise(resolve => {
+                        fileSystem.getHistory({
+                            path: '/' + filename,
+                            success: function(fileSystem,path,history) {
+                                resolve([filename,history]);
+                            },
+                            failure: function(f) {
+                                reject(f);
+                            }
+                        })
+                    });
+                }
 
                 var getSelectedRadioValue = function(element) {
                     return jQuery(element).find('input[type="radio"][name="fileselection"][checked]').val()
@@ -1151,7 +1172,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                 var selectEmailPanel = new Ext.FormPanel({
                     labelWidth: 75, // label settings here cascade unless overridden
                     frame: true,
-                    title: 'Please select an file to import results from:',
+                    title: 'Please select a file to import results from:',
                     bodyStyle: 'padding:5px 5px 0',
                     width: 500,
                     defaultType: 'textfield',
@@ -1258,7 +1279,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             html: '<p>' + file.name + '</p>'
                         },
                         {
-                            html: '<p>' + file.created.format("Y-m-d")+ '</p>'
+                            html: '<p>' + new Date(file.uploaded).format("Y-m-d H:i")+ '</p>'
                         },
                         {
                             xtype: 'button',

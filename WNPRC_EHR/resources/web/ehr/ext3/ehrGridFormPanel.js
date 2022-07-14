@@ -1070,7 +1070,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                     path: "/",
                     success: function (virologyResultsFolder, path, records) {
                         Ext.Msg.hide();
-                        importFromEmailWindow.show();
+                        importFromFileWindow.show();
                         var promises = [];
                         for (var i = 0; i < records.length; i++){
                             var record = records[i];
@@ -1087,8 +1087,8 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             }
                         }
                         Promise.all(promises).then((res)=> {
-                            selectEmailPanel.removeAll();
-                            selectEmailPanel.add({
+                            selectFilePanel.removeAll();
+                            selectFilePanel.add({
                                 xtype: 'panel',
                                 layout: 'table',
                                 defaults: {
@@ -1110,17 +1110,15 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                 ].concat(files.map(parseFilesToItems))
                             });
 
-                            // Update the window to display the file options, rather than the password
-                            // prompt
-                            importFromEmailWindow.removeAll();
-                            importFromEmailWindow.add(selectEmailPanel);
-                            importFromEmailWindow.doLayout();
+                            // Update the window to display the file options
+                            importFromFileWindow.removeAll();
+                            importFromFileWindow.add(selectFilePanel);
+                            importFromFileWindow.doLayout();
                         })
 
-                        // Refresh the radio options on the select file panel.
                     },
                     failure: function (f){
-                        importFromEmailWindow.hide();
+                        importFromFileWindow.hide();
                         Ext.Msg.hide();
                         var errorWindow = new Ext.Window({
                             style: {
@@ -1150,7 +1148,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                     return jQuery(element).find('input[type="radio"][name="fileselection"][checked]').val()
                 };
 
-                var importFromEmailWindow = new Ext.Window({
+                var importFromFileWindow = new Ext.Window({
                     title: 'Import Results From File',
                     width: 500,
                     id: 'importResultsFromEmailWindow'
@@ -1159,7 +1157,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                 var cancelButtonConfig = {
                     text: 'Cancel',
                     handler: function() {
-                        importFromEmailWindow.close();
+                        importFromFileWindow.close();
                     }
                 };
 
@@ -1169,7 +1167,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                     }
                 });
 
-                var selectEmailPanel = new Ext.FormPanel({
+                var selectFilePanel = new Ext.FormPanel({
                     labelWidth: 75, // label settings here cascade unless overridden
                     frame: true,
                     title: 'Please select a file to import results from:',
@@ -1180,27 +1178,25 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                         {
                             text: 'Import',
                             handler: function() {
-                                var self = selectEmailPanel;
+                                var self = selectFilePanel;
 
-                                selectEmailPanel.remove(errorMessagePanel);
-                                var selectedEmail = files[getSelectedRadioValue(selectEmailPanel.getEl().dom)];
+                                selectFilePanel.remove(errorMessagePanel);
+                                var selectedEmail = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
 
                                 if (!selectedEmail) {
-                                    // Add the error message to the errorMessagePanel
                                     errorMessagePanel.removeAll();
                                     errorMessagePanel.add({
                                         xtype: 'panel',
                                         html: '<p style="color: red">You need to select an file to import.</p>'
                                     });
 
-                                    // Add the error message panel to the password panel.
-                                    selectEmailPanel.add(errorMessagePanel);
-                                    selectEmailPanel.doLayout();
+                                    selectFilePanel.add(errorMessagePanel);
+                                    selectFilePanel.doLayout();
 
                                     return;
                                 }
 
-                                selectEmailPanel.disable();
+                                selectFilePanel.disable();
 
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'getVirologyResultsFromFile', null, {
@@ -1208,7 +1204,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                     }),
                                     callback: function(config, success, xhr) {
                                         var data = JSON.parse(xhr.responseText);
-                                        selectEmailPanel.enable();
+                                        selectFilePanel.enable();
 
                                         if (success) {
                                             var clinpathRecords = Ext.StoreMgr.get('study||Clinpath Runs||||').getRange();
@@ -1241,19 +1237,17 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                 });
                                             });
 
-                                            importFromEmailWindow.close();
+                                            importFromFileWindow.close();
                                         }
                                         else {
-                                            // Add the error message to the errorMessagePanel
                                             errorMessagePanel.removeAll();
                                             errorMessagePanel.add({
                                                 xtype: 'panel',
                                                 html: '<p style="color: red">' + JSON.parse(xhr.responseText).exception + '</p>'
                                             });
 
-                                            // Add the error message panel to the password panel.
-                                            selectEmailPanel.add(errorMessagePanel);
-                                            selectEmailPanel.doLayout();
+                                            selectFilePanel.add(errorMessagePanel);
+                                            selectFilePanel.doLayout();
                                         }
                                     }
                                 });
@@ -1264,8 +1258,6 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                 });
 
                 var parseFilesToItems = function(file, index) {
-
-
 
                     var config = [
                         {
@@ -1306,7 +1298,6 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
 
                     return config;
                 };
-
 
             }
         }

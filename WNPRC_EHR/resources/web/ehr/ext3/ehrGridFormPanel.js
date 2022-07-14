@@ -1063,18 +1063,14 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
             tooltip: "Imports results from an excel document in a folder",
             name: 'import-results-from-file-button',
             handler: function(btn) {
-                var self = this;
-                var username = '';
-                var password = '';
-                var serverid = '';
                 var files = [];
-
+                Ext.Msg.wait("Loading...");
                 var animalPortal =  new LABKEY.FileSystem.WebdavFileSystem({baseUrl: LABKEY.ActionURL.getBaseURL() + '_webdav' + LABKEY.ActionURL.getContainer() + '/@files/'});
                 animalPortal.listFiles({
                     path: "/",
                     success: function (animalPortal, path, records) {
-                        console.log("success", records);
-                        //add to file array or such
+                        Ext.Msg.hide();
+                        importFromEmailWindow.show();
                         for (var i = 0; i < records.length; i++){
                             var record = records[i];
                             if (record && record.data.name){
@@ -1116,7 +1112,16 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                         importFromEmailWindow.doLayout();
                     },
                     failure: function (f){
-                        console.log(f)
+                        importFromEmailWindow.hide();
+                        Ext.Msg.hide();
+                        var errorWindow = new Ext.Window({
+                            style: {
+                                color: 'red'
+                            },
+                            xtype: 'panel',
+                            html: f.response
+                        });
+                        errorWindow.show()
                     }
                 });
 
@@ -1282,7 +1287,6 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                 };
 
 
-                importFromEmailWindow.show();
             }
         }
     }

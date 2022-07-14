@@ -1065,7 +1065,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
             handler: function(btn) {
                 var files = [];
                 Ext.Msg.wait("Loading...");
-                var animalPortal =  new LABKEY.FileSystem.WebdavFileSystem({baseUrl: LABKEY.ActionURL.getBaseURL() + '_webdav' + LABKEY.ActionURL.getContainer() + '/@files/'});
+                var animalPortal =  new LABKEY.FileSystem.WebdavFileSystem({baseUrl: LABKEY.ActionURL.getBaseURL() + '_webdav/' + LABKEY.getModuleProperty("wnprc_ehr", "VirologyResultsUploadFolder") + '/@files/'});
                 animalPortal.listFiles({
                     path: "/",
                     success: function (animalPortal, path, records) {

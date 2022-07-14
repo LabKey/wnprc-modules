@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -55,6 +56,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
@@ -112,10 +114,6 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
-import org.labkey.wnprc_ehr.email.EmailMessageUtils;
-import org.labkey.wnprc_ehr.email.EmailServer;
-import org.labkey.wnprc_ehr.email.EmailServerConfig;
-import org.labkey.wnprc_ehr.email.MessageIdentifier;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
@@ -125,7 +123,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InvalidObjectException;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -300,143 +300,8 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public static class EmailForm
-    {
-        private String _name;
 
-        public String getName()
-        {
-            return _name;
-        }
 
-        public void setName(String name)
-        {
-            _name = name;
-        }
-    }
-
-    public static class EmailServerForm
-    {
-        private String id;
-        private String _username;
-        private String _password;
-
-        public String getId()
-        {
-            return id;
-        }
-
-        public void setId(String id)
-        {
-            this.id = id;
-        }
-
-        public String getUsername()
-        {
-            return _username;
-        }
-
-        public void setUsername(String username)
-        {
-            _username = username;
-        }
-
-        public String getPassword()
-        {
-            return _password;
-        }
-
-        public void setPassword(String password)
-        {
-            _password = password;
-        }
-
-        public EmailServer getEmailServer(User user, Container container) throws Exception
-        {
-            if ((id != null) && (_password != null) && (_username != null))
-            {
-                EmailServerConfig config = EmailServerConfig.load(user, container, getId());
-                return new EmailServer(config, getUsername(), getPassword());
-            }
-            else
-            {
-                throw new ApiUsageException("You must supply a server, username and password.");
-            }
-        }
-    }
-
-    public static class VirologyResultsForm extends EmailServerForm
-    {
-        private String _subject;
-        private String _date;
-        private String _fromList;
-
-        public String getSubject()
-        {
-            if (_subject == null)
-            {
-                throw new ApiUsageException("You must supply a subject line in the 'subject' parameter.");
-            }
-            return _subject;
-        }
-
-        public void setSubject(String subject)
-        {
-            _subject = subject;
-        }
-
-        public String getDate()
-        {
-            return _date;
-        }
-
-        public void setDate(String date)
-        {
-            _date = date;
-        }
-
-        public String getFromList()
-        {
-            return _fromList;
-        }
-
-        public void setFromList(String fromList)
-        {
-            _fromList = fromList;
-        }
-
-        public Date getSentDate()
-        {
-            DateFormat df = new SimpleDateFormat(EmailMessageUtils.VIROLOGY_DATE_FORMAT, Locale.ENGLISH);
-            Date result;
-            try
-            {
-                result = df.parse(_date);
-            }
-            catch (ParseException e)
-            {
-                throw new ApiUsageException("You must supply a valid sent timestamp in the form YYYY/MM/DD HH:mm:ss as the 'date' parameter.");
-            }
-            return result;
-        }
-
-        public String[] getFromListAsArray()
-        {
-            if (_fromList != null)
-            {
-                return StringUtils.split(_fromList, ",");
-            }
-            else
-            {
-                return new String[0];
-            }
-        }
-
-        public MessageIdentifier getMessageIdentifier()
-        {
-            return new MessageIdentifier(getSubject(), getFromListAsArray(), getSentDate());
-        }
-    }
 
     public static class AssignmentBaseForm
     {
@@ -901,69 +766,19 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public class EmailModel
-    {
-        public HashMap<String, Map<String, String>> data = new HashMap<>();
-
-        public String getName()
-        {
-            return "Jon";
-        }
-
-        public java.lang.Void add(String area, String room, String ob)
-        {
-            Map areaMap = data.get(area);
-            if (areaMap == null)
-            {
-                areaMap = new HashMap<>();
-                data.put(area, areaMap);
-            }
-
-            areaMap.put(room, ob);
-            return null;
-        }
-
-        public java.lang.Void populateData()
-        {
-            this.add("a", "a142", "r12900");
-            this.add("a", "a142", "r12905");
-            this.add("a", "a144", "r12904");
-            this.add("b", "b12", "r12903");
-            return null;
-        }
-    }
-
-    @RequiresNoPermission()
-    public class ExampleEmailAction extends MutatingApiAction<EmailForm>
-    {
-        @Override
-        public ApiResponse execute(EmailForm form, BindException errors) throws Exception
-        {
-            EmailModel model = new EmailModel();
-            model.populateData();
-            String name = form.getName();
-            if (name == null)
-            {
-                throw new Exception("You must supply a JSP template name.");
-            }
-            WNPRC_EHREmail<EmailModel> email = new WNPRC_EHREmail<>(form.getName());
-            String emailContents = email.renderEmail(model);
-
-            HashMap<String, String> props = new HashMap<>();
-            props.put("text", emailContents);
-
-            return new ApiSimpleResponse(props);
-        }
-    }
 
     @ActionNames("getVirologyResultsFromFile")
     @RequiresNoPermission()
     public class GetVirologyResultsFromFileAction extends ReadOnlyApiAction<ConvertExcelToJSONForm>
     {
+        public final static String VIROLOGY_RESULT_UPLOAD_FOLDER = "VirologyResultsUploadFolder";
         @Override
-        public ApiResponse execute(ConvertExcelToJSONForm form, BindException errors) throws Exception
+        public ApiResponse execute(ConvertExcelToJSONForm form, BindException errors) throws IOException, InvalidFormatException
         {
-            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/WNPRC/EHR/@files/" + form.getName())).getFile(),false);
+
+            Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
+            ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
             JSONArray newArr = new JSONArray();
             JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
             for (int i = 1; i < ja.length(); i ++)
@@ -971,6 +786,10 @@ public class WNPRC_EHRController extends SpringActionController
                 JSONObject jo = new JSONObject();
                 JSONArray jai = (JSONArray) ja.get(i);
                 jo.put("Id",jai.get(0));
+                if (!(jai.get(1) instanceof Date))
+                {
+                    throw new InvalidObjectException("Bad date format, please use YYYY-MM-DD");
+                }
                 jo.put("Date",jai.get(1));
                 jo.put("Sample Type",jai.get(2));
                 jo.put("Virus",jai.get(3));
@@ -987,24 +806,57 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    @ActionNames("previewEmailExcelAttachment")
+    @ActionNames("previewExcelFile")
     @RequiresNoPermission()
-    public class previewEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
+    public class previewExcelAction extends ReadOnlyApiAction<ConvertExcelToJSONForm>
     {
+        public final static String VIROLOGY_RESULT_UPLOAD_FOLDER = "VirologyResultsUploadFolder";
         @Override
-        public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
+        public ApiResponse execute(ConvertExcelToJSONForm form, BindException errors) throws IOException, InvalidFormatException
         {
+
+            Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
+            ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
+            JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
+            StringBuilder sb = new StringBuilder();
+            sb.append("<style> thead { font-weight: bold } table { border-collapse: collapse; } th, td {border: 1px solid black; padding: 5px; } </style>");
+            sb.append("<table><thead><tr>");
+            sb.append("<th>Id</th>");
+            sb.append("<th>Date</th>");
+            sb.append("<th>Sample Type</th>");
+            sb.append("<th>Virus</th>");
+            sb.append("<th>Method</th>");
+            sb.append("<th>Result</th>");
+            sb.append("<th>Qualifier</th>");
+            sb.append("<th>Remark</th>");
+            sb.append("</tr></thead><tbody>");
+            for (int i = 1; i < 10; i ++)
+            {
+                sb.append("<tr>");
+                JSONArray jai = (JSONArray) ja.get(i);
+                for (int k = 0; k < jai.length(); k++)
+                {
+                    sb.append("<td>");
+                    if (k == 1 && !(jai.get(k) instanceof Date))
+                    {
+                        sb.append("<span style=\"color:red\"> Bad date format, please use YYYY-MM-DD format</span>");
+                    }
+                    if (jai.get(k) instanceof Date)
+                    {
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                        sb.append(formatter.format(jai.get(k)));
+                    } else
+                    {
+                        sb.append(jai.get(k));
+                    }
+                    sb.append("</td>");
+                }
+                sb.append("</tr>");
+            }
+            sb.append("</tbody></table>");
             JSONObject json = new JSONObject();
-
-            JSONArray rows = form.getEmailServer(getUser(), getContainer()).getExcelPreviewData(form.getMessageIdentifier());
-            json.put("rows", rows);
-
-            JSONObject email = form.getEmailServer(getUser(), getContainer()).getInboxMessage(form.getMessageIdentifier());
-            json.put("emaildata", email);
-
-            WNPRC_EHREmail<JSONObject> tablePreview = new WNPRC_EHREmail<>("/org/labkey/wnprc_ehr/email/ExcelPreview.jsp");
-
-            json.put("html", tablePreview.renderEmail(json));
+            json.put("htmlContent", sb);
             return new ApiSimpleResponse(json);
         }
     }

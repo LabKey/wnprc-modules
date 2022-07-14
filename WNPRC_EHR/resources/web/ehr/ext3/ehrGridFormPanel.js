@@ -1222,7 +1222,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                             errorMessagePanel.removeAll();
                                             errorMessagePanel.add({
                                                 xtype: 'panel',
-                                                html: '<p style="color: red">An unknown error has occurred.</p>'
+                                                html: '<p style="color: red">' + JSON.parse(xhr.responseText).exception + '</p>'
                                             });
 
                                             // Add the error message panel to the password panel.
@@ -1260,15 +1260,14 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             text: 'Preview',
                             handler: function() {
                                 LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'getVirologyResultsFromFile', null, {
+                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'previewExcelFile', null, {
                                         name: file.name
                                     }),
                                     callback: function (config, success, xhr) {
                                         if (success) {
                                             var data = JSON.parse(xhr.responseText);
                                             var myWindow = window.open("", "Preview Spreadsheet", "width=900,height=500");
-                                            myWindow.document.write(data.toString());
-                                            myWindow.document.title = "Preview Spreadsheet";
+                                            myWindow.document.body.innerHTML = data.htmlContent;
                                         }
                                         else {
                                             alert('Couldn\'t generate preview.');

@@ -13,5 +13,11 @@
                 <permission>ADMIN</permission>
             </editPermissions>
         </propertyDescriptor>
+        <propertyDescriptor name="VirologyResultsUploadFolder">
+            <description>Folder location where virology results should be uploaded to.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
     </properties>
 </module>

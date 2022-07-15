@@ -1207,6 +1207,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                         selectFilePanel.enable();
 
                                         if (success) {
+                                            var matchingFound = false;
                                             var clinpathRecords = Ext.StoreMgr.get('study||Clinpath Runs||||').getRange();
                                             var virologyResults = Ext.StoreMgr.get('study||Virology Results||||');
 
@@ -1223,6 +1224,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                      && clinpathRun.get('servicerequested') == method + ' - ' + resultRow['Virus']
                                                      && clinpathRun.get('sampletype') == resultRow['Sample Type']
                                                     ) {
+                                                        matchingFound = true;
                                                         virologyResults.addRecord({
                                                             Id:             resultRow['Id'],
                                                             date:           resultRow['Date'].replace(/-/g, '/'),
@@ -1236,8 +1238,17 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                     }
                                                 });
                                             });
+                                            if (!matchingFound) {
+                                                errorMessagePanel.add({
+                                                    xtype: 'panel',
+                                                    html: '<p style="color: red">No matching clinpath records found.</p>'
+                                                });
 
-                                            importFromFileWindow.close();
+                                                selectFilePanel.add(errorMessagePanel);
+                                                selectFilePanel.doLayout();
+                                            } else {
+                                                importFromFileWindow.close();
+                                            }
                                         }
                                         else {
                                             errorMessagePanel.removeAll();

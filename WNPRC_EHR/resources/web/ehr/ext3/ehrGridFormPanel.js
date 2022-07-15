@@ -1069,8 +1069,6 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                 virologyResultsFolder.listFiles({
                     path: "/",
                     success: function (virologyResultsFolder, path, records) {
-                        Ext.Msg.hide();
-                        importFromFileWindow.show();
                         var promises = [];
                         for (var i = 0; i < records.length; i++){
                             var record = records[i];
@@ -1087,6 +1085,8 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             }
                         }
                         Promise.all(promises).then((res)=> {
+                            Ext.Msg.hide();
+                            importFromFileWindow.show();
                             selectFilePanel.removeAll();
                             selectFilePanel.add({
                                 xtype: 'panel',
@@ -1166,6 +1166,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                         color: 'red'
                     }
                 });
+                var messageContent = {};
 
                 var selectFilePanel = new Ext.FormPanel({
                     labelWidth: 75, // label settings here cascade unless overridden
@@ -1180,15 +1181,15 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             handler: function() {
                                 var self = selectFilePanel;
 
-                                selectFilePanel.remove(errorMessagePanel);
                                 var selectedEmail = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
 
                                 if (!selectedEmail) {
                                     errorMessagePanel.removeAll();
-                                    errorMessagePanel.add({
+                                    messageContent = new Ext.Panel({
                                         xtype: 'panel',
                                         html: '<p style="color: red">You need to select an file to import.</p>'
-                                    });
+                                    })
+                                    errorMessagePanel.add(messageContent)
 
                                     selectFilePanel.add(errorMessagePanel);
                                     selectFilePanel.doLayout();
@@ -1239,10 +1240,12 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                 });
                                             });
                                             if (!matchingFound) {
-                                                errorMessagePanel.add({
+                                                errorMessagePanel.removeAll();
+                                                messageContent = new Ext.Panel({
                                                     xtype: 'panel',
                                                     html: '<p style="color: red">No matching clinpath records found.</p>'
                                                 });
+                                                errorMessagePanel.add(messageContent);
 
                                                 selectFilePanel.add(errorMessagePanel);
                                                 selectFilePanel.doLayout();
@@ -1252,10 +1255,11 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                         }
                                         else {
                                             errorMessagePanel.removeAll();
-                                            errorMessagePanel.add({
+                                            messageContent = new Ext.Panel({
                                                 xtype: 'panel',
                                                 html: '<p style="color: red">' + JSON.parse(xhr.responseText).exception + '</p>'
                                             });
+                                            errorMessagePanel.add(messageContent);
 
                                             selectFilePanel.add(errorMessagePanel);
                                             selectFilePanel.doLayout();

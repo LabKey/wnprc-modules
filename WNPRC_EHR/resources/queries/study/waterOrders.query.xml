@@ -14,7 +14,7 @@
                     <column columnName="project"></column>
                     <column columnName="date">
                         <columnTitle>Start Date</columnTitle>
-                        <formatString>yyyy-MM-dd/formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="enddate">
                         <columnTitle>End Date</columnTitle>

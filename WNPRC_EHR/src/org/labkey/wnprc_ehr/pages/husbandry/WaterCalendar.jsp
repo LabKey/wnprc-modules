@@ -264,6 +264,10 @@
                                 <div class="modal-body" id="modal-body">
                                     <div>Select an option from this window:</div>
                                     <div>End Date for Water Order: <b>{{date}}</b></div>
+                                    <div>
+                                        <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
+                                        <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                    </div>
                                     <hr>
                                     <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
                                     <div class="server-return-message" id = "modelServerResponse"></div>
@@ -468,6 +472,7 @@
     var calendarEvents = {};
     var hideEditPanel = true;
     var allowProjects = "";
+    var endWaterSelected = false;
 
     var changeableItems = ko.observableArray();
 
@@ -1023,6 +1028,38 @@
                 });
 
             },
+            removeLastDay: function(){
+
+                debugger;
+                if (document.getElementById('removelastday').checked){
+                    console.log("selected "+ true);
+                    var newEndDate =moment(WebUtils.VM.taskDetails.date(), "MM/DD/YYYY");
+                    console.log(newEndDate);
+                    newEndDate = newEndDate.subtract(1, "days");
+                    console.log(newEndDate);
+                    newEndDate = newEndDate.format("MM/DD/YYYY");
+                    console.log(newEndDate);
+                    WebUtils.VM.taskDetails.date(newEndDate);
+                    endWaterSelected = true;
+                }else if (endWaterSelected){
+                    console.log("selected "+ false);
+                    var newEndDate = moment(WebUtils.VM.taskDetails.date(), "MM/DD/YYYY");
+                    console.log(newEndDate);
+                    newEndDate = newEndDate.add(1, "days");
+                    console.log(newEndDate);
+                    newEndDate = newEndDate.format("MM/DD/YYYY");
+                    console.log(newEndDate);
+                    WebUtils.VM.taskDetails.date(newEndDate);
+                    endWaterSelected = false;
+
+                }
+                //var selectedDateValue = value;
+
+                //var selectedDate =  ko.mapping.toJS(row);
+
+
+
+            },
 
             endWaterOrder: function (row){
                 document.getElementById("modelServerResponse").innerHTML = "";
@@ -1190,6 +1227,13 @@
             closeModalWindow: function (row){
 
                 $('#waterInfoPanel').unblock();
+
+                var originalDate = moment(selectedEvent.extendedProps.rawRowData.date, "YYYY-MM-DD hh:mm:ss.SSS")
+                console.log("original date "+originalDate);
+                originalDate = originalDate.format("MM/DD/YYYY")
+                WebUtils.VM.taskDetails.date(originalDate);
+                endWaterSelected = false;
+                document.getElementById('removelastday').checked = false;
                 document.getElementById("modelServerResponse").innerHTML = "";
                 document.getElementById("proceedButton").classList.add("hidden");
                 document.getElementById("returnTitle").classList.add("hidden");

@@ -182,15 +182,9 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         if (row.waterSource == 'lixit' && !row.remarks){
             EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Add remark for connecting lixit', 'WARN');
         }
-        console.log ('value outside if statement '+ row.treatmentId);
-        console.log (row.QCStateLabel);
 
-        if (row.treatmentId != null && row.id && row.performedby && row.volume && (row.QCStateLabel == 'In Progress' || row.QCStateLabel == 'Completed')){
-            //TODO: called function to change QC for water amount
-            console.log('value of dataSource ' + row.dataSource);
-            console.log('value of treatmentId ' + row.treatmentId);
-            console.log('extra context '+ waters);
-            console.log('date on water Given '+ row.date);
+        if (row.treatmentId != null && row.id && row.performedby && row.volume != null && (row.QCStateLabel == 'In Progress' || row.QCStateLabel == 'Completed')){
+
             let errorMessage = WNPRC.Utils.getJavaHelper().changeWaterAmountQC(row.treatmentId, waters);
             console.log('error Message ' + errorMessage);
             if (!errorMessage){
@@ -200,8 +194,6 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                 }
 
             }
-            //row.remarks=
-
         }
 
 

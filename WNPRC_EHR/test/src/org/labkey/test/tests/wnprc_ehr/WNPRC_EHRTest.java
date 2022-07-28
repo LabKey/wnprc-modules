@@ -225,6 +225,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.addBillingPublicWebParts();
 
         initTest.uploadBillingDataAndVerify();
+
+        initTest.setupClinpathVirologySection();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -428,6 +430,47 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         insertCmd2.execute(cn, EHR_FOLDER_PATH);
 
         log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+    }
+
+    public void setupClinpathVirologySection() throws IOException, CommandException
+    {
+        // update virology results section buttons
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        log("populating ehr.FormPanelSections with new clinpath file import button");
+        UpdateRowsCommand insertCmd = new UpdateRowsCommand("ehr", "FormPanelSections");
+        SelectRowsCommand sr = new SelectRowsCommand("ehr","FormPanelSections");
+        sr.addFilter("schemaName","study", Filter.Operator.EQUAL);
+        sr.addFilter("queryName","Virology Results", Filter.Operator.EQUAL);
+        sr.addFilter("formtype","Clinpath", Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        Integer rowid = null;
+        for (Map<String, Object> row : resp.getRows())
+        {
+            rowid = (Integer) row.get("rowid");
+        }
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("rowid",rowid);
+        rowMap.put("destination","formSections");
+        rowMap.put("formtype","Clinpath");
+        rowMap.put("xtype","ehr-gridformpanel");
+        rowMap.put("schemaName","study");
+        rowMap.put("sort_order",10);
+        rowMap.put("queryName","Virology Results");
+        rowMap.put("metadatasources","Task,Assay");
+        rowMap.put("buttons","add,requestdelete,copyfromclinpath,selectall,duplicate,bulk_edit,sortany,apply_template,save_template,import_results_from_file");
+        insertCmd.addRow(rowMap);
+        insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+        // upload virology results excel file
+        goToEHRFolder();
+        goToModule("FileContent");
+        _fileBrowserHelper.uploadFile(SAMPLE_FILE);
+
+        // set the location of the virology results upload location
+        goToEHRFolder();
+        List<ModulePropertyValue> properties = new ArrayList<>();
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "VirologyResultsUploadFolder", EHR_FOLDER_PATH));
+        setModuleProperties(properties);
     }
 
     @Override
@@ -2662,51 +2705,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testVirologyBulkUpload() throws IOException, CommandException
     {
-        goToEHRFolder();
-        goToModule("FileContent");
-        _fileBrowserHelper.uploadFile(SAMPLE_FILE);
-
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
-
-        log("populating ehr.FormPanelSections with new clinpath file import button");
-        //update the ext form section for virology results
-        UpdateRowsCommand insertCmd = new UpdateRowsCommand("ehr", "FormPanelSections");
-        SelectRowsCommand sr = new SelectRowsCommand("ehr","FormPanelSections");
-        sr.addFilter("schemaName","study", Filter.Operator.EQUAL);
-        sr.addFilter("queryName","Virology Results", Filter.Operator.EQUAL);
-        sr.addFilter("formtype","Clinpath", Filter.Operator.EQUAL);
-        SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
-        Integer rowid = null;
-        for (Map<String, Object> row : resp.getRows())
-        {
-            rowid = (Integer) row.get("rowid");
-        }
-        Map<String,Object> rowMap = new HashMap<>();
-        rowMap.put("rowid",rowid);
-        rowMap.put("destination","formSections");
-        rowMap.put("formtype","Clinpath");
-        rowMap.put("xtype","ehr-gridformpanel");
-        rowMap.put("schemaName","study");
-        rowMap.put("sort_order",10);
-        rowMap.put("queryName","Virology Results");
-        rowMap.put("metadatasources","Task,Assay");
-        rowMap.put("buttons","add,requestdelete,copyfromclinpath,selectall,duplicate,bulk_edit,sortany,apply_template,save_template,import_results_from_file");
-        insertCmd.addRow(rowMap);
-
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
-
-        goToEHRFolder();
-        List<ModulePropertyValue> properties = new ArrayList<>();
-        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "VirologyResultsUploadFolder", EHR_FOLDER_PATH));
-        setModuleProperties(properties);
-
-        goToEHRFolder();
-
-        //go to clinpath task
+        // go to clinpath task, import the virology results and submit
         beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
         WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
         waitForFormElementToEqual(titleEl, "Clinpath");
-
         waitForText("Import Results from File");
         _extHelper.clickMenuButton("Import Results from File");
         waitForText("Please select a file to import results from");
@@ -2718,10 +2720,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         click(Locator.extButton("Submit Final"));
         click(Locator.extButton("Yes"));
 
-        //verify that the clinpath task with the above taskid has virology results
-        SelectRowsCommand sr2 = new SelectRowsCommand("study","Virology Results");
-        sr.addFilter("taskid",VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
-        SelectRowsResponse resp2 = sr2.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        // verify that the clinpath task with the above taskid has virology results
+        waitForElement(Locator.tagWithText("span", "Data Entry"));
+        SelectRowsCommand sr = new SelectRowsCommand("study","Virology Results");
+        sr.addFilter("taskid", VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
         Assert.assertTrue(resp2.getRowCount().intValue() > 0);
     }
 

@@ -788,7 +788,7 @@ public class WNPRC_EHRController extends SpringActionController
                 jo.put("Id",jai.get(0));
                 if (!(jai.get(1) instanceof Date))
                 {
-                    throw new InvalidObjectException("Bad date format, please use YYYY-MM-DD");
+                    throw new InvalidObjectException("Bad date format or wrong column order. Set the date column format to 'Date' and/or arrange columns in this order: Id, Date, Sample Type, Virus, Method, Result, Qualifier, Remark");
                 }
                 jo.put("Date",jai.get(1));
                 jo.put("Sample Type",jai.get(2));
@@ -840,7 +840,7 @@ public class WNPRC_EHRController extends SpringActionController
                     sb.append("<td>");
                     if (k == 1 && !(jai.get(k) instanceof Date))
                     {
-                        sb.append("<span style=\"color:red\"> Bad date format, please use YYYY-MM-DD format</span>");
+                        sb.append("<span style=\"color:red\">Bad date format or wrong column order. Set the date column format to 'Date' and/or arrange columns in this order: Id, Date, Sample Type, Virus, Method, Result, Qualifier, Remark</span>");
                     }
                     if (jai.get(k) instanceof Date)
                     {

@@ -132,13 +132,13 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         ts.setNamedParameters(parameters);
         long total = ts.getRowCount();
 
-        if (total == 0){
+        if (total == 0 && !includeFuture){
             msg.append("All water orders are completed");
         }else{
             if(includeFuture){
-                msg.append("<p><b>There are "+total+ " water orders that are scheduled for today and have not being completed</b><br>");
+                msg.append("<p><b>There are "+total+ " water orders that are scheduled for today and have not been completed</b><br>");
             }else{
-                msg.append("<p><b>WARNING: There are "+total+ " water orders that have not being completed</b><br>");
+                msg.append("<p><b>WARNING: There are "+total+ " water orders that have not been completed</b><br>");
             }
 
             Map<String,Object>[] waterOrdersScheduled = ts.getMapArray();

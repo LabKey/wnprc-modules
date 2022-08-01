@@ -59,7 +59,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
 
     public String getScheduleDescription()
     {
-        return "daily at 1300, 1500, 1700, 1900";
+        return "daily at 1000, 1300, 1500, 1700, 1900";
     }
 
     @Override
@@ -70,13 +70,14 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         final Date now = new Date();
 
         msg.append("This email contains any water orders not marked as completed.  It was run on: " + _dateFormat.format(now) + " at " + _timeFormat.format(now) + ".<p>");
-        findWaterOrdersNotCompleted(c,u,msg,new Date());
+        findWaterOrdersNotCompleted(c,u,msg,new Date(), false);
+        findWaterOrdersNotCompleted(c,u,msg,new Date(), true);
 
         return msg.toString();
 
     }
 
-    private void findWaterOrdersNotCompleted(Container c,User u, StringBuilder msg, final Date maxDate){
+    private void findWaterOrdersNotCompleted(Container c,User u, StringBuilder msg, final Date maxDate, boolean includeFuture){
         Calendar currentTime = Calendar.getInstance();
         currentTime.setTime(maxDate);
 
@@ -94,9 +95,23 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         parameters.put("StartDate", roundedMax);
 
         TableInfo ti = QueryService.get().getUserSchema(u,c,"study").getTable("waterScheduleCoalesced");
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("dateOrdered"),currentTime.getTime(), CompareType.LTE);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("QCState/label"),"Scheduled",CompareType.EQUAL);
+
+        if (includeFuture){
+            Date futureDate = new Date();
+            futureDate.setTime(maxDate.getTime());
+            futureDate = DateUtils.addDays(futureDate,1);
+            futureDate = DateUtils.truncate(futureDate, Calendar.DATE);
+            //currentTime.add(Calendar.DATE,1);
+
+            filter.addCondition(FieldKey.fromString("dateOrdered"),futureDate, CompareType.LTE);
+            filter.addCondition(FieldKey.fromString("dateOrdered"),currentTime.getTime(), CompareType.GT);
+
+        }else{
+            filter.addCondition(FieldKey.fromString("dateOrdered"),currentTime.getTime(), CompareType.LTE);
+        }
+
         filter.addCondition(FieldKey.fromString("dateOrdered"), roundedMax,CompareType.DATE_GTE);
-        filter.addCondition(FieldKey.fromString("QCState/label"),"Scheduled",CompareType.EQUAL);
        // filter.addCondition(FieldKey.fromString("assignedTo"), "animalcare");
         filter.addCondition(FieldKey.fromString("actionRequired"),true,CompareType.EQUAL);
 
@@ -120,7 +135,12 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         if (total == 0){
             msg.append("All water orders are completed");
         }else{
-            msg.append("<p><b>There are "+total+ " water orders that have not being completed</b><br>");
+            if(includeFuture){
+                msg.append("<p><b>There are "+total+ " water orders that are scheduled for today and have not being completed</b><br>");
+            }else{
+                msg.append("<p><b>WARNING: There are "+total+ " water orders that have not being completed</b><br>");
+            }
+
             Map<String,Object>[] waterOrdersScheduled = ts.getMapArray();
             List <Map<String,Object>> animalCareWaters = new ArrayList<>();
             List<Map<String,Object>> researchStaffWaters = new ArrayList<>();

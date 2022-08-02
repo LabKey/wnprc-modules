@@ -789,7 +789,7 @@
                 //the form to be able to change.
                 if (info.event.source.id == "totalWater") {
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
-                    WebUils.VM.taskDetails["location"]()
+                    WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData.location.toString());
                 }else{
                     WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 }

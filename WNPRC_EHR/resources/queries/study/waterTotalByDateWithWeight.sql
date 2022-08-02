@@ -18,7 +18,9 @@ SELECT wtbd.id as animalId,
        CAST(waterScheduledAnimalsOuter.mlsperKg AS NUMERIC) AS InnerMlsPerKg,
        waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,
-       wtbd.qcstate
+       wtbd.qcstate,
+       wtbd.curRoom || '-' || wtbd.curCage AS location,
+       'waterTotal' AS dataSource
 FROM study.waterTotalByDate wtbd
 
 JOIN

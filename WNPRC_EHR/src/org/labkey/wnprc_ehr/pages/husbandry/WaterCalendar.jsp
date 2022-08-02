@@ -214,7 +214,7 @@
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {
-            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlPerKgCal') {
+            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlsPerKgCal') {
                 WebUtils.VM.taskDetails[key](null);
             }
         }

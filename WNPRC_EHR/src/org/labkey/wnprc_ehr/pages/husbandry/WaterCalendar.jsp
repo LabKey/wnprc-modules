@@ -264,6 +264,10 @@
                                 <div class="modal-body" id="modal-body">
                                     <div>Select an option from this window:</div>
                                     <div>End Date for Water Order: <b>{{date}}</b></div>
+                                    <div>
+                                        <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
+                                        <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                    </div>
                                     <hr>
                                     <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
                                     <div class="server-return-message" id = "modelServerResponse"></div>
@@ -446,6 +450,12 @@
                     <span  data-bind="style: {color: $parent.husbandryAssignmentLookup[$data].color }">&#x2589;</span><span>{{$parent.husbandryAssignmentLookup[$data].title}}</span>
                     <!-- /ko -->
                 </div>
+                <div id="waterTotalLegend" class="pull-left">
+
+                    <span style="color:red">&#x2589;</span><span>Total Water < 20 mL/Kg</span>
+                    <span style="color:white">&#x2589;</span><span>Total Water > 20 mL/Kg</span>
+
+                </div>
 
 
             </div>
@@ -468,7 +478,6 @@
     var calendarEvents = {};
     var hideEditPanel = true;
     var allowProjects = "";
-
     var changeableItems = ko.observableArray();
 
     ko.dirtyFlag = function(root, isInitiallyDirty) {
@@ -780,6 +789,7 @@
                 //the form to be able to change.
                 if (info.event.source.id == "totalWater") {
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
+                    WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData.location.toString());
                 }else{
                     WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 }
@@ -1023,6 +1033,26 @@
                 });
 
             },
+            removeLastDay: function(){
+
+                debugger;
+                if (document.getElementById('removelastday').checked){
+                    var newEndDate =moment(WebUtils.VM.taskDetails.date(), "MM/DD/YYYY");
+                    newEndDate = newEndDate.subtract(1, "days");
+                    newEndDate = newEndDate.format("MM/DD/YYYY");
+                    WebUtils.VM.taskDetails.date(newEndDate);
+                }else if (selectedEvent.extendedProps){
+                    var originalDate = moment(selectedEvent.extendedProps.rawRowData.date, "YYYY-MM-DD hh:mm:ss.SSS")
+                    originalDate = originalDate.format("MM/DD/YYYY")
+                    WebUtils.VM.taskDetails.date(originalDate);
+                }
+                //var selectedDateValue = value;
+
+                //var selectedDate =  ko.mapping.toJS(row);
+
+
+
+            },
 
             endWaterOrder: function (row){
                 document.getElementById("modelServerResponse").innerHTML = "";
@@ -1065,6 +1095,7 @@
 
                             $('#waterInfoPanel').unblock();
                             $('#myModal').modal('hide');
+                            document.getElementById('removelastday').checked = false;
 
 
                         }else if (response.errors){
@@ -1072,6 +1103,7 @@
                             document.getElementById("returnTitle").style.display = "block";
                             document.getElementById("returnTitle").classList.remove("hidden");
                             document.getElementById("modelServerResponse").style.display = "block";
+                            document.getElementById('removelastday').checked = false;
 
                             //let jsonArray = response.errors[0].errors;
                             let jsonArray;
@@ -1105,6 +1137,7 @@
                         }
                         else {
                             alert('Water cannot be closed')
+                            document.getElementById('removelastday').checked = false;
                         }
 
 
@@ -1165,13 +1198,15 @@
                             //('ehr', 'dataEntryForm.view', null, {formType: LABKEY.ActionURL.getParameter('formType')})
                             var newWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {formType: 'Enter Water Orders', 'taskid': response.taskId});
                             //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
+                            document.getElementById('removelastday').checked = false;
 
                             window.open(newWaterOrder,'_blank');
 
                         }
                         else{
                             response.errors;
-                            $('#myModal').modal('hide');;
+                            $('#myModal').modal('hide');
+                            document.getElementById('removelastday').checked = false;
                         }
 
 
@@ -1190,6 +1225,12 @@
             closeModalWindow: function (row){
 
                 $('#waterInfoPanel').unblock();
+
+                var originalDate = moment(selectedEvent.extendedProps.rawRowData.date, "YYYY-MM-DD hh:mm:ss.SSS")
+                console.log("original date "+originalDate);
+                originalDate = originalDate.format("MM/DD/YYYY")
+                WebUtils.VM.taskDetails.date(originalDate);
+                document.getElementById('removelastday').checked = false;
                 document.getElementById("modelServerResponse").innerHTML = "";
                 document.getElementById("proceedButton").classList.add("hidden");
                 document.getElementById("returnTitle").classList.add("hidden");

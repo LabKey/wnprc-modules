@@ -722,8 +722,7 @@
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
-                                            rawRowData: row,
-                                            dataTarget: "#waterTotalInformation"
+                                            rawRowData: row
                                         };
 
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
@@ -1063,8 +1062,6 @@
 
             },
             removeLastDay: function(){
-
-                debugger;
                 if (document.getElementById('removelastday').checked){
                     var newEndDate =moment(WebUtils.VM.taskDetails.date(), "MM/DD/YYYY");
                     newEndDate = newEndDate.subtract(1, "days");
@@ -1274,7 +1271,6 @@
         });
 
         WebUtils.VM.taskDetails.mlsPerKgCal = ko.pureComputed(function(){
-            debugger;
             if (WebUtils.VM.taskDetails.mlsPerKg() >= 20){
                 return false;
             }else{
@@ -1460,53 +1456,6 @@
                         }
 
                     });
-
-                   /* let waterAmountRecord = {
-                                                taskid:                 taskid,
-                                                Id:                     form.animalIdForm,
-                                                date:                   insertDate.getTime(),
-                                                project:                form.projectForm,
-                                                volume:                 form.volumeForm.value,
-                                                provideFruit:           form.provideFruitForm.value,
-                                                assignedTo:             form.assignedToForm.value,
-                                                frequency:              form.frequencyForm.value,
-                                                waterOrderObjectId:     form.waterOrderObjectId,
-                                                recordSource:           "WaterCalendar",
-                                                waterSource:            "regulated",
-                                                qcstate:                10 //Schedule
-                    };
-
-                    let returnObject = {};
-                    //var saveSuccess = saveWaterHelper(waterAmountRecord,"insert",userId);
-                    waterMonitoringSystem.saveWaterAmount(waterAmountRecord,"insert",userId, returnObject).then(  response => {
-                        debugger;
-
-                        console.log('returnObject ' + returnObject);
-                        console.log(returnObject.success);
-                        if( response.ok ){
-                            WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                            WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                            WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                            WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                            $('#waterExceptionPanel').unblock();
-                            calendar.refetchEvents();
-                        } else {
-                            console.log ('promise did not return');
-                        }
-
-                    });
-
-                    if (saveSuccess.success){
-                        WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                        WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                        WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                        WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                        $('#waterExceptionPanel').unblock();
-                        calendar.refetchEvents();
-                    }else{
-                        console.log(saveSuccess.message);
-                    }*/
-
                 } else if (form.dataSourceForm === "waterAmount"){
 
                     LABKEY.Ajax.request({
@@ -1610,7 +1559,6 @@
     }
 
     function deleteWaterAmount(currentModel,event,clientObjectId,divId){
-        debugger;
         if (!clientObjectId){
             clientObjectId = selectedEvent.extendedProps.rawRowData.objectIdCoalesced;
         }
@@ -1684,13 +1632,5 @@
             return row.objectIdCoalesced
         }
     }
-     function saveWaterHelper(waterAmountRecord,command,userId){
-        debugger;
-        let returnObj =  waterMonitoringSystem.saveWaterAmount(waterAmountRecord,command,userId);
-        console.log(returnObj);
-        return returnObj;
-
-    }
-
 
 </script>

@@ -1271,11 +1271,7 @@
         });
 
         WebUtils.VM.taskDetails.mlsPerKgCal = ko.pureComputed(function(){
-            if (WebUtils.VM.taskDetails.mlsPerKg() >= 20){
-                return false;
-            }else{
-                return true;
-            }
+            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20)
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel

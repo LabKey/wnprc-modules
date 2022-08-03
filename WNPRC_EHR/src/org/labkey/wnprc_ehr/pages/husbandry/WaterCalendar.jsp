@@ -214,7 +214,7 @@
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {
-            if (key != 'animalLink'  && key != 'displayDate') {
+            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlsPerKgCal') {
                 WebUtils.VM.taskDetails[key](null);
             }
         }
@@ -226,8 +226,8 @@
 <div class="row" >
     <div class="col-md-3">
 
-        <div class="row">
-            <div class="panel panel-primary">
+        <div class="row" id="infoPanels">
+            <div class="collapse panel panel-primary" id="waterInformation">
                 <div class="panel-heading"><span>Water Details</span></div>
                 <div class="panel-body" id="waterInfoPanel" data-bind="with: taskDetails">
 
@@ -283,6 +283,28 @@
                         </div>
                     </div>
 
+
+
+                </div>
+            </div>
+
+            <div class="collapse panel panel-primary" id="waterTotalInformation">
+                <div class="panel-heading"><span>Water Total Details</span></div>
+                <div class="panel-body" id="waterTotalPanel" data-bind="with: taskDetails">
+
+
+                    <dl class="dl-horizontal">
+                        <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
+                        <dt>Date:               </dt> <dd>{{displayDate}}</dd>
+                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalId}}</a></dd>
+                        <dt>Current Location:   </dt> <dd>{{location}}</dd>
+                        <dt>Total Volume:       </dt> <dd>{{volume}} ml</dd>
+                        <dt>ml Per Kg:          </dt> <dd>{{mlsPerKg}}</dd>
+                    </dl>
+                    <!-- ko if: mlsPerKgCal() -->
+                        <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
+
+                    <!-- /ko -->
 
 
                 </div>
@@ -453,7 +475,7 @@
                 <div id="waterTotalLegend" class="pull-left">
 
                     <span style="color:red">&#x2589;</span><span>Total Water < 20 mL/Kg</span>
-                    <span style="color:white">&#x2589;</span><span>Total Water > 20 mL/Kg</span>
+                    <span style="color:white">&#x2589;</span><span>Total Water >= 20 mL/Kg</span>
 
                 </div>
 
@@ -770,6 +792,7 @@
                             color: '#fff'
                         }
                     });
+                    $('#waterInformation').collapse('show');
 
                 }else{
                     $('#water-calendar').unblock();
@@ -788,9 +811,13 @@
                 //We also have to reset the dirty flag to track any change after the event is loaded into
                 //the form to be able to change.
                 if (info.event.source.id == "totalWater") {
+                    $('#waterInformation').collapse('hide');
+                    $('#waterTotalInformation').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
                     WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData.location.toString());
                 }else{
+                    $('#waterInformation').collapse('show');
+                    $('#waterTotalInformation').collapse('hide');
                     WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 }
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();
@@ -941,7 +968,8 @@
                 frequencyCoalesced:         ko.observable(),
                 frequencyMeaningCoalesced:  ko.observable(),
                 displaytimeofday:           ko.observable(),
-                rawDate:                    ko.observable()
+                rawDate:                    ko.observable(),
+                mlsPerKg:                   ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -1034,8 +1062,6 @@
 
             },
             removeLastDay: function(){
-
-                debugger;
                 if (document.getElementById('removelastday').checked){
                     var newEndDate =moment(WebUtils.VM.taskDetails.date(), "MM/DD/YYYY");
                     newEndDate = newEndDate.subtract(1, "days");
@@ -1046,12 +1072,6 @@
                     originalDate = originalDate.format("MM/DD/YYYY")
                     WebUtils.VM.taskDetails.date(originalDate);
                 }
-                //var selectedDateValue = value;
-
-                //var selectedDate =  ko.mapping.toJS(row);
-
-
-
             },
 
             endWaterOrder: function (row){
@@ -1248,16 +1268,10 @@
 
         WebUtils.VM.taskDetails.displayDate = ko.pureComputed(function(){
             return WebUtils.VM.taskDetails.date();
-            /*var dateString = WebUtils.VM.taskDetails.date();
+        });
 
-            if (dateString){
-                return (moment(dateString, "MM/DD/YYYY").calendar(null, {
-                    sameElse: 'MMM D[,] YYYY'
-                }).split(" at"))[0]
-
-            }else {
-                return " ";
-            }*/
+        WebUtils.VM.taskDetails.mlsPerKgCal = ko.pureComputed(function(){
+            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20)
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel
@@ -1438,53 +1452,6 @@
                         }
 
                     });
-
-                   /* let waterAmountRecord = {
-                                                taskid:                 taskid,
-                                                Id:                     form.animalIdForm,
-                                                date:                   insertDate.getTime(),
-                                                project:                form.projectForm,
-                                                volume:                 form.volumeForm.value,
-                                                provideFruit:           form.provideFruitForm.value,
-                                                assignedTo:             form.assignedToForm.value,
-                                                frequency:              form.frequencyForm.value,
-                                                waterOrderObjectId:     form.waterOrderObjectId,
-                                                recordSource:           "WaterCalendar",
-                                                waterSource:            "regulated",
-                                                qcstate:                10 //Schedule
-                    };
-
-                    let returnObject = {};
-                    //var saveSuccess = saveWaterHelper(waterAmountRecord,"insert",userId);
-                    waterMonitoringSystem.saveWaterAmount(waterAmountRecord,"insert",userId, returnObject).then(  response => {
-                        debugger;
-
-                        console.log('returnObject ' + returnObject);
-                        console.log(returnObject.success);
-                        if( response.ok ){
-                            WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                            WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                            WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                            WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                            $('#waterExceptionPanel').unblock();
-                            calendar.refetchEvents();
-                        } else {
-                            console.log ('promise did not return');
-                        }
-
-                    });
-
-                    if (saveSuccess.success){
-                        WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                        WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                        WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                        WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                        $('#waterExceptionPanel').unblock();
-                        calendar.refetchEvents();
-                    }else{
-                        console.log(saveSuccess.message);
-                    }*/
-
                 } else if (form.dataSourceForm === "waterAmount"){
 
                     LABKEY.Ajax.request({
@@ -1588,7 +1555,6 @@
     }
 
     function deleteWaterAmount(currentModel,event,clientObjectId,divId){
-        debugger;
         if (!clientObjectId){
             clientObjectId = selectedEvent.extendedProps.rawRowData.objectIdCoalesced;
         }
@@ -1662,13 +1628,5 @@
             return row.objectIdCoalesced
         }
     }
-     function saveWaterHelper(waterAmountRecord,command,userId){
-        debugger;
-        let returnObj =  waterMonitoringSystem.saveWaterAmount(waterAmountRecord,command,userId);
-        console.log(returnObj);
-        return returnObj;
-
-    }
-
 
 </script>

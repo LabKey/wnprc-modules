@@ -41,6 +41,9 @@ public class AzureAccessTokenRefreshSettings {
         return _instance;
     }
 
+    /**
+     * Refreshes the entire settings cache from the DB
+     */
     public void refreshSettingsMap() {
         _settings = new TreeMap<>();
 
@@ -70,6 +73,16 @@ public class AzureAccessTokenRefreshSettings {
         }
     }
 
+    /**
+     * Updates the settings for the given account(s) in the DB
+     * @param newSettings a list of rows to update in wnprc.azure_accounts
+     * @param user the currently logged in user
+     * @return true if update was successful, otherwise false
+     * @throws InvalidKeyException
+     * @throws BatchValidationException
+     * @throws QueryUpdateServiceException
+     * @throws SQLException
+     */
     public boolean updateSettings(List<Map<String, Object>> newSettings, User user) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException {
 
         for (Map<String, Object> accountSettings : newSettings) {

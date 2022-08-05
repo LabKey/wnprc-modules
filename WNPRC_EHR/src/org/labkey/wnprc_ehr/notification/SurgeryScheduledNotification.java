@@ -128,7 +128,7 @@ public class SurgeryScheduledNotification extends AbstractEHRNotification
 
             if (emails.size() == 0)
             {
-                _log.warn("ProjectRequestNotification.java: no emails, unable to send EHR trigger script email");
+                _log.warn("SurgeryScheduledNotification.java: no emails, unable to send EHR trigger script email");
                 return;
             }
 
@@ -139,7 +139,7 @@ public class SurgeryScheduledNotification extends AbstractEHRNotification
         }
         catch (Exception e)
         {
-            _log.error("ProjectRequestNotification.java: unable to send email from EHR trigger script", e);
+            _log.error("SurgeryScheduledNotification.java: unable to send email from EHR trigger script", e);
         }
     }
 

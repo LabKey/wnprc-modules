@@ -124,6 +124,8 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
         return CALENDAR_COLORS;
     }
 
+    // Converts a com.google.api.services.calendar.model.Events object into a JSONObject representation
+    // of a fullcalendar Event Source Object (https://fullcalendar.io/docs/event-source-object)
     protected JSONObject getJsonEventList(Events events, String calendarId) {
         JSONObject eventSourceObject = new JSONObject();
         JSONArray jsonEvents = new JSONArray();
@@ -196,6 +198,7 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
         DateTime dateMin;
         DateTime dateMax;
 
+        // Default to 6 months back, and 2 years in the future if no start/end dates are provided
         DateTime start = startDate != null
                 ? new DateTime(startDate.atStartOfDay(ZoneId.of("America/Chicago")).toInstant().toEpochMilli())
                 : new DateTime(LocalDate.now().minusMonths(6).atStartOfDay(ZoneId.of("America/Chicago")).toInstant().toEpochMilli());

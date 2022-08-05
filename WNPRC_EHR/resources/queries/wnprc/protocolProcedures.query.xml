@@ -36,6 +36,11 @@
                     </column>
                     <column columnName="procedureName">
                         <columnTitle>Procedure Name</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>codeAndMeaning</fkColumnName>
+                        </fk>
                     </column>
                     <column columnName="allowed">
                         <columnTitle>Number Allowed</columnTitle>

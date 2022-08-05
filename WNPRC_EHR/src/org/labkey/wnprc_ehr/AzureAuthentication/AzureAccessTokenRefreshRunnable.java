@@ -8,6 +8,9 @@ public class AzureAccessTokenRefreshRunnable implements Runnable {
         this.name = name;
     }
 
+    /**
+     * Scheduled the token refresh job and then also immediately runs a token refresh
+     */
     public void run() {
         AzureAccessTokenRefreshScheduler.get().schedule(name);
         AzureAccessTokenRefreshRunner azureAccessTokenRefreshRunner = new AzureAccessTokenRefreshRunner();

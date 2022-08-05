@@ -45,12 +45,19 @@ public class AzureActiveDirectoryAuthenticator {
         this.scopes = scopes;
     }
 
+	/**
+	 * Asks for a new access token using the device code flow. If we have previously recieved a token, this will
+	 * use the token cache to refresh that token, otherwise we will ask for a brand new token (this requires authentication
+	 * with Microsoft after following the provided link) and then store it in the encrypted property store
+	 * @return the status of the token request (SUCCESS, FAILURE, or AUTH_REQUIRED)
+	 */
     public AzureTokenStatus getUserAccessToken() {
         if (applicationId == null) {
             System.out.println("You must initialize Authentication before calling getUserAccessToken");
 			return null;
 		}
 
+		// Retrieves the token cache from the encrypted property store (and creates a new entry if none exists)
 		PropertyManager.PropertyMap properties = PropertyManager.getEncryptedStore().getWritableProperties(name + ".Credentials", true);
         String tokenCache = properties.get("TokenCache");
         ITokenCacheAccessAspect persistenceAspect = new TokenPersistence(tokenCache);
@@ -126,6 +133,7 @@ public class AzureActiveDirectoryAuthenticator {
 			}
 		} catch (Exception e) {
 			if (e.getCause() instanceof MsalException) {
+				//Attempt to authenticate in the background
 				Thread deviceCodeThread = new Thread() {
 					@Override
 					public void run() {
@@ -162,6 +170,7 @@ public class AzureActiveDirectoryAuthenticator {
 		return AzureTokenStatus.FAILURE;
 	}
 
+	// Update the encrypted property store with new properties
 	private void updateProperties(PropertyManager.PropertyMap props, IAuthenticationResult result, PublicClientApplication app) {
 		props.put("TokenCache", app.tokenCache().serialize());
 		if (result != null) {
@@ -172,6 +181,8 @@ public class AzureActiveDirectoryAuthenticator {
 		props.save();
 	}
 
+	// Methods that are used internally to (de)serialize the token data when creating
+	// an ITokenCacheAccessAspect from the TokenCache and vice versa
 	static class TokenPersistence implements ITokenCacheAccessAspect{
 		String data;
 

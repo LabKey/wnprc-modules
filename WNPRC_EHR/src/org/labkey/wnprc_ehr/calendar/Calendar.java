@@ -8,6 +8,12 @@ public interface Calendar
 {
     JSONObject getEventsAsJson(LocalDate startDate, LocalDate endDate) throws Exception;
 
+    /**
+     * Makes text more readable by determining if the text should be white
+     * or black based on the lightness/darkness of the background color
+     * @param backgroundColor a string containing the background color in either RRGGBB or #RRGGBB format
+     * @return the ideal text color in #RRGGBB format
+     */
     default String getTextColor(String backgroundColor) {
         int r, g, b;
         double hsp;

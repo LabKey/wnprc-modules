@@ -25,6 +25,11 @@ public class AzureAccessTokenRefreshRunner implements Job {
         doTokenRefresh(name);
     }
 
+    /**
+     * Creates an authenticator to request an azure token refresh
+     * @param name name of the account (from wnprc.azure_accounts) to refresh the access token for
+     * @return the status of the refresh operation (SUCCESS, FAILURE, or AUTH_REQUIRED)
+     */
     public AzureTokenStatus doTokenRefresh(String name) {
         AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
         String displayName = settings.getDisplayName(name);

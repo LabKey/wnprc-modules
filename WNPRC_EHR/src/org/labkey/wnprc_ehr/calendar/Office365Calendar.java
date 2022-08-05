@@ -280,6 +280,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         Graph.deleteEvent(getAccessToken(accountName), eventId);
     }
 
+    // Converts a List of com.microsoft.graph.models.extensions.Event object into a JSONObject representation
+    // of a fullcalendar Event Source Object (https://fullcalendar.io/docs/event-source-object)
     private JSONObject getJsonEventList(List<Event> events) throws IOException {
         JSONObject allJsonData = new JSONObject();
         JSONObject allJsonEvents = new JSONObject();
@@ -455,6 +457,15 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return allJsonData;
     }
 
+    /**
+     * Creates a JSONObject containing all the unmanaged events in the given List
+     * of com.microsoft.graph.models.extensions.Event objects. An unmanaged event
+     * is an event that is not managed by EHR, and therefore can be edited either
+     * within EHR, or from Outlook (or the web) without causing any issues.
+     * @param events
+     * @param isTransitional true if this is a temporary calendar only used for transition to the new system
+     * @return a JSONObject containing all unmanaged event info
+     */
     private JSONObject getUnmanagedJsonEventList(List<Event> events, boolean isTransitional) {
         JSONObject allJsonData = new JSONObject();
         JSONObject allJsonEvents = new JSONObject();
@@ -531,6 +542,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             String folderId = (String) queryResults[i].get("folder_id");
 
             if (calendarId != null && folderId != null) {
+                // If a calendar requires authorization to view, then make sure that the user has the correct authorization
                 if (queryResults[i].get("requires_authorization") != null && (Boolean) queryResults[i].get("requires_authorization")) {
                     String authorizedGroupsString = (String) queryResults[i].get("authorized_groups");
 
@@ -572,6 +584,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             transitionCalendars.put(calendarId, folderId);
         }
 
+        // Fetch all the events from MS Graph
         long startTime = System.currentTimeMillis();
         List<Event> baseCalendarEventsList = getCalendarAppointments(start, end, authorizedBaseCalendars);
         List<Event> transitionCalendarEventsList = getCalendarAppointments(start, end, transitionCalendars);
@@ -579,6 +592,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         long endTime = System.currentTimeMillis();
         _log.debug("Time to fetch events: " + (endTime - startTime));
 
+        // Organize all the events into a format that fullcalendar can use
         startTime = System.currentTimeMillis();
         JSONObject baseCalendarEvents = getJsonEventList(baseCalendarEventsList);
         JSONObject unmanagedEvents = getUnmanagedJsonEventList(unmanagedEventsList, false);
@@ -586,6 +600,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         endTime = System.currentTimeMillis();
         _log.debug("Time to organize events: " + (endTime - startTime));
 
+        // Combine all of the events into a single object
         for (Map.Entry entry : unmanagedEvents.entrySet()) {
             JSONArray events = ((JSONObject) baseCalendarEvents.get(entry.getKey())).getJSONArray("events");
             JSONArray newEvents = ((JSONObject) unmanagedEvents.get(entry.getKey())).getJSONArray("events");

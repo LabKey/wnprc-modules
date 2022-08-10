@@ -781,22 +781,20 @@ public class WNPRC_EHRController extends SpringActionController
             JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
             JSONArray newArr = new JSONArray();
             JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
+            JSONArray header = (JSONArray) ja.get(0);
             for (int i = 1; i < ja.length(); i ++)
             {
                 JSONObject jo = new JSONObject();
                 JSONArray jai = (JSONArray) ja.get(i);
-                jo.put("Id",jai.get(0));
-                if (!(jai.get(1) instanceof Date))
-                {
-                    throw new InvalidObjectException("Bad date format or wrong column order. Set the date column format to 'Date' and/or arrange columns in this order: Id, Date, Sample Type, Virus, Method, Result, Qualifier, Remark");
+
+                for (int j = 0; j < header.length(); j++){
+                    String label = (String) header.get(j);
+                    if ("date".equals(label.trim().toLowerCase()) && !(jai.get(j) instanceof Date))
+                    {
+                        throw new InvalidObjectException("Bad date format. Set the date column format to 'Date'.");
+                    }
+                    jo.put(label.trim(), jai.get(j));
                 }
-                jo.put("Date",jai.get(1));
-                jo.put("Sample Type",jai.get(2));
-                jo.put("Virus",jai.get(3));
-                jo.put("Method",jai.get(4));
-                jo.put("Result",jai.get(5));
-                jo.put("Qualifier",jai.get(6));
-                jo.put("Remark",jai.get(7));
                 newArr.put(jo);
 
             }
@@ -822,27 +820,29 @@ public class WNPRC_EHRController extends SpringActionController
             StringBuilder sb = new StringBuilder();
             sb.append("<style> thead { font-weight: bold } table { border-collapse: collapse; } th, td {border: 1px solid black; padding: 5px; } </style>");
             sb.append("<table><thead><tr>");
-            sb.append("<th>Id</th>");
-            sb.append("<th>Date</th>");
-            sb.append("<th>Sample Type</th>");
-            sb.append("<th>Virus</th>");
-            sb.append("<th>Method</th>");
-            sb.append("<th>Result</th>");
-            sb.append("<th>Qualifier</th>");
-            sb.append("<th>Remark</th>");
+            JSONArray header = (JSONArray) ja.get(0);
+            for (int j = 0; j < header.length(); j++)
+            {
+                sb.append("<th>");
+                String label = (String) header.get(j);
+                sb.append(label.trim());
+                sb.append("</th>");
+            }
             sb.append("</tr></thead><tbody>");
-            for (int i = 1; i < 10; i ++)
+            int previewLength = (ja.length() >= 10) ? 10 : ja.length();
+            for (int i = 1; i < previewLength; i ++)
             {
                 sb.append("<tr>");
                 JSONArray jai = (JSONArray) ja.get(i);
                 for (int k = 0; k < jai.length(); k++)
                 {
                     sb.append("<td>");
-                    if (k == 1 && !(jai.get(k) instanceof Date))
+                    String headerLabel = (String) header.get(k);
+                    if ("date".equals(headerLabel.trim().toLowerCase()) && !(jai.get(k) instanceof Date))
                     {
-                        sb.append("<span style=\"color:red\">Bad date format or wrong column order. Set the date column format to 'Date' and/or arrange columns in this order: Id, Date, Sample Type, Virus, Method, Result, Qualifier, Remark</span>");
+                        sb.append("<span style=\"color:red\" id=\"bad-date-preview-err\">Bad date format. Set the date column format to 'Date'.</span>");
                     }
-                    if (jai.get(k) instanceof Date)
+                    else if (jai.get(k) instanceof Date)
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                         sb.append(formatter.format(jai.get(k)));

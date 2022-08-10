@@ -1187,7 +1187,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                     errorMessagePanel.removeAll();
                                     messageContent = new Ext.Panel({
                                         xtype: 'panel',
-                                        html: '<p style="color: red">You need to select an file to import.</p>'
+                                        html: '<p style="color: red" id="clinpath-virology-err">You need to select an file to import.</p>'
                                     })
                                     errorMessagePanel.add(messageContent)
 
@@ -1243,7 +1243,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                 errorMessagePanel.removeAll();
                                                 messageContent = new Ext.Panel({
                                                     xtype: 'panel',
-                                                    html: '<p style="color: red">No matching clinpath records found.</p>'
+                                                    html: '<p style="color: red" id="clinpath-virology-err">No matching clinpath records found.</p>'
                                                 });
                                                 errorMessagePanel.add(messageContent);
 
@@ -1257,7 +1257,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                             errorMessagePanel.removeAll();
                                             messageContent = new Ext.Panel({
                                                 xtype: 'panel',
-                                                html: '<p style="color: red">' + JSON.parse(xhr.responseText).exception + '</p>'
+                                                html: '<p style="color: red" id="clinpath-virology-err">' + JSON.parse(xhr.responseText).exception + '</p>'
                                             });
                                             errorMessagePanel.add(messageContent);
 

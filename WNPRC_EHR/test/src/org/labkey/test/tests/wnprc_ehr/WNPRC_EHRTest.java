@@ -84,9 +84,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -159,7 +161,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
-    private static final File SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/virologyResults.xlsx");
+    private static final String CORRECT_SAMPLE_FILE_NAME = "virologyResults_correct.xlsx";
+    private static final String INCORRECT_FORMAT_SAMPLE_FILE_NAME = "virologyResults_baddate.xlsx";
+    private static final String NO_MATCHING_RECORDS_SAMPLE_FILE_NAME = "virologyResults_nomatch.xlsx";
+    private static final File CORRECT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + CORRECT_SAMPLE_FILE_NAME);
+    private static final File INCORRECT_FORMAT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + INCORRECT_FORMAT_SAMPLE_FILE_NAME);
+    private static final File NO_MATCHING_RECORDS_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + NO_MATCHING_RECORDS_SAMPLE_FILE_NAME);
     protected static final String VIROLOGY_CLINPATH_TASKID = "0ebd60fd-c6ac-102e-990b-48cf881b52cf";
 
     @Nullable
@@ -464,7 +471,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // upload virology results excel file
         goToEHRFolder();
         goToModule("FileContent");
-        _fileBrowserHelper.uploadFile(SAMPLE_FILE);
+        _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE);
+        _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE);
+        _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE);
 
         // set the location of the virology results upload location
         goToEHRFolder();
@@ -2703,7 +2712,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testVirologyBulkUpload() throws IOException, CommandException
+    public void testClinpathVirologyBulkUpload() throws IOException, CommandException
     {
         // go to clinpath task, import the virology results and submit
         beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
@@ -2712,7 +2721,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Import Results from File");
         _extHelper.clickMenuButton("Import Results from File");
         waitForText("Please select a file to import results from");
-        click(Locator.radioButtonByName("fileselection"));
+        click(Locator.radioButtonByNameAndValue("fileselection","1"));
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
         click(Locator.extButton("Import"));
@@ -2726,6 +2735,62 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sr.addFilter("taskid", VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
         Assert.assertTrue(resp2.getRowCount().intValue() > 0);
+    }
+
+    @Test
+    public void testClinpathVirologyBulkUploadValidations()
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","2"));
+        click(Locator.extButton("Import"));
+        Assert.assertEquals("No matching clinpath records found.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
+    }
+
+    @Test
+    public void testClinpathVirologyBulkUploadPreviewAndDate()
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","0"));
+        //for this one the click works but the function times out for some reason
+        //_extHelper.clickExtButton("Import");
+        waitForText("Preview");
+        // TODO: set a preview button id, from ext3 it seems there's not a way to add an itemId to a button,
+        // so here the test finds the first preview button on the page, but since the files are sorted alphabetically,
+        // we can assume the first one is the one we want to check for the bad date formatting
+        click(Locator.extButton("Preview"));
+        //get the popup window
+        String parentWindowHandler = getDriver().getWindowHandle();
+        String subWindowHandler = null;
+
+        Set<String> handles = getDriver().getWindowHandles();
+        // preview should generate a popup window
+        Assert.assertTrue(handles.size() > 1);
+        Iterator<String> iterator = handles.iterator();
+        // we can assume the popup window is the only other window other than the parent
+        String next = null;
+        while (iterator.hasNext()){
+            next = iterator.next();
+            if (!next.equals(parentWindowHandler))
+            {
+                subWindowHandler = next;
+            }
+        }
+        // switch to popup window
+        getDriver().switchTo().window(subWindowHandler);
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("bad-date-preview-err").findElement(getDriver()).getText());
+        getDriver().switchTo().window(parentWindowHandler);
     }
 
     //@Test - comment out for now, need to fix qc state error on submit

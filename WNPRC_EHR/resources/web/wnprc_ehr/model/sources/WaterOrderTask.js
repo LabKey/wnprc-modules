@@ -58,7 +58,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
                     width:90
                 },
                 editorConfig: {
-                    minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 2)
+                    minValue: new Date()
                 }
             },
             waterSource:{

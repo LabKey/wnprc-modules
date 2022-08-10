@@ -2793,6 +2793,24 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         getDriver().switchTo().window(parentWindowHandler);
     }
 
+    @Test
+    public void testClinpathVirologyBulkUploadDateFormatValidation()
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","0"));
+        //for this one the click works but the function times out for some reason
+        //_extHelper.clickExtButton("Import");
+        waitForText("Import");
+        click(Locator.extButton("Import"));
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
+    }
+
     //@Test - comment out for now, need to fix qc state error on submit
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {

@@ -1092,10 +1092,10 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                 xtype: 'panel',
                                 layout: 'table',
                                 defaults: {
-                                    bodyStyle: 'padding-left: 5px; padding-right: 5px;'
+                                    bodyStyle: 'padding: 5px;'
                                 },
                                 layoutConfig: {
-                                    columns: 4
+                                    columns: 3
                                 },
                                 hideLabel: true,
                                 items: [
@@ -1105,8 +1105,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                     },
                                     {
                                         html: '<strong>Date uploaded</strong>'
-                                    },
-                                    {}
+                                    }
                                 ].concat(files.map(parseFilesToItems))
                             });
 
@@ -1181,9 +1180,9 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             handler: function() {
                                 var self = selectFilePanel;
 
-                                var selectedEmail = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
+                                var selectedFile = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
 
-                                if (!selectedEmail) {
+                                if (!selectedFile) {
                                     errorMessagePanel.removeAll();
                                     messageContent = new Ext.Panel({
                                         xtype: 'panel',
@@ -1201,7 +1200,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
 
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'getVirologyResultsFromFile', null, {
-                                        name: selectedEmail.name
+                                        name: selectedFile.name
                                     }),
                                     callback: function(config, success, xhr) {
                                         var data = JSON.parse(xhr.responseText);
@@ -1268,33 +1267,13 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                 });
                             }
                         },
-                        cancelButtonConfig
-                    ]
-                });
-
-                var parseFilesToItems = function(file, index) {
-
-                    var config = [
                         {
-                            xtype: 'radio',
-                            boxLabel: '',
-                            name: 'fileselection',
-                            inputValue: index,
-                            fileData: file
-                        },
-                        {
-                            html: '<p>' + file.name + '</p>'
-                        },
-                        {
-                            html: '<p>' + new Date(file.uploaded).format("Y-m-d H:i")+ '</p>'
-                        },
-                        {
-                            xtype: 'button',
                             text: 'Preview',
                             handler: function() {
+                                var selectedFile = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'previewExcelFile', null, {
-                                        name: file.name
+                                        name: selectedFile.name
                                     }),
                                     callback: function (config, success, xhr) {
                                         if (success) {
@@ -1308,7 +1287,28 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                     }
                                 });
                             }
-                        }
+                        },
+                        cancelButtonConfig
+                    ]
+                });
+
+                var parseFilesToItems = function(file, index) {
+
+                    var config = [
+                        {
+                            xtype: 'radio',
+                            boxLabel: '',
+                            name: 'fileselection',
+                            inputValue: index,
+                            fileData: file,
+                            style: 'margin: 5px 4px 4px 0px;'
+                        },
+                        {
+                            html: '<span>' + file.name + '</span>'
+                        },
+                        {
+                            html: '<span>' + new Date(file.uploaded).format("Y-m-d H:i")+ '</span>'
+                        },
                     ];
 
                     return config;

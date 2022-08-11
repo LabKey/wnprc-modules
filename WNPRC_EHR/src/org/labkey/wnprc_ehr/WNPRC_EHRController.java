@@ -791,7 +791,7 @@ public class WNPRC_EHRController extends SpringActionController
                     String label = (String) header.get(j);
                     if ("date".equals(label.trim().toLowerCase()) && !(jai.get(j) instanceof Date))
                     {
-                        throw new InvalidObjectException("Bad date format. Set the date column format to 'Date'.");
+                        throw new ApiUsageException("Bad date format. Set the date column format to 'Date'.");
                     }
                     jo.put(label.trim(), jai.get(j));
                 }

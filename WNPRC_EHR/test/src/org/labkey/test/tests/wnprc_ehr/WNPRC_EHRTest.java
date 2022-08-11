@@ -2766,9 +2766,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
         waitForText("Preview");
-        // TODO: set a preview button id, from ext3 it seems there's not a way to add an itemId to a button,
-        // so here the test finds the first preview button on the page, but since the files are sorted alphabetically,
-        // we can assume the first one is the one we want to check for the bad date formatting
         click(Locator.extButton("Preview"));
         //get the popup window
         String parentWindowHandler = getDriver().getWindowHandle();

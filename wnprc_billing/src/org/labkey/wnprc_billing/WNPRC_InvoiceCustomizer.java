@@ -48,7 +48,7 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
                 simpleDisplayColumn.setDisplayHtml("View PDF");
                 ActionURL url = new ActionURL(WNPRC_BillingController.PDFExportAction.class, ti.getUserSchema().getContainer());
                 url.addParameter("invoiceNumber", "${invoiceNumber}");
-                simpleDisplayColumn.setURL(url.toString());
+                simpleDisplayColumn.setURL(url);
 
                 return simpleDisplayColumn;
             });
@@ -75,7 +75,7 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
                 url.addParameter("invoiceNumber", "${invoiceNumber}");
                 url.addParameter("asAttachment", asAttachment);
                 url.addParameter("name", formName);
-                simpleDisplayColumn.setURL(url.toString());
+                simpleDisplayColumn.setURL(url);
 
                 return simpleDisplayColumn;
             });

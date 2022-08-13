@@ -51,7 +51,7 @@ public class WNPRC_InvoiceRunCustomizer extends AbstractTableCustomizer
             wrappedColumnPDF.setDisplayColumnFactory(colInfo -> {
                 ActionURL url = new ActionURL(WNPRC_BillingController.GetJetInvoiceCSVAction.class, ti.getUserSchema().getContainer());
                 url.addParameter("runId", "${rowId}");
-                UrlColumn urlColumn = new UrlColumn(url.toString(), "Download CSV");
+                UrlColumn urlColumn = new UrlColumn(url, "Download CSV");
                 urlColumn.setName(colName);
                 return urlColumn;
             });
@@ -59,5 +59,4 @@ public class WNPRC_InvoiceRunCustomizer extends AbstractTableCustomizer
             ((AbstractTableInfo) ti).addColumn(wrappedColumnPDF);
         }
     }
-
 }

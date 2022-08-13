@@ -146,7 +146,7 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
                 detailsUrl.addParameter("requestRowId", "${"+requestIdColName+"}");
                 detailsUrl.addParameter("isReorder", "true");
                 detailsUrl.addParameter("returnUrl", returnUrl.toString());
-                UrlColumn urlColumn = new UrlColumn(detailsUrl.toString(), "Reorder");
+                UrlColumn urlColumn = new UrlColumn(detailsUrl, "Reorder");
                 urlColumn.setName(colName);
                 return urlColumn;
             });

@@ -170,8 +170,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final File NO_MATCHING_RECORDS_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + NO_MATCHING_RECORDS_SAMPLE_FILE_NAME);
     protected static final String VIROLOGY_CLINPATH_TASKID = "0ebd60fd-c6ac-102e-990b-48cf881b52cf";
 
-    private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/Private/";
-    private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/Restricted/";
+    private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
+    private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
 
     @Nullable
     @Override
@@ -491,8 +491,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void setupAnimalRequests()
     {
         _containerHelper.createSubfolder(EHR_FOLDER_PATH, "Assigns", "Collaboration");
-        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "Private", "Collaboration");
-        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "Restricted", "Collaboration");
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "PrivateBoard", "Collaboration");
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "RestrictedBoard", "Collaboration");
         // set the location of the virology results upload location
         goToEHRFolder();
         List<ModulePropertyValue> properties = new ArrayList<>();

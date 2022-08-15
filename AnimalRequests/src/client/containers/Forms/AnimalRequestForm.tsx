@@ -206,7 +206,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
     async onSubmit(values) {
 
         this.setState({submitted: true});
-        const QCState = 5;
+        const QCState = "In Progress";
 
         submitAnimalRequest(values,QCState)
             .then(data => {

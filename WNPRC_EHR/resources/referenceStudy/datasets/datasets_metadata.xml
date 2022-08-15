@@ -4550,6 +4550,9 @@
         <datatype>timestamp</datatype>
         <columnTitle>Projected Release</columnTitle>
       </column>
+      <column columnName="animal_request_rowid">
+        <datatype>integer</datatype>
+      </column>
     </columns>
     <tableTitle>Assignment</tableTitle>
   </table>

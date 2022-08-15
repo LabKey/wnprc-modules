@@ -19,5 +19,17 @@
                 <permission>ADMIN</permission>
             </editPermissions>
         </propertyDescriptor>
+        <propertyDescriptor name="AssignsSecureMessageBoardPrivateFolder">
+            <description>Folder location where the assigns group internal message board lives.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="AssignsSecureMessageBoardRestrictedFolder">
+            <description>Folder location where the assigns group restricted message board lives.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
     </properties>
 </module>

@@ -89,6 +89,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -169,6 +170,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final File NO_MATCHING_RECORDS_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + NO_MATCHING_RECORDS_SAMPLE_FILE_NAME);
     protected static final String VIROLOGY_CLINPATH_TASKID = "0ebd60fd-c6ac-102e-990b-48cf881b52cf";
 
+    private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/Private/";
+    private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/Restricted/";
+
     @Nullable
     @Override
     protected String getProjectName()
@@ -234,6 +238,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.uploadBillingDataAndVerify();
 
         initTest.setupClinpathVirologySection();
+
+        initTest.setupAnimalRequests();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -479,6 +485,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         goToEHRFolder();
         List<ModulePropertyValue> properties = new ArrayList<>();
         properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "VirologyResultsUploadFolder", EHR_FOLDER_PATH));
+        setModuleProperties(properties);
+    }
+
+    public void setupAnimalRequests()
+    {
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH, "Assigns", "Collaboration");
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "Private", "Collaboration");
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "Restricted", "Collaboration");
+        // set the location of the virology results upload location
+        goToEHRFolder();
+        List<ModulePropertyValue> properties = new ArrayList<>();
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "AssignsSecureMessageBoardPrivateFolder", ASSIGNS_MSG_BOARD_PRIVATE_PATH));
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "AssignsSecureMessageBoardRestrictedFolder", ASSIGNS_MSG_BOARD_RESTRICTED_PATH));
         setModuleProperties(properties);
     }
 
@@ -2808,17 +2827,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
     }
 
-    //@Test - comment out for now, need to fix qc state error on submit
+    @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
-        sleep(5000);
+        waitForText("Comments:");
         //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
 
+        UUID uid = UUID.randomUUID();
         fillAnInputByName("principalinvestigator", "Other");
-        fillAnInputByName("externalprincipalinvestigator", "Automated Test");
+        fillAnInputByName("externalprincipalinvestigator", uid.toString());
         fillAnInputByName("numberofanimals", "23");
         fillAnInputByName("speciesneeded", "Cyno");
         fillAnInputByName("originneeded", "any");
@@ -2844,6 +2864,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         clickAndWait(Locator.tagWithId("button","submit-final"));
         assertTextPresent("Data Entry");
+        SelectRowsCommand sr = new SelectRowsCommand("wnprc","animal_requests");
+        sr.addFilter("externalprincipalinvestigator", uid, Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        Assert.assertTrue(resp.getRowCount().intValue() > 0);
     }
 
 

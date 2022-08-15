@@ -102,7 +102,6 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
         assignmentsWithoutReleaseCondition(c, u, msg);
         //getU42Assignments(c, u, msg);
         //doDuplicateResourceCheck(c, u, msg);
-        //doCandidateChecks(c, u, msg);
 
         //housing
         // roomsWithMixedViralStatus(c, u, msg);

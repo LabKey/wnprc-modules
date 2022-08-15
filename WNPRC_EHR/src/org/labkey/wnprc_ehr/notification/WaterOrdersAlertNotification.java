@@ -74,11 +74,11 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
     }
 
     private void findWaterOrdersNotCompleted(Container c,User u, StringBuilder msg, final LocalDateTime maxDate, boolean includeFuture){
-        LocalDateTime currentTime = LocalDateTime.of(maxDate.toLocalDate(), maxDate.toLocalTime());
+        LocalDateTime currentTime = maxDate;
         LocalDateTime amThreshold = LocalDateTime.now().withHour(10).withMinute(30);
 
         //Setting interval to start the water schedule, the system generates the calendar thirty days before
-        LocalDateTime roundedMax = LocalDateTime.of(maxDate.toLocalDate(), maxDate.toLocalTime());
+        LocalDateTime roundedMax = maxDate;
         roundedMax = roundedMax.plusDays(-5).truncatedTo(ChronoUnit.DAYS);
 
         //final String intervalLength = "10";
@@ -94,7 +94,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("QCState/label"),"Scheduled",CompareType.EQUAL);
 
         if (includeFuture){
-            LocalDateTime futureDate = LocalDateTime.of(maxDate.toLocalDate(), maxDate.toLocalTime());
+            LocalDateTime futureDate = maxDate;
             futureDate = futureDate.plusDays(1).truncatedTo(ChronoUnit.DAYS);
 
             filter.addCondition(FieldKey.fromString("dateOrdered"),futureDate, CompareType.LTE);

@@ -292,6 +292,11 @@
             <column columnName="arrow_common_name"/>
             <column columnName="max_three_year"/>
             <column columnName="usda_code"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
         </columns>
     </table>
     <table tableName="extra_protocols" tableDbType="TABLE">
@@ -306,6 +311,11 @@
             <column columnName="arrow_common_name"/>
             <column columnName="max_three_year"/>
             <column columnName="usda_code"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
         </columns>
     </table>
 </tables>

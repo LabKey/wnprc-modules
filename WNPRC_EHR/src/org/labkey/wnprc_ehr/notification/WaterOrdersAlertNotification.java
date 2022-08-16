@@ -1,4 +1,5 @@
 package org.labkey.wnprc_ehr.notification;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
@@ -12,9 +13,7 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.DateUtil;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -154,16 +153,12 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
                     htmlTable = createTable(spiWaters, "SPI");
                     msg.append(htmlTable);
                 }
-
-
             }
             msg.append("<br><a href='" + getExecuteQueryUrl(c,"study","waterScheduleCoalesced","Scheduled")+"&query.param.StartDate="+roundedMax+"&query.param.NumDays=" + 1 +
                     "&query.dateOrdered~lte="+currentTime.getTime()+ "&query.dateOrdered~dategte="+roundedMax+"'>Click here to view schedule waters</a></p>");
         }
-
-
-
     }
+
     private StringBuilder createTable (List<Map<String,Object>> listOfDBObjects, String assignedTo){
         StringBuilder returnTable = new StringBuilder();
         returnTable.append("<br><strong>"+ assignedTo +"</strong>");

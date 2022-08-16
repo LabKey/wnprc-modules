@@ -13,7 +13,8 @@ if [[ $DOCKER_TAG =~ $DEVANDRELEASE ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
-elif [[ $DOCKER_TAG =~ $FB_REGEX  && $LK_VERSION != "" ]]
+#Docker tag for SNAPSHOT and FB
+elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}

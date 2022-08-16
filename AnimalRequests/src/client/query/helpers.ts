@@ -14,7 +14,7 @@ export const createTask = (config) => {
 
 };
 
-export const submitAnimalRequest  = (values:Object, qcstate:any) => {
+export const submitAnimalRequest  = (values:Object, qcstate:string) => {
     let currentDate = moment(new Date()).format();
     let weightValToInsert = [];
     let jsonData;

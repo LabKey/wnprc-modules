@@ -2486,7 +2486,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void navigateToWeightsTable()
     {
-        beginAt(buildURL("ehr", getContainerPath(), "updateQuery.view?schemaName=study&queryName=weight"));
+        beginAt(buildURL("ehr", getContainerPath(), "updateQuery", Map.of("schemaName", "study", "queryName", "weight")));
     }
 
 

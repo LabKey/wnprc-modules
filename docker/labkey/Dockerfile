@@ -6,7 +6,7 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 ARG WNPRC_BRANCH=master
-ARG LABKEY_VERSION=22.9
+ARG LABKEY_VERSION
 ARG LABKEY_IS_PREMIUM=true
 
 WORKDIR /tmp/labkey
@@ -17,7 +17,7 @@ RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
 RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
- && if [ "$LABKEY_VERSION" = 22.9 ] ; then \
+ && if [[  ! -z "$LABKEY_VERSION" ]] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \

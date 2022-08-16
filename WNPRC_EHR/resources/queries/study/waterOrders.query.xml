@@ -11,9 +11,10 @@
                     <column columnName="Id">
 
                     </column>
+                    <column columnName="project"></column>
                     <column columnName="date">
                         <columnTitle>Start Date</columnTitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="enddate">
                         <columnTitle>End Date</columnTitle>

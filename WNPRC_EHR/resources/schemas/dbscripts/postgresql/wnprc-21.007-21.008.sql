@@ -23,4 +23,4 @@ CREATE TABLE IF NOT EXISTS wnprc.protocolProcedures
     CONSTRAINT FK_wnprc_protocolProcedures_Container FOREIGN KEY (Container) REFERENCES core.Containers(EntityId)
 );
 
-CREATE INDEX IX_wnprc_protocolProcedures_Container ON wnprc.protocolProcedures (Container);
+CREATE INDEX IF NOT EXISTS IX_wnprc_protocolProcedures_Container ON wnprc.protocolProcedures (Container);

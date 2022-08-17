@@ -4,7 +4,7 @@ exports.init = function (EHR) {
 
     const console = require('console');
     const LABKEY = require('labkey');
-    const PrimateID = new (require('primateid/primateid.webpack')).PrimateID.Sync();
+    const PrimateID = new (require('primateid/gen/primateid.webpack')).PrimateID.Sync();
 
     //endregion
 

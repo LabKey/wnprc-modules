@@ -1,26 +1,48 @@
-CREATE TABLE IF NOT EXISTS wnprc.protocolProcedures
+DROP TABLE IF EXISTS wnprc.arrow_protocols;
+CREATE TABLE wnprc.arrow_protocols
 (
-    rowid serial not null,
-    protocol varchar(200) not null,
-    procedureName varchar(200),
-    code varchar(100),
-    allowed integer,
-    animalsAllowed integer,
-    isTerminal boolean,
-    startdate timestamp,
-    enddate timestamp,
-    objectid entityid,
-    daysBetween integer,
-    remark TEXT,
+    rowid               SERIAL NOT NULL,
+    protocol_id	        VARCHAR(255),
+    protocol_title	    VARCHAR(255),
+    pi_name	            VARCHAR(255),
+    date_approved	    TIMESTAMP,
+    date_expiration	    TIMESTAMP,
+    date_modified	    TIMESTAMP,
+    arrow_common_name	VARCHAR(255),
+    max_three_year	    INTEGER,
+    usda_code	        VARCHAR(255),
 
-    container entityid NOT NULL,
-    CreatedBy USERID NOT NULL,
-    Created TIMESTAMP NOT NULL,
-    ModifiedBy USERID NOT NULL,
-    Modified TIMESTAMP NOT NULL,
+    -- Default fields for LabKey.
+    container           entityid NOT NULL,
+    createdby           userid,
+    created             TIMESTAMP,
+    modifiedby          userid,
+    modified            TIMESTAMP,
 
-    CONSTRAINT PK_wnprcProtocolProcedures PRIMARY KEY (rowid),
-    CONSTRAINT FK_wnprc_protocolProcedures_Container FOREIGN KEY (Container) REFERENCES core.Containers(EntityId)
+    CONSTRAINT PK_arrow_protocols_sequence PRIMARY KEY (rowid)
 );
 
-CREATE INDEX IX_wnprc_protocolProcedures_Container ON wnprc.protocolProcedures (Container);
+DROP TABLE IF EXISTS wnprc.extra_protocols;
+CREATE TABLE wnprc.extra_protocols
+(
+    rowid               SERIAL NOT NULL,
+    protocol_id	        VARCHAR(255),
+    protocol_title	    VARCHAR(255),
+    pi_name	            VARCHAR(255),
+    date_approved	    TIMESTAMP,
+    date_expiration	    TIMESTAMP,
+    date_modified	    TIMESTAMP,
+    arrow_common_name	VARCHAR(255),
+    max_three_year	    INTEGER,
+    usda_code	        VARCHAR(255),
+
+    -- Default fields for LabKey.
+    container           entityid NOT NULL,
+    createdby           userid,
+    created             TIMESTAMP,
+    modifiedby          userid,
+    modified            TIMESTAMP,
+
+    CONSTRAINT PK_extra_protocols_sequence PRIMARY KEY (rowid)
+);
+

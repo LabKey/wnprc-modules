@@ -26,7 +26,7 @@
     </transforms>
     <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="headerDate" />
     <schedule>
-        <poll interval="60m" />
+        <poll interval="10m" />
     </schedule>
 </etl>
 

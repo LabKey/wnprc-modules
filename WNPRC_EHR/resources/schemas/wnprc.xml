@@ -188,6 +188,8 @@
             <column columnName="pregnantanimalsrequired"/>
             <column columnName="animalidstooffer"/>
             <column columnName="optionalproject"/>
+            <column columnName="internalthreadrowid"/>
+            <column columnName="externalthreadrowid"/>
         </columns>
     </table>
     <table tableName="gestational_days" tableDbType="TABLE">

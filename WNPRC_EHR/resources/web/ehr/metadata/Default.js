@@ -2811,6 +2811,16 @@ EHR.Metadata.registerMetadata('Default', {
                 }
             }
             //,performedby: {allowBlank: true}
+        },
+        'Water Orders':{
+            date: {
+                xtype: 'datefield',
+                extFormat: LABKEY.extDefaultDateFormat
+            },
+            enddate: {
+                xtype: 'datefield',
+                extFormat: LABKEY.extDefaultDateFormat
+            }
         }
     }
 });

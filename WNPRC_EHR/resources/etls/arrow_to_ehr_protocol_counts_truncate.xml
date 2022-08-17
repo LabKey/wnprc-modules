@@ -1,0 +1,22 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>Arrow ETL 3: Copy wnprc arrow protocol data into ehr.protocol_counts table</name>
+    <description>Truncate data from arrow into ehr.protocol_counts table</description>
+    <transforms>
+        <transform id="step1">
+            <description>Copy to target</description>
+            <source queryName="MaxSpeciesPlusSubSpecies" schemaName="wnprc"/>
+            <destination queryName="protocol_counts" schemaName="ehr" targetOption="truncate">
+                <columnTransforms>
+                    <column source="rowid" target="rowid"/>
+                    <column source="protocol" target="protocol"/>
+                    <column source="allowed" target="allowed"/>
+                    <column source="species" target="species"/>
+                    <column source="date_modified" target="modified"/>
+                </columnTransforms>
+            </destination>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 0 3 * * ?"/>
+    </schedule>
+</etl>

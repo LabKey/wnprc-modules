@@ -335,6 +335,7 @@ $results = LabKey::Query::selectRows(
     -columns=>'protocol,allowed,PercentUsed,TotalRemaining,Species,protocol/inves',
     -filterArray => [
         ['TotalRemaining', 'lt', '5'],
+        ['allowed', 'neq', '0'],
     ],
     -requiredVersion => 8.3,
     #-debug => 1,

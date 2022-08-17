@@ -12,15 +12,18 @@
                     </column>
                     <column columnName="rowid" >
                         <columnTitle>#</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
+                        <url></url>
                     </column>
 
                     <column columnName="date" >
                         <columnTitle>Date Requested</columnTitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
                         <isUserEditable>false</isUserEditable>
                     </column>
                     <column columnName="createdBy">
                         <columnTitle>Created By</columnTitle>
+                        <url></url>
                     </column>
                     <column columnName="principalinvestigator">
                     <columnTitle>Principal Investigator</columnTitle>
@@ -44,6 +47,7 @@
                         </fk>
                     </column>
                     <column columnName="originneeded">
+                        <url></url>
                         <columnTitle>Origin</columnTitle>
                         <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>geographic_origins</fkTable>
@@ -93,6 +97,7 @@
                         </fk>
                     </column>
                     <column columnName="dateneeded">
+                        <isHidden>true</isHidden>
                         <columnTitle>Date Needed</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
@@ -143,6 +148,18 @@
                     </column>
                     <column columnName="animalsorigin">
                         <columnTitle>Animal Origin</columnTitle>
+                    </column>
+                    <column columnName="externalthreadrowid">
+                        <columnTitle>External Disc</columnTitle>
+                        <url>/announcements/WNPRC/WNPRC_Units/Animal_Services/Assigns/Private/thread.view?rowId=${externalthreadrowid}</url>
+                        <isHidden>true</isHidden>
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="internalthreadrowid">
+                        <columnTitle>Internal Disc</columnTitle>
+                        <url>/announcements/WNPRC/WNPRC_Units/Animal_Services/Assigns/Private/thread.view?rowId=${internalthreadrowid}</url>
+                        <isUserEditable>false</isUserEditable>
+                        <isHidden>true</isHidden>
                     </column>
                     <column columnName="animal_history_link">
                         <columnTitle>Animal History</columnTitle>

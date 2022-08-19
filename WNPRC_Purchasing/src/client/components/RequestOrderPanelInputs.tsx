@@ -233,7 +233,7 @@ export const SpecialInstructionInput: FC<InputProps> = memo(props => {
 
     return (
         <div>
-            <PurchasingFormInput label="Special instructions">
+            <PurchasingFormInput label="Comments/Special instructions">
                 <textarea
                     className="special-instr-input form-control"
                     value={value}

@@ -17,9 +17,6 @@ public class WaterSingleDaySection extends SimpleFormSection
     }*/
     public WaterSingleDaySection (String title){
         super ("study", "waterAmount", title, "ehr-gridpanel");
-        this.addConfigSource("WNPRC_Request");
-        //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
-        // setAllowBulkAdd(true);
     }
 
 

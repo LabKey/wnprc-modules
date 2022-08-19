@@ -6,7 +6,7 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 ARG WNPRC_BRANCH=master
-ARG LABKEY_VERSION=21.3
+ARG LABKEY_VERSION
 ARG LABKEY_IS_PREMIUM=true
 
 WORKDIR /tmp/labkey
@@ -16,29 +16,24 @@ ARG LABKEY_TEAMCITY_BUILD=
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
-RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
- && if [ "$LABKEY_VERSION" = 17.2 ] ; then \
-        LABKEY_SNAPSHOT="-" ; \
-        if [ "$LABKEY_IS_PREMIUM" = true ] ; then \
-            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Premium_Installers" ; \
-            LABKEY_DISTRIBUTION="wisc" ; \
-            LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
-        else \
-            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Community_Installers" ; \
-            LABKEY_DISTRIBUTION="wisc_community" ; \
-            LABKEY_FILE_NAME="UWisc-Community-bin.tar.gz" ; \
-        fi \
-    elif [ "$LABKEY_VERSION" = 18.3 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \
+RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
+ && if [[  ! -z "$LABKEY_VERSION" ]] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
-    elif [ "$LABKEY_VERSION" = 21.3 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_213Release_External_Wnprc_Installers" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+    elif [ "$LABKEY_VERSION" = 21.7 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_217Release_External_Wnprc_Installers" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+    elif [ "$LABKEY_VERSION" = 21.11 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_2111Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     fi \
+
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
@@ -50,7 +45,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
 
-FROM wnprcehr/tomcat:21.7
+FROM wnprcehr/tomcat:21.11
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

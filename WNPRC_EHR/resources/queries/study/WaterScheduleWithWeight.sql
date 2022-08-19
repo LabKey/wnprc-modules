@@ -1,6 +1,7 @@
 SELECT
     lsid AS lsid,
     objectid AS objectIdCoalesced,
+    waterOrderObjectId AS waterOrderObjectId,
     taskid AS taskid,
     project AS projectCoalesced,
     animalId AS animalId,

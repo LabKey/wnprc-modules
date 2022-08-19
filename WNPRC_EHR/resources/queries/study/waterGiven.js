@@ -66,14 +66,15 @@ function onInit(event, helper){
 
         if (shouldAdd){
             waterInTransaction[row.Id].push({
-                objectid: row.objectid,
-                date: row.date,
-                datasource: row.datasource,
-                qcstate: row.qcstate,
-                assignedto: row.assignedto,
-                parentid: row.parentid,
-                volume: row.volume,
-                lsid: row.lsid
+                objectid:       row.objectid,
+                date:           row.date,
+                datasource:     row.datasource,
+                qcstate:        row.qcstate,
+                assignedto:     row.assignedto,
+                parentid:       row.parentid,
+                volume:         row.volume,
+                lsid:           row.lsid,
+                treatmentId:    row.treatmentId
 
             });
         }
@@ -90,19 +91,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }*/
 
     if (row.QCStateLabel == 'Scheduled'){
-        console.log ("value of date given "+ row.date);
         EHR.Server.Validation.verifyDate(row, scriptErrors, helper);
-
-        /*if(row.QCStateLabel == 'Scheduled'){
-            //TODO: add special condition for water given
-            currentTimeRounded.setHours(13,30,0,0);
-            console.log ('RowTime at 1:30 PM '+currentTimeRounded);
-            console.log ('Rowtime '+ date);
-            if (date>currentTimeRounded){
-                EHR.Server.Utils.addError(errors, 'date', 'Cannot schedule water after 13:30 PM', 'ERROR');
-            }
-
-        }*/
     }
 
         if (row.Id && row.date)
@@ -144,14 +133,9 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                     EHR.Server.Utils.addError(scriptErrors, 'performedby', "Must add Performed By", errorQC)
             }
 
-            //TODO: move validation to water amount to make sure not PN waters are requested after 1:30PM
-            /*var msg = WNPRC.Utils.getJavaHelper().checkScheduledWaterTask(waters);
-            if (msg != null){
-                EHR.Server.Utils.addError(scriptErrors, 'date', msg, errorQC);
-                //EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, errorQC);
-            }*/
 
-            if (row.volume)
+            //TODO: Troubleshoot this function to determine if the animal has not gotten enough water for the last three days.
+            /*if (row.volume)
                 {
                     var msg = WNPRC.Utils.getJavaHelper().waterLastThreeDays(row.Id, row.date, waters);
                     if (msg != null){
@@ -159,7 +143,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                         //EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, errorQC);
                     }
 
-                }
+                }*/
             console.log ("value of treatmentId "+ row.treatmentId + (row.treatmentId == null));
 
             //This validation should only be called when using the Lab Water from, when entering
@@ -198,63 +182,44 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         if (row.waterSource == 'lixit' && !row.remarks){
             EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Add remark for connecting lixit', 'WARN');
         }
-        console.log ('value outside if statement '+ row.treatmentId);
-        console.log (row.QCStateLabel);
 
-        if (row.treatmentId != null && row.id && row.performedby && row.volume && (row.QCStateLabel == 'In Progress' || row.QCStateLabel == 'Completed')){
-            //TODO: called function to change QC for water amount
-            console.log('value of dataSource ' + row.dataSource);
-            console.log('value of treatmentId ' + row.treatmentId);
-            console.log('extra context '+ waters);
-            console.log('date on water Given '+ row.date);
+        if (row.treatmentId != null && row.id && row.performedby && row.volume != null && (row.QCStateLabel == 'In Progress' || row.QCStateLabel == 'Completed')){
+
             let errorMessage = WNPRC.Utils.getJavaHelper().changeWaterAmountQC(row.treatmentId, waters);
             console.log('error Message ' + errorMessage);
             if (!errorMessage){
                 console.log('before adding description '+ row);
-                addWaterGivenDescription(row, waters);
-            }
-            //row.remarks=
+                if (waters[0].waterObjects){
+                    addWaterGivenDescription(row, waters);
+                }
 
+            }
         }
 
 
         //EHR.Server.Validation.checkRestraint(row, scriptErrors);
 
-
 }
 function addWaterGivenDescription(row, waters){
     let clientDescription = '';
-    console.log ('description  '+clientDescription+ ' waters length '+ waters.length);
     let waterRecords = [];
     waterRecords = waters[0].waterObjects;
-    console.log('waterRecords '+waterRecords.length + ' inside waters '+ waters[0].waterObjects);
     for (var i=0;i<waterRecords.length; i++ ){
-        console.log ('value of map '+ waterRecords[i]);
         let waterRecord = waterRecords[i];
-        console.log (waterRecord.assignedTo + ',' + waterRecord.volume);
-        clientDescription += 'Volume of ' + + waterRecord.volume + ' assigned to ' +waterRecord.assignedTo + '\n'  ;
+        clientDescription += 'Volume of ' + + waterRecord.volume + ' assigned to ' +waterRecord.assignedTo;
 
-
+        if ( i < waterRecords.length-1){
+            clientDescription += '\n';
+        }
     }
-    /*LABKEY.ExtAdapter.each(waters, function (waterRecord){
-        console.log (waterRecord.get('assignedto') + ',' + waterRecord.get('volume'));
-        clientDescription += 'Volume of' + + waterRecord.get('volume') + 'assigned to' +waterRecord.get('assignedto') + ',' ;
-
-
-    },this)*/
-
-    console.log ('description after   '+clientDescription);
-
-    row.description = clientDescription;
-
-    
+    row.clientDescription = clientDescription;
 }
 
 function setDescription(row, helper){
     var description = new Array();
 
-    if (row.description)
-        description.push(EHR.Server.Utils.nullToString(row.description));
+    if (row.clientDescription)
+        description.push(EHR.Server.Utils.nullToString(row.clientDescription));
     if (row.volume)
         description.push('Total Volume: ' +EHR.Server.Utils.nullToString(row.volume));
     if (row.provideFruit)

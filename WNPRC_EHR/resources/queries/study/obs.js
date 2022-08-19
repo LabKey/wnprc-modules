@@ -5,12 +5,11 @@
  */
 
 require("ehr/triggers").initScript(this);
-
 function onUpsert(helper, scriptErrors, row, oldRow){
-
     //for compatability with the ETL
     if (!row.performedby)
         row.performedby = row.userid;
+
 
     if (
         row.feces ||

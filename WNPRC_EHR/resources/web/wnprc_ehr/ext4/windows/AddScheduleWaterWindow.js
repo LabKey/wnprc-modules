@@ -175,12 +175,14 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
         Ext4.Msg.wait("Loading Scheduled Water...");
         this.hide();
+        var selectedDate = this.down('#CurDate').getValue();
+        console.log (selectedDate);
 
         LABKEY.Query.selectRows({
             requiredVersion: 9.1,
             schemaName: 'study',
             queryName: 'waterScheduleCoalesced',
-            parameters: {NumDays: 1, StartDate: new Date()},
+            parameters: {NumDays: 1, StartDate: new Date(selectedDate)},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
             columns: 'lsid,animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
             filterArray: filtersArray,
@@ -264,12 +266,17 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             var row = new LDK.SelectRowsRow(sr);
             let animalId = row.getValue('animalid');
             var dateCurrentTime = new Date();
-            var modelDate = new Date (row.getValue('date'));
+            var modelDate = new Date (row.getDateValue('date'));
             modelDate.setHours(dateCurrentTime.getHours());
             modelDate.setMinutes(dateCurrentTime.getMinutes());
 
-            let waterObject = {treatmentId: row.getValue('objectid'), volume: row.getValue('volume'), assignedTo: row.getValue('assignedTo'),
-                                dataSource: row.getValue('dataSource'), lsid:row.getValue('lsid')};
+            let waterObject = {
+                                treatmentId:    row.getValue('objectid'),
+                                volume:         row.getValue('volume'),
+                                assignedTo:     row.getValue('assignedTo'),
+                                dataSource:     row.getValue('dataSource'),
+                                lsid:           row.getValue('lsid')
+            };
 
             let previousVolume = 0;
             let previousTreatmentId = '';
@@ -300,7 +307,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     dataSource = row.getValue('dataSource');
                 }*/
                 //for water Orders I need to keep the date ordered from the waterschedule to change qc state
-                matchingDate = row.getValue('dateOrdered');
+                matchingDate = row.getDateValue('dateOrdered');
                 containsWaterOrder = true;
             }
 
@@ -335,7 +342,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     waterSource:        row.getValue('waterSource'),
                     treatmentId:        row.getValue('objectid'),
                     dataSource:         row.getValue('dataSource'),
-                    dateOrdered:        row.getValue('dateOrdered'),
+                    dateOrdered:        row.getDateValue('dateOrdered'),
                     model:              'fruitRecord'
 
                 });

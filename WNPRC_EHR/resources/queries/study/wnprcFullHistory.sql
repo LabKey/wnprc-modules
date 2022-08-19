@@ -1,6 +1,6 @@
 SELECT Id,
        date,
-       CAST (project AS VARCHAR) AS project,
+       project  AS project,
        DataSet.Label AS dataset,
        DataSet.Name AS DataSetName,
        remark,
@@ -13,16 +13,29 @@ FROM study.studyData
 
 UNION ALL
 SELECT
-    animalId AS Id,
+    Id AS Id,
     date,
-     projectConcat AS project,
-     'Water Given (Total)' AS dataset,
-     'watertotal' AS DataSetName,
-     'Sum of all water given for the day.' AS remark,
-     'Total Water for the day equals: ' || TotalWater || 'ml' AS description,
-     performedConcat AS performedBy,
-     qcstate AS qcstate,
-     null AS  taskid,
-     null AS requestid
+    project AS project,
+    'Water Given (Total)' AS dataset,
+    'watertotal' AS DataSetName,
+    CASE
+         WHEN (remark IS NOT NULL AND remark !='') THEN
+             ('Sum of all water given for the day.' || CHR(10)
+                 || remark)
+             ELSE
+            'Sum of all water given for the day.'
+    END AS remark,
+    CASE
+         WHEN (provideFruit IS NOT NULL AND provideFruit != '') THEN
+            ('Total Water for the day equals: ' || TotalWater || 'ml' || CHR(10)
+            || 'Food provided: ' || provideFruit)
+         ELSE
+            ('Total Water for the day equals: ' || TotalWater || 'ml')
+    END AS description,
+    performedConcat AS performedBy,
+    qcstate AS qcstate,
+    null AS  taskid,
+    null AS requestid
 
-FROM study.waterPrePivot
+FROM study.waterTotalByDate
+WHERE TotalWater IS NOT NULL

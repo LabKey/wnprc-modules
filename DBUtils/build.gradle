@@ -9,5 +9,5 @@ dependencies {
     apiImplementation "com.google.guava:guava:${guavaVersion}"
     implementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"))
     external "org.jooq:jooq:3.8.4"
-    external "javax.xml.bind:jaxb-api:${jaxbVersion}"
+    external "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbVersion}"
 }

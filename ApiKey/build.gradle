@@ -8,5 +8,5 @@ dependencies {
     implementation "javax.servlet:jsp-api:2.0"
     implementation files(apiJar)
     external "org.jooq:jooq:3.8.4"
-    external "javax.xml.bind:jaxb-api:${jaxbVersion}"
+    external "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbVersion}"
 }

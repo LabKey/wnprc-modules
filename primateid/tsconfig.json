@@ -9,8 +9,5 @@
   },
   "exclude": [
     "resources"
-  ],
-  "files": [
-    "src/ts/primateid.ts"
   ]
 }

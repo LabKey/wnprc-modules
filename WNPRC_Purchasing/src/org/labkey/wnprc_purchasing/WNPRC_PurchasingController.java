@@ -297,7 +297,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                     Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
 
                     //get folder admin users
-                    List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+                    List<User> adminUsers = getFolderAdmins();
 
                     //send emails to admins minus purchasing director
                     for (User user : adminUsers)

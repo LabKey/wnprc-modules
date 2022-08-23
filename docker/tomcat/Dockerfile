@@ -1,5 +1,4 @@
-FROM adoptopenjdk/openjdk15:x86_64-centos-jdk-15.0.2_7
-#FROM openjdk:15.0.2-jdk-oraclelinux7
+FROM eclipse-temurin:17.0.1_12-jdk-centos7
 
 ENV LANG en_US.utf8
 
@@ -35,7 +34,7 @@ RUN yum -y -q install \
 ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
-ENV TOMCAT_VERSION 9.0.54
+ENV TOMCAT_VERSION 9.0.56
 RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .

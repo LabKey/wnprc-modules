@@ -1,0 +1,2 @@
+#!/bin/bash
+docker build --build-arg PROD_VERSION=$perl_prod  --rm=true -t $IMAGE_NAME .

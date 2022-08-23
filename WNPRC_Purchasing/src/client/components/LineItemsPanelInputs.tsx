@@ -11,6 +11,21 @@ interface InputProps {
     isReadOnly?: boolean;
 }
 
+export const LineItemNumber: FC<InputProps> = memo(props => {
+    const { value } = props;
+
+    return (
+        <input
+            className={
+                'line-item-row-input line-item-number form-control'
+            }
+            value={value}
+            id="item-line-number"
+            disabled={true}
+        />
+    );
+});
+
 export const DescriptionInput: FC<InputProps> = memo(props => {
     const { onChange, value, hasError, isReadOnly } = props;
 

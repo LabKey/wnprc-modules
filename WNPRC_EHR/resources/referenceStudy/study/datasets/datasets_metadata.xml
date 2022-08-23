@@ -7642,6 +7642,10 @@
         </importAliases>
         <formatString>00000000</formatString>
       </column>
+      <column columnName="waterOrderObjectId">
+        <datatype>entityid</datatype>
+        <columnTitle>waterOrderObjectId</columnTitle>
+      </column>
     </columns>
   </table>
   <table tableName="waterGiven" tableDbType="TABLE">

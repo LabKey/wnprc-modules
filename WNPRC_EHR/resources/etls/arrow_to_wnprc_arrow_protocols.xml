@@ -1,0 +1,14 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>Arrow ETL 1: Copy arrow iacuc protocol data to wnprc/ehr schema</name>
+    <description>Truncates and copies data from arrow iacuc.wnprc_species_max table into wnprc.arrow_protocols table</description>
+    <transforms>
+        <transform id="step1">
+            <description>Copy to wnprc schema</description>
+            <source queryName="wnprc_species_max" schemaName="arrow"/>
+            <destination queryName="arrow_protocols" schemaName="wnprc" targetOption="truncate"/>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 30 2 * * ?"/>
+    </schedule>
+</etl>

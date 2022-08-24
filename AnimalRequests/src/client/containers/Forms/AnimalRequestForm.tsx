@@ -19,7 +19,7 @@ const renderField = ({
     }) => (
     <div className="row top-buffer">
         <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)}: </label>
+            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
             <input min={min} {...required==true ? required : ''} className={`col-xs-5 form-control-${type}`}  type={type} {...input} />
             {touched && ((error && <span>{error}</span>))}
         </div>
@@ -34,7 +34,7 @@ const renderSelectField = ({
     <div className="row top-buffer">
         <div className={asyncValidating ? 'async-validating' : ''}>
             <label className="col-xs-5 form-control-label"> {label}{tooltip && (
-            <sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)}: </label>
+                <a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
             <select {...required==true ? required : ''} className="col-xs-5 form-control-input" {...input}> {...options} </select>
             {touched && ((error && <span>{error}</span>))}
         </div>
@@ -65,7 +65,7 @@ const renderTextArea = ({
     }) => (
     <div className="row top-buffer">
         <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)}: </label>
+            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
             <textarea {...required==true ? required : ''} className={`col-xs-5 form-control-${type}`}  type={type} {...input} />
             {touched && ((error && <span>{error}</span>))}
         </div>
@@ -425,6 +425,21 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 >
                                                 </Field>
                                                 <Field
+                                                    name="majorsurgery"
+                                                    label="Major Surgery?"
+                                                    tooltip="Whether or not the animals are going to have major surgery on the project."
+                                                    component={renderSelectField}
+                                                    validate={required}
+                                                    required={true}
+                                                    options={
+                                                        <>
+                                                            <option/>
+                                                            <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                        </>
+                                                    }
+                                                >
+                                                </Field>
+                                                <Field
                                                   name="pregnantanimalsrequired"
                                                   label="Pregnant Animals Required?"
                                                   component={renderSelectField}
@@ -438,6 +453,38 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                   }
                                                 >
                                                 </Field>
+                                                <Condition when="pregnantanimalsrequired" is="Yes">
+                                                    <Field
+                                                        name="pregnantanimalsrequiredtermdam"
+                                                        label="Terminal For Dam?"
+                                                        component={renderSelectField}
+                                                        validate={required}
+                                                        required={true}
+                                                        options={
+                                                            <>
+                                                                <option/>
+                                                                <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                            </>
+                                                        }
+                                                    >
+                                                    </Field>
+                                                </Condition>
+                                                <Condition when="pregnantanimalsrequired" is="Yes">
+                                                    <Field
+                                                        name="pregnantanimalsrequiredterminfant"
+                                                        label="Terminal For Infant?"
+                                                        component={renderSelectField}
+                                                        validate={required}
+                                                        required={true}
+                                                        options={
+                                                            <>
+                                                                <option/>
+                                                                <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                            </>
+                                                        }
+                                                    >
+                                                    </Field>
+                                                </Condition>
                                                 <Field
                                                     name="disposition"
                                                     label="Disposition"
@@ -450,6 +497,15 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                             <DropdownOptions name="animal_requests_disposition" rowkey="value"/>
                                                         </>
                                                     }
+                                                >
+                                                </Field>
+                                                <Field
+                                                    name="previousexposures"
+                                                    label="Unwanted Previous Exposures"
+                                                    tooltip="List which exposures you do not want the animals exposed to."
+                                                    component={renderField}
+                                                    type="text"
+                                                    required={false}
                                                 >
                                                 </Field>
                                                 <Field
@@ -529,6 +585,15 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     component={renderTextArea}
                                                     type="textarea"
                                                     required={false}
+                                                >
+                                                </Field>
+                                                <Field
+                                                    name="contacts"
+                                                    label="Contacts"
+                                                    component={renderTextArea}
+                                                    type="textarea"
+                                                    required={false}
+                                                    tooltip="List any contacts for this request (names, emails, etc)."
                                                 >
                                                 </Field>
                                             </div>

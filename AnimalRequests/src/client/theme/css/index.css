@@ -123,7 +123,7 @@ select {
     border-radius: 1px;
     -moz-appearance: none;
     -webkit-appearance: none;
-    background: url(/labkey/_images/arrow_down.png) right no-repeat !important;
+    background: url(/_images/arrow_down.png) right no-repeat !important;
     text-transform: Capitalize !important;
 
 }
@@ -133,7 +133,7 @@ select {
     text-align: center;
     display: block;
     position: relative;
-    background: url(/labkey/_images/ajax-loading.gif) left no-repeat !important;
+    background: url(/_images/ajax-loading.gif) left no-repeat !important;
     background-size: fill;
     font-size: 2em;
     padding: 20px 0 0 0;

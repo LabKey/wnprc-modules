@@ -14,6 +14,9 @@ docker/ehrcron/scripts/pg_backup/lkbackup.ini
 **/build/
 
 **/resources/credits/dependencies.txt
+ApiKey/resources/credits/jars.txt
+DeviceProxy/resources/credits/jars.txt
+DBUtils/resources/credits/jars.txt
 Gringots/resources/credits/jars.txt
 WNPRC_Compliance/resources/credits/jars.txt
 wnprc_billing/resources/credits/jars.txt

@@ -12,19 +12,6 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.jooq:jooq:3.8.4",
-            "jOOQ",
-            "jOOQ.org",
-            "https://www.jooq.org/",
-            ExternalDependency.APACHE_2_LICENSE_NAME,
-            ExternalDependency.APACHE_2_LICENSE_URL,
-            "Database-mapping for Java"
-        )
-    )
-
-    BuildUtils.addExternalDependency(
-        project,
-        new ExternalDependency(
             "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbVersion}",
             "Jakarta XML Binding API",
             "Eclipse",
@@ -37,5 +24,18 @@ dependencies {
             // Exclude activation jars from webapp to avoid classloader conflicts with <tomcat>/lib/javax.activation.jar
             exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
         }
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "org.jooq:jooq:${jooqVersion}",
+            "jOOQ",
+            "jOOQ.org",
+            "https://www.jooq.org/",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Database-mapping for Java"
+        )
     )
 }

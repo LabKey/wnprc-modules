@@ -23,7 +23,7 @@ import static java.lang.Math.toIntExact;
 
 public class FoodNotCompletedNotification extends AbstractEHRNotification
 {
-    protected String cronString = "0 0/60 6-21 * * ?";
+    protected String cronString = "0 0 6-21 * * ?";
 
 
     public FoodNotCompletedNotification(Module owner){

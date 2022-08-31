@@ -280,323 +280,331 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                         <form onSubmit={handleSubmit}>
                                             {loading && <div className="loading" />}
                                             <div style={{display:display}} className="card-body">
-                                                <Field
-                                                    name="principalinvestigator"
-                                                    label="PI"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="uniqueProtocolInvestigator" rowkey="inves"/>
-                                                            <option value="other">Other</option>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <Condition when="principalinvestigator" is="other">
-                                                    <Field
-                                                        name="externalprincipalinvestigator"
-                                                        component={renderField}
-                                                        label="Specify PI"
-                                                        type="text"
-                                                        validate={required}
-                                                        required={true}
-                                                    >
-                                                    </Field>
-                                                </Condition>
-                                                <Field
-                                                    name="numberofanimals"
-                                                    component={renderField}
-                                                    label="# of Animals"
-                                                    type="number"
-                                                    min="1"
-                                                    validate={required}
-                                                    required={true}
-                                                    tooltip="Please provide the number of animals needed (integers only)."
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="speciesneeded"
-                                                    label="Species"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_species" rowkey="common"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <ConditionIsNot when="speciesneeded" isnot="Marmoset">
-                                                <Field
-                                                    name="originneeded"
-                                                    label="Origin"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_origin" rowkey="meaning"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                </ConditionIsNot>
-                                                <Field
-                                                    name="sex"
-                                                    label="Sex"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_sex" rowkey="value"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="age"
-                                                    component={renderField}
-                                                    label="Age"
-                                                    type="text"
-                                                    validate={required}
-                                                    required={true}
-                                                    tooltip="Please provide an approximate age range for the animals requested."
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="weight"
-                                                    component={renderField}
-                                                    label="Weight (kg)"
-                                                    type="text"
-                                                    validate={required}
-                                                    required={true}
-                                                    tooltip="Please provide an approximate weight range for the animals requested."
-                                                >
-                                                </Field>
-                                                <ConditionIsNot when="speciesneeded" isnot="Marmoset">
-                                                <Field
-                                                    name="mhctype"
-                                                    component={renderField}
-                                                    label="MHC Type"
-                                                    type="text"
-                                                    validate={required}
-                                                    required={true}
-                                                >
-                                                </Field>
-                                                </ConditionIsNot>
-                                                <ConditionIsNot when="speciesneeded" isnot="Marmoset">
-                                                <Field
-                                                    name="viralstatus"
-                                                    label="Viral Status"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_viral_status" rowkey="value"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                </ConditionIsNot>
+                                                <div className="row">
+                                                    <div className="col-xs-6">
+                                                        <Field
+                                                            name="principalinvestigator"
+                                                            label="PI"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="uniqueProtocolInvestigator" rowkey="inves"/>
+                                                                    <option value="other">Other</option>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <Condition when="principalinvestigator" is="other">
+                                                            <Field
+                                                                name="externalprincipalinvestigator"
+                                                                component={renderField}
+                                                                label="Specify PI"
+                                                                type="text"
+                                                                validate={required}
+                                                                required={true}
+                                                            >
+                                                            </Field>
+                                                        </Condition>
+                                                        <Field
+                                                            name="numberofanimals"
+                                                            component={renderField}
+                                                            label="# of Animals"
+                                                            type="number"
+                                                            min="1"
+                                                            validate={required}
+                                                            required={true}
+                                                            tooltip="Please provide the number of animals needed (integers only)."
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="speciesneeded"
+                                                            label="Species"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_species" rowkey="common"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <ConditionIsNot when="speciesneeded" isnot="Marmoset">
+                                                        <Field
+                                                            name="originneeded"
+                                                            label="Origin"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_origin" rowkey="meaning"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        </ConditionIsNot>
+                                                        <Field
+                                                            name="sex"
+                                                            label="Sex"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_sex" rowkey="value"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="age"
+                                                            component={renderField}
+                                                            label="Age"
+                                                            type="text"
+                                                            validate={required}
+                                                            required={true}
+                                                            tooltip="Please provide an approximate age range for the animals requested."
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="weight"
+                                                            component={renderField}
+                                                            label="Weight (kg)"
+                                                            type="text"
+                                                            validate={required}
+                                                            required={true}
+                                                            tooltip="Please provide an approximate weight range for the animals requested."
+                                                        >
+                                                        </Field>
+                                                        <ConditionIsNot when="speciesneeded" isnot="Marmoset">
+                                                        <Field
+                                                            name="mhctype"
+                                                            component={renderField}
+                                                            label="MHC Type"
+                                                            type="text"
+                                                            validate={required}
+                                                            required={true}
+                                                        >
+                                                        </Field>
+                                                        </ConditionIsNot>
+                                                        <ConditionIsNot when="speciesneeded" isnot="Marmoset">
+                                                        <Field
+                                                            name="viralstatus"
+                                                            label="Viral Status"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_viral_status" rowkey="value"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        </ConditionIsNot>
 
-                                                <Field
-                                                    name="infectiousdisease"
-                                                    label="Infectious Disease"
-                                                    tooltip="Is this an infectious disease project?"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_infectiousdisease" rowkey="value"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="majorsurgery"
-                                                    label="Major Surgery?"
-                                                    tooltip="Whether or not the animals are going to have major surgery on the project."
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <Field
-                                                  name="pregnantanimalsrequired"
-                                                  label="Pregnant Animals Required?"
-                                                  component={renderSelectField}
-                                                  validate={required}
-                                                  required={true}
-                                                  options={
-                                                      <>
-                                                          <option/>
-                                                          <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
-                                                      </>
-                                                  }
-                                                >
-                                                </Field>
-                                                <Condition when="pregnantanimalsrequired" is="Yes">
-                                                    <Field
-                                                        name="pregnantanimalsrequiredtermdam"
-                                                        label="Terminal For Dam?"
-                                                        component={renderSelectField}
-                                                        validate={required}
-                                                        required={true}
-                                                        options={
-                                                            <>
-                                                                <option/>
-                                                                <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
-                                                            </>
-                                                        }
-                                                    >
-                                                    </Field>
-                                                </Condition>
-                                                <Condition when="pregnantanimalsrequired" is="Yes">
-                                                    <Field
-                                                        name="pregnantanimalsrequiredterminfant"
-                                                        label="Terminal For Infant?"
-                                                        component={renderSelectField}
-                                                        validate={required}
-                                                        required={true}
-                                                        options={
-                                                            <>
-                                                                <option/>
-                                                                <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
-                                                            </>
-                                                        }
-                                                    >
-                                                    </Field>
-                                                </Condition>
-                                                <Field
-                                                    name="disposition"
-                                                    label="Disposition"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <DropdownOptions name="animal_requests_disposition" rowkey="value"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="previousexposures"
-                                                    label="Unwanted Previous Exposures"
-                                                    tooltip="List which exposures you do not want the animals exposed to."
-                                                    component={renderField}
-                                                    type="text"
-                                                    required={false}
-                                                >
-                                                </Field>
-                                                <Field
-                                                  name="executivecommitteeapproval"
-                                                  label="Executive Committee Approval?"
-                                                  component={renderSelectField}
-                                                  validate={required}
-                                                  required={true}
-                                                  options={
-                                                      <>
-                                                          <option/>
-                                                          <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
-                                                      </>
-                                                  }
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="optionalproject"
-                                                    label="Project"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <option value="TBD">TBD</option>
-                                                            <DropdownOptions name="animal_requests_active_projects" rowkey="project"/>
-                                                        </>
-                                                    }
-                                                >
+                                                        <Field
+                                                            name="infectiousdisease"
+                                                            label="Infectious Disease"
+                                                            tooltip="Is this an infectious disease project?"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_infectiousdisease" rowkey="value"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="majorsurgery"
+                                                            label="Major Surgery?"
+                                                            tooltip="Whether or not the animals are going to have major surgery on the project."
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                          name="pregnantanimalsrequired"
+                                                          label="Pregnant Animals Required?"
+                                                          component={renderSelectField}
+                                                          validate={required}
+                                                          required={true}
+                                                          options={
+                                                              <>
+                                                                  <option/>
+                                                                  <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                              </>
+                                                          }
+                                                        >
+                                                        </Field>
+                                                        <Condition when="pregnantanimalsrequired" is="Yes">
+                                                            <Field
+                                                                name="pregnantanimalsrequiredtermdam"
+                                                                label="Terminal For Dam?"
+                                                                component={renderSelectField}
+                                                                validate={required}
+                                                                required={true}
+                                                                options={
+                                                                    <>
+                                                                        <option/>
+                                                                        <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                                    </>
+                                                                }
+                                                            >
+                                                            </Field>
+                                                        </Condition>
+                                                        <Condition when="pregnantanimalsrequired" is="Yes">
+                                                            <Field
+                                                                name="pregnantanimalsrequiredterminfant"
+                                                                label="Terminal For Infant?"
+                                                                component={renderSelectField}
+                                                                validate={required}
+                                                                required={true}
+                                                                options={
+                                                                    <>
+                                                                        <option/>
+                                                                        <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                                    </>
+                                                                }
+                                                            >
+                                                            </Field>
+                                                        </Condition>
+                                                        <Field
+                                                            name="disposition"
+                                                            label="Disposition"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <DropdownOptions name="animal_requests_disposition" rowkey="value"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="previousexposures"
+                                                            label="Unwanted Previous Exposures"
+                                                            tooltip="List which exposures you do not want the animals exposed to."
+                                                            component={renderField}
+                                                            type="text"
+                                                            required={false}
+                                                        >
+                                                        </Field>
+                                                    </div>
+                                                    <div className="col-xs-6">
+                                                        <Field
+                                                          name="executivecommitteeapproval"
+                                                          label="Executive Committee Approval?"
+                                                          component={renderSelectField}
+                                                          validate={required}
+                                                          required={true}
+                                                          options={
+                                                              <>
+                                                                  <option/>
+                                                                  <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                              </>
+                                                          }
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="optionalproject"
+                                                            label="Project"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <option value="TBD">TBD</option>
+                                                                    <DropdownOptions name="animal_requests_active_projects" rowkey="project"/>
+                                                                </>
+                                                            }
+                                                        >
 
-                                                </Field>
-                                                <Field
-                                                  name="account"
-                                                  label="Account"
-                                                  component={renderField}
-                                                  type="text"
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="protocol"
-                                                    label="Protocol"
-                                                    component={renderSelectField}
-                                                    validate={required}
-                                                    required={true}
-                                                    options={
-                                                        <>
-                                                            <option/>
-                                                            <option value="TBD">TBD</option>
-                                                            <DropdownOptions name="protocol" rowkey="protocol"/>
-                                                        </>
-                                                    }
-                                                >
-                                                </Field>
-                                                <Field
-                                                  name="anticipatedstartdate"
-                                                  id="anticipatedstartdate"
-                                                  label="Anticipated Start Date"
-                                                  component={renderDateTimePicker}
-                                                  type="text"
-                                                  validate={required}
-                                                >
+                                                        </Field>
+                                                        <Field
+                                                          name="account"
+                                                          label="Account"
+                                                          component={renderField}
+                                                          type="text"
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="protocol"
+                                                            label="Protocol"
+                                                            component={renderSelectField}
+                                                            validate={required}
+                                                            required={true}
+                                                            options={
+                                                                <>
+                                                                    <option/>
+                                                                    <option value="TBD">TBD</option>
+                                                                    <DropdownOptions name="protocol" rowkey="protocol"/>
+                                                                </>
+                                                            }
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                          name="anticipatedstartdate"
+                                                          id="anticipatedstartdate"
+                                                          label="Anticipated Start Date"
+                                                          component={renderDateTimePicker}
+                                                          type="text"
+                                                          validate={required}
+                                                        >
 
-                                                </Field>
-                                                <Field
-                                                  name="anticipatedenddate"
-                                                  id="anticipatedenddate"
-                                                  label="Anticipated End Date"
-                                                  component={renderDateTimePicker}
-                                                  type="text"
-                                                  validate={required}
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="comments"
-                                                    label="Comments"
-                                                    component={renderTextArea}
-                                                    type="textarea"
-                                                    required={false}
-                                                >
-                                                </Field>
-                                                <Field
-                                                    name="contacts"
-                                                    label="Contacts"
-                                                    component={renderTextArea}
-                                                    type="textarea"
-                                                    required={false}
-                                                    tooltip="List any contacts for this request (names, emails, etc)."
-                                                >
-                                                </Field>
+                                                        </Field>
+                                                        <Field
+                                                          name="anticipatedenddate"
+                                                          id="anticipatedenddate"
+                                                          label="Anticipated End Date"
+                                                          component={renderDateTimePicker}
+                                                          type="text"
+                                                          validate={required}
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="comments"
+                                                            label="Comments"
+                                                            component={renderTextArea}
+                                                            type="textarea"
+                                                            required={false}
+                                                        >
+                                                        </Field>
+                                                        <Field
+                                                            name="contacts"
+                                                            label="Contacts"
+                                                            component={renderTextArea}
+                                                            type="textarea"
+                                                            required={false}
+                                                            tooltip="List any contacts for this request (names, emails, etc)."
+                                                        >
+                                                        </Field>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <br/>
+                                            <p>{formDescription}</p>
                                             <div className="row top-buffer">
                                                 <div className="btn-wrap">
                                                     <button
@@ -604,7 +612,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         id="submit-final"
                                                         disabled={this.state.submitted}
                                                         type="submit"
-                                                        >
+                                                    >
                                                         Submit
                                                     </button>
                                                     <button
@@ -612,13 +620,11 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         onClick={ () => {
                                                             window.location = cancelUrl;
                                                         }}
-                                                        >
+                                                    >
                                                         Cancel
                                                     </button>
                                                 </div>
                                             </div>
-                                            <br/>
-                                            <p>{formDescription}</p>
                                         </form>
 
                                     </div>

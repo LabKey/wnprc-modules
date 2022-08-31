@@ -51,10 +51,10 @@ RUN postconf  -e transport_maps=hash:/etc/postfix/transport              \
                 smtpd_tls_ciphers=medium            \
                 smtpd_tls_protocols=!SSLv2,!SSLv3    \
                 # TLS, DNSSEC and DANE for SMTP client outbound email
-                smtp_tls_session_cache_database = btree:/var/lib/postfix/smtp_scache  \
-                smtp_tls_security_level = dane                                     \
-                smtp_dns_support_level = dnssec                                   \
-                smtp_tls_cert_file = /etc/postfix/certs/ehr.pem                   \
+                smtp_tls_session_cache_database=btree:/var/lib/postfix/smtp_scache  \
+                smtp_tls_security_level=dane                                     \
+                smtp_dns_support_level=dnssec                                   \
+                smtp_tls_cert_file=/etc/postfix/certs/ehr.pem                   \
                 smtp_tls_key_file=/etc/postfix/certs/ehr.key
 
 CMD envsubst < /etc/postfix/transport.template > /etc/postfix/transport && postmap hash:/etc/postfix/transport && postmap /etc/postfix/header_checks && /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

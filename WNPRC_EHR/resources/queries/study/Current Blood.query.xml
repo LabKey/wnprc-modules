@@ -57,7 +57,7 @@
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="MaxBlood">
-                        <columnTitle>Max Allowable Blood At Time</columnTitle>
+                        <columnTitle>20% Volume By Weight</columnTitle>
                     </column>
                     <column columnName="AvailBlood">
                         <columnTitle>Volume Remaining After Draw (mL)</columnTitle>

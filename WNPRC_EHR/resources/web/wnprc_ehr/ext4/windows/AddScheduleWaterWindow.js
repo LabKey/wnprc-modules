@@ -175,12 +175,14 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
         Ext4.Msg.wait("Loading Scheduled Water...");
         this.hide();
+        var selectedDate = this.down('#CurDate').getValue();
+        console.log (selectedDate);
 
         LABKEY.Query.selectRows({
             requiredVersion: 9.1,
             schemaName: 'study',
             queryName: 'waterScheduleCoalesced',
-            parameters: {NumDays: 1, StartDate: new Date()},
+            parameters: {NumDays: 1, StartDate: new Date(selectedDate)},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
             columns: 'lsid,animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
             filterArray: filtersArray,

@@ -1,5 +1,4 @@
 package org.labkey.wnprc_ehr.notification;
-import org.apache.commons.lang3.time.DateUtils;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -12,14 +11,11 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.DateUtil;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +55,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
 
     public String getScheduleDescription()
     {
-        return "daily at 1300, 1500, 1700, 1900";
+        return "daily at 1000, 1300, 1500, 1700, 1900";
     }
 
     @Override
@@ -70,33 +66,45 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         final Date now = new Date();
 
         msg.append("This email contains any water orders not marked as completed.  It was run on: " + _dateFormat.format(now) + " at " + _timeFormat.format(now) + ".<p>");
-        findWaterOrdersNotCompleted(c,u,msg,new Date());
+        findWaterOrdersNotCompleted(c,u,msg,LocalDateTime.now(), false);
+        findWaterOrdersNotCompleted(c,u,msg,LocalDateTime.now(), true);
 
         return msg.toString();
 
     }
 
-    private void findWaterOrdersNotCompleted(Container c,User u, StringBuilder msg, final Date maxDate){
-        Calendar currentTime = Calendar.getInstance();
-        currentTime.setTime(maxDate);
+    private void findWaterOrdersNotCompleted(Container c,User u, StringBuilder msg, final LocalDateTime maxDate, boolean includeFuture){
+        LocalDateTime currentTime = maxDate;
+        LocalDateTime amThreshold = LocalDateTime.now().withHour(10).withMinute(30);
 
         //Setting interval to start the water schedule, the system generates the calendar thirty days before
-        Date roundedMax = new Date();
-        roundedMax.setTime(maxDate.getTime());
-        roundedMax = DateUtils.addDays(roundedMax, -5);
-        roundedMax = DateUtils.truncate(roundedMax, Calendar.DATE);
+        LocalDateTime roundedMax = maxDate;
+        roundedMax = roundedMax.plusDays(-5).truncatedTo(ChronoUnit.DAYS);
 
         //final String intervalLength = "10";
 
         //Sending parameters to the query that generates the water schedule from water orders and water amounts
         Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
         parameters.put("NumDays", 6);
-        parameters.put("StartDate", roundedMax);
+        //static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+        String dateFormat = roundedMax.format(DateTimeFormatter.ISO_DATE_TIME);
+        parameters.put("StartDate", roundedMax.toString());
 
         TableInfo ti = QueryService.get().getUserSchema(u,c,"study").getTable("waterScheduleCoalesced");
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("dateOrdered"),currentTime.getTime(), CompareType.LTE);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("QCState/label"),"Scheduled",CompareType.EQUAL);
+
+        if (includeFuture){
+            LocalDateTime futureDate = maxDate;
+            futureDate = futureDate.plusDays(1).truncatedTo(ChronoUnit.DAYS);
+
+            filter.addCondition(FieldKey.fromString("dateOrdered"),futureDate, CompareType.LTE);
+            filter.addCondition(FieldKey.fromString("dateOrdered"),currentTime, CompareType.GT);
+
+        }else{
+            filter.addCondition(FieldKey.fromString("dateOrdered"),currentTime, CompareType.LTE);
+        }
+
         filter.addCondition(FieldKey.fromString("dateOrdered"), roundedMax,CompareType.DATE_GTE);
-        filter.addCondition(FieldKey.fromString("QCState/label"),"Scheduled",CompareType.EQUAL);
        // filter.addCondition(FieldKey.fromString("assignedTo"), "animalcare");
         filter.addCondition(FieldKey.fromString("actionRequired"),true,CompareType.EQUAL);
 
@@ -117,10 +125,20 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         ts.setNamedParameters(parameters);
         long total = ts.getRowCount();
 
-        if (total == 0){
-            msg.append("All water orders are completed");
-        }else{
-            msg.append("<p><b>There are "+total+ " water orders that have not being completed</b><br>");
+        String timeofday = "AM";
+        if (currentTime.isAfter(amThreshold)){
+            timeofday = "PM";
+        }
+
+        if (total == 0 && !includeFuture){
+            msg.append("All " + timeofday + " water orders are completed");
+        }else if(total > 0){
+            if(includeFuture && timeofday.equals("PM")){
+                msg.append("<p><b>There are "+total+ " water orders that are scheduled for today and have not been completed</b><br>");
+            }else{
+                msg.append("<p><b>WARNING: There are "+total+ " water orders that have not been completed</b><br>");
+            }
+
             Map<String,Object>[] waterOrdersScheduled = ts.getMapArray();
             List <Map<String,Object>> animalCareWaters = new ArrayList<>();
             List<Map<String,Object>> researchStaffWaters = new ArrayList<>();
@@ -158,7 +176,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
 
             }
             msg.append("<br><a href='" + getExecuteQueryUrl(c,"study","waterScheduleCoalesced","Scheduled")+"&query.param.StartDate="+roundedMax+"&query.param.NumDays=" + 1 +
-                    "&query.dateOrdered~lte="+currentTime.getTime()+ "&query.dateOrdered~dategte="+roundedMax+"'>Click here to view schedule waters</a></p>");
+                    "&query.dateOrdered~lte="+currentTime+ "&query.dateOrdered~dategte="+roundedMax+"'>Click here to view schedule waters</a></p>");
         }
 
 

@@ -65,7 +65,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.auth:google-auth-library-oauth2-http:0.19.0",
+            "com.google.auth:google-auth-library-oauth2-http:1.10.0",
             "Google Auth Library",
             "Google",
             "https://github.com/googleapis/google-auth-library-java",

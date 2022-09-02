@@ -7,6 +7,7 @@ ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 ARG WNPRC_BRANCH=master
 ARG LABKEY_VERSION
+ARG GENERAL_LK_VERSION
 ARG LABKEY_IS_PREMIUM=true
 
 WORKDIR /tmp/labkey
@@ -29,6 +30,12 @@ RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B=""
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     elif [ "$LABKEY_VERSION" = 21.11 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_2111Release_External_Wnprc_Installers2" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+    else  \
+        GENERAL_LK_VERSION = "${LABKEY_VERSION//.} \
+        LABKEY_TEAMCITY_CONFIG="LabKey_"+ $GENERAL_LK_VERSION + "Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \

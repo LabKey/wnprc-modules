@@ -72,11 +72,7 @@ dependencies {
             "BSD 3-Clause \"New\" or \"Revised\" License",
             "https://github.com/googleapis/google-auth-library-java/blob/main/LICENSE",
             "Contains a wide variety of credentials as well as utility methods to create them and to get Application Default Credentials"
-        ),
-        {
-            // Avoid conflict with version pulled in by :platform:api and :platform:internal
-            exclude group: "com.google.code.findbugs", module: "jsr305"
-        }
+        )
     )
 
     BuildUtils.addExternalDependency(

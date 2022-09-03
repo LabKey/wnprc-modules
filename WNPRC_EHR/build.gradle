@@ -65,18 +65,14 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.auth:google-auth-library-oauth2-http:0.19.0",
+            "com.google.auth:google-auth-library-oauth2-http:1.10.0",
             "Google Auth Library",
             "Google",
             "https://github.com/googleapis/google-auth-library-java",
             "BSD 3-Clause \"New\" or \"Revised\" License",
             "https://github.com/googleapis/google-auth-library-java/blob/main/LICENSE",
             "Contains a wide variety of credentials as well as utility methods to create them and to get Application Default Credentials"
-        ),
-        {
-            // Avoid conflict with version pulled in by :platform:api and :platform:internal
-            exclude group: "com.google.code.findbugs", module: "jsr305"
-        }
+        )
     )
 
     BuildUtils.addExternalDependency(
@@ -153,8 +149,7 @@ configurations.all {
         resolutionStrategy {
             force "org.javassist:javassist:${javassistVersion}"
 
-            // Conflicts with versions in 'GoogleDrive' module
-            force "com.google.http-client:google-http-client-jackson2:${googleHttpClientVersion}"
-            force "com.google.http-client:google-http-client:${googleHttpClientVersion}"
+            // Conflicts with other versions
+            force "com.google.http-client:google-http-client-gson:${googleHttpClientGsonVersion}"
         }
 }

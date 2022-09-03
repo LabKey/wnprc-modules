@@ -25,6 +25,19 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
+            "com.google.http-client:google-http-client:${googleHttpClientVersion}",
+            "Google HTTP Client Library for Java",
+            "Google",
+            "https://developers.google.com/api-client-library/java",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Google API Client dependency",
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
             "com.google.apis:google-api-services-drive:v3-rev85-1.23.0",
             "Google Drive API Client Library for Java",
             "Google",

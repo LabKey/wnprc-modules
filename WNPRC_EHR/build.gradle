@@ -148,8 +148,5 @@ configurations.all {
     Configuration config ->
         resolutionStrategy {
             force "org.javassist:javassist:${javassistVersion}"
-
-            // Conflicts with other versions
-            force "com.google.http-client:google-http-client-gson:${googleHttpClientGsonVersion}"
         }
 }

@@ -34,7 +34,8 @@ RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B=""
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     else  \
-        GENERAL_LK_VERSION = "${LABKEY_VERSION//.}" \
+        echo "LabKey Version " + $LABKEY_VERSION;   \
+        GENERAL_LK_VERSION = "$LABKEY_VERSION";      \
         LABKEY_TEAMCITY_CONFIG="LabKey_"+ $GENERAL_LK_VERSION + "Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \

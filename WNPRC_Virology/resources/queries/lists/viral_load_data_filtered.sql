@@ -11,11 +11,14 @@ SELECT vl.Id,
        vl.experiment_number,
        vl.rna_isolation_method,
        vl.account,
-       mp.account,
-       mp.folder_name
+       mp.accounts,
+       mp.folderName,
 FROM study.viral_loads vl
 LEFT JOIN (
-       SELECT  lists.folders_and_accounts_mappings.account,
-               lists.folders_and_accounts_mappings.folder_name
-       FROM lists.folders_and_accounts_mappings) mp
-ON mp.account in vl.account
+       SELECT  lists."Create Folders".accounts,
+               lists."Create Folders".folderName
+       FROM lists."Create Folders") mp
+--ON mp.accounts in vl.account
+ON ';' || LOWER(mp.accounts) || ';' LIKE '%;' || LOWER(vl.account) || ';%'
+--might be able to use a %like% here with semicolons around each account
+--ON vl.account in any(unnest(string_to_array(mp.accounts, ';')))

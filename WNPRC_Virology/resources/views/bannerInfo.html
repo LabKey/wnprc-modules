@@ -1,0 +1,23 @@
+<html>
+<head>
+    <script type="text/javascript">
+
+        LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL('core', 'getModuleProperties', null),
+            method: 'POST',
+            jsonData: {moduleName: 'WNPRC_Virology', includePropertyValues: true},
+            success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                new LABKEY.WebPart({
+                    partName: 'Wiki',
+                    renderTo: 'assayInfo',
+                    frame: 'none',
+                    containerPath: response["values"]["RSEHRPortalContainerPath"]["effectiveValue"],
+                    partConfig: {name: 'Information'}
+                }).render();
+            }, this),
+        });
+
+    </script>
+</head>
+<div id="assayInfo"></div>
+</html>

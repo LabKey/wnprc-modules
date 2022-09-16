@@ -27,6 +27,13 @@
                 <permission>ADMIN</permission>
             </editPermissions>
         </propertyDescriptor>
+        <propertyDescriptor name="RSEHRPortalContainerPath">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>Container path where the data lives on the rsehr portal. Used in folder creation for each subfolder.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
         <propertyDescriptor name="RSEHRViralLoadDataFolder">
             <canSetPerContainer>true</canSetPerContainer>
             <defaultValue>/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/Private/</defaultValue>

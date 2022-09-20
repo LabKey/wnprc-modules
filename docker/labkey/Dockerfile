@@ -18,6 +18,8 @@ RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
 RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
+    && echo -e "LabKeyVersion: "${LABKEY_VERSION} \
+    && echo -e "value of B: " ${B} \
  && if [[  ! -z "$LABKEY_VERSION" ]] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
@@ -34,7 +36,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B=""
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     else  \
-        echo "LabKey Version " + $LABKEY_VERSION;   \
+        echo -e "LabKey Version " + $LABKEY_VERSION;   \
         GENERAL_LK_VERSION = "$LABKEY_VERSION";      \
         LABKEY_TEAMCITY_CONFIG="LabKey_"+ $GENERAL_LK_VERSION + "Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \

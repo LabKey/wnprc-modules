@@ -18,8 +18,8 @@ RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
 RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
-    && echo -e "LabKeyVersion: "${LABKEY_VERSION}; \
-    && echo -e "value of B: " ${B}; \
+     echo -e "LabKeyVersion: "${LABKEY_VERSION}; \
+     echo -e "value of B: " ${B}; \
  && if [[  ! -z "$LABKEY_VERSION" ]] ; then \
         echo -e "No LabKey version, building trunk ";\
         LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \

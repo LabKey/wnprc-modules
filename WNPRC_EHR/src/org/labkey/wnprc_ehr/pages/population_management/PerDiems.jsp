@@ -1,5 +1,5 @@
 <%@ page import="org.joda.time.LocalDate" %>
-<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.json.old.JSONObject" %>
 <%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 

@@ -1,6 +1,6 @@
 package org.labkey.deviceproxy;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;

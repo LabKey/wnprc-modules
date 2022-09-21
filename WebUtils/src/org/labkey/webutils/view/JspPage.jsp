@@ -1,4 +1,4 @@
-<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.old.JSONArray" %>
 <%@ page import="org.labkey.api.data.PropertyManager" %>
 <%@ page import="org.labkey.api.module.Module" %>
 <%@ page import="org.labkey.api.module.ModuleLoader" %>

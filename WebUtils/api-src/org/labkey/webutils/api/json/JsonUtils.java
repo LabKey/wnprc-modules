@@ -1,8 +1,7 @@
 package org.labkey.webutils.api.json;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.labkey.webutils.api.json.StringKeyComparator;
+import org.json.old.JSONArray;
+import org.json.old.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;

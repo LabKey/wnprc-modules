@@ -6,7 +6,7 @@ import org.jooq.Record;
 import org.jooq.RecordContext;
 import org.jooq.TableRecord;
 import org.jooq.impl.DefaultRecordListener;
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.audit.AbstractAuditTypeProvider;
 import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.data.Container;

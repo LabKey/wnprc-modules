@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.dataentry.generics.sections;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.RequestFormSection;
 

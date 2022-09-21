@@ -1,5 +1,5 @@
 <%@ page import="com.google.common.base.Joiner" %>
-<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.old.JSONArray" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>

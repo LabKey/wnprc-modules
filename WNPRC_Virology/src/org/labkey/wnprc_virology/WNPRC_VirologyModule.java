@@ -3,19 +3,13 @@ package org.labkey.wnprc_virology;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.ehr.EHRService;
-import org.labkey.api.ldk.notification.Notification;
-import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
-import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
-import org.labkey.wnprc_virology.security.roles.WNPRCViralLoadReaderRole;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,16 +21,6 @@ public class WNPRC_VirologyModule extends SpringModule
 {
     public static final String NAME = "WNPRC_Virology";
 
-    public static final String VIROLOGY_EHR_VL_SAMPLE_QUEUE_PATH_PROP = "virologyEHRVLSampleQueueFolderPath";
-    public static final String RSEHR_QC_STATUS_STRING_PROP = "RSEHRQCStatus";
-    public static final String RSEHR_PORTAL_URL_PROP = "RSEHRPortalPath";
-    public static final String RSEHR_PARENT_FOLDER_STRING_PROP = "RSEHRViralLoadDataFolder";
-    public static final String RSEHR_JOB_INTERVAL_PROP = "RSEHRJobInterval"; // in minutes
-    public static final String ZIKA_PORTAL_QC_STATUS_STRING_PROP = "ZikaPortalQCStatus";
-    public static final String ZIKA_PORTAL_URL_PROP = "ZikaPortalPath";
-    //TODO: assemble notify list from ETL from RSEHR
-    public static final String USE_RSEHR_FOLDER_PERMS_FOR_EMAIL = "virologyRSHEREmailMethod";
-
     @Override
     public String getName()
     {
@@ -46,7 +30,7 @@ public class WNPRC_VirologyModule extends SpringModule
     @Override
     public Double getSchemaVersion()
     {
-        return 21.700;
+        return 21.110;
     }
 
     @Override
@@ -66,8 +50,6 @@ public class WNPRC_VirologyModule extends SpringModule
     protected void init()
     {
         addController(WNPRC_VirologyController.NAME, WNPRC_VirologyController.class);
-        registerRoles();
-        registerNotifications();
     }
 
     @Override
@@ -84,8 +66,6 @@ public class WNPRC_VirologyModule extends SpringModule
             }
         });
 
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_virology/datasetButtons.js"), this);
-        ViralLoadRSEHRRunner.schedule();;
     }
 
     @Override
@@ -100,21 +80,6 @@ public class WNPRC_VirologyModule extends SpringModule
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(WNPRC_VirologySchema.NAME);
-    }
-
-    public void registerRoles() {
-        RoleManager.registerRole(new WNPRCViralLoadReaderRole());
-    }
-
-    public void registerNotifications() {
-        List<Notification> notifications = Arrays.asList(
-                new ViralLoadQueueNotification(this)
-        );
-
-        for (Notification notification : notifications)
-        {
-            NotificationService.get().registerNotification(notification);
-        }
     }
 
 }

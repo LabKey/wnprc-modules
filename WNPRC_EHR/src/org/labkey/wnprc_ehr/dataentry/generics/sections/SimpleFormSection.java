@@ -4,7 +4,7 @@ import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;

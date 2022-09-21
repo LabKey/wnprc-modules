@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.email;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 
 import javax.mail.BodyPart;
 import java.io.InputStream;

@@ -1,6 +1,6 @@
 package org.labkey.webutils.api.json;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 
 /**
  * Created by jon on 9/16/16.

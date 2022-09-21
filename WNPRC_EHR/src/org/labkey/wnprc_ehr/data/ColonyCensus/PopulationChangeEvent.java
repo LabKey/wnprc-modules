@@ -2,8 +2,8 @@ package org.labkey.wnprc_ehr.data.ColonyCensus;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
-import org.json.JSONObject;
-import org.json.JSONString;
+import org.json.old.JSONObject;
+import org.json.old.JSONString;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.webutils.api.json.ConvertibleToJSON;

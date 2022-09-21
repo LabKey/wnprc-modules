@@ -16,7 +16,7 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;

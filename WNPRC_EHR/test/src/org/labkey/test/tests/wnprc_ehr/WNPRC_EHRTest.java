@@ -2440,7 +2440,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         //get the weight data
         SelectRowsResponse w = fetchWeightData();
-        JSONObject wt = (JSONObject) w.getRows().get(0).get("restraint_objectid");
+        Map<String, Object> wt = (Map<String, Object>) w.getRows().get(0).get("restraint_objectid");
         SelectRowsResponse r = fetchRestraintDataGivenObjectId((String) wt.get("value"));
         Assert.assertEquals(1, r.getRows().size());
     }
@@ -2450,8 +2450,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         addBatchByLocation();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
-            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
+        for (String s : ANIMAL_SUBSET_EHR_TEST)
+        {
+            assertTextPresent(s);
         }
     }
 

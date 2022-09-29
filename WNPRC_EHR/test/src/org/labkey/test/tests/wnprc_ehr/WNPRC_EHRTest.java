@@ -2174,10 +2174,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success", 1, 50000);
 
         SelectRowsResponse r = fetchFeedingData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("amount");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("amount");
         TestLogger.log((wt.get("value")).toString());
         Assert.assertEquals(null, FEEDING_AMT, wt.get("value"));
-
     }
 
     @Test
@@ -2198,7 +2197,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         testWeightToRestraintObjectIdRelationship();
@@ -2214,7 +2213,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("submit-final");
         waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
 
@@ -2268,15 +2267,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
 
         SelectRowsResponse t = fetchTaskData(taskid);
         //assert that this task's assigned to is the same as info entered above
-        JSONObject id = (JSONObject) t.getRows().get(0).get("assignedto");
+        Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("assignedto");
         Assert.assertEquals(null, defaultItem, id.get("value").toString());
 
         testWeightToRestraintObjectIdRelationship();
@@ -2293,10 +2292,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Saved");
         //and check that it was actually saved and QC state is "In Progress"
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
-        JSONObject qc = (JSONObject) r.getRows().get(0).get("QCState");
+        Map<String, Object> qc = (Map<String, Object>) r.getRows().get(0).get("QCState");
         Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
 
     }
@@ -2325,14 +2324,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
         navigateToWeightsTable();
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
         SelectRowsResponse t = fetchTaskData(taskid);
-        JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
+        Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("rowid");
         TestLogger.log("testEditAndDelete: Navigating to task id...");
         TestLogger.log(id.get("value").toString());
         waitAndClick(Locator.linkWithText(id.get("value").toString()));
@@ -2429,7 +2428,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse r = fetchWeightData();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
         {
-            JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
+            Map<String, Object> wt = (Map<String, Object>) r.getRows().get(i).get("weight");
             Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         }
         testWeightToRestraintObjectIdRelationship();
@@ -2480,12 +2479,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-        JSONObject objectid = (JSONObject) r.getRows().get(0).get("restraint_objectid");
+        Map<String, Object> objectid = (Map<String, Object>) r.getRows().get(0).get("restraint_objectid");
 
         SelectRowsResponse c = fetchRestraintDataGivenObjectId(objectid.get("value").toString());
-        JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
+        Map<String, Object> rt = (Map<String, Object>) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
         testWeightToRestraintObjectIdRelationship();
 
@@ -2530,10 +2529,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
-
     }
 
     @Test

@@ -4,7 +4,7 @@ SELECT lsid
       ,animalid
       ,animalid.Demographics.gender    AS sex
       ,animalid.age.ageFriendly        AS age
-      ,animalid.Demographics.weight    AS weight
+      ,animalid.mostRecentWeight.mostRecentWeight    AS weight
       ,animalid.Demographics.medical   AS medical
       ,animalid.curLocation.room       AS cur_room
       ,animalid.curLocation.cage       AS cur_cage

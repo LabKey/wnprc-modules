@@ -17,7 +17,6 @@ package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -309,7 +308,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating studyLinked Schema");
         _schemaHelper.setQueryLoadTimeout(60000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
                 null, null);
     }
@@ -318,7 +317,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating coreLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "coreLinked", "/"+EHR_FOLDER_PATH, "coreLinked", null,
                 null, null);
     }
@@ -327,7 +326,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating ehrLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "ehrLinked", "/"+EHR_FOLDER_PATH, "ehrLinked", null,
                 null, null);
     }
@@ -336,7 +335,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating ehr_billing_public Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), "EHR",
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + "EHR",
                 "ehr_billing_public", PRIVATE_FOLDER_PATH, "ehr_billing_public", null,
                 null, null);
     }
@@ -345,7 +344,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating wnprc_billingLinked Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), "EHR",
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + "EHR",
                 "wnprc_billingLinked", PRIVATE_FOLDER_PATH, "wnprc_billingLinked", null,
                 null, null);
     }
@@ -354,7 +353,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating wnprc_billing_public Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PI_FOLDER_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PI_FOLDER_FOLDER_PATH,
                 "wnprc_billing_public", PRIVATE_FOLDER_PATH, "wnprc_billing_public", null,
                 null, null);
     }
@@ -490,7 +489,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "feeding");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "type", "amount", "remark", "QCState", "taskid", "objectid"));
@@ -502,7 +501,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchWeightData() throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid", "objectid", "restraint_objectid"));
@@ -1358,7 +1357,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadData() throws IOException, CommandException
     {
-        Connection connection = createDefaultConnection(true);
+        Connection connection = createDefaultConnection();
         Map<String, Object> responseMap = new HashMap<>();
 
         truncateBillingTables(connection);
@@ -1643,7 +1642,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.xpath("//div[contains(@class, 'my-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         clickBootstrapTab("Tasks Requiring Review");
         waitForElement(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']")));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']").findElements(getDriver()).size());
         String href2 = getAttribute(Locator.linkWithText(TASK_TITLE), "href");
         beginAt(href2); // Clicking opens in a new window.
         waitForElement(Locator.xpath("/*//*[contains(@class,'ehr-weight-records-grid')]"), WAIT_FOR_JAVASCRIPT);
@@ -1665,7 +1664,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         (new DataRegionTable("query", this)).setFilter("date", "Equals", DATE_FORMAT.format(new Date()));
         assertTextPresent("3.333", "4.444", "5.555");
-        assertEquals("Completed was not present the expected number of times", 6, getElementCount(Locator.xpath("//td[text() = 'Completed']")));
+        assertEquals("Completed was not present the expected number of times", 6, Locator.xpath("//td[text() = 'Completed']").findElements(getDriver()).size());
     }
 
     @Test
@@ -1696,13 +1695,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickBootstrapTab("All Tasks");
         //TODO: make these more
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         clickBootstrapTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         clickBootstrapTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         stopImpersonating();
 
         // this might be a workaround (not fix) for Issue 22361
@@ -2228,7 +2227,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
     public SelectRowsResponse fetchTaskData(String taskid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("ehr", "tasks");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("rowid", "updateTitle", "formtype", "assignedto", "duedate", "createdby", "created", "qcstate"));
@@ -2302,7 +2301,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchWeightDataGivenTaskRowId(String taskrowid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid"));
@@ -2389,7 +2388,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchRestraintDataGivenObjectId(String objectid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "restraints");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "restraintType", "objectid"));

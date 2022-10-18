@@ -1,4 +1,5 @@
 #!/bin/bash
+##Regex value to identified all folders that start with dev*
 dev_regex="^dev(.*)"
 
 args=()
@@ -21,21 +22,14 @@ while [[ $# -gt 0 ]]; do
  done
  set -- "${args[@]}"
 
-function isTrue() {
-   if [[ "${@^^}" =~ ^(TRUE|OUI|Y|O$|ON$|[1-9]) ]]; then return 0;fi
-   return 1
-}
-
+##Getting list of folders with dev in front
 listOfDevFolders=()
 shopt -s nullglob
 for f in *; do
-  ##echo -n 'list of folders '
-  #echo "${#listOfDevFolders[@]}"
   if [[ $f =~ $dev_regex ]]; then
     echo $f
     listOfDevFolders+=("$f")
   fi
-
 done
 
 if $start; then
@@ -50,10 +44,10 @@ if $start; then
 else
   for folder in "${listOfDevFolders[@]}"
   do
-    echo 'Stoping containers in ' $folder
+    echo 'Stopping containers in ' $folder
     docker-compose -f $folder/docker-compose.yml down
   done
 
-  echo -n 'Stoping main docker-compose file'
+  echo -n 'Stopping main docker-compose file'
   docker-compose -f docker-compose.yml down
 fi

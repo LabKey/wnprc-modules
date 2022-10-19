@@ -21,7 +21,7 @@ RUN apt-get update                 \
                            ssmtp   \
                            cron    \
                            gettext \
-                           postgresql-client-11 \
+                           postgresql-client-12 \
                            tzdata \
  && apt-get clean
 
@@ -33,7 +33,7 @@ RUN chmod u+x /usr/local/labkey/*/* \
  && echo "\n\nMAILTO=ehrservices@g-groups.wisc.edu\n\n" >> /etc/crontab \
  && touch ~/.netrc
 
-#Adding an ARG to determine if the image will be used by production server
+#Adding an ARG to determine if the image will be used by production servers
 #Default value false, we would only change to true for production
 #If true, the ehrcron image will send emails and ran deleteStudyRecords
 RUN if [ "$PROD_VERSION" = "true" ] ; \

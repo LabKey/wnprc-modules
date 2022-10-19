@@ -35,7 +35,9 @@ RUN chmod u+x /usr/local/labkey/*/* \
 
 #Adding an ARG to determine if the image will be used by production servers
 #Default value false, we would only change to true for production
-#If true, the ehrcron image will send emails and ran deleteStudyRecords
+#With false the backup script still runs and creates pgDumps that can be
+#use to restore the db.
+#If set to true, the ehrcron image will send emails and ran deleteStudyRecords
 RUN if [ "$PROD_VERSION" = "true" ] ; \
       then cat /usr/local/labkey/*/*.cron >> /etc/crontab ; \
       else cat /usr/local/labkey/pg_backup/pg_backup.cron >> /etc/crontab ; \

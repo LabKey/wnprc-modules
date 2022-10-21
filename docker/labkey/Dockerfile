@@ -53,7 +53,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B=""
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
 
-FROM wnprcehr/tomcat:21.11
+FROM wnprcehr/tomcat9:22.7
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

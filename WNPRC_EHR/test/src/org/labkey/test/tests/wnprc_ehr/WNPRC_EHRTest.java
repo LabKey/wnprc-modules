@@ -17,7 +17,6 @@ package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -309,7 +308,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating studyLinked Schema");
         _schemaHelper.setQueryLoadTimeout(60000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
                 null, null);
     }
@@ -318,7 +317,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating coreLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "coreLinked", "/"+EHR_FOLDER_PATH, "coreLinked", null,
                 null, null);
     }
@@ -327,7 +326,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating ehrLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "ehrLinked", "/"+EHR_FOLDER_PATH, "ehrLinked", null,
                 null, null);
     }
@@ -336,7 +335,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating ehr_billing_public Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), "EHR",
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + "EHR",
                 "ehr_billing_public", PRIVATE_FOLDER_PATH, "ehr_billing_public", null,
                 null, null);
     }
@@ -345,7 +344,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating wnprc_billingLinked Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), "EHR",
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + "EHR",
                 "wnprc_billingLinked", PRIVATE_FOLDER_PATH, "wnprc_billingLinked", null,
                 null, null);
     }
@@ -354,7 +353,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating wnprc_billing_public Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PI_FOLDER_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PI_FOLDER_FOLDER_PATH,
                 "wnprc_billing_public", PRIVATE_FOLDER_PATH, "wnprc_billing_public", null,
                 null, null);
     }
@@ -490,7 +489,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "feeding");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "type", "amount", "remark", "QCState", "taskid", "objectid"));
@@ -502,7 +501,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchWeightData() throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid", "objectid", "restraint_objectid"));
@@ -1358,7 +1357,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadData() throws IOException, CommandException
     {
-        Connection connection = createDefaultConnection(true);
+        Connection connection = createDefaultConnection();
         Map<String, Object> responseMap = new HashMap<>();
 
         truncateBillingTables(connection);
@@ -1643,7 +1642,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.xpath("//div[contains(@class, 'my-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         clickBootstrapTab("Tasks Requiring Review");
         waitForElement(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']")));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']").findElements(getDriver()).size());
         String href2 = getAttribute(Locator.linkWithText(TASK_TITLE), "href");
         beginAt(href2); // Clicking opens in a new window.
         waitForElement(Locator.xpath("/*//*[contains(@class,'ehr-weight-records-grid')]"), WAIT_FOR_JAVASCRIPT);
@@ -1665,7 +1664,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         (new DataRegionTable("query", this)).setFilter("date", "Equals", DATE_FORMAT.format(new Date()));
         assertTextPresent("3.333", "4.444", "5.555");
-        assertEquals("Completed was not present the expected number of times", 6, getElementCount(Locator.xpath("//td[text() = 'Completed']")));
+        assertEquals("Completed was not present the expected number of times", 6, Locator.xpath("//td[text() = 'Completed']").findElements(getDriver()).size());
     }
 
     @Test
@@ -1696,13 +1695,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickBootstrapTab("All Tasks");
         //TODO: make these more
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         clickBootstrapTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         clickBootstrapTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         stopImpersonating();
 
         // this might be a workaround (not fix) for Issue 22361
@@ -2174,10 +2173,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success", 1, 50000);
 
         SelectRowsResponse r = fetchFeedingData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("amount");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("amount");
         TestLogger.log((wt.get("value")).toString());
         Assert.assertEquals(null, FEEDING_AMT, wt.get("value"));
-
     }
 
     @Test
@@ -2198,7 +2196,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         testWeightToRestraintObjectIdRelationship();
@@ -2214,7 +2212,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("submit-final");
         waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
 
@@ -2229,7 +2227,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
     public SelectRowsResponse fetchTaskData(String taskid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("ehr", "tasks");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("rowid", "updateTitle", "formtype", "assignedto", "duedate", "createdby", "created", "qcstate"));
@@ -2268,15 +2266,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
 
         SelectRowsResponse t = fetchTaskData(taskid);
         //assert that this task's assigned to is the same as info entered above
-        JSONObject id = (JSONObject) t.getRows().get(0).get("assignedto");
+        Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("assignedto");
         Assert.assertEquals(null, defaultItem, id.get("value").toString());
 
         testWeightToRestraintObjectIdRelationship();
@@ -2293,17 +2291,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Saved");
         //and check that it was actually saved and QC state is "In Progress"
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
-        JSONObject qc = (JSONObject) r.getRows().get(0).get("QCState");
+        Map<String, Object> qc = (Map<String, Object>) r.getRows().get(0).get("QCState");
         Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
 
     }
 
     public SelectRowsResponse fetchWeightDataGivenTaskRowId(String taskrowid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid"));
@@ -2325,14 +2323,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
         navigateToWeightsTable();
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
         SelectRowsResponse t = fetchTaskData(taskid);
-        JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
+        Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("rowid");
         TestLogger.log("testEditAndDelete: Navigating to task id...");
         TestLogger.log(id.get("value").toString());
         waitAndClick(Locator.linkWithText(id.get("value").toString()));
@@ -2390,7 +2388,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchRestraintDataGivenObjectId(String objectid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "restraints");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "restraintType", "objectid"));
@@ -2429,7 +2427,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse r = fetchWeightData();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
         {
-            JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
+            Map<String, Object> wt = (Map<String, Object>) r.getRows().get(i).get("weight");
             Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         }
         testWeightToRestraintObjectIdRelationship();
@@ -2441,7 +2439,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         //get the weight data
         SelectRowsResponse w = fetchWeightData();
-        JSONObject wt = (JSONObject) w.getRows().get(0).get("restraint_objectid");
+        Map<String, Object> wt = (Map<String, Object>) w.getRows().get(0).get("restraint_objectid");
         SelectRowsResponse r = fetchRestraintDataGivenObjectId((String) wt.get("value"));
         Assert.assertEquals(1, r.getRows().size());
     }
@@ -2451,8 +2449,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         addBatchByLocation();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
-            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
+        for (String s : ANIMAL_SUBSET_EHR_TEST)
+        {
+            assertTextPresent(s);
         }
     }
 
@@ -2480,12 +2479,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-        JSONObject objectid = (JSONObject) r.getRows().get(0).get("restraint_objectid");
+        Map<String, Object> objectid = (Map<String, Object>) r.getRows().get(0).get("restraint_objectid");
 
         SelectRowsResponse c = fetchRestraintDataGivenObjectId(objectid.get("value").toString());
-        JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
+        Map<String, Object> rt = (Map<String, Object>) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
         testWeightToRestraintObjectIdRelationship();
 
@@ -2530,10 +2529,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Success");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
-
     }
 
     @Test

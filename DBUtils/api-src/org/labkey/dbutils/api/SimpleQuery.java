@@ -195,14 +195,14 @@ public class SimpleQuery<RowType> extends QueryHelper {
             // Now, loop through results, adding them to our results object
             if (rs.next()) {
                 do {
-                    JSONObject rowJSONOjbect = new JSONObject();
+                    JSONObject rowJSONObject = new JSONObject();
 
                     Map<String, Object> rowMap = rs.getRowMap();
                     for(String key : rowMap.keySet()) {
-                        rowJSONOjbect.put(key, rowMap.get(key));
+                        rowJSONObject.put(key, rowMap.get(key));
                     }
 
-                    rows.add(rowJSONOjbect);
+                    rows.add(rowJSONObject);
                 } while (rs.next());
             }
         }

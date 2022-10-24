@@ -13,7 +13,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.apache.commons:commons-text:1.9",
+            "org.apache.commons:commons-text:1.10.0",
             "Commons Text",
             "Apache",
             "https://commons.apache.org/proper/commons-text/",

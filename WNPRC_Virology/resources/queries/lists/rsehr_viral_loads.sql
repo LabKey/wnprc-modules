@@ -21,9 +21,6 @@ SELECT
     v.run.exptNumber as experiment_number,
     GROUP_CONCAT(DISTINCT vsq.funding_string, ' ; ') as account,
     GROUP_CONCAT(DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
-    CASE WHEN (MIN(v.viralLoadScientific) = 0 AND MAX(v.viralLoadScientific) != 0)
-        THEN ('Equoivical')
-    END AS equivocal,
 FROM "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/".assay.Viral_Loads.Viral_Load.Data v
 
 -- join on QPCR_QC_list to only include results from qPCR runs that pass QC

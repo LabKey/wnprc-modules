@@ -23,12 +23,14 @@ import javax.mail.Message;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -266,7 +268,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
         // Define columns to get
         List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("Rowid"));
+        columns.add(FieldKey.fromString("Key"));
+        columns.add(FieldKey.fromString("rowid"));
         columns.add(FieldKey.fromString("account"));
         columns.add(FieldKey.fromString("emails"));
         columns.add(FieldKey.fromString("folder_path"));
@@ -281,10 +284,17 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 emailProps.put("portalURL", firstPart + rs.getString(FieldKey.fromString("folder_path")));
 
                 String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");
-                for (int k = 0; k < emails.length-1; k++)
+
+                //we should also only iterate over results that are not the same Key
+
+                //don't we want unique emails?
+                Set<String> temp = new LinkedHashSet<String>( Arrays.asList( emails ) );
+                String[] result = temp.toArray( new String[temp.size()] );
+
+                for (int k = 0; k < result.length; k++)
                 {
                     Integer count = accountsAndCount.get(rs.getString(FieldKey.fromString("account")));
-                    String recipientEmail = emails[k];
+                    String recipientEmail = result[k];
                     String recipientName = getUserFullName(recipientEmail);
                     sendMessage(getEmailSubject(container), getMessageBodyHTML(recipientEmail, count), subscribedRecipients, recipientEmail, container);
                 }

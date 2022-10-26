@@ -6,12 +6,16 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
+import org.labkey.api.util.TestContext;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
@@ -22,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.labkey.wnprc_virology.ViralLoadRSEHRRunner.virologyModule;
 
 public class TriggerScriptHelper
 {
@@ -38,6 +44,8 @@ public class TriggerScriptHelper
      *  */
     @NotNull
     private static final Map<String, String> _centerCustomProps = new HashMap<>();
+    private static final String _folderType = "WNPRC_Virology";
+    private static final String _sourceDataTableName = "viral_load_data_filtered";
 
     private static final Logger _log = LogHelper.getLogger(TriggerScriptHelper.class, "Server-side validation of WNPRC_Virology data insert/update/deletes");
 
@@ -166,5 +174,33 @@ public class TriggerScriptHelper
         {
             _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.RSEHR_QC_STATUS_STRING_PROP + " module prop is not set, not sending email notification.");
         }
+    }
+
+    public void setupChildFolder(String folderName)
+    {
+        String parentContainerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_CONTAINER_PATH).getEffectiveValue(ContainerManager.getRoot());
+        Container parentContainer = ContainerManager.getForPath(parentContainerPath);
+        Container newContainer = ContainerManager.createContainer(parentContainer, folderName);
+        newContainer.setFolderType(FolderTypeManager.get().getFolderType(_folderType), _user);
+        setupLinkedSchema(parentContainer, newContainer);
+
+    }
+
+    public void setupLinkedSchema(Container parentContainer, Container childContainer)
+    {
+
+        String metadata = "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\">\n" +
+                "  <filters name=\"client-filter\">\n" +
+                "    <cv:filter column=\"folderName\" operator=\"eq\" value=\"" +
+                childContainer.getName() +
+                "\"/>\n" +
+                "  </filters>\n" +
+                "  <table tableName=\"" +
+                _sourceDataTableName +
+                "\" tableDbType=\"NOT_IN_DB\">\n" +
+                "    <filters ref=\"client-filter\"/>\n" +
+                "  </table>\n" +
+                "</tables>";
+        QueryService.get().createLinkedSchema(_user, childContainer,childContainer.getName() + "LinkedSchema", parentContainer.getId(), "lists", metadata, _sourceDataTableName, null);
     }
 }

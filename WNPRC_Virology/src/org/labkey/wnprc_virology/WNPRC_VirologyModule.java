@@ -36,6 +36,7 @@ public class WNPRC_VirologyModule extends SpringModule
     public static final String ZIKA_PORTAL_URL_PROP = "ZikaPortalPath";
     //TODO: assemble notify list from ETL from RSEHR
     public static final String USE_RSEHR_FOLDER_PERMS_FOR_EMAIL = "virologyRSHEREmailMethod";
+    public static final String RSEHR_PORTAL_CONTAINER_PATH = "RSEHRPortalContainerPath";
 
     @Override
     public String getName()
@@ -46,7 +47,7 @@ public class WNPRC_VirologyModule extends SpringModule
     @Override
     public Double getSchemaVersion()
     {
-        return 21.700;
+        return 21.111;
     }
 
     @Override

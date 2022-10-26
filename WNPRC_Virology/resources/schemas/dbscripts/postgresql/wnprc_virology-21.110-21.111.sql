@@ -1,5 +1,3 @@
-CREATE SCHEMA wnprc_virology;
-
 DROP TABLE IF EXISTS wnprc_virology.folder_paths_with_readers;
 CREATE TABLE wnprc_virology.folder_paths_with_readers
 (
@@ -23,6 +21,7 @@ DROP TABLE IF EXISTS wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails;
 CREATE TABLE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails
 (
     rowid               serial NOT NULL,
+    Key                 integer NOT NULL,
     account             text NOT NULL,
     emails              text,
     folder_name         text NOT NULL,

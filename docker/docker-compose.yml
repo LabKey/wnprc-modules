@@ -42,7 +42,8 @@ services:
     depends_on:
       - "mailcatcher"
     volumes:
-      - "${POSTFIX_CERT_FOLDER}:/etc/postfix/certs"
+      - "${NGINX_SERVER_CER_FILE}:/etc/postfix/certs/ehr.pem"
+      - "${NGINX_SERVER_KEY_FILE}:/etc/postfix/certs/ehr.key"
     environment:
       MAIL_SERVER:
       TZ: America/Chicago

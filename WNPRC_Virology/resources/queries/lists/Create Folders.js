@@ -10,6 +10,7 @@ function afterInsert(row) {
 
 function onUpdate(row, oldRow) {
 
+    //TODO handle updates
     //update the mappings entries if the account changes.
     //do we want to allow folder name changes?
 

@@ -285,6 +285,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
                 String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");
 
+                //TODO strip out unique Keys (can we do this at the query level?)
                 //we should also only iterate over results that are not the same Key
 
                 //don't we want unique emails?

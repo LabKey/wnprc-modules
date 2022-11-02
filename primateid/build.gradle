@@ -12,8 +12,11 @@ dependencies {
 }
 
 project.afterEvaluate {
-    project.tasks.named("npmRunBuildProd").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
-    project.tasks.named("npm_run_${project.npmRun.buildProd}").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
-    project.tasks.named("npmRunBuild").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
-    project.tasks.named("npm_run_${project.npmRun.buildDev}").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
+    List.of(project.tasks.named("npmRunBuildProd"),
+            project.tasks.named("npm_run_${project.npmRun.buildProd}"),
+            project.tasks.named("npmRunBuild"),
+            project.tasks.named("npm_run_${project.npmRun.buildDev}")
+    ).forEach(task -> task.configure {
+        outputs.dir project.file('resources/scripts/primateid/gen')
+    })
 }

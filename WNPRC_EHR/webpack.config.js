@@ -4,7 +4,7 @@ let breedingConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
-        entry: './src/ts/breeding.ts',
+        entry: './src/client/breeding.ts',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',
@@ -33,7 +33,7 @@ let testConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
-        entry: './src/ts/test.tsx',
+        entry: './src/client/test.tsx',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',
@@ -69,7 +69,7 @@ let feedingConfig = function wp(env) {
     return {
         mode: process.env.NODE_ENV,
         devtool: 'source-map',
-        entry: './src/feeding/base/App.tsx',
+        entry: './src/client/feeding/base/App.tsx',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',
@@ -102,7 +102,7 @@ var abstractConfig = function wp(env) {
     return {
         mode: process.env.NODE_ENV,
         devtool: 'source-map',
-        entry: './src/abstract/base/App.tsx',
+        entry: './src/client/abstract/base/App.tsx',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',
@@ -135,7 +135,7 @@ let researchUltrasoundsConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
-        entry: './src/ts/research_ultrasounds.ts',
+        entry: './src/client/research_ultrasounds.ts',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',
@@ -165,7 +165,7 @@ var weightConfig = function wp(env) {
     return {
         mode: process.env.NODE_ENV,
         devtool: 'source-map',
-        entry: './src/weight/app.tsx',
+        entry: './src/client/weight/app.tsx',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',

@@ -12,7 +12,7 @@
     "resources"
   ],
   "files": [
-    "src/ts/test.tsx",
-    "src/ts/breeding.ts"
+    "src/client/test.tsx",
+    "src/client/breeding.ts"
   ]
 }

@@ -10,3 +10,10 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: 'published', depExtension: 'module')
 }
+
+project.afterEvaluate {
+    project.tasks.named("npmRunBuildProd").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
+    project.tasks.named("npm_run_${project.npmRun.buildProd}").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
+    project.tasks.named("npmRunBuild").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
+    project.tasks.named("npm_run_${project.npmRun.buildDev}").configure { outputs.dir project.file('resources/scripts/primateid/gen') }
+}

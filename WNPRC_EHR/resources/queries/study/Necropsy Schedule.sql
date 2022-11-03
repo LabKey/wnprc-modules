@@ -2,30 +2,30 @@
 SELECT lsid
       ,necropsy.taskid
       ,animalid
-      ,animalid.Demographics.gender    AS sex
-      ,animalid.age.ageFriendly        AS age
-      ,animalid.Demographics.weight    AS weight
-      ,animalid.Demographics.medical   AS medical
-      ,animalid.curLocation.room       AS cur_room
-      ,animalid.curLocation.cage       AS cur_cage
-      ,animalid.curLocation.cond.title AS cur_cond
+      ,animalid.Demographics.gender                         AS sex
+      ,animalid.age.ageFriendly                             AS age
+      ,animalid.mostRecentWeight.mostRecentWeight           AS weight
+      ,animalid.Demographics.medical                        AS medical
+      ,animalid.curLocation.room                            AS cur_room
+      ,animalid.curLocation.cage                            AS cur_cage
+      ,animalid.curLocation.cond.title                      AS cur_cond
       ,date
       ,created
       ,caseno
-      ,causeofdeath                    AS death_type
+      ,causeofdeath                                         AS death_type
       ,project
       ,protocol
       ,account
-      ,performedby                     AS pathologist
+      ,performedby                                          AS pathologist
       ,location
-      ,delivery_option.title           AS who_delivers
-      ,shipping_comment                AS delivery_comment
-      ,animalid.Demographics.necropsyAbstractNotes.remark as remark
+      ,delivery_option.title                                AS who_delivers
+      ,shipping_comment                                     AS delivery_comment
+      ,animalid.Demographics.necropsyAbstractNotes.remark   AS remark
       ,CASE
        WHEN hasTissuesForAvrl IS NULL
          THEN FALSE
          ELSE TRUE
-       END                             AS has_tissues_for_avrl
+       END                                                  AS has_tissues_for_avrl
       ,state
  FROM (SELECT taskid           AS lsid
              ,taskid.rowid     AS taskid

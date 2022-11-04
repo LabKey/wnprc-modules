@@ -1,4 +1,4 @@
-import { TaskValuesType } from '../../org/labkey/wnprc_ehr/pages/typings/main';
+import { TaskValuesType } from '../watermonitoring/typings/main';
 import { ActionURL, Filter, Query } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';

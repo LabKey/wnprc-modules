@@ -10,9 +10,5 @@
   },
   "exclude": [
     "resources"
-  ],
-  "files": [
-    "src/client/test.tsx",
-    "src/client/breeding.ts"
   ]
 }

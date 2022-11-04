@@ -6,7 +6,7 @@ import {
     TaskValuesType,
     WaterAmountValuesType
 } from '../typings/main';
-import { InsertValuesWithCommand, RowObj } from '../../../../../client/weight/typings/main';
+import { InsertValuesWithCommand, RowObj } from '../../weight/typings/main';
 
 export const setupWaterAmountValues = (values: Object, QCStateLabel: string, taskId: string): Array<WaterAmountValuesType> => {
     let valuesToInsert: Array<WaterAmountValuesType> = [];

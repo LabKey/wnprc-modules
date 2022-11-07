@@ -1,7 +1,7 @@
 const path = require('path');
 module.exports = function wp(env) {
     const base = {
-        entry: './src/ts/primateid.ts',
+        entry: './src/client/primateid.ts',
         externals: {
             console: 'console',
         },

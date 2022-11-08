@@ -4,7 +4,7 @@ var helper = org.labkey.wnprc_virology.utils.TriggerScriptHelper.create(LABKEY.S
 
 function afterInsert(row) {
     console.log(row.folderName);
-    helper.setupChildFolder(row.folderName);
+    //helper.setupChildFolder(row.folderName);
 
 }
 

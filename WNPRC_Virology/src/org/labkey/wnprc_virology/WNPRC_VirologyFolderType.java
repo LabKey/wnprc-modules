@@ -47,6 +47,7 @@ public class WNPRC_VirologyFolderType extends MultiPortalFolderType
                 ActionURL setupUrl = new ActionURL(WNPRC_VirologyController.SetupAction.class, c);
                 ActionURL permsSetupUrl = new ActionURL("security", "permissions", c);
                 extraSteps.add(new NavTree(WNPRC_VirologyController.CONFIGURE_VIROLOGY_FOLDER, setupUrl));
+                //adds a step to appear in the nav menu but actually gets handled in the controller's success url handler
                 extraSteps.add(new NavTree("Setup user access", permsSetupUrl));
                 return extraSteps;
             }

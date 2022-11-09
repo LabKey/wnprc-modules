@@ -32,7 +32,7 @@ tr.spaceUnder > td
             </tr>
             <tr>
                 <td align="right">
-                    <labkey:button text="Finish" />
+                    <labkey:button text="Save and Configure Permissions" />
                 </td>
             </tr>
         </table>

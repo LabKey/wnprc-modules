@@ -1,4 +1,4 @@
-<view xmlns="http://labkey.org/data/xml/view" title="bannerInfo">
+<view xmlns="http://labkey.org/data/xml/view" title="Info Panel">
     <permissions>
         <permission name="read"/>
     </permissions>

@@ -43,10 +43,12 @@ public class WNPRC_VirologyFolderType extends MultiPortalFolderType
         {
             if (module instanceof WNPRC_VirologyModule)
             {
-                    List<NavTree> extraSteps = new ArrayList<>();
-                    ActionURL setupUrl = new ActionURL(WNPRC_VirologyController.SetupAction.class, c);
-                    extraSteps.add(new NavTree(WNPRC_VirologyController.CONFIGURE_VIROLOGY_FOLDER, setupUrl));
-                    return extraSteps;
+                List<NavTree> extraSteps = new ArrayList<>();
+                ActionURL setupUrl = new ActionURL(WNPRC_VirologyController.SetupAction.class, c);
+                ActionURL permsSetupUrl = new ActionURL("security", "permissions", c);
+                extraSteps.add(new NavTree(WNPRC_VirologyController.CONFIGURE_VIROLOGY_FOLDER, setupUrl));
+                extraSteps.add(new NavTree("Setup user access", permsSetupUrl));
+                return extraSteps;
             }
         }
         return Collections.emptyList();

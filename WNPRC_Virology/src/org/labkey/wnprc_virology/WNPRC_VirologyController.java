@@ -122,9 +122,9 @@ public class WNPRC_VirologyController extends SpringActionController
                     _log.info("No container found for RSEHR Viral Load Parent Folder. Check the module properties.");
                     return true;
                 }
-                SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, "lists", "Create Folders");
+                SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, "wnprc_virology", "folders_accounts_mappings");
                 Map<String,Object> mp = new HashMap<>();
-                mp.put("folderName", containerName);
+                mp.put("folder_name", containerName);
                 mp.put("accounts", accountNumbers);
                 List<Map<String, Object>> rowsToInsert = new ArrayList<>();
                 rowsToInsert.add(mp);
@@ -133,7 +133,7 @@ public class WNPRC_VirologyController extends SpringActionController
                 // set up linked schema to filter data per lab
                 String metadata = "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\">\n" +
                         "  <filters name=\"client-filter\">\n" +
-                        "    <cv:filter column=\"folderName\" operator=\"eq\" value=\"" +
+                        "    <cv:filter column=\"folder_name\" operator=\"eq\" value=\"" +
                         containerName +
                         "\"/>\n" +
                         "  </filters>\n" +

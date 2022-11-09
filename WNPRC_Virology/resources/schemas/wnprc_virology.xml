@@ -28,4 +28,16 @@
             <column columnName="modified"/>
         </columns>
     </table>
+    <table tableName="folders_accounts_mappings" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="folder_name"/>
+            <column columnName="accounts"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
 </tables>

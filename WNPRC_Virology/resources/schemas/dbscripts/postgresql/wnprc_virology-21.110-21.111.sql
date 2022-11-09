@@ -38,3 +38,19 @@ CREATE TABLE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails
     CONSTRAINT pk_rsehr_folders_accounts_and_vl_reader_emails_rowid PRIMARY KEY (rowid)
 );
 
+DROP TABLE IF EXISTS wnprc_virology.folders_accounts_mappings;
+CREATE TABLE wnprc_virology.folders_accounts_mappings
+(
+    rowid               serial NOT NULL,
+    folder_name         text NOT NULL,
+    accounts            text NOT NULL,
+
+    -- Default fields for LabKey.
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+
+    CONSTRAINT pk_folders_accounts_mappings_rowid PRIMARY KEY (rowid)
+);

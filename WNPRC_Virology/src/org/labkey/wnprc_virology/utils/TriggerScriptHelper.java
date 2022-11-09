@@ -176,31 +176,4 @@ public class TriggerScriptHelper
         }
     }
 
-    public void setupChildFolder(String folderName)
-    {
-        String parentContainerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_CONTAINER_PATH).getEffectiveValue(ContainerManager.getRoot());
-        Container parentContainer = ContainerManager.getForPath(parentContainerPath);
-        Container newContainer = ContainerManager.createContainer(parentContainer, folderName);
-        newContainer.setFolderType(FolderTypeManager.get().getFolderType(_folderType), _user);
-        setupLinkedSchema(parentContainer, newContainer);
-
-    }
-
-    public void setupLinkedSchema(Container parentContainer, Container childContainer)
-    {
-
-        String metadata = "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\">\n" +
-                "  <filters name=\"client-filter\">\n" +
-                "    <cv:filter column=\"folderName\" operator=\"eq\" value=\"" +
-                childContainer.getName() +
-                "\"/>\n" +
-                "  </filters>\n" +
-                "  <table tableName=\"" +
-                _sourceDataTableName +
-                "\" tableDbType=\"NOT_IN_DB\">\n" +
-                "    <filters ref=\"client-filter\"/>\n" +
-                "  </table>\n" +
-                "</tables>";
-        QueryService.get().createLinkedSchema(_user, childContainer,childContainer.getName() + "LinkedSchema", parentContainer.getId(), "lists", metadata, _sourceDataTableName, null);
-    }
 }

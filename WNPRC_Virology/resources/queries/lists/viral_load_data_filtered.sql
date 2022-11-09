@@ -12,12 +12,12 @@ SELECT vl.Id,
        vl.rna_isolation_method,
        vl.account,
        mp.accounts,
-       mp.folderName,
+       mp.folder_name,
 FROM study.viral_loads vl
 LEFT JOIN (
-       SELECT  lists."Create Folders".accounts,
-               lists."Create Folders".folderName
-       FROM lists."Create Folders") mp
+       SELECT  wnprc_virology.folders_accounts_mappings.accounts,
+               wnprc_virology.folders_accounts_mappings.folder_name
+       FROM wnprc_virology.folders_accounts_mappings) mp
 --ON mp.accounts in vl.account
 ON ';' || LOWER(mp.accounts) || ';' LIKE '%;' || LOWER(vl.account) || ';%'
 --might be able to use a %like% here with semicolons around each account

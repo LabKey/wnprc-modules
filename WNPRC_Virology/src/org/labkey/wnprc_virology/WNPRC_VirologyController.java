@@ -16,6 +16,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.WebPartView;
@@ -152,7 +153,9 @@ public class WNPRC_VirologyController extends SpringActionController
         @Override
         public URLHelper getSuccessURL(FolderSetupForm folderSetupForm)
         {
-            return getContainer().getStartURL(getUser());
+            // have the user setup permissions after accounts setup
+            ActionURL permsSetupUrl = new ActionURL("security", "permissions", getContainer());
+            return permsSetupUrl;
         }
 
     }

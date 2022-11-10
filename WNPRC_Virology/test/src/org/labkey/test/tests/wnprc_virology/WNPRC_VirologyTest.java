@@ -1,6 +1,7 @@
 package org.labkey.test.tests.wnprc_virology;
 
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -10,18 +11,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
+import org.labkey.test.pages.admin.CreateSubFolderPage;
+import org.labkey.test.pages.admin.SetFolderPermissionsPage;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.Ext4Helper;
+import org.openqa.selenium.WebElement;
 
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 
@@ -29,42 +36,81 @@ import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
 
-    public static final String PROJECT_NAME = "WNPRC_VirologyTestProject";
+    public static final String PROJECT_NAME_EHR = "WNPRC_VirologyTestProject";
+
+    //this will simulate where the study data lives on the RSEHR server
+    public static final String PROJECT_NAME_RSEHR = "RSHERPrivate";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
+
+    private static WNPRC_VirologyTest _test;
+
+    private static final String ACCOUNT_STR = "testaccount12345";
 
     @Nullable
     @Override
     protected String getProjectName()
     {
-        return PROJECT_NAME;
+        return PROJECT_NAME_EHR;
+    }
+
+    protected String getProjectNameRSEHR()
+    {
+        return PROJECT_NAME_RSEHR;
     }
 
     @BeforeClass
     @LogMethod
     public static void doSetup() throws Exception
     {
-        WNPRC_VirologyTest initTest = (WNPRC_VirologyTest)getCurrentTest();
-        initTest.initProject("Collaboration");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster"));
+        _test = (WNPRC_VirologyTest)getCurrentTest();
+        _test.initProject("Collaboration");
 
         // Set up the module properties
         List<ModulePropertyValue> properties = new ArrayList<>();
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", initTest.getProjectName()));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", "09-complete-email-RSEHR"));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/Private/"));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalContainerPath", _test.getProjectName()));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", _test.getProjectName() + "/" + _test.getProjectNameRSEHR()));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
-        initTest.setModuleProperties(properties);
+        _test.setModuleProperties(properties);
 
-        initTest.clickFolder(PROJECT_NAME);
-        initTest._listHelper.importListArchive(initTest.getProjectName(), LIST_ARCHIVE);
+        _test.clickFolder(PROJECT_NAME_EHR);
+        _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
+
+        //TODO import study to EHR project folder and sync to RSEHR folder.. or as a shortcut just import to RSEHR folder.
     }
 
     protected void createProjectAndFolders(String type)
     {
+        //create EHR folder with sample queue, etc
         _containerHelper.createProject(getProjectName(), type);
+        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster"));
+        //create RSHER folder with study data
+        _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHR(), "Collaboration");
+        //does this point to the new container?
+        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster"));
+        //set up a child folder under RSHER
+        setupSharedDataFolder("test_linked_schema");
+    }
+
+    protected void setupSharedDataFolder(String name)
+    {
+        _test.clickFolder("RSHERPrivate");
+        CreateSubFolderPage createSubFolderPage = _test.projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
+        createSubFolderPage.selectFolderType("WNPRC_Virology");
+        SetFolderPermissionsPage setFolderPermissionsPage = createSubFolderPage.clickNext();
+        setFolderPermissionsPage.setMyUserOnly();
+        _test.clickButton("Next");
+        _test.waitForText("Save and Configure Permissions");
+        WebElement el = Locator.id("accountNumbers").findElement(getDriver());
+        el.sendKeys(ACCOUNT_STR);
+        _test.clickButton("Save and Configure Permissions");
+        _test.waitForText("Save and Finish");
+        _test.clickButton("Save and Finish");
+
     }
 
     protected void initProject(String type) throws Exception
@@ -120,5 +166,15 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         log("Check that the Zika notification email was sent");
         goToModule("Dumbster");
         assertTextPresent("[EHR Server] Viral load results completed on ");
+    }
+
+    @Test
+    public void testFolderAccountMapping() throws Exception
+    {
+        //assert that the folders_accounts_mapping table was populated w folder name
+        SelectRowsCommand sr = new SelectRowsCommand("wnprc_virology","folders_accounts_mappings");
+        sr.addFilter("folder_name","test_linked_schema", Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(),_test.getProjectName() + "/" + _test.getProjectNameRSEHR());
+        Assert.assertEquals(1, resp.getRows().size());
     }
 }

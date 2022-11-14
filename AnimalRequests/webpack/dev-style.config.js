@@ -11,7 +11,7 @@ module.exports = {
     },
 
     output: {
-        path: path.resolve(__dirname, '../resources/web/animalrequests/app/'),
+        path: path.resolve(__dirname, '../resources/web/AnimalRequests/gen/'),
         publicPath: '/',
         filename: 'style.js' // do not override app.js
     },

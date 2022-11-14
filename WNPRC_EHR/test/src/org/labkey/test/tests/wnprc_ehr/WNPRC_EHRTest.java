@@ -2848,9 +2848,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("mhctype", "2");
         fillAnInputByName("viralstatus", "SPF4");
         fillAnInputByName("infectiousdisease", "Yes");
+        fillAnInputByName("majorsurgery", "Yes");
         fillAnInputByName("pregnantanimalsrequired", "Yes");
+        fillAnInputByName("pregnantanimalsrequiredterminfant", "Yes");
+        fillAnInputByName("pregnantanimalsrequiredtermdam", "Yes");
         fillAnInputByName("disposition", "Terminal");
         fillAnInputByName("executivecommitteeapproval", "Yes");
+        fillAnInputByName("previousexposures", "None");
         fillAnInputByName("optionalproject", "TBD");
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
@@ -2861,6 +2865,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         el.sendKeys("2022-02-11");
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
+        fillAnInputByName("contacts", "test@test.com");
 
         clickAndWait(Locator.tagWithId("button","submit-final"));
         assertTextPresent("Data Entry");

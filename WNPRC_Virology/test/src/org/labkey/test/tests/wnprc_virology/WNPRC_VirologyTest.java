@@ -18,6 +18,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.TestFileUtils;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
@@ -44,7 +45,9 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     private static WNPRC_VirologyTest _test;
 
-    private static final String ACCOUNT_STR = "testaccount12345";
+    private static final String ACCOUNT_STR = "testaccount123";
+
+    private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
 
     @Nullable
     @Override
@@ -70,7 +73,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", "09-complete-email-RSEHR"));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalContainerPath", _test.getProjectName()));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", _test.getProjectName() + "/" + _test.getProjectNameRSEHR()));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
@@ -80,7 +82,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test.clickFolder(PROJECT_NAME_EHR);
         _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
 
-        //TODO import study to EHR project folder and sync to RSEHR folder.. or as a shortcut just import to RSEHR folder.
     }
 
     protected void createProjectAndFolders(String type)
@@ -90,10 +91,45 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster"));
         //create RSHER folder with study data
         _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHR(), "Collaboration");
+        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster","Study"));
+        importStudyFromPath(1);
         //does this point to the new container?
-        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster"));
         //set up a child folder under RSHER
-        setupSharedDataFolder("test_linked_schema");
+        setupSharedDataFolder(LINKED_SCHEMA_FOLDER_NAME);
+    }
+
+    protected void importStudyFromPath(int jobCount)
+    {
+        File path = new File(TestFileUtils.getLabKeyRoot(), getModulePath() + "/resources/referenceStudy");
+        setPipelineRoot(path.getPath());
+
+        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectName() + "/" + getProjectNameRSEHR() + "/begin.view");
+        clickButton("Process and Import Data", defaultWaitForPage);
+
+        _fileBrowserHelper.expandFileBrowserRootNode();
+        _fileBrowserHelper.checkFileBrowserFileCheckbox("study.xml");
+
+        if (isTextPresent("Reload Study"))
+            _fileBrowserHelper.selectImportDataAction("Reload Study");
+        else
+            _fileBrowserHelper.selectImportDataAction("Import Study");
+
+        Locator cb = Locator.checkboxByName("validateQueries");
+        waitForElement(cb);
+        uncheckCheckbox(cb);
+
+        clickButton("Start Import"); // Validate queries page
+        waitForPipelineJobsToComplete(jobCount, "Study import", false, MAX_WAIT_SECONDS * 2500);
+    }
+
+    protected String getModuleDirectory()
+    {
+        return "WNPRC_Virology";
+    }
+
+    public String getModulePath()
+    {
+        return "/server/modules/wnprc-modules/" + getModuleDirectory();
     }
 
     protected void setupSharedDataFolder(String name)
@@ -173,8 +209,16 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     {
         //assert that the folders_accounts_mapping table was populated w folder name
         SelectRowsCommand sr = new SelectRowsCommand("wnprc_virology","folders_accounts_mappings");
-        sr.addFilter("folder_name","test_linked_schema", Filter.Operator.EQUAL);
+        sr.addFilter("folder_name",LINKED_SCHEMA_FOLDER_NAME, Filter.Operator.EQUAL);
         SelectRowsResponse resp = sr.execute(createDefaultConnection(),_test.getProjectName() + "/" + _test.getProjectNameRSEHR());
         Assert.assertEquals(1, resp.getRows().size());
+    }
+
+    @Test
+    public void testLinkedSchemaDataWebpart()
+    {
+        _test.clickFolder(LINKED_SCHEMA_FOLDER_NAME);
+        //not the best check but better than nothing
+        assertTextPresent(ACCOUNT_STR);
     }
 }

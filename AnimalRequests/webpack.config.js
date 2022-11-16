@@ -28,7 +28,7 @@ module.exports  = [function wp() {
             library: 'AnimalRequests',
             libraryExport: 'default',
             libraryTarget: 'umd',
-            path: path.resolve(__dirname, 'resources/web/animalrequests/gen/')
+            path: path.resolve(__dirname, 'resources/web/AnimalRequests/gen/')
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.json', '.css'],

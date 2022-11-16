@@ -12,7 +12,7 @@
     "build-storybook": "build-storybook",
     "build": "better-npm-run build",
     "build-prod": "better-npm-run build-prod",
-    "clean": "rm -rf resources/web/gen; rm -rf resources/views/gen"
+    "clean": "rm -rf resources/web/wnprc_ehr/gen; rm -rf resources/views/gen"
   },
   "keywords": [],
   "author": "",

@@ -16,7 +16,8 @@ public class WaterMultipleFormSection extends SimpleGridSection
 
         addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddScheduleWaterWindow.js"));
         addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
-        _showLocation = true;
+
+        _showRoomCage = true;
         setAllowBulkAdd(false);
         setTemplateMode(TEMPLATE_MODE.NONE);
        // _templateMode = TEMPLATE_MODE.NONE;

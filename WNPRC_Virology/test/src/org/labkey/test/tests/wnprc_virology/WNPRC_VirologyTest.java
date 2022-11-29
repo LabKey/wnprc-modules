@@ -7,11 +7,17 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.InsertRowsCommand;
+import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
@@ -41,11 +47,15 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     //this will simulate where the study data lives on the RSEHR server
     public static final String PROJECT_NAME_RSEHR = "RSHERPrivate";
+
+    public static final String RSHER_PRIVATE_FOLDER_PATH = PROJECT_NAME_EHR + "/" + PROJECT_NAME_RSEHR;
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
+    private static final File ALIASES_TSV = TestFileUtils.getSampleData("aliases.tsv");
 
     private static WNPRC_VirologyTest _test;
 
-    private static final String ACCOUNT_STR = "testaccount123";
+    private static final String ACCOUNT_LOOKUP = "1";
+    private static final String ACCOUNT_STR = "acct100";
 
     private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
 
@@ -73,29 +83,47 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", "09-complete-email-RSEHR"));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", _test.getProjectName() + "/" + _test.getProjectNameRSEHR()));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", RSHER_PRIVATE_FOLDER_PATH));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
         _test.setModuleProperties(properties);
 
-        _test.clickFolder(PROJECT_NAME_EHR);
-        _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
 
     }
 
-    protected void createProjectAndFolders(String type)
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String destinationContainer) throws IOException, CommandException
+    {
+        log("Loading tsv data: " + schemaName + "." + queryName);
+        InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
+        command.setRows(tsv);
+        SaveRowsResponse response = command.execute(connection, destinationContainer);
+        return response.getRows();
+    }
+
+    protected void createProjectAndFolders(String type) throws IOException, CommandException
     {
         //create EHR folder with sample queue, etc
         _containerHelper.createProject(getProjectName(), type);
-        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster"));
+        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster", "EHR_Billing"));
+
+        Connection connection = createDefaultConnection(true);
+        //import example grant accnt data
+        List<Map<String, Object>> tsv = loadTsv(ALIASES_TSV);
+        // we need the grant accounts in both locations, for the sample queue list and the rsher study dataset that gets ETLd
+        insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
+        _test.clickFolder(PROJECT_NAME_EHR);
+        _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
         //create RSHER folder with study data
         _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHR(), "Collaboration");
         _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster","Study"));
         importStudyFromPath(1);
+        //also upload grant accounts to the RSEHR folder (simulates the ETL)
+        insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSHER_PRIVATE_FOLDER_PATH);
         //does this point to the new container?
         //set up a child folder under RSHER
         setupSharedDataFolder(LINKED_SCHEMA_FOLDER_NAME);
+
     }
 
     protected void importStudyFromPath(int jobCount)
@@ -103,7 +131,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         File path = new File(TestFileUtils.getLabKeyRoot(), getModulePath() + "/resources/referenceStudy");
         setPipelineRoot(path.getPath());
 
-        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectName() + "/" + getProjectNameRSEHR() + "/begin.view");
+        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + RSHER_PRIVATE_FOLDER_PATH + "/begin.view");
         clickButton("Process and Import Data", defaultWaitForPage);
 
         _fileBrowserHelper.expandFileBrowserRootNode();
@@ -142,7 +170,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test.clickButton("Next");
         _test.waitForText("Save and Configure Permissions");
         WebElement el = Locator.id("accountNumbers").findElement(getDriver());
-        el.sendKeys(ACCOUNT_STR);
+        el.sendKeys(ACCOUNT_LOOKUP);
         _test.clickButton("Save and Configure Permissions");
         _test.waitForText("Save and Finish");
         _test.clickButton("Save and Finish");
@@ -204,13 +232,14 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         assertTextPresent("[EHR Server] Viral load results completed on ");
     }
 
+
     @Test
     public void testFolderAccountMapping() throws Exception
     {
         //assert that the folders_accounts_mapping table was populated w folder name
         SelectRowsCommand sr = new SelectRowsCommand("wnprc_virology","folders_accounts_mappings");
         sr.addFilter("folder_name",LINKED_SCHEMA_FOLDER_NAME, Filter.Operator.EQUAL);
-        SelectRowsResponse resp = sr.execute(createDefaultConnection(),_test.getProjectName() + "/" + _test.getProjectNameRSEHR());
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(),RSHER_PRIVATE_FOLDER_PATH);
         Assert.assertEquals(1, resp.getRows().size());
     }
 
@@ -219,6 +248,9 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     {
         _test.clickFolder(LINKED_SCHEMA_FOLDER_NAME);
         //not the best check but better than nothing
+        //should really check the number of expected results
         assertTextPresent(ACCOUNT_STR);
     }
+
+
 }

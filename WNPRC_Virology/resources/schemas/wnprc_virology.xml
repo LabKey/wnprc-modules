@@ -17,7 +17,13 @@
     <table tableName="rsehr_folders_accounts_and_vl_reader_emails" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
-            <column columnName="account"/>
+            <column columnName="account">
+                <fk>
+                    <fkDbSchema>ehr_billing</fkDbSchema>
+                    <fkTable>aliases</fkTable>
+                    <fkColumnName>rowid</fkColumnName>
+                </fk>
+            </column>
             <column columnName="emails"/>
             <column columnName="folder_name"/>
             <column columnName="folder_container_id"/>
@@ -33,11 +39,93 @@
         <columns>
             <column columnName="rowid"/>
             <column columnName="folder_name"/>
-            <column columnName="accounts"/>
+            <column columnName="account">
+                <fk>
+                    <fkDbSchema>wnprc_virology</fkDbSchema>
+                    <fkTable>grant_accounts</fkTable>
+                    <fkColumnName>rowid</fkColumnName>
+                </fk>
+            </column>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>
             <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="grant_accounts" tableDbType="TABLE">
+        <tableTitle>Aliases</tableTitle>
+        <description>Meant to serve as a copy of EHR's ehr_billing.aliases table</description>
+        <auditLogging>DETAILED</auditLogging>
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="alias"/>
+            <column columnName="category">
+                <columnTitle>Category</columnTitle>
+            </column>
+            <column columnName="isAcceptingCharges">
+                <columnTitle>Is Accepting Charges?</columnTitle>
+            </column>
+            <column columnName="isActive"/>
+            <column columnName="groupName"/>
+            <column columnName="projectNumber">
+                <description>Institution generated or given project number (not necessarily same as ehr.project.project)</description>
+            </column>
+            <column columnName="grantNumber"/>
+            <column columnName="agencyAwardNumber">
+                <columnTitle>Agency Award Number</columnTitle>
+            </column>
+            <column columnName="investigatorId">
+                <columnTitle>Investigator</columnTitle>
+                <shownInInsertView>true</shownInInsertView>
+            </column>
+            <column columnName="investigatorName">
+                <shownInInsertView>false</shownInInsertView>
+            </column>
+            <column columnName="fiscalAuthority">
+                <columnTitle>Fiscal Authority</columnTitle>
+                <shownInInsertView>true</shownInInsertView>
+            </column>
+            <column columnName="fiscalAuthorityName">
+                <columnTitle>Fiscal Authority Name</columnTitle>
+                <shownInInsertView>false</shownInInsertView>
+            </column>
+            <column columnName="budgetStartDate"/>
+            <column columnName="budgetEndDate"/>
+            <column columnName="faRate">
+                <columnTitle>F&amp;A Rate</columnTitle>
+            </column>
+            <column columnName="faSchedule">
+                <columnTitle>F&amp;A Schedule</columnTitle>
+            </column>
+            <column columnName="projectTitle">
+                <columnTitle>Project Title</columnTitle>
+            </column>
+            <column columnName="projectDescription">
+                <columnTitle>Project Description</columnTitle>
+            </column>
+            <column columnName="projectStatus">
+                <columnTitle>Project Status</columnTitle>
+            </column>
+            <column columnName="aliasType">
+                <columnTitle>Alias Type</columnTitle>
+            </column>
+            <column columnName="Lsid">
+                <datatype>lsidtype</datatype>
+                <isReadOnly>true</isReadOnly>
+                <isHidden>true</isHidden>
+                <isUserEditable>false</isUserEditable>
+                <isUnselectable>true</isUnselectable>
+                <fk>
+                    <fkColumnName>ObjectUri</fkColumnName>
+                    <fkTable>Object</fkTable>
+                    <fkDbSchema>exp</fkDbSchema>
+                </fk>
+            </column>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
             <column columnName="modified"/>
         </columns>
     </table>

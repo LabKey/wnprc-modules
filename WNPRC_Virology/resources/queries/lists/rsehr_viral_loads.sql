@@ -19,7 +19,7 @@ SELECT
     v.sourceMaterial.type AS source_type,
     v.comment AS comment,
     v.run.exptNumber as experiment_number,
-    GROUP_CONCAT(DISTINCT vsq.funding_string, ' ; ') as account,
+    vsq.funding_string as account,
     GROUP_CONCAT(DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
 FROM "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/".assay.Viral_Loads.Viral_Load.Data v
 
@@ -36,4 +36,4 @@ WHERE
 
 -- groupBy viral load so these can be averaged
 GROUP BY
-    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber
+    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string

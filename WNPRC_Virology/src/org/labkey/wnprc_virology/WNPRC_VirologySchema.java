@@ -13,7 +13,7 @@ public class WNPRC_VirologySchema extends SimpleUserSchema
     public Container _container;
 
     public WNPRC_VirologySchema(User user, Container container) {
-        super(NAME, "WNPRC VIROLOGY SCHEMA FOR ETLS", user, container, DbSchema.get(NAME, DbSchemaType.Module));
+        super(NAME, "Contains ETLs, jobs, and other necessary behaviors for sharing data in RSEHR", user, container, DbSchema.get(NAME, DbSchemaType.Module));
         _container = container;
     }
 

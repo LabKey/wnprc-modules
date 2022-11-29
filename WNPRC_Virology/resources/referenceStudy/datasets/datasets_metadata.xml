@@ -105,11 +105,15 @@
         <scale>4000</scale>
       </column>
       <column columnName="account">
-        <datatype>varchar</datatype>
-        <columnTitle>Account</columnTitle>
-        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <defaultValueType>FIXED_EDITABLE</defaultValueType>
-        <scale>4000</scale>
+        <datatype>integer</datatype>
+        <columnTitle>Funding string</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <required>true</required>
+        <fk>
+          <fkDbSchema>wnprc_virology</fkDbSchema>
+          <fkTable>grant_accounts</fkTable>
+          <fkColumnName>rowid</fkColumnName>
+        </fk>
       </column>
     </columns>
     <tableTitle>Viral Loads - EHR</tableTitle>

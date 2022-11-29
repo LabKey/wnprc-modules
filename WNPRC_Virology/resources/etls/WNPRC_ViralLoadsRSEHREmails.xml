@@ -4,7 +4,7 @@
     <description>This ETL copies over the folder plus account plus emails information from RSEHR to EHR</description>
     <transforms>
         <transform id="rsher-folder-mappings-to-ehr" type="RemoteQueryTransformStep">
-            <source queryName="rsehr_folders_accounts_and_vl_reader_emails" remoteSource="RSEHRServerVirology" schemaName="lists"/>
+            <source queryName="rsehr_folders_accounts_and_vl_reader_emails_etl" remoteSource="RSEHRServerVirology" schemaName="lists"/>
             <destination queryName="rsehr_folders_accounts_and_vl_reader_emails" schemaName="wnprc_virology" targetOption="truncate"/>
         </transform>
     </transforms>

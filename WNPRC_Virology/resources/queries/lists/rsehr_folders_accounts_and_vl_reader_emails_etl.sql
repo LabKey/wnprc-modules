@@ -1,6 +1,6 @@
 SELECT
 
-    unnest(string_to_array(m.accounts, ';')) as account,
+    m.account,
     m.Key,
     f.folder_name,
     f.emails,

@@ -125,10 +125,11 @@ public class WNPRC_VirologyController extends SpringActionController
                 SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, "wnprc_virology", "folders_accounts_mappings");
                 Map<String,Object> mp = new HashMap<>();
                 mp.put("folder_name", containerName);
-                mp.put("accounts", accountNumbers);
+                mp.put("account", accountNumbers);
                 List<Map<String, Object>> rowsToInsert = new ArrayList<>();
                 rowsToInsert.add(mp);
                 qu.insert(rowsToInsert);
+                QueryService.get().createLinkedSchema(getUser(), c,"wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts", null);
 
                 // set up linked schema to filter data per lab
                 String metadata = "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\">\n" +
@@ -141,9 +142,21 @@ public class WNPRC_VirologyController extends SpringActionController
                         _sourceDataTableName +
                         "\" tableDbType=\"NOT_IN_DB\">\n" +
                         "    <filters ref=\"client-filter\"/>\n" +
+                        "       <columns>\n" +
+                        "          <column columnName=\"account\">\n" +
+                        "             <fk>\n" +
+                        "                <fkDbSchema>wnprc_virology_linked</fkDbSchema>\n" +
+                        "                <fkTable>grant_accounts</fkTable>\n" +
+                        "                <fkColumnName>rowid</fkColumnName>\n" +
+                        "                <fkDisplayColumnName>alias</fkDisplayColumnName>\n" +
+                        "             </fk>\n" +
+                        "          </column>\n" +
+                        "       </columns>" +
                         "  </table>\n" +
                         "</tables>";
                 QueryService.get().createLinkedSchema(getUser(), c,containerName + "LinkedSchema", viralLoadContainer.getId(), "lists", metadata, _sourceDataTableName, null);
+
+
             }
 
             return true;

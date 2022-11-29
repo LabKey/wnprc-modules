@@ -7,7 +7,7 @@ SELECT
     v.sourceMaterial.type AS source_type,
     v.comment AS comment,
     v.run.exptNumber as experiment_number,
-    GROUP_CONCAT(DISTINCT vsq.funding_string, ' ; ') as account,
+    vsq.funding_string as account,
     GROUP_CONCAT(DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
     CASE WHEN (MIN(v.viralLoadScientific) = 0 AND MAX(v.viralLoadScientific) != 0) THEN ('Equoivical') END AS equivocal,
     MAX(v.RowId)as Key
@@ -26,4 +26,4 @@ WHERE
 
 -- groupBy viral load so these can be averaged
 GROUP BY
-    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber
+    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string

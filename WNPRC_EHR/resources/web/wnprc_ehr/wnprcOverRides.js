@@ -98,6 +98,12 @@ WNPRC_EHR.ProjectField2 = Ext.extend(LABKEY.ext.ComboBox, {
     }
 });
 
+EHR.Utils.formatAnimalIds = function(subjects) {
+    return subjects.map(element => {
+        return element.toLowerCase();
+    });
+}
+
 Ext.reg('ehr-project_2', WNPRC_EHR.ProjectField2);
 
 EHR.Metadata.Columns['Irregular Observations'] = 'id/curlocation/location,id,id/curlocation/cond,date,enddate,inRoom,feces,menses,other,tlocation,other,breeding,' + EHR.Metadata.bottomCols + ',behavior,otherbehavior';

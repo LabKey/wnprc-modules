@@ -98,6 +98,10 @@ WNPRC_EHR.ProjectField2 = Ext.extend(LABKEY.ext.ComboBox, {
     }
 });
 
+
+/** This forces animal Ids to lowercase in UI components like animal history, animal search,
+ *  and data entry windows. This is no longer the default formatting in EHR so overriding this locally.
+ */
 EHR.Utils.formatAnimalIds = function(subjects) {
     return subjects.map(element => {
         return element.toLowerCase();

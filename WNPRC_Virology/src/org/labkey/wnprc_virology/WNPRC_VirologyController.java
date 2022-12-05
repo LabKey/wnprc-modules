@@ -3,6 +3,8 @@ package org.labkey.wnprc_virology;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.action.FormHandlerAction;
+import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -22,6 +24,11 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -65,16 +72,16 @@ public class WNPRC_VirologyController extends SpringActionController
 
     public static class FolderSetupForm
     {
-        private String _accountNumbers;
+        private String accounts;
 
         public String getAccountNumbers()
         {
-            return _accountNumbers;
+            return accounts;
         }
 
         public void setAccountNumbers(String accountNumbers)
         {
-            _accountNumbers = accountNumbers;
+            accounts = accountNumbers;
         }
     }
 
@@ -90,6 +97,10 @@ public class WNPRC_VirologyController extends SpringActionController
         @Override
         public boolean handlePost(FolderSetupForm folderSetupForm, BindException errors) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException
         {
+            if (folderSetupForm.getAccountNumbers() == null)
+            {
+                return false;
+            }
             Container c = getContainer();
             WNPRC_VirologyModule wnprcVirologyModule = null;
             for (Module m : c.getActiveModules())
@@ -173,6 +184,49 @@ public class WNPRC_VirologyController extends SpringActionController
 
     }
 
+    @RequiresPermission(AdminPermission.class)
+    public static class StartRSEHRJobAction extends MutatingApiAction<Object>
+    {
+
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+
+            JobDetail _job = null;
+            _job = JobBuilder.newJob(ViralLoadRSEHRRunner.class)
+                    .withIdentity(ViralLoadRSEHRRunner.class.getCanonicalName())
+                    .build();
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .withIdentity(ViralLoadRSEHRRunner.class.getCanonicalName())
+                    .startNow()
+                    .forJob(_job)
+                    .build();
+            StdSchedulerFactory.getDefaultScheduler().scheduleJob(_job, trigger);
+            return null;
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public static class LinkedSchemaSetupAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+/*            String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
+            if (containerPath == null)
+                containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getDefaultValue();
+            if (containerPath == null)
+            {
+                _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module settings.");
+                return true;
+            }
+            Container viralLoadContainer = ContainerManager.getForPath(containerPath);
+            Container c = getContainer();
+            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts", null);*/
+            return null;
+        }
+
+    }
     @RequiresPermission(AdminPermission.class)
     public static class SetupAction extends SimpleViewAction<Object>
     {

@@ -1,3 +1,4 @@
+CREATE SCHEMA IF NOT EXISTS wnprc_virology;
 DROP TABLE IF EXISTS wnprc_virology.grant_accounts CASCADE;
 CREATE TABLE wnprc_virology.grant_accounts
 (

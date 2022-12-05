@@ -15,28 +15,37 @@
 %>
 
 <style type="text/css">
-tr.spaceUnder > td
-{
-  padding-bottom: 1em;
-}
+    .dropdown-section {
+        padding-bottom: 5px;
+    }
 </style>
 
-<div id="folder-type-set" <%= unsafe(!isNull ? "" : "style=\"display:none\"") %> >
-    <labkey:form action="<%= new ActionURL(WNPRC_VirologyController.FolderSetupAction.class, getContainer()) %>" method="post">
-        <table cellspacing="7" width="100%">
-            <tr class="spaceUnder">
-                <td>
-                    <!--- maybe we can get the value later for updates --->
-                  <label for="accountNumbers"><strong>Account number(s)</strong></label>  <input type="text" name="accountNumbers" id="accountNumbers">
-                </td>
-            </tr>
-            <tr>
-                <td align="right">
-                    <labkey:button text="Save and Configure Permissions" />
-                </td>
-            </tr>
-        </table>
-    </labkey:form>
+<script type="text/javascript">
+
+    LABKEY.Ajax.request({
+        url: LABKEY.ActionURL.buildURL("wnprc_virology", "linkedSchemaSetup"),
+        method : 'POST',
+        jsonData : {},
+        success: function () {
+            LABKEY.requiresScript("/wnprc_ehr/gen/dropdown.js",true, function() {
+                Dropdown.renderDropdown("whtaever",'Whatever')
+                document.getElementById("folder-type-set").setAttribute("style", "display:block");
+            });
+        },
+        failure: function (e) {
+            alert(JSON.parse(e.response).exception)
+        }
+    });
+
+
+
+
+</script>
+
+<div id="folder-type-set" style="display:none">
+    <form method="post">
+      <div id="dropdown-section"></div>
+    </form>
 </div>
 
 <div id="folder-type-unset" <%= unsafe(isNull ? "" : "style=\"display:none\"") %> >

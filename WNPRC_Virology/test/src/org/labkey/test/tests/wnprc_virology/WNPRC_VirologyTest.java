@@ -13,8 +13,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.security.MutableSecurityPolicy;
+import org.labkey.api.security.SecurityPolicy;
+import org.labkey.api.security.roles.FolderAdminRole;
+import org.labkey.api.security.roles.RoleManager;
+import org.labkey.api.util.GUID;
+import org.labkey.api.view.ActionURL;
 import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.PostCommand;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
@@ -29,12 +39,16 @@ import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
 import org.labkey.test.pages.admin.SetFolderPermissionsPage;
+import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
+import org.labkey.test.util.PermissionsHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.Ext4Helper;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
@@ -78,18 +92,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test = (WNPRC_VirologyTest)getCurrentTest();
         _test.initProject("Collaboration");
 
-        // Set up the module properties
-        List<ModulePropertyValue> properties = new ArrayList<>();
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", "09-complete-email-RSEHR"));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", RSHER_PRIVATE_FOLDER_PATH));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
-        _test.setModuleProperties(properties);
-
-
     }
 
     private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String destinationContainer) throws IOException, CommandException
@@ -106,12 +108,22 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //create EHR folder with sample queue, etc
         _containerHelper.createProject(getProjectName(), type);
         _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster", "EHR_Billing"));
+        // Set up the module properties
+        List<ModulePropertyValue> properties = new ArrayList<>();
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", "09-complete-email-RSEHR"));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", RSHER_PRIVATE_FOLDER_PATH));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
+        _test.setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
         List<Map<String, Object>> tsv = loadTsv(ALIASES_TSV);
         // we need the grant accounts in both locations, for the sample queue list and the rsher study dataset that gets ETLd
-        insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
+        //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
         _test.clickFolder(PROJECT_NAME_EHR);
         _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
         //create RSHER folder with study data
@@ -160,7 +172,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         return "/server/modules/wnprc-modules/" + getModuleDirectory();
     }
 
-    protected void setupSharedDataFolder(String name)
+    protected void setupSharedDataFolder(String name) throws IOException, CommandException
     {
         _test.clickFolder("RSHERPrivate");
         CreateSubFolderPage createSubFolderPage = _test.projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
@@ -168,12 +180,28 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         SetFolderPermissionsPage setFolderPermissionsPage = createSubFolderPage.clickNext();
         setFolderPermissionsPage.setMyUserOnly();
         _test.clickButton("Next");
-        _test.waitForText("Save and Configure Permissions");
-        WebElement el = Locator.id("accountNumbers").findElement(getDriver());
-        el.sendKeys(ACCOUNT_LOOKUP);
+        _test.waitForText("Select...");
+        WebElement el = Locator.id("dropdown-section").findElement(getDriver());
+        WebElement inp = el.findElement(By.tagName("input"));
+        inp.sendKeys(ACCOUNT_STR);
+        inp.sendKeys(Keys.ENTER);
         _test.clickButton("Save and Configure Permissions");
         _test.waitForText("Save and Finish");
         _test.clickButton("Save and Finish");
+
+        //add readers and then run the pipeline job
+        Container c = ContainerManager.getForPath(RSHER_PRIVATE_FOLDER_PATH);
+        //TODO create fake user
+        //_users = createUsers(ALL_EMAILS);
+        MutableSecurityPolicy policy = new MutableSecurityPolicy(c, c.getPolicy());
+        PermissionsHelper _permissionsHelper = new ApiPermissionsHelper(this);
+        _permissionsHelper.setUserPermissions(_test.getCurrentUserName(), "WNPRC Viral Load Reader Role");
+
+        Connection connection = createDefaultConnection();
+        PostCommand command = new PostCommand("wnprc_virology", "startRSEHRJob");
+        command.setTimeout(1200000);
+        CommandResponse response = command.execute(connection, RSHER_PRIVATE_FOLDER_PATH);
+        Assert.assertTrue(response.getStatusCode() < 400);
 
     }
 

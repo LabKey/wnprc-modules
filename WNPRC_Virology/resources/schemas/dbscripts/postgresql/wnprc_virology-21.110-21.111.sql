@@ -58,7 +58,6 @@ DROP TABLE IF EXISTS wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails;
 CREATE TABLE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails
 (
     rowid               serial NOT NULL,
-    Key                 integer NOT NULL,
     account             integer NOT NULL,
     emails              text,
     folder_name         text NOT NULL,

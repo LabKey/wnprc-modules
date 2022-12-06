@@ -48,7 +48,7 @@ public class WNPRC_PurchasingModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 22.000;
+        return 22.001;
     }
 
     @Override

@@ -14,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.security.MutableSecurityPolicy;
-import org.labkey.api.security.SecurityPolicy;
-import org.labkey.api.security.roles.FolderAdminRole;
-import org.labkey.api.security.roles.RoleManager;
-import org.labkey.api.util.GUID;
-import org.labkey.api.view.ActionURL;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
@@ -39,10 +32,8 @@ import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
 import org.labkey.test.pages.admin.SetFolderPermissionsPage;
-import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
-import org.labkey.test.util.PermissionsHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -63,6 +54,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String PROJECT_NAME_RSEHR = "RSHERPrivate";
 
     public static final String RSHER_PRIVATE_FOLDER_PATH = PROJECT_NAME_EHR + "/" + PROJECT_NAME_RSEHR;
+    public static final String TEST_USER = "test@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File ALIASES_TSV = TestFileUtils.getSampleData("aliases.tsv");
 
@@ -72,6 +64,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     private static final String ACCOUNT_STR = "acct100";
 
     private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
+    private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
 
     @Nullable
     @Override
@@ -111,7 +104,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         // Set up the module properties
         List<ModulePropertyValue> properties = new ArrayList<>();
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", "09-complete-email-RSEHR"));
+        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", RSEHR_QC_CODE));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", RSHER_PRIVATE_FOLDER_PATH));
         properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
@@ -134,6 +127,9 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSHER_PRIVATE_FOLDER_PATH);
         //does this point to the new container?
         //set up a child folder under RSHER
+        List<ModulePropertyValue> props = new ArrayList<>();
+        props.add(new ModulePropertyValue("EHR", RSHER_PRIVATE_FOLDER_PATH, "EHRAdminUser", getCurrentUser()));
+        _test.setModuleProperties(props);
         setupSharedDataFolder(LINKED_SCHEMA_FOLDER_NAME);
 
     }
@@ -175,6 +171,8 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     protected void setupSharedDataFolder(String name) throws IOException, CommandException
     {
         _test.clickFolder("RSHERPrivate");
+        setupNotificationService();
+        _test.clickFolder("RSHERPrivate");
         CreateSubFolderPage createSubFolderPage = _test.projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
         createSubFolderPage.selectFolderType("WNPRC_Virology");
         SetFolderPermissionsPage setFolderPermissionsPage = createSubFolderPage.clickNext();
@@ -190,12 +188,11 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test.clickButton("Save and Finish");
 
         //add readers and then run the pipeline job
-        Container c = ContainerManager.getForPath(RSHER_PRIVATE_FOLDER_PATH);
         //TODO create fake user
         //_users = createUsers(ALL_EMAILS);
-        MutableSecurityPolicy policy = new MutableSecurityPolicy(c, c.getPolicy());
-        PermissionsHelper _permissionsHelper = new ApiPermissionsHelper(this);
-        _permissionsHelper.setUserPermissions(_test.getCurrentUserName(), "WNPRC Viral Load Reader Role");
+        _userHelper.createUser(TEST_USER);
+        _permissionsHelper.setUserPermissions(TEST_USER, "WNPRC Viral Load Reader");
+        _test.clickButton("Save and Finish");
 
         Connection connection = createDefaultConnection();
         PostCommand command = new PostCommand("wnprc_virology", "startRSEHRJob");
@@ -208,7 +205,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     protected void initProject(String type) throws Exception
     {
         createProjectAndFolders(type);
-        setupNotificationService();
     }
 
     public void setupNotificationService()
@@ -225,6 +221,14 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         clickButton("Save", 0);
         waitForElement(Ext4Helper.Locators.window().withDescendant(Window.Locators.title().withText("Success")));
         waitAndClickAndWait(Ext4Helper.Locators.ext4Button("OK"));
+        beginAt(buildRelativeUrl("ldk", RSHER_PRIVATE_FOLDER_PATH, "notificationAdmin"));
+        Ext4FieldRef.getForLabel(this, "Notification User").setValue(PasswordUtil.getUsername());
+        Ext4FieldRef.getForLabel(this, "Reply Email").setValue(email);
+        Ext4CmpRef btn2 = _ext4Helper.queryOne("button[text='Save']", Ext4CmpRef.class);
+        btn2.waitForEnabled();
+        clickButton("Save", 0);
+        waitForElement(Ext4Helper.Locators.window().withDescendant(Window.Locators.title().withText("Success")));
+        waitAndClickAndWait(Ext4Helper.Locators.ext4Button("OK"));
     }
 
     @Override
@@ -238,6 +242,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     {
         log("Select first 2 samples and batch complete");
         enableEmailRecorder();
+        _test.clickFolder(PROJECT_NAME_EHR);
         waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
         //select all records and batch complete
         waitAndClick(Locator.checkboxByNameAndValue(".select", "1")); //for some reason waitAndClickAndWait() didn't work here
@@ -260,6 +265,8 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         assertTextPresent("[EHR Server] Viral load results completed on ");
     }
 
+   
+
 
     @Test
     public void testFolderAccountMapping() throws Exception
@@ -278,6 +285,16 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //not the best check but better than nothing
         //should really check the number of expected results
         assertTextPresent(ACCOUNT_STR);
+    }
+
+    @Test
+    public void testViralLoadRSEHRJob() throws IOException, CommandException
+    {
+        SelectRowsCommand sr = new SelectRowsCommand("lists","rsehr_folders_accounts_and_vl_reader_emails_etl");
+        sr.addFilter("emails", TEST_USER, Filter.Operator.EQUAL);
+        sr.addFilter("folder_name",LINKED_SCHEMA_FOLDER_NAME, Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), RSHER_PRIVATE_FOLDER_PATH);
+        Assert.assertEquals(1, resp.getRows().size());
     }
 
 

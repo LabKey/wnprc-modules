@@ -1,7 +1,6 @@
 SELECT
 
     m.account,
-    m.Key,
     f.folder_name,
     f.emails,
     f.folder_path,

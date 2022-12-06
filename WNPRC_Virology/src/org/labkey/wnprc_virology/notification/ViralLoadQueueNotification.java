@@ -268,7 +268,6 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
         // Define columns to get
         List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("Key"));
         columns.add(FieldKey.fromString("rowid"));
         columns.add(FieldKey.fromString("account"));
         columns.add(FieldKey.fromString("emails"));
@@ -285,7 +284,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
                 String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");
 
-                //TODO strip out unique Keys (can we do this at the query level?)
+                //TODO strip out unique Keys (can we do this at the query level, maybe group by folder_path
                 //we should also only iterate over results that are not the same Key
 
                 //don't we want unique emails?

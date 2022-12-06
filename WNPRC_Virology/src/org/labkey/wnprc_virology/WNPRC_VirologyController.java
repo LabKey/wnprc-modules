@@ -2,6 +2,8 @@ package org.labkey.wnprc_virology;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
@@ -72,34 +74,31 @@ public class WNPRC_VirologyController extends SpringActionController
 
     public static class FolderSetupForm
     {
-        private String accounts;
+        private int[] _accounts;
 
-        public String getAccountNumbers()
+        public int[] getAccounts()
         {
-            return accounts;
+            return _accounts;
         }
 
-        public void setAccountNumbers(String accountNumbers)
+        public void setAccounts(int[] accounts)
         {
-            accounts = accountNumbers;
+            _accounts = accounts;
         }
     }
 
     /* Add accounts and linked schema during folder setup */
     @RequiresPermission(ReadPermission.class)
-    public static class FolderSetupAction extends FormHandlerAction<FolderSetupForm>
+    public class FolderSetupAction extends MutatingApiAction<FolderSetupForm>
     {
         @Override
-        public void validateCommand(FolderSetupForm target, Errors errors)
+        public ApiResponse execute(FolderSetupForm folderSetupForm, BindException errors) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException
         {
-        }
-
-        @Override
-        public boolean handlePost(FolderSetupForm folderSetupForm, BindException errors) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException
-        {
-            if (folderSetupForm.getAccountNumbers() == null)
+            if (folderSetupForm.getAccounts() == null)
             {
-                return false;
+                Map<String, Object> result = new HashMap<>();
+                result.put("failure", true);
+                return new ApiSimpleResponse(result);
             }
             Container c = getContainer();
             WNPRC_VirologyModule wnprcVirologyModule = null;
@@ -112,12 +111,14 @@ public class WNPRC_VirologyController extends SpringActionController
             }
             if (wnprcVirologyModule == null)
             {
-                return true; // no wnprc virology module found, do nothing
+                Map<String, Object> result = new HashMap<>();
+                result.put("failure", true);
+                return new ApiSimpleResponse(result);
             }
             else
             {
                 // insert folder name and account info into mapping table to filter data
-                String accountNumbers = folderSetupForm.getAccountNumbers();
+                int[] accountNumbers = folderSetupForm.getAccounts();
                 String containerName = c.getName();
                 String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
                 if (containerPath == null)
@@ -125,22 +126,28 @@ public class WNPRC_VirologyController extends SpringActionController
                 if (containerPath == null)
                 {
                     _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module settings.");
-                    return true;
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("failure", true);
+                    return new ApiSimpleResponse(result);
                 }
                 Container viralLoadContainer = ContainerManager.getForPath(containerPath);
                 if (viralLoadContainer == null)
                 {
                     _log.info("No container found for RSEHR Viral Load Parent Folder. Check the module properties.");
-                    return true;
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("failure", true);
+                    return new ApiSimpleResponse(result);
                 }
                 SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, "wnprc_virology", "folders_accounts_mappings");
-                Map<String,Object> mp = new HashMap<>();
-                mp.put("folder_name", containerName);
-                mp.put("account", accountNumbers);
                 List<Map<String, Object>> rowsToInsert = new ArrayList<>();
-                rowsToInsert.add(mp);
+                for (int i = 0; i < accountNumbers.length; i++)
+                {
+                    Map<String,Object> mp = new HashMap<>();
+                    mp.put("folder_name", containerName);
+                    mp.put("account", accountNumbers[i]);
+                    rowsToInsert.add(mp);
+                }
                 qu.insert(rowsToInsert);
-                QueryService.get().createLinkedSchema(getUser(), c,"wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts", null);
 
                 // set up linked schema to filter data per lab
                 String metadata = "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\">\n" +
@@ -170,17 +177,11 @@ public class WNPRC_VirologyController extends SpringActionController
 
             }
 
-            return true;
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            return new ApiSimpleResponse(result);
         }
 
-
-        @Override
-        public URLHelper getSuccessURL(FolderSetupForm folderSetupForm)
-        {
-            // have the user setup permissions after accounts setup
-            ActionURL permsSetupUrl = new ActionURL("security", "permissions", getContainer());
-            return permsSetupUrl;
-        }
 
     }
 
@@ -212,7 +213,7 @@ public class WNPRC_VirologyController extends SpringActionController
         @Override
         public Object execute(Object o, BindException errors) throws Exception
         {
-/*            String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
+            String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
             if (containerPath == null)
                 containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getDefaultValue();
             if (containerPath == null)
@@ -222,7 +223,7 @@ public class WNPRC_VirologyController extends SpringActionController
             }
             Container viralLoadContainer = ContainerManager.getForPath(containerPath);
             Container c = getContainer();
-            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts", null);*/
+            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts", null);
             return null;
         }
 

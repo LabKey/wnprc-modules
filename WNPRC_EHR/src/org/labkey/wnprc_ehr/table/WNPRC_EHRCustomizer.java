@@ -1476,7 +1476,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String num_animals_assigned = "num_animals_assigned";
             TableInfo assignmentTable = getRealTableForDataset(table, "assignment");
 
-            // Adding null check here to keep teamcity test happy otherwise 'WNPRCComplianceTrainingTest.testSopSubmission' test
+            // Adding null check here to keep teamcity happy otherwise 'WNPRCComplianceTrainingTest.testSopSubmission' test
             // results in server side error: Cannot invoke "org.labkey.api.data.TableInfo.getName()" because "assignmentTable" is null
             if (null != assignmentTable)
             {

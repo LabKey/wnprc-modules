@@ -197,39 +197,6 @@ let waterMonitoringConfig = function wp(env) {
     };
 };
 
-var dropdownConfig = function wp(env) {
-
-    return {
-        mode: process.env.NODE_ENV,
-        devtool: 'source-map',
-        entry: './src/abstract/base/DropdownApp.tsx',
-        externals: {
-            jquery: 'jQuery',
-            urijs: 'URI',
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    loader: "ts-loader"
-                },
-                {
-                    test: /\.css$/i,
-                    use: ['style-loader', 'css-loader']
-                }
-            ],
-        },
-        output: {
-            filename: 'dropdown.js',
-            library: 'Dropdown',
-            libraryTarget: 'umd',
-            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen'),
-        },
-        resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
-        },
-    };
-};
 module.exports = [
-    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig, waterMonitoringConfig, dropdownConfig
+    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig, waterMonitoringConfig
 ];

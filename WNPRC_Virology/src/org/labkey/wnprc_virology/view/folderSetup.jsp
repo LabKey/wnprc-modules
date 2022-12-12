@@ -1,6 +1,4 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.wnprc_virology.WNPRC_VirologyController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     //configure fancier folder type checking later if needed
@@ -14,12 +12,6 @@
     }
 %>
 
-<style type="text/css">
-    .dropdown-section {
-        padding-bottom: 5px;
-    }
-</style>
-
 <script type="text/javascript">
 
     LABKEY.Ajax.request({
@@ -27,8 +19,8 @@
         method : 'POST',
         jsonData : {},
         success: function () {
-            LABKEY.requiresScript("/wnprc_ehr/gen/dropdown.js",true, function() {
-                Dropdown.renderDropdown("whtaever",'Whatever')
+            LABKEY.requiresScript("/wnprc_virology/gen/dropdown.js",true, function() {
+                DropdownSelect.renderDropdown();
                 document.getElementById("folder-type-set").setAttribute("style", "display:block");
             });
         },
@@ -37,14 +29,11 @@
         }
     });
 
-
-
-
 </script>
 
 <div id="folder-type-set" style="display:none">
     <form method="post">
-      <div id="dropdown-section"></div>
+      <div id="app"></div>
     </form>
 </div>
 

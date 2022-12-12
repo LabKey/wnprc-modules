@@ -223,7 +223,7 @@ public class WNPRC_VirologyController extends SpringActionController
             }
             Container viralLoadContainer = ContainerManager.getForPath(containerPath);
             Container c = getContainer();
-            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts", null);
+            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts, folders_accounts_mappings", null);
             return null;
         }
 

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "jsx": "react",
+    "lib": ["dom","es2017"],
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "downlevelIteration": true
+  },
+  "exclude": [
+    "resources"
+  ]
+}

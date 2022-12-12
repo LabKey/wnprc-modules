@@ -265,7 +265,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         assertTextPresent("[EHR Server] Viral load results completed on ");
     }
 
-   
+
 
 
     @Test
@@ -295,6 +295,35 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         sr.addFilter("folder_name",LINKED_SCHEMA_FOLDER_NAME, Filter.Operator.EQUAL);
         SelectRowsResponse resp = sr.execute(createDefaultConnection(), RSHER_PRIVATE_FOLDER_PATH);
         Assert.assertEquals(1, resp.getRows().size());
+    }
+
+    //@Test
+    public void testBatchCompleteAndSendRSERHEmail() throws Exception
+    {
+        //TODO either add test data to rsehr_folders_accounts_and_vl_reader_emails or run the ETL
+        log("Select first 2 samples and batch complete");
+        enableEmailRecorder();
+        _test.clickFolder(PROJECT_NAME_EHR);
+        waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
+        //select all records and batch complete
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "1")); //for some reason waitAndClickAndWait() didn't work here
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "2"));
+        waitAndClick(Locator.lkButton("Batch Complete Samples"));
+        //select the dropdown arrow to select qc state
+        waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
+        Locator.XPathLocator ZikaQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
+        click(ZikaQCStateSelectItem);
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
+        click(Ext4Helper.Locators.ext4Button("Submit"));
+
+        sleep(5000);
+        log("Check that the Zika notification email was sent");
+        goToModule("Dumbster");
+        assertTextPresent("[EHR Server] Viral load results completed on ");
     }
 
 

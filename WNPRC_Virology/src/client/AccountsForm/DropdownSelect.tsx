@@ -39,6 +39,7 @@ const DropdownSelect: React.FunctionComponent<DropdownSelectProps> = props => {
           temp.push({ value: item["account"], label: optionsObject[item["account"]]});
         });
         setSelectedOptions(temp);
+        setAccountsContext(temp);
       }
     });
 
@@ -58,13 +59,19 @@ const DropdownSelect: React.FunctionComponent<DropdownSelectProps> = props => {
     accounts
   } = useContext(AppContext);
 
-  const handleChange = e => {
-    setSelectedOptions(e);
+  const setAccountsContext = (accounts:object) => {
     let valArr = [];
-    for (let val in e) {
-      valArr.push(e[val].value)
+    if (accounts != null) {
+      Object.keys(accounts).map(account => {
+        valArr.push(accounts[account].value)
+      });
     }
     setAccountsExternal(valArr)
+  }
+
+  const handleChange = e => {
+    setSelectedOptions(e);
+    setAccountsContext(e);
   };
 
   const dropdown = (

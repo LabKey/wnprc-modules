@@ -32,20 +32,41 @@ const DropdownContainer: React.FunctionComponent<any> = props => {
         });
     }, []);
 
+    //do we do a completely separate onSubmit handler here and diff virology action
+    // or just pass more stuff to folderSetup..?
+
+    //can we make the Update Accounts tab admin only?
     function onSubmit() {
         setDisabled(true);
-        Ajax.request({
-            url: ActionURL.buildURL("wnprc_virology", "folderSetup"),
-            method : 'POST',
-            jsonData : {accounts: accounts},
-            success: function (s) {
-                //send user to perms form
-                window.location.replace(ActionURL.buildURL("security", "permissions"));
-            },
-            failure: function (e) {
-                alert(JSON.parse(e.response.failure))
-            }
-        })
+        if (props.update==true)
+        {
+            Ajax.request({
+                url: ActionURL.buildURL("wnprc_virology", "updateAccounts"),
+                method : 'POST',
+                jsonData : {accounts: accounts},
+                success: function (s) {
+                    window.location.reload();
+                },
+                failure: function (e) {
+                    alert(JSON.parse(e.response).exception)
+                }
+            })
+        } else {
+            debugger;
+            Ajax.request({
+                url: ActionURL.buildURL("wnprc_virology", "folderSetup"),
+                method : 'POST',
+                jsonData : {accounts: accounts},
+                success: function (s) {
+                    //send user to perms form
+                    window.location.replace(ActionURL.buildURL("security", "permissions"));
+                },
+                failure: function (e) {
+                    alert(JSON.parse(e.response).exception)
+                }
+            })
+        }
+
     }
 
     return (
@@ -57,13 +78,20 @@ const DropdownContainer: React.FunctionComponent<any> = props => {
                 controlWidth={560}
             />
             </React.StrictMode>
-            <Button
+            {!props.update && <Button
                 variant="primary"
                 onClick={onSubmit}
                 disabled={disabled}
                 >
                 Save and Configure Permissions
-            </Button>
+            </Button>}
+            {props.update && <Button
+                    variant="primary"
+                    onClick={onSubmit}
+                    disabled={disabled}
+            >
+                Update Accounts
+            </Button>}
         </>
     )
 }

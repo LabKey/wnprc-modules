@@ -2,6 +2,8 @@ package org.labkey.wnprc_virology;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.FormHandlerAction;
@@ -11,9 +13,12 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.RequiresPermission;
@@ -25,6 +30,7 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -37,6 +43,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,19 +95,121 @@ public class WNPRC_VirologyController extends SpringActionController
         }
     }
 
+    /* A function to insert/update accounts */
+    public void upsertAccounts(Container viralLoadContainer, Container currentContainer, int[] accountNumbers) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
+    {
+        String schemaName = "wnprc_virology";
+        String queryName = "folders_accounts_mappings";
+
+        List<Map<String, Object>> rowsToInsert = new ArrayList<>();
+        List<Map<String, Object>> rowsToDelete = new ArrayList<>();
+
+        SimpleQueryFactory f = new SimpleQueryFactory(getUser(), viralLoadContainer);
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("folder_name"), currentContainer.getName());
+        JSONArray ja = f.selectRows(schemaName, queryName, filter);
+
+        List<Integer> accountsList = new ArrayList<>();
+        for (int k = 0; k < accountNumbers.length; k ++)
+        {
+            accountsList.add(accountNumbers[k]);
+        }
+
+        SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, schemaName, queryName);
+
+        if (accountsList.size() == 0)
+        {
+            for (int j = 0; j < ja.length(); j++)
+            {
+                JSONObject jo = (JSONObject) ja.get(j);
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("folder_name", currentContainer.getName());
+                mp.put("account", jo.get("account"));
+                mp.put("rowid", jo.get("rowid"));
+                rowsToDelete.add(mp);
+            }
+        } else if (ja.length() == 0)
+        {
+            for (int i = 0; i < accountsList.size(); i++)
+            {
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("folder_name", currentContainer.getName());
+                mp.put("account", accountsList.get(i));
+                rowsToInsert.add(mp);
+            }
+        } else if (accountsList.size() > 0 && ja.length() > 0)
+        {
+
+            for (int t = 0; t < ja.length(); t++)
+            {
+                JSONObject jo = (JSONObject) ja.get(t);
+                boolean neverFound = true;
+                for (int h = 0; h < accountsList.size(); h++)
+                {
+                    if (accountsList.get(h).equals(jo.get("account")))
+                    {
+                        neverFound = false;
+                        accountsList.remove((Integer) jo.get("account"));
+                    }
+                }
+                if (neverFound)
+                {
+                    Map<String,Object> mp = new HashMap<>();
+                    mp.put("folder_name", currentContainer.getName());
+                    mp.put("account", jo.get("account"));
+                    mp.put("rowid", jo.get("rowid"));
+                    rowsToDelete.add(mp);
+                }
+            }
+            for (int g = 0; g < accountsList.size(); g++)
+            {
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("folder_name", currentContainer.getName());
+                mp.put("account", accountsList.get(g));
+                rowsToInsert.add(mp);
+            }
+
+        }
+        if (!rowsToInsert.isEmpty())
+            qu.insert(rowsToInsert);
+        if (!rowsToDelete.isEmpty())
+            qu.delete(rowsToDelete);
+
+    }
+
+    /* An action to update accounts without folder setup */
+    @RequiresPermission(ReadPermission.class)
+    public class updateAccountsAction extends MutatingApiAction<FolderSetupForm>
+    {
+        @Override
+        public ApiResponse execute(FolderSetupForm folderSetupForm, BindException errors) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
+        {
+            Container vlc = getViralLoadDataContainer();
+            upsertAccounts(vlc, getContainer(), folderSetupForm.getAccounts());
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    public Container getViralLoadDataContainer()
+    {
+        String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
+        if (containerPath == null)
+            containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getDefaultValue();
+        if (containerPath == null)
+        {
+            _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module settings.");
+            return null;
+        }
+        return ContainerManager.getForPath(containerPath);
+    }
+
     /* Add accounts and linked schema during folder setup */
     @RequiresPermission(ReadPermission.class)
     public class FolderSetupAction extends MutatingApiAction<FolderSetupForm>
     {
         @Override
-        public ApiResponse execute(FolderSetupForm folderSetupForm, BindException errors) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException
+        public ApiResponse execute(FolderSetupForm folderSetupForm, BindException errors) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
         {
-            if (folderSetupForm.getAccounts() == null)
-            {
-                Map<String, Object> result = new HashMap<>();
-                result.put("failure", true);
-                return new ApiSimpleResponse(result);
-            }
             Container c = getContainer();
             WNPRC_VirologyModule wnprcVirologyModule = null;
             for (Module m : c.getActiveModules())
@@ -120,17 +230,7 @@ public class WNPRC_VirologyController extends SpringActionController
                 // insert folder name and account info into mapping table to filter data
                 int[] accountNumbers = folderSetupForm.getAccounts();
                 String containerName = c.getName();
-                String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
-                if (containerPath == null)
-                    containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getDefaultValue();
-                if (containerPath == null)
-                {
-                    _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module settings.");
-                    Map<String, Object> result = new HashMap<>();
-                    result.put("failure", true);
-                    return new ApiSimpleResponse(result);
-                }
-                Container viralLoadContainer = ContainerManager.getForPath(containerPath);
+                Container viralLoadContainer = getViralLoadDataContainer();
                 if (viralLoadContainer == null)
                 {
                     _log.info("No container found for RSEHR Viral Load Parent Folder. Check the module properties.");
@@ -138,16 +238,9 @@ public class WNPRC_VirologyController extends SpringActionController
                     result.put("failure", true);
                     return new ApiSimpleResponse(result);
                 }
-                SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, "wnprc_virology", "folders_accounts_mappings");
-                List<Map<String, Object>> rowsToInsert = new ArrayList<>();
-                for (int i = 0; i < accountNumbers.length; i++)
-                {
-                    Map<String,Object> mp = new HashMap<>();
-                    mp.put("folder_name", containerName);
-                    mp.put("account", accountNumbers[i]);
-                    rowsToInsert.add(mp);
+                if (accountNumbers != null) {
+                    upsertAccounts(viralLoadContainer, c, accountNumbers);
                 }
-                qu.insert(rowsToInsert);
 
                 // set up linked schema to filter data per lab
                 String metadata = "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\">\n" +
@@ -173,7 +266,6 @@ public class WNPRC_VirologyController extends SpringActionController
                         "  </table>\n" +
                         "</tables>";
                 QueryService.get().createLinkedSchema(getUser(), c,containerName + "LinkedSchema", viralLoadContainer.getId(), "lists", metadata, _sourceDataTableName, null);
-
 
             }
 

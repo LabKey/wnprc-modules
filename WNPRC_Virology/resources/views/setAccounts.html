@@ -1,0 +1,28 @@
+<html>
+<head>
+    <script type="text/javascript">
+
+        LABKEY.Query.selectRows({
+            schemaName: 'wnprc_virology_linked',
+            queryName: 'folders_accounts_mappings',
+            filterArray: [LABKEY.Filter.create('folder_name', LABKEY.container.name, LABKEY.Filter.Types.EQUAL)],
+            success: function (resp) {
+                LABKEY.requiresScript("/wnprc_virology/gen/dropdown.js",true, function() {
+                    DropdownSelect.renderDropdown(true);
+                    document.getElementById("folder-type-set").setAttribute("style", "display:block");
+                });
+            },
+            failure: function (err) {
+            }
+        })
+
+
+    </script>
+</head>
+
+<div id="folder-type-set" style="display:none">
+    <form method="post">
+        <div id="app"></div>
+    </form>
+</div>
+</html>

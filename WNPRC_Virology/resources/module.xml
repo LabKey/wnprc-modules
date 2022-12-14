@@ -29,8 +29,15 @@
         </propertyDescriptor>
         <propertyDescriptor name="RSEHRViralLoadDataFolder">
             <canSetPerContainer>true</canSetPerContainer>
-            <defaultValue>/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/Private/</defaultValue>
+            <defaultValue>/WNPRC/Research Services/Virology Services/Private/</defaultValue>
             <description>Relative folder path to the parent viral load data folder on RSEHR. Used to set up mapping table to find readers in each child folder, from this parent folder. TODO item.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="RSEHRPublicInfoPath">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>Folder where all site users can read basic FAQs or Wikis</description>
             <editPermissions>
                 <permission>ADMIN</permission>
             </editPermissions>

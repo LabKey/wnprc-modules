@@ -5,11 +5,11 @@ import * as jQuery from 'jquery';
 import { ContextProvider } from "./VirologyContextProvider";
 import DropdownContainer from "./DropdownContainer";
 //export this function to be called in a requiresScript callback
-export const renderDropdown = () => {
+export const renderDropdown = (update: boolean) => {
   jQuery(() => {
     ReactDom.render(
       <ContextProvider>
-        <DropdownContainer></DropdownContainer>
+        <DropdownContainer update={update}></DropdownContainer>
       </ContextProvider>,
       document.getElementById("app")
     );

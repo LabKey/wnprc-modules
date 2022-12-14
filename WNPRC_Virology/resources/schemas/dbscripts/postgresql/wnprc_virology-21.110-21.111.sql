@@ -81,6 +81,7 @@ CREATE TABLE wnprc_virology.folders_accounts_mappings
     rowid               serial NOT NULL,
     folder_name         text NOT NULL,
     account             integer NOT NULL,
+    UNIQUE(folder_name, account),
 
     -- Default fields for LabKey.
     container         entityid NOT NULL,

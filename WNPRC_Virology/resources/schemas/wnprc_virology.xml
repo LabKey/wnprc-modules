@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tables xsi:schemaLocation="http://labkey.org/data/xml" xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <table tableName="assays_llod" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="assay_name"/>
+            <column columnName="start_date"/>
+            <column columnName="end_date"/>
+            <column columnName="llod"/>
+
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
     <table tableName="folder_paths_with_readers" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>

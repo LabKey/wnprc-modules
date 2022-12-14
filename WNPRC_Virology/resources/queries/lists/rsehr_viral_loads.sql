@@ -1,6 +1,6 @@
 SELECT
     v.subjectId AS Id,
-    v.date AS sampleDate,
+    v.date AS date,
     MAX(v.Run.runDate) as runDate,
     v.assayId AS assay,
     v.sampleType AS sample_type,

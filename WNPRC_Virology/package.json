@@ -11,7 +11,7 @@
     "build": "better-npm-run build",
     "start": "cross-env NODE_ENV=development LK_MODULE=WNPRC_EHR webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
     "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
-    "clean": "rimraf resources/web/wnprc_virology/gen && rimraf resources/views/gen"
+    "clean": "rm -rf resources/web/wnprc_virology/gen && rm -rf resources/views/gen && rm -rf resources/web/gen"
   },
   "keywords": [],
   "author": "",

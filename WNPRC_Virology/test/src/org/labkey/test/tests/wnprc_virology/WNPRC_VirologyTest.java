@@ -59,6 +59,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String TEST_USER = "test@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File ALIASES_TSV = TestFileUtils.getSampleData("aliases.tsv");
+    private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
     //private static final File EMAILS_TSV = TestFileUtils.getSampleData("rsehr_folder_email_data.tsv");
 
     private static WNPRC_VirologyTest _test;
@@ -126,6 +127,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
         List<Map<String, Object>> tsv = loadTsv(ALIASES_TSV);
+        List<Map<String, Object>> tsv2 = loadTsv(ALIASES_EHR_TSV);
         //List<Map<String, Object>> tsv2 = loadTsv(EMAILS_TSV);
         // we need the grant accounts in both locations, for the sample queue list and the rsher study dataset that gets ETLd
         //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
@@ -137,6 +139,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         importStudyFromPath(1);
         //also upload grant accounts to the RSEHR folder (simulates the ETL)
         insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSEHR_PRIVATE_FOLDER_PATH);
+        insertTsvData(connection, "ehr_billing", "aliases", tsv2, PROJECT_NAME_EHR);
         //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
         //insertTsvData(connection, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails", tsv2, PROJECT_NAME_EHR);
         //does this point to the new container?

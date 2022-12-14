@@ -1,8 +1,8 @@
-CREATE SCHEMA IF NOT EXISTS wnprc_virology;
 DROP TABLE IF EXISTS wnprc_virology.grant_accounts CASCADE;
 CREATE TABLE wnprc_virology.grant_accounts
 (
-    rowid               int,
+    rowid               serial NOT NULL,
+    rowid_etl           int, -- store the actual rowid so that when WNPRC_ViralLoadsRSEHREmails ETL gets sent back to EHR we refer to the same accnt num
     alias               varchar(200),
     aliasEnabled        Varchar(100),
     projectNumber       varchar(200),
@@ -31,6 +31,7 @@ CREATE TABLE wnprc_virology.grant_accounts
     created             timestamp,
     modifiedBy          userid,
     modified            timestamp,
+    UNIQUE(rowid_etl),
 
     CONSTRAINT PK_grant_accounts PRIMARY KEY (rowid)
 );
@@ -72,7 +73,7 @@ CREATE TABLE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails
     modified          TIMESTAMP,
 
     CONSTRAINT pk_rsehr_folders_accounts_and_vl_reader_emails_rowid PRIMARY KEY (rowid),
-    CONSTRAINT FK_rsehr_folders_accounts_and_vl_reader_emails_account FOREIGN KEY (account) REFERENCES wnprc_virology.grant_accounts (rowid)
+    CONSTRAINT FK_rsehr_folders_accounts_and_vl_reader_emails_account FOREIGN KEY (account) REFERENCES ehr_billing.aliases (rowid)
 );
 
 DROP TABLE IF EXISTS wnprc_virology.folders_accounts_mappings;
@@ -91,6 +92,6 @@ CREATE TABLE wnprc_virology.folders_accounts_mappings
     modified          TIMESTAMP,
 
     CONSTRAINT pk_folders_accounts_mappings_rowid PRIMARY KEY (rowid),
-    CONSTRAINT FK_rsehr_folders_accounts_mappings_account FOREIGN KEY (account) REFERENCES wnprc_virology.grant_accounts (rowid)
+    CONSTRAINT FK_rsehr_folders_accounts_mappings_account FOREIGN KEY (account) REFERENCES wnprc_virology.grant_accounts (rowid_etl)
 );
 

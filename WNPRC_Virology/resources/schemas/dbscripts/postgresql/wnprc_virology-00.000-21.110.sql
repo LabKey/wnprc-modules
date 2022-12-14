@@ -1,3 +1,4 @@
+DROP SCHEMA IF EXISTS wnprc_virology CASCADE;
 CREATE SCHEMA wnprc_virology;
 
 DROP TABLE IF EXISTS wnprc_virology.assays_llod;

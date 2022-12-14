@@ -5,8 +5,8 @@
                 <columns>
                     <column columnName="account">
                         <fk>
-                            <fkDbSchema>wnprc_virology</fkDbSchema>
-                            <fkTable>grant_accounts</fkTable>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>

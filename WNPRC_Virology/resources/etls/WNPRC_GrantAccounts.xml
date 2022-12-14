@@ -4,7 +4,11 @@
     <transforms>
         <transform id="grant-accounts-rsehr" type="RemoteQueryTransformStep">
             <source queryName="aliases" remoteSource="ProductionEHRServerVirology" schemaName="ehr_billing"/>
-            <destination queryName="grant_accounts" schemaName="wnprc_virology" targetOption="truncate"/>
+            <destination queryName="grant_accounts" schemaName="wnprc_virology" targetOption="truncate">
+                <columnTransforms>
+                    <column source="rowid" target="rowid_etl"></column>
+                </columnTransforms>
+            </destination>
         </transform>
     </transforms>
     <!-- run at 10:15pm CST every day -->

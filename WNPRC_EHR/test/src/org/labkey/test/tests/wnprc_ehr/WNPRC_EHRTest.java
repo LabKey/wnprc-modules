@@ -1689,7 +1689,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         click(Locator.xpath("//div[./label[normalize-space()='Id:']]//input"));
         waitForElement(Locator.linkWithText(PROJECT_MEMBER_ID), WAIT_FOR_JAVASCRIPT);
         _helper.setDataEntryField("performedby", FULL_SUBMITTER.getEmail());
-        getArtifactCollector().dumpPageSnapshot("Edited_title_for_MPR task");
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);

@@ -6,6 +6,18 @@
                     <column columnName="folder_name">
                         <isHidden>true</isHidden>
                     </column>
+                    <column columnName="mpaccount">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>Account</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc_virology_linked</fkDbSchema>
+                            <fkTable>grant_accounts</fkTable>
+                            <fkColumnName>rowid_etl</fkColumnName>
+                            <fkDisplayColumnName>alias</fkDisplayColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

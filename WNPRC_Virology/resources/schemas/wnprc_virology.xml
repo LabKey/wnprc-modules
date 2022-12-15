@@ -20,6 +20,7 @@
             <column columnName="rowid"/>
             <column columnName="folder_container_id"/>
             <column columnName="folder_path"/>
+            <column columnName="folder_name"/>
             <column columnName="emails"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
@@ -73,7 +74,9 @@
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid"/>
+            <column columnName="rowid_etl"/>
             <column columnName="alias"/>
+            <column columnName="aliasEnabled"/>
             <column columnName="category">
                 <columnTitle>Category</columnTitle>
             </column>

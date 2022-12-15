@@ -184,7 +184,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 HashMap<String,Object> mp = new HashMap<>();
                 mp.put("Key", rs.getInt(FieldKey.fromString("Key")));
                 mp.put("emails", rs.getString(FieldKey.fromString("emails")));
-                mp.put("funding_string", rs.getString(FieldKey.fromString("funding_string")));
+                mp.put("funding_string", rs.getInt(FieldKey.fromString("funding_string")));
 
                 VLSampleListResults.add(mp);
 
@@ -239,13 +239,13 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public void getRowsAndSendMessage() throws SQLException
     {
         //pull out accounts
-        Set<String> accounts = new HashSet<>();
-        Map<String, Integer> accountsAndCount = new HashMap<>();
-        String arr[] = new String[VLSampleListResults.size()];
+        Set<Integer> accounts = new HashSet<>();
+        Map<Integer, Integer> accountsAndCount = new HashMap<>();
+        Integer arr[] = new Integer[VLSampleListResults.size()];
         for (int i = 0; i < VLSampleListResults.size(); i++)
         {
             //need to record # of samples per account
-            String accountNum = VLSampleListResults.get(i).get("funding_string").toString();
+            Integer accountNum = (Integer) VLSampleListResults.get(i).get("funding_string");
             if (accountsAndCount.containsKey(accountNum))
             {
                 Integer val = accountsAndCount.get(accountNum);

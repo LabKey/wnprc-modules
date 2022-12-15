@@ -13,7 +13,12 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.query.SamplesSchema;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
@@ -21,6 +26,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -277,6 +283,7 @@ public class WNPRC_VirologyController extends SpringActionController
 
     }
 
+    // Intended to be called from test code
     @RequiresPermission(AdminPermission.class)
     public static class StartRSEHRJobAction extends MutatingApiAction<Object>
     {
@@ -320,6 +327,31 @@ public class WNPRC_VirologyController extends SpringActionController
         }
 
     }
+
+    // Only to be called from test code
+    @RequiresPermission(AdminPermission.class)
+    public static class AlterEHRBillingAliasesPKSequenceAction extends MutatingApiAction<Object>{
+
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_billing");
+            DbScope scope = DbScope.getLabKeyScope();
+            try (DbScope.Transaction tx = schema.getDbSchema().getScope().ensureTransaction())
+            {
+                SQLFragment sql;
+                if (scope.getSqlDialect().isPostgreSQL())
+                {
+                    sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96;\n");
+                    new SqlExecutor(scope).execute(sql);
+                }
+                tx.commit();
+            }
+            return null;
+        }
+    }
+
+
     @RequiresPermission(AdminPermission.class)
     public static class SetupAction extends SimpleViewAction<Object>
     {

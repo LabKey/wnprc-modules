@@ -22,6 +22,7 @@ import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
+import org.labkey.remoteapi.query.TruncateTableCommand;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
@@ -60,13 +61,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File ALIASES_TSV = TestFileUtils.getSampleData("aliases.tsv");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
-    //private static final File EMAILS_TSV = TestFileUtils.getSampleData("rsehr_folder_email_data.tsv");
+    private static final File EMAILS_TSV = TestFileUtils.getSampleData("rsehr_folder_email_data.tsv");
 
     private static WNPRC_VirologyTest _test;
 
     private static final String ACCOUNT_LOOKUP = "1";
-    private static final String ACCOUNT_STR = "acct100";
-    private static final String ACCOUNT_STR_2 = "acct101";
+    private static final String ACCOUNT_STR = "acct105";
+    private static final String ACCOUNT_STR_2 = "acct106";
 
     private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
@@ -98,6 +99,14 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     }
 
+    public void tearDownStuff() throws IOException, CommandException
+    {
+        // getting foreign key constraint error, so trying to clear out the table first
+        Connection cn = createDefaultConnection();
+        new TruncateTableCommand("wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails").execute(cn, getProjectName());
+    }
+
+
     private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String destinationContainer) throws IOException, CommandException
     {
         log("Loading tsv data: " + schemaName + "." + queryName);
@@ -128,7 +137,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //import example grant accnt data
         List<Map<String, Object>> tsv = loadTsv(ALIASES_TSV);
         List<Map<String, Object>> tsv2 = loadTsv(ALIASES_EHR_TSV);
-        //List<Map<String, Object>> tsv2 = loadTsv(EMAILS_TSV);
+        List<Map<String, Object>> tsv3 = loadTsv(EMAILS_TSV);
         // we need the grant accounts in both locations, for the sample queue list and the rsher study dataset that gets ETLd
         //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
         _test.clickFolder(PROJECT_NAME_EHR);
@@ -139,9 +148,15 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         importStudyFromPath(1);
         //also upload grant accounts to the RSEHR folder (simulates the ETL)
         insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSEHR_PRIVATE_FOLDER_PATH);
+
+        PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
+        command.setTimeout(1200000);
+        CommandResponse response = command.execute(connection, PROJECT_NAME_EHR);
+        Assert.assertTrue(response.getStatusCode() < 400);
+
         insertTsvData(connection, "ehr_billing", "aliases", tsv2, PROJECT_NAME_EHR);
         //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
-        //insertTsvData(connection, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails", tsv2, PROJECT_NAME_EHR);
+        insertTsvData(connection, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails", tsv3, PROJECT_NAME_EHR);
         //does this point to the new container?
         //set up a child folder under RSEHR
         List<ModulePropertyValue> props = new ArrayList<>();
@@ -308,7 +323,8 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         SelectRowsCommand sr = new SelectRowsCommand("wnprc_virology","folders_accounts_mappings");
         sr.addFilter("folder_name",LINKED_SCHEMA_FOLDER_NAME, Filter.Operator.EQUAL);
         SelectRowsResponse resp = sr.execute(createDefaultConnection(),RSEHR_PRIVATE_FOLDER_PATH);
-        Assert.assertEquals(1, resp.getRows().size());
+        //this test might run after the updating accounts test so we just want to check if there's something there.
+        Assert.assertTrue(resp.getRows().size() > 0);
     }
 
     @Test
@@ -346,7 +362,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertEquals(1, resp.getRows().size());
     }
 
-    //@Test
+    @Test
     public void testBatchCompleteAndSendRSERHEmail() throws Exception
     {
         //TODO either add test data to rsehr_folders_accounts_and_vl_reader_emails or run the ETL
@@ -370,9 +386,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         click(Ext4Helper.Locators.ext4Button("Submit"));
 
         sleep(5000);
-        log("Check that the Zika notification email was sent");
+        log("Check that the RSEHR notification email was sent");
         goToModule("Dumbster");
+        //TODO look for the email was sent to test@test.com
         assertTextPresent("[EHR Server] Viral load results completed on ");
+
+        //delete the emails table (was getting stuck in normal cleanup process on the account foreign key)
+        tearDownStuff();
     }
 
 

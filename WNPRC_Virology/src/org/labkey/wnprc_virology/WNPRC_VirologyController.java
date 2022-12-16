@@ -264,7 +264,7 @@ public class WNPRC_VirologyController extends SpringActionController
                         "             <fk>\n" +
                         "                <fkDbSchema>wnprc_virology_linked</fkDbSchema>\n" +
                         "                <fkTable>grant_accounts</fkTable>\n" +
-                        "                <fkColumnName>rowid_etl</fkColumnName>\n" +
+                        "                <fkColumnName>rowid</fkColumnName>\n" +
                         "                <fkDisplayColumnName>alias</fkDisplayColumnName>\n" +
                         "             </fk>\n" +
                         "          </column>\n" +

@@ -112,7 +112,7 @@
         <fk>
           <fkDbSchema>wnprc_virology</fkDbSchema>
           <fkTable>grant_accounts</fkTable>
-          <fkColumnName>rowid_etl</fkColumnName>
+          <fkColumnName>rowid</fkColumnName>
         </fk>
       </column>
     </columns>

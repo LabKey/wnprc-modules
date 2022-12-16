@@ -1,7 +1,9 @@
 package org.labkey.test.tests.wnprc_virology;
 
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -32,10 +34,12 @@ import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
 import org.labkey.test.pages.admin.SetFolderPermissionsPage;
+import org.labkey.test.tests.di.ETLHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
+import org.labkey.test.util.RemoteConnectionHelper;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.Ext4Helper;
@@ -50,6 +54,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 {
 
     public static final String PROJECT_NAME_EHR = "WNPRC_VirologyTestProject";
+    public static final String MODULE_NAME = "WNPRC_Virology";
 
     //this will simulate where the study data lives on the RSEHR server
     public static final String PROJECT_NAME_RSEHR = "RSEHRPrivate";
@@ -57,7 +62,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     public static final String RSEHR_PRIVATE_FOLDER_PATH = PROJECT_NAME_EHR + "/" + PROJECT_NAME_RSEHR;
     public static final String RSEHR_PUBLIC_FOLDER_PATH = PROJECT_NAME_EHR + "/" + PROJECT_NAME_RSHER_PUBLIC;
-    public static final String TEST_USER = "test@test.com";
+
+    public static final String EHR_REMOTE_CONNECTION = "ProductionEHRServerVirology";
+    public static final String EHR_EMAILS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsRSEHREmails";
+    public static final String RSEHR_REMOTE_CONNECTION = "RSEHRServerVirology";
+    public static final String RSEHR_ACCOUNTS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_GrantAccounts";
+    public static final String RSEHR_VIRAL_LOAD_DATA_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoads";
+    public static final String TEST_USER = "test_wnprc_virology@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File ALIASES_TSV = TestFileUtils.getSampleData("aliases.tsv");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
@@ -73,6 +84,9 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
 
     protected final PortalHelper portalHelper = new PortalHelper(this);
+
+    protected final RemoteConnectionHelper _rconnHelper = new RemoteConnectionHelper(this);
+    protected final ETLHelper _etlHelper = new ETLHelper(this, getProjectName());
 
     @Nullable
     @Override
@@ -99,12 +113,23 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     }
 
-    public void tearDownStuff() throws IOException, CommandException
+
+    //have to do some cleanup after each test
+    /*@Before
+    public void runEmailETL()
     {
-        // getting foreign key constraint error, so trying to clear out the table first
+        _test.clickFolder(getProjectName());
+        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
+        ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
+        _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
+    }
+    @After
+    public void tearDown() throws IOException, CommandException
+    {
+        log("Truncating ");
         Connection cn = createDefaultConnection();
         new TruncateTableCommand("wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails").execute(cn, getProjectName());
-    }
+    }*/
 
 
     private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String destinationContainer) throws IOException, CommandException
@@ -120,17 +145,17 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     {
         //create EHR folder with sample queue, etc
         _containerHelper.createProject(getProjectName(), type);
-        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster", "EHR_Billing"));
+        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing"));
         // Set up the module properties
         List<ModulePropertyValue> properties = new ArrayList<>();
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRQCStatus", RSEHR_QC_CODE));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRViralLoadDataFolder", RSEHR_PRIVATE_FOLDER_PATH));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRPublicInfoPath", RSEHR_PUBLIC_FOLDER_PATH));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "RSEHRJobInterval", "5"));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
-        properties.add(new ModulePropertyValue("WNPRC_Virology", "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRQCStatus", RSEHR_QC_CODE));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRViralLoadDataFolder", RSEHR_PRIVATE_FOLDER_PATH));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPublicInfoPath", RSEHR_PUBLIC_FOLDER_PATH));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRJobInterval", "5"));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
         _test.setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);
@@ -144,10 +169,10 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
         //create RSEHR folder with study data
         _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHR(), "Collaboration");
-        _test._containerHelper.enableModules(Arrays.asList("WNPRC_Virology", "Dumbster","Study"));
+        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study"));
         importStudyFromPath(1);
         //also upload grant accounts to the RSEHR folder (simulates the ETL)
-        insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSEHR_PRIVATE_FOLDER_PATH);
+        //insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSEHR_PRIVATE_FOLDER_PATH);
 
         PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
         command.setTimeout(1200000);
@@ -155,15 +180,21 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertTrue(response.getStatusCode() < 400);
 
         insertTsvData(connection, "ehr_billing", "aliases", tsv2, PROJECT_NAME_EHR);
-        //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
-        insertTsvData(connection, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails", tsv3, PROJECT_NAME_EHR);
-        //does this point to the new container?
-        //set up a child folder under RSEHR
+
+        //runs grant account ETL
+        _rconnHelper.createConnection(EHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), getProjectName());
+        ETLHelper _etlHelperRSEHR = new ETLHelper(this, getProjectNameRSEHR());
+        _test.clickFolder(PROJECT_NAME_RSEHR);
+        _etlHelperRSEHR.runETL(RSEHR_ACCOUNTS_ETL_ID);
+
+        //insertTsvData(connection, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails", tsv3, PROJECT_NAME_EHR);
+        _test.clickFolder(getProjectNameRSEHR());
         List<ModulePropertyValue> props = new ArrayList<>();
         props.add(new ModulePropertyValue("EHR", RSEHR_PRIVATE_FOLDER_PATH, "EHRAdminUser", getCurrentUser()));
         _test.setModuleProperties(props);
 
         //create the public folder and wiki
+        _userHelper.createUser(TEST_USER);
         _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHRPublic(), "Collaboration");
         _permissionsHelper.setUserPermissions(TEST_USER, "Reader");
         createWiki("Information", "Information");
@@ -211,7 +242,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     protected String getModuleDirectory()
     {
-        return "WNPRC_Virology";
+        return MODULE_NAME;
     }
 
     public String getModulePath()
@@ -225,7 +256,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         setupNotificationService();
         _test.clickFolder(PROJECT_NAME_RSEHR);
         CreateSubFolderPage createSubFolderPage = _test.projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
-        createSubFolderPage.selectFolderType("WNPRC_Virology");
+        createSubFolderPage.selectFolderType(MODULE_NAME);
         SetFolderPermissionsPage setFolderPermissionsPage = createSubFolderPage.clickNext();
         setFolderPermissionsPage.setMyUserOnly();
         _test.clickButton("Next");
@@ -238,7 +269,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test.waitForText("Save and Finish");
         _test.clickButton("Save and Finish");
 
-        _userHelper.createUser(TEST_USER);
         _permissionsHelper.setUserPermissions(TEST_USER, "WNPRC Viral Load Reader");
         _test.clickButton("Save and Finish");
 
@@ -247,6 +277,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         command.setTimeout(1200000);
         CommandResponse response = command.execute(connection, RSEHR_PRIVATE_FOLDER_PATH);
         Assert.assertTrue(response.getStatusCode() < 400);
+
+        //run email etl
+        _test.clickFolder(getProjectName());
+        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
+        ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
+        _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
 
     }
 
@@ -391,8 +427,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //TODO look for the email was sent to test@test.com
         assertTextPresent("[EHR Server] Viral load results completed on ");
 
-        //delete the emails table (was getting stuck in normal cleanup process on the account foreign key)
-        tearDownStuff();
     }
 
 

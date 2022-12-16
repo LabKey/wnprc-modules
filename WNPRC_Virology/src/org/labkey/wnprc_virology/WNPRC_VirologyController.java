@@ -38,6 +38,9 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
+import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.query.TruncateTableCommand;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -47,6 +50,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -343,6 +347,29 @@ public class WNPRC_VirologyController extends SpringActionController
                 if (scope.getSqlDialect().isPostgreSQL())
                 {
                     sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96;\n");
+                    new SqlExecutor(scope).execute(sql);
+                }
+                tx.commit();
+            }
+            return null;
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public static class cleanupTestsAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors)
+        {
+            // getting foreign key constraint error, so trying to clear out the table first
+            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_billing");
+            DbScope scope = DbScope.getLabKeyScope();
+            try (DbScope.Transaction tx = schema.getDbSchema().getScope().ensureTransaction())
+            {
+                SQLFragment sql;
+                if (scope.getSqlDialect().isPostgreSQL())
+                {
+                    sql = new SQLFragment("TRUNCATE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails CASCADE;\n");
                     new SqlExecutor(scope).execute(sql);
                 }
                 tx.commit();

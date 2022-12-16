@@ -26,7 +26,7 @@ const DropdownContainer: React.FunctionComponent<any> = props => {
         labkeyActionSelectWithPromise(config).then(data => {
             let temp = [];
             data["rows"].forEach(item => {
-                temp.push({ value: item["rowid_etl"], label: item["alias"]});
+                temp.push({ value: item["rowid"], label: item["alias"]});
             });
             setOptions(temp);
         });

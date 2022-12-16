@@ -74,7 +74,7 @@
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid"/>
-            <column columnName="rowid_etl"/>
+            <!--<column columnName="rowid_etl"/>-->
             <column columnName="alias"/>
             <column columnName="aliasEnabled"/>
             <column columnName="category">

@@ -293,7 +293,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
                 for (int k = 0; k < result.length; k++)
                 {
-                    Integer count = accountsAndCount.get(rs.getString(FieldKey.fromString("account")));
+                    Integer count = accountsAndCount.get(rs.getInt(FieldKey.fromString("account")));
                     String recipientEmail = result[k];
                     String recipientName = getUserFullName(recipientEmail);
                     sendMessage(getEmailSubject(container), getMessageBodyHTML(recipientEmail, count), subscribedRecipients, recipientEmail, container);

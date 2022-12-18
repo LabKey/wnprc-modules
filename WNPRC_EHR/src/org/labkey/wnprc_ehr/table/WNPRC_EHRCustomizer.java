@@ -1476,22 +1476,31 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String num_animals_assigned = "num_animals_assigned";
             TableInfo assignmentTable = getRealTableForDataset(table, "assignment");
 
-            String theQuery  = "( " +
-                    "(SELECT " +
-                    "(CASE WHEN COUNT(*) = 0 " +
-                    " THEN null " +
-                    " ELSE COUNT(*) " +
-                    " END) as num_animals_assigned " +
-                    " FROM studydataset." + assignmentTable.getName() + " a " +
-                    "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
-                    ")";
+            // Adding null check here to keep teamcity happy otherwise 'WNPRCComplianceTrainingTest.testSopSubmission' test
+            // results in server side error: Cannot invoke "org.labkey.api.data.TableInfo.getName()" because "assignmentTable" is null
+            // This test does not set up a full EHR folder, which is why it cannot find the assignment table.
+            if (null != assignmentTable)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
+                        "(CASE WHEN COUNT(*) = 0 " +
+                        " THEN null " +
+                        " ELSE COUNT(*) " +
+                        " END) as num_animals_assigned " +
+                        " FROM studydataset." + assignmentTable.getName() + " a " +
+                        "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
+                        ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
-            newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
-            table.addColumn(newCol);
-
+                ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
+                newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
+                table.addColumn(newCol);
+            }
+            else
+            {
+                _log.warn("Unable to customize column 'num_animals_assigned', 'study.assignment' dataset not found.");
+            }
         }
     }
 

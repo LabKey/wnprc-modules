@@ -1478,6 +1478,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             // Adding null check here to keep teamcity happy otherwise 'WNPRCComplianceTrainingTest.testSopSubmission' test
             // results in server side error: Cannot invoke "org.labkey.api.data.TableInfo.getName()" because "assignmentTable" is null
+            // This test does not set up a full EHR folder, which is why it cannot find the assignment table.
             if (null != assignmentTable)
             {
                 String theQuery = "( " +

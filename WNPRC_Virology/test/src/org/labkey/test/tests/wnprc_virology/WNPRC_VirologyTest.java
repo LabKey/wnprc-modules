@@ -35,6 +35,7 @@ import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
 import org.labkey.test.pages.admin.SetFolderPermissionsPage;
 import org.labkey.test.tests.di.ETLHelper;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
@@ -62,6 +63,9 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     public static final String RSEHR_PRIVATE_FOLDER_PATH = PROJECT_NAME_EHR + "/" + PROJECT_NAME_RSEHR;
     public static final String RSEHR_PUBLIC_FOLDER_PATH = PROJECT_NAME_EHR + "/" + PROJECT_NAME_RSHER_PUBLIC;
+    public static final String RSEHR_PORTAL_PATH = WebTestHelper.getBaseURL();
+    public static final String RSEHR_JOB_INTERVAL = "5";
+    public static final String ZIKA_PORTAL_PATH = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
     public static final String EHR_REMOTE_CONNECTION = "ProductionEHRServerVirology";
     public static final String EHR_EMAILS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsRSEHREmails";
@@ -77,11 +81,15 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     private static final String ACCOUNT_LOOKUP = "1";
     private static final String ACCOUNT_STR = "acct105";
     private static final String ACCOUNT_STR_2 = "acct106";
+    private static final String ACCOUNT_STR_3 = "acct107";
     private static final String ANIMAL_ID = "testanimal1";
+    private static final String ANIMAL_ID_3 = "testanimal2"; //associated w linked folder 3
 
     private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
     private static final String A_SECOND_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_2";
+    private static final String A_THIRD_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_3";
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
+    private static final String ZIKA_QC_CODE = "08-complete-email-Zika_portal";
 
     protected final PortalHelper portalHelper = new PortalHelper(this);
 
@@ -151,12 +159,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         List<ModulePropertyValue> properties = new ArrayList<>();
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRQCStatus", RSEHR_QC_CODE));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPortalPath","https://rsehr.primate.wisc.edu/WNPRC/Research%20Services/Virology%20Services/Private/" ));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPortalPath",RSEHR_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRViralLoadDataFolder", RSEHR_PRIVATE_FOLDER_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPublicInfoPath", RSEHR_PUBLIC_FOLDER_PATH));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRJobInterval", "5"));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", "08-complete-email-Zika_portal" ));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080" ));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRJobInterval", RSEHR_JOB_INTERVAL));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
         _test.setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);
@@ -168,6 +176,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHR(), "Collaboration");
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study"));
         importStudyFromPath(1);
+        setupNotificationService();
 
         PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
         command.setTimeout(1200000);
@@ -182,6 +191,10 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test.clickFolder(PROJECT_NAME_RSEHR);
         _etlHelperRSEHR.runETL(RSEHR_ACCOUNTS_ETL_ID);
 
+        // set up ETL connection for EHR to RSEHR
+        _test.clickFolder(getProjectName());
+        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
+
         _test.clickFolder(getProjectNameRSEHR());
         List<ModulePropertyValue> props = new ArrayList<>();
         props.add(new ModulePropertyValue("EHR", RSEHR_PRIVATE_FOLDER_PATH, "EHRAdminUser", getCurrentUser()));
@@ -195,10 +208,8 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         setupSharedDataFolder(LINKED_SCHEMA_FOLDER_NAME);
         setupSharedDataFolder(A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
+        setupSharedDataFolder(A_THIRD_LINKED_SCHEMA_FOLDER_NAME);
 
-        // set up ETL connection
-        _test.clickFolder(getProjectName());
-        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
 
     }
 
@@ -252,7 +263,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     protected void setupSharedDataFolder(String name) throws IOException, CommandException
     {
         _test.clickFolder(PROJECT_NAME_RSEHR);
-        setupNotificationService();
         _test.clickFolder(PROJECT_NAME_RSEHR);
         CreateSubFolderPage createSubFolderPage = _test.projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
         createSubFolderPage.selectFolderType(MODULE_NAME);
@@ -279,7 +289,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         //run email etl
         _test.clickFolder(getProjectName());
-        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
         ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
         _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
 
@@ -324,6 +333,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public void testBatchCompleteAndSendZikaEmail() throws Exception
     {
         log("Select first 2 samples and batch complete");
+        //this clears out emails
         enableEmailRecorder();
         _test.clickFolder(PROJECT_NAME_EHR);
         waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
@@ -401,18 +411,36 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     @Test
     public void testBatchCompleteAndSendRSERHEmail() throws Exception
     {
+        //first add another account 107 to A_THIRD_LINKED_SCHEMA_FOLDER_NAME
+        _test.clickFolder(A_THIRD_LINKED_SCHEMA_FOLDER_NAME);
+        waitForText("Update Accounts");
+        clickTab("Update Accounts");
+        waitForText("Update Accounts Panel");
+        WebElement el = Locator.id("app").findElement(getDriver());
+        WebElement inp = el.findElement(By.tagName("input"));
+        inp.sendKeys(ACCOUNT_STR_3);
+        inp.sendKeys(Keys.ENTER);
+        _test.clickButton("Update Accounts");
+        runEmailETL();
+
         log("Select first 2 samples and batch complete");
+        //this clears out email messages
         enableEmailRecorder();
         _test.clickFolder(PROJECT_NAME_EHR);
         waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
         //select all records and batch complete
-        waitAndClick(Locator.checkboxByNameAndValue(".select", "1")); //for some reason waitAndClickAndWait() didn't work here
-        waitAndClick(Locator.checkboxByNameAndValue(".select", "2"));
+        //TODO should really select an item by account number... or just sort
+        //can we capture what rows are selected so that we can test the email later?
+        DataRegionTable table = new DataRegionTable("query", this);
+        table.setFilter("Funding_string", "Equals", ACCOUNT_STR_3);
+        //get index where account is 105 and 107, then expect to see one email
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "4")); //for some reason waitAndClickAndWait() didn't work here
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "5"));
         waitAndClick(Locator.lkButton("Batch Complete Samples"));
         //select the dropdown arrow to select qc state
         waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
-        Locator.XPathLocator ZikaQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
-        click(ZikaQCStateSelectItem);
+        Locator.XPathLocator RSEHRQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
+        click(RSEHRQCStateSelectItem);
         Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
@@ -423,9 +451,14 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         sleep(5000);
         log("Check that the RSEHR notification email was sent");
         goToModule("Dumbster");
-        //TODO look for the email was sent to test@test.com
-        //TODO look for actual email contents such as link to folder, etc.
-        assertTextPresent("[EHR Server] Viral load results completed on ");
+        //TODO look for the email was sent to TEST_USER
+
+        //this will test at least that destination link works and should click one of the emails that went out
+        waitAndClick(Locator.linkContainingText("[EHR Server]"));
+        assertTextPresent("2 sample(s)");
+        waitAndClick(Locator.linkContainingText("link"));
+        waitForText(ANIMAL_ID_3);
+        assertTextPresent(ANIMAL_ID_3);
 
     }
 

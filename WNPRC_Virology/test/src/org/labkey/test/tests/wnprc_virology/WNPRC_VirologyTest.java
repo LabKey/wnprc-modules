@@ -70,17 +70,17 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String RSEHR_VIRAL_LOAD_DATA_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoads";
     public static final String TEST_USER = "test_wnprc_virology@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
-    private static final File ALIASES_TSV = TestFileUtils.getSampleData("aliases.tsv");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
-    private static final File EMAILS_TSV = TestFileUtils.getSampleData("rsehr_folder_email_data.tsv");
 
     private static WNPRC_VirologyTest _test;
 
     private static final String ACCOUNT_LOOKUP = "1";
     private static final String ACCOUNT_STR = "acct105";
     private static final String ACCOUNT_STR_2 = "acct106";
+    private static final String ANIMAL_ID = "testanimal1";
 
     private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
+    private static final String A_SECOND_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_2";
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
 
     protected final PortalHelper portalHelper = new PortalHelper(this);
@@ -114,22 +114,23 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     }
 
 
-    //have to do some cleanup after each test
-    /*@Before
+    //have to do some cleanup after each test, cannot call createConnection from @AfterClass since that requires
+    // a static method
+    @Before
     public void runEmailETL()
     {
-        _test.clickFolder(getProjectName());
-        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
+        log("Populating rsehr_folders_accounts_and_vl_reader_emails before each test");
         ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
+        _test.clickFolder(getProjectName());
         _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
     }
     @After
     public void tearDown() throws IOException, CommandException
     {
-        log("Truncating ");
+        log("Truncating rsehr_folders_accounts_and_vl_reader_emails, issue with cleanup of ehr_billing.aliases table");
         Connection cn = createDefaultConnection();
         new TruncateTableCommand("wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails").execute(cn, getProjectName());
-    }*/
+    }
 
 
     private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String destinationContainer) throws IOException, CommandException
@@ -160,19 +161,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
-        List<Map<String, Object>> tsv = loadTsv(ALIASES_TSV);
         List<Map<String, Object>> tsv2 = loadTsv(ALIASES_EHR_TSV);
-        List<Map<String, Object>> tsv3 = loadTsv(EMAILS_TSV);
-        // we need the grant accounts in both locations, for the sample queue list and the rsher study dataset that gets ETLd
-        //insertTsvData(connection, "ehr_billing", "aliases", tsv, PROJECT_NAME_EHR);
         _test.clickFolder(PROJECT_NAME_EHR);
         _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
         //create RSEHR folder with study data
         _containerHelper.createSubfolder(getProjectName(), getProjectNameRSEHR(), "Collaboration");
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study"));
         importStudyFromPath(1);
-        //also upload grant accounts to the RSEHR folder (simulates the ETL)
-        //insertTsvData(connection, "wnprc_virology", "grant_accounts", tsv, RSEHR_PRIVATE_FOLDER_PATH);
 
         PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
         command.setTimeout(1200000);
@@ -187,7 +182,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         _test.clickFolder(PROJECT_NAME_RSEHR);
         _etlHelperRSEHR.runETL(RSEHR_ACCOUNTS_ETL_ID);
 
-        //insertTsvData(connection, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails", tsv3, PROJECT_NAME_EHR);
         _test.clickFolder(getProjectNameRSEHR());
         List<ModulePropertyValue> props = new ArrayList<>();
         props.add(new ModulePropertyValue("EHR", RSEHR_PRIVATE_FOLDER_PATH, "EHRAdminUser", getCurrentUser()));
@@ -200,6 +194,11 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         createWiki("Information", "Information");
 
         setupSharedDataFolder(LINKED_SCHEMA_FOLDER_NAME);
+        setupSharedDataFolder(A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
+
+        // set up ETL connection
+        _test.clickFolder(getProjectName());
+        _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), RSEHR_PRIVATE_FOLDER_PATH);
 
     }
 
@@ -359,33 +358,34 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         SelectRowsCommand sr = new SelectRowsCommand("wnprc_virology","folders_accounts_mappings");
         sr.addFilter("folder_name",LINKED_SCHEMA_FOLDER_NAME, Filter.Operator.EQUAL);
         SelectRowsResponse resp = sr.execute(createDefaultConnection(),RSEHR_PRIVATE_FOLDER_PATH);
-        //this test might run after the updating accounts test so we just want to check if there's something there.
-        Assert.assertTrue(resp.getRows().size() > 0);
+        Assert.assertTrue(resp.getRows().size() == 1);
     }
 
     @Test
     public void testLinkedSchemaDataWebpart()
     {
         _test.clickFolder(LINKED_SCHEMA_FOLDER_NAME);
-        waitForText(ACCOUNT_STR);
-        assertTextPresent(ACCOUNT_STR);
+        waitForText(ANIMAL_ID);
+        assertTextPresent(ANIMAL_ID);
     }
 
     @Test
     public void testUpdateAccountsPage()
     {
-        _test.clickFolder(LINKED_SCHEMA_FOLDER_NAME);
+        _test.clickFolder(A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
         waitForText("Update Accounts");
         clickTab("Update Accounts");
         waitForText("Update Accounts Panel");
         WebElement el = Locator.id("app").findElement(getDriver());
         WebElement inp = el.findElement(By.tagName("input"));
+        inp.sendKeys(Keys.DELETE);
         inp.sendKeys(ACCOUNT_STR_2);
         inp.sendKeys(Keys.ENTER);
         _test.clickButton("Update Accounts");
-        _test.clickFolder(LINKED_SCHEMA_FOLDER_NAME);
+        _test.clickFolder(A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
         waitForText(ACCOUNT_STR_2);
         assertTextPresent(ACCOUNT_STR_2);
+        assertTextNotPresent(ACCOUNT_STR);
     }
 
     @Test
@@ -401,7 +401,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     @Test
     public void testBatchCompleteAndSendRSERHEmail() throws Exception
     {
-        //TODO either add test data to rsehr_folders_accounts_and_vl_reader_emails or run the ETL
         log("Select first 2 samples and batch complete");
         enableEmailRecorder();
         _test.clickFolder(PROJECT_NAME_EHR);
@@ -425,6 +424,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         log("Check that the RSEHR notification email was sent");
         goToModule("Dumbster");
         //TODO look for the email was sent to test@test.com
+        //TODO look for actual email contents such as link to folder, etc.
         assertTextPresent("[EHR Server] Viral load results completed on ");
 
     }

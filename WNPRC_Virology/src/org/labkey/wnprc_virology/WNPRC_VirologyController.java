@@ -119,19 +119,25 @@ public class WNPRC_VirologyController extends SpringActionController
         filter.addCondition(FieldKey.fromString("folder_name"), currentContainer.getName());
         JSONArray ja = f.selectRows(schemaName, queryName, filter);
 
-        List<Integer> accountsList = new ArrayList<>();
+        List<Integer> newList = new ArrayList<>();
+        List<JSONObject> currentList = new ArrayList<>();
         for (int k = 0; k < accountNumbers.length; k ++)
         {
-            accountsList.add(accountNumbers[k]);
+            newList.add(accountNumbers[k]);
         }
 
         SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, schemaName, queryName);
 
-        if (accountsList.size() == 0)
+        for (int r = 0; r < ja.length(); r++)
         {
-            for (int j = 0; j < ja.length(); j++)
+            currentList.add((JSONObject) ja.get(r));
+        }
+
+        if (newList.size() == 0)
+        {
+            for (int j = 0; j < currentList.size(); j++)
             {
-                JSONObject jo = (JSONObject) ja.get(j);
+                JSONObject jo = currentList.get(j);
                 Map<String,Object> mp = new HashMap<>();
                 mp.put("folder_name", currentContainer.getName());
                 mp.put("account", jo.get("account"));
@@ -140,26 +146,26 @@ public class WNPRC_VirologyController extends SpringActionController
             }
         } else if (ja.length() == 0)
         {
-            for (int i = 0; i < accountsList.size(); i++)
+            for (int i = 0; i < newList.size(); i++)
             {
                 Map<String,Object> mp = new HashMap<>();
                 mp.put("folder_name", currentContainer.getName());
-                mp.put("account", accountsList.get(i));
+                mp.put("account", newList.get(i));
                 rowsToInsert.add(mp);
             }
-        } else if (accountsList.size() > 0 && ja.length() > 0)
+        } else if (newList.size() > 0 && ja.length() > 0)
         {
 
-            for (int t = 0; t < ja.length(); t++)
+            for (int t = 0; t < currentList.size(); t++)
             {
-                JSONObject jo = (JSONObject) ja.get(t);
+                JSONObject jo = currentList.get(t);
                 boolean neverFound = true;
-                for (int h = 0; h < accountsList.size(); h++)
+                for (int h = 0; h < newList.size(); h++)
                 {
-                    if (accountsList.get(h).equals(jo.get("account")))
+                    if (newList.get(h).equals(jo.get("account")))
                     {
                         neverFound = false;
-                        accountsList.remove((Integer) jo.get("account"));
+                        newList.remove((Integer) jo.get("account"));
                     }
                 }
                 if (neverFound)
@@ -171,11 +177,11 @@ public class WNPRC_VirologyController extends SpringActionController
                     rowsToDelete.add(mp);
                 }
             }
-            for (int g = 0; g < accountsList.size(); g++)
+            for (int g = 0; g < newList.size(); g++)
             {
                 Map<String,Object> mp = new HashMap<>();
                 mp.put("folder_name", currentContainer.getName());
-                mp.put("account", accountsList.get(g));
+                mp.put("account", newList.get(g));
                 rowsToInsert.add(mp);
             }
 

@@ -65,6 +65,7 @@ WNPRC_Virology.DatasetButtons = new function() {
                                     queryName: 'status',
                                     columns: 'Key,Status',
                                     sort: 'Key',
+                                    storeId: 'lists||status',
                                     //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
                                     autoLoad: true
                                 }),
@@ -119,6 +120,12 @@ WNPRC_Virology.DatasetButtons = new function() {
                             ref: '../submit',
                             scope: this,
                             handler: function (o) {
+                                var statusStore = Ext4.StoreMgr.get('lists||status').data.items;
+                                var statusStoreObj = {};
+                                for (var k = 0; k < statusStore.length; k++){
+                                    statusStoreObj[statusStore[k].data.Key] = statusStore[k].data.Status;
+                                }
+                                var additionalChecksForStatuses = ["09-complete-email-RSEHR", "08-complete-email-Zika_portal"];
                                 var win = o.up('window');
                                 var form = win.down('form');
                                 var qc = form.getForm().findField('change-vl-qcstate').getValue();
@@ -127,6 +134,21 @@ WNPRC_Virology.DatasetButtons = new function() {
                                 var vl_positive_control = form.getForm().findField('enter-vlpositive-control').getValue();
                                 var avg_vl_positive_control = form.getForm().findField('enter-avgvlpositive-control').getValue();
                                 var efficiency = form.getForm().findField('efficiency').getValue();
+
+                                if ((num == null ||
+                                        num == "" ||
+                                        positive_control == null ||
+                                        positive_control == "" ||
+                                        vl_positive_control == null ||
+                                        vl_positive_control == "" ||
+                                        avg_vl_positive_control == null ||
+                                        avg_vl_positive_control == "" ||
+                                        efficiency == null ||
+                                        efficiency == "" )
+                                        && additionalChecksForStatuses.includes(statusStoreObj[qc])) {
+                                    alert ('Cannot complete record without an experiment number, positive control or efficiency value');
+                                    return;
+                                }
 
                                 Ext4.Msg.wait('Loading...');
 

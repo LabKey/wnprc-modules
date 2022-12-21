@@ -124,20 +124,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     //have to do some cleanup after each test, cannot call createConnection from @AfterClass since that requires
     // a static method
-    @Before
     public void runEmailETL()
     {
         log("Populating rsehr_folders_accounts_and_vl_reader_emails before each test");
         ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
         _test.clickFolder(getProjectName());
         _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
-    }
-    @After
-    public void tearDown() throws IOException, CommandException
-    {
-        log("Truncating rsehr_folders_accounts_and_vl_reader_emails, issue with cleanup of ehr_billing.aliases table");
-        Connection cn = createDefaultConnection();
-        new TruncateTableCommand("wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails").execute(cn, getProjectName());
     }
 
 

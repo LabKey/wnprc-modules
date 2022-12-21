@@ -1,39 +1,12 @@
 package org.labkey.wnprc_virology;
 
-import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager.ContainerListener;
-import org.labkey.api.security.User;
-import java.util.Collections;
-import java.util.Collection;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.SimpleModuleContainerListener;
 
-import java.beans.PropertyChangeEvent;
-
-public class WNPRC_VirologyContainerListener implements ContainerListener
+public class WNPRC_VirologyContainerListener extends SimpleModuleContainerListener
 {
-    @Override
-    public void containerCreated(Container c, User user)
+    public WNPRC_VirologyContainerListener(Module owner)
     {
-    }
-
-    @Override
-    public void containerDeleted(Container c, User user)
-    {
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
-    @Override
-    public void containerMoved(Container c, Container oldParent, User user)
-    {
-    }
-
-    @NotNull @Override
-    public Collection<String> canMove(Container c, Container newParent, User user)
-    {
-        return Collections.emptyList();
+        super(owner);
     }
 }

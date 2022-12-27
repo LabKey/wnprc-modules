@@ -19,8 +19,8 @@
         method : 'POST',
         jsonData : {},
         success: function () {
-            LABKEY.requiresScript("/wnprc_virology/gen/dropdown.js",true, function() {
-                DropdownSelect.renderDropdown();
+            LABKEY.requiresScript("gen/DropdownSelect",true, function() {
+                LABKEY.App.loadApp('DropdownSelect', 'app', {update: false});
                 document.getElementById("folder-type-set").setAttribute("style", "display:block");
             });
         },

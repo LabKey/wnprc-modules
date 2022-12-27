@@ -2,21 +2,10 @@
 <head>
     <script type="text/javascript">
 
-        LABKEY.Query.selectRows({
-            schemaName: 'wnprc_virology_linked',
-            queryName: 'folders_accounts_mappings',
-            filterArray: [LABKEY.Filter.create('folder_name', LABKEY.container.name, LABKEY.Filter.Types.EQUAL)],
-            success: function (resp) {
-                LABKEY.requiresScript("/wnprc_virology/gen/dropdown.js",true, function() {
-                    DropdownSelect.renderDropdown(true);
-                    document.getElementById("folder-type-set").setAttribute("style", "display:block");
-                });
-            },
-            failure: function (err) {
-            }
-        })
-
-
+        window.addEventListener('DOMContentLoaded', (event) => {
+            LABKEY.App.loadApp('DropdownSelect', 'app', {update: true});
+            document.getElementById("folder-type-set").setAttribute("style", "display:block");
+        });
     </script>
 </head>
 

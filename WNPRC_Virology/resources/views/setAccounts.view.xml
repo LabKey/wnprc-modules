@@ -2,4 +2,7 @@
     <permissions>
         <permission name="read"/>
     </permissions>
+    <dependencies>
+        <dependency path="gen/DropdownSelect"/>
+    </dependencies>
 </view>

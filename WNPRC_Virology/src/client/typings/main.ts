@@ -12,3 +12,7 @@ export interface DropdownSelectProps {
     dropdownLabel: string;
     controlWidth?: number;
 }
+
+export interface DropdownContainerProps {
+    update: boolean;
+}

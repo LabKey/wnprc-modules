@@ -5,14 +5,15 @@ import { Button } from 'react-bootstrap';
 
 import { AppContext } from "./VirologyContextProvider";
 import DropdownSelect from "./DropdownSelect";
-import { ConfigProps } from '../typings/main';
+import { ConfigProps, DropdownContainerProps } from '../typings/main';
 import { labkeyActionSelectWithPromise } from '../helpers/helper';
 
-const DropdownContainer: React.FunctionComponent<any> = props => {
+const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContainerProps) => {
+
+    const updateAccounts = props.update;
 
     const [disabled, setDisabled] = useState(false);
     const {
-        setAccountsExternal,
         accounts
     } = useContext(AppContext);
     const [options, setOptions] = useState<Array<object>>();
@@ -32,13 +33,9 @@ const DropdownContainer: React.FunctionComponent<any> = props => {
         });
     }, []);
 
-    //do we do a completely separate onSubmit handler here and diff virology action
-    // or just pass more stuff to folderSetup..?
-
-    //can we make the Update Accounts tab admin only?
     function onSubmit() {
         setDisabled(true);
-        if (props.update==true)
+        if (updateAccounts==true)
         {
             Ajax.request({
                 url: ActionURL.buildURL("wnprc_virology", "updateAccounts"),
@@ -52,7 +49,6 @@ const DropdownContainer: React.FunctionComponent<any> = props => {
                 }
             })
         } else {
-            debugger;
             Ajax.request({
                 url: ActionURL.buildURL("wnprc_virology", "folderSetup"),
                 method : 'POST',
@@ -71,27 +67,31 @@ const DropdownContainer: React.FunctionComponent<any> = props => {
 
     return (
         <>
-            <React.StrictMode>
             <DropdownSelect
                 options={options}
                 dropdownLabel="Accounts"
                 controlWidth={560}
             />
-            </React.StrictMode>
-            {!props.update && <Button
-                variant="primary"
-                onClick={onSubmit}
-                disabled={disabled}
-                >
-                Save and Configure Permissions
-            </Button>}
-            {props.update && <Button
+            <br/>
+            <div className="row">
+                <div className="col-xs-10"></div>
+                    <div className="col-xs-2">
+                {!updateAccounts && <Button
                     variant="primary"
                     onClick={onSubmit}
                     disabled={disabled}
-            >
-                Update Accounts
-            </Button>}
+                    >
+                    Save and Configure Permissions
+                </Button>}
+                {updateAccounts && <Button
+                        variant="primary"
+                        onClick={onSubmit}
+                        disabled={disabled}
+                >
+                    Update Accounts
+                </Button>}
+                    </div>
+            </div>
         </>
     )
 }

@@ -4,5 +4,6 @@
     </permissions>
     <dependencies>
         <dependency path="gen/DropdownSelect"/>
+        <!-- <dependency path="http://localhost:3001/DropdownSelect.js"/> -->
     </dependencies>
 </view>

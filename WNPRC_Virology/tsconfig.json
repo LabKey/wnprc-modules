@@ -6,7 +6,8 @@
     "sourceMap": false,
     "experimentalDecorators": true,
     "moduleResolution": "node",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "node_modules",

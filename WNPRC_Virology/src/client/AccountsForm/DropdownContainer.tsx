@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useContext, useEffect } from 'react';
 import { ActionURL, Ajax } from '@labkey/api';
-import { Button } from 'react-bootstrap';
+import { Button, Alert } from 'react-bootstrap';
 import CSS from "csstype";
 
 import { AppContext } from "./VirologyContextProvider";
@@ -14,14 +14,15 @@ const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContaine
     const updateAccounts = props.update;
 
     const containerStyles: CSS.Properties = {
-        maxWidth: '660px'
+        maxWidth: '760px'
     }
 
     const buttonRowStyle: CSS.Properties = {
         float: 'right'
     }
 
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState<boolean>(false);
+    const [submitted, setSubmitted] = useState<boolean>(false);
     const {
         accounts
     } = useContext(AppContext);
@@ -51,7 +52,8 @@ const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContaine
                 method : 'POST',
                 jsonData : {accounts: accounts},
                 success: function (s) {
-                    window.location.reload();
+                    setSubmitted(true);
+                    setDisabled(false);
                 },
                 failure: function (e) {
                     alert(JSON.parse(e.response).exception)
@@ -76,6 +78,7 @@ const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContaine
 
     return (
         <div style={containerStyles}>
+            <Alert variant="success" dismissible={true} className="in" show={submitted} onClose={()=> {setSubmitted(false)}}>Accounts successfully updated!</Alert>
             <div className="row">
                 <div className="col-xs-9">
                     <DropdownSelect

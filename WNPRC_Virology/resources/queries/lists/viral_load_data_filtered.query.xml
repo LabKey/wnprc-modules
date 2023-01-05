@@ -17,6 +17,7 @@
                             <fkColumnName>rowid</fkColumnName>
                             <fkDisplayColumnName>alias</fkDisplayColumnName>
                         </fk>
+                        <isHidden>true</isHidden>
                     </column>
                 </columns>
             </table>

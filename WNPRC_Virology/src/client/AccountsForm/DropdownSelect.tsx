@@ -11,7 +11,6 @@ const DropdownSelect: React.FunctionComponent<DropdownSelectProps> = props => {
   const [selectedOptions, setSelectedOptions] = useState<Array<object>>();
 
   const dropdownLabel = props.dropdownLabel;
-  const controlWidth = props.controlWidth ? props.controlWidth : 600;
   const options = props.options;
 
   //load up any existing options
@@ -45,15 +44,6 @@ const DropdownSelect: React.FunctionComponent<DropdownSelectProps> = props => {
 
   },[options]);
 
-  const customStyles = {
-    control: provided => ({
-      // none of react-select's styles are passed to <Control />
-      ...provided,
-      width: controlWidth,
-      borderRadius: "unset"
-    }),
-  };
-
   const {
     setAccountsExternal,
     accounts
@@ -76,25 +66,16 @@ const DropdownSelect: React.FunctionComponent<DropdownSelectProps> = props => {
 
   const dropdown = (
       <>
-        <div className="row">
-          <div className="col-xs-12">
             <label htmlFor="options">{dropdownLabel}:</label>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-xs-12">
             <Select
                 id="options"
                 value={selectedOptions}
                 onChange={handleChange}
                 options={options}
-                styles={customStyles}
                 name="option-select"
                 isMulti
                 isSearchable
             />
-          </div>
-        </div>
       </>
   );
 

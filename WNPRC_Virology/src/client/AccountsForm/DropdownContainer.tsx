@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useContext, useEffect } from 'react';
 import { ActionURL, Ajax } from '@labkey/api';
 import { Button } from 'react-bootstrap';
+import CSS from "csstype";
 
 import { AppContext } from "./VirologyContextProvider";
 import DropdownSelect from "./DropdownSelect";
@@ -11,6 +12,14 @@ import { labkeyActionSelectWithPromise } from '../helpers/helper';
 const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContainerProps) => {
 
     const updateAccounts = props.update;
+
+    const containerStyles: CSS.Properties = {
+        maxWidth: '660px'
+    }
+
+    const buttonRowStyle: CSS.Properties = {
+        float: 'right'
+    }
 
     const [disabled, setDisabled] = useState(false);
     const {
@@ -66,33 +75,39 @@ const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContaine
     }
 
     return (
-        <>
-            <DropdownSelect
-                options={options}
-                dropdownLabel="Accounts"
-                controlWidth={560}
-            />
-            <br/>
+        <div style={containerStyles}>
             <div className="row">
-                <div className="col-xs-10"></div>
-                    <div className="col-xs-2">
-                {!updateAccounts && <Button
-                    variant="primary"
-                    onClick={onSubmit}
-                    disabled={disabled}
-                    >
-                    Save and Configure Permissions
-                </Button>}
-                {updateAccounts && <Button
+                <div className="col-xs-9">
+                    <DropdownSelect
+                        options={options}
+                        dropdownLabel="Accounts"
+                    />
+                </div>
+                <div className="col-xs-3"></div>
+            </div>
+            <div className="row">&nbsp;</div>
+            <div className="row">
+                <div className="col-xs-9"></div>
+                <div className="col-xs-3">
+                    {!updateAccounts && <Button
                         variant="primary"
                         onClick={onSubmit}
                         disabled={disabled}
-                >
-                    Update Accounts
-                </Button>}
-                    </div>
+                        style={buttonRowStyle}
+                        >
+                        Save and Configure Permissions
+                    </Button>}
+                    {updateAccounts && <Button
+                            variant="primary"
+                            onClick={onSubmit}
+                            disabled={disabled}
+                            style={buttonRowStyle}
+                    >
+                        Update Accounts
+                    </Button>}
+                </div>
             </div>
-        </>
+        </div>
     )
 }
 

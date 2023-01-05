@@ -389,13 +389,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         WebElement el = Locator.id("app").findElement(getDriver());
         WebElement inp = el.findElement(By.tagName("input"));
         inp.sendKeys(Keys.DELETE);
-        inp.sendKeys(ACCOUNT_STR_2);
+        inp.sendKeys(ACCOUNT_STR_3);
         inp.sendKeys(Keys.ENTER);
         _test.clickButton("Update Accounts");
         navigateToFolder(PROJECT_NAME_EHR, A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
-        waitForText(ACCOUNT_STR_2);
-        assertTextPresent(ACCOUNT_STR_2);
-        assertTextNotPresent(ACCOUNT_STR);
+        waitForText(ANIMAL_ID_2);
+        assertTextPresent(ANIMAL_ID_2);
+        assertTextNotPresent(ANIMAL_ID);
     }
 
     @Test

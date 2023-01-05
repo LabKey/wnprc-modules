@@ -11,8 +11,8 @@ SELECT vl.Id,
        vl.experiment_number,
        vl.rna_isolation_method,
        vl.account,
-       mp.account,
-       mp.folder_name,
+       mp.account as mpaccount,
+       mp.folder_name
 FROM study.viral_loads vl
 LEFT JOIN (
        SELECT  wnprc_virology.folders_accounts_mappings.account,

@@ -22,7 +22,7 @@ const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContaine
     }
 
     const [disabled, setDisabled] = useState<boolean>(false);
-    const [submitted, setSubmitted] = useState<boolean>(false);
+    const [submitted, setSubmitted] = useState<boolean>(new URL(window.location.href).search.indexOf('submitted') > 0);
     const {
         accounts
     } = useContext(AppContext);
@@ -52,8 +52,14 @@ const DropdownContainer: React.FunctionComponent<any> = (props: DropdownContaine
                 method : 'POST',
                 jsonData : {accounts: accounts},
                 success: function (s) {
-                    setSubmitted(true);
                     setDisabled(false);
+                    //can we refresh with success in url?
+                    let currUrl = window.location.href;
+                    if (new URL(currUrl).search.indexOf('submitted') > 0) {
+                        window.location.reload();
+                    } else {
+                        window.location.href = currUrl + '&submitted=true'
+                    }
                 },
                 failure: function (e) {
                     alert(JSON.parse(e.response).exception)

@@ -391,7 +391,9 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         inp.sendKeys(Keys.DELETE);
         inp.sendKeys(ACCOUNT_STR_3);
         inp.sendKeys(Keys.ENTER);
+        //note that this clickbutton expects a page reload
         _test.clickButton("Update Accounts");
+        waitForText("Accounts successfully updated!");
         navigateToFolder(PROJECT_NAME_EHR, A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
         waitForText(ANIMAL_ID_2);
         assertTextPresent(ANIMAL_ID_2);

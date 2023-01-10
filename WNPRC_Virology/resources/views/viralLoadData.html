@@ -1,0 +1,18 @@
+<html>
+<head>
+    <script type="text/javascript">
+
+        new LABKEY.WebPart({
+            partName: 'Query',
+            renderTo: 'viralLoadData',
+            frame: 'none',
+            partConfig: {
+                schemaName: LABKEY.container.name + 'LinkedSchema',
+                queryName: 'viral_load_data_filtered'
+            },
+        }).render();
+
+    </script>
+</head>
+<div id="viralLoadData"></div>
+</html>

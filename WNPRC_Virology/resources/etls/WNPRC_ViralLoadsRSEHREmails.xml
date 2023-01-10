@@ -1,0 +1,15 @@
+<!--- etl to get folder info / emails onto main EHR... query the folder_to_experiment_mappings_sql table. use folder_to_experiment_mappings.sql-->
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>RSEHR to EHR folders with accounts and emails truncate ETL</name>
+    <description>This ETL copies over the folder plus account plus emails information from RSEHR to EHR</description>
+    <transforms>
+        <transform id="rsher-folder-mappings-to-ehr" type="RemoteQueryTransformStep">
+            <source queryName="rsehr_folders_accounts_and_vl_reader_emails_etl" remoteSource="RSEHRServerVirology" schemaName="lists"/>
+            <destination queryName="rsehr_folders_accounts_and_vl_reader_emails" schemaName="wnprc_virology" targetOption="truncate"/>
+        </transform>
+    </transforms>
+    <!-- run at 10:10pm CST every day -->
+    <schedule>
+        <cron expression="0 10 22 ? * *"/>
+    </schedule>
+</etl>

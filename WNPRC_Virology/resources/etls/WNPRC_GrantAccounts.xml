@@ -1,0 +1,14 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>EHR -> RSEHR grant accounts ETL</name>
+    <description>This ETL truncates the wnprc_virology.grant_accounts and uploads a clean copy of the data</description>
+    <transforms>
+        <transform id="grant-accounts-rsehr" type="RemoteQueryTransformStep">
+            <source queryName="aliases" remoteSource="ProductionEHRServerVirology" schemaName="ehr_billing"/>
+            <destination queryName="grant_accounts" schemaName="wnprc_virology" targetOption="truncate"></destination>
+        </transform>
+    </transforms>
+    <!-- run at 10:15pm CST every day -->
+    <schedule>
+        <cron expression="0 15 22 ? * *"/>
+    </schedule>
+</etl>

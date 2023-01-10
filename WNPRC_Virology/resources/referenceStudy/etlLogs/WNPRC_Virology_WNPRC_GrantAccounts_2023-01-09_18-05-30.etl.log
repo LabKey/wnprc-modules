@@ -1,0 +1,10 @@
+09 Jan 2023 18:05:30,749 INFO : Starting to run task 'WNPRC_Virology:task:{WNPRC_Virology}/WNPRC_GrantAccounts#grant-accounts-rsehr' at location 'webserver'
+09 Jan 2023 18:05:30,749 DEBUG: SimpleQueryTransformStep.doWork called
+09 Jan 2023 18:05:30,751 INFO : Copying data from ehr_billing.aliases to wnprc_virology.grant_accounts
+09 Jan 2023 18:05:30,752 INFO : Target option: truncate
+09 Jan 2023 18:05:30,758 INFO : Deleted 0 rows from wnprc_virology.grant_accounts
+09 Jan 2023 18:05:31,919 INFO : Copied 4 rows in 1.168s
+09 Jan 2023 18:05:31,919 INFO : Successfully completed task 'WNPRC_Virology:task:{WNPRC_Virology}/WNPRC_GrantAccounts#grant-accounts-rsehr'
+09 Jan 2023 18:05:31,940 INFO : Starting to run task 'org.labkey.api.exp.pipeline.XarGeneratorId:expGen' at location 'webserver'
+09 Jan 2023 18:05:31,953 INFO : Checking files referenced by experiment run
+09 Jan 2023 18:05:31,984 INFO : Successfully completed task 'org.labkey.api.exp.pipeline.XarGeneratorId:expGen'

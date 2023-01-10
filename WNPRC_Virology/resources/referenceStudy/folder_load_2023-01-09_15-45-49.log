@@ -1,0 +1,39 @@
+09 Jan 2023 15:45:49,576 INFO : Starting to run task 'org.labkey.pipeline.importer.FolderImportTask' at location 'webserver'
+09 Jan 2023 15:45:49,578 DEBUG: [/WNPRC_VirologyTestProject/RSEHRPrivate] Importing folder properties from: /Users/chad/labkey/server/modules/wnprc-modules/WNPRC_Virology/resources/referenceStudy
+09 Jan 2023 15:45:49,583 INFO : Loading etl definitions
+09 Jan 2023 15:45:49,583 INFO : Starting to copy files
+09 Jan 2023 15:45:49,584 INFO : Copied 0 files
+09 Jan 2023 15:45:49,584 INFO : Ensuring exp.data rows exist for imported files
+09 Jan 2023 15:45:49,792 INFO : Loading study
+09 Jan 2023 15:45:49,795 INFO : Loading study from study.xml
+09 Jan 2023 15:45:49,796 INFO : Creating study
+09 Jan 2023 15:45:51,970 INFO : Loading top-level study properties (label, start/end date, description, etc.)
+09 Jan 2023 15:45:52,029 INFO : Done importing top-level study properties (label, start/end date, description, etc.)
+09 Jan 2023 15:45:52,044 INFO : Loading datasets manifest from datasets_manifest.xml
+09 Jan 2023 15:45:52,049 INFO : Loading dataset schema from datasets_metadata.xml
+09 Jan 2023 15:45:52,371 INFO : Start batch wnprc_virology.dataset
+09 Jan 2023 15:45:52,401 INFO : Viral Loads - EHR: Starting import from dataset5080.tsv
+09 Jan 2023 15:45:52,471 INFO : Viral Loads - EHR: Processed 5 rows from dataset5080.tsv
+09 Jan 2023 15:45:52,472 INFO : Viral Loads - EHR: Merged 5 rows
+09 Jan 2023 15:45:52,472 INFO : Finish batch wnprc_virology.dataset
+09 Jan 2023 15:45:52,474 INFO : Updating study-wide subject/visit information...
+09 Jan 2023 15:45:52,475 INFO : Updating participants
+09 Jan 2023 15:45:52,481 INFO : Updating participant visit table
+09 Jan 2023 15:45:52,530 INFO : Updating visit table
+09 Jan 2023 15:45:52,541 INFO : Updating cohorts
+09 Jan 2023 15:45:52,541 INFO : Clearing participant visit caches
+09 Jan 2023 15:45:52,544 INFO : Subject/visit update complete.
+09 Jan 2023 15:45:52,578 INFO : Loading dataset cohort assignments
+09 Jan 2023 15:45:52,578 INFO : Done importing dataset cohort assignments
+09 Jan 2023 15:45:52,620 INFO : Done importing study
+09 Jan 2023 15:45:52,625 INFO : Starting Sample Type and Data Class import
+09 Jan 2023 15:45:52,625 INFO : No types XAR file to process.
+09 Jan 2023 15:45:52,626 INFO : Finished importing Sample Types and Data Classes
+09 Jan 2023 15:45:52,626 INFO : xar directory not found in folder /WNPRC_VirologyTestProject/RSEHRPrivate
+09 Jan 2023 15:45:52,631 INFO : Starting Sample Status Data import
+09 Jan 2023 15:45:52,631 INFO : No sample types XAR file to process.
+09 Jan 2023 15:45:52,631 INFO : Finished importing Sample Status Data
+09 Jan 2023 15:45:52,652 INFO : Post-processing queries
+09 Jan 2023 15:45:52,652 INFO : Skipping query validation.
+09 Jan 2023 15:45:52,652 INFO : Done post-processing queries
+09 Jan 2023 15:45:52,692 INFO : Successfully completed task 'org.labkey.pipeline.importer.FolderImportTask'

@@ -66,11 +66,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String RSEHR_JOB_INTERVAL = "5";
     public static final String ZIKA_PORTAL_PATH = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
-    public static final String EHR_REMOTE_CONNECTION = "ProductionEHRServerVirology";
+    public static final String EHR_REMOTE_CONNECTION = "ProductionEHRServerFinance";
     public static final String EHR_EMAILS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsRSEHREmails";
     public static final String RSEHR_REMOTE_CONNECTION = "RSEHRServerVirology";
     public static final String RSEHR_ACCOUNTS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_GrantAccounts";
     public static final String RSEHR_VIRAL_LOAD_DATA_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoads";
+    public static final String EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME = "ProductionEHRServerVirology";
     public static final String TEST_USER = "test_wnprc_virology@test.com";
     public static final String TEST_USER_2 = "test_wnprc_virology_2@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");

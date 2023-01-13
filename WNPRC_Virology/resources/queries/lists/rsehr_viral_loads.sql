@@ -36,4 +36,4 @@ WHERE
 
 -- groupBy viral load so these can be averaged
 GROUP BY
-    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber
+    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string

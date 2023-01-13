@@ -3,7 +3,7 @@
     <description>This ETL truncates the wnprc_virology.grant_accounts and uploads a clean copy of the data</description>
     <transforms>
         <transform id="grant-accounts-rsehr" type="RemoteQueryTransformStep">
-            <source queryName="aliases" remoteSource="ProductionEHRServerVirology" schemaName="ehr_billing"/>
+            <source queryName="aliases" remoteSource="ProductionEHRServerFinance" schemaName="ehr_billing"/>
             <destination queryName="grant_accounts" schemaName="wnprc_virology" targetOption="truncate"></destination>
         </transform>
     </transforms>

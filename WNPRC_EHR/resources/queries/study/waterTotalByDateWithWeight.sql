@@ -3,7 +3,7 @@
   was done due to performance reasons and to include the same records as waterTotalByDate. In the future
   there may be a need to limit to 90 days in the pass when this query becomes too slow.*/
 
-SELECT wtbd.id as animalId,
+SELECT wtbd.id as Id,
        wtbd.date,
        weigthDates.weight,
        weigthDates.startDate,

@@ -1687,7 +1687,7 @@ public class TriggerScriptHelper {
                 if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId()))
                 {
 
-                    if (waterRecord.getAnimalId().equals(animalId))
+                    if (waterRecord.getId().equals(animalId))
                     {
                         waterScheduledFromServer += waterRecord.getVolume();
                     }
@@ -1853,7 +1853,7 @@ public class TriggerScriptHelper {
         private String objectId;
         private String waterOrderObjectId;
         private String lsid;
-        private String animalId;
+        private String Id;
         private Date date;
         private Date startDateCoalesced;
         private Date endDateCoalescedFuture;
@@ -1883,9 +1883,9 @@ public class TriggerScriptHelper {
             this.lsid = lsid;
         }
 
-        public void setAnimalId(String animalId)
+        public void setId(String Id)
         {
-            this.animalId = animalId;
+            this.Id = Id;
         }
 
         public void setDate(Date date)
@@ -1947,9 +1947,9 @@ public class TriggerScriptHelper {
             return lsid;
         }
 
-        public String getAnimalId()
+        public String getId()
         {
-            return animalId;
+            return Id;
         }
 
         public Date getDate()
@@ -2001,7 +2001,7 @@ public class TriggerScriptHelper {
                 else if (prop.getKey().equalsIgnoreCase("objectId") && prop.getValue() instanceof String)
                     setObjectId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("Id") && prop.getValue() instanceof String)
-                    setAnimalId((String)prop.getValue());
+                    setId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("startDate") && prop.getValue() instanceof Date)
                     setStartDateCoalesced((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("endDate") && prop.getValue() instanceof Date)

@@ -1,7 +1,7 @@
 SELECT
 
-    m.account,
     f.folder_name,
+    m.account,
     f.emails,
     f.folder_path,
     f.folder_container_id

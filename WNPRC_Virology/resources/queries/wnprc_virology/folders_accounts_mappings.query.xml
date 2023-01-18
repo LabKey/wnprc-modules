@@ -10,6 +10,12 @@
                             <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="rowid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="container">
+                        <isHidden>true</isHidden>
+                    </column>
                 </columns>
             </table>
         </tables>

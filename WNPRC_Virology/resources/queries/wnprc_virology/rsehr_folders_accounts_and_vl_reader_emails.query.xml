@@ -5,7 +5,7 @@
                 <columns>
                     <column columnName="account">
                         <fk>
-                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkDbSchema>ehr_billing_linked</fkDbSchema>
                             <fkTable>aliases</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                         </fk>

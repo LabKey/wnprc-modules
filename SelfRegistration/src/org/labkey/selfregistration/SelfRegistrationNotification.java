@@ -71,7 +71,7 @@ public class SelfRegistrationNotification
         msg.append("<p>View all of the self registrations " +
                 "<a href=\"" +
                 hostName +
-                "/query/" + _issueTrackerFolderName + "Private/executeQuery.view?schemaName=issues&query.queryName=" + _issueTrackerDefName + "\"" +
+                "/query/" + _issueTrackerFolderName + "/executeQuery.view?schemaName=issues&query.queryName=" + _issueTrackerDefName + "\"" +
                 " >here</a>.</p>");
 
         return msg.toString();

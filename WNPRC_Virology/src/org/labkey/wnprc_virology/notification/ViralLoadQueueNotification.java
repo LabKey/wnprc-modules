@@ -45,8 +45,6 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String hostName;
     public String notifyEmails = "";
     public Container container;
-    public String modifiedByFullName = "";
-    public String modifiedByEmail = "";
     public Map<String, Integer> emailsAndCount = new HashMap<>();
     public Integer experimentNumber;
     public Integer positiveControl;
@@ -106,18 +104,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }
     }
 
-    public void countEmailsAndPut(String emails, String createdyByEmail)
+    public void countEmailsAndPut(String emails)
     {
         if (emails != null){
             //we should split by comma, semicolon, or new line
             String[] emailArray = notifyEmails.split(";|,|\n|\r\n|\r");
             for (String e : emailArray)
             {
-                e = e.trim();
-                if (!createdyByEmail.equals(e))
-                {
-                    addEmail(e);
-                }
+                addEmail(e);
             }
         }
 
@@ -170,15 +164,11 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("ModifiedBy"));
         columns.add(FieldKey.fromString("funding_string")); //account
 
-        Integer createdByUserId = null;
         String notifyEmails = null;
-        Integer modifiedBy = null;
 
         // Execute the query
         try (Results rs = viralLoadQuery.select(columns, filter))
         {
-            User createdByUser = null;
-            String createdByUserEmail = null;
             User mod = null;
             while (rs.next()){
                 HashMap<String,Object> mp = new HashMap<>();
@@ -188,49 +178,18 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
                 VLSampleListResults.add(mp);
 
-                createdByUserId = rs.getInt(FieldKey.fromString("CreatedBy"));
                 notifyEmails = rs.getString(FieldKey.fromString("emails"));
-                modifiedBy = rs.getInt(FieldKey.fromString("ModifiedBy"));
-
-                if (createdByUserId != null)
-                {
-                    createdByUser = UserManager.getUser(createdByUserId);
-                    if (createdByUser != null)
-                    {
-                        createdByUserEmail = createdByUser.getEmail();
-                    }
-                }
 
                 if (notifyEmails != null)
                 {
                     this.notifyEmails = notifyEmails;
-                }
-                if (modifiedBy != null)
-                {
-                    mod = UserManager.getUser(modifiedBy);
-                    if (mod != null)
-                    {
-                        this.modifiedByEmail = mod.getEmail();
-                        String fullName = mod.getFullName();
-                        if ("".equals(fullName))
-                        {
-                            this.modifiedByFullName = "Virology Services";
-                        } else
-                        {
-                            this.modifiedByFullName = fullName;
-                        }
-                    }
                 }
                 // old notes:
                 //emails.put(createdByUserId, getEmailArray(notifyEmails)); - old way, user id is unique.
                 //used to use public Map<Integer, List<String>> emails = new HashMap<Integer,List<String>>();
                 //but ideally instead of Integer as the key it would be a a string of:
                 //submitter email + notify email string(normalized = sorted in such a way there arent repeats).
-
-                //add the submitter email, the modified by email, and also the rest in the "emails" column
-                addEmail(createdByUserEmail);
-                addEmail(modifiedByEmail);
-                countEmailsAndPut(notifyEmails, createdByUserEmail);
+                countEmailsAndPut(notifyEmails);
             }
         }
 
@@ -332,7 +291,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public String getMessageBodyHTML(String recipientName, Integer count)
     {
-
+        String contactEmail = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_EMAIL_CONTACT_INFO).getEffectiveValue(ContainerManager.getRoot());
         final StringBuilder msg = new StringBuilder();
         msg.append("<p>Hello " +
                 recipientName +
@@ -364,14 +323,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
         msg.append("<p>Please feel free to contact " +
                 "<a href=\"mailto:" +
-                modifiedByEmail +
+                contactEmail +
                 "\">" +
-                modifiedByEmail +
+                contactEmail +
                 "</a> " +
                 "if you have any questions or concerns. We look forward to serving you again in the future.</p>");
 
         msg.append("Best,<br>" +
-                modifiedByFullName);
+                "Virology Services");
 
         return msg.toString();
     }

@@ -25,9 +25,9 @@
                             WNPRC_Virology.DatasetButtons.batchCompleteRecords(dataRegion.name);
                         </onClick>
                     </item>
-                    <item text="Download CSV" requiresSelection="false">
+                    <item text="Download CSV" requiresSelection="true">
                         <onClick>
-                            WNPRC_Virology.DatasetButtons.downloadRecordsToCSV();
+                            WNPRC_Virology.DatasetButtons.downloadRecordsToCSV(dataRegion.name);
                         </onClick>
                     </item>
 

@@ -196,9 +196,17 @@ WNPRC_Virology.DatasetButtons = new function() {
             });
 
         },
-        downloadRecordsToCSV: function () {
+        downloadRecordsToCSV: function (dataRegionName) {
             let filt = [];
-            filt.push(LABKEY.Filter.create('status', '1;2;3', LABKEY.Filter.Types.EQUALS_ONE_OF));
+            var dataRegion = LABKEY.DataRegions[dataRegionName];
+            var checked = dataRegion.getChecked();
+            var checkedJoin = checked.join(";");
+            console.log(checkedJoin);
+            if (!checked || !checked.length) {
+                Ext4.Msg.alert('Error', 'No records selected');
+                return;
+            }
+            filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
 
             function replaceSampleTypeCasing(sampleType) {
                 switch(sampleType) {

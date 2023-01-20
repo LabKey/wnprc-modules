@@ -72,6 +72,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String RSEHR_ACCOUNTS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_GrantAccounts";
     public static final String RSEHR_VIRAL_LOAD_DATA_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoads";
     public static final String EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME = "ProductionEHRServerVirology";
+    public static final String RSEHR_EMAIL_CONTACT_INFO = "virologyservices@primate.wisc.edu";
     public static final String TEST_USER = "test_wnprc_virology@test.com";
     public static final String TEST_USER_2 = "test_wnprc_virology_2@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
@@ -162,6 +163,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRJobInterval", RSEHR_JOB_INTERVAL));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRNotificationEmailReplyTo", RSEHR_EMAIL_CONTACT_INFO));
         _test.setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);

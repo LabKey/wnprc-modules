@@ -35,6 +35,8 @@ public class WNPRC_VirologyModule extends SpringModule
     //TODO: assemble notify list from ETL from RSEHR
     public static final String USE_RSEHR_FOLDER_PERMS_FOR_EMAIL = "virologyRSHEREmailMethod";
 
+    public static final String RSEHR_EMAIL_CONTACT_INFO = "RSEHRNotificationEmailReplyTo";
+
     @Override
     public String getName()
     {

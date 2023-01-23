@@ -477,7 +477,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry", Maps.of("requestRowId", requestID)));
         log("Impersonate as " + REQUESTER_USER_2);
         impersonate(REQUESTER_USER_2);
-        assertTextPresent("You do not have sufficient permissions to update this request.");
+        waitForText("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }
 

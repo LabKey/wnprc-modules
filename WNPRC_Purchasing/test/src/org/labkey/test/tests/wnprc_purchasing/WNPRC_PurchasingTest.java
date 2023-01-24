@@ -35,6 +35,7 @@ import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.componenes.CreateVendorDialog;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.util.APIUserHelper;
@@ -173,9 +174,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         selectQuery("ehr_billing", "aliases");
         clickAndWait(Locator.linkWithText("create definition"), 5000);
 
-        Locator.XPathLocator manuallyDefineFieldsLoc = Locator.tagWithClass("div", "domain-form-manual-btn");
-        click(manuallyDefineFieldsLoc);
-        setFormElement(Locator.inputByNameContaining("domainpropertiesrow-name"), extensibleCol);
+        DomainFormPanel domainFormPanel = new DomainFormPanel.DomainFormPanelFinder(getDriver()).find();
+        domainFormPanel.manuallyDefineFields(extensibleCol);
         clickButton("Save");
     }
 
@@ -477,7 +477,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry", Maps.of("requestRowId", requestID)));
         log("Impersonate as " + REQUESTER_USER_2);
         impersonate(REQUESTER_USER_2);
-        assertTextPresent("You do not have sufficient permissions to update this request.");
+        waitForText("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }
 

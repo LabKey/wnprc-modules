@@ -174,7 +174,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //just import study to root and tie down perms later
         //_containerHelper.createSubfolder(getProjectNameRSEHR(), RSEHR_PRIVATE_FOLDER_NAME, "Collaboration");
         //_containerHelper.enableModules(Arrays.asList("Dumbster", "Study"));
-        importStudyFromPath(1);
+        importFolderFromPath(1);
         setupNotificationService();
 
         PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
@@ -231,28 +231,24 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         clickButton("Save & Close");
     }
 
-    protected void importStudyFromPath(int jobCount)
-    {
+    protected void importFolderFromPath(int jobCount)
+    {   
         File path = new File(TestFileUtils.getLabKeyRoot(), getModulePath() + "/resources/referenceStudy");
         setPipelineRoot(path.getPath());
-
-        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectNameRSEHR() + "/begin.view");
+        
+        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectNameRSEHR()  + "/begin.view");
         clickButton("Process and Import Data", defaultWaitForPage);
 
         _fileBrowserHelper.expandFileBrowserRootNode();
-        _fileBrowserHelper.checkFileBrowserFileCheckbox("study.xml");
-
-        if (isTextPresent("Reload Study"))
-            _fileBrowserHelper.selectImportDataAction("Reload Study");
-        else
-            _fileBrowserHelper.selectImportDataAction("Import Study");
-
+        _fileBrowserHelper.checkFileBrowserFileCheckbox("folder.xml");
+        _fileBrowserHelper.selectImportDataAction("Import Folder");
+        
         Locator cb = Locator.checkboxByName("validateQueries");
         waitForElement(cb);
         uncheckCheckbox(cb);
-
+        
         clickButton("Start Import"); // Validate queries page
-        waitForPipelineJobsToComplete(jobCount, "Study import", false, MAX_WAIT_SECONDS * 2500);
+        waitForPipelineJobsToComplete(jobCount, "Folder import", false, MAX_WAIT_SECONDS * 2500);
 
         goToManageStudy();
         clickAndWait(Locator.linkWithText("Manage Security"));
@@ -260,7 +256,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         setFormElement(Locator.name("fileUpload"), TestFileUtils.getSampleData("wnprcVirologyStudyPolicy.xml"));
         clickButton("Import");
 
-    }
+    } 
 
     protected String getModuleDirectory()
     {

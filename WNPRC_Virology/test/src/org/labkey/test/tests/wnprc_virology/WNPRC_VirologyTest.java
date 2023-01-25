@@ -253,6 +253,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         clickButton("Start Import"); // Validate queries page
         waitForPipelineJobsToComplete(jobCount, "Study import", false, MAX_WAIT_SECONDS * 2500);
+
+        goToManageStudy();
+        clickAndWait(Locator.linkWithText("Manage Security"));
+
+        setFormElement(Locator.name("fileUpload"), TestFileUtils.getSampleData("wnprcVirologyStudyPolicy.xml"));
+        clickButton("Import");
+
     }
 
     protected String getModuleDirectory()

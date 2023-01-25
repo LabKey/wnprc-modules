@@ -72,6 +72,7 @@ import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
-    private SchemaHelper _schemaHelper = new SchemaHelper(this);
+    private final SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
 
@@ -142,12 +143,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
     public static final String GEN_CREDIT_ACCT_ID = "acct103";
 
-    private Map<String, Object> aliasesMap = new HashMap<>();
+    private final Map<String, Object> aliasesMap = new HashMap<>();
 
-    protected static final Double FEEDING_AMT = 12.12;
-    protected static final Double WEIGHT_VAL = 12.12;
-    protected static final Double NEW_WEIGHT_VAL = 12.13;
-    protected static final Double LOW_VAL = 0.1;
+    protected static final BigDecimal FEEDING_AMT = new BigDecimal("12.12");
+    protected static final BigDecimal WEIGHT_VAL = new BigDecimal("12.12");
+    protected static final BigDecimal NEW_WEIGHT_VAL = new BigDecimal("12.13");
+    protected static final BigDecimal LOW_VAL = new BigDecimal("0.1");
     protected static final Double HIGH_VAL = 0.12;
     protected static final String ROOM_ID_LOCAL = "ab160";
     protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
@@ -2181,11 +2182,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testWeights() throws IOException, CommandException
+    public void testWeights()
     {
       //dummy test
-
     }
+
     @Test
     public void testEnterWeights() throws IOException, CommandException
     {

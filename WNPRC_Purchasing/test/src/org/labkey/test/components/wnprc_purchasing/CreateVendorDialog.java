@@ -1,4 +1,4 @@
-package org.labkey.test.componenes;
+package org.labkey.test.components.wnprc_purchasing;
 
 import org.labkey.test.Locator;
 import org.labkey.test.components.bootstrap.ModalDialog;

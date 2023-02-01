@@ -181,7 +181,7 @@
             }
 
             LABKEY.Ajax.request({
-                url: LABKEY.ActionURL.buildURL('login', 'registerUser.api', this.containerPath),
+                url: LABKEY.ActionURL.buildURL('login', 'registerUser.api', "/"),
                 method: 'POST',
                 params: {
                     email: email,

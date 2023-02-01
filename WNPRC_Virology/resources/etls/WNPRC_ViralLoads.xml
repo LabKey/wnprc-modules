@@ -7,8 +7,8 @@
             <destination queryName="viral_loads" schemaName="study" targetOption="truncate"/>
         </transform>
     </transforms>
-    <!-- run at 10:10pm CST every day -->
+    <!-- run every hour -->
     <schedule>
-        <cron expression="0 10 22 ? * *"/>
+        <cron expression="0 0 * ? * *"/>
     </schedule>
 </etl>

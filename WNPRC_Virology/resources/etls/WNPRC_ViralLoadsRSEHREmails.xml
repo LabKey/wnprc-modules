@@ -8,8 +8,8 @@
             <destination queryName="rsehr_folders_accounts_and_vl_reader_emails" schemaName="wnprc_virology" targetOption="truncate"/>
         </transform>
     </transforms>
-    <!-- run at 10:10pm CST every day -->
+    <!-- run every hour -->
     <schedule>
-        <cron expression="0 10 22 ? * *"/>
+        <cron expression="0 0 * ? * *"/>
     </schedule>
 </etl>

@@ -168,6 +168,10 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
         //create RSEHR folder with study data
+        if (_containerHelper.doesContainerExist(getProjectNameRSEHR()))
+        {
+            _containerHelper.deleteProject(getProjectNameRSEHR());
+        }
         _containerHelper.createProject(getProjectNameRSEHR(),"Collaboration");
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study", "EHR"));
         //create study folder

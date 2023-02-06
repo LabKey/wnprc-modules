@@ -56,7 +56,7 @@
 
             <div>To help protect against abuse by bots, please enter the six characters shown below (case-insensitive).<br>
                 <a href="javascript: window.location.reload()">Reload the page to get a new image.</a></div>
-            <img src="/labkey/kaptcha.jpg" alt="Verification text" title="Verification text" height="50" />
+            <img id="kaptcha-img" src="/kaptcha.jpg" alt="Verification text" title="Verification text" height="50" />
             <input id="kaptchaText" name="kaptchaText" type="text" class="input-block i-am-an-input-field" autofocus required>
 
             <div>
@@ -70,6 +70,8 @@
         LIST_VALUES = {}
 
         function onReady() {
+            let contextPath = LABKEY.ActionURL.getContextPath();
+            $("#kaptcha-img").attr("src", contextPath + "/kaptcha.jpg");
             LABKEY.requiresCss("/login.css");
             getProjectList();
             $('.register-btn').on('click', function(e){

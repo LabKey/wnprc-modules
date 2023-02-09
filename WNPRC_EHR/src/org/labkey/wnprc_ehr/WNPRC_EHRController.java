@@ -1633,7 +1633,10 @@ public class WNPRC_EHRController extends SpringActionController
 
                             service = ti.getUpdateService();
 
-                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                            BatchValidationException errors = new BatchValidationException();
+                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, errors, null, null);
+                            if (errors.hasErrors())
+                                throw errors;
                             if (updatedRows.size() != rowToUpdate.size())
                             {
                                 throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -1715,7 +1718,10 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, extraContext);
+                        BatchValidationException errors = new BatchValidationException();
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, errors, null, extraContext);
+                        if (errors.hasErrors())
+                            throw errors;
                         if (updatedRows.size() != rowToUpdate.size())
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -1789,7 +1795,10 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                        BatchValidationException errors = new BatchValidationException();
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, errors, null, null);
+                        if (errors.hasErrors())
+                            throw errors;
                         if (updatedRows.size() != rowToUpdate.size())
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");

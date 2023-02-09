@@ -235,7 +235,7 @@ public class WNPRC_PurchasingManager
                 if (isNewRequest || requestForm.getIsReorder())
                     insertedPurchasingReq = qus.insertRows(user, container, purchasingRequestsData, errors, null, null);
                 else
-                    insertedPurchasingReq = qus.updateRows(user, container, purchasingRequestsData, null, null, null);
+                    insertedPurchasingReq = qus.updateRows(user, container, purchasingRequestsData, null, errors, null, null);
 
                 if (null != insertedPurchasingReq)
                     requestForm.setRowId((Integer) insertedPurchasingReq.get(0).get("rowId"));
@@ -326,7 +326,7 @@ public class WNPRC_PurchasingManager
                 if (newLineItemsData.size() > 0)
                     qus.insertRows(user, container, newLineItemsData, errors, null, null);
                 if (updatedLineItemsData.size() > 0)
-                    qus.updateRows(user, container, updatedLineItemsData, null, null, null);
+                    qus.updateRows(user, container, updatedLineItemsData, null, errors, null, null);
                 if (deleteLineItemsData.size() > 0)
                     qus.deleteRows(user, container, deleteLineItemsData, null, null);
             }

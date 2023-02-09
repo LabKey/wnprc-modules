@@ -187,7 +187,12 @@ public class SimpleQueryUpdater {
     public List<Map<String, Object>> doUpdate(List<Map<String, Object>> rows) throws BatchValidationException , InvalidKeyException, SQLException, QueryUpdateServiceException {
         List<Map<String, Object>> updatedRows = new ArrayList<>();
         if (rows.size() > 0) {
-            updatedRows = service.updateRows(user, container, rows, rows, null, null);
+            BatchValidationException validationException = new BatchValidationException();
+            updatedRows = service.updateRows(user, container, rows, rows, validationException, null, null);
+
+            if (validationException.hasErrors()) {
+                throw validationException;
+            }
 
             if (updatedRows.size() != rows.size()) {
                 throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -241,7 +246,7 @@ public class SimpleQueryUpdater {
 
     /**
      * Casts a "list" of rows to appropriate case insensitive rows for {@link QueryUpdateService#insertRows(User, Container, List, BatchValidationException, Map, Map)}
-     * and {@link QueryUpdateService#updateRows(User, Container, List, List, Map, Map)}.
+     * and {@link QueryUpdateService#updateRows(User, Container, List, List, BatchValidationException, Map, Map)}.
      *
      * @param rows A series (possibly of just one) of {@link Map<String, Object>} objects (which includes
      *             {@link JSONObject} objects, since they extend {@link Map<String, Object>}.

@@ -1011,7 +1011,7 @@ public class TriggerScriptHelper {
 
                 BatchValidationException errors = new BatchValidationException();
                 List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
-                if (errors.hasError())
+                if (errors.hasErrors())
                     throw errors;
                 if (updatedRows.isEmpty()){
                     returnMessage = "Error changing QCState for waterAmount table";

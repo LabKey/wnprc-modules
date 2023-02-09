@@ -1633,10 +1633,10 @@ public class WNPRC_EHRController extends SpringActionController
 
                             service = ti.getUpdateService();
 
-                            BatchValidationException errors = new BatchValidationException();
-                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, errors, null, null);
-                            if (errors.hasErrors())
-                                throw errors;
+                            BatchValidationException batchValidationException = new BatchValidationException();
+                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, batchValidationException, null, null);
+                            if (batchValidationException.hasErrors())
+                                throw batchValidationException;
                             if (updatedRows.size() != rowToUpdate.size())
                             {
                                 throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -1718,10 +1718,10 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        BatchValidationException errors = new BatchValidationException();
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, errors, null, extraContext);
-                        if (errors.hasErrors())
-                            throw errors;
+                        BatchValidationException batchValidationException = new BatchValidationException();
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, batchValidationException, null, extraContext);
+                        if (batchValidationException.hasErrors())
+                            throw batchValidationException;
                         if (updatedRows.size() != rowToUpdate.size())
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -1795,9 +1795,9 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        BatchValidationException errors = new BatchValidationException();
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, errors, null, null);
-                        if (errors.hasErrors())
+                        BatchValidationException batchValidationException = new BatchValidationException();
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, batchValidationException, null, null);
+                        if (batchValidationException.hasErrors())
                             throw errors;
                         if (updatedRows.size() != rowToUpdate.size())
                         {
@@ -1859,10 +1859,6 @@ public class WNPRC_EHRController extends SpringActionController
                     if (taskToInsert.size() != insertedTask.size() || rowToInsert.size() != insertedRows.size()){
                         throw new QueryUpdateServiceException("Task record or water record not inserted");
                     }
-
-
-
-
 
                     transaction.commit();
                     //TODO: return JSON string with taskid and success

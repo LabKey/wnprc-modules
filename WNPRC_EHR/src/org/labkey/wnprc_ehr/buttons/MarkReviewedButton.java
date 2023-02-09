@@ -27,6 +27,7 @@ public class MarkReviewedButton  extends SimpleButtonConfigFactory
         super(owner, "Mark Reviewed", "WNPRC_EHR.DatasetButtons.markReviewedButtonHandler(dataRegion);");
     }
 
+    @Override
     public boolean isAvailable(TableInfo ti)
     {
         if (!super.isAvailable(ti))

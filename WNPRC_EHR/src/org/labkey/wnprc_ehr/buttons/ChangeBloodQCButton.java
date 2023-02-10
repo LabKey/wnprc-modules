@@ -27,6 +27,7 @@ public class ChangeBloodQCButton extends SimpleButtonConfigFactory
         super(owner, "Change Request Status", "WNPRC_EHR.DatasetButtons.changeQCBloodStatusButtonHandler(dataRegion);");
     }
 
+    @Override
     public boolean isAvailable(TableInfo ti)
     {
         if (!super.isAvailable(ti))

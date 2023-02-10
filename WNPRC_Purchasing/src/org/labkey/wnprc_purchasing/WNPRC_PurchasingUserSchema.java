@@ -4,10 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.DatabaseTableType;
-import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.SimpleUserSchema;
-import org.labkey.api.query.SimpleQueryUpdateService;
 import org.labkey.api.security.User;
 
 /**
@@ -60,24 +57,4 @@ public class WNPRC_PurchasingUserSchema extends SimpleUserSchema
         }
         return super.createTable(name, cf);
     }
-
-//    @Override
-//    public QueryUpdateService getUpdateService()
-//    {
-//        // UNDONE: add an 'isUserEditable' bit to the schema and table?
-//        if (!isReadOnly())
-//        {
-//            TableInfo table = getRealTable();
-//            if (table != null && table.getTableType() == DatabaseTableType.TABLE)
-//                return new SimpleQueryUpdateService(this, table)
-//                {
-//                    @Override
-//                    protected boolean supportUpdateUsingDIB()
-//                    {
-//                        return false;
-//                    }
-//                };
-//        }
-//        return null;
-//    }
 }

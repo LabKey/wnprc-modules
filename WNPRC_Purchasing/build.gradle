@@ -4,6 +4,7 @@ dependencies {
 
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:EHR_Purchasing", depProjectConfig: "apiJarFile")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:EHR_Purchasing", depProjectConfig: "published", depExtension: "module")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
 }
 
 sourceSets {

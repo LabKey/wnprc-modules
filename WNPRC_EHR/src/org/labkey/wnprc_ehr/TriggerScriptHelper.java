@@ -1555,8 +1555,8 @@ public class TriggerScriptHelper {
                             Container container = getContainer();
                             User user = getUser();
                             BatchValidationException errors = new BatchValidationException();
-                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, null, null);
-                            if (updateRows.isEmpty()){
+                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, errors, null, null);
+                            if (updateRows.isEmpty() || errors.hasErrors()){
                                 returnErrors.put("field", "Id");
                                 returnErrors.put("severity", "ERROR");
                                 returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
@@ -2177,7 +2177,7 @@ public class TriggerScriptHelper {
                     User user = getUser();
                     BatchValidationException errors = new BatchValidationException();
                     List<Map<String, Object>> updatedRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
-                    if (updatedRows.isEmpty())
+                    if (errors.hasErrors() || updatedRows.isEmpty())
                     {
                         returnErrors.put("field", "project");
                         returnErrors.put("severity", "ERROR");

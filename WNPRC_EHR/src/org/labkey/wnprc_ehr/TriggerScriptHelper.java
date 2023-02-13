@@ -1009,7 +1009,10 @@ public class TriggerScriptHelper {
                 Container container = getContainer();
                 User user = getUser();
 
-                List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
+                BatchValidationException errors = new BatchValidationException();
+                List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
+                if (errors.hasErrors())
+                    throw errors;
                 if (updatedRows.isEmpty()){
                     returnMessage = "Error changing QCState for waterAmount table";
 
@@ -1068,7 +1071,10 @@ public class TriggerScriptHelper {
                     Container container = getContainer();
                     User user = getUser();
                     Map<String, Object> context = getExtraContext();
-                    List<Map<String, Object>> updatedRows = waterTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, context);
+                    BatchValidationException errors = new BatchValidationException();
+                    List<Map<String, Object>> updatedRows = waterTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, context);
+                    if (errors.hasErrors())
+                        throw errors;
                     if (!updatedRows.isEmpty())
                     {
                         completeWaterGivenTask(taskIds, waterTable);
@@ -1548,14 +1554,14 @@ public class TriggerScriptHelper {
                         if(!toUpdate.isEmpty()){
                             Container container = getContainer();
                             User user = getUser();
-                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, null, null);
-                            if (updateRows.isEmpty()){
+                            BatchValidationException errors = new BatchValidationException();
+                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, errors, null, null);
+                            if (updateRows.isEmpty() || errors.hasErrors()){
                                 returnErrors.put("field", "Id");
                                 returnErrors.put("severity", "ERROR");
                                 returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
 
                             }
-
                         }
                         insertRows(rowToAdd, "study", "waterScheduledAnimals");
                     }
@@ -2169,8 +2175,9 @@ public class TriggerScriptHelper {
                 {
                     Container container = getContainer();
                     User user = getUser();
-                    List<Map<String, Object>> updatedRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
-                    if (updatedRows.isEmpty())
+                    BatchValidationException errors = new BatchValidationException();
+                    List<Map<String, Object>> updatedRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
+                    if (errors.hasErrors() || updatedRows.isEmpty())
                     {
                         returnErrors.put("field", "project");
                         returnErrors.put("severity", "ERROR");

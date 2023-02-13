@@ -168,10 +168,12 @@ public abstract class SecurityEscalatedService {
 
             // Wrap the whole thing in a transaction so that the insert is an all or nothing thing.
             try (DbScope.Transaction transaction = getTableInfo().getSchema().getScope().ensureTransaction()) {
+                BatchValidationException batchValidationException = new BatchValidationException();
+
                 try (SecurityEscalatorAggregator escalator = SecurityEscalatorAggregator.beginEscalation(user, container, escalationComment)) {
                     escalator.registerSecurityEscalators(getEscalators(user, container, escalationComment));
 
-                    returnedRows = getUpdateService().updateRows(user, container, this.castToCaseInsensitiveMap(rowMaps), this.castToCaseInsensitiveMap(keyMaps), null, null);
+                    returnedRows = getUpdateService().updateRows(user, container, this.castToCaseInsensitiveMap(rowMaps), this.castToCaseInsensitiveMap(keyMaps), batchValidationException, null, null);
                 }
                 catch (QueryUpdateServiceException|SQLException e) {
                     // These errors shouldn't happen, and if they do are part of the internals of LabKey, so don't worry about
@@ -183,6 +185,10 @@ public abstract class SecurityEscalatedService {
                 // certain errors for rows, and not throw an error (such as when there's a SQL validation exception).
                 if (returnedRows.size() != numberOfRowsToUpdate) {
                     throw new UnknownError("Unexpected number of rows returned from insertRows");
+                }
+
+                if (batchValidationException.hasErrors()) {
+                    throw batchValidationException;
                 }
 
                 transaction.commit();

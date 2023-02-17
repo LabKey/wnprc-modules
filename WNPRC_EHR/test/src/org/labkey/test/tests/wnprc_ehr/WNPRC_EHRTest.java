@@ -145,10 +145,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private final Map<String, Object> aliasesMap = new HashMap<>();
 
-    protected static final BigDecimal FEEDING_AMT = new BigDecimal("12.12");
-    protected static final BigDecimal WEIGHT_VAL = new BigDecimal("12.12");
-    protected static final BigDecimal NEW_WEIGHT_VAL = new BigDecimal("12.13");
-    protected static final BigDecimal LOW_VAL = new BigDecimal("0.1");
+    protected static final Double FEEDING_AMT = 12.12;
+    protected static final Double WEIGHT_VAL = 12.12;
+    protected static final Double NEW_WEIGHT_VAL = 12.13;
+    protected static final Double LOW_VAL = 0.1;
     protected static final Double HIGH_VAL = 0.12;
     protected static final String ROOM_ID_LOCAL = "ab160";
     protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};

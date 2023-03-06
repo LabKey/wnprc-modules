@@ -86,7 +86,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
 
     getInnerTpl: function(){
         //return ['Sire: {[values["sireid"] + " - " + values["date_conception"]]}'];
-        return ['{[values["date_conception"] + " (Sire: " + values["sireid"] + ")"]}'];
+        return ['{[LABKEY.Utils.encodeHtml(values["date_conception"] + " (Sire: " + values["sireid"] + ")")]}'];
     },
 
     trigger1Cls: 'x4-form-search-trigger',

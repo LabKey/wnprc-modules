@@ -16,6 +16,7 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.util.MailHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
 import javax.mail.Address;
@@ -40,6 +41,7 @@ import static org.labkey.wnprc_virology.ViralLoadRSEHRRunner.virologyModule;
 
 public class ViralLoadQueueNotification extends AbstractEHRNotification
 {
+    public Module _owner;
     public String[] rowIds;
     public User currentUser;
     public String hostName;
@@ -56,6 +58,12 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public List<HashMap<String,Object>> VLSampleListResults = new ArrayList<>();
     public boolean useRSEHREmailMethod = false;
 
+    public String _timeCompleted;
+
+
+    public Map<String, Object> _emailSummary;
+    public Map<Integer, String> _accounts = new HashMap<>();
+
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
@@ -64,6 +72,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops, boolean usersehremailmethod) throws SQLException
     {
         super(owner);
+        _owner = owner;
         rowIds = rowids;
         currentUser = currentuser;
         container = c;
@@ -75,6 +84,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         avgVLPositiveControl = (String) emailprops.get("avg_vl_positive_control");
         efficiency = (Double) emailprops.get("efficiency");
         useRSEHREmailMethod = usersehremailmethod;
+        _timeCompleted = _dateTimeFormat.format(new Date());
         this.setUp();
     }
 
@@ -91,6 +101,16 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         avgVLPositiveControl = (String) emailprops.get("avg_vl_positive_control");
         efficiency = (Double) emailprops.get("efficiency");
         this.setUp();
+    }
+
+    public Map<String, Object> getEmailSummary()
+    {
+        return _emailSummary;
+    }
+
+    public void setEmailSummary(Map<String, Object> emailSummary)
+    {
+        _emailSummary = emailSummary;
     }
     public void addEmail(String email)
     {
@@ -197,6 +217,26 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public void getRowsAndSendMessage() throws SQLException
     {
+        HashMap<String, Object> subscriberEmailSummary = new HashMap<>();
+        // was hoping to pull in grant account info since this is gathered in the trigger script on init,
+        // but ran into issues with the native object, the compiler doesn't like emailProps.get("grantAccounts").values(),
+        // even though it's a native object and has that method in the docs https://javadoc.io/static/org.mozilla/rhino/1.7.14/org/mozilla/javascript/NativeObject.html
+
+        //HashMap<Object, Object> accountsObj = new HashMap<>();
+        //NativeObject no = (NativeObject) emailProps.get("grantAccounts");
+
+
+        //HashMap<String,Object> hs = (HashMap<String, Object>) no.entrySet(); does not work
+        /*for (Object entry : no.entrySet())
+        {
+            NativeObject nob = new NativeObject();
+            //nob = (NativeObject) entry; // this does not work
+        }*/
+        /*NativeObject no = (NativeObject) emailProps.get("grantAccounts").values();
+        for (Map.Entry<Object, Object> entry : emailProps.get("grantAccounts").values())
+        {
+            accountsObj.put(entry.getValue(), entry.getKey());
+        }*/
         //pull out accounts
         Set<Integer> accounts = new HashSet<>();
         Map<Integer, Integer> accountsAndCount = new HashMap<>();
@@ -220,8 +260,22 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             arr[i] = accountNum;
         }
         Collections.addAll(accounts, arr);
-        SimpleFilter filter = new SimpleFilter();
-        filter.addInClause(FieldKey.fromString("account"), accounts);
+
+        // let's look up the accounts so we can send their display value in an email
+        SimpleFilter accountFilter = new SimpleFilter();
+        accountFilter.addInClause(FieldKey.fromString("rowid"), accounts);
+        QueryHelper accountsQuery = new QueryHelper(container, currentUser, "ehr_billing", "aliases");
+        List<FieldKey> accountsColumns = new ArrayList<>();
+        accountsColumns.add(FieldKey.fromString("rowid"));
+        accountsColumns.add(FieldKey.fromString("alias"));
+
+        try (Results rs = accountsQuery.select(accountsColumns, accountFilter))
+        {
+            while (rs.next())
+            {
+                _accounts.put(rs.getInt(FieldKey.fromString("rowid")), rs.getString(FieldKey.fromString(("alias"))));
+            }
+        }
 
         QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails");
 
@@ -232,14 +286,24 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("emails"));
         columns.add(FieldKey.fromString("folder_path"));
 
+        SimpleFilter filter = new SimpleFilter();
+        filter.addInClause(FieldKey.fromString("account"), accounts);
+
         // Execute the query
         Collection<UserPrincipal> subscribedRecipients = getRecipients(container);
         try (Results rs = viralLoadQuery.select(columns, filter))
         {
             while (rs.next())
             {
-                String firstPart = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot());
-                emailProps.put("portalURL", firstPart + rs.getString(FieldKey.fromString("folder_path")));
+                // We want to use LabKey's URL APIs to build up URLs but this might be tricky in this situation because the URL points to a diff server
+                // e.g. ActionURL.setContainer might not work here, so we have to set the path instead
+                ActionURL viralLoadRSEHRDataLink = new ActionURL();
+                viralLoadRSEHRDataLink.setHost(virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot()));
+                viralLoadRSEHRDataLink.setPath(rs.getString(FieldKey.fromString("folder_path")) + "/project-begin.view");
+                viralLoadRSEHRDataLink.addParameter("vlqwp.experiment_number~eq", (Integer) emailProps.get("experimentNumber"));
+
+                String portalURL = viralLoadRSEHRDataLink.getBaseServerURI() + viralLoadRSEHRDataLink.toString();
+                emailProps.put("portalURL", portalURL);
 
                 String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");
 
@@ -249,17 +313,39 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 //don't we want unique emails?
                 Set<String> temp = new LinkedHashSet<String>( Arrays.asList( emails ) );
                 String[] result = temp.toArray( new String[temp.size()] );
+                Integer count = accountsAndCount.get(rs.getInt(FieldKey.fromString("account")));
 
+                HashMap<String, Object> subscriberEmailItem = new HashMap();
+                List<String> emailList = new ArrayList<>();
+                subscriberEmailItem.put("portalURL", portalURL);
+                subscriberEmailItem.put("count", count);
                 for (int k = 0; k < result.length; k++)
                 {
-                    Integer count = accountsAndCount.get(rs.getInt(FieldKey.fromString("account")));
                     String recipientEmail = result[k];
+                    emailList.add(recipientEmail);
                     String recipientName = getUserFullName(recipientEmail);
                     sendMessage(getEmailSubject(container), getMessageBodyHTML(recipientEmail, count), subscribedRecipients, recipientEmail, container);
                 }
+                subscriberEmailItem.put("emails", emailList);
+                String accountKey = rs.getString(FieldKey.fromString("account"));
+                if (subscriberEmailSummary.containsKey(accountKey)){
+                    List<HashMap<String,Object>> item = (ArrayList<HashMap<String,Object>>) subscriberEmailSummary.get(accountKey);
+                    item.add(subscriberEmailItem);
+                } else {
+                    List<HashMap<String, Object>> subscriberItemList = new ArrayList<>();
+                    subscriberItemList.add(subscriberEmailItem);
+                    subscriberEmailSummary.put(rs.getString(FieldKey.fromString("account")), subscriberItemList);
+                }
             }
+            setEmailSummary(subscriberEmailSummary);
         }
 
+    }
+
+    public void sendSubscriberMessage() throws SQLException
+    {
+        ViralLoadQueueNotificationSummaryEmail subscribersNotification = new ViralLoadQueueNotificationSummaryEmail(_owner, currentUser, _emailSummary, _timeCompleted, _accounts);
+        subscribersNotification.sendManually(container);
     }
 
     @Override
@@ -286,7 +372,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     @Override
     public String getEmailSubject(Container c)
     {
-        return "[EHR Server] Viral load results completed on " + _dateTimeFormat.format(new Date());
+        return "[EHR Server] Viral load results completed on " + _timeCompleted;
     }
 
     public String getMessageBodyHTML(String recipientName, Integer count)
@@ -346,6 +432,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         if (useRSEHREmailMethod)
         {
             getRowsAndSendMessage();
+            sendSubscriberMessage();
         }
         else
         {

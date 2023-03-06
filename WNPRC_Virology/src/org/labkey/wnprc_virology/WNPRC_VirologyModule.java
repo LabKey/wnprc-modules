@@ -14,6 +14,9 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
+import org.labkey.wnprc_virology.notification.ViralLoadQueueNotificationSummaryEmail;
+import org.labkey.wnprc_virology.security.roles.WNPRCViralLoadReaderRole;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -99,6 +102,22 @@ public class WNPRC_VirologyModule extends SpringModule
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(WNPRC_VirologySchema.NAME);
+    }
+
+    public void registerRoles() {
+        RoleManager.registerRole(new WNPRCViralLoadReaderRole());
+    }
+
+    public void registerNotifications() {
+        List<Notification> notifications = Arrays.asList(
+                new ViralLoadQueueNotification(this),
+                new ViralLoadQueueNotificationSummaryEmail(this)
+        );
+
+        for (Notification notification : notifications)
+        {
+            NotificationService.get().registerNotification(notification);
+        }
     }
 
 }

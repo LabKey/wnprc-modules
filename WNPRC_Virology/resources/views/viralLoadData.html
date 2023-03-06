@@ -2,15 +2,16 @@
 <head>
     <script type="text/javascript">
 
-        new LABKEY.WebPart({
-            partName: 'Query',
-            renderTo: 'viralLoadData',
-            frame: 'none',
-            partConfig: {
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new LABKEY.QueryWebPart({
+                partName: 'Query',
+                renderTo: 'viralLoadData',
+                dataRegionName: 'vlqwp',
                 schemaName: LABKEY.container.name + 'LinkedSchema',
-                queryName: 'viral_load_data_filtered'
-            },
-        }).render();
+                queryName: 'viral_load_data_filtered',
+                frame: 'none'
+            }).render();
+        });
 
     </script>
 </head>

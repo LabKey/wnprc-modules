@@ -93,7 +93,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
         super();
         //this has to be an array of promises
         const dataArr = [
-            getEHRData('ehr','uniqueProtocolInvestigator'),
+            getEHRData('ehr','investigatorsWithName', 'rowid', '', [], 'IncludeExternal'),
             getEHRData('ehr_lookups','animal_requests_viral_status'),
             getEHRData('ehr_lookups','animal_requests_origin','meaning'),
             getEHRData('ehr_lookups','animal_requests_species','common'),
@@ -224,12 +224,12 @@ export class AnimalRequestForm extends React.Component<any,State> {
     render() {
 
         //component to render dropdowns
-        const DropdownOptions = ({name,rowkey}) => {
+        const DropdownOptions = ({name, rowkey, rowval = rowkey}) => {
             return (
                 <>
                     {this.state[name] && this.state[name].map((x,index) => {
                         return (
-                            <option key={index} value={x[rowkey]}>{x[rowkey]}</option>
+                            <option key={index} value={x[rowkey]}>{x[rowval]}</option>
                         )
                     })}
                 </>
@@ -291,23 +291,11 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                             options={
                                                                 <>
                                                                     <option/>
-                                                                    <DropdownOptions name="uniqueProtocolInvestigator" rowkey="inves"/>
-                                                                    <option value="other">Other</option>
+                                                                    <DropdownOptions name="investigatorsWithName" rowkey="rowid" rowval="investigatorWithName"/>
                                                                 </>
                                                             }
                                                         >
                                                         </Field>
-                                                        <Condition when="principalinvestigator" is="other">
-                                                            <Field
-                                                                name="externalprincipalinvestigator"
-                                                                component={renderField}
-                                                                label="Specify PI"
-                                                                type="text"
-                                                                validate={required}
-                                                                required={true}
-                                                            >
-                                                            </Field>
-                                                        </Condition>
                                                         <Field
                                                             name="numberofanimals"
                                                             component={renderField}

@@ -1,0 +1,12 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="rowid"/>
+        <column name="investigatorType"/>
+        <column name="investigatorWithName"/>
+        <column name="userid"/>
+        <column name="financialAnalyst"/>
+    </columns>
+    <filters>
+        <filter column="investigatorType" operator="in" value="Core;Affiliate;External"/>
+    </filters>
+</customView>

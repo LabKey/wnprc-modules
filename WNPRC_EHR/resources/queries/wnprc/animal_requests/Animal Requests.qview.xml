@@ -5,6 +5,7 @@
         <column name="date" ></column>
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>
+        <column name="principalinvestigator/investigatorType"></column>
         <column name="comments"></column>
         <column name="project"></column>
         <column name="protocol"></column>

@@ -1,0 +1,6 @@
+Id	Date	Key	Assay	Nucleic Acid	Viral Load	Viral Load Replicates	Equivocal	Sample Source	Comment	Experiment Number	RNA Isolation Method	Account
+testanimal1	2022-03-29	169392	SIVmac239-Gag	vRNA	80166.664	61167 ; 99167		Plasma		10098		96
+testanimal1	2022-02-03	169347	SIVmac239-Gag	vRNA	82416.664	82000 ; 82833		Plasma		10098		97
+testanimal2	2022-02-07	169352	SIVmac239-Gag	vRNA	82416.664	81333 ; 83500		Plasma		10099		98
+testanimal3	2022-02-08	169352	SIVmac239-Gag	vRNA	82416.664	81333 ; 83500		Plasma		10100		99
+testanimal4	2022-02-09	169352	SIVmac239-Gag	vRNA	82416.664	81333 ; 83500		Plasma		10100		99

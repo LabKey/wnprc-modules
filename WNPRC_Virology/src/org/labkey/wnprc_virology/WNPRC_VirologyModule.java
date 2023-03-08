@@ -16,6 +16,7 @@ import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
+import org.labkey.wnprc_virology.notification.ViralLoadQueueNotificationSummaryEmail;
 import org.labkey.wnprc_virology.security.roles.WNPRCViralLoadReaderRole;
 
 import java.util.Arrays;
@@ -112,7 +113,8 @@ public class WNPRC_VirologyModule extends SpringModule
 
     public void registerNotifications() {
         List<Notification> notifications = Arrays.asList(
-                new ViralLoadQueueNotification(this)
+                new ViralLoadQueueNotification(this),
+                new ViralLoadQueueNotificationSummaryEmail(this)
         );
 
         for (Notification notification : notifications)

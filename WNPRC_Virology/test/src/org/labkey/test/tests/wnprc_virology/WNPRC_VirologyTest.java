@@ -41,6 +41,7 @@ import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.RemoteConnectionHelper;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
+import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.Ext4Helper;
 import org.openqa.selenium.By;
@@ -73,6 +74,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String RSEHR_EMAIL_CONTACT_INFO = "virologyservices@primate.wisc.edu";
     public static final String TEST_USER = "test_wnprc_virology@test.com";
     public static final String TEST_USER_2 = "test_wnprc_virology_2@test.com";
+    public static final String ADMIN_USER = "admin_user@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
 
@@ -149,6 +151,8 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //create EHR folder with sample queue, etc
         _containerHelper.createProject(getProjectName(), type);
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing"));
+        _userHelper.createUser(ADMIN_USER);
+        _apiPermissionsHelper.setUserPermissions(ADMIN_USER, "Folder Administrator");
         // Set up the module properties
         List<ModulePropertyValue> properties = new ArrayList<>();
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
@@ -318,6 +322,18 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         beginAt(buildRelativeUrl("ldk", getProjectName(), "notificationAdmin"));
         Ext4FieldRef.getForLabel(this, "Notification User").setValue(PasswordUtil.getUsername());
         Ext4FieldRef.getForLabel(this, "Reply Email").setValue(email);
+        //Add subscribed users
+        //better way to index in to the correct one rather than a #?
+        Locator manageLink = Locator.tagContainingText("a", "Manage Subscribed Users/Groups").index(2);
+        waitAndClick(manageLink);
+        waitForElement(Ext4Helper.Locators.window("Manage Subscribed Users"));
+        Ext4ComboRef.waitForComponent(this, "field[fieldLabel^='Add User Or Group']");
+        Ext4ComboRef combo = Ext4ComboRef.getForLabel(this, "Add User Or Group");
+        combo.waitForStoreLoad();
+        _ext4Helper.selectComboBoxItem(Locator.id(combo.getId()), Ext4Helper.TextMatchTechnique.CONTAINS, ADMIN_USER);
+        waitForElement(Ext4Helper.Locators.ext4Button("Close"));
+        clickButton("Close", 0);
+
         Ext4CmpRef btn = _ext4Helper.queryOne("button[text='Save']", Ext4CmpRef.class);
         btn.waitForEnabled();
         clickButton("Save", 0);
@@ -328,6 +344,8 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Ext4FieldRef.getForLabel(this, "Reply Email").setValue(email);
         Ext4CmpRef btn2 = _ext4Helper.queryOne("button[text='Save']", Ext4CmpRef.class);
         btn2.waitForEnabled();
+
+
         clickButton("Save", 0);
         waitForElement(Ext4Helper.Locators.window().withDescendant(Window.Locators.title().withText("Success")));
         waitAndClickAndWait(Ext4Helper.Locators.ext4Button("OK"));
@@ -422,6 +440,11 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertEquals(1, resp.getRows().size());
     }
 
+    //@Test
+    public void testBatchCompleteAndSendRSEHRToSubscribers()
+    {
+        // should just throw this in an existing test
+    }
     @Test
     public void testBatchCompleteAndSendRSERHEmail() throws Exception
     {
@@ -458,24 +481,26 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
         Locator.XPathLocator RSEHRQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
         click(RSEHRQCStateSelectItem);
-        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("10099");
         Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
         click(Ext4Helper.Locators.ext4Button("Submit"));
 
-        sleep(5000);
+        sleep(10000);
         log("Check that the RSEHR notification email was sent");
         goToModule("Dumbster");
-        //TODO look for the email was sent to TEST_USER
+
+
         EmailRecordTable mailTable = new EmailRecordTable(this);
+        Assert.assertEquals(ADMIN_USER, mailTable.getMessageWithSubjectContaining("[EHR Server] Summary information for viral load").getTo()[0]);
         Assert.assertEquals(TEST_USER, mailTable.getMessageWithSubjectContaining("Viral load results completed").getTo()[0]);
 
         //this will test at least that destination link works and should click one of the emails that went out
-        waitAndClick(Locator.linkContainingText("[EHR Server]"));
+        waitAndClick(Locator.linkContainingText("[EHR Server] Viral load results completed on"));
         assertTextPresent("2 sample(s)");
-        waitAndClick(Locator.linkContainingText("link"));
+        waitAndClick(Locator.linkWithText("link"));
         waitForText(ANIMAL_ID_2);
         assertTextPresent(ANIMAL_ID_2);
 
@@ -524,7 +549,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
         Locator.XPathLocator RSEHRQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
         click(RSEHRQCStateSelectItem);
-        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("10100");
         Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
@@ -537,7 +562,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         EmailRecordTable mailTable = new EmailRecordTable(this);
         Assert.assertEquals(TEST_USER_2, mailTable.getMessageWithSubjectContaining("Viral load results completed").getTo()[0]);
 
-        waitAndClick(Locator.linkContainingText("[EHR Server]"));
+        waitAndClick(Locator.linkContainingText("[EHR Server] Viral load results completed on"));
         assertTextPresent("2 sample(s)");
         waitAndClick(Locator.linkContainingText("link"));
         impersonate(TEST_USER_2);

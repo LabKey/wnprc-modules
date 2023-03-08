@@ -140,7 +140,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
     },
 
     getInnerTpl: function(){
-        return ['Sire: {[values["sireid"] + "<br>" + values["date"] + " to<br>" + values["enddate_coalesced"]]}'];
+        return ['Sire: {[LABKEY.Utils.encodeHtml(values["sireid"]) + "<br>" + LABKEY.Utils.encodeHtml(values["date"]) + " to<br>" + LABKEY.Utils.encodeHtml(values["enddate_coalesced"])]}'];
     },
 
     trigger1Cls: 'x4-form-search-trigger',

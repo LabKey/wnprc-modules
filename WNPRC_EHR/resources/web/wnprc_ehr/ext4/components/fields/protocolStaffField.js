@@ -101,7 +101,7 @@ Ext4.define('WNPRC.ext.components.fields.protocolStaffField', {
     },
 
     getInnerTpl: function(){
-        return ['<span style="white-space:nowrap;{[values["isAssigned"] ? "font-weight:bold;" : ""]}">{[values["displayName"] + " " + (values["shortname"] ? ("(" + values["shortname"] + ")") : (values["investigator"] ? "(" + (values["investigator"] ? values["investigator"] : "") : "") + (values["invest1"] ? ": " + values["invest1"] : "") + (values["investigator"] ? ")" : ""))]}&nbsp;</span>'];
+        return ['<span style="white-space:nowrap;{[values["isAssigned"] ? "font-weight:bold;" : ""]}">{[LABKEY.Utils.encodeHtml(values["displayName"] + " " + (values["shortname"] ? ("(" + values["shortname"] + ")") : (values["investigator"] ? "(" + (values["investigator"] ? values["investigator"] : "") : "") + (values["invest1"] ? ": " + values["invest1"] : "") + (values["investigator"] ? ")" : "")))]}&nbsp;</span>'];
         //return ['<span style="white-space:nowrap;{[values["isAssigned"] ? "font-weight:bold;" : ""]}">{[values["displayName"] + " " + (values["shortname"] ? ("(" + values["shortname"] + ")") : (values["investigator"] ? "(" + (values["investigator"] ? values["investigator"] : "") : "") + (values["account"] ? ": " + values["account"] : "") + (values["investigator"] ? ")" : ""))]}&nbsp;</span>'];
     },
 

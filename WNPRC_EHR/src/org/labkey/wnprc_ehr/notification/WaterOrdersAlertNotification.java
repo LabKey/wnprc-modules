@@ -109,7 +109,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         filter.addCondition(FieldKey.fromString("actionRequired"),true,CompareType.EQUAL);
 
         Set<FieldKey> columns = new HashSet<>();
-        columns.add(FieldKey.fromString("animalId"));
+        columns.add(FieldKey.fromString("Id"));
         columns.add(FieldKey.fromString("dateOrdered"));
         columns.add(FieldKey.fromString("volume"));
         columns.add(FieldKey.fromString("frequencyMeaning"));
@@ -196,7 +196,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
             LocalDateTime objectDateTime = ConvertHelper.convert(dbObject.get("dateOrdered"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-            returnTable.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(dbObject.get("animalId"),String.class)
+            returnTable.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(dbObject.get("Id"),String.class)
                     + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
                     + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(dbObject.get("volume"),String.class)
                     + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(dbObject.get("displaytimeofday"),String.class)

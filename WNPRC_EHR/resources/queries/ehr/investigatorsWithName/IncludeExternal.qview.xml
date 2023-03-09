@@ -9,4 +9,7 @@
     <filters>
         <filter column="investigatorType" operator="in" value="Core;Affiliate;External"/>
     </filters>
+    <sorts>
+        <sort column="investigatorWithName" descending="false"/>
+    </sorts>
 </customView>

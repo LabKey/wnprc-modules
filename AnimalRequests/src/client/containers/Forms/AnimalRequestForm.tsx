@@ -93,7 +93,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
         super();
         //this has to be an array of promises
         const dataArr = [
-            getEHRData('ehr','investigatorsWithName', 'rowid', '', [], 'IncludeExternal'),
+            getEHRData('ehr','investigatorsWithName', '', '', [], 'IncludeExternal'),
             getEHRData('ehr_lookups','animal_requests_viral_status'),
             getEHRData('ehr_lookups','animal_requests_origin','meaning'),
             getEHRData('ehr_lookups','animal_requests_species','common'),

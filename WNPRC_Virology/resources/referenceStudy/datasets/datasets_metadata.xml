@@ -62,21 +62,6 @@
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
         <scale>4000</scale>
       </column>
-      <column columnName="equivocal">
-        <datatype>varchar</datatype>
-        <columnTitle>Equivocal</columnTitle>
-        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <defaultValueType>FIXED_EDITABLE</defaultValueType>
-        <conditionalFormats>
-          <conditionalFormat>
-            <filters>
-              <filter operator="contains" value="Equoivical"/>
-            </filters>
-            <backgroundColor>FFD700</backgroundColor>
-          </conditionalFormat>
-        </conditionalFormats>
-        <scale>4000</scale>
-      </column>
       <column columnName="source_type">
         <datatype>varchar</datatype>
         <columnTitle>Sample Source</columnTitle>

@@ -268,6 +268,7 @@ WNPRC_Virology.DatasetButtons = new function() {
                     csvRows.push(["RNase out: ______________________________________________"]);
                     csvRows.push(["DEPC water: _____________________________________________"]);
                     csvRows.push(["Transcript: _____________________________________________"]);
+                    csvRows.push(["Carrier RNA: _____________________________________________"]);
                     csvRows.push(["Taqman fast mix: ________________________________________"]);
                     csvRows.push(["Instrument: _____________________________________________"]);
                     csvRows.push(["QC info entered: ________________________________________"]);

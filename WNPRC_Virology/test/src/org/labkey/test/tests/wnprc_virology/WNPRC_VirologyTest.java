@@ -62,7 +62,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String PROJECT_NAME_RSEHR = "RSEHRServer";
     public static final String PROJECT_NAME_RSHER_PUBLIC = "RSEHRPublic";
     public static final String RSEHR_PUBLIC_FOLDER_PATH = PROJECT_NAME_RSEHR + "/" + PROJECT_NAME_RSHER_PUBLIC;
-    public static final String RSEHR_PORTAL_PATH = WebTestHelper.getBaseURL();
+    public static final String RSEHR_PORTAL_PATH = WebTestHelper.getBaseUrlWithoutContextPath();
     public static final String RSEHR_JOB_INTERVAL = "5";
     public static final String ZIKA_PORTAL_PATH = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 

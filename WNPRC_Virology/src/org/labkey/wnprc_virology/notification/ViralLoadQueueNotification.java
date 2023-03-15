@@ -218,7 +218,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }
         catch (Exception e)
         {
-            _log.error(this.getClass().getName() +  e.getMessage());
+            _log.error(this.getClass().getName() + ": issue getting sample queue list ", e);
         }
 
     }
@@ -310,11 +310,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 // We want to use LabKey's URL APIs to build up URLs but this might be tricky in this situation because the URL points to a diff server
                 // e.g. ActionURL.setContainer might not work here, so we have to set the path instead
                 ActionURL viralLoadRSEHRDataLink = new ActionURL();
-                viralLoadRSEHRDataLink.setHost(virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot()));
                 viralLoadRSEHRDataLink.setPath(rs.getString(FieldKey.fromString("folder_path")) + "/project-begin.view");
                 viralLoadRSEHRDataLink.addParameter("vlqwp.experiment_number~eq", (Integer) emailProps.get("experimentNumber"));
 
-                String portalURL = viralLoadRSEHRDataLink.getBaseServerURI() + viralLoadRSEHRDataLink.toString();
+                //normally here we would use ActionURL().getHost() - but that resets the hostname, so unfortunately we have to manually conjure the URL.
+                //another trick here might be to call ActionURL().getHost() to initialize it then set it later but that seems weird.
+                String theHost = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot());
+                String thePath = viralLoadRSEHRDataLink.getPath();
+                String portalURL = theHost + thePath;
                 emailProps.put("portalURL", portalURL);
 
                 String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");

@@ -270,7 +270,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         // let's look up the accounts so we can send their display value in an email
         SimpleFilter accountFilter = new SimpleFilter();
         accountFilter.addInClause(FieldKey.fromString("rowid"), accounts);
-        QueryHelper accountsQuery = new QueryHelper(container, currentUser, "ehr_billing", "aliases");
+        QueryHelper accountsQuery = new QueryHelper(container, currentUser, "ehr_billing_linked", "aliases");
         List<FieldKey> accountsColumns = new ArrayList<>();
         accountsColumns.add(FieldKey.fromString("rowid"));
         accountsColumns.add(FieldKey.fromString("alias"));

@@ -1,6 +1,7 @@
 package org.labkey.wnprc_virology.notification;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
@@ -16,6 +17,7 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.util.MailHelper;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
@@ -36,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.labkey.api.search.SearchService._log;
 import static org.labkey.wnprc_virology.ViralLoadRSEHRRunner.virologyModule;
 
 public class ViralLoadQueueNotification extends AbstractEHRNotification
@@ -60,16 +61,19 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public String _timeCompleted;
 
+    public String _experimentInfoTable;
 
-    public Map<String, Object> _emailSummary;
+
+    public Map<String, Object> _emailSummaryTable;
     public Map<Integer, String> _accounts = new HashMap<>();
+    private static final Logger _log = LogHelper.getLogger(ViralLoadQueueNotification.class, "Server-side logger for WNPRC_Virology notifications");
 
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops, boolean usersehremailmethod) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops, boolean usersehremailmethod)
     {
         super(owner);
         _owner = owner;
@@ -103,14 +107,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         this.setUp();
     }
 
-    public Map<String, Object> getEmailSummary()
+    public Map<String, Object> getEmailSummaryTable()
     {
-        return _emailSummary;
+        return _emailSummaryTable;
     }
 
-    public void setEmailSummary(Map<String, Object> emailSummary)
+    public void setEmailSummaryTable(Map<String, Object> emailSummaryTable)
     {
-        _emailSummary = emailSummary;
+        _emailSummaryTable = emailSummaryTable;
     }
     public void addEmail(String email)
     {
@@ -160,7 +164,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     //this setup method does most of the work to get the notify list
     //if we want to change the location of where the notify list comes from we'll need to change this method
-    public void setUp() throws SQLException
+    public void setUp()
     {
 
         // Set up query to get records for each rowid
@@ -212,10 +216,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 countEmailsAndPut(notifyEmails);
             }
         }
+        catch (Exception e)
+        {
+            _log.error(this.getClass().getName() +  e.getMessage());
+        }
 
     }
 
-    public void getRowsAndSendMessage() throws SQLException
+    public void getRowsAndSendMessage()
     {
         HashMap<String, Object> subscriberEmailSummary = new HashMap<>();
         // was hoping to pull in grant account info since this is gathered in the trigger script on init,
@@ -264,7 +272,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         // let's look up the accounts so we can send their display value in an email
         SimpleFilter accountFilter = new SimpleFilter();
         accountFilter.addInClause(FieldKey.fromString("rowid"), accounts);
-        QueryHelper accountsQuery = new QueryHelper(container, currentUser, "ehr_billing", "aliases");
+        QueryHelper accountsQuery = new QueryHelper(container, currentUser, "ehr_billing_linked", "aliases");
         List<FieldKey> accountsColumns = new ArrayList<>();
         accountsColumns.add(FieldKey.fromString("rowid"));
         accountsColumns.add(FieldKey.fromString("alias"));
@@ -275,6 +283,10 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             {
                 _accounts.put(rs.getInt(FieldKey.fromString("rowid")), rs.getString(FieldKey.fromString(("alias"))));
             }
+        }
+        catch (Exception e)
+        {
+            _log.error(this.getClass().getName() +  ": error while fetching grant account info", e);
         }
 
         QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails");
@@ -337,14 +349,18 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                     subscriberEmailSummary.put(rs.getString(FieldKey.fromString("account")), subscriberItemList);
                 }
             }
-            setEmailSummary(subscriberEmailSummary);
+            setEmailSummaryTable(subscriberEmailSummary);
+        }
+        catch (Exception e)
+        {
+            _log.error(this.getClass().getName() +  ": error getting email information", e);
         }
 
     }
 
-    public void sendSubscriberMessage() throws SQLException
+    public void sendSubscriberMessage()
     {
-        ViralLoadQueueNotificationSummaryEmail subscribersNotification = new ViralLoadQueueNotificationSummaryEmail(_owner, currentUser, _emailSummary, _timeCompleted, _accounts);
+        ViralLoadQueueNotificationSummaryEmail subscribersNotification = new ViralLoadQueueNotificationSummaryEmail(_owner, currentUser, _emailSummaryTable, _timeCompleted, _experimentInfoTable, _accounts);
         subscribersNotification.sendManually(container);
     }
 
@@ -379,6 +395,45 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     {
         String contactEmail = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_EMAIL_CONTACT_INFO).getEffectiveValue(ContainerManager.getRoot());
         final StringBuilder msg = new StringBuilder();
+
+        String experimentInfoTable = "<p>Below is a summary of the experiment:</p>" +
+                "<p><table><tbody>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "Experiment #:" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                experimentNumber.toString() +
+                "</td>" +
+                "</tr>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "Positive Control " + positiveControl.toString()  + ":" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                vlPositiveControl + " copies/ml" +
+                "</td>" +
+                "</tr>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "AVG Positive Control " + positiveControl  + ":" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                avgVLPositiveControl + " copies/ml" +
+                "</td>" +
+                "</tr>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "Efficiency:" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                efficiency.toString() +
+                "</td>" +
+                "</tr>" +
+                "</tbody></table></p>";
+
+        _experimentInfoTable = experimentInfoTable;
+
         msg.append("<p>Hello " +
                 recipientName +
                 ",</p>");
@@ -389,23 +444,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 "<a href=\"" +
                 emailProps.get("portalURL") +
                 "\">link</a>.</p>");
-        msg.append("<p>Below is a summary of the experiment:</p>");
 
-        msg.append("<p><table><tbody>" +
-                "<tr>" +
-                "<td>Experiment #:</td>" + "<td>" + experimentNumber.toString() + "</td>" +
-                "</tr>" +
-                "<tr>" +
-                "<td>Positive Control " + positiveControl.toString()  + ":</td>" + "<td>" + vlPositiveControl + " copies/ml</td>" +
-                "</tr>" +
-                "<tr>" +
-                "<td>AVG Positive Control " + positiveControl  + ":</td>" + "<td>" + avgVLPositiveControl + " copies/ml</td>" +
-                "</tr>" +
-                "<tr>" +
-                "<td>Efficiency:</td>" + "<td>" + efficiency.toString() + "</td>" +
-                "</tr>" +
-                "</tbody></table></p>"
-                );
+        msg.append(experimentInfoTable);
 
         msg.append("<p>Please feel free to contact " +
                 "<a href=\"mailto:" +
@@ -427,7 +467,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         return getMessageBodyHTML("overrideabove", 1);
     }
 
-    public void sendManually (Container container) throws SQLException
+    public void sendManually (Container container)
     {
         if (useRSEHREmailMethod)
         {
@@ -465,7 +505,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, String recipient,Container container)
     {
-        _log.info("ViralLoadNotification.java: sending viral sample queue update email...");
+        _log.info(this.getClass().getName() + ": sending viral sample queue update email...");
         try
         {
             MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();
@@ -495,7 +535,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
             if (emails.size() == 0)
             {
-                _log.warn("ViralLoadNotification.java: no emails, unable to send EHR trigger script email");
+                _log.warn(this.getClass().getName() + ": no emails, unable to send EHR trigger script email");
                 return;
             }
 
@@ -506,7 +546,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }
         catch (Exception e)
         {
-            _log.error("ViralLoadNotification.java: unable to send email from EHR trigger script", e);
+            _log.error(this.getClass().getName() + ": unable to send email from EHR trigger script", e);
         }
     }
 

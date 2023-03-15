@@ -158,7 +158,6 @@ public class TriggerScriptHelper
                 String WNPRCVirologyRSEHRPortalUrlVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer);
                 if (WNPRCVirologyRSEHRPortalUrlVal != null)
                 {
-                    emailPropsCopy.put("portalURL", WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
                     ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, true);
                     //TODO add ability to query special table with info from RSEHR on who to notify
                     //ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, _settings.getRSEHREmailMode());

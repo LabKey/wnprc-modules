@@ -47,7 +47,8 @@ public class ViralLoadQueueNotificationSummaryEmail extends AbstractEHRNotificat
 
      */
     public String _dateComplete;
-    public Map<String, Object> _emailContents;
+    public Map<String, Object> _emailSummaryTable;
+    public String _experimentInfoTable;
     public Map<Integer, String> _accounts;
     public User _currentUser;
     private static final Logger _log = LogHelper.getLogger(ViralLoadQueueNotificationSummaryEmail.class, "Server-side logger for WNPRC_Virology notifications");
@@ -56,12 +57,13 @@ public class ViralLoadQueueNotificationSummaryEmail extends AbstractEHRNotificat
     {
         super(owner);
     }
-    public ViralLoadQueueNotificationSummaryEmail(Module owner, User currentuser, Map<String, Object> emailContents, String dateComplete, Map<Integer, String> accounts)
+    public ViralLoadQueueNotificationSummaryEmail(Module owner, User currentuser, Map<String, Object> emailSummaryTable, String dateComplete, String experimentInfoTable, Map<Integer, String> accounts)
     {
         super(owner);
-        _emailContents = emailContents;
+        _emailSummaryTable = emailSummaryTable;
         _currentUser = currentuser;
         _dateComplete = dateComplete;
+        _experimentInfoTable = experimentInfoTable;
         _accounts = accounts;
     }
 
@@ -83,7 +85,7 @@ public class ViralLoadQueueNotificationSummaryEmail extends AbstractEHRNotificat
 
     public String getDescription()
     {
-        return "This notification gets sent every time there is a viral load sample tracker data that's been completed";
+        return "This notification gets sent every time there is a viral load sample tracker data that's been batch completed";
     }
 
     @Override
@@ -95,19 +97,21 @@ public class ViralLoadQueueNotificationSummaryEmail extends AbstractEHRNotificat
     public String getMessageBodyHTML()
     {
         final StringBuilder msg = new StringBuilder();
-        //TODO make summary email here
         msg.append("<p>");
-        msg.append("Below is a summary of the viral load email notifications that were sent on " + _dateComplete);
+        msg.append("This email contains a summary of the emails that were sent to users about their viral load results on " + _dateComplete + ".");
+        msg.append("</p>");
+        msg.append(_experimentInfoTable);
+        msg.append("<p>");
+        msg.append("Below is a summary of the viral load email notifications that were sent:");
         msg.append("</p>");
 
         msg.append("<table style='border: 1px solid black;'><thead style='font-weight: bold;'><tr style='border: 1px solid black; padding: 5px' >" +
-                "<td style='border: 1px solid black; padding: 5px'>Email</td>" +
+                "<td style='border: 1px solid black; padding: 5px'>Recipient</td>" +
                 "<td style='border: 1px solid black; padding: 5px'>Link Sent</td>" +
                 "<td style='border: 1px solid black; padding: 5px'>Account #</td>" +
                 "<td style='border: 1px solid black; padding: 5px'># of Samples Complete</td></tr></thead>");
-        for (Map.Entry<String, Object> entry : _emailContents.entrySet()) {
+        for (Map.Entry<String, Object> entry : _emailSummaryTable.entrySet()) {
             String key = entry.getKey();
-            //fails when entry size is zero. either check for this or find out why no accounts w/ 99?
             ArrayList<HashMap<String,Object>> value = (ArrayList<HashMap<String,Object>>) entry.getValue();
             for (HashMap<String,Object> item : value )
             {
@@ -116,7 +120,7 @@ public class ViralLoadQueueNotificationSummaryEmail extends AbstractEHRNotificat
                 msg.append( String.join(", ", (List<String>) item.get("emails")));
                 msg.append("</td>");
                 msg.append("<td style='border: 1px solid black; padding: 4px'>");
-                msg.append("<a href=\"" + item.get("portalURL") + "\">" + item.get("portalURL") + "</a>");
+                msg.append("<a href=\"" + item.get("portalURL") + "\">" + "RSEHR Data Link" + "</a>");
                 msg.append("</td>");
                 msg.append("<td style='border: 1px solid black; padding: 4px'>");
                 msg.append(_accounts.get(Integer.parseInt(key)));
@@ -128,6 +132,10 @@ public class ViralLoadQueueNotificationSummaryEmail extends AbstractEHRNotificat
             }
         }
         msg.append("</table>");
+
+        msg.append("<p>");
+        msg.append("Please contact the EHR administrators if there are any issues seen in the above content.");
+        msg.append("</p>");
         return msg.toString();
     }
 

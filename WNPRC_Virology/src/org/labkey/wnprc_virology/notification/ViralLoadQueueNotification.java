@@ -61,8 +61,10 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public String _timeCompleted;
 
+    public String _experimentInfoTable;
 
-    public Map<String, Object> _emailSummary;
+
+    public Map<String, Object> _emailSummaryTable;
     public Map<Integer, String> _accounts = new HashMap<>();
     private static final Logger _log = LogHelper.getLogger(ViralLoadQueueNotification.class, "Server-side logger for WNPRC_Virology notifications");
 
@@ -105,14 +107,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         this.setUp();
     }
 
-    public Map<String, Object> getEmailSummary()
+    public Map<String, Object> getEmailSummaryTable()
     {
-        return _emailSummary;
+        return _emailSummaryTable;
     }
 
-    public void setEmailSummary(Map<String, Object> emailSummary)
+    public void setEmailSummaryTable(Map<String, Object> emailSummaryTable)
     {
-        _emailSummary = emailSummary;
+        _emailSummaryTable = emailSummaryTable;
     }
     public void addEmail(String email)
     {
@@ -347,7 +349,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                     subscriberEmailSummary.put(rs.getString(FieldKey.fromString("account")), subscriberItemList);
                 }
             }
-            setEmailSummary(subscriberEmailSummary);
+            setEmailSummaryTable(subscriberEmailSummary);
         }
         catch (Exception e)
         {
@@ -358,7 +360,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public void sendSubscriberMessage()
     {
-        ViralLoadQueueNotificationSummaryEmail subscribersNotification = new ViralLoadQueueNotificationSummaryEmail(_owner, currentUser, _emailSummary, _timeCompleted, _accounts);
+        ViralLoadQueueNotificationSummaryEmail subscribersNotification = new ViralLoadQueueNotificationSummaryEmail(_owner, currentUser, _emailSummaryTable, _timeCompleted, _experimentInfoTable, _accounts);
         subscribersNotification.sendManually(container);
     }
 
@@ -393,6 +395,45 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     {
         String contactEmail = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_EMAIL_CONTACT_INFO).getEffectiveValue(ContainerManager.getRoot());
         final StringBuilder msg = new StringBuilder();
+
+        String experimentInfoTable = "<p>Below is a summary of the experiment:</p>" +
+                "<p><table><tbody>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "Experiment #:" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                experimentNumber.toString() +
+                "</td>" +
+                "</tr>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "Positive Control " + positiveControl.toString()  + ":" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                vlPositiveControl + " copies/ml" +
+                "</td>" +
+                "</tr>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "AVG Positive Control " + positiveControl  + ":" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                avgVLPositiveControl + " copies/ml" +
+                "</td>" +
+                "</tr>" +
+                "<tr style='border: 1px solid black; padding: 4px'>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                "Efficiency:" +
+                "</td>" +
+                "<td style='border: 1px solid black; padding: 4px'>" +
+                efficiency.toString() +
+                "</td>" +
+                "</tr>" +
+                "</tbody></table></p>";
+
+        _experimentInfoTable = experimentInfoTable;
+
         msg.append("<p>Hello " +
                 recipientName +
                 ",</p>");
@@ -403,23 +444,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 "<a href=\"" +
                 emailProps.get("portalURL") +
                 "\">link</a>.</p>");
-        msg.append("<p>Below is a summary of the experiment:</p>");
 
-        msg.append("<p><table><tbody>" +
-                "<tr>" +
-                "<td>Experiment #:</td>" + "<td>" + experimentNumber.toString() + "</td>" +
-                "</tr>" +
-                "<tr>" +
-                "<td>Positive Control " + positiveControl.toString()  + ":</td>" + "<td>" + vlPositiveControl + " copies/ml</td>" +
-                "</tr>" +
-                "<tr>" +
-                "<td>AVG Positive Control " + positiveControl  + ":</td>" + "<td>" + avgVLPositiveControl + " copies/ml</td>" +
-                "</tr>" +
-                "<tr>" +
-                "<td>Efficiency:</td>" + "<td>" + efficiency.toString() + "</td>" +
-                "</tr>" +
-                "</tbody></table></p>"
-                );
+        msg.append(experimentInfoTable);
 
         msg.append("<p>Please feel free to contact " +
                 "<a href=\"mailto:" +

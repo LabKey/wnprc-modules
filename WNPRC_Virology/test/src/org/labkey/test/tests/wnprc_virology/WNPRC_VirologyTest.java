@@ -40,6 +40,7 @@ import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.RemoteConnectionHelper;
+import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -101,6 +102,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     protected final RemoteConnectionHelper _rconnHelper = new RemoteConnectionHelper(this);
     protected final ETLHelper _etlHelper = new ETLHelper(this, getProjectName());
     protected final ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
+    private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     @Nullable
     @Override
@@ -191,6 +193,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertTrue(response.getStatusCode() < 400);
 
         insertTsvData(connection, "ehr_billing", "aliases", tsv2, PROJECT_NAME_EHR);
+        _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billing_linked", getProjectName(), null,"ehr_billing", "aliases", null);
 
         //runs grant account ETL
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
@@ -568,7 +571,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         waitAndClick(Locator.linkContainingText("[EHR Server] Viral load results completed on"));
         assertTextPresent("2 sample(s)");
-        waitAndClick(Locator.linkContainingText("link"));
+        waitAndClick(Locator.linkWithText("link"));
         impersonate(TEST_USER_2);
         waitForText(ANIMAL_ID_3);
         assertTextPresent(ANIMAL_ID_3);

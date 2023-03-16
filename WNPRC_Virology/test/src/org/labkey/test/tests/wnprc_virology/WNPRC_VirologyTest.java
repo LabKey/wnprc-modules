@@ -506,6 +506,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         waitAndClick(Locator.linkWithText("link"));
         waitForText(ANIMAL_ID_2);
         assertTextPresent(ANIMAL_ID_2);
+        assertTextNotPresent(ANIMAL_ID); //this should test the experiment # filtering
 
     }
 

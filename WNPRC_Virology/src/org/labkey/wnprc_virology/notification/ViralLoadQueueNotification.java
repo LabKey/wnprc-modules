@@ -309,12 +309,18 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             {
                 // We want to use LabKey's URL APIs to build up URLs but this might be tricky in this situation because the URL points to a diff server
                 // e.g. ActionURL.setContainer might not work here, so we have to set the path instead
+                // We also have to be careful of using setHost() followed by a getHost(), as the first call to a getHost() will overwrite our URL host on the first call.
+                // Normally, for external URLs, URLHelper should be used, but that does not give us the context path, which we need for selenium testing.
+                //  so here, we do a hybrid approach.
+                //  see ticket 47394 for details.
                 ActionURL viralLoadRSEHRDataLink = new ActionURL();
                 viralLoadRSEHRDataLink.setPath(rs.getString(FieldKey.fromString("folder_path")) + "/project-begin.view");
                 viralLoadRSEHRDataLink.addParameter("vlqwp.experiment_number~eq", (Integer) emailProps.get("experimentNumber"));
-                viralLoadRSEHRDataLink.setHost(virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot()));
-                viralLoadRSEHRDataLink.setPort(443);
-                emailProps.put("portalURL", viralLoadRSEHRDataLink.getURIString());
+
+                String RSEHRBaseURL = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot());
+                String dataPath = viralLoadRSEHRDataLink.getLocalURIString();
+                String portalURL = RSEHRBaseURL + dataPath;
+                emailProps.put("portalURL", portalURL);
 
                 String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");
 

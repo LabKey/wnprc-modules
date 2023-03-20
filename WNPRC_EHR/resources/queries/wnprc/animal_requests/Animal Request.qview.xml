@@ -1,0 +1,35 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="rowid"/>
+        <column name="principalinvestigator"/>
+        <column name="numberofanimals"/>
+        <column name="speciesneeded"/>
+        <column name="originneeded"/>
+        <column name="sex"/>
+        <column name="age"/>
+        <column name="weight"/>
+        <column name="mhctype"/>
+        <column name="viralstatus"/>
+        <column name="infectiousdisease"/>
+        <column name="majorsurgery"/>
+        <column name="pregnantanimalsrequired"/>
+        <column name="pregnantanimalsrequiredtermdam"/>
+        <column name="pregnantanimalsrequiredterminfant"/>
+        <column name="disposition"/>
+        <column name="previousexposures"/>
+        <column name="executivecommitteeapproval"/>
+        <column name="project"/>
+        <column name="account"/>
+        <column name="protocol"/>
+        <column name="comments"/>
+        <column name="contacts"/>
+        <column name="anticipatedstartdate"/>
+        <column name="anticipatedenddate"/>
+        <column name="QCState"/>
+        <column name="dateapprovedordenied"/>
+        <column name="dateordered"/>
+        <column name="datearrival"/>
+        <column name="animalidstooffer"/>
+        <column name="animalsorigin"/>
+    </columns>
+</customView>

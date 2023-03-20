@@ -450,7 +450,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage2.getAccountsToCharge());
         checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage2.getVendor());
         checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage2.getBusinessPurpose());
-        checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage2.getSpecialInstructions());
+        checker().verifyEquals("Invalid value for Comments/Special Instructions ", "Ho Ho Ho", requestPage2.getSpecialInstructions());
         checker().verifyEquals("Invalid value for Shipping Destination", "456 Thompson lane (Math bldg)", requestPage2.getShippingDestination());
         checker().verifyEquals("Invalid value for Delivery Attention to ", "Mrs Claus", requestPage2.getDeliveryAttentionTo());
         checker().verifyEquals("Invalid value for Line Item ", "Pen", requestPage2.getItemDesc());
@@ -741,7 +741,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToModule("Dumbster");
         mailTable = new EmailRecordTable(this);
         subject = "Purchase request # " + requestId + " status update";
-        checker().verifyEquals("Incorrect To for the emails sent after approval", Arrays.asList(getCurrentUser(), ADMIN_USER), mailTable.getColumnDataAsText("To"));
+        checker().verifyEquals("Incorrect To for the emails sent after approval", Arrays.asList(ADMIN_USER), mailTable.getColumnDataAsText("To"));
         mailTable.clickSubjectAtIndex(subject, 0);
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
@@ -787,7 +787,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToModule("Dumbster");
         EmailRecordTable mailTable = new EmailRecordTable(this);
         String subject = "Purchase request # " + requestId + " status update";
-        checker().verifyEquals("Incorrect To for the emails sent after rejection", Arrays.asList(getCurrentUser(), ADMIN_USER),
+        checker().verifyEquals("Incorrect To for the emails sent after rejection", Arrays.asList(ADMIN_USER),
                 mailTable.getColumnDataAsText("To"));
         mailTable.clickSubjectAtIndex(subject, 0);
         log("Email body " + mailTable.getMessage(subject).getBody());
@@ -951,8 +951,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 .setUnitCost(request.get("Unit Cost"))
                 .setQuantity(request.get("Quantity"));
 
-        if (request.containsKey("Special instructions"))
-            requestPage.setSpecialInstructions(request.get("Special instructions"));
+        if (request.containsKey("Comments/Special instructions"))
+            requestPage.setSpecialInstructions(request.get("Comments/Special instructions"));
 
         if (fileName != null)
             requestPage.addAttachment(fileName);

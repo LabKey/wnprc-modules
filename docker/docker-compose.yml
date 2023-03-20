@@ -8,6 +8,8 @@ services:
 
   postgres:
     image: postgres:11
+    container_name: postgres
+    shm_size: 4g
     restart: always
     volumes:
       - "${PG_CONF_FILE}:/conf/postgresql.conf"
@@ -48,7 +50,8 @@ services:
       - network1
 
   labkey:
-    image: wnprcehr/labkeysnapshot:21.3
+    image: wnprcehr/labkeysnapshot:$LABKEY_VERSION
+    container_name: labkey
     depends_on:
       - "mailserver"
       - "postgres"
@@ -65,10 +68,12 @@ services:
       CATALINA_OPTS:
       JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
                   -Dmsql.user=${MSQL_USER} -Dmsql.pass=${MSQL_PASS} -Dmsql.url=\"${MSQL_URL}\" \
-                  -Dlabkey.masterEncryptionKey=${LABKEY_MASTER_ENCRYPTION_KEY}"
-      LK_BACKGROUND_USER:
-      LK_BACKGROUND_USER_PASSWORD:
-      LK_BASE_URL:
+                  -Dlabkey.masterEncryptionKey=${LABKEY_MASTER_ENCRYPTION_KEY} \
+		  -Darrow.user=${ARROW_USER} -Darrow.pass=${ARROW_PASS} -Darrow.url=\"${ARROW_URL}\" \
+                  -Dlog4j2.formatMsgNoLookups=true"
+      LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
+      LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
+      LK_BASE_URL: ${LK_BASE_URL}
       PG_NAME:
       PG_PASS:
       PG_USER:
@@ -98,7 +103,7 @@ services:
       TZ: America/Chicago
 
   cadvisor:
-    image: google/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:latest
     depends_on:
       - "postgres"
     volumes:

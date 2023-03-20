@@ -188,6 +188,13 @@
             <column columnName="pregnantanimalsrequired"/>
             <column columnName="animalidstooffer"/>
             <column columnName="optionalproject"/>
+            <column columnName="internalthreadrowid"/>
+            <column columnName="externalthreadrowid"/>
+            <column columnName="pregnantanimalsrequiredterminfant"/>
+            <column columnName="pregnantanimalsrequiredtermdam"/>
+            <column columnName="majorsurgery"/>
+            <column columnName="previousexposures"/>
+            <column columnName="contacts"/>
         </columns>
     </table>
     <table tableName="gestational_days" tableDbType="TABLE">
@@ -242,12 +249,78 @@
     </table>
     <table tableName="husbandry_frequency" tableDbType="TABLE">
         <columns>
-            <column columnName="RowId"/>
+            <column columnName="rowid"/>
             <column columnName="meaning"/>
             <column columnName="dayofweek"/>
             <column columnName="sort_order"/>
             <column columnName="active"/>
             <column columnName="altmeaning"/>
+        </columns>
+    </table>
+    <table tableName="watermonitoring_access" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="date"/>
+            <column columnName="alloweduser"/>
+            <column columnName="project"/>
+            <column columnName="principalinvestigator"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="mgap_sequence_datasets" tableDbType="TABLE">
+        <columns>
+            <column columnName="mgap_id"/>
+            <column columnName="sequence_type"/>
+            <column columnName="total_reads"/>
+            <column columnName="sra_accession"/>
+            <column columnName="original_id"/>
+            <column columnName="parsed_id"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="arrow_protocols" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="protocol_id"/>
+            <column columnName="protocol_title"/>
+            <column columnName="pi_name"/>
+            <column columnName="date_approved"/>
+            <column columnName="date_expiration"/>
+            <column columnName="date_modified"/>
+            <column columnName="arrow_common_name"/>
+            <column columnName="max_three_year"/>
+            <column columnName="usda_code"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="extra_protocols" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="protocol_id"/>
+            <column columnName="protocol_title"/>
+            <column columnName="pi_name"/>
+            <column columnName="date_approved"/>
+            <column columnName="date_expiration"/>
+            <column columnName="date_modified"/>
+            <column columnName="arrow_common_name"/>
+            <column columnName="max_three_year"/>
+            <column columnName="usda_code"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
         </columns>
     </table>
 </tables>

@@ -4,7 +4,7 @@
     -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
     padding: 15px;
-    max-width: 620px;
+    max-width: 1220px;
     margin-left: 20px;
 }
 
@@ -19,7 +19,7 @@
 }
 
 .form-wrapper {
-    max-width: 600px;
+    max-width: 1200px;
 }
 
 /*override some datepicker css to get it to line up with the other fields*/
@@ -41,7 +41,7 @@
     padding-right: 15px;
 }
 
-#datepicker {
+.col-xs-5.datepicker-wrapper {
     padding-left: 0;
     padding-right: 0;
 }

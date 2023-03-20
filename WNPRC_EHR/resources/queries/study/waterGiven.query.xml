@@ -14,8 +14,23 @@
                     <column columnName="date">
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
+                    <column columnName="Id/curLocation/room">
+                        <columnTitle>Room</columnTitle>
+                    </column>
+                    <column columnName="Id/curLocation/cage">
+                        <columnTitle>Cage</columnTitle>
+                    </column>
                     <column columnName="dateOrdered">
                         <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="assignedto">
+                        <columnTitle>Assigned To</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_assigned</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+
                     </column>
                     <column columnName="performedby">
                         <columnTitle>Performed By</columnTitle>
@@ -63,15 +78,6 @@
                         </fk>
 
                     </column>
-                    <column columnName="assignedto">
-                        <columnTitle>Assigned To</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>husbandry_assigned</fkTable>
-                            <fkColumnName>value</fkColumnName>
-                        </fk>
-
-                    </column>
 
                     <column columnName="project">
 
@@ -88,6 +94,16 @@
                     </column>
                     <column columnName="treatmentId">
                         <isHidden>false</isHidden>
+                    </column>
+
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?taskid=${taskid}</url>
                     </column>
                 </columns>
             </table>

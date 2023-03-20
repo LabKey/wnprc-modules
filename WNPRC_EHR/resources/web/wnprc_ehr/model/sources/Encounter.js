@@ -8,15 +8,34 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
             date: {
                 xtype: 'datefield',
                 allowBlank:     false,
-                editable:       false,
+                editable:       true,
                 shownInGrid:    true,
                 columnConfig: {
-                    width:125
+                    width:      125,
+                    editable:   false
                 }
             },
-            project:{
+            'id/curLocation/room' :{
                 editable: false,
-                allowBlank: false
+                shownInGrid: true,
+                columnConfig: {
+                    width:80
+                }
+            },
+            'id/curLocation/cage':{
+                editable: false,
+                shownInGrid: true,
+                columnConfig: {
+                    width:80
+                }
+            },
+            assignedTo:{
+                editable: false
+            },
+            project:{
+                editable:       false,
+                allowBlank:     false,
+                shownInGrid :   false
             },
             volume: {
                 xtype: 'numberfield',
@@ -30,8 +49,9 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
 
             },
             waterSource:{
-                editable: false,
-                allowBlank: false
+                editable:       false,
+                allowBlank:     false,
+                shownInGrid:    false
 
             },
             remarks :{
@@ -39,8 +59,9 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 shownInGrid: true
             },
             route: {
-                editable: false,
-                defaultValue : 'oral'
+                editable:       false,
+                defaultValue :  'oral',
+                shownInGrid :   false
 
             },
             location:{
@@ -58,11 +79,6 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                     width:80
                 }
             },
-            assignedTo:{
-                editable: false
-
-            },
-            
             performedby:{
                 allowBlank: false,
                 columnConfig: {

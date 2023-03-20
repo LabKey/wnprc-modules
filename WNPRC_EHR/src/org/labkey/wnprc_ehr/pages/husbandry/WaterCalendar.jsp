@@ -1,14 +1,28 @@
-<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
+<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="java.util.UUID" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Comparator" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.text.ParseException" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+
+<%@ page import="org.labkey.api.query.QueryAction"%>
+<%@ page import="org.labkey.api.query.QueryDefinition"%>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+
+<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
 <%@ page import="org.labkey.api.security.Group" %>
 <%@ page import="org.labkey.api.security.GroupManager" %>
-<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
-<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
+<%@ page import="static java.lang.Integer.parseInt" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -17,6 +31,7 @@
         dependencies.add("clientapi/ext4");
         dependencies.add("fullcalendar");
         dependencies.add("/webutils/lib/webutils_core/api.js");
+        dependencies.add("/wnprc_ehr/gen/waterMonitoringSystem.js");
 
         dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");
         dependencies.add("https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js");
@@ -93,8 +108,11 @@
     //TODO:use labkey roles instead of hard coding the group names.
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group complianceGroup = GroupManager.getGroup(getContainer(), "compliance (LDAP)", GroupEnumType.SITE);
+    Group animalCare = GroupManager.getGroup(getContainer(),"animalcare (LDAP)",GroupEnumType.SITE);
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
+    boolean isAnimalCare = getUser().isInGroup(animalCare.getUserId());
+    String container = getContainer().getEncodedPath();
 
     //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "husbandry_frequency"));
 
@@ -196,7 +214,7 @@
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {
-            if (key != 'animalLink'  && key != 'displayDate') {
+            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlsPerKgCal') {
                 WebUtils.VM.taskDetails[key](null);
             }
         }
@@ -208,8 +226,8 @@
 <div class="row" >
     <div class="col-md-3">
 
-        <div class="row">
-            <div class="panel panel-primary">
+        <div class="row" id="infoPanels">
+            <div class="collapse panel panel-primary" id="waterInformation">
                 <div class="panel-heading"><span>Water Details</span></div>
                 <div class="panel-body" id="waterInfoPanel" data-bind="with: taskDetails">
 
@@ -217,7 +235,7 @@
                     <dl class="dl-horizontal">
                         <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
                         <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
-                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalId}}</a></dd>
+                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
                         <dt>Location:           </dt> <dd>{{location}}</dd>
                         <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
                         <dt>Volume:             </dt> <dd>{{volume}}</dd>
@@ -234,6 +252,7 @@
                     <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
                             id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
 
+
                     <!--  Modal Definition -->
                     <div class="modal fade" id="myModal" role="dialog">
                         <div class="modal-dialog modal-lg">
@@ -245,8 +264,12 @@
                                 <div class="modal-body" id="modal-body">
                                     <div>Select an option from this window:</div>
                                     <div>End Date for Water Order: <b>{{date}}</b></div>
+                                    <div>
+                                        <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
+                                        <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                    </div>
                                     <hr>
-                                    <div class="server-return-message" id = "returnTitle">Return Errors from Server:</div>
+                                    <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
                                     <div class="server-return-message" id = "modelServerResponse"></div>
 
                                 </div>
@@ -260,6 +283,28 @@
                         </div>
                     </div>
 
+
+
+                </div>
+            </div>
+
+            <div class="collapse panel panel-primary" id="waterTotalInformation">
+                <div class="panel-heading"><span>Water Total Details</span></div>
+                <div class="panel-body" id="waterTotalPanel" data-bind="with: taskDetails">
+
+
+                    <dl class="dl-horizontal">
+                        <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
+                        <dt>Date:               </dt> <dd>{{displayDate}}</dd>
+                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                        <dt>Current Location:   </dt> <dd>{{location}}</dd>
+                        <dt>Total Volume:       </dt> <dd>{{volume}} ml</dd>
+                        <dt>ml Per Kg:          </dt> <dd>{{mlsPerKg}}</dd>
+                    </dl>
+                    <!-- ko if: mlsPerKgCal() -->
+                        <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
+
+                    <!-- /ko -->
 
 
                 </div>
@@ -393,19 +438,20 @@
                                     </label>
                                 </div>
                             </div>
+
                             <div style="text-align: right;">
                                 <button class="btn btn-default" data-bind="click: $root.collapseSingleWater" data-toggle="collapse" >Cancel</button>
                                 <%--<button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>--%>
                                 <!-- ko if: dataSourceForm() == 'waterAmount' -->
                                 <button class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Update Single Day Water</button>
+                                <button class="btn btn-primary" data-bind="click: deleteWaterAmount">Delete Single Day Water</button>
                                 <!-- /ko -->
                                 <!-- ko if: dataSourceForm() == 'waterOrders' -->
                                 <button id ="submitNewWater" class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Insert Single Day Water</button>
 
                                 <!-- /ko -->
-
-
                             </div>
+
                         </form>
 
                     </div>
@@ -425,6 +471,12 @@
                     <!-- ko foreach: _.keys(husbandryAssignmentLookup) -->
                     <span  data-bind="style: {color: $parent.husbandryAssignmentLookup[$data].color }">&#x2589;</span><span>{{$parent.husbandryAssignmentLookup[$data].title}}</span>
                     <!-- /ko -->
+                </div>
+                <div id="waterTotalLegend" class="pull-left">
+
+                    <span style="color:red">&#x2589;</span><span>Total Water < 20 mL/Kg</span>
+                    <span style="color:white">&#x2589;</span><span>Total Water >= 20 mL/Kg</span>
+
                 </div>
 
 
@@ -448,7 +500,6 @@
     var calendarEvents = {};
     var hideEditPanel = true;
     var allowProjects = "";
-
     var changeableItems = ko.observableArray();
 
     ko.dirtyFlag = function(root, isInitiallyDirty) {
@@ -513,12 +564,14 @@
         let isAdmin = <%=isAdmin%>;
         let complianceStaff = <%=isCompliance%>;
         let isVet = <%=isVet%>;
+        let isAnimalCare = <%=isAnimalCare%>;
+        let container = "<%= h(container.toString())%>";
 
         if (isAdmin || complianceStaff || isVet){
             isSuperUser = true;
         }
 
-        var waterAccessControlled = <%= h(userAccessWater.toString()) %>;
+        var waterAccessControlled = <%= unsafe(userAccessWater.toString()) %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
 
         let firstEntry = true;
@@ -557,7 +610,7 @@
 
                             if ($animalId == 'undefined' || $animalId == "null"){
                                 let queryConfig ={};
-                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser);
+                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser,isAnimalCare);
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data)
                                 {
@@ -574,14 +627,14 @@
                                         }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + ' ' + volume,
+                                            title: row.Id + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
-                                            groupId : row.objectIdCoalesced,
+                                            groupId : groupId(row),
                                             rawRowData: row,
                                             textColor: '#000000',
                                             //editable: true,
-                                            description: 'Water for animal ' + row.animalId
+                                            description: 'Water for animal ' + row.Id
                                         };
 
                                         if (row.assignedToCoalesced in husbandryAssignmentLookup) {
@@ -597,7 +650,7 @@
                                         })
                                     );
                                     failureCallback((function(data){
-                                        console.log ("error!!");
+                                        console.log ("Error retriving waterScheduleWithWeight");
                                     }));
                                 })
 
@@ -606,7 +659,7 @@
                             //Display panel in the animal history
                             else{
                                 let queryConfig ={};
-                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser, $animalId);
+                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser, isAnimalCare, $animalId);
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
@@ -622,14 +675,14 @@
 
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + ' ' + volume,
+                                            title: row.Id + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
-                                            groupId : row.objectIdCoalesced,
+                                            groupId : groupId(row),
                                             rawRowData: row,
                                             //editable: true,
-                                            description: 'Water for animal ' + row.animalId
+                                            description: 'Water for animal ' + row.Id
                                         };
 
                                         if (row.assignedToCoalesced in husbandryAssignmentLookup) {
@@ -649,19 +702,23 @@
                 },
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId == 'undefined' || $animalId == "null"){
-                            debugger;
-                        WebUtils.API.selectRows("study", "waterPrePivot", {
+                        if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
+                        WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d')
+                            "date~lte": fetchInfo.end.format('Y-m-d'),
+                            "TotalWater~isnonblank":true
                         }).then(function (data) {
                             var events = data.rows;
 
                             successCallback(
                                     events.map(function (row) {
+                                        let parsedTotalWater = 0;
+                                        if(row.TotalWater !== null){
+                                            parsedTotalWater = row.TotalWater;
+                                        }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.Id + " Total: " + parsedTotalWater,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
@@ -669,7 +726,7 @@
                                         };
 
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#000CFF';
+                                            eventObj.color = '#FFFFFF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }
@@ -684,31 +741,36 @@
 
                         }else{
 
-                            WebUtils.API.selectRows("study", "waterPrePivot", {
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "animalId~in": $animalId
+                            "TotalWater~isnonblank":true,
+                            "Id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(events.map(function (row) {
+                                    let parsedTotalWater = 0;
+                                    if(row.TotalWater !== null){
+                                        parsedTotalWater = row.TotalWater;
+                                    }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.Id + " Total: " + parsedTotalWater,
                                             start: new Date(row.date),
                                             textColor: '#000000',
                                             allDay: true,
                                             rawRowData: row
                                         };
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#000CFF';
+                                            eventObj.color = '#FFFFFF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }
                                             return eventObj;
                                     }));
                                 failureCallback((function (data){
-                                    console.log("error from waterPrePivot");
+                                    console.log("error from waterTotalByDateWithWeight");
                                 }))
                                 })
                             }
@@ -730,6 +792,7 @@
                             color: '#fff'
                         }
                     });
+                    $('#waterInformation').collapse('show');
 
                 }else{
                     $('#water-calendar').unblock();
@@ -744,14 +807,17 @@
                 }
             },
             eventClick: function (info){
-                console.log(info.event.id);
-
                 //This updates all the fields that can be change in this form
                 //We also have to reset the dirty flag to track any change after the event is loaded into
                 //the form to be able to change.
                 if (info.event.source.id == "totalWater") {
+                    $('#waterInformation').collapse('hide');
+                    $('#waterTotalInformation').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
+                    WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData.location.toString());
                 }else{
+                    $('#waterInformation').collapse('show');
+                    $('#waterTotalInformation').collapse('hide');
                     WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 }
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();
@@ -826,44 +892,44 @@
                 selectedEvent = info.event;
 
 
-                    var momentDate;
-                    jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
+                var momentDate;
+                var waterTotal = info.event.source.id;
+                jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
 
-                        if (key in WebUtils.VM.taskDetails) {
-                            if (key == "date") {
-                                momentDate = moment(value, "YYYY/MM/DD HH:mm:ss");
-                                value = moment(value, "YYYY/MM/DD HH:mm:ss").format("MM/DD/YYYY");
-
-
-                                // value = displayDate(value);
-                               // webUtils.VM.taskDetails[rawDate](moment(value, "YYYY/MM/DD HH:mm:ss").format("MM/DD/YYYY"));
-                                //value = value.toDate();
-                            }
-
-                            WebUtils.VM.taskDetails[key](value);
-                            if (hideEditPanel){
-                                $('#waterExceptionPanel').collapse('hide');
-                            }
+                    if (key in WebUtils.VM.taskDetails) {
+                        if (key == "date") {
+                            momentDate = moment(value, "YYYY/MM/DD HH:mm:ss");
+                            value = moment(value, "YYYY/MM/DD HH:mm:ss").format("MM/DD/YYYY");
 
 
-
-                            var today = moment();
-
-                            if (key =="date" && (momentDate.diff(today, 'days'))>= 0){
-                                $('#waterInfo').removeAttr('disabled');
-
-                            }
-
-                            if(key == "dataSource" && value == "waterOrders" && (momentDate.diff(today, 'days'))>= 0){
-                                $('#enterWaterOrder').removeAttr('disabled');
-                            }
-
-                            if(key == "dataSource" && value == "waterAmount" && (momentDate.diff(today, 'days'))>= 0){
-                               // $('#enterWaterOrder').removeAttr('disabled');
-                                $('#waterInfo').text('Edit Single Day Water');
-                            }
+                            // value = displayDate(value);
+                           // webUtils.VM.taskDetails[rawDate](moment(value, "YYYY/MM/DD HH:mm:ss").format("MM/DD/YYYY"));
+                            //value = value.toDate();
                         }
-                    });
+
+                        WebUtils.VM.taskDetails[key](value);
+                        if (hideEditPanel){
+                            $('#waterExceptionPanel').collapse('hide');
+                        }
+
+
+
+                        var today = moment();
+
+                        if (waterTotal !== "totalWater" && key =="date" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isSuperUser)){
+                            $('#waterInfo').removeAttr('disabled');
+
+                        }
+
+                        if(waterTotal !== "totalWater" && key == "dataSource" && value == "waterOrders" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isSuperUser)){
+                            $('#enterWaterOrder').removeAttr('disabled');
+                        }
+
+                        if(waterTotal !== "totalWater" && key == "dataSource" && value == "waterAmount" && (momentDate.diff(today, 'days'))>= 0 && (allowProjects !== "" || isSuperUser)){
+                            $('#waterInfo').text('Edit Single Day Water');
+                        }
+                    }
+                });
             },
 
         },);
@@ -887,9 +953,10 @@
             taskDetails: {
                 lsid:                       ko.observable(),
                 objectIdCoalesced:          ko.observable(),
+                waterOrderObjectId:         ko.observable(),
                 taskid:                     ko.observable(),
                 projectCoalesced:           ko.observable(),
-                animalId:                   ko.observable(),
+                Id:                         ko.observable(),
                 date:                       ko.observable(),
                 location:                   ko.observable(),
                 volume:                     ko.observable(),
@@ -901,7 +968,8 @@
                 frequencyCoalesced:         ko.observable(),
                 frequencyMeaningCoalesced:  ko.observable(),
                 displaytimeofday:           ko.observable(),
-                rawDate:                    ko.observable()
+                rawDate:                    ko.observable(),
+                mlsPerKg:                   ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -911,8 +979,7 @@
                 animalIdForm:               ko.pureComputed(function (){return ''}),
                 dateForm:                   ko.observable(),
                 projectForm:                ko.observable(),
-                dataSourceForm:             ko.observable(),
-                objectIdForm:               ko.observable(),
+                waterOrderObjectId:         ko.observable(),
                 frequencyForm:              new Item("Time of Day:","PM"),
                 volumeForm:                 new Item("Volume:", ""),
                 provideFruitForm:           new Item("Provide Fruit:","none"),
@@ -948,7 +1015,7 @@
                         lsid:               waterOrder.lsid,
                         taskId:             waterOrder.taskid,
                         objectId:           waterOrder.objectIdCoalesced,
-                        animalId:           waterOrder.animalId,
+                        animalId:           waterOrder.Id,
                         endDate:            waterOrder.date,
                         dataSource:         waterOrder.dataSource,
                         skipWaterRegulationCheck:     true
@@ -963,6 +1030,7 @@
 
                             $('#waterInfoPanel').unblock();
                             $('#myModal').modal('hide');
+                            document.getElementById("modelServerResponse").innerHTML = "";
 
 
                         }else if (response.errors){
@@ -987,10 +1055,23 @@
                         }
 
 
-                    }, this)
+                    }, this),
+                    method: "POST"
 
                 });
 
+            },
+            removeLastDay: function(){
+                if (document.getElementById('removelastday').checked){
+                    var newEndDate =moment(WebUtils.VM.taskDetails.date(), "MM/DD/YYYY");
+                    newEndDate = newEndDate.subtract(1, "days");
+                    newEndDate = newEndDate.format("MM/DD/YYYY");
+                    WebUtils.VM.taskDetails.date(newEndDate);
+                }else if (selectedEvent.extendedProps){
+                    var originalDate = moment(selectedEvent.extendedProps.rawRowData.date, "YYYY-MM-DD hh:mm:ss.SSS")
+                    originalDate = originalDate.format("MM/DD/YYYY")
+                    WebUtils.VM.taskDetails.date(originalDate);
+                }
             },
 
             endWaterOrder: function (row){
@@ -1020,7 +1101,7 @@
                         lsid:               waterOrder.lsid,
                         taskId:             waterOrder.taskid,
                         objectId:           waterOrder.objectIdCoalesced,
-                        animalId:           waterOrder.animalId,
+                        animalId:           waterOrder.Id,
                         endDate:            waterOrder.date,
                         dataSource:         waterOrder.dataSource
 
@@ -1034,12 +1115,15 @@
 
                             $('#waterInfoPanel').unblock();
                             $('#myModal').modal('hide');
+                            document.getElementById('removelastday').checked = false;
 
 
                         }else if (response.errors){
 
                             document.getElementById("returnTitle").style.display = "block";
+                            document.getElementById("returnTitle").classList.remove("hidden");
                             document.getElementById("modelServerResponse").style.display = "block";
+                            document.getElementById('removelastday').checked = false;
 
                             //let jsonArray = response.errors[0].errors;
                             let jsonArray;
@@ -1060,9 +1144,9 @@
                                     let clientObjectId = Ext4.util.Format.htmlEncode(errorObject.objectId);
                                     let volume = Ext4.util.Format.htmlEncode(errorObject.volume);
                                     let date = Ext4.util.Format.htmlEncode(errorObject.date);
-                                    returnMessage += "There is another waterAmount on "+date+" for the volume of "+volume+" " +
+                                    returnMessage += "<div id='waterException" + i +"'>There is another waterAmount on "+date+" for the volume of "+volume+" " +
                                             " <button onclick=\"updateWaterAmount('"+clientObjectId+"')\">Update</button> " +
-                                            "<button onclick=\"deleteWaterAmount('"+clientObjectId+"')\">Delete</button><br>";
+                                            "<button onclick=\"deleteWaterAmount(null, null,'"+clientObjectId+"','waterException" + i +"')\">Delete</button><br></div>";
 
                                 }
 
@@ -1070,21 +1154,16 @@
                             document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";
                             document.getElementById("proceedButton").classList.remove("hidden");
 
-                            //$('#myModal')
-                            //LABKEY.Utils.alert("Update failed", response.errors);
                         }
-                        /*if(!response.success){
-                            debugger;
-                            response.errors;
-                            $('#myModal');
-
-                        }*/ else {
+                        else {
                             alert('Water cannot be closed')
+                            document.getElementById('removelastday').checked = false;
                         }
 
 
-                    }, this)
+                    },this),
 
+                    method:"POST"
                 });
 
             },
@@ -1110,13 +1189,14 @@
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
+                //DONE: Add allowDatesInDistantPast: true into the waterOrders.js file
 
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "EnterNewWaterOrder", null, {
                         lsid:                   waterOrder.lsid,
                         taskId:                 waterOrder.taskid,
                         objectId:               waterOrder.objectIdCoalesced,
-                        animalId:               waterOrder.animalId,
+                        animalId:               waterOrder.Id,
                         endDate:                waterOrder.date,
                         dataSource:             waterOrder.dataSource,
                         project:                waterOrder.projectCoalesced,
@@ -1138,33 +1218,48 @@
                             //('ehr', 'dataEntryForm.view', null, {formType: LABKEY.ActionURL.getParameter('formType')})
                             var newWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {formType: 'Enter Water Orders', 'taskid': response.taskId});
                             //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
+                            document.getElementById('removelastday').checked = false;
 
                             window.open(newWaterOrder,'_blank');
 
                         }
-                        if (!response.success){
-
+                        else{
                             response.errors;
-                            $('#myModal');
-
-                        }else {
-                            alert('Water cannot be closed')
-                            $('#waterInfoPanel').unblock();
+                            $('#myModal').modal('hide');
+                            document.getElementById('removelastday').checked = false;
                         }
 
 
-                    }, this)
+                    }, this),
+                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        alert('Water cannot be closed')
+                        $('#waterInfoPanel').unblock();
+
+                    },this),
+                    method:"POST"
 
                 });
 
             },
             closeModalWindow: function (row){
+
                 $('#waterInfoPanel').unblock();
+
+                var originalDate = moment(selectedEvent.extendedProps.rawRowData.date, "YYYY-MM-DD hh:mm:ss.SSS")
+                console.log("original date "+originalDate);
+                originalDate = originalDate.format("MM/DD/YYYY")
+                WebUtils.VM.taskDetails.date(originalDate);
+                document.getElementById('removelastday').checked = false;
+                document.getElementById("modelServerResponse").innerHTML = "";
+                document.getElementById("proceedButton").classList.add("hidden");
+                document.getElementById("returnTitle").classList.add("hidden");
+
             }
         });
 
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {
-            var animalId = WebUtils.VM.taskDetails.animalId();
+            var animalId = WebUtils.VM.taskDetails.Id();
 
             return LABKEY.ActionURL.buildURL('ehr', 'participantView', null, {
                 participantId: animalId
@@ -1172,23 +1267,18 @@
         });
 
         WebUtils.VM.taskDetails.displayDate = ko.pureComputed(function(){
-            var dateString = WebUtils.VM.taskDetails.date();
+            return WebUtils.VM.taskDetails.date();
+        });
 
-            if (dateString){
-                return (moment(dateString, "MM/DD/YYYY").calendar(null, {
-                    sameElse: 'MMM D[,] YYYY'
-                }).split(" at"))[0]
-
-            }else {
-                return " ";
-            }
+        WebUtils.VM.taskDetails.mlsPerKgCal = ko.pureComputed(function(){
+            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20)
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel
         //These records are not supposed to be change by the end users when adding or updating
         //a waterAmount record.
         WebUtils.VM.form.animalIdForm = ko.pureComputed(function(){
-            return WebUtils.VM.taskDetails.animalId();
+            return WebUtils.VM.taskDetails.Id();
         });
 
         WebUtils.VM.form.dataSourceForm = ko.pureComputed(function(){
@@ -1203,12 +1293,16 @@
                 return WebUtils.VM.taskDetails.projectCoalesced();
         });
 
-        WebUtils.VM.form.dataSourceForm = ko.pureComputed(function(){
-            return WebUtils.VM.taskDetails.dataSource();
-        });
-
         WebUtils.VM.form.objectIdForm = ko.pureComputed(function(){
             return WebUtils.VM.taskDetails.objectIdCoalesced();
+        });
+
+        WebUtils.VM.form.waterOrderObjectId = ko.pureComputed(function(){
+            //if (WebUtils.VM.form.dataSourceForm === "waterOrders") {
+                return WebUtils.VM.taskDetails.objectIdCoalesced();
+            /*} else {
+                return  WebUtils.VM.taskDetails.waterOrderObjectId();
+            }*/
         });
 
         WebUtils.VM.form.taskidForm = ko.pureComputed(function(){
@@ -1234,7 +1328,6 @@
 
 
         WebUtils.VM.form.dirtyItems = ko.computed(function() {
-            console.log('change data '+ JSON.stringify(changeableItems()));
             return ko.utils.arrayFilter(changeableItems(), function(item) {
                 return item.dirtyFlag.isDirty();
             });
@@ -1287,8 +1380,8 @@
 
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 var taskid = LABKEY.Utils.generateUUID();
+                var taskInsertSuccess = false;
                 //var date = form.date.format("Y-m-d H:i:s");
-                debugger;
 
                 var insertDate = new Date(form.dateForm);
                 if (form.frequencyForm.value === "AM"){
@@ -1305,35 +1398,60 @@
                 }
 
                 if (form.dataSourceForm === "waterOrders"){
-                    WebUtils.API.insertRows('study', 'waterAmount', [{
-                        taskid:         taskid,
-                        Id:             form.animalIdForm,
-                        date:           insertDate.getTime(),
-                        project:        form.projectForm,
-                        volume:         form.volumeForm.value,
-                        provideFruit:   form.provideFruitForm.value,
-                        assignedTo:     form.assignedToForm.value,
-                        frequency:      form.frequencyForm.value,
-                        recordSource:   "WaterCalendar",
-                        waterSource:    "regulated",
-                        qcstate:        10 //Schedule
-                    }]);
-                    WebUtils.API.insertRows('ehr', 'tasks', [{
-                        taskid:     taskid,
-                        title:      "Enter Water Daily Amount",
-                        category:   "task",
-                        qcstate:    1, //Complete
-                        formType:   "Enter Water Daily Amount"
-                       // assignedTo:
-                    }])
-                    WebUtils.VM.form.volumeForm.dirtyFlag.reset();
-                    WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
-                    WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
-                    WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
-                    $('#waterExceptionPanel').unblock();
-                    calendar.refetchEvents();
+                    LABKEY.Query.saveRows({
+                        method: 'POST',
+                        containerPath: container,
+                        commands:[{
+                            command: 'insert',
+                            containerPath: container,
+                            schemaName: 'study',
+                            queryName: 'waterAmount',
+                            rows:[{
+                                taskid:                 taskid,
+                                Id:                     form.animalIdForm,
+                                date:                   insertDate.getTime(),
+                                project:                form.projectForm,
+                                volume:                 form.volumeForm.value,
+                                provideFruit:           form.provideFruitForm.value,
+                                assignedTo:             form.assignedToForm.value,
+                                frequency:              form.frequencyForm.value,
+                                waterOrderObjectId:     form.waterOrderObjectId,
+                                recordSource:           "WaterCalendar",
+                                waterSource:            "regulated",
+                                qcstate:                10 //Schedule
+                            }]
+                        },{
+                            command: 'insert',
+                            containerPath: container,
+                            schemaName: 'ehr',
+                            queryName: 'tasks',
+                            rows:[{
+                                taskid:     taskid,
+                                title:      "Enter Water Daily Amount",
+                                category:   "task",
+                                qcstate:    1, //Complete
+                                formType:   "Enter Water Daily Amount"
+                            }]
+                        }],
+                        timeout: 999999,
+                        scope: this,
+                        failure: function(e){
+                            console.log('Error saving water amount and task' + e);
+                            // Refresh the calendar view.
+                            calendar.refetchEvents();
+                            //Unblock calendar
+                            $('#water-calendar').unblock();
+                        },
+                        success: function(){
+                            WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                            WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                            WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                            WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+                            $('#waterExceptionPanel').unblock();
+                            calendar.refetchEvents();
+                        }
 
-
+                    });
                 } else if (form.dataSourceForm === "waterAmount"){
 
                     LABKEY.Ajax.request({
@@ -1364,14 +1482,19 @@
                                 WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
                                 WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
 
-                                //$('#waterInfoPanel').unblock();
+                                $('#waterExceptionPanel').unblock();
+                                // Refresh the calendar view.
+                                calendar.refetchEvents();
+                                //Unblock calendar
+                                $('#water-calendar').unblock();
 
                             } else {
                                 alert('Water cannot be closed')
                             }
 
 
-                        }, this)
+                        }, this),
+                        method:"POST"
 
                     });
 
@@ -1382,12 +1505,6 @@
                     $('#waterExceptionPanel').collapse('hide')
                 }
 
-                // Refresh the calendar view.
-                debugger;
-                calendar.refetchEvents();
-                //Unblock calendar
-                $('#water-calendar').unblock();
-
             },
             editMultiple: function (){
                 if (document.getElementById('multiple').checked){
@@ -1396,9 +1513,6 @@
                     hideEditPanel = true;
                 }
                 console.log("get Spam");
-
-
-
             },
 
         });
@@ -1416,35 +1530,38 @@
 
 
 
-    function queryConfigFunc (fetchInfo, isSuperUser, animalId){
+    function queryConfigFunc (fetchInfo, isSuperUser, isAnimalCare, animalId){
         let date = new Date();
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
             "date~lte": fetchInfo.end.format('Y-m-d'),
-            "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "parameters": {NumDays: 120, StartDate: date.format(LABKEY.extDefaultDateFormat)},
             "qcstate/label~eq": "Scheduled"
         };
 
 
-        if (isSuperUser){
+        if (isSuperUser || isAnimalCare){
             if (animalId){
-                configObject["animalid~in"]= animalId;
+                configObject["Id~in"]= animalId;
             }
         }
-        else{
+        if (allowProjects !== ""){
             configObject["projectCoalesced~in"] = allowProjects;
             if (animalId){
-                configObject["animalid~in"] = animalId;
+                configObject["Id~in"] = animalId;
             }
         }
         return configObject;
     }
 
-    function deleteWaterAmount(objectId){
+    function deleteWaterAmount(currentModel,event,clientObjectId,divId){
+        if (!clientObjectId){
+            clientObjectId = selectedEvent.extendedProps.rawRowData.objectIdCoalesced;
+        }
 
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateWaterAmount", null, {
-                objectId:           objectId,
+                objectId:           clientObjectId,
                 dataSource:         "waterAmount",
                 action:             "delete"
 
@@ -1458,7 +1575,7 @@
                     calendar.refetchEvents();
 
                     //Clearing error message
-                    document.getElementById("modelServerResponse").innerHTML = "";
+                    document.getElementById(divId).innerHTML = "";
 
                     //$('#waterInfoPanel').unblock();
 
@@ -1467,7 +1584,8 @@
                 }
 
 
-            }, this)
+            }, this),
+            method: "POST"
 
         });
 
@@ -1476,7 +1594,7 @@
 
         var updateWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'manageRecord', null, {
             schemaName:         'study',
-            queryName:          "Water Amount",
+            queryName:          "waterAmount",
             keyField:           "objectId",
             key:                objectId
         });
@@ -1486,36 +1604,9 @@
 
         //TODO: add a wait for user to update water
 
+
         // Refresh the calendar view.
         calendar.refetchEvents();
-
-
-        /*LABKEY.Ajax.request({
-            url: LABKEY.ActionURL.buildURL("EHR", "manageRecord", null, {
-                schema:             "study",
-                queryName:          "waterAmount",
-                //objectId:           objectId,
-                keyField:           "objectId",
-                key:                objectId
-
-            }),
-            success: LABKEY.Utils.getCallbackWrapper(function (response)
-            {
-                if (response.success){
-
-                    // Refresh the calendar view.
-                    //$calendar.fullCalendar('refetchEvents');
-
-                    //$('#waterInfoPanel').unblock();
-
-                } else {
-                    alert('Water Amount cannot be deleted')
-                }
-
-
-            }, this)
-
-        });*/
 
     }
 
@@ -1524,6 +1615,18 @@
         var start = new Date().getTime();
         while (new Date().getTime() < start + delay);
     }
+    function groupId(row){
 
+        if (row.dataSource === "waterAmount") {
+            if(row.waterOrderObjectId === null){
+                return LABKEY.Utils.generateUUID();
+            }else {
+                return row.waterOrderObjectId
+            }
+
+        }else{
+            return row.objectIdCoalesced
+        }
+    }
 
 </script>

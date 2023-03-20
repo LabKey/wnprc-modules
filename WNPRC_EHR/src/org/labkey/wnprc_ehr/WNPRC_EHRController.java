@@ -16,9 +16,12 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.google.api.client.http.FileContent;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -35,24 +38,33 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.files.FileContentService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
@@ -67,17 +79,24 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.webdav.WebdavResource;
+import org.labkey.api.webdav.WebdavService;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
 import org.labkey.googledrive.api.GoogleDriveService;
 import org.labkey.security.xml.GroupEnumType;
+import org.labkey.study.StudySchema;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
@@ -95,10 +114,6 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
-import org.labkey.wnprc_ehr.email.EmailMessageUtils;
-import org.labkey.wnprc_ehr.email.EmailServer;
-import org.labkey.wnprc_ehr.email.EmailServerConfig;
-import org.labkey.wnprc_ehr.email.MessageIdentifier;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
@@ -108,7 +123,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InvalidObjectException;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -269,10 +286,9 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public static class EmailForm
+    public static class ConvertExcelToJSONForm
     {
         private String _name;
-
         public String getName()
         {
             return _name;
@@ -284,128 +300,8 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public static class EmailServerForm
-    {
-        private String id;
-        private String _username;
-        private String _password;
 
-        public String getId()
-        {
-            return id;
-        }
 
-        public void setId(String id)
-        {
-            this.id = id;
-        }
-
-        public String getUsername()
-        {
-            return _username;
-        }
-
-        public void setUsername(String username)
-        {
-            _username = username;
-        }
-
-        public String getPassword()
-        {
-            return _password;
-        }
-
-        public void setPassword(String password)
-        {
-            _password = password;
-        }
-
-        public EmailServer getEmailServer(User user, Container container) throws Exception
-        {
-            if ((id != null) && (_password != null) && (_username != null))
-            {
-                EmailServerConfig config = EmailServerConfig.load(user, container, getId());
-                return new EmailServer(config, getUsername(), getPassword());
-            }
-            else
-            {
-                throw new ApiUsageException("You must supply a server, username and password.");
-            }
-        }
-    }
-
-    public static class VirologyResultsForm extends EmailServerForm
-    {
-        private String _subject;
-        private String _date;
-        private String _fromList;
-
-        public String getSubject()
-        {
-            if (_subject == null)
-            {
-                throw new ApiUsageException("You must supply a subject line in the 'subject' parameter.");
-            }
-            return _subject;
-        }
-
-        public void setSubject(String subject)
-        {
-            _subject = subject;
-        }
-
-        public String getDate()
-        {
-            return _date;
-        }
-
-        public void setDate(String date)
-        {
-            _date = date;
-        }
-
-        public String getFromList()
-        {
-            return _fromList;
-        }
-
-        public void setFromList(String fromList)
-        {
-            _fromList = fromList;
-        }
-
-        public Date getSentDate()
-        {
-            DateFormat df = new SimpleDateFormat(EmailMessageUtils.VIROLOGY_DATE_FORMAT, Locale.ENGLISH);
-            Date result;
-            try
-            {
-                result = df.parse(_date);
-            }
-            catch (ParseException e)
-            {
-                throw new ApiUsageException("You must supply a valid sent timestamp in the form YYYY/MM/DD HH:mm:ss as the 'date' parameter.");
-            }
-            return result;
-        }
-
-        public String[] getFromListAsArray()
-        {
-            if (_fromList != null)
-            {
-                return StringUtils.split(_fromList, ",");
-            }
-            else
-            {
-                return new String[0];
-            }
-        }
-
-        public MessageIdentifier getMessageIdentifier()
-        {
-            return new MessageIdentifier(getSubject(), getFromListAsArray(), getSentDate());
-        }
-    }
 
     public static class AssignmentBaseForm
     {
@@ -682,7 +578,6 @@ public class WNPRC_EHRController extends SpringActionController
                     props.put(filename, fileInfo);
                 }
             }
-
             return new ApiSimpleResponse(props);
         }
     }
@@ -871,121 +766,97 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public class EmailModel
+
+    @ActionNames("getVirologyResultsFromFile")
+    @RequiresNoPermission()
+    public class GetVirologyResultsFromFileAction extends ReadOnlyApiAction<ConvertExcelToJSONForm>
     {
-        public HashMap<String, Map<String, String>> data = new HashMap<>();
-
-        public String getName()
+        public final static String VIROLOGY_RESULT_UPLOAD_FOLDER = "VirologyResultsUploadFolder";
+        @Override
+        public ApiResponse execute(ConvertExcelToJSONForm form, BindException errors) throws IOException, InvalidFormatException
         {
-            return "Jon";
-        }
 
-        public java.lang.Void add(String area, String room, String ob)
-        {
-            Map areaMap = data.get(area);
-            if (areaMap == null)
+            Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
+            ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
+            JSONArray newArr = new JSONArray();
+            JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
+            JSONArray header = (JSONArray) ja.get(0);
+            for (int i = 1; i < ja.length(); i ++)
             {
-                areaMap = new HashMap<>();
-                data.put(area, areaMap);
+                JSONObject jo = new JSONObject();
+                JSONArray jai = (JSONArray) ja.get(i);
+
+                for (int j = 0; j < header.length(); j++){
+                    String label = (String) header.get(j);
+                    if ("date".equals(label.trim().toLowerCase()) && !(jai.get(j) instanceof Date))
+                    {
+                        throw new ApiUsageException("Bad date format. Set the date column format to 'Date'.");
+                    }
+                    jo.put(label.trim(), jai.get(j));
+                }
+                newArr.put(jo);
+
             }
-
-            areaMap.put(room, ob);
-            return null;
-        }
-
-        public java.lang.Void populateData()
-        {
-            this.add("a", "a142", "r12900");
-            this.add("a", "a142", "r12905");
-            this.add("a", "a144", "r12904");
-            this.add("b", "b12", "r12903");
-            return null;
-        }
-    }
-
-    @RequiresNoPermission()
-    public class ExampleEmailAction extends MutatingApiAction<EmailForm>
-    {
-        @Override
-        public ApiResponse execute(EmailForm form, BindException errors) throws Exception
-        {
-            EmailModel model = new EmailModel();
-            model.populateData();
-            String name = form.getName();
-            if (name == null)
-            {
-                throw new Exception("You must supply a JSP template name.");
-            }
-            WNPRC_EHREmail<EmailModel> email = new WNPRC_EHREmail<>(form.getName());
-            String emailContents = email.renderEmail(model);
-
-            HashMap<String, String> props = new HashMap<>();
-            props.put("text", emailContents);
-
-            return new ApiSimpleResponse(props);
-        }
-    }
-
-    @ActionNames("listEmails")
-    @RequiresNoPermission()
-    public class ListEmailsAction extends ReadOnlyApiAction<EmailServerForm>
-    {
-        @Override
-        public ApiResponse execute(EmailServerForm form, BindException errors) throws Exception
-        {
-            return new ApiSimpleResponse(form.getEmailServer(getUser(), getContainer()).getInboxMessages());
-        }
-    }
-
-    @ActionNames("getVirologyResultsFromEmail")
-    @RequiresNoPermission()
-    public class GetVirologyResultsFromEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
-    {
-        @Override
-        public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
-        {
             JSONObject json = new JSONObject();
-
-            JSONArray rows = form.getEmailServer(getUser(), getContainer()).getExcelDataFromMessage(form.getMessageIdentifier());
-            json.put("rows", rows);
-
+            json.put("rows", newArr);
             return new ApiSimpleResponse(json);
         }
     }
 
-    @ActionNames("deleteEmail")
+    @ActionNames("previewExcelFile")
     @RequiresNoPermission()
-    public class deleteEmailAction extends MutatingApiAction<VirologyResultsForm>
+    public class previewExcelAction extends ReadOnlyApiAction<ConvertExcelToJSONForm>
     {
+        public final static String VIROLOGY_RESULT_UPLOAD_FOLDER = "VirologyResultsUploadFolder";
         @Override
-        public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
+        public ApiResponse execute(ConvertExcelToJSONForm form, BindException errors) throws IOException, InvalidFormatException
         {
+
+            Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
+            ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
+            JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
+            StringBuilder sb = new StringBuilder();
+            sb.append("<style> thead { font-weight: bold } table { border-collapse: collapse; } th, td {border: 1px solid black; padding: 5px; } </style>");
+            sb.append("<table><thead><tr>");
+            JSONArray header = (JSONArray) ja.get(0);
+            for (int j = 0; j < header.length(); j++)
+            {
+                sb.append("<th>");
+                String label = (String) header.get(j);
+                sb.append(label.trim());
+                sb.append("</th>");
+            }
+            sb.append("</tr></thead><tbody>");
+            int previewLength = (ja.length() >= 10) ? 10 : ja.length();
+            for (int i = 1; i < previewLength; i ++)
+            {
+                sb.append("<tr>");
+                JSONArray jai = (JSONArray) ja.get(i);
+                for (int k = 0; k < jai.length(); k++)
+                {
+                    sb.append("<td>");
+                    String headerLabel = (String) header.get(k);
+                    if ("date".equals(headerLabel.trim().toLowerCase()) && !(jai.get(k) instanceof Date))
+                    {
+                        sb.append("<span style=\"color:red\" id=\"bad-date-preview-err\">Bad date format. Set the date column format to 'Date'.</span>");
+                    }
+                    else if (jai.get(k) instanceof Date)
+                    {
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                        sb.append(formatter.format(jai.get(k)));
+                    } else
+                    {
+                        sb.append(jai.get(k));
+                    }
+                    sb.append("</td>");
+                }
+                sb.append("</tr>");
+            }
+            sb.append("</tbody></table>");
             JSONObject json = new JSONObject();
-
-            form.getEmailServer(getUser(), getContainer()).deleteMessage(form.getMessageIdentifier());
-
-            return new ApiSimpleResponse(json);
-        }
-    }
-
-    @ActionNames("previewEmailExcelAttachment")
-    @RequiresNoPermission()
-    public class previewEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
-    {
-        @Override
-        public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
-        {
-            JSONObject json = new JSONObject();
-
-            JSONArray rows = form.getEmailServer(getUser(), getContainer()).getExcelPreviewData(form.getMessageIdentifier());
-            json.put("rows", rows);
-
-            JSONObject email = form.getEmailServer(getUser(), getContainer()).getInboxMessage(form.getMessageIdentifier());
-            json.put("emaildata", email);
-
-            WNPRC_EHREmail<JSONObject> tablePreview = new WNPRC_EHREmail<>("/org/labkey/wnprc_ehr/email/ExcelPreview.jsp");
-
-            json.put("html", tablePreview.renderEmail(json));
+            json.put("htmlContent", sb);
             return new ApiSimpleResponse(json);
         }
     }
@@ -1465,6 +1336,8 @@ public class WNPRC_EHRController extends SpringActionController
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
             formType = formType != null ? formType.toLowerCase() : null;
 
+            //TODO: change the switch statement to use form_framework_types instread of hard coding the names of the new forms
+
             switch (formType)
             {
 
@@ -1482,6 +1355,10 @@ public class WNPRC_EHRController extends SpringActionController
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "necropsy":
                 case "breeding encounter":
+                case "enter water orders":
+                case "enter lab water":
+                case "enter treatments - water":
+                case "enter water daily amount":
                 case "research ultrasounds":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));
@@ -2194,5 +2071,73 @@ public class WNPRC_EHRController extends SpringActionController
         rs.close();
         return woRows;
 
+    }
+
+    /* TODO: This is an API to clean up an inconsistency in the performed by column of study.obs dataset. Once the
+     underlying issue is resolved, this API can be deleted.
+     */
+    @RequiresPermission(AdminPermission.class)
+    public class CorrectObsUserIdsAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            DbSchema studySchema = StudySchema.getInstance().getSchema();
+            Dataset obsDataset = StudyService.get().getStudy(getContainer()).getDatasetByName("obs");
+//            TableInfo obsTable = studySchema.getTable("obs");
+
+            if (null == obsDataset)
+            {
+                errors.reject(ERROR_MSG, "study.obs dataset not found. Ensure you are in the right folder.");
+                return false;
+            }
+
+            Domain obsDomain = obsDataset.getTableInfo(getUser()).getDomain();
+            if (null == obsDomain)
+            {
+                errors.reject(ERROR_MSG, "study.obs domain not found.");
+                return false;
+            }
+
+            SQLFragment sql = new SQLFragment("UPDATE studydataset.").append(obsDomain.getStorageTableName()).append(" o SET performedBy = s.performedBy FROM (\n ")
+                    .append("SELECT ob.lsid, COALESCE(ud.displayname, ob.performedBy) as performedBy FROM ").append(obsDataset.getTableInfo(getUser()), "ob").append("\n")
+                    .append("LEFT JOIN ").append(CoreSchema.getInstance().getTableInfoUsersData(),"ud").append(" ON CAST(ud.userid AS VARCHAR) = ob.performedBy\n")
+                    .append(") s WHERE s.lsid = o.lsid");
+
+            new SqlExecutor(studySchema).execute(sql);
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            return response;
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class CorrectEHRCageObs extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+
+            UserSchema us = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr");
+            TableInfo ti = us.getTable("cage_observations");
+
+            if (null == ti)
+            {
+                errors.reject(ERROR_MSG, "ehr.cage_observations dataset not found. Ensure you are in the right folder.");
+                return false;
+            }
+
+            SQLFragment sql = new SQLFragment("UPDATE ehr.cage_observations o SET userid = s.userid FROM (\n ")
+                    .append("SELECT ob.objectid, COALESCE(ud.displayname, ob.userid) as userid FROM ehr.cage_observations ob").append("\n")
+                    .append("LEFT JOIN ").append(CoreSchema.getInstance().getTableInfoUsersData(),"ud").append(" ON CAST(ud.userid AS VARCHAR) = ob.userid\n")
+                    .append(") s WHERE s.objectid = o.objectid ");
+
+            new SqlExecutor(us.getDbSchema()).execute(sql);
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            return response;
+        }
     }
 }

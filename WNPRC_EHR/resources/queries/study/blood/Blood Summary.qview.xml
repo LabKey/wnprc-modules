@@ -35,7 +35,7 @@
        </column>
        <column name="BloodRemaining/MaxBlood">
             <properties>
-                <property name="columnTitle" value="Max Allowable Blood At Time"/>
+                <property name="columnTitle" value="20% Volume By Weight"/>
             </properties>
        </column>
        <column name="BloodRemaining/AvailBlood">

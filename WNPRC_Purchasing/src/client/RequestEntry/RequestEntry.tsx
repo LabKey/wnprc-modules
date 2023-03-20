@@ -249,7 +249,7 @@ export const App: FC = memo(() => {
             setLineItems(lineItemArray);
             setIsDirty(true);
 
-            if (rowIdToDelete) {
+            if (rowIdToDelete && !isReorder) {
                 const updatedRowsToDelete = produce(lineItemRowsToDelete, (draft: Draft<number[]>) => {
                     draft.push(rowIdToDelete);
                 });

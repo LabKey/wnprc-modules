@@ -1,6 +1,6 @@
 const path = require('path');
 
-let breedingConfig = function wp(env){
+let breedingConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
@@ -38,6 +38,7 @@ let testConfig = function wp(env) {
             jquery: 'jQuery',
             urijs: 'URI',
         },
+        mode: process.env.NODE_ENV,
         module: {
             rules: [
                 {
@@ -139,6 +140,7 @@ let researchUltrasoundsConfig = function wp(env) {
             jquery: 'jQuery',
             urijs: 'URI',
         },
+        mode: process.env.NODE_ENV,
         module: {
             rules: [
                 {loader: 'ts-loader', test: /\.tsx?$/},

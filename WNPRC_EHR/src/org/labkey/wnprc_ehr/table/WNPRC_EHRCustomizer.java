@@ -15,7 +15,8 @@
  */
 package org.labkey.wnprc_ehr.table;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
@@ -67,7 +68,7 @@ import java.util.List;
  */
 public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 {
-    protected static final Logger _log = Logger.getLogger(WNPRC_EHRCustomizer.class);
+    protected static final Logger _log = LogManager.getLogger(WNPRC_EHRCustomizer.class);
     public WNPRC_EHRCustomizer()
     {
 
@@ -223,12 +224,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         {
                             super.renderGridCellContents(ctx, out);
                         }
-                    }
-
-                    @Override
-                    public Object getDisplayValue(RenderContext ctx)
-                    {
-                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
                     }
                 });
             }

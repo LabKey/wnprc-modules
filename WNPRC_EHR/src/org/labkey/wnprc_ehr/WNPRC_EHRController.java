@@ -16,12 +16,11 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.api.client.http.FileContent;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
-import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -153,7 +152,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class WNPRC_EHRController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_EHRController.class);
-    private static Logger _log = Logger.getLogger(WNPRC_EHRController.class);
+    private static Logger _log = LogManager.getLogger(WNPRC_EHRController.class);
 
     public WNPRC_EHRController()
     {

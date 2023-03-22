@@ -1,6 +1,7 @@
 package org.labkey.selfregistration;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.*;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -58,7 +59,7 @@ public class SelfRegistrationController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(SelfRegistrationController.class);
     public static final String NAME = "selfregistration";
-    protected static final Logger _log = Logger.getLogger(SelfRegistrationController.class);
+    protected static final Logger _log = LogManager.getLogger(SelfRegistrationController.class);
 
     public SelfRegistrationController()
     {

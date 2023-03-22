@@ -30,7 +30,7 @@
     "react-dom": "16.14.0",
     "react-select": "3.2.0",
     "react-tabs": "2.3.0",
-    "@labkey/api": "1.0.0",
+    "@labkey/api": "1.10.0",
     "rsvp": "~3.3.0",
     "typescript": "^3.8.3",
     "ts-loader": "^6.2.2",

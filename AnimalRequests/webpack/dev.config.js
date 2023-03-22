@@ -16,7 +16,7 @@ module.exports = {
     },
 
     output: {
-        path: path.resolve(__dirname, '../resources/web/animalrequests/app/'),
+        path: path.resolve(__dirname, '../resources/web/AnimalRequests/gen/'),
         publicPath: 'http://localhost:3000/',
         filename: '[name].js'
     },

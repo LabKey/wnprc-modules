@@ -1,11 +1,11 @@
-import {TaskValuesType} from "../org/labkey/wnprc_ehr/pages/typings/main";
+import { TaskValuesType } from '../watermonitoring/typings/main';
+import { ActionURL, Filter, Query } from '@labkey/api';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 interface jsonDataType {
   commands: Array<any>;
 }
-import {Query,ActionURL,Filter} from '@labkey/api';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 export const groupCommands = (values: Array<any>) => {
   return values.reduce((acc, item) => {

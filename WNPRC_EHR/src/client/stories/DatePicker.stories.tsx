@@ -43,7 +43,7 @@ export const ToStorybook = () => {
             id="date-id"
             onFocus={()=> {console.log("Focused!")}}
             onChange={handleDateChange}
-            customInput={<DateInput value={date} opendate={openDatepicker} />}
+            customInput={<DateInput opendate={openDatepicker} />}
         />
     )
 };

@@ -47,8 +47,7 @@ module.exports = {
     },
 
     output: {
-        path: path.resolve(__dirname, '../resources/web/animalrequests/gen/app/'),
-        //path: path.resolve(__dirname, '../../WNPRC_EHR/resources/web/wnprc_ehr/reactjs/animalrequests/'),
+        path: path.resolve(__dirname, '../resources/web/AnimalRequests/gen/'),
         publicPath: './', // allows context path to resolve in both js/css
         filename: "[name].js"
     },

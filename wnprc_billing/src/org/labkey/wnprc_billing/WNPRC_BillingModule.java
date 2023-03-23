@@ -39,6 +39,7 @@ import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 import org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer;
+import org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin;
 
 import java.util.Collection;
 import java.util.Collections;

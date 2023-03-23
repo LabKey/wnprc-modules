@@ -8,30 +8,33 @@ dependencies {
     implementation project("${project.parent.path}:DBUtils")
     implementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     implementation "javax.servlet:jsp-api:2.0"
+
     BuildUtils.addExternalDependency(
-            project,
-            new ExternalDependency(
-                    "org.jooq:jooq:3.8.4",
-                    "jOOQ",
-                    "jOOQ.org",
-                    "https://www.jooq.org/",
-                    ExternalDependency.APACHE_2_LICENSE_NAME,
-                    ExternalDependency.APACHE_2_LICENSE_URL,
-                    "Database-mapping for Java"
-            )
+        project,
+        new ExternalDependency(
+            "org.apache.pdfbox:pdfbox:${pdfboxVersion}",
+            "Apache PDFBox",
+            "Apache",
+            "http://svn.apache.org/repos/asf/pdfbox/trunk/",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Generates and manipulates PDFs"
+        )
     )
+
     BuildUtils.addExternalDependency(
-            project,
-            new ExternalDependency(
-                    "org.apache.pdfbox:pdfbox:${pdfboxVersion}",
-                    "Apache PDFBox",
-                    "Apache",
-                    "http://svn.apache.org/repos/asf/pdfbox/trunk/",
-                    ExternalDependency.APACHE_2_LICENSE_NAME,
-                    ExternalDependency.APACHE_2_LICENSE_URL,
-                    "Generates and manipulates PDFs"
-            )
+        project,
+        new ExternalDependency(
+            "org.jooq:jooq:${jooqVersion}",
+            "jOOQ",
+            "jOOQ.org",
+            "https://www.jooq.org/",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Database-mapping for Java"
+        )
     )
+
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     jspImplementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"))
 

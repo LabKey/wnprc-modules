@@ -1,7 +1,7 @@
 package org.labkey.wnprc_compliance;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.Marshal;

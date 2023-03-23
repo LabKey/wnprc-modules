@@ -172,16 +172,12 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
                     htmlTable = createTable(spiWaters, "SPI");
                     msg.append(htmlTable);
                 }
-
-
             }
             msg.append("<br><a href='" + getExecuteQueryUrl(c,"study","waterScheduleCoalesced","Scheduled")+"&query.param.StartDate="+roundedMax+"&query.param.NumDays=" + 1 +
                     "&query.dateOrdered~lte="+currentTime+ "&query.dateOrdered~dategte="+roundedMax+"'>Click here to view schedule waters</a></p>");
         }
-
-
-
     }
+
     private StringBuilder createTable (List<Map<String,Object>> listOfDBObjects, String assignedTo){
         StringBuilder returnTable = new StringBuilder();
         returnTable.append("<br><strong>"+ assignedTo +"</strong>");

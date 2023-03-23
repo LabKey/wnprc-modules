@@ -1,4 +1,5 @@
 import org.labkey.gradle.util.BuildUtils
+import org.labkey.gradle.util.ExternalDependency
 
 dependencies {
     implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
@@ -8,19 +9,123 @@ dependencies {
     implementation project(path: "${project.parent.path}:DBUtils", configuration: "apiJarFile")
     implementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     implementation project(path: "${project.parent.path}:GoogleDrive", configuration: "apiJarFile")
-    external "joda-time:joda-time:${jodaTimeVersion}"
-    external "org.jsoup:jsoup:1.13.1"
-    external "org.reflections:reflections:0.9.10"
 
-    external "com.google.api-client:google-api-client:${googleApiClientVersion}"
-    external "com.google.apis:google-api-services-calendar:${googleApiServicesCalendarVersion}"
-    external "com.google.http-client:google-http-client-gson:${googleHttpClientVersion}"
-    external "com.microsoft.ews-java-api:ews-java-api:2.0"
-    external ("com.google.auth:google-auth-library-oauth2-http:0.19.0") {
-        // Avoid conflict with version pulled in by :platform:api and :platform:internal
-        exclude group: "com.google.code.findbugs", module: "jsr305"
-    }
-    external "org.apache.commons:commons-text:1.9"
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "org.apache.commons:commons-text:1.10.0",
+            "Commons Text",
+            "Apache",
+            "https://commons.apache.org/proper/commons-text/",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "String algorithms",
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "com.microsoft.ews-java-api:ews-java-api:2.0",
+            "Exchange Web Services (EWS) Java API",
+            "EWS Java API",
+            "https://github.com/OfficeDev/ews-java-api",
+            ExternalDependency.MIT_LICENSE_NAME,
+            ExternalDependency.MIT_LICENSE_URL,
+            "API for interacting with Exchange calendars"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "com.google.api-client:google-api-client:${googleApiClientVersion}",
+            "Google API Client Library for Java",
+            "Google",
+            "https://developers.google.com/api-client-library/java",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Library to interact with Google APIs"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "com.google.apis:google-api-services-calendar:${googleApiServicesCalendarVersion}",
+            "Google Calendar API Client Library for Java",
+            "Google",
+            "https://github.com/googleapis/google-api-java-client-services/tree/master/clients/google-api-services-calendar/v3",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Library for interacting with Google Calendars in Java"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "com.google.auth:google-auth-library-oauth2-http:1.10.0",
+            "Google Auth Library",
+            "Google",
+            "https://github.com/googleapis/google-auth-library-java",
+            "BSD 3-Clause \"New\" or \"Revised\" License",
+            "https://github.com/googleapis/google-auth-library-java/blob/main/LICENSE",
+            "Contains a wide variety of credentials as well as utility methods to create them and to get Application Default Credentials"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "com.google.http-client:google-http-client:${googleHttpClientVersion}",
+            "GSON extensions to the Google HTTP Client Library for Java",
+            "Google",
+            "https://github.com/googleapis/google-http-java-client/tree/master/google-http-client-gson",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "A flexible, efficient, and powerful Java library for accessing any resource on the web via HTTP"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "joda-time:joda-time:${jodaTimeVersion}",
+            "Joda-Time",
+            "Joda.org",
+            "http://www.joda.org/joda-time/",
+            ExternalDependency.APACHE_2_LICENSE_NAME,
+            ExternalDependency.APACHE_2_LICENSE_URL,
+            "Tools for dealing with dates/times in Java"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "org.jsoup:jsoup:1.13.1",
+            "jsoup: Java HTML Parser",
+            "jsoup",
+            "https://github.com/jhy/jsoup",
+            ExternalDependency.MIT_LICENSE_NAME,
+            ExternalDependency.MIT_LICENSE_URL,
+            "Tools for parsing and manipulating HTML and CSS using the DOM"
+        )
+    )
+
+    BuildUtils.addExternalDependency(
+        project,
+        new ExternalDependency(
+            "org.reflections:reflections:0.9.10",
+            "Reflections",
+            "Reflections",
+            "https://github.com/ronmamo/reflections",
+            "WTFPL",
+            "http://www.wtfpl.net/about/",
+            "Runtime analysis of Java classes and packages"
+        )
+    )
 
     jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
@@ -43,10 +148,6 @@ configurations.all {
     Configuration config ->
         resolutionStrategy {
             force "org.javassist:javassist:${javassistVersion}"
-
-            // Conflicts with versions in 'GoogleDrive' module
-            force "com.google.http-client:google-http-client-jackson2:${googleHttpClientVersion}"
-            force "com.google.http-client:google-http-client:${googleHttpClientVersion}"
         }
 }
 

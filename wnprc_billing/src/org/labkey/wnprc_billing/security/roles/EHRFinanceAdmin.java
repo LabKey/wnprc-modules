@@ -5,7 +5,8 @@ import org.labkey.wnprc_billing.security.permissions.EHRFinanceAdminPermission;
 
 public class EHRFinanceAdmin extends AbstractRole {
     public EHRFinanceAdmin() {
-        super(name: "Test", description: "test", EHRFinanceAdminPermission.class
-        );
+        super("EHR Finance Admin",
+                "This role allows users to modify the current program income account.",
+                EHRFinanceAdminPermission.class);
     }
 }

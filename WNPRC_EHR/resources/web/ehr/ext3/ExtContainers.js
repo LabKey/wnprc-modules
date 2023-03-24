@@ -1869,7 +1869,7 @@ EHR.ext.BloodSelectorPanel = Ext.extend(Ext.Panel, {
         LABKEY.Query.selectRows({
             schemaName: 'study',
             queryName: 'BloodSchedule',
-            sort: 'Id/curLocation/Room,Id',
+            sort: 'Id/curLocation/location,Id',
             columns: 'lsid,Id,date',
             filterArray: filterArray,
             scope: this,

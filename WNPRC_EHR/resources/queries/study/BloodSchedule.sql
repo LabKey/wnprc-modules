@@ -7,6 +7,7 @@ SELECT
 b.lsid,
 b.id,
 b.date,
+b.id.curLocation.location,
 cast(b.date as DATE) as dateOnly,
 b.daterequested,
 b.project,

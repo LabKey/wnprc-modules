@@ -88,6 +88,9 @@
                 }
                 let row = data.rows[0].data;
                 displayAnimalRequest(row);
+            },
+            failure: function (err) {
+                $('#render-area').html('<p>User does not have permission to view this request.</p>');
             }
         }
 

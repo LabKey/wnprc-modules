@@ -81,7 +81,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     endDate.setHours(0,0,0,0);
 
     //This does not get checked when the dataset if updated, only when using Ext4 form
-    if (rowDate.getTime() >= endDate.getTime()){
+    if (rowDate.getTime() > endDate.getTime()){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
 

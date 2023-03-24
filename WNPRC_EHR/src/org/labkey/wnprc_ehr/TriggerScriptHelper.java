@@ -1333,13 +1333,13 @@ public class TriggerScriptHelper {
 
             //Look for any orders that overlap in the waterScheduleCoalesced table
             TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
             filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
             filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
             //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","Id", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1479,7 +1479,7 @@ public class TriggerScriptHelper {
                             String htmlDate = simpleDateFormat.format(waterRecord.getDate());
 
 
-                            returnErrors.put("field", "animalId");
+                            returnErrors.put("field", "Id");
                             returnErrors.put("severity", "ERROR");
                             //returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
                             returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
@@ -1645,7 +1645,7 @@ public class TriggerScriptHelper {
 
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterGivenFromDatabase = new TableSelector(waterGiven, PageFlowUtil.set("taskId", "objectid", "lsid", "animalId", "date", "project", "assignedTo", "volume"), filterWaterGiven, null);
+            TableSelector waterGivenFromDatabase = new TableSelector(waterGiven, PageFlowUtil.set("taskId", "objectid", "lsid", "Id", "date", "project", "assignedTo", "volume"), filterWaterGiven, null);
 
             waterGivenRecords.addAll(waterGivenFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1676,13 +1676,13 @@ public class TriggerScriptHelper {
 
             //Look for any orders that overlap in the waterScheduleCoalesced table
             TableInfo waterSchedule = getTableInfo("study", "waterScheduleCoalesced");
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
             filter.addCondition(FieldKey.fromString("date"), startDate.getTime(), CompareType.DATE_EQUAL);
             filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
             filter.addCondition(FieldKey.fromString("waterSource"), "regulated");
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set("taskId", "objectid", "lsid", "animalId", "date", "startDateCoalesced", "endDateCoalescedFuture", "dataSource", "project", "frequency", "assignedTo", "volume"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set("taskId", "objectid", "lsid", "Id", "date", "startDateCoalesced", "endDateCoalescedFuture", "dataSource", "project", "frequency", "assignedTo", "volume"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1693,7 +1693,7 @@ public class TriggerScriptHelper {
                 if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId()))
                 {
 
-                    if (waterRecord.getAnimalId().equals(animalId))
+                    if (waterRecord.getId().equals(animalId))
                     {
                         waterScheduledFromServer += waterRecord.getVolume();
                     }
@@ -1859,7 +1859,7 @@ public class TriggerScriptHelper {
         private String objectId;
         private String waterOrderObjectId;
         private String lsid;
-        private String animalId;
+        private String Id;
         private Date date;
         private Date startDateCoalesced;
         private Date endDateCoalescedFuture;
@@ -1889,9 +1889,9 @@ public class TriggerScriptHelper {
             this.lsid = lsid;
         }
 
-        public void setAnimalId(String animalId)
+        public void setId(String Id)
         {
-            this.animalId = animalId;
+            this.Id = Id;
         }
 
         public void setDate(Date date)
@@ -1953,9 +1953,9 @@ public class TriggerScriptHelper {
             return lsid;
         }
 
-        public String getAnimalId()
+        public String getId()
         {
-            return animalId;
+            return Id;
         }
 
         public Date getDate()
@@ -2006,8 +2006,8 @@ public class TriggerScriptHelper {
                     setTaskId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("objectId") && prop.getValue() instanceof String)
                     setObjectId((String)prop.getValue());
-                else if (prop.getKey().equalsIgnoreCase("animalId") && prop.getValue() instanceof String)
-                    setAnimalId((String)prop.getValue());
+                else if (prop.getKey().equalsIgnoreCase("Id") && prop.getValue() instanceof String)
+                    setId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("startDate") && prop.getValue() instanceof Date)
                     setStartDateCoalesced((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("endDate") && prop.getValue() instanceof Date)

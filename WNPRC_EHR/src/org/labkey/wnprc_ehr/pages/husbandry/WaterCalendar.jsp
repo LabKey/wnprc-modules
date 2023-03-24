@@ -235,7 +235,7 @@
                     <dl class="dl-horizontal">
                         <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
                         <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
-                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalId}}</a></dd>
+                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
                         <dt>Location:           </dt> <dd>{{location}}</dd>
                         <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
                         <dt>Volume:             </dt> <dd>{{volume}}</dd>
@@ -296,7 +296,7 @@
                     <dl class="dl-horizontal">
                         <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
                         <dt>Date:               </dt> <dd>{{displayDate}}</dd>
-                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalId}}</a></dd>
+                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
                         <dt>Current Location:   </dt> <dd>{{location}}</dd>
                         <dt>Total Volume:       </dt> <dd>{{volume}} ml</dd>
                         <dt>ml Per Kg:          </dt> <dd>{{mlsPerKg}}</dd>
@@ -627,14 +627,14 @@
                                         }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + ' ' + volume,
+                                            title: row.Id + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
                                             groupId : groupId(row),
                                             rawRowData: row,
                                             textColor: '#000000',
                                             //editable: true,
-                                            description: 'Water for animal ' + row.animalId
+                                            description: 'Water for animal ' + row.Id
                                         };
 
                                         if (row.assignedToCoalesced in husbandryAssignmentLookup) {
@@ -675,14 +675,14 @@
 
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + ' ' + volume,
+                                            title: row.Id + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
                                             groupId : groupId(row),
                                             rawRowData: row,
                                             //editable: true,
-                                            description: 'Water for animal ' + row.animalId
+                                            description: 'Water for animal ' + row.Id
                                         };
 
                                         if (row.assignedToCoalesced in husbandryAssignmentLookup) {
@@ -718,7 +718,7 @@
                                         }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + parsedTotalWater,
+                                            title: row.Id + " Total: " + parsedTotalWater,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
@@ -745,7 +745,7 @@
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
                             "TotalWater~isnonblank":true,
-                            "animalId~in": $animalId
+                            "Id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
@@ -756,7 +756,7 @@
                                     }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + parsedTotalWater,
+                                            title: row.Id + " Total: " + parsedTotalWater,
                                             start: new Date(row.date),
                                             textColor: '#000000',
                                             allDay: true,
@@ -956,7 +956,7 @@
                 waterOrderObjectId:         ko.observable(),
                 taskid:                     ko.observable(),
                 projectCoalesced:           ko.observable(),
-                animalId:                   ko.observable(),
+                Id:                         ko.observable(),
                 date:                       ko.observable(),
                 location:                   ko.observable(),
                 volume:                     ko.observable(),
@@ -1015,7 +1015,7 @@
                         lsid:               waterOrder.lsid,
                         taskId:             waterOrder.taskid,
                         objectId:           waterOrder.objectIdCoalesced,
-                        animalId:           waterOrder.animalId,
+                        animalId:           waterOrder.Id,
                         endDate:            waterOrder.date,
                         dataSource:         waterOrder.dataSource,
                         skipWaterRegulationCheck:     true
@@ -1101,7 +1101,7 @@
                         lsid:               waterOrder.lsid,
                         taskId:             waterOrder.taskid,
                         objectId:           waterOrder.objectIdCoalesced,
-                        animalId:           waterOrder.animalId,
+                        animalId:           waterOrder.Id,
                         endDate:            waterOrder.date,
                         dataSource:         waterOrder.dataSource
 
@@ -1196,7 +1196,7 @@
                         lsid:                   waterOrder.lsid,
                         taskId:                 waterOrder.taskid,
                         objectId:               waterOrder.objectIdCoalesced,
-                        animalId:               waterOrder.animalId,
+                        animalId:               waterOrder.Id,
                         endDate:                waterOrder.date,
                         dataSource:             waterOrder.dataSource,
                         project:                waterOrder.projectCoalesced,
@@ -1259,7 +1259,7 @@
         });
 
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {
-            var animalId = WebUtils.VM.taskDetails.animalId();
+            var animalId = WebUtils.VM.taskDetails.Id();
 
             return LABKEY.ActionURL.buildURL('ehr', 'participantView', null, {
                 participantId: animalId
@@ -1278,7 +1278,7 @@
         //These records are not supposed to be change by the end users when adding or updating
         //a waterAmount record.
         WebUtils.VM.form.animalIdForm = ko.pureComputed(function(){
-            return WebUtils.VM.taskDetails.animalId();
+            return WebUtils.VM.taskDetails.Id();
         });
 
         WebUtils.VM.form.dataSourceForm = ko.pureComputed(function(){
@@ -1542,13 +1542,13 @@
 
         if (isSuperUser || isAnimalCare){
             if (animalId){
-                configObject["animalid~in"]= animalId;
+                configObject["Id~in"]= animalId;
             }
         }
         if (allowProjects !== ""){
             configObject["projectCoalesced~in"] = allowProjects;
             if (animalId){
-                configObject["animalid~in"] = animalId;
+                configObject["Id~in"] = animalId;
             }
         }
         return configObject;

@@ -152,7 +152,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     {
         //create EHR folder with sample queue, etc
         _containerHelper.createProject(getProjectName(), type);
-        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing"));
+        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
         _userHelper.createUser(ADMIN_USER);
         _apiPermissionsHelper.setUserPermissions(ADMIN_USER, "Folder Administrator");
         // Set up the module properties
@@ -179,12 +179,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
             _containerHelper.deleteProject(getProjectNameRSEHR());
         }
         _containerHelper.createProject(getProjectNameRSEHR(),"Collaboration");
-        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study", "EHR"));
+        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study", "EHR", "DataIntegration"));
         //create study folder
         //just import study to root and tie down perms later
         //_containerHelper.createSubfolder(getProjectNameRSEHR(), RSEHR_PRIVATE_FOLDER_NAME, "Collaboration");
         //_containerHelper.enableModules(Arrays.asList("Dumbster", "Study"));
-        importStudyFromPath(1);
+        importFolderFromPath(1);
         setupNotificationService();
 
         PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
@@ -197,6 +197,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         //runs grant account ETL
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
+        _rconnHelper.goToManageRemoteConnections();
         _rconnHelper.createConnection(EHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(),getProjectName());
         ETLHelper _etlHelperRSEHR = new ETLHelper(this, getProjectNameRSEHR());
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
@@ -204,6 +205,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         // set up ETL connection for EHR to RSEHR
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
+        _rconnHelper.goToManageRemoteConnections();
         _rconnHelper.createConnection(RSEHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(), getProjectNameRSEHR());
 
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
@@ -242,28 +244,24 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         clickButton("Save & Close");
     }
 
-    protected void importStudyFromPath(int jobCount)
+    protected void importFolderFromPath(int jobCount)
     {
         File path = new File(TestFileUtils.getLabKeyRoot(), getModulePath() + "/resources/referenceStudy");
         setPipelineRoot(path.getPath());
 
-        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectNameRSEHR() + "/begin.view");
+        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectNameRSEHR()  + "/begin.view");
         clickButton("Process and Import Data", defaultWaitForPage);
 
         _fileBrowserHelper.expandFileBrowserRootNode();
-        _fileBrowserHelper.checkFileBrowserFileCheckbox("study.xml");
-
-        if (isTextPresent("Reload Study"))
-            _fileBrowserHelper.selectImportDataAction("Reload Study");
-        else
-            _fileBrowserHelper.selectImportDataAction("Import Study");
+        _fileBrowserHelper.checkFileBrowserFileCheckbox("folder.xml");
+        _fileBrowserHelper.selectImportDataAction("Import Folder");
 
         Locator cb = Locator.checkboxByName("validateQueries");
         waitForElement(cb);
         uncheckCheckbox(cb);
 
         clickButton("Start Import"); // Validate queries page
-        waitForPipelineJobsToComplete(jobCount, "Study import", false, MAX_WAIT_SECONDS * 2500);
+        waitForPipelineJobsToComplete(jobCount, "Folder import", false, MAX_WAIT_SECONDS * 2500);
 
         goToManageStudy();
         clickAndWait(Locator.linkWithText("Manage Security"));
@@ -272,7 +270,6 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         clickButton("Import");
 
     }
-
     protected String getModuleDirectory()
     {
         return MODULE_NAME;

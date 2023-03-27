@@ -12,6 +12,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
@@ -88,6 +89,8 @@ public class WNPRC_VirologyModule extends SpringModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_virology/datasetButtons.js"), this);
         ViralLoadRSEHRRunner.schedule();;
         FolderTypeManager.get().registerFolderType(this, new WNPRC_VirologyFolderType(this));
+        registerRoles();
+        registerNotifications();
     }
 
     @Override

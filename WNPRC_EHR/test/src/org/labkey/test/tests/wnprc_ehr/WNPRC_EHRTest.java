@@ -1761,7 +1761,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _extHelper.setExtFormElementByLabel("Id:", PROJECT_MEMBER_ID + "\t");
         click(Locator.xpath("//div[./label[normalize-space()='Id:']]//input"));
         waitForElement(Locator.linkWithText(PROJECT_MEMBER_ID), WAIT_FOR_JAVASCRIPT);
-        _helper.setDataEntryField("title", MPR_TASK_TITLE);
+        setFormElement(Locator.name("title"), MPR_TASK_TITLE);
         waitAndClick(Locator.name("title"));
 
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));

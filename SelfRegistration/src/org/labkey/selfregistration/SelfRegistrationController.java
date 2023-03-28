@@ -213,7 +213,8 @@ public class SelfRegistrationController extends SpringActionController
         @Override
         public ApiResponse execute(SelfRegistrationForm form, BindException errors)
         {
-            Container container = ContainerManager.getForPath(form.getContainerPath());
+            String containerPath = ModuleLoader.getInstance().getModule(SelfRegistrationModule.NAME).getModuleProperties().get(SelfRegistrationModule.ISSUE_TRACKER_FOLDER_LOCATION).getEffectiveValue(ContainerManager.getRoot());
+            Container container = ContainerManager.getForPath(containerPath);
             User user = getViewContext().getUser();
             saveIssue(user, container, form);
             return new ApiSimpleResponse();

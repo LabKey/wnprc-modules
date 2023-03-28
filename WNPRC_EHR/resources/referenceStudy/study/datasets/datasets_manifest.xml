@@ -69,6 +69,8 @@
     <dataset name="waterScheduledAnimals" id="6010"/>
     <dataset name="singleGeneralEncounter" id="6011"/>
     <dataset name="chairing" id="6014"/>
+    <dataset name="Cytology Manual Evaluation" id="5012" category="ClinPath" type="Standard"/>
+    <dataset name="Cytology Automated Evaluation" id="5013" category="ClinPath" type="Standard"/>
 
   </datasets>
 </datasets>

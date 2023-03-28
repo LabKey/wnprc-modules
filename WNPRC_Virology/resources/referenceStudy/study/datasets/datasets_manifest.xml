@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasets metaDataFile="datasets_metadata.xml" xmlns="http://labkey.org/study/xml" xmlns:rep="http://labkey.org/data/xml/reportProps">
+  <datasets>
+    <dataset name="viral_loads" id="5080" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+  </datasets>
+</datasets>

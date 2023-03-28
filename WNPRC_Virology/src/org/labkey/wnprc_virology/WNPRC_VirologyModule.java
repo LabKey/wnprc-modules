@@ -70,8 +70,6 @@ public class WNPRC_VirologyModule extends SpringModule
     protected void init()
     {
         addController(WNPRC_VirologyController.NAME, WNPRC_VirologyController.class);
-        registerRoles();
-        registerNotifications();
     }
 
     @Override
@@ -91,6 +89,8 @@ public class WNPRC_VirologyModule extends SpringModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_virology/datasetButtons.js"), this);
         ViralLoadRSEHRRunner.schedule();;
         FolderTypeManager.get().registerFolderType(this, new WNPRC_VirologyFolderType(this));
+        registerRoles();
+        registerNotifications();
     }
 
     @Override

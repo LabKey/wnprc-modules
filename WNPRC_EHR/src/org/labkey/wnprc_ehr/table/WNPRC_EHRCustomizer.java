@@ -1475,7 +1475,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         if (table.getColumn("num_animals_assigned") == null) {
             String num_animals_assigned = "num_animals_assigned";
             TableInfo assignmentTable = getRealTableForDataset(table, "assignment");
-            String theQuery  = "( " +
+
+            if (null != assignmentTable)
+            {
+                String theQuery  = "( " +
                     "(SELECT " +
                     "(CASE WHEN COUNT(*) = 0 " +
                     " THEN null " +
@@ -1485,10 +1488,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
                     ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            if (null != assignmentTable)
-            {
                 ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
                 newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
                 table.addColumn(newCol);

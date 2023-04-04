@@ -56,7 +56,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
 
   const openDatepicker = () => {
     //@ts-ignore
-    calendarEl.setOpen(true);
+    calendarEl.current.setOpen(true);
   };
   const getAnimalInfo = () => {
     if (values.Id.value == "") {
@@ -104,7 +104,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
         </div>
         <div className="col-xs-9">
           <DatePicker
-            ref={(r) => (calendarEl = r)}
+            ref={(r) => (calendarEl.current = r)}
             showTimeSelect
             onChangeRaw={handleRawDateChange}
             dateFormat="yyyy-MM-dd HH:mm"

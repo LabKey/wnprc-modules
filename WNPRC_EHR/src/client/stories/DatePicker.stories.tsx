@@ -12,7 +12,7 @@ export default {
 };
 
 export const ToStorybook = () => {
-    const [date, setDate] = useState(new Date());
+    const [date, setDate] = useState<Date>(new Date());
 
     let calendarEl = useRef(null);
 
@@ -32,7 +32,7 @@ export const ToStorybook = () => {
     };
     return (
         <DatePicker
-            ref={r => (calendarEl = r)}
+            ref={r => (calendarEl.current = r)}
             showTimeSelect
             onChangeRaw={handleRawDateChange}
             dateFormat="yyyy-MM-dd HH:mm"

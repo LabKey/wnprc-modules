@@ -90,7 +90,7 @@
 }
 
 .loading {
-  background-image: url("/_images/ajax-loading.gif");
+  background-image: url("../../../../../../platform/core/webapp/_images/ajax-loading.gif");
   background-size: 25px 25px;
   background-repeat: no-repeat;
   opacity: 0;

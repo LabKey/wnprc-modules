@@ -34,7 +34,7 @@ import Spinner from "../../../components/Spinner";
 import SubmitForReviewModal from "../../components/SubmitForReviewModal";
 import { AppContext } from "../App/ContextProvider";
 import CustomAlert from "../../components/CustomAlert";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {ActionURL, Utils, Security, Filter} from "@labkey/api";
 import {AnimalInfoStates, FormErrorLevels} from "../../../typings/main";
 import { Command, CommandType } from "@labkey/api/dist/labkey/query/Rows";
@@ -404,7 +404,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const wait = (time: number): Promise<any> => {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       let countdown: number = time;
       setInterval(() => {
         setSubmitBoxText("Success! Redirecting in..." + countdown);
@@ -631,7 +631,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           variant="primary"
           className="wnprc-secondary-btn"
           id="edit-batch"
-          onClick={handleShowModal}
+          onClick={() => handleShowModal}
         >
           Bulk Edit
         </Button>
@@ -640,7 +640,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           className="wnprc-secondary-btn"
           id="add-batch"
           disabled={singleEditMode}
-          onClick={handleShowModal}
+          onClick={() => handleShowModal}
         >
           Add Batch
         </Button>

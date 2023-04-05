@@ -7,16 +7,35 @@ import {
     AppContextProvider
 } from '@labkey/components';
 
-import { DefaultGridPanel } from "../components/DefaultGridPanel";
 
-export const ResearchUltrasounds: FC<any> = (props) => {
+import { DefaultGridPanel } from "./DefaultGridPanel";
+
+interface configProps {
+    schemaName: string;
+    queryName: string;
+    formType: string;
+}
+
+/*
+Grid Panel Configuration
+This is the HOC for the default grid panel. This is where the grid panel picks up the schema, query and any other props
+that describe the future grid data. Any customization options on the grid itself is done in the DefaultGridPanel
+component.
+
+@param configProps The properties passed in, usually defining the schema, query, and insert form.
+*/
+export const GridPanelConfig: FC<configProps> = ({
+    schemaName,
+    queryName,
+    formType
+    }) => {
 
     const serverContext = withAppUser(getServerContext());
     const queryConfigs = {
         containersModel: {
-            schemaQuery: new SchemaQuery('study', 'ResearchUltrasoundsInfo'),
+            schemaQuery: new SchemaQuery(schemaName, queryName),
             containerFilter: Query.containerFilter.allFolders,
-            omittedColumns: ['SortOrder','Searchable','Type','Title','ContainerType','Workbook','IdPrefixedName'],
+            omittedColumns: [],
             includeTotalCount: true,
         }
     };
@@ -27,7 +46,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
             <AppContextProvider>
                 <DefaultGridPanel
                     queryConfigs={queryConfigs}
-                    asPanel={true}
+                    formType={formType}
                     autoLoad
                 />
             </AppContextProvider>

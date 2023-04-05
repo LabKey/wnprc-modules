@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: 'breeding',
-        title: 'Breeding',
+        title: 'Pregnancies',
         permission: 'read',
         path: './src/client/breeding'
     },{

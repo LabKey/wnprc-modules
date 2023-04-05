@@ -3,12 +3,16 @@ import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { App } from '@labkey/api';
 
-import {ResearchUltrasounds} from '../research_ultrasounds';
+import { GridPanelConfig } from '../../components/GridPanelConfig';
 
-App.registerApp<any>('breedingWebpart', (target: string) => {
+App.registerApp<any>('researchUltrasoundsWebpart', (target: string) => {
     ReactDOM.render(
         <AppContainer>
-            <ResearchUltrasounds />
+            <GridPanelConfig
+                schemaName = {"study"}
+                queryName = {"ResearchUltrasoundsInfo"}
+                formType = {"Research Ultrasounds"}
+            />
         </AppContainer>,
         document.getElementById(target)
     );

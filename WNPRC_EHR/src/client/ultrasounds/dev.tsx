@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 
 // Main react component
-import { ResearchUltrasounds } from './research_ultrasounds';
+import { GridPanelConfig } from '../components/GridPanelConfig';
 
 // Import stylesheets
 import "../wnprc_ehr.scss";
@@ -11,7 +11,11 @@ import "../wnprc_ehr.scss";
 const render = () => {
     ReactDOM.render(
         <AppContainer>
-            <ResearchUltrasounds />
+            <GridPanelConfig
+                schemaName = {"study"}
+                queryName = {"ResearchUltrasoundsInfo"}
+                formType = {"Research Ultrasounds"}
+            />
         </AppContainer>,
         document.getElementById('app')
     )

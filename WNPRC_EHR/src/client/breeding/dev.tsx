@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 
 // Main react component
-import  {Breeding}  from './breeding';
+import  {GridPanelConfig}  from '../components/GridPanelConfig';
 
 // Import stylesheets
 import '../wnprc_ehr.scss';
@@ -11,8 +11,12 @@ import '../wnprc_ehr.scss';
 const render = () => {
     ReactDOM.render(
         <AppContainer>
-            <Breeding />
-            </AppContainer>,
+            <GridPanelConfig
+                schemaName = {"study"}
+                queryName = {"PregnancyInfo"}
+                formType = {"Pregnancies"}
+            />
+        </AppContainer>,
         document.getElementById('app')
     )
 };

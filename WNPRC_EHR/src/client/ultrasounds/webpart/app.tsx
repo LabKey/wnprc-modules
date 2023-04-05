@@ -2,8 +2,14 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { App } from '@labkey/api';
 
-import {ResearchUltrasounds} from '../research_ultrasounds';
+import { GridPanelConfig } from '../../components/GridPanelConfig';
 
 App.registerApp<any>('breedingWebpart', target => {
-    ReactDOM.render(<ResearchUltrasounds />, document.getElementById(target));
+    ReactDOM.render(
+        <GridPanelConfig
+            schemaName = {"study"}
+            queryName = {"ResearchUltrasoundsInfo"}
+            formType = {"Research Ultrasounds"}
+        />,
+        document.getElementById(target));
 });

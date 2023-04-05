@@ -9,7 +9,7 @@ import {
 
 // Any props you might use will go here
 interface myProps {
-    asPanel?: boolean;
+    formType: string;
 
 }
 
@@ -25,16 +25,23 @@ type Props = myProps & InjectedQueryModels;
 const DefaultGridPanelImpl: FC<Props> = ({
     actions,
     queryModels,
-    asPanel
+    formType
     }) => {
 
     //declare any states here
 
     const onRefreshGrid = () => {
-        //const { queryModels, actions } = props;
+
         const { containersModel } = queryModels;
 
         actions.loadModel(containersModel.id);
+    };
+
+    const onInsert = () => {
+        window.location = LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.ActionURL.getContainer(), {
+            formType: formType,
+            returnUrl: window.location
+        })
     };
 
     // This is an example of a custom button bar element in your GridPanel that can interact with the QueryModel.
@@ -43,6 +50,9 @@ const DefaultGridPanelImpl: FC<Props> = ({
             <div className={'labkey-button-bar'}>
                 <button className={'labkey-button'} onClick={onRefreshGrid}>
                     Refresh Grid
+                </button>
+                <button className={'labkey-button'} onClick={onInsert}>
+                    Insert New
                 </button>
             </div>
 
@@ -56,7 +66,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
             model={containersModel}
             ButtonsComponent={renderGridButtons}
             actions={actions}
-            asPanel={asPanel}
+            asPanel={true}
             showSearchInput={false}
         />
     );

@@ -66,12 +66,14 @@
             <column columnName="rowid"/>
             <column columnName="principalinvestigator">
                 <measure>false</measure>
-                <dimension>true</dimension>
                 <fk>
                     <fkDbSchema>ehr</fkDbSchema>
-                    <fkTable>uniqueProtocolInvestigator</fkTable>
-                    <fkColumnName>inves</fkColumnName>
+                    <fkTable>investigatorsWithName</fkTable>
+                    <fkColumnName>rowid</fkColumnName>
                 </fk>
+            </column>
+            <column columnName="principalinvestigatorold">
+                <description>Old PI field that referenced ehr.uniqueProtocolInvestigator</description>
             </column>
             <column columnName="date"/>
             <column columnName="originneeded">

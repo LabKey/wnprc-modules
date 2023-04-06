@@ -7,7 +7,7 @@ networks:
 services:
 
   postgres:
-    image: postgres:11
+    image: postgres:$POSTGRES_VERSION
     container_name: postgres
     shm_size: 4g
     restart: always
@@ -38,9 +38,12 @@ services:
       TZ: America/Chicago
 
   mailserver:
-    image: wnprcehr/postfix:latest
+    image: wnprcehr/postfix:$POSTFIX_VERSION
     depends_on:
       - "mailcatcher"
+    volumes:
+      - "${NGINX_SERVER_CER_FILE}:/etc/postfix/certs/ehr.pem"
+      - "${NGINX_SERVER_KEY_FILE}:/etc/postfix/certs/ehr.key"
     environment:
       MAIL_SERVER:
       TZ: America/Chicago
@@ -69,8 +72,8 @@ services:
       JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
                   -Dmsql.user=${MSQL_USER} -Dmsql.pass=${MSQL_PASS} -Dmsql.url=\"${MSQL_URL}\" \
                   -Dlabkey.masterEncryptionKey=${LABKEY_MASTER_ENCRYPTION_KEY} \
-		  -Darrow.user=${ARROW_USER} -Darrow.pass=${ARROW_PASS} -Darrow.url=\"${ARROW_URL}\" \
-                  -Dlog4j2.formatMsgNoLookups=true"
+		          -Darrow.user=${ARROW_USER} -Darrow.pass=${ARROW_PASS} -Darrow.url=\"${ARROW_URL}\" \
+                  -Dlog4j2.formatMsgNoLookups=true -Dserver.email.address=${SERVER_EMAIL_ADDRESS}"
       LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
       LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
       LK_BASE_URL: ${LK_BASE_URL}

@@ -84,7 +84,7 @@ public class GoogleDriveController extends SpringActionController {
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
-            JSONObject object = (form.getNewJsonObject() == null) ? new JSONObject() : form.getNewJsonObject();
+            JSONObject object = (form.getJsonObject() == null) ? new JSONObject() : form.getJsonObject();
 
             RegisterServiceAccountForm registerForm = mapper.readValue(object.toString(), RegisterServiceAccountForm.class);
 

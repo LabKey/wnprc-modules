@@ -7,7 +7,7 @@ networks:
 services:
 
   postgres:
-    image: postgres:12
+    image: postgres:$POSTGRES_VERSION
     container_name: postgres
     shm_size: 4g
     restart: always
@@ -38,7 +38,7 @@ services:
       TZ: America/Chicago
 
   mailserver:
-    image: wnprcehr/postfix:22.7
+    image: wnprcehr/postfix:$POSTFIX_VERSION
     depends_on:
       - "mailcatcher"
     volumes:

@@ -3,7 +3,7 @@ package org.labkey.dbutils.jooq;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.TableRecord;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Created by jon on 3/29/17.

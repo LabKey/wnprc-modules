@@ -1,7 +1,7 @@
 package org.labkey.wnprc_compliance;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.Marshal;
@@ -18,6 +18,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -354,7 +355,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     public class SearchUserAPI extends ReadOnlyApiAction<SearchPersonForm> {
         @Override
-        public Object execute(SearchPersonForm form, BindException errors) throws Exception {
+        public Object execute(SearchPersonForm form, BindException errors)
+        {
             JSONObject json = new JSONObject();
             Map<String, List<JSONObject>> results = new HashMap<>();
 
@@ -371,7 +373,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
 
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter).toJSONObjectArray()) {
+            for (JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter))) {
                 String type = row.getString("type");
 
                 List<JSONObject> rows = results.get(type);
@@ -449,7 +451,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
 
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter).toJSONObjectArray()) {
+            for (JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter)))
+            {
                 String type = row.getString("type");
 
                 List<JSONObject> rows = results.get(type);
@@ -472,11 +475,11 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @Marshal(Marshaller.Jackson)
     @CSRF(CSRF.Method.NONE)
     public class GetClearancesFromPerson extends ReadOnlyApiAction<SearchClearanceFromPersonForm> {
-        public Object execute(SearchClearanceFromPersonForm form, BindException errors) throws Exception {
+        public Object execute(SearchClearanceFromPersonForm form, BindException errors)
+        {
 
             int resultLimit = 3;
             JSONObject json = new JSONObject();
-            Map<String, List<JSONObject>> results = new HashMap<>();
 
             SimpleFilter filter = new SimpleFilter();
             filter.addCondition(FieldKey.fromString("personid"), form.getQuery(), CompareType.EQUAL);
@@ -484,7 +487,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
             List<JSONObject> rows = new ArrayList<>();
             int resultCount = 0;
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, form.getTable(), filter).toJSONObjectArray()) {
+            for (JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, form.getTable(), filter))) {
                 if (resultCount < resultLimit)
                 {
                     rows.add(row);
@@ -533,7 +536,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
                 for (ClearanceForm tbform : form.clearances)
                 {
-                    JSONObject tbClearance = new JSONObject();
+                    Map<String, Object> tbClearance = new HashMap<>();
                     tbClearance.put("id", tbform.id);
                     tbClearance.put("date", tbform.date);
                     tbClearance.put("container", getContainer().getId());
@@ -555,18 +558,15 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @Marshal(Marshaller.Jackson)
     @CSRF(CSRF.Method.NONE)
     public class GetMeaslesClearanceFromPerson extends ReadOnlyApiAction<SearchPersonFromCardForm> {
-        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+        public Object execute(SearchPersonFromCardForm form, BindException errors)
+        {
             JSONObject json = new JSONObject();
-            Map<String, List<JSONObject>> results = new HashMap<>();
 
             SimpleFilter filter = new SimpleFilter();
             filter.addCondition(FieldKey.fromString("personid"), form.getQuery(), CompareType.EQUAL);
 
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
-            List<JSONObject> rows = new ArrayList<>();
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapMeaslesClearances", filter).toJSONObjectArray()) {
-                rows.add(row);
-            }
+            List<JSONObject> rows = new ArrayList<>(JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapMeaslesClearances", filter)));
 
             json.put("results", rows);
 
@@ -631,7 +631,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     String tbClearanceId = UUID.randomUUID().toString().toUpperCase();
 
                     // Insert the new clearance
-                    JSONObject tbClearance = new JSONObject();
+                    Map<String, Object> tbClearance = new HashMap<>();
                     tbClearance.put("id", tbClearanceId);
                     tbClearance.put("date", form.date);
                     tbClearance.put("comment", form.notes);
@@ -639,16 +639,16 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     tBsToUpdate.add(tbClearance);
 
                     // Update the pending clearance to point to the completed one.
-                    JSONObject pendingTbClearance = new JSONObject();
+                    Map<String, Object> pendingTbClearance = new HashMap<>();
                     pendingTbClearance.put("id", pendingTBId);
                     pendingTbClearance.put("tbclearance_id", tbClearanceId);
                     pendingTbClearance.put("container", getContainer().getId());
                     pendingTBsToUpdate.add(pendingTbClearance);
 
-                    JSONObject[] rows = queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "persons_pending_tb_clearances", new SimplerFilter("clearance_id", CompareType.EQUAL, pendingTBId)).toJSONObjectArray();
+                    List<JSONObject> rows = JsonUtil.toJSONObjectList(queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "persons_pending_tb_clearances", new SimplerFilter("clearance_id", CompareType.EQUAL, pendingTBId)));
 
-                    JSONObject tbMap = new JSONObject();
-                    tbMap.put("person_id", rows[0].getString("person_id"));
+                    Map<String, Object> tbMap = new HashMap<>();
+                    tbMap.put("person_id", rows.get(0).getString("person_id"));
                     tbMap.put("clearance_id", tbClearanceId);
                     tbMap.put("container", getContainer().getId());
                     tbMapsToUpdate.add(tbMap);

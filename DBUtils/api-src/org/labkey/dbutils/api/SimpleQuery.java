@@ -1,7 +1,7 @@
 package org.labkey.dbutils.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DisplayColumn;
@@ -141,7 +141,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
         jsonError.put("message",  "");
 
         Results rs = null;
-        List<Map<String, Object>> rows = new ArrayList<>();
+        List<JSONObject> rows = new ArrayList<>();
         List<Map<String, Object>> columnMetadataArray = new ArrayList<>();
         List<Map<String, Object>> columnDisplayData = new ArrayList<>();
         try {

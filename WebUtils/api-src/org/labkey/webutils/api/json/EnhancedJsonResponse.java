@@ -1,7 +1,7 @@
 package org.labkey.webutils.api.json;
 
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiResponseWriter;
 
@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * Created by jon on 2/23/16.
  */
-public class EnhancedJsonResponse extends JSONObject implements ApiResponse, Map<String, Object> {
+public class EnhancedJsonResponse extends JSONObject implements ApiResponse {
     public EnhancedJsonResponse() {}
 
     public EnhancedJsonResponse(JSONObject json) {
@@ -62,7 +62,7 @@ public class EnhancedJsonResponse extends JSONObject implements ApiResponse, Map
             List<Object> list = new ArrayList<>();
             JSONArray jsonArray = (JSONArray) object;
 
-            for( Object value : jsonArray.toArray()) {
+            for( Object value : jsonArray.toList()) {
                 list.add(parseJsonObject(value));
             }
 

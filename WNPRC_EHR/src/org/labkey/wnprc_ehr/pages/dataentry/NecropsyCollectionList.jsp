@@ -1,7 +1,8 @@
-<%@ page import="org.json.old.JSONArray" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
@@ -68,8 +69,8 @@
     <%
         JSONObject task = tasks.getJSONObject(0);
         JSONObject necropsy = necropsies.getJSONObject(0);
-        JSONObject[] tissueSamples = queryFactory.selectRows("study", "tissue_samples", taskFilter).toJSONObjectArray();
-        JSONObject[] organWeights  = queryFactory.selectRows("study", "organ_weights",  taskFilter).toJSONObjectArray();
+        List<JSONObject> tissueSamples = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "tissue_samples", taskFilter));
+        List<JSONObject> organWeights  = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "organ_weights",  taskFilter));
 
         Timestamp necropsyDate = (Timestamp) necropsy.get("date");
         String necropsyDisplayDate;
@@ -121,7 +122,7 @@
         <h4>Antemortem Tissue Samples</h4>
         <hr class="sectionBar"/>
 
-        <% if (tissueSamples.length > 0) { %>
+        <% if (!tissueSamples.isEmpty()) { %>
         <table class="table">
             <thead>
                 <tr>
@@ -182,7 +183,7 @@
         <h4>Postmortem Tissue Samples</h4>
         <hr class="sectionBar"/>
 
-        <% if (tissueSamples.length > 0) { %>
+        <% if (!tissueSamples.isEmpty()) { %>
         <table class="table">
             <thead>
             <tr>
@@ -246,7 +247,7 @@
         <h4>Organ Weights</h4>
         <hr class="sectionBar"/>
 
-        <% if (organWeights.length > 0) { %>
+        <% if (!organWeights.isEmpty()) { %>
         <table class="table">
             <thead>
             <tr>

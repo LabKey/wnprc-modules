@@ -3,8 +3,8 @@ package org.labkey.wnprc_ehr.schemas;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
@@ -125,9 +125,6 @@ public class WNPRC_Schema extends SimpleUserSchema {
         JSONArray results = queryFactory.selectRows(NAME, table.tableName, filter);
 
         // Transform to a List
-        List<JSONObject> rows = new ArrayList<>();
-        rows.addAll(JsonUtils.getListFromJSONArray(results));
-
-        return rows;
+        return new ArrayList<>(JsonUtils.getListFromJSONArray(results));
     }
 }

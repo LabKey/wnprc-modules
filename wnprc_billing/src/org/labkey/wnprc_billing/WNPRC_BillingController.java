@@ -17,9 +17,15 @@
 package org.labkey.wnprc_billing;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
@@ -34,6 +40,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.security.ActionNames;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
@@ -48,6 +56,7 @@ import org.labkey.wnprc_billing.domain.*;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
 import org.labkey.wnprc_billing.invoice.SummaryPDF;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
+import org.labkey.wnprc_billing.security.permissions.EHRFinanceAdminPermission;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -62,6 +71,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -678,4 +688,43 @@ public class WNPRC_BillingController extends SpringActionController
         pdfFile.setInvoicePDF(pdf);
         return pdfFile;
     }
+
+    //This function returns the current container's values for the 'CreditToAccount' and 'JetCsvSetting' variables.
+    @ActionNames("getProgramIncomeAccount")
+    @RequiresNoPermission
+    public class GetProgramIncomeAccountAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public ApiResponse execute(Object form, BindException errors) throws Exception
+        {
+            //Gets current values of CreditToAccount and JetCsvSetting.
+            Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
+            var currentCreditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
+            var currentJETCSVSetting = moduleProperties.get(WNPRC_BillingModule.JetCsvSetting).getEffectiveValue(getContainer());
+
+            //Saves the values in a JSON object.
+            ApiSimpleResponse jsonResponse = new ApiSimpleResponse();
+            jsonResponse.put("creditToAccount", currentCreditToAccount);
+            jsonResponse.put("jetCSVSetting", currentJETCSVSetting);
+
+            //Returns this object as a JSON response.
+            return jsonResponse;
+        }
+    }
+
+    //This function verifies a user has the permission: EHRFinanceAdminPermission.
+    //This function is used before updating the current Program Income Account.
+    @ActionNames("checkFinanceAdminStatus")
+    @RequiresPermission(EHRFinanceAdminPermission.class)
+    public class CheckFinanceAdminStatusAction extends ReadOnlyApiAction<Object> {
+        @Override
+        public ApiResponse execute(Object form, BindException errors) throws Exception
+        {
+            //Returns the current root id.
+            ApiSimpleResponse jsonResponse = new ApiSimpleResponse();
+            jsonResponse.put("permissionVerified", "true");
+            return jsonResponse;
+        }
+    }
+
 }

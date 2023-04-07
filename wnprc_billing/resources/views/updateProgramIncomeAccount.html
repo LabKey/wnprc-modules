@@ -4,7 +4,121 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body>
-    <p>Test text for new module.</p>
+<body onload = "getValues()">
+    <!--Header-->
+    <h1>Update Program Income Account</h1>
+    <br>
+
+    <!--Current Values-->
+    <h3>Current Values</h3>
+    <p id="field1Description">CreditToAccount:</p>
+    <p id="field2Description">JETCSVSetting:</p>
+    <br>
+
+    <!--Description-->
+    <h4>Please enter your new values in the fields below.</h4>
+
+    <!--CreditToAccount Form-->
+    <form>
+        <label for="field1">CreditToAccount:</label>
+        <input type="text" id="field1" name="field1">
+    </form>
+    <button id="field1Button" onclick="updateField1()">Update CreditToAccount</button>
+    <br>
+    <!--JETCSVSetting Form-->
+    <form>
+        <label for="field2">JETCSVSetting:</label>
+        <input type="text" id="field2" name="field2">
+    </form>
+    <button id="field2Button" onclick="updateField2()">Update JETCSVSetting</button>
+
+    <script>
+        function updateField1() {
+            let field1NewValue = document.getElementById("field1").value;
+            setValues("CreditToAccount", "" + field1NewValue);
+        }
+        function updateField2() {
+            let field2NewValue = document.getElementById("field2").value;
+            setValues("JETCSVSetting", "" + field2NewValue);
+        }
+
+        //This function updates the view with the current values for 'CreditToAccount' and 'JetCsvSetting'.
+        function getValues() {
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('wnprc_billing', 'getProgramIncomeAccount', null, {}),
+                callback: function (config, success, xhr) {
+                    if (success) {
+                        var jsonResponse = JSON.parse(xhr.responseText);
+                        var currentCreditToAccount = jsonResponse.creditToAccount;
+                        var currentJETCSVSetting = jsonResponse.jetCSVSetting;
+                        field1Description.innerText = "CreditToAccount: " + currentCreditToAccount;
+                        field2Description.innerText = "JETCSVSetting: " + currentJETCSVSetting;
+                    }
+                    else {
+                        alert('Couldn\'t get program income account.');
+                    }
+                }
+            });
+        }
+
+        //This function verifies the user has the EHRFinanceAdminPermission, then sets the new
+        // values for 'CreditToAccount' and 'JetCsvSetting'.
+        function setValues(propertyName, newValue) {
+            if ((propertyName !== "") && (newValue !== "")) {
+                //Verifies the current user has EHRFinanceAdminPermission.
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL('wnprc_billing', 'checkFinanceAdminStatus', null, {}),
+                    callback: function (config, success, xhr) {
+                        if (success) {
+                            //Sets the new module property values.
+                            let parentContainer = LABKEY.Security.currentContainer.parentId;
+                            let newPropertyValue = newValue;
+                            let propertyToUpdate = propertyName;
+                            let moduleToUpdate = "wnprc_billing"
+
+                            //Creates an object with the new module property values.
+                            var newProperties = [];
+                            newProperties.push({
+                                container: parentContainer,
+                                value: newPropertyValue,
+                                propName: propertyToUpdate,
+                                moduleName: moduleToUpdate
+                            });
+
+                            //Updates properties.
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL('core', 'saveModuleProperties', null),
+                                method: "POST",
+                                jsonData: {
+                                    properties: newProperties
+                                },
+                                headers: {
+                                    'Content-Type' : 'application/json'
+                                },
+                                callback: function (config, success, xhr) {
+                                    if (success) {
+                                        getValues();
+
+                                    }
+                                    else {
+                                        alert("Unable to update the program income account.  AJAX response failed.");
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            alert("Unable to update the program income account.  User does not have the correct permissions.");
+                        }
+                    }
+                })
+            }
+            else {
+                alert("Unable to update the program income account.  One or more fields are empty.");
+            }
+        }
+
+
+
+    </script>
 </body>
 </html>

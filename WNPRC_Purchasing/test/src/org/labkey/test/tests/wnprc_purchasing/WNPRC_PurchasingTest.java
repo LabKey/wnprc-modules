@@ -182,17 +182,17 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private void createUsersAndGroups()
     {
         log("Create a purchasing admin user");
-        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
+        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId();
 
         log("Create a purchasing requester users");
-        _requesterUserId1 = _userHelper.createUser(REQUESTER_USER_1).getUserId().intValue();
-        _requesterUserId2 = _userHelper.createUser(REQUESTER_USER_2).getUserId().intValue();
+        _requesterUserId1 = _userHelper.createUser(REQUESTER_USER_1).getUserId();
+        _requesterUserId2 = _userHelper.createUser(REQUESTER_USER_2).getUserId();
 
         log("Create a purchasing receiver user");
-        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId().intValue();
+        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId();
 
         log("Create a purchasing director user");
-        _directorUserId = _userHelper.createUser(PURCHASE_DIRECTOR_USER).getUserId().intValue();
+        _directorUserId = _userHelper.createUser(PURCHASE_DIRECTOR_USER).getUserId();
 
         log("Create a purchasing groups");
         _adminGroupId = _permissionsHelper.createPermissionsGroup(PURCHASE_ADMIN_GROUP);

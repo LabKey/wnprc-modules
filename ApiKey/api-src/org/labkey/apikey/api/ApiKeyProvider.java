@@ -1,6 +1,6 @@
 package org.labkey.apikey.api;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 
 /**
  * Created by jon on 11/15/16.

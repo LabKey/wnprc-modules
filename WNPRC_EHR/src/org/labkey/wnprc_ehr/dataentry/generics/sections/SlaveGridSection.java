@@ -1,7 +1,7 @@
 package org.labkey.wnprc_ehr.dataentry.generics.sections;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.old.JSONArray;
+import org.json.old.JSONObject;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 
 import java.util.Set;

@@ -1,6 +1,6 @@
 package org.labkey.apikey;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;

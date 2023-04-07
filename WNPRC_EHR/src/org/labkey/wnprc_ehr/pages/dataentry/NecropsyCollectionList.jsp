@@ -1,5 +1,5 @@
-<%@ page import="org.json.JSONArray" %>
-<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.json.old.JSONArray" %>
+<%@ page import="org.json.old.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>

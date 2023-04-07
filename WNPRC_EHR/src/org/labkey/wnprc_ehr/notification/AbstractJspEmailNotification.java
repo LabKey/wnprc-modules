@@ -3,24 +3,19 @@ package org.labkey.wnprc_ehr.notification;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserPrincipal;
-import org.labkey.api.security.ValidEmail;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.util.MailHelper;
 import org.labkey.wnprc_ehr.WNPRC_EHREmail;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
-import javax.mail.Address;
 import javax.mail.Message;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by jon on 7/13/16.

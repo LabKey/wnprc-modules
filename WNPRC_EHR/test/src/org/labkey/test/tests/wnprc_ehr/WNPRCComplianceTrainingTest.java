@@ -6,8 +6,6 @@ import org.labkey.test.Locator;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
-import org.labkey.test.pages.list.EditListDefinitionPage;
-import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.tests.ehr.ComplianceTrainingTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
@@ -28,7 +26,7 @@ public class WNPRCComplianceTrainingTest extends ComplianceTrainingTest implemen
         _containerHelper.enableModule("WNPRC_EHR");
 
         SchemaHelper schemaHelper = new SchemaHelper(this);
-        schemaHelper.createLinkedSchema(getProjectName(), null, "PublicSOPs", "/" + getProjectName(), null, "lists", null, null);
+        schemaHelper.createLinkedSchema(getProjectName(), "PublicSOPs", "/" + getProjectName(), null, "lists", null, null);
 
         goToSchemaBrowser();
         selectQuery("PublicSOPs", "SOPs");

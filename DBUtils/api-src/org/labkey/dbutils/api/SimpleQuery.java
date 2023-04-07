@@ -1,8 +1,7 @@
 package org.labkey.dbutils.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
-import org.labkey.api.collections.CaseInsensitiveMapWrapper;
+import org.json.old.JSONObject;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DisplayColumn;
@@ -13,7 +12,6 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyColumn;
-import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
@@ -27,7 +25,6 @@ import org.labkey.api.util.ResultSetUtil;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jon on 1/12/16.
@@ -198,14 +195,14 @@ public class SimpleQuery<RowType> extends QueryHelper {
             // Now, loop through results, adding them to our results object
             if (rs.next()) {
                 do {
-                    JSONObject rowJSONOjbect = new JSONObject();
+                    JSONObject rowJSONObject = new JSONObject();
 
                     Map<String, Object> rowMap = rs.getRowMap();
                     for(String key : rowMap.keySet()) {
-                        rowJSONOjbect.put(key, rowMap.get(key));
+                        rowJSONObject.put(key, rowMap.get(key));
                     }
 
-                    rows.add(rowJSONOjbect);
+                    rows.add(rowJSONObject);
                 } while (rs.next());
             }
         }

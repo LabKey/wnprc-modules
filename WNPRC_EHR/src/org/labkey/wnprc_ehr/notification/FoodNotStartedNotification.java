@@ -108,8 +108,5 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
                 msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "'>Click here to view this list</a></p>\n");
             }
         }
-
     }
-
-
 }

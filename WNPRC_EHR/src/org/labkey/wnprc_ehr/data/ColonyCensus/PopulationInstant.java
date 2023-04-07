@@ -1,7 +1,7 @@
 package org.labkey.wnprc_ehr.data.ColonyCensus;
 
 import org.joda.time.LocalDate;
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.webutils.api.json.ConvertibleToJSON;
 
 /**

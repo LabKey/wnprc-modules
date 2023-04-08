@@ -251,8 +251,9 @@ public class WNPRC_PurchasingManager
             List<Map<String, Object>> updatedLineItemsData = new ArrayList<>();
             List<Map<String, Object>> deleteLineItemsData = new ArrayList<>();
             int index = 0;
-            for (JSONObject lineItem : requestForm.getLineItems())
+            for (Object object : requestForm.getLineItems())
             {
+                JSONObject lineItem = (JSONObject)object;
                 row = new CaseInsensitiveHashMap<>();
                 row.put("requestRowId", insertedPurchasingReq.get(0).get("rowId"));
 

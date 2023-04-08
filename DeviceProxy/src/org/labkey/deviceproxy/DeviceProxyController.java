@@ -1,6 +1,6 @@
 package org.labkey.deviceproxy;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -35,7 +35,8 @@ public class DeviceProxyController extends SpringActionController {
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception {
+        public ModelAndView getView(Object o, BindException errors)
+        {
             return new JspView("/org/labkey/deviceproxy/view/hello.jsp");
         }
 
@@ -94,7 +95,8 @@ public class DeviceProxyController extends SpringActionController {
     public class RequestLeaseAction extends MutatingApiAction<RequestLeaseForm>
     {
         @Override
-        public Object execute(RequestLeaseForm form, BindException errors) throws Exception {
+        public Object execute(RequestLeaseForm form, BindException errors)
+        {
             DeviceProxyService.get().requestLease(
                     form.getPublicKey(),
                     form.getName(),
@@ -120,7 +122,8 @@ public class DeviceProxyController extends SpringActionController {
     @RequiresSiteAdmin
     public class ApproveLeaseAction extends MutatingApiAction<LeaseForm> {
         @Override
-        public Object execute(LeaseForm form, BindException errors) throws Exception {
+        public Object execute(LeaseForm form, BindException errors)
+        {
             DeviceProxyService.get().approveLease(form.getPublicKey(), getUser());
 
             return new JSONObject();
@@ -130,7 +133,8 @@ public class DeviceProxyController extends SpringActionController {
     @RequiresSiteAdmin
     public class RevokeLeaseAction extends MutatingApiAction<LeaseForm> {
         @Override
-        public Object execute(LeaseForm form, BindException errors) throws Exception {
+        public Object execute(LeaseForm form, BindException errors)
+        {
             DeviceProxyService.get().revokeLease(form.getPublicKey(), form.getStartDate(), getUser());
             return new JSONObject();
         }
@@ -160,7 +164,8 @@ public class DeviceProxyController extends SpringActionController {
     @RequiresNoPermission
     public class RequestApiKeyAction extends ReadOnlyApiAction<RequestApiKeyForm> {
         @Override
-        public Object execute(RequestApiKeyForm form, BindException errors) throws Exception {
+        public Object execute(RequestApiKeyForm form, BindException errors)
+        {
             ApiKey key = DeviceProxyService.get().requestApiKey(form.getPublicKey(), form.getCardnumber(), form.getPin());
 
             JSONObject response = new JSONObject();
@@ -173,7 +178,8 @@ public class DeviceProxyController extends SpringActionController {
     @RequiresLogin
     public class EnrollUserAction extends MutatingApiAction<RequestApiKeyForm> {
         @Override
-        public Object execute(RequestApiKeyForm form, BindException errors) throws Exception {
+        public Object execute(RequestApiKeyForm form, BindException errors)
+        {
             DeviceProxyService.get().enroll(getUser(), form.getCardnumber(), form.getPin());
             return new JSONObject();
         }

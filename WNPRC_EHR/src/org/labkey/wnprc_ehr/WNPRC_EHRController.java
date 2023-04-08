@@ -23,8 +23,8 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -1472,7 +1472,7 @@ public class WNPRC_EHRController extends SpringActionController
                     {
                         for (Map<String, Object> woRow : WaterAmountRows)
                         {
-                            JSONObject waterAmountRecord = new JSONObject();
+                            Map<String, Object> waterAmountRecord = new HashMap<>();
                             waterAmountRecord.put("taskid", woRow.get("taskid"));
                             waterAmountRecord.put("objectid", event.getObjectId());
                             waterAmountRecord.put("volume", event.getVolume());
@@ -1482,7 +1482,6 @@ public class WNPRC_EHRController extends SpringActionController
                             waterAmountRecord.put("frequency", event.getFrequency());
                             waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
                             rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
-
 
                             service = ti.getUpdateService();
 
@@ -1494,7 +1493,6 @@ public class WNPRC_EHRController extends SpringActionController
                             {
                                 throw new QueryUpdateServiceException("Not all rows updated properly");
                             }
-
                         }
                     }
                     if ("delete".equals(event.getAction()))
@@ -1505,34 +1503,20 @@ public class WNPRC_EHRController extends SpringActionController
                         JSONObject rowToDelete = new JSONObject();
                         rowToDelete.put("objectId", event.getObjectId());
                         waterAmountTable.delete(rowToDelete);
-
-                        
-
                     }
 
                     transaction.commit();
                     response.put("success", true);
-
                 }
                 catch (Exception e)
                 {
-
                     response.put("success", false);
-
-                }
-                finally
-                {
-
                 }
             }
 
             return response;
-
         }
-
     }
-
-
 
     @ActionNames("CloseWaterOrder")
     @RequiresLogin
@@ -1556,10 +1540,9 @@ public class WNPRC_EHRController extends SpringActionController
 
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
                 {
-
                     for (Map<String, Object> woRow : WaterOrdersRows)
                     {
-                        JSONObject waterOrderRecord = new JSONObject();
+                        Map<String, Object> waterOrderRecord = new HashMap<>();
                         waterOrderRecord.put("taskid", woRow.get("taskid"));
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
@@ -1579,36 +1562,23 @@ public class WNPRC_EHRController extends SpringActionController
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");
                         }
-
                     }
 
                     transaction.commit();
                     response.put("success", true);
-
                 }
                 catch (BatchValidationException e){
                     response.put("success", false);
-
                     response.put("errors", createResponseWriter().getJSON(e).get("errors"));
                     response.put("extraContext", extraContext);
-
                 }
                 catch (Exception e)
                 {
-
                     response.put("success", false);
-
-
-                }
-
-                finally
-                {
-
                 }
             }
 
             return response;
-
         }
 
     }
@@ -1638,7 +1608,7 @@ public class WNPRC_EHRController extends SpringActionController
 
                     for (Map<String, Object> woRow : WaterOrdersRows)
                     {
-                        JSONObject waterOrderRecord = new JSONObject();
+                        Map<String, Object> waterOrderRecord = new HashMap<>();
                         waterOrderRecord.put("taskid", woRow.get("taskid"));
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
@@ -1662,8 +1632,7 @@ public class WNPRC_EHRController extends SpringActionController
                     //Start new water order
                     List<Map<String, Object>> rowToInsert = null;
                     List<Map<String, Object>> taskToInsert = null;
-                    JSONObject taskRecord = new JSONObject();
-                    JSONObject waterOrderRow = new JSONObject();
+                    Map<String, Object> taskRecord = new HashMap<>();
 
                     String taskId = UUID.randomUUID().toString();
                     taskRecord.put("taskid", taskId);
@@ -1672,8 +1641,6 @@ public class WNPRC_EHRController extends SpringActionController
                     taskRecord.put("qcstate", EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId());
                     taskRecord.put("formType","Enter Water Orders");
                     taskRecord.put("assignedTo",getUser().getUserId());
-
-
 
                     taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
 
@@ -1687,6 +1654,7 @@ public class WNPRC_EHRController extends SpringActionController
                     StartDate.setTime(event.getEndDate());
                     StartDate.add(java.util.Calendar.DATE, 1);
 
+                    Map<String, Object> waterOrderRow = new HashMap<>();
                     waterOrderRow.put("taskid", taskId);
                     waterOrderRow.put("date",StartDate.getTime());
                     waterOrderRow.put("id",event.getAnimalId());

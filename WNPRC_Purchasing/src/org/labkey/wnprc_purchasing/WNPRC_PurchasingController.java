@@ -23,8 +23,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
@@ -183,7 +183,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     public class GetFolderAdminsAction extends ReadOnlyApiAction
     {
         @Override
-        public Object execute(Object o, BindException errors) throws Exception
+        public Object execute(Object o, BindException errors)
         {
             Map<String, Object> resultProperties = new HashMap<>();
             List<User> folderAdmins = getFolderAdmins(); //this doesn't include site admins
@@ -697,7 +697,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
     public static class RequestForm
     {
-        List<JSONObject> _lineItems;
+        org.json.old.JSONObject[] _lineItems; // Leave in place until BaseApiAction.populateForm() takes a new JSONObject
         List<Integer> _lineItemsToDelete;
         Integer _rowId;
         Integer _account;
@@ -733,12 +733,12 @@ public class WNPRC_PurchasingController extends SpringActionController
         Boolean _isNewRequest;
         Boolean _isReorder;
 
-        public List<JSONObject> getLineItems()
+        public org.json.old.JSONObject[] getLineItems()
         {
             return _lineItems;
         }
 
-        public void setLineItems(List<JSONObject> lineItems)
+        public void setLineItems(org.json.old.JSONObject[] lineItems)
         {
             _lineItems = lineItems;
         }

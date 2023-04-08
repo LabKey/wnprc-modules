@@ -8,8 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
 import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -247,11 +247,11 @@ public class TriggerScriptHelper {
                 }
 
                 for (JSONObject existingMeasurement : existingMeasurements) {
-                    rowsToDelete.add(existingMeasurement);
+                    rowsToDelete.add(existingMeasurement.toMap());
                 }
 
                 for (Double newMeasurement : newMeasurements) {
-                    JSONObject newRow = new JSONObject();
+                    Map<String, Object> newRow = new HashMap<>();
                     newRow.put("Id", updatedRow.get("Id"));
                     newRow.put("date", updatedRow.get("date"));
                     newRow.put("measurement_name", updatedRow.get("measurement_name"));
@@ -296,7 +296,7 @@ public class TriggerScriptHelper {
 
         List<Map<String, Object>> updateRows = new ArrayList<>();
         for (String lsid : lsids) {
-            JSONObject row = new JSONObject();
+            Map<String, Object> row = new HashMap<>();
             row.put("lsid", lsid);
             row.put("outcome", true);
             updateRows.add(row);
@@ -321,7 +321,7 @@ public class TriggerScriptHelper {
         List<Map<String, Object>> updateRows = new ArrayList<>();
         for (JSONObject row : ultrasounds) {
             row.put("followup_required", false);
-            updateRows.add(row);
+            updateRows.add(row.toMap());
         }
 
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
@@ -330,7 +330,6 @@ public class TriggerScriptHelper {
         } catch (Exception e) {
             _log.error(e);
         }
-
     }
 
     public List<Map<String, String>> createBreedingRecordsFromHousingChanges(final List<Map<String, Object>> housingRows) {
@@ -512,7 +511,7 @@ public class TriggerScriptHelper {
         {
             remark.append("no remarks\n");
         }
-        JSONObject encounter = new JSONObject();
+        Map<String, Object> encounter = new HashMap<>();
         encounter.put("objectid", UUID.randomUUID().toString());
         encounter.put("Id", animalsInEncounter.get(0).get("Id"));
         encounter.put("sireid", sireid.toString());
@@ -537,29 +536,34 @@ public class TriggerScriptHelper {
         if (!StringUtils.isEmpty((String) group.get(index).get("remark")) && group.get(index).get("reason").equals("Breeding ended")) {
             remarkFound = true;
             remark.append("\n")
-                    .append(group.get(index).get("Id"))
-                    .append(": ")
-                    .append(group.get(index).get("remark"));
+                .append(group.get(index).get("Id"))
+                .append(": ")
+                .append(group.get(index).get("remark"));
         }
 
         String[] sireList = openEncounter.getString("sireid").split(",");
-        for (int j = 0; j < sireList.length; j++) {
-            for(int k = 0; k < filteredHousingRows.size(); k++) {
-                if (sireList[j].equals(filteredHousingRows.get(k).get("Id")) && sdf.format(filteredHousingRows.get(k).get("date")).equals(sdf.format(group.get(index).get("date"))) && filteredHousingRows.get(k).get("reason").equals("Breeding ended")) {
-                    if (!StringUtils.isEmpty((String) filteredHousingRows.get(k).get("remark"))) {
+        for (String s : sireList)
+        {
+            for (Map<String, Object> filteredHousingRow : filteredHousingRows)
+            {
+                if (s.equals(filteredHousingRow.get("Id")) && sdf.format(filteredHousingRow.get("date")).equals(sdf.format(group.get(index).get("date"))) && filteredHousingRow.get("reason").equals("Breeding ended"))
+                {
+                    if (!StringUtils.isEmpty((String) filteredHousingRow.get("remark")))
+                    {
                         remarkFound = true;
                         remark.append("\n")
-                                .append(sireList[j])
-                                .append(": ")
-                                .append(filteredHousingRows.get(k).get("remark"));
+                            .append(s)
+                            .append(": ")
+                            .append(filteredHousingRow.get("remark"));
                     }
-                    if (filteredHousingRows.get(k).get("ejacConfirmed") != null && ((Boolean) filteredHousingRows.get(k).get("ejacConfirmed"))) {
+                    if (filteredHousingRow.get("ejacConfirmed") != null && ((Boolean) filteredHousingRow.get("ejacConfirmed")))
+                    {
                         remarkFound = true;
                         ejacConfirmed = true;
                         remark.append("\n")
-                                .append(sireList[j])
-                                .append(": ")
-                                .append("Ejaculation Confirmed");
+                            .append(s)
+                            .append(": ")
+                            .append("Ejaculation Confirmed");
                     }
                 }
             }
@@ -575,7 +579,7 @@ public class TriggerScriptHelper {
         openEncounter.put("remark", openEncounter.getString("remark") != null ? openEncounter.getString("remark") + remark : remark.toString());
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        rows.add(openEncounter);
+        rows.add(openEncounter.toMap());
         return rows;
     }
 
@@ -615,7 +619,7 @@ public class TriggerScriptHelper {
         List<Map<String, Object>> testData = new ArrayList<>();
 
         //female 1 - end
-        JSONObject row4 = new JSONObject();
+        Map<String, Object> row4 = new HashMap<>();
         row4.put("Id", "testid1");
         row4.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
         row4.put("room", "room1");
@@ -628,7 +632,7 @@ public class TriggerScriptHelper {
         testData.add(row4);
 
         //male 1a - end
-        JSONObject row5 = new JSONObject();
+        Map<String, Object> row5 = new HashMap<>();
         row5.put("Id", "testid2");
         row5.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
         row5.put("room", "room1");
@@ -641,7 +645,7 @@ public class TriggerScriptHelper {
         testData.add(row5);
 
         //male 1b - end
-        JSONObject row6 = new JSONObject();
+        Map<String, Object> row6 = new HashMap<>();
         row6.put("Id", "testid3");
         row6.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
         row6.put("room", "room1");
@@ -654,7 +658,7 @@ public class TriggerScriptHelper {
         testData.add(row6);
 
         //female 1 - start
-        JSONObject row1 = new JSONObject();
+        Map<String, Object> row1 = new HashMap<>();
         row1.put("Id", "testid1");
         row1.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
         row1.put("room", "room1");
@@ -667,7 +671,7 @@ public class TriggerScriptHelper {
         testData.add(row1);
 
         //male 1a - start
-        JSONObject row2 = new JSONObject();
+        Map<String, Object> row2 = new HashMap<>();
         row2.put("Id", "testid2");
         row2.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
         row2.put("room", "room1");
@@ -680,7 +684,7 @@ public class TriggerScriptHelper {
         testData.add(row2);
 
         //male 1b - start
-        JSONObject row3 = new JSONObject();
+        Map<String, Object> row3 = new HashMap<>();
         row3.put("Id", "testid3");
         row3.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
         row3.put("room", "room1");
@@ -693,7 +697,7 @@ public class TriggerScriptHelper {
         testData.add(row3);
 
         //female 2a - start
-        JSONObject row7 = new JSONObject();
+        Map<String, Object> row7 = new HashMap<>();
         row7.put("Id", "testid4");
         row7.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
         row7.put("room", "room2");
@@ -706,7 +710,7 @@ public class TriggerScriptHelper {
         testData.add(row7);
 
         //female 2b - start
-        JSONObject row8 = new JSONObject();
+        Map<String, Object> row8 = new HashMap<>();
         row8.put("Id", "testid5");
         row8.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
         row8.put("room", "room2");
@@ -719,7 +723,7 @@ public class TriggerScriptHelper {
         testData.add(row8);
 
         //male 2 - start
-        JSONObject row9 = new JSONObject();
+        Map<String, Object> row9 = new HashMap<>();
         row9.put("Id", "testid6");
         row9.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
         row9.put("room", "room2");
@@ -732,7 +736,7 @@ public class TriggerScriptHelper {
         testData.add(row9);
 
         //male 3 - start
-        JSONObject row13 = new JSONObject();
+        Map<String, Object> row13 = new HashMap<>();
         row13.put("Id", "testid6");
         row13.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row13.put("room", "room3");
@@ -745,7 +749,7 @@ public class TriggerScriptHelper {
         testData.add(row13);
 
         //female 2b - end
-        JSONObject row11 = new JSONObject();
+        Map<String, Object> row11 = new HashMap<>();
         row11.put("Id", "testid5");
         row11.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row11.put("room", "room2");
@@ -758,7 +762,7 @@ public class TriggerScriptHelper {
         testData.add(row11);
 
         //male 2 - end
-        JSONObject row12 = new JSONObject();
+        Map<String, Object> row12 = new HashMap<>();
         row12.put("Id", "testid6");
         row12.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row12.put("room", "room2");
@@ -771,7 +775,7 @@ public class TriggerScriptHelper {
         testData.add(row12);
 
         //female 2a/3 - end/start
-        JSONObject row10 = new JSONObject();
+        Map<String, Object> row10 = new HashMap<>();
         row10.put("Id", "testid4");
         row10.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row10.put("room", "room3");
@@ -1532,22 +1536,20 @@ public class TriggerScriptHelper {
                         keyMap.put("lsid", lsid);
                         oldKeys.add(keyMap);
                     }
-
                 }
 
                 //TODO: only change water schedule animals if they are not in Lixit
-                Map animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
-                if ("lixit".equals(animalCondition.get(animalId).toString())){
-                    List<Map<String, Object>> rowToAdd = null;
-
-                    JSONObject scheduledAnimalRecord = new JSONObject();
+                Map<String,Object> animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
+                if ("lixit".equals(animalCondition.get(animalId).toString()))
+                {
+                    Map<String, Object> scheduledAnimalRecord = new HashMap<>();
                     scheduledAnimalRecord.put("date", clientStartDate);
                     scheduledAnimalRecord.put("id", animalId);
                     scheduledAnimalRecord.put("condition", waterSource);
                     scheduledAnimalRecord.put("project", project);
                     scheduledAnimalRecord.put("mlsperKg",animalCondition.get("mlsPerKg"));
 
-                    rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+                    List<Map<String, Object>> rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
 
                     try
                     {
@@ -1560,7 +1562,6 @@ public class TriggerScriptHelper {
                                 returnErrors.put("field", "Id");
                                 returnErrors.put("severity", "ERROR");
                                 returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
-
                             }
                         }
                         insertRows(rowToAdd, "study", "waterScheduledAnimals");
@@ -1573,9 +1574,7 @@ public class TriggerScriptHelper {
 
                         errorMap.put(objectId, returnErrors);
                     }
-
                 }
-
             }
 
             errorMap.forEach((objectIdString, JSONObject)->{
@@ -2148,14 +2147,11 @@ public class TriggerScriptHelper {
                 extraContextArray.put(extraContextObject);
 
             }
-
-
         }
 
         List<Map<String, Object>> rowToAdd = null;
 
-
-        JSONObject scheduledAnimalRecord = new JSONObject();
+        Map<String, Object> scheduledAnimalRecord = new HashMap<>();
         scheduledAnimalRecord.put("date", startDate);
         scheduledAnimalRecord.put("id",animalId);
         scheduledAnimalRecord.put("condition",waterSource);
@@ -2366,12 +2362,9 @@ public class TriggerScriptHelper {
     {
         boolean returnCondition = false;
 
-
         TableInfo waterOrdersAccess = getTableInfo("wnprc","watermonitoring_access");
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("alloweduser/UserId"), userId);
         filter.addCondition(FieldKey.fromString("project"), project,CompareType.EQUAL);
-
-
 
         TableSelector userList = new TableSelector(waterOrdersAccess, PageFlowUtil.set("date", "alloweduser", "project"),filter, null);
         userList.setMaxRows(1);
@@ -2387,6 +2380,6 @@ public class TriggerScriptHelper {
         }
         return  returnCondition;
     }
-    public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}
 
+    public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}
 }

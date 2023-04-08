@@ -1,5 +1,5 @@
-<%@ page import="org.json.old.JSONArray" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.security.Group" %>
@@ -45,7 +45,7 @@
     JSONObject necropsySuiteLookup = new JSONObject();
     List<JSONObject> necropsySuites = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "necropsy_suite"));
     for (JSONObject json : necropsySuites) {
-        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json.toMap());
         JSONObject suiteInfo = new JSONObject();
 
         if (map.get("display_color") != null) {

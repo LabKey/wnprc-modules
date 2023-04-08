@@ -10,8 +10,8 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 
@@ -72,10 +72,12 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
      */
     abstract protected HttpRequestInitializer getCredentials() throws Exception;
 
+    @Override
     public void setUser(User u) {
         user = u;
     }
 
+    @Override
     public void setContainer(Container c) {
         container = c;
     }
@@ -136,6 +138,7 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
         return getJsonEventList(events, calendarId, backgroundColor);
     }
 
+    @Override
     public JSONArray getEventsAsJson(String calendarId, String backgroundColor, EventType eventType, Date startDate, Date endDate) throws Exception {
         Calendar calendar = getCalendar();
         java.util.Calendar currentDate = java.util.Calendar.getInstance();

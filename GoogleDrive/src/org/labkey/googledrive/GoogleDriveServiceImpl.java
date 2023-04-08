@@ -11,7 +11,7 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.query.BatchValidationException;
@@ -19,6 +19,7 @@ import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -36,6 +37,7 @@ import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,7 +45,7 @@ import java.util.UUID;
  * Created by jon on 1/13/17.
  */
 public class GoogleDriveServiceImpl extends GoogleDriveService {
-    private static Logger _log = LogManager.getLogger(GoogleDriveService.class);
+    private static final Logger _log = LogManager.getLogger(GoogleDriveService.class);
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
@@ -64,17 +66,17 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
 
     private JSONObject getCredentialJSON(String id, User user) throws NotFoundException {
         SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, id);
-        JSONObject[] rows = (new SimpleQueryFactory(user, ContainerManager.getHomeContainer())).selectRows("googledrive", "service_accounts", filter).toJSONObjectArray();
+        List<JSONObject> rows = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, ContainerManager.getHomeContainer()).selectRows("googledrive", "service_accounts", filter));
 
-        if (rows.length == 0) {
+        if (rows.isEmpty()) {
             throw new NotFoundException();
         }
-        else if (rows.length > 1) {
+        else if (rows.size() > 1) {
             // Since Id is our primary key, this shouldn't happen.
             throw new  RuntimeException("More than one row returned for googldrive.service_accounts matching PK of: " + id);
         }
         else {
-            return rows[0];
+            return rows.get(0);
         }
     }
 
@@ -128,7 +130,8 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     }
 
     @Override
-    public void updateDisplayNameForAccount(String accountId, String newDisplayname, User user) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException {
+    public void updateDisplayNameForAccount(String accountId, String newDisplayname, User user) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException
+    {
         SimpleQueryUpdater queryUpdater = getQueryUpdater(user);
 
         JSONObject row = new JSONObject();
@@ -139,7 +142,8 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     }
 
     @Override
-    public void deleteAccount(String accountId, User user) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException {
+    public void deleteAccount(String accountId, User user) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException
+    {
         SimpleQueryUpdater queryUpdater = getQueryUpdater(user);
 
         JSONObject row = new JSONObject();
@@ -152,7 +156,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     public Map<String, String> getAccounts(User user) {
         Map<String, String> accountDisplayNameLookup = new HashMap<>();
 
-        JSONObject[] rows = (new SimpleQueryFactory(user, ContainerManager.getHomeContainer())).selectRows("googledrive", "service_accounts").toJSONObjectArray();
+        List<JSONObject> rows = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, ContainerManager.getHomeContainer()).selectRows("googledrive", "service_accounts"));
 
         for (JSONObject row : rows) {
             accountDisplayNameLookup.put(row.getString("id"), row.getString("display_name"));

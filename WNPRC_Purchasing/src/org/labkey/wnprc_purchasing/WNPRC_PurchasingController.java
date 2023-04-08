@@ -697,7 +697,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
     public static class RequestForm
     {
-        Object[] _lineItems; // Previously JSONObject[], but this now (with new JSONObject) fails spring binding
+        org.json.old.JSONObject[] _lineItems; // Leave in place until BaseApiAction.populateForm() takes a new JSONObject
         List<Integer> _lineItemsToDelete;
         Integer _rowId;
         Integer _account;
@@ -733,12 +733,12 @@ public class WNPRC_PurchasingController extends SpringActionController
         Boolean _isNewRequest;
         Boolean _isReorder;
 
-        public Object[] getLineItems()
+        public org.json.old.JSONObject[] getLineItems()
         {
             return _lineItems;
         }
 
-        public void setLineItems(Object[] lineItems)
+        public void setLineItems(org.json.old.JSONObject[] lineItems)
         {
             _lineItems = lineItems;
         }

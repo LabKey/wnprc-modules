@@ -1,1 +1,3 @@
-/^From:[[:space:]]+(.*)/ REPLACE From: "WNPRC EHR SERVER" <ehr-do-not-reply@primate.wisc.edu>
+if /^From:[[:space:]]+ehr-do-not-reply@primate.wisc.edu/
+/^From:[[:space:]]+(.*)$/ REPLACE From: "WNPRC EHR SERVER" <ehr-do-not-reply@primate.wisc.edu>
+endif

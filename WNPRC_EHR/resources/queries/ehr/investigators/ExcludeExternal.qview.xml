@@ -1,0 +1,20 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="firstName"/>
+        <column name="lastName"/>
+        <column name="userid"/>
+        <column name="position"/>
+        <column name="address"/>
+        <column name="city"/>
+        <column name="state"/>
+        <column name="country"/>
+        <column name="zip"/>
+        <column name="phoneNumber"/>
+        <column name="investigatorType"/>
+        <column name="emailAddress"/>
+        <column name="financialAnalyst"/>
+    </columns>
+    <filters>
+        <filter column="investigatorType" operator="in" value="Core;Affiliate"/>
+    </filters>
+</customView>

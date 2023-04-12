@@ -5,38 +5,46 @@
     <title>Title</title>
 </head>
 <body onload = "getValues()">
-    <!--Header-->
-    <h1>Update Program Income Account</h1>
-    <br>
 
-    <!--Current Values-->
-    <h3>Current Values</h3>
-    <p id="field1Description">CreditToAccount:</p>
-    <p id="field2Description">JETCSVSetting:</p>
-    <br>
-
-    <!--Description-->
-    <h4>Please enter your new values in the fields below.</h4>
-
-    <!--CreditToAccount Form-->
-    <form>
-        <label for="field1">CreditToAccount:</label>
-        <input type="text" id="field1" name="field1">
-    </form>
-    <button id="field1Button" onclick="updateField1()">Update CreditToAccount</button>
-    <br>
-    <!--JETCSVSetting Form-->
-    <form>
-        <label for="field2">JETCSVSetting:</label>
-        <input type="text" id="field2" name="field2">
-    </form>
-    <button id="field2Button" onclick="updateField2()">Update JETCSVSetting</button>
+    <table id="myTable" style="border: 1px solid black; font-size: 15px; width: 800px; text-align: center">
+        <tr>
+            <th style="padding:5px; font-size:20px; text-align: center; text-decoration: underline">Variable</th>
+            <th style="padding:5px; font-size:20px; text-align: center; text-decoration: underline">Current Value</th>
+            <th style="padding:5px; font-size:20px; text-align: center; text-decoration: underline">New Value</th>
+            <th></th>
+        </tr>
+        <tr>
+            <td style="padding:5px">CreditToAccount</td>
+            <td style="padding:5px" id="ctaCell1"></td>
+            <td style="padding:5px" id="ctaCell2">
+                <form>
+                    <input type="text" id="field1" name="field1">
+                </form>
+            </td>
+            <td style="padding:5px">
+                <button id="field1Button" onclick="updateField1()">Update CreditToAccount</button>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:5px">JETCSVSetting</td>
+            <td style="padding:5px" id="jetcsvCell1"></td>
+            <td style="padding:5px" id="jetcsvCell2">
+                <form>
+                    <input type="text" id="field2" name="field2">
+                </form>
+            </td>
+            <td style="padding:5px">
+                <button id="field2Button" onclick="updateField2()">Update JETCSVSetting</button>
+            </td>
+        </tr>
+    </table>
 
     <script>
         function updateField1() {
             let field1NewValue = document.getElementById("field1").value;
             setValues("CreditToAccount", "" + field1NewValue);
         }
+
         function updateField2() {
             let field2NewValue = document.getElementById("field2").value;
             setValues("JETCSVSetting", "" + field2NewValue);
@@ -51,8 +59,8 @@
                         var jsonResponse = JSON.parse(xhr.responseText);
                         var currentCreditToAccount = jsonResponse.creditToAccount;
                         var currentJETCSVSetting = jsonResponse.jetCSVSetting;
-                        field1Description.innerText = "CreditToAccount: " + currentCreditToAccount;
-                        field2Description.innerText = "JETCSVSetting: " + currentJETCSVSetting;
+                        document.getElementById("ctaCell1").innerHTML = currentCreditToAccount;
+                        document.getElementById("jetcsvCell1").innerHTML = currentJETCSVSetting;
                     }
                     else {
                         alert('Couldn\'t get program income account.');
@@ -98,7 +106,8 @@
                                 callback: function (config, success, xhr) {
                                     if (success) {
                                         getValues();
-
+                                        document.getElementById("field1").value = "";
+                                        document.getElementById("field2").value = "";
                                     }
                                     else {
                                         alert("Unable to update the program income account.  AJAX response failed.");
@@ -116,9 +125,6 @@
                 alert("Unable to update the program income account.  One or more fields are empty.");
             }
         }
-
-
-
     </script>
 </body>
 </html>

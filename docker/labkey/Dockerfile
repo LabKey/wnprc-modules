@@ -16,8 +16,9 @@ ARG LABKEY_TEAMCITY_BUILD=
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
-RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
- && if [[  ! -z "$LABKEY_VERSION" ]] ; then \
+RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
+ && if [ -z "$LABKEY_VERSION" ] ; then \
+         echo -e "No LabKey version, building trunk ";\
         LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
@@ -29,6 +30,13 @@ RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B=""
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     elif [ "$LABKEY_VERSION" = 21.11 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_2111Release_External_Wnprc_Installers2" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+    else  \
+         echo -e "LabKey Version: " ${LABKEY_VERSION}; \
+        GENERAL_LK_VERSION=${LABKEY_VERSION//./}; \
+        LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
@@ -45,7 +53,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" || "$WNPRC_BRANCH" = "develop" ] ; then B=""
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
 
-FROM wnprcehr/tomcat:21.11
+FROM wnprcehr/tomcat:tomcat9_22.7
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

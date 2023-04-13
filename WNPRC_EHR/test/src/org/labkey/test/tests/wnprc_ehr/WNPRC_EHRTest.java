@@ -981,6 +981,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String,Object> rowMap = new HashMap<>();
         rowMap.put("firstName", "Jon");
         rowMap.put("lastName", "Snow");
+        rowMap.put("investigatorType", "Core");
         rowMap.put("emailAddress", INVESTIGATOR_PRINCIPAL.getEmail());
         rowMap.put("userid", getUserId(INVESTIGATOR_PRINCIPAL.getEmail()));
         insertCmd.addRow(rowMap);
@@ -989,6 +990,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap = new HashMap<>();
         rowMap.put("firstName", "Sansa");
         rowMap.put("lastName", "Stark");
+        rowMap.put("investigatorType", "External");
         rowMap.put("emailAddress", INVESTIGATOR.getEmail());
         rowMap.put("userid", getUserId(INVESTIGATOR.getEmail()));
         insertCmd.addRow(rowMap);
@@ -1757,12 +1759,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.tagWithText("span", "Treatments & Procedures"), WAIT_FOR_JAVASCRIPT);
         waitForElement(Locator.name("Id"), WAIT_FOR_JAVASCRIPT);
         waitForElement(Locator.name("title"), WAIT_FOR_JAVASCRIPT);
+        _helper.setDataEntryField("title", MPR_TASK_TITLE);
         _extHelper.selectComboBoxItem("Assigned To:", BASIC_SUBMITTER.getGroup() + "\u00A0"); // appended with a nbsp (Alt+0160)
         _extHelper.setExtFormElementByLabel("Id:", PROJECT_MEMBER_ID + "\t");
         click(Locator.xpath("//div[./label[normalize-space()='Id:']]//input"));
         waitForElement(Locator.linkWithText(PROJECT_MEMBER_ID), WAIT_FOR_JAVASCRIPT);
-        _helper.setDataEntryField("title", MPR_TASK_TITLE);
-        waitAndClick(Locator.name("title"));
 
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
@@ -2817,9 +2818,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Comments:");
         //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
 
-        UUID uid = UUID.randomUUID();
-        fillAnInputByName("principalinvestigator", "Other");
-        fillAnInputByName("externalprincipalinvestigator", uid.toString());
+        //this is dependent on the billing setup above which populates the investigators table
+        fillAnInputByName("principalinvestigator", "Snow, Jon");
         fillAnInputByName("numberofanimals", "23");
         fillAnInputByName("speciesneeded", "Cyno");
         fillAnInputByName("originneeded", "any");
@@ -2851,7 +2851,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.tagWithId("button","submit-final"));
         assertTextPresent("Data Entry");
         SelectRowsCommand sr = new SelectRowsCommand("wnprc","animal_requests");
-        sr.addFilter("externalprincipalinvestigator", uid, Filter.Operator.EQUAL);
+        sr.addFilter("numberofanimals",23, Filter.Operator.EQUAL);
         SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
         Assert.assertTrue(resp.getRowCount().intValue() > 0);
     }

@@ -19,9 +19,9 @@ dependencies {
     BuildUtils.addExternalDependency(
             project,
             new ExternalDependency(
-                    "org.apache.sanselan:sanselan:${sanselanVersion}",
+                    "org.apache.commons:commons-imaging:${commonsImaging}",
                     "Apache Commons Imaging",
-                    "Sanselan",
+                    "Apache",
                     "https://commons.apache.org/proper/commons-imaging/",
                     ExternalDependency.APACHE_2_LICENSE_NAME,
                     ExternalDependency.APACHE_2_LICENSE_URL,

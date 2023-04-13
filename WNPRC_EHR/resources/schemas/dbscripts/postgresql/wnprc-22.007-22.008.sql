@@ -1,4 +1,4 @@
--- conditionalized version of wnprc-22.001-21.002.sql that got added in 22.11
+-- A conditionalized version of wnprc-22.001-21.002.sql that got added in 22.11
 DO $$
 BEGIN
 IF NOT EXISTS(SELECT *
@@ -24,7 +24,7 @@ END IF;
 END
 $$ LANGUAGE plpgsql;
 
--- conditionalized version of wnprc-21.006-21.007.sql (and wnprc-22.001-21.002.sql that was created in develop and backported to 21.11)
+-- A conditionalized version of wnprc-21.006-21.007.sql that was added as a new script 'wnprc-22.001-21.002.sql' in develop (and was backported to 21.11)
 alter table wnprc.animal_requests add column if not exists pregnantanimalsrequiredterminfant varchar(100);
 alter table wnprc.animal_requests add column if not exists pregnantanimalsrequiredtermdam varchar(100);
 alter table wnprc.animal_requests add column if not exists majorsurgery varchar(100);

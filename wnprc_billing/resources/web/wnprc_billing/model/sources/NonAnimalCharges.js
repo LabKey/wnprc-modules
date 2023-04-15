@@ -54,7 +54,8 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                 xtype: 'wnprc_billing-miscchargesdatefield',
                 columnConfig: {
                     width: 125
-                }
+                },
+                defaultValue:  Ext4.Date.format(new Date(), 'Y-m-d')
             },
             chargeGroup: {
                 hidden: false,

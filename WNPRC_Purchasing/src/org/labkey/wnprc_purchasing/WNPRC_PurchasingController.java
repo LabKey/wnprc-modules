@@ -26,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -204,6 +206,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
+    @Marshal(Marshaller.Jackson)
     public class SubmitRequestAction extends MutatingApiAction<RequestForm>
     {
         @Override
@@ -697,7 +700,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
     public static class RequestForm
     {
-        org.json.old.JSONObject[] _lineItems; // Leave in place until BaseApiAction.populateForm() takes a new JSONObject
+        List<JSONObject> _lineItems;
         List<Integer> _lineItemsToDelete;
         Integer _rowId;
         Integer _account;
@@ -733,12 +736,12 @@ public class WNPRC_PurchasingController extends SpringActionController
         Boolean _isNewRequest;
         Boolean _isReorder;
 
-        public org.json.old.JSONObject[] getLineItems()
+        public List<JSONObject> getLineItems()
         {
             return _lineItems;
         }
 
-        public void setLineItems(org.json.old.JSONObject[] lineItems)
+        public void setLineItems(List<JSONObject> lineItems)
         {
             _lineItems = lineItems;
         }

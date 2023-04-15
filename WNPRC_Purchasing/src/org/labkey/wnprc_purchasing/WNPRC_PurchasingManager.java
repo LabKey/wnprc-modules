@@ -17,6 +17,7 @@
 package org.labkey.wnprc_purchasing;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -250,7 +251,7 @@ public class WNPRC_PurchasingManager
             List<Map<String, Object>> updatedLineItemsData = new ArrayList<>();
             List<Map<String, Object>> deleteLineItemsData = new ArrayList<>();
             int index = 0;
-            for (org.json.old.JSONObject lineItem : requestForm.getLineItems())
+            for (JSONObject lineItem : requestForm.getLineItems())
             {
                 row = new CaseInsensitiveHashMap<>();
                 row.put("requestRowId", insertedPurchasingReq.get(0).get("rowId"));

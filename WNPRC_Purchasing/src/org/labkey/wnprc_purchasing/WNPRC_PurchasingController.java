@@ -18,6 +18,7 @@ package org.labkey.wnprc_purchasing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.ActionURL;
@@ -209,6 +211,13 @@ public class WNPRC_PurchasingController extends SpringActionController
     @Marshal(Marshaller.Jackson)
     public class SubmitRequestAction extends MutatingApiAction<RequestForm>
     {
+        @Override
+        protected ObjectMapper createRequestObjectMapper()
+        {
+            // These incoming dates include T and Z
+            return JsonUtil.createDefaultMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+        }
+
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {

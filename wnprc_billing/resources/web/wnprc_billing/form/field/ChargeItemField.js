@@ -51,8 +51,8 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
                         queryName: 'chargeRates',
                         filterArray: [
                             LABKEY.Filter.create('chargeId', chargeId, LABKEY.Filter.Types.EQUAL),
-                            LABKEY.Filter.create('startDate', chargeDateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL),
-                            LABKEY.Filter.create('endDate', chargeDateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL)
+                            LABKEY.Filter.create('startDate', Ext4.Date.format(chargeDateValue, "Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL),
+                            LABKEY.Filter.create('endDate', Ext4.Date.format(chargeDateValue, "Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL)
                         ],
                         columns: 'chargeId, unitCost',
                         failure: LDK.Utils.getErrorCallback(),
@@ -123,8 +123,8 @@ function filterFunction(object,fieldBulk){
 
     returnFilter.push(LABKEY.Filter.create('departmentCode', chargeGroup, LABKEY.Filter.Types.EQUAL));
     if (dateValue) {
-        returnFilter.push(LABKEY.Filter.create('startDate', Ext4.Date.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
-        returnFilter.push(LABKEY.Filter.create('endDate', Ext4.Date.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+        returnFilter.push(LABKEY.Filter.create('startDate', Ext4.Date.format(dateValue,"Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
+        returnFilter.push(LABKEY.Filter.create('endDate', Ext4.Date.format(dateValue,"Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
     }
 
     return returnFilter;

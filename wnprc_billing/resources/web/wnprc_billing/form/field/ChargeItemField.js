@@ -123,8 +123,8 @@ function filterFunction(object,fieldBulk){
 
     returnFilter.push(LABKEY.Filter.create('departmentCode', chargeGroup, LABKEY.Filter.Types.EQUAL));
     if (dateValue) {
-        returnFilter.push(LABKEY.Filter.create('startDate', dateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
-        returnFilter.push(LABKEY.Filter.create('endDate', dateValue.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+        returnFilter.push(LABKEY.Filter.create('startDate', Ext4.Date.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
+        returnFilter.push(LABKEY.Filter.create('endDate', Ext4.Date.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
     }
 
     return returnFilter;

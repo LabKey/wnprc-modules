@@ -58,7 +58,7 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                 xtype: 'wnprc_billing-miscchargesdatefield',
                 columnConfig: {
                     width: 125
-                },
+                }
             },
             chargeGroup: {
                 hidden: false,

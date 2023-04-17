@@ -77,8 +77,16 @@ public class DecoratedTableInfo implements TableInfo {
 
     @Nullable
     @Override
-    public String getSelectName() {
+    public String getSelectName()
+    {
         return _tableInfo.getSelectName();
+    }
+
+    @Nullable
+    @Override
+    public SQLFragment getSQLName()
+    {
+        return _tableInfo.getSQLName();
     }
 
     @Nullable

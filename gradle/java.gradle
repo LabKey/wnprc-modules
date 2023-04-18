@@ -63,7 +63,7 @@ dependencies {
 
 project.evaluationDependsOn(BuildUtils.getApiProjectPath(project.gradle))
 
-tasks.jar {
+tasks.named('jar').configure {
     manifest {
         attributes 'Sealed': 'true'
     }

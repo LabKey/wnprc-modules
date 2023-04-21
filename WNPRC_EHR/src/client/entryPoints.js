@@ -36,5 +36,10 @@ module.exports = {
         title: 'Weight',
         permission: 'login',
         path: './src/client/weight'
+    },{
+        name: 'researchUltrasoundsEntry',
+        title: 'Research Ultrasounds Data Entry',
+        permission: 'login',
+        path: './src/client/researchUltrasoundsEntry'
     }]
 };

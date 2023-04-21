@@ -1,9 +1,9 @@
 <webpart xmlns="http://labkey.org/data/xml/webpart"
-    title="WNPRC Electronic Health Record">
-   <view name="ehrBegin"/>
-   <locations>
-       <location name="body"/>
-       <location name="right"/>
-       <location name="menu"/>
-   </locations>
+         title="WNPRC Electronic Health Record">
+    <view name="ehrBegin"/>
+    <locations>
+        <location name="body"/>
+        <location name="right"/>
+        <location name="menu"/>
+    </locations>
 </webpart>

@@ -12,6 +12,7 @@ App.registerApp<any>('researchUltrasoundsWebpart', (target: string) => {
                 schemaName = {"study"}
                 queryName = {"ResearchUltrasoundsInfo"}
                 formType = {"Research Ultrasounds"}
+                input = {"researchUltrasoundsEntry"}
             />
         </AppContainer>,
         document.getElementById(target)

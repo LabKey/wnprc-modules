@@ -10,6 +10,7 @@ App.registerApp<any>('breedingWebpart', target => {
             schemaName = {"study"}
             queryName = {"ResearchUltrasoundsInfo"}
             formType = {"Research Ultrasounds"}
+            input = {"researchUltrasoundsEntry"}
         />,
         document.getElementById(target));
 });

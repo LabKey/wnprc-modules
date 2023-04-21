@@ -15,6 +15,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             schemaName = {"study"}
             queryName = {"ResearchUltrasoundsInfo"}
             formType = {"Research Ultrasounds"}
+            input = {"researchUltrasoundsEntry"}
         />,
         document.getElementById('app')
     );

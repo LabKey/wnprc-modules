@@ -1498,7 +1498,7 @@ public class WNPRC_EHRController extends SpringActionController
                 case "enter treatments - water":
                 case "enter water daily amount":
                 case "research ultrasounds":
-                    newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
+                    newUrl = new ActionURL(String.format("/wnprc_ehr%s/researchUltrasoundsEntry.view",
                             getContainer().getPath()));
                     // the ExtJS 4 data entry form expects "formType" with a capital 'T'
                     if (params.containsKey(LOWERCASE_FORMTYPE))

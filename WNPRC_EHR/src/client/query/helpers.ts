@@ -2,6 +2,7 @@ import { TaskValuesType } from '../watermonitoring/typings/main';
 import { ActionURL, Filter, Query } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
+import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -97,6 +98,16 @@ export function labkeyActionSelectWithPromise(
   });
 }
 
+export function labkeyActionDistinctSelectWithPromise(
+    options: SelectDistinctOptions
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    options.success = (data) => {resolve(data)};
+    options.failure = (data) => {reject(data)};
+    Query.selectDistinctRows(options);
+  });
+}
+
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getlocations = (location:Array<any>): Array<Promise<any>> => {
@@ -164,7 +175,6 @@ export const lookupAnimalInfo = (id:string) => {
       .catch((data) => {
         reject(data);
       });
-
   });
 };
 
@@ -201,3 +211,84 @@ export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: num
     QCStateLabel: QCStateLabel
   }];
 };
+
+/*
+An expanded helper function for lookupAnimalInfo. This function updates the components animalInfo state.
+Caching has not been implemented yet.
+@param id The animal ID that the user is requesting
+@param setAnimalInfo A state setter for animalInfo
+@param setAnimalInfoState A state setter for animalInfoState
+ */
+export const getAnimalInfo = (id, setAnimalInfo,setAnimalInfoState, setValidId, setAnimalInfoCache) => {
+      lookupAnimalInfo(id).then((d) => {
+        setAnimalInfo(d);
+        setAnimalInfoState("loading-success");
+        setValidId(true);
+        setAnimalInfoCache(d);
+      }).catch((d)=> {
+        setAnimalInfoState("loading-unsuccess");
+        setValidId(false);
+      });
+}
+
+/*
+Helper function to open the DatePicker component
+
+@param caldenderEl calender reference object
+ */
+export const openDatepicker = (calendarEl) => {
+  //@ts-ignore
+  calendarEl.current.setOpen(true);
+};
+
+/*
+Generic state handler for dates, this is only for states that are one object
+
+@param name Name of date object in state
+@param date New date to set
+@param setState Generic state setter for state object
+ */
+export const handleDateChange = (name, date, setState) => {
+  setState((prevState) => ({
+    ...prevState,
+    [name]: date,
+  }));
+};
+
+/*
+Generic state handler, this is only for states that are one object and does not work for dropdown menus
+
+@param event Event of call that needs handling
+@param setState Generic state setter for state object
+ */
+export const handleInputChange = (event, setState) => {
+  const target = event.target;
+  const value = target.type === 'checkbox'
+      ? target.checked
+      : target.value;
+  const name = target.name;
+
+  setState((prevState) => ({
+    ...prevState,
+    [name]: value,
+  }));
+};
+
+/*
+Helper that connects dropdown values to display names and puts them into an available options state.
+
+@param config Configuration for the query to be executed by labkeyActionSelectWithPromise
+@param setState A state setter for the options to be presented in a dropdown selector
+@param value The true value of the dropdown options
+@param display The display value of the dropdown options
+ */
+export const findDropdownOptions = (config, setState, value, display) => {
+
+  labkeyActionSelectWithPromise(config).then(data => {
+    let temp = [];
+    data["rows"].forEach(item => {
+      temp.push({value: item[value], label: item[display]});
+    });
+    setState(temp);
+  });
+}

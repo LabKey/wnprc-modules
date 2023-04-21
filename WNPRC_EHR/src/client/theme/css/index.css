@@ -145,6 +145,40 @@ select.form-control {
   margin-right: 15px;
 }
 
+.panel-portal-beneath {
+  clear: left;
+  max-width: 500px;
+}
+
+.default-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  align-items: stretch;
+}
+
+.panel-input-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.panel-label {
+  text-align: left;
+  margin-right: 10px; /* add margin-right to separate from input */
+  width: 120px;
+}
+
+.panel-input-row input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1; /* update to flex: 1 to take up remaining space */
+}
+
 .animal-info-pane {
   position: fixed;
   transform: translate(115%);
@@ -222,4 +256,21 @@ select[id^="restraint"] {
     top: 1px;
     cursor: pointer;
   }
+}
+
+.my-datepicker-popper {
+  z-index: 9999; /* Ensure the popper is displayed above other elements */
+}
+
+.react-datepicker__time-container {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: calc(100% + 5px);
+}
+
+/*
+Text input box is red if required
+ */
+.required-text {
+  margin-left: 10px;
 }

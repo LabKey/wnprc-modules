@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
+import "../theme/css/index.css";
+
 
 interface TextInputProps {
   name: string;
@@ -11,6 +13,8 @@ interface TextInputProps {
   onFocus?: any;
   required: boolean;
   autoFocus: boolean;
+  readOnly?: boolean;
+  isValid?: boolean;
 }
 
 const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
@@ -24,8 +28,14 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
     onFocus,
     required,
     autoFocus,
+    readOnly,
+    isValid,
   } = props;
-
+  const borderColor = required && value === ''
+      ? 'red'
+      : isValid === false
+      ? 'red'
+      : null;
   return (
     <>
       <input
@@ -33,13 +43,18 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
         name={name}
         id={id}
         className={className}
+        style={{ borderColor: borderColor }}
         value={value}
         onChange={onChange}
         onBlur={onBlur}
         onFocus={onFocus}
         required={required}
         autoFocus={autoFocus}
+        readOnly={readOnly}
       />
+      {isValid === false ? (<div className={"required-text"}>Invalid</div>)
+          : required && value === '' && ( <div className={"required-text"}>Required</div>
+      )}
     </>
   );
 };

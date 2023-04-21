@@ -14,6 +14,7 @@ interface configProps {
     schemaName: string;
     queryName: string;
     formType: string;
+    input?: string;
 }
 
 /*
@@ -27,7 +28,8 @@ component.
 export const GridPanelConfig: FC<configProps> = ({
     schemaName,
     queryName,
-    formType
+    formType,
+    input
     }) => {
 
     const serverContext = withAppUser(getServerContext());
@@ -47,6 +49,7 @@ export const GridPanelConfig: FC<configProps> = ({
                 <DefaultGridPanel
                     queryConfigs={queryConfigs}
                     formType={formType}
+                    input = {input}
                     autoLoad
                 />
             </AppContextProvider>

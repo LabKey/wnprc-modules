@@ -2,21 +2,19 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 
+//Context for Entry Page
+import {ContextProvider} from './ContextProvider';
 // Main react component
-import { GridPanelConfig } from '../components/GridPanelConfig';
-
+import {ResearchUltrasoundFormContainer} from './ResearchUltrasoundFormContainer';
 // Import stylesheets
-import "../wnprc_ehr.scss";
+import '../wnprc_ehr.scss';
 
 const render = () => {
     ReactDOM.render(
         <AppContainer>
-            <GridPanelConfig
-                schemaName = {"study"}
-                queryName = {"ResearchUltrasoundsInfo"}
-                formType = {"Research Ultrasounds"}
-                input = {"researchUltrasoundsEntry"}
-            />
+            <ContextProvider>
+                <ResearchUltrasoundFormContainer />
+            </ContextProvider>
         </AppContainer>,
         document.getElementById('app')
     )

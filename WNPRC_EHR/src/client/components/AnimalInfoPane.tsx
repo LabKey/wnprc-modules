@@ -46,7 +46,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   if (infoState == "loading-success") {
     return (
       <div>
-        <Table responsive="sm" className="animal-info-table">
+        <Table responsive className="animal-info-table">
           <tbody>
           <tr>
             <td>Id</td>

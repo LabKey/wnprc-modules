@@ -11,6 +11,7 @@ import {
 interface myProps {
     formType: string;
 
+    input?: string;
 }
 
 
@@ -25,7 +26,8 @@ type Props = myProps & InjectedQueryModels;
 const DefaultGridPanelImpl: FC<Props> = ({
     actions,
     queryModels,
-    formType
+    formType,
+    input
     }) => {
 
     //declare any states here
@@ -38,7 +40,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
     };
 
     const onInsert = () => {
-        window.location = LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.ActionURL.getContainer(), {
+        window.location = LABKEY.ActionURL.buildURL('wnprc_ehr', input , LABKEY.ActionURL.getContainer(), {
             formType: formType,
             returnUrl: window.location
         })
@@ -51,9 +53,9 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 <button className={'labkey-button'} onClick={onRefreshGrid}>
                     Refresh Grid
                 </button>
-                <button className={'labkey-button'} onClick={onInsert}>
+                {input && <button className={'labkey-button'} onClick={onInsert}>
                     Insert New
-                </button>
+                </button>}
             </div>
 
         )

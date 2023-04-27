@@ -1,8 +1,10 @@
 import { TaskValuesType } from '../watermonitoring/typings/main';
-import { ActionURL, Filter, Query } from '@labkey/api';
+import { ActionURL, Filter, Query, Utils } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
+import { useState } from 'react';
+import { ModifyRowsCommands } from '../weight/typings/main';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -199,7 +201,7 @@ export const insertTaskCommand = (taskid, title) => {
   return taskCommand;
 
 };
-
+/*
 export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: number, QCStateLabel: string): Array<TaskValuesType> => {
   return [{
     taskId: taskId,
@@ -210,7 +212,7 @@ export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: num
     formType: "Enter Water Daily Amount",
     QCStateLabel: QCStateLabel
   }];
-};
+}; */
 
 /*
 An expanded helper function for lookupAnimalInfo. This function updates the components animalInfo state.
@@ -219,15 +221,13 @@ Caching has not been implemented yet.
 @param setAnimalInfo A state setter for animalInfo
 @param setAnimalInfoState A state setter for animalInfoState
  */
-export const getAnimalInfo = (id, setAnimalInfo,setAnimalInfoState, setValidId, setAnimalInfoCache) => {
+export const getAnimalInfo = (id, setAnimalInfo,setAnimalInfoState, setAnimalInfoCache) => {
       lookupAnimalInfo(id).then((d) => {
         setAnimalInfo(d);
         setAnimalInfoState("loading-success");
-        setValidId(true);
         setAnimalInfoCache(d);
       }).catch((d)=> {
         setAnimalInfoState("loading-unsuccess");
-        setValidId(false);
       });
 }
 
@@ -251,7 +251,7 @@ Generic state handler for dates, this is only for states that are one object
 export const handleDateChange = (name, date, setState) => {
   setState((prevState) => ({
     ...prevState,
-    [name]: date,
+    [name]: {value: date, error: ""}
   }));
 };
 
@@ -270,7 +270,7 @@ export const handleInputChange = (event, setState) => {
 
   setState((prevState) => ({
     ...prevState,
-    [name]: value,
+    [name]: {value: value, error: ""}
   }));
 };
 
@@ -290,5 +290,241 @@ export const findDropdownOptions = (config, setState, value, display) => {
       temp.push({value: item[value], label: item[display]});
     });
     setState(temp);
+  });
+}
+
+
+/*
+Helper that finds the accounts associated with a project
+
+@param projectId A project ID that you want to find the account of
+ */
+export const findAccount = async (projectId) => {
+  let config: SelectDistinctOptions = {
+    schemaName: "ehr",
+    queryName: "project",
+    column: "account",
+    filterArray: [
+      Filter.create(
+          "project",
+          projectId,
+          Filter.Types.EQUALS
+      )
+    ]
+  };
+  const data = await labkeyActionDistinctSelectWithPromise(config);
+  return {value: data["values"][0], error: ""};
+}
+
+/*
+Helper that finds the projects associated with an animal
+
+@param projectId A project ID that you want to find the account of
+ */
+export const findProjects = async (animalId) => {
+  let config: SelectDistinctOptions = {
+    schemaName: "study",
+    queryName: "Assignment",
+    column: "project",
+    filterArray: [
+      Filter.create(
+          "Id",
+          animalId,
+          Filter.Types.EQUALS
+      )
+    ]
+  };
+
+  const data = await labkeyActionDistinctSelectWithPromise(config);
+
+  let temp = [];
+  // Default projects, these should always show
+  temp.push({value:300901, label:"300901"});
+  temp.push({value:400901, label:"400901"});
+
+  data["values"].forEach(item => {
+    // we don't want defaults added twice if an animal has already been in one
+    if (item === 300901 || item === 400901) return;
+    temp.push({value: item, label: item});
+  });
+
+  return temp;
+}
+
+/*
+General validation helper function for form submission, currently only checks for valid id, and living status
+
+@props animalInfoCache Cache of animalInfos to reference for validity
+@props formData Form data to validate, see triggerSubmit() for more details
+@props setShowModal  see triggerSubmit() for more details
+@props setErrorText see triggerSubmit() for more details
+ */
+export const validate = async (animalInfoCache, formData, setShowModal, setErrorText) => {
+  return new Promise((resolve, reject) => {
+    let promises = [];
+    try
+    {
+      for (let record of formData) {
+        if (animalInfoCache && animalInfoCache[record["id"]["value"]]) {
+          let animalRecord = animalInfoCache[record["id"]["value"]];
+          if (animalRecord["calculated_status"] == "Dead") {
+            setErrorText("Cannot update dead animal record " + record["id"]["value"]);
+            setShowModal("none");
+            setShowModal("error");
+            //return false;
+            resolve(false);
+          }
+        } else {
+          promises.push(lookupAnimalInfo(record["id"]["value"]));
+        }
+      }
+    } catch(err) {
+      console.log(JSON.stringify(err));
+    }
+    Promise.all(promises).then((results) => {
+
+      try
+      {
+        for (let result of results)
+        {
+          if (result["calculated_status"] == "Dead")
+          {
+            setErrorText("Cannot update dead animal record: " + result["id"]);
+            resolve(false);
+          }
+        }
+      } catch (err) {
+        console.log(JSON.stringify(err));
+      }
+      resolve(true);
+    }).catch((d)=>{
+      if (d.rows.length == 0){
+        setErrorText("One or more animals not found. Unable to submit records.")
+      } else {
+        setErrorText("Unknown error. Unable to submit records.")
+      }
+      console.log(d);
+      resolve(false);
+    });
+  });
+};
+
+/*
+Main submit handler for forms
+
+@props animalInfoCache The cache of info per animal for validation
+@props formData Can be either rowObj or array<rowObj> if form is a single entry or batch
+@props setSubmitTextBody handles the submission text for showModal
+@props setShowModal handles the modal that appears when user clicks submit
+@props setErrorText handles error texts for showModal if any occur
+@props schemaName Name of schema to submit to
+@props queryName Name of table of schema to submit to
+*/
+
+export const triggerSubmit = async (
+    animalInfoCache,
+    formData,
+    setSubmitTextBody,
+    setShowModal,
+    setErrorText,
+    schemaName,
+    queryName,
+    ): Promise<any> => {
+
+  // Check if formData is a single submission (rowObj) or batch (array<rowObj>)
+  if(!Array.isArray(formData)){
+    formData = [formData]
+  }
+  let jsonData;
+  //do some validation here
+  setSubmitTextBody("One moment. Performing validations...");
+  await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
+    if (!d) {
+      setShowModal("none");
+      setShowModal("error");
+      setSubmitTextBody("Submit values?");
+      return;
+    }
+
+    /*let command = wasSaved || editMode ? "update" : "insert";*/
+    setSubmitTextBody("Submitting...");
+
+    console.log('grouping stuff... but skipping group cmds');
+    try {
+      console.log('grouping stuff')
+      let itemsToInsert = groupCommands(formData);
+      console.log('setting up stuff')
+      console.log("items: ", itemsToInsert);
+      jsonData = setupJsonData(itemsToInsert, schemaName, queryName);
+    }catch(err) {
+      console.log(err);
+      console.log(JSON.stringify(err))
+      return;
+    }
+    console.log("jsonData: ", jsonData);
+    console.log('calling save rows');
+
+    /*
+    saveRowsDirect(jsonData)
+        .then((data) => {
+            console.log('done!!');
+            console.log(JSON.stringify(data));
+            setSubmitTextBody("Success!");
+            wait(3, setSubmitTextBody).then(() => {
+                window.location.href = ActionURL.buildURL(
+                    "ehr",
+                    "executeQuery.view?schemaName=study&query.queryName=research_ultrasounds",
+                    ActionURL.getContainer()
+                );
+            });
+        })
+        .catch((e) => {
+            console.log(e);
+            setSubmitTextBody(e.exception);
+        }); */
+  });
+  return jsonData;
+}
+
+/*
+TODO create special handler for task submission (this is special)
+ */
+export const generateTask = (
+    taskState,
+    command
+) => {
+
+  return({
+    schemaName: "ehr",
+    queryName: "tasks",
+    command: command,
+    rows: [{
+      taskId: taskState.taskId.value || Utils.generateUUID().toUpperCase(),
+      duedate: taskState.taskDueDate.value,
+      assignedTo: taskState.taskAssignedTo.value,
+      category: taskState.taskCategory.value,
+      title: taskState.taskTitle.value,
+      formType: taskState.taskFormType.value,
+      QCStateLabel: taskState.taskQCStateLabel.value
+    }],
+  });
+}
+
+export const generateRestraint = (
+    restraintState,
+    command
+) => {
+
+  return({
+    schemaName: "study",
+    queryName: "restraints",
+    command: command,
+    rows: [{
+      Id: restraintState.animalid.value,
+      restraintType: restraintState.restraint.value,
+      taskid: restraintState.taskId,
+      objectid: restraintState.restraint.objectid,
+      date: restraintState.date.value
+    }],
   });
 }

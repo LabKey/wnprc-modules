@@ -12,8 +12,8 @@ export const RestraintPane: FC<any> = (props) => {
     const [restraintTypes, setRestraintTypes]  = useState<Array<any>>([]);
 
     const [resState, setResState] = useState({
-        restraintRemark: "",
-        resType: "",
+        restraintRemark: { value: "", error: "" },
+        resType: { value: "", error: "" },
     });
 
     // Update higher form state
@@ -50,7 +50,7 @@ export const RestraintPane: FC<any> = (props) => {
                         classname="navbar__search-form"
                         required={false}
                         isClearable={true}
-                        value={resState.resType}
+                        value={resState.resType.value}
                         setState={setResState}
                     />
                 </div>
@@ -66,7 +66,7 @@ export const RestraintPane: FC<any> = (props) => {
                             id={`id_${"restraintRemark"}`}
                             className="form-control"
                             rows={3}
-                            value={resState.restraintRemark}
+                            value={resState.restraintRemark.value}
                             onChange={(event) => handleInputChange(event, setResState)}
                             required={false}
                             autoFocus={false}

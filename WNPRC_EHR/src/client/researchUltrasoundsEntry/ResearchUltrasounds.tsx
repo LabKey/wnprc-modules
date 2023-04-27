@@ -1,36 +1,25 @@
 import * as React from "react";
-import { FC, useContext, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import "../theme/css/index.css";
-import InputLabel from '../components/InputLabel';
-import TextInput from '../components/TextInput';
 import {
     getAnimalInfo,
-    handleInputChange,
-    openDatepicker,
-    handleDateChange,
-    findDropdownOptions, labkeyActionSelectWithPromise, labkeyActionDistinctSelectWithPromise
+    findDropdownOptions,
+    findAccount,
+    findProjects
 } from '../query/helpers';
-import { AppContext } from "./ContextProvider";
-import DateInput from '../components/DateInput';
-import { ActionURL, Filter } from '@labkey/api';
-import DatePicker from 'react-datepicker';
-import DropdownSearch from '../components/DropdownSearch';
-import Checkbox from '../components/Checkbox';
-import BulkTextInput from '../components/BulkTextInput';
-import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
+import { Filter } from '@labkey/api';
+import BulkFormInput from '../components/BulkFormInput';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 export const ResearchUltrasounds: FC<any> = (props) => {
-    const { setAnimalInfoState, setAnimalInfo, setAnimalInfoCache, validId, setValidId} = useContext(AppContext);
-
-    const {onStateChange} = props;
-    // This state is strictly for the form values
+    const {setAnimalInfo, setAnimalInfoState, setAnimalInfoCache, onStateChange} = props;
+    // This state is strictly for the form values, more added later but these must be defined here
     const [state, setState] = useState({
-        id: '',
-        date: new Date(),
-        idPregnancies: '',
-        idProject: null,
-        account: '',
+        id: { value: "", error: "" },
+        date: { value: new Date(), error: "" },
+        idPregnancies: { value: "", error: "" },
+        idProject: { value: null, error: "" },
+        account: { value: "", error: "" },
     });
 
     // These states are options for dropdowns, not the value that is selected
@@ -41,8 +30,8 @@ export const ResearchUltrasounds: FC<any> = (props) => {
 
     // Finds the animal info for the id on update and checks if valid for form submission
     useEffect(() => {
-        getAnimalInfo(state.id, setAnimalInfo, setAnimalInfoState,setValidId, setAnimalInfoCache);
-    },[state.id]);
+        getAnimalInfo(state.id.value, setAnimalInfo, setAnimalInfoState, setAnimalInfoCache);
+    },[state.id.value]);
 
     // find pregnancies for id, update when id changes
     useEffect(() => {
@@ -53,168 +42,52 @@ export const ResearchUltrasounds: FC<any> = (props) => {
             filterArray: [
                 Filter.create(
                     "lsid",
-                    state.id,
+                    state.id.value,
                     Filter.Types.CONTAINS
                 )
             ]
         };
         findDropdownOptions(config, setPregOptions, 'lsid','date_conception');
-    }, [state.id]);
+    }, [state.id.value]);
 
     // Find projects for animal id
     useEffect(() => {
-        if(!validId) return;
-        let config: SelectDistinctOptions = {
-            schemaName: "study",
-            queryName: "Assignment",
-            column: "project",
-            filterArray: [
-                Filter.create(
-                    "Id",
-                    state.id,
-                    Filter.Types.EQUALS
-                )
-            ]
-        };
-
-        labkeyActionDistinctSelectWithPromise(config).then(data => {
-            let temp = [];
-            // Default projects, these should always show
-            temp.push({value:300901, label:"300901"});
-            temp.push({value:400901, label:"400901"});
-
-            data["values"].forEach(item => {
-                // we don't want them added twice if an animal has already been in a default project
-                if (item === 300901 || item === 400901) return;
-                temp.push({value: item, label: item});
-            });
-            setProjectOptions(temp);
+        findProjects(state.id.value).then(newProjects => {
+            setProjectOptions(newProjects);
         });
-
-    }, [validId]);
+    }, [state.id.value]);
 
     // Find account for project
     useEffect(() => {
         // Clears account if project is also cleared
-        if(state.idProject === null) {
-            setState({...state,account: ''});
+        if(state.idProject.value === null) {
+            setState({...state,account: { value: "", error: "" }});
             return;
         }
 
-        let config: SelectDistinctOptions = {
-            schemaName: "ehr",
-            queryName: "project",
-            column: "account",
-            filterArray: [
-                Filter.create(
-                    "project",
-                    state.idProject,
-                    Filter.Types.EQUALS
-                )
-            ]
-        };
-
-        labkeyActionDistinctSelectWithPromise(config).then(data => {
-            setState({...state,account: data["values"][0]});
+        findAccount(state.idProject.value).then(newAccount => {
+            setState({...state, account: newAccount});
         });
-
-    }, [state.idProject]);
+    }, [state.idProject.value]);
 
     // Updates state in form container
     useEffect(() => {
         onStateChange(state);
-        console.log(state);
     },[state]);
 
+    // Check for valid id??
     return (
         <>
             <div className="panel-heading">
                 <h3>Research Ultrasounds</h3>
             </div>
             <div className={'default-form'}>
-                <div className="panel-input-row">
-                    <InputLabel
-                        labelFor="id"
-                        label="Id"
-                        className={'panel-label'}
-                    />
-                    <TextInput
-                        name="id"
-                        id={`id_${'animalId'}`}
-                        className="form-control"
-                        value={state.id}
-                        onChange={(event) => handleInputChange(event,setState)}
-                        required={true}
-                        autoFocus={false}
-                        isValid={validId}
-                    />
-                </div>
-
-                <div className="panel-input-row">
-                    <InputLabel
-                        labelFor="date"
-                        label="Date"
-                        className={'panel-label'}
-                    />
-                    <DatePicker
-                        ref={(r) => (calendarEl.current = r)}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
-                        todayButton="Today"
-                        selected={state.date}
-                        className="form-control"
-                        name="dueDate"
-                        onChange={(date) => handleDateChange("date", date, setState)}
-                        customInput={
-                            <DateInput
-                                opendate={() => openDatepicker(calendarEl)}
-                                iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
-                        }
-                        popperClassName={"my-datepicker-popper"}
-                    />
-                </div>
-
-                <div className={"panel-input-row"}>
-                    <InputLabel
-                        labelFor={'idPregnancies'}
-                        label={'Pregnancy (Conc. Date)'}
-                        className = {'panel-label'}
-                    />
-                    <DropdownSearch
-                        options={pregOptions}
-                        initialvalue={null}
-                        name="idPregnancies"
-                        id={`id_${'idPregnancies'}`}
-                        classname="navbar__search-form"
-                        required={false}
-                        isClearable={true}
-                        value={state.idPregnancies}
-                        setState={setState}
-                    />
-                </div>
-
-                <div className={"panel-input-row"}>
-                    <InputLabel
-                        labelFor={'idProject'}
-                        label={'Project'}
-                        className = {'panel-label'}
-                    />
-                    <DropdownSearch
-                        options={projectOptions}
-                        initialvalue={null}
-                        name="idProject"
-                        id={`id_${'idProject'}`}
-                        classname="navbar__search-form"
-                        required={false}
-                        isClearable={true}
-                        value={state.idProject}
-                        setState={setState}
-                    />
-                </div>
-
-               
-                <BulkTextInput
+                <BulkFormInput
                     inputField={[
+                        {name: "id", label: "Id", type: "text"},
+                        {name: "date", label: "Date", type: "date", calendarEl: calendarEl},
+                        {name: "idPregnancies", label: "Pregnancy (Conc. Date)", type: "dropdown", options: pregOptions},
+                        {name: "idProject", label: "Project", type: "dropdown", options: projectOptions},
                         {name: "account", label: "Account", type: "text"},
                         {name: "fetalHB", label: "Fetal HB", type: "checkbox"},
                         {name: "crownRump", label: "Crown Rump (mm)", type: "text"},
@@ -254,8 +127,8 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                     ]
                     }
                     state={state}
-                    handleInputChange={(event) => handleInputChange(event,setState)}
-                    required={[32]}
+                    setState={setState}
+                    required={["id","perfBy"]}
                 />
             </div>
         </>

@@ -37,7 +37,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         const value = selectedOption ? selectedOption.value : null;
         setState((prevState) => ({
             ...prevState,
-            [name]: value,
+            [name]: {value: value, error: ""}
         }));
     };
 

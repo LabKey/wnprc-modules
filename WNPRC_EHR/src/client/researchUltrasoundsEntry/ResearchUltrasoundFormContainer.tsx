@@ -1,24 +1,25 @@
 import * as React from "react";
-import { useEffect, useState, useContext, useRef } from "react";
-//import { AppContext } from "./ContextProvider.tsx";
+import { useEffect, useState } from "react";
 import "../theme/css/react-datepicker.css";
 import "../theme/css/index.css";
-import SubmitModal from "../components/SubmitModal";
-import {
-    groupCommands,
-    lookupAnimalInfo,
-    setupJsonData,
-} from "../query/helpers";
+import { generateTask, triggerSubmit } from '../query/helpers';
 import AnimalInfoPane from "../components/AnimalInfoPane";
 import {TaskPane} from "../components/TaskPane";
 import { ResearchUltrasounds } from './ResearchUltrasounds';
-import {AppContext} from './ContextProvider';
 import {RestraintPane} from '../components/RestraintPane';
 import ErrorModal from '../feeding/base/ErrorModal';
-
+import { InfoProps, infoStates } from './typings';
+import { StatusStates,TaskValuesType } from '../typings/taskPaneTypes';
+import { Utils } from '@labkey/api';
 
 export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (props) => {
-    const {animalInfo, animalInfoState, taskStatus, taskTitle,validId, formData, animalInfoCache, setAnimalInfoCache} = useContext(AppContext);
+
+    const finalJsonData = [];
+    const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
+    const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
+    const [animalInfoCache, setAnimalInfoCache] = useState<any>();
+
+    const [taskStatus, setTaskStatus] = useState<StatusStates>("In Progress");
 
     // States for each subcomponent on the page. Each of their states will propagate upwards into these states
     const [taskPaneState, setTaskPaneState] = useState({});
@@ -29,122 +30,63 @@ export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (pr
     const [showModal, setShowModal] = useState<string>();
     const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
 
+    const [formData, setFormData] = useState({
+            lsid: { value: "", error: "" },
+            command: { value: "insert", error: "" },
+            QCStateLabel: { value: taskStatus, error: "" },
+        }
+    );
+
     //"study", "research_ultrasounds", "Research Ultrasounds"
 
-    const validate = () => {
-        return new Promise((resolve, reject) => {
-            let promises = [];
-            console.log("formData: ", formData);
-            console.log("animalCache: ", animalInfoCache);
-            try
-            {
-                for (let record of formData)
-                {
-                    console.log("record: ", record);
-                    if (animalInfoCache && animalInfoCache[record["Id"]["value"]])
-                    {
-                        let animalRecord = animalInfoCache[record["Id"]["value"]];
-                        if (animalRecord["calculated_status"] == "Dead")
-                        {
-                            setErrorText("Cannot update dead animal record " + record["Id"]["value"]);
-                            setShowModal("none");
-                            setShowModal("error");
-                            //return false;
-                            resolve(false);
-                        }
-                    }
-                    else
-                    {
-                        promises.push(lookupAnimalInfo(record["Id"]["value"]));
-                    }
-                }
-            } catch(err) {
-                console.log(JSON.stringify(err));
-            }
-            Promise.all(promises).then((results) => {
-
-                try
-                {
-                    for (let result of results)
-                    {
-                        if (result["calculated_status"] == "Dead")
-                        {
-                            setErrorText("Cannot update dead animal record: " + result["Id"]);
-                            resolve(false);
-                        }
-                    }
-                } catch (err) {
-                    console.log(JSON.stringify(err));
-                }
-                resolve(true);
-            }).catch((d)=>{
-                if (d.rows.length == 0){
-                    setErrorText("One or more animals not found. Unable to submit records.")
-                } else {
-                    setErrorText("Unknown error. Unable to submit records.")
-                }
-                console.log(d);
-                resolve(false);
-            });
+    //Update form data if a component state changes
+    useEffect(() => {
+        setFormData({
+            ...formData,
+            ...taskPaneState,
+            ...researchPaneState,
+            ...restraintPaneState,
         });
-    };
+    }, [taskPaneState, researchPaneState, restraintPaneState]);
 
-    function triggerSubmit() {
-        //do some validation here
-        setSubmitTextBody("One moment. Performing validations...");
-        validate().then((d) => {
-            if (!d) {
-                setShowModal("none");
-                setShowModal("error");
-                setSubmitTextBody("Submit values?");
-                return;
+
+    //This function is used to pair all the submission data into one variable
+    // to pass to saveRowsDirect. For this form that is tasks, research ultrasounds, and restraints
+    const generateData = async () => {
+        finalJsonData.push(generateTask(taskPaneState, "insert"));
+        try {
+            const tempData = await triggerSubmit(
+                animalInfoCache,
+                formData,
+                setSubmitTextBody,
+                setShowModal,
+                setErrorText,
+                "study",
+                "research_ultrasounds");
+
+            for (const item of tempData.commands) {
+                finalJsonData.push(item);
             }
+        }
+        catch (error) {console.log(error);}
 
-            /*let command = wasSaved || editMode ? "update" : "insert";*/
-            setSubmitTextBody("Submitting...");
-
-
-            let jsonData;
-            console.log('grouping stuff... but skipping group cmds');
-            try {
-                console.log('grouping stuff')
-                let itemsToInsert = groupCommands(formData);
-                console.log('setting up stuff')
-                jsonData = setupJsonData(itemsToInsert, "study", "research_ultrasounds");
-            }catch(err) {
-                console.log(JSON.stringify(err))
-            }
-            console.log(jsonData);
-            /*
-            console.log('calling save rows');
-            saveRowsDirect(jsonData)
-                .then((data) => {
-                    console.log('done!!');
-                    console.log(JSON.stringify(data));
-                    setSubmitTextBody("Success!");
-                    wait(3, setSubmitTextBody).then(() => {
-                        window.location.href = ActionURL.buildURL(
-                            "ehr",
-                            "executeQuery.view?schemaName=study&query.queryName=research_ultrasounds",
-                            ActionURL.getContainer()
-                        );
-                    });
-                })
-                .catch((e) => {
-                    console.log(e);
-                    setSubmitTextBody(e.exception);
-                }); */
-        });
+        //finalJsonData.push
     }
 
     // Form submission handler
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log("hello");
+        await generateData();
         console.log("Tasks: ",taskPaneState);
         console.log("Research: ",researchPaneState);
         console.log("Restraint: ",restraintPaneState);
-        //triggerSubmit();
+
+        // Generate taskUUID here? or in trigger submit, might run into errors... no use generating if I not gonna use
+        // if in trigger submit then I have to add support for submissions that dont use tasks, possible?
+
+        console.log("formData: ", formData);
+
+        console.log("top commands: ", finalJsonData);
     }
 
     return (
@@ -158,14 +100,18 @@ export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (pr
                 <form className={'default-form'} onSubmit={handleSubmit}>
                     <div className="col-xs-6 panel panel-portal panel-portal-left">
                         <TaskPane
-                            title={taskTitle}
+                            title={"Research Ultrasounds"}
                             status={taskStatus}
                             onStateChange={setTaskPaneState}
+                            formType={"Research Ultrasounds"}
                         />
                     </div>
                     <div className={"col-xs-6 panel panel-portal panel-portal-beneath"}>
                         <ResearchUltrasounds
                             onStateChange={setResearchPaneState}
+                            setAnimalInfo={setAnimalInfo}
+                            setAnimalInfoState={setAnimalInfoState}
+                            setAnimalInfoCache={setAnimalInfoCache}
                         />
                     </div>
                     <div className="col-xs-5 panel panel-portal animal-info-pane">
@@ -184,7 +130,6 @@ export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (pr
                         <button
                             type="submit"
                             className={`btn btn-primary submit-btn ${false ? "saving" : ""}`}
-                            disabled={!validId}
                         >
                             Submit For Review
                         </button>

@@ -1,20 +1,3 @@
-export interface ContextProps {
-  animalInfo: any;
-  animalInfoState: string;
-  setAnimalInfoState: any;
-  setAnimalInfo: any;
-  taskStatus: any;
-  setTaskStatus: any;
-  taskTitle: any;
-  setTaskTitle: any;
-  validId: any;
-  setValidId: any;
-  formData: any;
-  animalInfoCache: any;
-  setAnimalInfoCache: any;
-
-}
-
 export interface ConfigProps {
   schemaName: string;
   queryName: string;
@@ -36,6 +19,8 @@ export interface InfoProps {
   _labkeyurl_dam: string;
   birth: string;
   _labkeyurl_birth: string;
+  medical: string;
+  _labkeyurl_gender: string;
 }
 
 export type infoStates =

@@ -1,8 +1,8 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import {
     GridPanel,
-    InjectedQueryModels,
+    InjectedQueryModels, QueryInfo, QueryModel,
     withQueryModels
 } from '@labkey/components';
 
@@ -31,6 +31,26 @@ const DefaultGridPanelImpl: FC<Props> = ({
     }) => {
 
     //declare any states here
+    const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
+
+    useEffect(() => {
+        console.log("Start");
+        if(queryModels?.containersModel?.queryInfo) {
+            const {containersModel} = queryModels;
+            const {queryInfo} = containersModel;
+            const column = queryInfo.getColumn("reviewcompleted");
+            const allColumns = queryInfo.get("columns");
+            const newColumn = column.set("cell", cellRender);
+            const columns = allColumns.set("reviewcompleted", newColumn);
+            const newQueryInfo = QueryInfo.create({...queryInfo, columns});
+            const newModel = {...containersModel, ...{"queryInfo": newQueryInfo}} as QueryModel;
+            setQueryModel(newModel);
+        }
+    },[queryModels, actions]);
+
+    const cellRender = () => {
+        console.log("cellRender");
+    };
 
     const onRefreshGrid = () => {
 
@@ -61,16 +81,17 @@ const DefaultGridPanelImpl: FC<Props> = ({
         )
     };
 
-    const { containersModel } = queryModels;
 
     return (
-        <GridPanel
-            model={containersModel}
-            ButtonsComponent={renderGridButtons}
-            actions={actions}
-            asPanel={true}
-            showSearchInput={false}
-        />
+        <div>
+            {queryModel?.queryInfo && <GridPanel
+                model={queryModel}
+                ButtonsComponent={renderGridButtons}
+                actions={actions}
+                asPanel={true}
+                showSearchInput={false}
+            />}
+        </div>
     );
 
 }

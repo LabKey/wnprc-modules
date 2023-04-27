@@ -1,7 +1,6 @@
 import * as React from "react";
 import { FC, useEffect, useRef, useState } from 'react';
 import TextInput from './TextInput';
-//import {TextInput} from "@labkey/components";
 import InputLabel from './InputLabel';
 import "../theme/css/index.css";
 import { ConfigProps } from '../weight/typings/main';
@@ -10,17 +9,20 @@ import DateInput from './DateInput';
 import { ActionURL } from '@labkey/api';
 import DatePicker from 'react-datepicker';
 import {openDatepicker, handleDateChange, handleInputChange, findDropdownOptions} from '../query/helpers';
+import { TaskValuesType } from '../typings/taskPaneTypes';
 
 export const TaskPane: FC<any> = (props) =>{
 
-    const {id, status, title, onStateChange} = props;
+    const {id, status, title, onStateChange, formType} = props;
 
-    const [taskState, setTaskState] = useState({
-        taskId: id,
-        taskTitle: title,
-        taskAssign: null,
-        dueDate: new Date(),
-        taskStatus: status
+    const [taskState, setTaskState] = useState<TaskValuesType>({
+        taskId: { value: id, error: "" },
+        taskTitle: { value: title, error: "" },
+        taskAssignedTo: { value: null, error: "" },
+        taskCategory: {value: 'task', error: ""},
+        taskDueDate: { value: new Date(), error: "" },
+        taskFormType: {value: formType, error: ""},
+        taskQCStateLabel: { value: status, error: "" },
     });
 
     const [assignTypes, setAssignTypes] = useState<Array<any>>([]);
@@ -58,7 +60,7 @@ export const TaskPane: FC<any> = (props) =>{
                         name="taskId"
                         id={`id_${'taskId'}`}
                         className="form-control"
-                        value={taskState.taskId}
+                        value={taskState.taskId.value}
                         onChange={(event) => handleInputChange(event, setTaskState)}
                         required={false}
                         autoFocus={false}
@@ -76,7 +78,7 @@ export const TaskPane: FC<any> = (props) =>{
                         id={`id_${'taskTitle'}`}
                         className="form-control"
                         onChange={(event) => handleInputChange(event, setTaskState)}
-                        value={taskState.taskTitle}
+                        value={taskState.taskTitle.value}
                         required={true}
                         autoFocus={false}
                     />
@@ -84,26 +86,26 @@ export const TaskPane: FC<any> = (props) =>{
 
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskAssign'}
+                        labelFor={'taskAssignedTo'}
                         label={'Assigned To'}
                         className = {'panel-label'}
                     />
                     <DropdownSearch
                         options={assignTypes}
                         initialvalue={null}
-                        name="taskAssign"
-                        id={`id_${'taskAssign'}`}
+                        name="taskAssignedTo"
+                        id={`id_${'taskAssignedTo'}`}
                         classname="navbar__search-form"
                         required={true}
                         isClearable={true}
-                        value={taskState.taskAssign}
+                        value={taskState.taskAssignedTo.value}
                         setState={setTaskState}
                     />
                 </div>
 
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'dueDate'}
+                        labelFor={'taskDueDate'}
                         label={'Due Date'}
                         className = {'panel-label'}
                     />
@@ -112,10 +114,10 @@ export const TaskPane: FC<any> = (props) =>{
                         showTimeSelect
                         dateFormat="yyyy-MM-dd HH:mm"
                         todayButton="Today"
-                        selected={taskState.dueDate}
+                        selected={taskState.taskDueDate.value}
                         className="form-control"
-                        name="dueDate"
-                        onChange={(date) => handleDateChange("dueDate",date,setTaskState)}
+                        name="taskDueDate"
+                        onChange={(date) => handleDateChange("taskDueDate",date,setTaskState)}
                         customInput={
                             <DateInput
                                 opendate={() => openDatepicker(calendarEl)}
@@ -126,15 +128,15 @@ export const TaskPane: FC<any> = (props) =>{
                 </div>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskStatus'}
+                        labelFor={'taskQCStateLabel'}
                         label={'Status'}
                         className={'panel-label'}
                     />
                     <TextInput
-                        name="taskStatus"
-                        id={`id_${'status'}`}
+                        name="taskQCStateLabel"
+                        id={`id_${'taskQCStateLabel'}`}
                         className="form-control"
-                        value={taskState.taskStatus}
+                        value={taskState.taskQCStateLabel.value}
                         onChange={(e) => handleInputChange(e,setTaskState)}
                         required={false}
                         autoFocus={false}

@@ -14,12 +14,18 @@ then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME=$DEVBRANCH
 
+    echo "LabKey version: $LK_VERSION"
+    echo "Branch name: $SHORT_BRANCH_NAME"
+    
     docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
 #Docker tag for SNAPSHOT and FB
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
+    
+    echo "LabKey version: $LK_VERSION"
+    echo "Branch name: $SHORT_BRANCH_NAME"
 
     docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
@@ -28,8 +34,8 @@ then
     SHORT_BRANCH_NAME="master"
 
     # Some debugging info
-echo "LabKey version: $LK_VERSION"
-echo "Branch name: $SHORT_BRANCH_NAME"
+    echo "LabKey version: $LK_VERSION"
+    echo "Branch name: $SHORT_BRANCH_NAME"
 
     docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
 else

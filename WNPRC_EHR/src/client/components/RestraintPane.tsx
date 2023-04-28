@@ -6,14 +6,19 @@ import InputLabel from './InputLabel';
 import TextInput from './TextInput';
 import * as React from 'react';
 import DropdownSearch from './DropdownSearch';
+import { RestraintPaneTypes } from '../typings/restraintPaneTypes';
+import { Utils } from '@labkey/api';
 
 export const RestraintPane: FC<any> = (props) => {
-    const {onStateChange} = props;
+    const {onStateChange, objectId, taskState} = props;
     const [restraintTypes, setRestraintTypes]  = useState<Array<any>>([]);
 
-    const [resState, setResState] = useState({
-        restraintRemark: { value: "", error: "" },
-        resType: { value: "", error: "" },
+    const [resState, setResState] = useState<RestraintPaneTypes>({
+        restraintAnimalId: {error: '', value: ''},
+        restraintDate: {error: '', value: new Date()},
+        restraintObjectId: {error: '', value: objectId || Utils.generateUUID().toUpperCase()},
+        restraintRemark: {error: '', value: ''},
+        restraintType: {error: '', value: ''},
     });
 
     // Update higher form state
@@ -38,19 +43,19 @@ export const RestraintPane: FC<any> = (props) => {
             <div className={"default-form"}>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'resType'}
+                        labelFor={"restraintType"}
                         label={'Restraint Type'}
                         className = {'panel-label'}
                     />
                     <DropdownSearch
                         options={restraintTypes}
                         initialvalue={null}
-                        name="resType"
-                        id={`id_${'resType'}`}
+                        name="restraintType"
+                        id={`id_${'restraintType'}`}
                         classname="navbar__search-form"
                         required={false}
                         isClearable={true}
-                        value={resState.resType.value}
+                        value={resState.restraintType.value}
                         setState={setResState}
                     />
                 </div>

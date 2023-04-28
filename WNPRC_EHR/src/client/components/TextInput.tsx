@@ -15,6 +15,7 @@ interface TextInputProps {
   autoFocus: boolean;
   readOnly?: boolean;
   isValid?: boolean;
+  type?: string;
 }
 
 const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
@@ -30,6 +31,7 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
     autoFocus,
     readOnly,
     isValid,
+    type,
   } = props;
   const borderColor = required && value === ''
       ? 'red'
@@ -39,7 +41,7 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
   return (
     <>
       <input
-        type="text"
+        type={type || "text"}
         name={name}
         id={id}
         className={className}

@@ -499,7 +499,7 @@ export const generateTask = (
     queryName: "tasks",
     command: command,
     rows: [{
-      taskId: taskState.taskId.value || Utils.generateUUID().toUpperCase(),
+      taskId: taskState.taskId.value,
       duedate: taskState.taskDueDate.value,
       assignedTo: taskState.taskAssignedTo.value,
       category: taskState.taskCategory.value,
@@ -511,6 +511,8 @@ export const generateTask = (
 }
 
 export const generateRestraint = (
+    formState,
+    taskState,
     restraintState,
     command
 ) => {
@@ -520,11 +522,12 @@ export const generateRestraint = (
     queryName: "restraints",
     command: command,
     rows: [{
-      Id: restraintState.animalid.value,
-      restraintType: restraintState.restraint.value,
-      taskid: restraintState.taskId,
-      objectid: restraintState.restraint.objectid,
-      date: restraintState.date.value
-    }],
+      Id: formState.id.value,
+      date: restraintState.restraintDate.value,
+      objectid: restraintState.restraintObjectId.value,
+      remark: restraintState.restraintRemark.value,
+      restraintType: restraintState.restraintType.value,
+      taskid: taskState.taskId.value,
+    }]
   });
 }

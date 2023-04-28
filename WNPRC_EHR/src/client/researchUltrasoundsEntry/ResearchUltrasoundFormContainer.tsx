@@ -2,7 +2,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import "../theme/css/react-datepicker.css";
 import "../theme/css/index.css";
-import { generateTask, triggerSubmit } from '../query/helpers';
+import { generateRestraint, generateTask, triggerSubmit } from '../query/helpers';
 import AnimalInfoPane from "../components/AnimalInfoPane";
 import {TaskPane} from "../components/TaskPane";
 import { ResearchUltrasounds } from './ResearchUltrasounds';
@@ -14,7 +14,6 @@ import { Utils } from '@labkey/api';
 
 export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (props) => {
 
-    const finalJsonData = [];
     const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
     const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
@@ -53,7 +52,11 @@ export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (pr
     //This function is used to pair all the submission data into one variable
     // to pass to saveRowsDirect. For this form that is tasks, research ultrasounds, and restraints
     const generateData = async () => {
+        const finalJsonData = [];
+        //const taskId = Utils.generateUUID().toUpperCase();
         finalJsonData.push(generateTask(taskPaneState, "insert"));
+        finalJsonData.push(generateRestraint(formData,taskPaneState,restraintPaneState,"insert"));
+
         try {
             const tempData = await triggerSubmit(
                 animalInfoCache,
@@ -70,13 +73,15 @@ export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (pr
         }
         catch (error) {console.log(error);}
 
-        //finalJsonData.push
+
+        return finalJsonData;
+
     }
 
     // Form submission handler
     const handleSubmit = async (event) => {
         event.preventDefault();
-        await generateData();
+        const finalJsonData = await generateData();
         console.log("Tasks: ",taskPaneState);
         console.log("Research: ",researchPaneState);
         console.log("Restraint: ",restraintPaneState);
@@ -123,6 +128,7 @@ export const ResearchUltrasoundFormContainer: React.FunctionComponent<any> = (pr
                     <div className="col-xs-5 panel panel-portal panel-portal-beneath">
                         <RestraintPane
                             onStateChange={setRestraintPaneState}
+                            taskState={taskPaneState}
                         />
                     </div>
 

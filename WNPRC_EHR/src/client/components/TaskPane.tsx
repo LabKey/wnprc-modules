@@ -6,7 +6,7 @@ import "../theme/css/index.css";
 import { ConfigProps } from '../weight/typings/main';
 import DropdownSearch from './DropdownSearch';
 import DateInput from './DateInput';
-import { ActionURL } from '@labkey/api';
+import { ActionURL, Utils } from '@labkey/api';
 import DatePicker from 'react-datepicker';
 import {openDatepicker, handleDateChange, handleInputChange, findDropdownOptions} from '../query/helpers';
 import { TaskValuesType } from '../typings/taskPaneTypes';
@@ -16,7 +16,7 @@ export const TaskPane: FC<any> = (props) =>{
     const {id, status, title, onStateChange, formType} = props;
 
     const [taskState, setTaskState] = useState<TaskValuesType>({
-        taskId: { value: id, error: "" },
+        taskId: { value: id || Utils.generateUUID().toUpperCase(), error: "" },
         taskTitle: { value: title, error: "" },
         taskAssignedTo: { value: null, error: "" },
         taskCategory: {value: 'task', error: ""},
@@ -57,7 +57,7 @@ export const TaskPane: FC<any> = (props) =>{
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name="taskId"
+                        name={"taskId"}
                         id={`id_${'taskId'}`}
                         className="form-control"
                         value={taskState.taskId.value}
@@ -65,6 +65,7 @@ export const TaskPane: FC<any> = (props) =>{
                         required={false}
                         autoFocus={false}
                         readOnly={true}
+                        type={id ? "text": "hidden"}
                     />
                 </div>
                 <div className={"panel-input-row"}>

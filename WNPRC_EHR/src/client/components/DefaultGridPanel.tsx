@@ -1,8 +1,12 @@
 import React, { FC, useEffect, useState } from 'react';
 
+import { produce } from 'immer';
+
 import {
     GridPanel,
-    InjectedQueryModels, QueryInfo, QueryModel,
+    InjectedQueryModels,
+    QueryColumn,
+    QueryModel,
     withQueryModels
 } from '@labkey/components';
 
@@ -34,22 +38,33 @@ const DefaultGridPanelImpl: FC<Props> = ({
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
 
     useEffect(() => {
-        console.log("Start");
         if(queryModels?.containersModel?.queryInfo) {
-            const {containersModel} = queryModels;
-            const {queryInfo} = containersModel;
-            const column = queryInfo.getColumn("reviewcompleted");
-            const allColumns = queryInfo.get("columns");
-            const newColumn = column.set("cell", cellRender);
-            const columns = allColumns.set("reviewcompleted", newColumn);
-            const newQueryInfo = QueryInfo.create({...queryInfo, columns});
-            const newModel = {...containersModel, ...{"queryInfo": newQueryInfo}} as QueryModel;
-            setQueryModel(newModel);
-        }
-    },[queryModels, actions]);
+            const { containersModel } = queryModels;
+            const { queryInfo } = containersModel;
 
-    const cellRender = () => {
-        console.log("cellRender");
+            // Add custom cell renderer to column
+            const oldColumn = queryInfo.getColumn("date");
+            const newColumn = new QueryColumn({...oldColumn, ...{"cell": cellRenderer}});
+
+            // Add the new column to the list of columns and add to QueryInfo
+            // Note: QueryInfo and the columns list are currently defined with ImmutableJS, this is likely to change
+            // in future versions to immer, so these lines will need to be changed when that conversion happens
+            const oldColumns = queryInfo.get("columns");
+            const newQueryInfo = queryInfo.set("columns", oldColumns.set("date", newColumn));
+
+            // Update QueryModel with new QueryInfo
+            setQueryModel(
+                produce<QueryModel>(draft => {
+                    Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo}});
+                })
+            );
+        }
+    },[queryModels?.containersModel]);
+
+    const cellRenderer = (data, row, col, rowIndex, columnIndex) => {
+        return (
+            <div style={{backgroundColor: 'red'}}>{data.get('formattedValue')}</div>
+        );
     };
 
     const onRefreshGrid = () => {

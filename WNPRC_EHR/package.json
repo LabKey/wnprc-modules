@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "start-storybook -p 6006",
     "start": "better-npm-run start",
+    "start-link": "cross-env LINK=true npm run start",
     "build-storybook": "build-storybook",
     "build": "npm run clean && better-npm-run build",
     "build-prod": "npm run clean && better-npm-run build-prod",
@@ -19,8 +20,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@labkey/api": "1.18.3",
-    "@labkey/components": "2.295.0",
+    "@labkey/api": "1.19.2",
+    "@labkey/components": "2.332.0",
     "css-loader": "6.7.3",
     "bootstrap": "4.6.0",
     "dayjs": "1.11.7",

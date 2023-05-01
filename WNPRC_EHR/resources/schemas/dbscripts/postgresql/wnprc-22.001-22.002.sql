@@ -1,5 +1,7 @@
---Modifying wnprc.animal_requests table by renaming pi column and adding constraint 
-ALTER TABLE IF EXISTS wnprc.animal_requests RENAME COLUMN principalinvestigator TO principalinvestigatorold;
-ALTER TABLE IF EXISTS wnprc.animal_requests ALTER COLUMN principalinvestigatorold DROP NOT NULL;
-ALTER TABLE IF EXISTS wnprc.animal_requests ADD COLUMN principalinvestigator INTEGER;
-ALTER TABLE IF EXISTS wnprc.animal_requests ADD CONSTRAINT FK_WNPRC_ANIMAL_REQUESTS_EHR_INVESTIGATORS_ROWID FOREIGN KEY (principalinvestigator) REFERENCES ehr.investigators (rowid);
+-- wnprc-21.006-21.007.sql was added after wnprc-22.000-22.001.sql, in which case wnprc-21.006-21.007.sql would not run on some dev machines
+-- this script is a correct conditionalized version of what wnprc-21.006-21.007.sql intended to achieve
+alter table wnprc.animal_requests add column if not exists pregnantanimalsrequiredterminfant varchar(100);
+alter table wnprc.animal_requests add column if not exists pregnantanimalsrequiredtermdam varchar(100);
+alter table wnprc.animal_requests add column if not exists majorsurgery varchar(100);
+alter table wnprc.animal_requests add column if not exists previousexposures text;
+alter table wnprc.animal_requests add column if not exists contacts text;

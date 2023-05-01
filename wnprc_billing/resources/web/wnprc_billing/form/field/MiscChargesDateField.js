@@ -43,7 +43,7 @@ Ext4.define('WNPRC_Billing.form.field.MiscChargesDateField', {
                         projectField.setValue(null);
                     }
 
-                    var debitedAccount = this.up("form").getForm().findField("debitedAccount");
+                    var debitedAccount = this.up("form").getForm().findField("debitedaccount");
                     if (debitedAccount) {
                         debitedAccount.setValue(null);
                     }

@@ -14,7 +14,7 @@ export const createTask = (config) => {
 
 };
 
-export const submitAnimalRequest  = (values:Object, qcstate:number) => {
+export const submitAnimalRequest  = (values:Object, qcstate:string) => {
     let currentDate = moment(new Date()).format();
     let weightValToInsert = [];
     let jsonData;
@@ -22,7 +22,7 @@ export const submitAnimalRequest  = (values:Object, qcstate:number) => {
     let valuesToBeInserted = {...values};
 
     valuesToBeInserted['date'] = currentDate;
-    valuesToBeInserted['QCState'] = qcstate;
+    valuesToBeInserted['QCStateLabel'] = qcstate;
 
     //replace the principalinvestigator (PI) field if there's custom input from an external PI
     if (valuesToBeInserted['externalprincipalinvestigator']) {

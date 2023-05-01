@@ -1056,25 +1056,99 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
             }
         },
 
-        import_results_from_email: {
-            text: "Import Results from Email",
+        import_results_from_file: {
+            text: "Import Results from File",
             xtype: 'button',
             scope: this,
-            tooltip: "Imports results from an excel document in a given mailbox",
-            name: 'import-results-from-email-button',
+            tooltip: "Imports results from an excel document in a folder",
+            name: 'import-results-from-file-button',
             handler: function(btn) {
-                var self = this;
-                var username = '';
-                var password = '';
-                var serverid = '';
-                var emails = [];
+                var files = [];
+                Ext.Msg.wait("Loading...");
+                var virologyResultsFolder =  new LABKEY.FileSystem.WebdavFileSystem({baseUrl: LABKEY.ActionURL.getBaseURL() + '_webdav/' + LABKEY.getModuleProperty("wnprc_ehr", "VirologyResultsUploadFolder") + '/@files/'});
+                virologyResultsFolder.listFiles({
+                    path: "/",
+                    success: function (virologyResultsFolder, path, records) {
+                        var promises = [];
+                        for (var i = 0; i < records.length; i++){
+                            var record = records[i];
+                            if (record && record.data.name){
+                                var extension = record.data.name.split('.').pop();
+                                if (extension === 'xlsx' || extension === 'xls') {
+                                    // need to get the date it was uploaded,
+                                    // since 'record' only provides the date when the actual file was created
+                                    promises.push(getFileHistory(virologyResultsFolder, record.data.name).then((history) => {
+                                        files.push({"name": history[0], "uploaded": history[1][0].data.date})
+                                    }))
+
+                                }
+                            }
+                        }
+                        Promise.all(promises).then((res)=> {
+                            Ext.Msg.hide();
+                            importFromFileWindow.show();
+                            selectFilePanel.removeAll();
+                            selectFilePanel.add({
+                                xtype: 'panel',
+                                layout: 'table',
+                                defaults: {
+                                    bodyStyle: 'padding: 5px;'
+                                },
+                                layoutConfig: {
+                                    columns: 3
+                                },
+                                hideLabel: true,
+                                items: [
+                                    {},
+                                    {
+                                        html: '<strong>Name</strong>'
+                                    },
+                                    {
+                                        html: '<strong>Date uploaded</strong>'
+                                    }
+                                ].concat(files.map(parseFilesToItems))
+                            });
+
+                            // Update the window to display the file options
+                            importFromFileWindow.removeAll();
+                            importFromFileWindow.add(selectFilePanel);
+                            importFromFileWindow.doLayout();
+                        })
+
+                    },
+                    failure: function (f){
+                        importFromFileWindow.hide();
+                        Ext.Msg.hide();
+                        var errorWindow = new Ext.Window({
+                            style: {
+                                color: 'red'
+                            },
+                            xtype: 'panel',
+                            html: f.response
+                        });
+                        errorWindow.show()
+                    }
+                });
+                function getFileHistory(fileSystem, filename) {
+                    return new Promise(resolve => {
+                        fileSystem.getHistory({
+                            path: '/' + filename,
+                            success: function(fileSystem,path,history) {
+                                resolve([filename,history]);
+                            },
+                            failure: function(f) {
+                                reject(f);
+                            }
+                        })
+                    });
+                }
 
                 var getSelectedRadioValue = function(element) {
-                    return jQuery(element).find('input[type="radio"][name="emailselection"][checked]').val()
+                    return jQuery(element).find('input[type="radio"][name="fileselection"][checked]').val()
                 };
 
-                var importFromEmailWindow = new Ext.Window({
-                    title: 'Import Results From Email',
+                var importFromFileWindow = new Ext.Window({
+                    title: 'Import Results From File',
                     width: 500,
                     id: 'importResultsFromEmailWindow'
                 });
@@ -1082,7 +1156,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                 var cancelButtonConfig = {
                     text: 'Cancel',
                     handler: function() {
-                        importFromEmailWindow.close();
+                        importFromFileWindow.close();
                     }
                 };
 
@@ -1091,11 +1165,12 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                         color: 'red'
                     }
                 });
+                var messageContent = {};
 
-                var selectEmailPanel = new Ext.FormPanel({
+                var selectFilePanel = new Ext.FormPanel({
                     labelWidth: 75, // label settings here cascade unless overridden
                     frame: true,
-                    title: 'Please select an email to import results from:',
+                    title: 'Please select a file to import results from:',
                     bodyStyle: 'padding:5px 5px 0',
                     width: 500,
                     defaultType: 'textfield',
@@ -1103,42 +1178,36 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                         {
                             text: 'Import',
                             handler: function() {
-                                var self = selectEmailPanel;
+                                var self = selectFilePanel;
 
-                                selectEmailPanel.remove(errorMessagePanel);
-                                var selectedEmail = emails[getSelectedRadioValue(selectEmailPanel.getEl().dom)];
+                                var selectedFile = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
 
-                                if (!selectedEmail) {
-                                    // Add the error message to the errorMessagePanel
+                                if (!selectedFile) {
                                     errorMessagePanel.removeAll();
-                                    errorMessagePanel.add({
+                                    messageContent = new Ext.Panel({
                                         xtype: 'panel',
-                                        html: '<p style="color: red">You need to select an email to import.</p>'
-                                    });
+                                        html: '<p style="color: red" id="clinpath-virology-err">You need to select an file to import.</p>'
+                                    })
+                                    errorMessagePanel.add(messageContent)
 
-                                    // Add the error message panel to the password panel.
-                                    selectEmailPanel.add(errorMessagePanel);
-                                    selectEmailPanel.doLayout();
+                                    selectFilePanel.add(errorMessagePanel);
+                                    selectFilePanel.doLayout();
 
                                     return;
                                 }
 
-                                selectEmailPanel.disable();
+                                selectFilePanel.disable();
 
                                 LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'getVirologyResultsFromEmail', null, {
-                                        id:       serverid,
-                                        username: username,
-                                        password: password,
-                                        subject:  selectedEmail.subject,
-                                        date:     selectedEmail['sent'],
-                                        fromList: selectedEmail.from.join(',')
+                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'getVirologyResultsFromFile', null, {
+                                        name: selectedFile.name
                                     }),
                                     callback: function(config, success, xhr) {
                                         var data = JSON.parse(xhr.responseText);
-                                        selectEmailPanel.enable();
+                                        selectFilePanel.enable();
 
                                         if (success) {
+                                            var matchingFound = false;
                                             var clinpathRecords = Ext.StoreMgr.get('study||Clinpath Runs||||').getRange();
                                             var virologyResults = Ext.StoreMgr.get('study||Virology Results||||');
 
@@ -1151,10 +1220,11 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
 
                                                 jQuery.each(clinpathRecords, function(i, clinpathRun) {
                                                     if (clinpathRun.get('Id') == resultRow['Id']
-                                                     && clinpathRun.get('date').format('Y-m-d') == resultRow['Date']
+                                                     && clinpathRun.get('date').format('Y-m-d') == new Date(resultRow['Date']).format('Y-m-d')
                                                      && clinpathRun.get('servicerequested') == method + ' - ' + resultRow['Virus']
                                                      && clinpathRun.get('sampletype') == resultRow['Sample Type']
                                                     ) {
+                                                        matchingFound = true;
                                                         virologyResults.addRecord({
                                                             Id:             resultRow['Id'],
                                                             date:           resultRow['Date'].replace(/-/g, '/'),
@@ -1168,99 +1238,48 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                     }
                                                 });
                                             });
+                                            if (!matchingFound) {
+                                                errorMessagePanel.removeAll();
+                                                messageContent = new Ext.Panel({
+                                                    xtype: 'panel',
+                                                    html: '<p style="color: red" id="clinpath-virology-err">No matching clinpath records found.</p>'
+                                                });
+                                                errorMessagePanel.add(messageContent);
 
-                                            importFromEmailWindow.close();
+                                                selectFilePanel.add(errorMessagePanel);
+                                                selectFilePanel.doLayout();
+                                            } else {
+                                                importFromFileWindow.close();
+                                            }
                                         }
                                         else {
-                                            // Add the error message to the errorMessagePanel
                                             errorMessagePanel.removeAll();
-                                            errorMessagePanel.add({
+                                            messageContent = new Ext.Panel({
                                                 xtype: 'panel',
-                                                html: '<p style="color: red">An unknown error has occurred.</p>'
+                                                html: '<p style="color: red" id="clinpath-virology-err">' + JSON.parse(xhr.responseText).exception + '</p>'
                                             });
+                                            errorMessagePanel.add(messageContent);
 
-                                            // Add the error message panel to the password panel.
-                                            selectEmailPanel.add(errorMessagePanel);
-                                            selectEmailPanel.doLayout();
+                                            selectFilePanel.add(errorMessagePanel);
+                                            selectFilePanel.doLayout();
                                         }
                                     }
                                 });
                             }
                         },
                         {
-                            text: "Delete Email",
-                            handler: function() {
-                                if (true == window.confirm("This will delete the email from the server.  Are you sure you want to do this?")) {
-
-                                    var selectedEmail = emails[getSelectedRadioValue(selectEmailPanel.getEl().dom)];
-                                    if (!selectedEmail) {
-                                        alert('Please select an email.');
-                                        return;
-                                    }
-
-                                    LABKEY.Ajax.request({
-                                        url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'deleteEmail', null, {
-                                            id:       serverid,
-                                            username: username,
-                                            password: password,
-                                            subject:  selectedEmail.subject,
-                                            date:     selectedEmail['sent'],
-                                            fromList: selectedEmail.from.join(',')
-                                        }),
-                                        callback: function(config, success, xhr) {
-                                            if (success) {
-                                                alert('Successfully deleted email.');
-                                                importFromEmailWindow.close();
-                                            }
-                                            else {
-                                                alert('Failed to delete email.');
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        },
-                        cancelButtonConfig
-                    ]
-                });
-
-                var parseEmailToItems = function(email, index) {
-                    var config = [
-                        {
-                            xtype: 'radio',
-                            boxLabel: '',
-                            name: 'emailselection',
-                            inputValue: index,
-                            emailData: email
-                        },
-                        {
-                            html: '<p>' + email.from[0] + '</p>'
-                        },
-                        {
-                            html: '<p>' + email.subject + '</p>'
-                        },
-                        {
-                            html: '<p>' + email.sent + '</p>'
-                        },
-                        {
-                            xtype: 'button',
                             text: 'Preview',
                             handler: function() {
+                                var selectedFile = files[getSelectedRadioValue(selectFilePanel.getEl().dom)];
                                 LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'previewEmailExcelAttachment', null, {
-                                        id:       serverid,
-                                        username: username,
-                                        password: password,
-                                        subject:  email.subject,
-                                        date:     email['sent'],
-                                        fromList: email.from.join(',')
+                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'previewExcelFile', null, {
+                                        name: selectedFile.name
                                     }),
                                     callback: function (config, success, xhr) {
                                         if (success) {
                                             var data = JSON.parse(xhr.responseText);
                                             var myWindow = window.open("", "Preview Spreadsheet", "width=900,height=500");
-                                            myWindow.document.write(data.html);
-                                            myWindow.document.title = "Preview Spreadsheet";
+                                            myWindow.document.body.innerHTML = data.htmlContent;
                                         }
                                         else {
                                             alert('Couldn\'t generate preview.');
@@ -1268,142 +1287,33 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                     }
                                 });
                             }
-                        }
-                    ];
-
-                    return config;
-                };
-
-                var passwordPanel = new Ext.FormPanel({
-                    labelWidth: 75, // label settings here cascade unless overridden
-                    frame: true,
-                    title: 'Please select the email server for the bulk import and enter the credentials ',
-                    bodyStyle: 'padding:5px 5px 0',
-                    width: 500,
-                    defaultType: 'textfield',
-                    items: [
-                        {
-                            fieldLabel:   'Server',
-                            name:         'bulk_email_server',
-                            xtype:        'combo',
-                            displayField: 'display_name',
-                            valueField:   'id',
-                            id:           'bulk_email_server_field',
-                            store: EHR.ext.metaHelper.getLookupStore({
-                                lookup: {
-                                    schemaName:    'wnprc',
-                                    queryName:     'email_server',
-                                    keyColumn:     'id',
-                                    displayColumn: 'display_name'
-                                }
-                            }),
-                            triggerAction: 'all'
-                        },
-                        {
-                            fieldLabel: "Username",
-                            name: "bulk_email_username"
-                        },
-                        {
-                            fieldLabel: 'Password',
-                            name: 'secret',
-                            inputType: 'password'
-                        }
-                    ],
-                    buttons: [
-                        {
-                            text: 'Submit',
-                            handler: function() {
-                                var form = this.findParentByType('form');
-                                password = jQuery('#importResultsFromEmailWindow input[name="secret"]').val();
-                                serverid = form.findById('bulk_email_server_field').getValue();
-                                username = jQuery('#importResultsFromEmailWindow input[name="bulk_email_username"]').val();
-
-                                passwordPanel.disable();
-
-                                LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'listEmails', null, {
-                                        id:       serverid,
-                                        username: username,
-                                        password: password
-                                    }),
-                                    callback: function(config, success, xhr) {
-                                        var data = JSON.parse(xhr.responseText);
-                                        passwordPanel.enable();
-
-                                        if (success) {
-                                            // filter out any messages without an excel attachment.
-                                            emails = data.messages.filter(function(message) {
-                                                return message.attachments.length > 0 && message.attachments[0].filename.match(/.xlsx$/);
-                                            });
-
-                                            // Remove the error message panel, if there is one.
-                                            passwordPanel.remove(errorMessagePanel);
-                                            passwordPanel.doLayout();
-
-                                            // Refresh the radio options on the select email panel.
-                                            selectEmailPanel.removeAll();
-                                            selectEmailPanel.add({
-                                                xtype: 'panel',
-                                                layout: 'table',
-                                                defaults: {
-                                                    bodyStyle: 'padding-left: 5px; padding-right: 5px'
-                                                },
-                                                layoutConfig: {
-                                                    columns: 5
-                                                },
-                                                hideLabel: true,
-                                                items: [
-                                                    {},
-                                                    {
-                                                        html: '<strong>From</strong>'
-                                                    },
-                                                    {
-                                                        html: '<strong>Subject</strong>'
-                                                    },
-                                                    {
-                                                        html: '<strong>Date Sent</strong>'
-                                                    },
-                                                    {}
-                                                ].concat(emails.map(parseEmailToItems))
-                                            });
-
-                                            // Update the window to display the email options, rather than the password
-                                            // prompt
-                                            importFromEmailWindow.removeAll();
-                                            importFromEmailWindow.add(selectEmailPanel);
-                                            importFromEmailWindow.doLayout();
-                                        }
-                                        else {
-                                            // Set the error message
-                                            var errorMessage = "An unknown error has occurred.";
-                                            if ('exception' in data && data.exception.match(/invalid password|bad password/i)) {
-                                                errorMessage = "Invalid credentials."
-                                            }
-                                            else if (data.exception && data.exception.match(/you must supply/i)) {
-                                                errorMessage = "Please supply all fields."
-                                            }
-
-                                            // Add the error message to the errorMessagePanel
-                                            errorMessagePanel.removeAll();
-                                            errorMessagePanel.add({
-                                                xtype: 'panel',
-                                                html: '<p style="color: red">' + errorMessage + '</p>'
-                                            });
-
-                                            // Add the error message panel to the password panel.
-                                            passwordPanel.add(errorMessagePanel);
-                                            passwordPanel.doLayout();
-                                        }
-                                    }
-                                });
-                            }
                         },
                         cancelButtonConfig
                     ]
                 });
 
-                importFromEmailWindow.add(passwordPanel);
-                importFromEmailWindow.show();
+                var parseFilesToItems = function(file, index) {
+
+                    var config = [
+                        {
+                            xtype: 'radio',
+                            boxLabel: '',
+                            name: 'fileselection',
+                            inputValue: index,
+                            fileData: file,
+                            style: 'margin: 5px 4px 4px 0px;'
+                        },
+                        {
+                            html: '<span>' + file.name + '</span>'
+                        },
+                        {
+                            html: '<span>' + new Date(file.uploaded).format("Y-m-d H:i")+ '</span>'
+                        },
+                    ];
+
+                    return config;
+                };
+
             }
         }
     }

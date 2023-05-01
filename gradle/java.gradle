@@ -58,6 +58,8 @@ dependencies {
     implementation project(BuildUtils.getInternalProjectPath(project.gradle))
     implementation project(":server:modules:LabDevKitModules:LDK")
     implementation project(":server:modules:wnprc-modules:java2ts")
+
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ldap", depProjectConfig: 'published', depExtension: 'module')
 }
 
 project.evaluationDependsOn(BuildUtils.getInternalProjectPath(project.gradle))

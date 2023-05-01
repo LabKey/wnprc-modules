@@ -29,10 +29,13 @@
                     <columnTitle>Principal Investigator</columnTitle>
                         <fk>
                             <fkDbSchema>ehr</fkDbSchema>
-                            <fkTable>uniqueProtocolInvestigator</fkTable>
-                            <fkColumnName>inves</fkColumnName>
-                            <fkDisplayColumnName>inves</fkDisplayColumnName>
+                            <fkTable>investigatorsWithName</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                         </fk>
+                    </column>
+                    <column columnName="principalinvestigatorold">
+                        <isHidden>true</isHidden>
                     </column>
                     <column columnName="numberofanimals">
                         <columnTitle># of Animals Needed</columnTitle>
@@ -73,8 +76,32 @@
                     <column columnName="infectiousdisease">
                         <columnTitle>Infectious Disease</columnTitle>
                     </column>
+                    <column columnName="majorsurgery">
+                        <columnTitle>Major Surgery?</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_yes_no</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="pregnantanimalsrequired">
                         <columnTitle>Pregnant Animals Required?</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_yes_no</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="pregnantanimalsrequiredterminfant">
+                        <columnTitle>Terminal for Infant?</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_yes_no</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="pregnantanimalsrequiredtermdam">
+                        <columnTitle>Terminal for Dam?</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>animal_requests_yes_no</fkTable>
@@ -87,6 +114,9 @@
                             <fkTable>animal_requests_disposition</fkTable>
                             <fkColumnName>value</fkColumnName>
                         </fk>
+                    </column>
+                    <column columnName="previousexposures">
+                        <columnTitle>Unwanted Previous Exposures</columnTitle>
                     </column>
                     <column columnName="executivecommitteeapproval">
                         <columnTitle>Executive Committee Approval?</columnTitle>
@@ -147,7 +177,10 @@
                         <columnTitle>Animal Ids to Offer</columnTitle>
                     </column>
                     <column columnName="animalsorigin">
-                        <columnTitle>Animal Origin</columnTitle>
+                        <columnTitle>Internal Comments</columnTitle>
+                    </column>
+                    <column columnName="contacts">
+                        <columnTitle>Contacts</columnTitle>
                     </column>
                     <column columnName="externalthreadrowid">
                         <columnTitle>External Disc</columnTitle>
@@ -159,7 +192,6 @@
                         <columnTitle>Internal Disc</columnTitle>
                         <url>/announcements/WNPRC/WNPRC_Units/Animal_Services/Assigns/Private/thread.view?rowId=${internalthreadrowid}</url>
                         <isUserEditable>false</isUserEditable>
-                        <isHidden>true</isHidden>
                     </column>
                     <column columnName="animal_history_link">
                         <columnTitle>Animal History</columnTitle>

@@ -16,7 +16,7 @@ export const saveRowsDirect = (jsonData) => {
 };
 
 //returns a promise to get data from labkey
-export const getEHRData = (schemaName,queryName,sort='rowid',columns='',filterArray=[]):any => {
+export const getEHRData = (schemaName,queryName,sort='rowid',columns='',filterArray=[], viewName = ''):any => {
     return new Promise((resolve, reject) => {
         return LABKEY.Query.selectRows({
             schemaName: schemaName,
@@ -24,6 +24,7 @@ export const getEHRData = (schemaName,queryName,sort='rowid',columns='',filterAr
             columns: columns,
             sort: sort,
             filterArray: filterArray,
+            viewName: viewName,
             success: (data) => {
                 resolve(data)
             },

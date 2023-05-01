@@ -1,7 +1,9 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
-        <column name="animalId" />
+        <column name="Id" />
         <column name="dateOrdered"/>
+        <column name="room"/>
+        <column name="cage"/>
         <column name="volume" />
         <column name="frequency" />
         <column name="waterSource"/>
@@ -14,6 +16,9 @@
     </columns>
     <sorts>
         <sort column="date" descending="false"/>
+        <sort column="room" />
+        <sort column="cage" />
+        <sort column="Id"/>
     </sorts>
     <filters>
     <filter column="qcstate/label" operator="eq" value="Scheduled"/>

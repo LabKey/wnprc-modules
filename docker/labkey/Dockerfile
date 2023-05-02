@@ -1,11 +1,11 @@
 # -----------------------------------------------------------------------------
 # HELPER IMAGE (to download LabKey)
-
+ARG LABKEY_VERSION
 FROM alpine:latest as download
 
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
-ARG WNPRC_BRANCH=master
+ARG WNPRC_BRANCH=SNAPSHOT
 ARG LABKEY_VERSION
 
 WORKDIR /tmp/labkey
@@ -15,16 +15,17 @@ ARG LABKEY_TEAMCITY_BUILD=
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
-RUN if [[ "$WNPRC_BRANCH" = "master" ] || ["$WNPRC_BRANCH" = "develop" ] ]; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
+RUN if [ "$WNPRC_BRANCH" = "SNAPSHOT" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
  && if [ "$WNPRC_BRANCH" = "develop" ] ; then \
-         echo -e "Building develop branch ";\
+        echo -e "Building develop branch "; \
+        B=""; \
         LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     else  \
-         echo -e "LabKey Version: " ${LABKEY_VERSION}; \
-         echo -e "Branch: " ${$WNPRC_BRANCH}; \
+        echo -e "LabKey Version: " ${LABKEY_VERSION}; \
+        echo -e "Branch: " ${WNPRC_BRANCH}; \
         GENERAL_LK_VERSION=${LABKEY_VERSION//./}; \
         LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
@@ -42,8 +43,7 @@ RUN if [[ "$WNPRC_BRANCH" = "master" ] || ["$WNPRC_BRANCH" = "develop" ] ]; then
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
-
-FROM wnprcehr/tomcat:tomcat9_22.7
+FROM wnprcehr/tomcat:tomcat9_${LABKEY_VERSION}
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

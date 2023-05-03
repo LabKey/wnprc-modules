@@ -14,16 +14,17 @@ if [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then
     echo "Pushing image to SNAPSHOT repo, version " ${BASH_REMATCH[1]}
     #WNPRC_REPO+=snapshot
-    docker tag $IMAGE_NAME "wnprcehr/labkeysnapshot:"${BASH_REMATCH[1]}_${DOCKER_TAG}
+    docker tag $IMAGE_NAME "wnprcehr/labkeysnapshot:"${BASH_REMATCH[1]}
     docker push "wnprcehr/labkeysnapshot":${BASH_REMATCH[1]}
 
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
-    docker tag $IMAGE_NAME "wnprcehr/labkey:"${BASH_REMATCH[1]}_${DOCKER_TAG}
-    docker push "wnprcehr/labkey:"${BASH_REMATCH[1]}_${DOCKER_TAG}
+    docker tag $IMAGE_NAME "wnprcehr/labkey:"${BASH_REMATCH[1]}_${BASH_REMATCH[2]}
+    docker push "wnprcehr/labkey:"${BASH_REMATCH[1]}_${BASH_REMATCH[2]}
 
 else
     echo "Pushing develop branch"
+    docker tag $IMAGE_NAME "wnprcehr/labkey:"${BASH_REMATCH[1]}_develop
     docker push "wnprcehr/labkey:"${BASH_REMATCH[1]}_develop
 
 fi

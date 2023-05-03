@@ -185,7 +185,9 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRNotificationEmailReplyTo", RSEHR_EMAIL_CONTACT_INFO));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataContainerPath", this.getProjectName()));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataContainerPath", getProjectName()));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadQCList", PROJECT_NAME_EHR));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", PROJECT_NAME_EHR));
         _test.setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);

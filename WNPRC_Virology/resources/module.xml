@@ -8,7 +8,7 @@
     <properties>
         <propertyDescriptor name="virologyEHRVLSampleQueueFolderPath">
             <canSetPerContainer>false</canSetPerContainer>
-            <description>Relative folder path to the viral load sample queue on main EHR. Used in trigger script to send notification</description>
+            <description>Folder path to the viral load sample queue on main EHR. Used in trigger script to send notification</description>
             <editPermissions>
                 <permission>ADMIN</permission>
             </editPermissions>
@@ -78,6 +78,13 @@
         <propertyDescriptor name="EHRViralLoadAssayDataContainerPath">
             <canSetPerContainer>false</canSetPerContainer>
             <description>Folder path to the viral load assay data on EHR</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="EHRViralLoadQCList">
+            <canSetPerContainer>false</canSetPerContainer>
+            <description>Folder path to the QPCR_QC_list list</description>
             <editPermissions>
                 <permission>ADMIN</permission>
             </editPermissions>

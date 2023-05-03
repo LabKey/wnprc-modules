@@ -21,14 +21,14 @@ SELECT
     v.run.exptNumber as experiment_number,
     vsq.funding_string as account,
     GROUP_CONCAT(DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
-FROM "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/".assay.Viral_Loads.Viral_Load.Data v
+FROM "/LaboratoryVerifyProject/".assay.Viral_Loads.LC480_Viral_Load_Test.Data v
 
 -- join on QPCR_QC_list to only include results from qPCR runs that pass QC
-INNER JOIN "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VS_group_wiki/".lists.QPCR_QC_list q
+INNER JOIN "/WNPRC_VirologyTestProject/".lists.QPCR_QC_list q
     ON CAST(q.Expt_nr AS integer) = CAST(v.run.exptNumber AS integer)
 
 -- join on vl_sample_queue to pull in the account # (funding string) for filtering results out on rsehr
-LEFT JOIN "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/".lists.vl_sample_queue vsq
+LEFT JOIN "/WNPRC_VirologyTestProject/".lists.vl_sample_queue vsq
     ON vsq.Id = v.subjectId AND vsq.Sample_date = v.date
 
 WHERE

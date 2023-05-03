@@ -33,6 +33,7 @@ import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
 import org.labkey.test.pages.admin.SetFolderPermissionsPage;
 import org.labkey.test.tests.di.ETLHelper;
+import org.labkey.test.tests.external.labModules.ViralLoadAssayTest;
 import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
@@ -52,9 +53,10 @@ import org.openqa.selenium.WebElement;
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 
 @Category({WNPRC_EHR.class})
-public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnlyTest
+public class WNPRC_VirologyTest extends ViralLoadAssayTest
 {
 
+    public static final String CUSTOM_PROJECT_NAME = "LaboratoryVerifyProject";
     public static final String PROJECT_NAME_EHR = "WNPRC_VirologyTestProject";
     public static final String MODULE_NAME = "WNPRC_Virology";
 
@@ -77,6 +79,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public static final String TEST_USER_2 = "test_wnprc_virology_2@test.com";
     public static final String ADMIN_USER = "admin_user@test.com";
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
+    private static final File LIST_ARCHIVE_QC = TestFileUtils.getSampleData("VS_group_wiki_2023-04-26_14-36-16.lists.zip");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
 
     private static WNPRC_VirologyTest _test;
@@ -100,17 +103,15 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     protected final PortalHelper _portalHelper = new PortalHelper(this);
     protected final RemoteConnectionHelper _rconnHelper = new RemoteConnectionHelper(this);
-    protected final ETLHelper _etlHelper = new ETLHelper(this, getProjectName());
+    protected final ETLHelper _etlHelper = new ETLHelper(this, PROJECT_NAME_EHR);
     protected final ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
-    @Nullable
     @Override
     protected String getProjectName()
     {
-        return PROJECT_NAME_EHR;
+        return CUSTOM_PROJECT_NAME;
     }
-
     protected String getProjectNameRSEHR()
     {
         return PROJECT_NAME_RSEHR;
@@ -120,12 +121,30 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         return PROJECT_NAME_RSHER_PUBLIC;
     }
 
-    @BeforeClass
-    @LogMethod
-    public static void doSetup() throws Exception
+    @Override
+    @Test
+    public void testSteps() throws Exception
     {
-        _test = (WNPRC_VirologyTest)getCurrentTest();
+        super.testSteps();
+        doVirologySetup();
+        testTheStuff();
+    }
+
+    public void doVirologySetup() throws Exception
+    {
+        _test = (WNPRC_VirologyTest) getCurrentTest();
         _test.initProject("Collaboration");
+    }
+
+    public void testTheStuff() throws Exception
+    {
+        testViralLoadRSEHRJob();
+        testUpdateAccountsPage();
+        testBatchCompleteAndSendRSERHEmail();
+        testFolderAccountMapping();
+        testBatchCompleteAndSendRSERHEmailToDiffUser();
+        testBatchCompleteAndSendZikaEmail();
+        testLinkedSchemaDataWebpart();
 
     }
 
@@ -133,7 +152,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     public void runEmailETL()
     {
         log("Populating rsehr_folders_accounts_and_vl_reader_emails before each test");
-        ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
+        ETLHelper _etlHelperEHR = new ETLHelper(this, PROJECT_NAME_EHR);
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
     }
@@ -151,13 +170,13 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
     protected void createProjectAndFolders(String type) throws IOException, CommandException
     {
         //create EHR folder with sample queue, etc
-        _containerHelper.createProject(getProjectName(), type);
+        _containerHelper.createProject(PROJECT_NAME_EHR, type);
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
         _userHelper.createUser(ADMIN_USER);
         _apiPermissionsHelper.setUserPermissions(ADMIN_USER, "Folder Administrator");
         // Set up the module properties
         List<ModulePropertyValue> properties = new ArrayList<>();
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", _test.getProjectName()));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", PROJECT_NAME_EHR));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRQCStatus", RSEHR_QC_CODE));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPortalPath",RSEHR_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRViralLoadDataFolder", getProjectNameRSEHR()));
@@ -166,13 +185,15 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRNotificationEmailReplyTo", RSEHR_EMAIL_CONTACT_INFO));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataContainerPath", this.getProjectName()));
         _test.setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
         List<Map<String, Object>> tsv2 = loadTsv(ALIASES_EHR_TSV);
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        _test._listHelper.importListArchive(_test.getProjectName(), LIST_ARCHIVE);
+        _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE);
+        _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE_QC);
         //create RSEHR folder with study data
         if (_containerHelper.doesContainerExist(getProjectNameRSEHR()))
         {
@@ -193,12 +214,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertTrue(response.getStatusCode() < 400);
 
         insertTsvData(connection, "ehr_billing", "aliases", tsv2, PROJECT_NAME_EHR);
-        _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billing_linked", getProjectName(), null,"ehr_billing", "aliases", null);
+        _schemaHelper.createLinkedSchema(PROJECT_NAME_EHR, "ehr_billing_linked", PROJECT_NAME_EHR, null,"ehr_billing", "aliases", null);
 
         //runs grant account ETL
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         _rconnHelper.goToManageRemoteConnections();
-        _rconnHelper.createConnection(EHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(),getProjectName());
+        _rconnHelper.createConnection(EHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
         ETLHelper _etlHelperRSEHR = new ETLHelper(this, getProjectNameRSEHR());
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         _etlHelperRSEHR.runETL(RSEHR_ACCOUNTS_ETL_ID);
@@ -307,7 +328,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
         //run email etl
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        ETLHelper _etlHelperEHR = new ETLHelper(this, getProjectName());
+        ETLHelper _etlHelperEHR = new ETLHelper(this, PROJECT_NAME_EHR);
         _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
 
     }
@@ -323,7 +344,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         //set the notification user and reply to email
         log("Set up general settings for LDK notification service");
         String email = getCurrentUser();
-        beginAt(buildRelativeUrl("ldk", getProjectName(), "notificationAdmin"));
+        beginAt(buildRelativeUrl("ldk", PROJECT_NAME_EHR, "notificationAdmin"));
         Ext4FieldRef.getForLabel(this, "Notification User").setValue(PasswordUtil.getUsername());
         Ext4FieldRef.getForLabel(this, "Reply Email").setValue(email);
         //Add subscribed users
@@ -361,7 +382,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         return null;
     }
 
-    @Test
+
     public void testBatchCompleteAndSendZikaEmail() throws Exception
     {
         log("Select first 2 samples and batch complete");
@@ -393,7 +414,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
 
 
-    @Test
+
     public void testFolderAccountMapping() throws Exception
     {
         //assert that the folders_accounts_mapping table was populated w folder name
@@ -403,7 +424,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertTrue(resp.getRows().size() == 1);
     }
 
-    @Test
+
     public void testLinkedSchemaDataWebpart()
     {
         navigateToFolder(PROJECT_NAME_RSEHR, LINKED_SCHEMA_FOLDER_NAME);
@@ -413,7 +434,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         stopImpersonating();
     }
 
-    @Test
+
     public void testUpdateAccountsPage()
     {
         navigateToFolder(PROJECT_NAME_RSEHR, A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
@@ -434,7 +455,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         assertTextNotPresent(ANIMAL_ID);
     }
 
-    @Test
+
     public void testViralLoadRSEHRJob() throws IOException, CommandException
     {
         SelectRowsCommand sr = new SelectRowsCommand("lists","rsehr_folders_accounts_and_vl_reader_emails_etl");
@@ -444,12 +465,12 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
         Assert.assertEquals(1, resp.getRows().size());
     }
 
-    //@Test
+    //
     public void testBatchCompleteAndSendRSEHRToSubscribers()
     {
         // should just throw this in an existing test
     }
-    @Test
+
     public void testBatchCompleteAndSendRSERHEmail() throws Exception
     {
         //first add another account 107 to A_THIRD_LINKED_SCHEMA_FOLDER_NAME
@@ -511,7 +532,7 @@ public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnl
 
     }
 
-    @Test
+
     public void testBatchCompleteAndSendRSERHEmailToDiffUser() throws Exception
     {
         navigateToFolder(PROJECT_NAME_RSEHR, A_FOURTH_LINKED_SCHEMA_FOLDER_NAME);

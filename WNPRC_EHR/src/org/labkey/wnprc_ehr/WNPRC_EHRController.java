@@ -769,14 +769,14 @@ public class WNPRC_EHRController extends SpringActionController
 
             Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
             ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
-            org.json.JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
-            org.json.JSONArray newArr = new org.json.JSONArray();
-            org.json.JSONArray ja = (org.json.JSONArray) arr.getJSONObject(0).get("data");
-            org.json.JSONArray header = (org.json.JSONArray) ja.get(0);
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
+            JSONArray newArr = new JSONArray();
+            JSONArray ja = arr.getJSONObject(0).getJSONArray("data");
+            JSONArray header = ja.getJSONArray(0);
             for (int i = 1; i < ja.length(); i ++)
             {
-                org.json.JSONObject jo = new org.json.JSONObject();
-                org.json.JSONArray jai = (org.json.JSONArray) ja.get(i);
+                JSONObject jo = new JSONObject();
+                JSONArray jai = ja.getJSONArray(i);
 
                 for (int j = 0; j < header.length(); j++){
                     String label = (String) header.get(j);
@@ -789,7 +789,7 @@ public class WNPRC_EHRController extends SpringActionController
                 newArr.put(jo);
 
             }
-            org.json.JSONObject json = new org.json.JSONObject();
+            JSONObject json = new JSONObject();
             json.put("rows", newArr);
             return new ApiSimpleResponse(json);
         }
@@ -806,12 +806,12 @@ public class WNPRC_EHRController extends SpringActionController
 
             Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
             ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
-            org.json.JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
-            org.json.JSONArray ja = (org.json.JSONArray) arr.getJSONObject(0).get("data");
+            JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
+            JSONArray ja = arr.getJSONObject(0).getJSONArray("data");
             StringBuilder sb = new StringBuilder();
             sb.append("<style> thead { font-weight: bold } table { border-collapse: collapse; } th, td {border: 1px solid black; padding: 5px; } </style>");
             sb.append("<table><thead><tr>");
-            org.json.JSONArray header = (org.json.JSONArray) ja.get(0);
+            JSONArray header = ja.getJSONArray(0);
             for (int j = 0; j < header.length(); j++)
             {
                 sb.append("<th>");
@@ -820,11 +820,11 @@ public class WNPRC_EHRController extends SpringActionController
                 sb.append("</th>");
             }
             sb.append("</tr></thead><tbody>");
-            int previewLength = (ja.length() >= 10) ? 10 : ja.length();
+            int previewLength = Math.min(ja.length(), 10);
             for (int i = 1; i < previewLength; i ++)
             {
                 sb.append("<tr>");
-                org.json.JSONArray jai = (org.json.JSONArray) ja.get(i);
+                JSONArray jai = ja.getJSONArray(i);
                 for (int k = 0; k < jai.length(); k++)
                 {
                     sb.append("<td>");
@@ -846,7 +846,7 @@ public class WNPRC_EHRController extends SpringActionController
                 sb.append("</tr>");
             }
             sb.append("</tbody></table>");
-            org.json.JSONObject json = new org.json.JSONObject();
+            JSONObject json = new JSONObject();
             json.put("htmlContent", sb);
             return new ApiSimpleResponse(json);
         }

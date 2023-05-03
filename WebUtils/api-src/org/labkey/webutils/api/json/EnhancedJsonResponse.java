@@ -46,8 +46,7 @@ public class EnhancedJsonResponse extends JSONObject implements ApiResponse {
         if (object == null) {
             return null;
         }
-        else if (object instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) object;
+        else if (object instanceof JSONObject jsonObject) {
             Map<String, Object> map = new HashMap<>();
 
             // Iterate over keys, and recursively call this method.
@@ -58,9 +57,8 @@ public class EnhancedJsonResponse extends JSONObject implements ApiResponse {
 
             return map;
         }
-        else if (object instanceof JSONArray) {
+        else if (object instanceof JSONArray jsonArray) {
             List<Object> list = new ArrayList<>();
-            JSONArray jsonArray = (JSONArray) object;
 
             for( Object value : jsonArray.toList()) {
                 list.add(parseJsonObject(value));

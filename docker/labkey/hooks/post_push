@@ -19,6 +19,7 @@ then
 
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
+    echo "Push image to Docker repo ${WNPRC_REPPO} with tag ${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
     docker tag $IMAGE_NAME "wnprcehr/labkey:"${BASH_REMATCH[1]}_${BASH_REMATCH[2]}
     docker push "wnprcehr/labkey:"${BASH_REMATCH[1]}_${BASH_REMATCH[2]}
 

@@ -13,17 +13,20 @@ if [[ $DOCKER_TAG =~ $DEVBRANCH_REGEX ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME="develop"
+    TOMCAT_IMAGE="_develop"
 
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME="SNAPSHOT"
+    TOMCAT_IMAGE=""
 
 #Docker tag for SNAPSHOT and FB
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
+    TOMCAT_IMAGE="_${SHORT_BRANCH_NAME}"
     
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
@@ -34,8 +37,4 @@ fi
 echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
-docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
-
-
-
-
+docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .

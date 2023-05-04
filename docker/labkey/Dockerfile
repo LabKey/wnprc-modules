@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # HELPER IMAGE (to download LabKey)
 ARG LABKEY_VERSION
-ARG WNPRC_BRANCH
+ARG TOMCAT_IMAGE
 FROM alpine:latest as download
 
 ARG LABKEY_TEAMCITY_PASSWORD
@@ -44,7 +44,7 @@ RUN if [ "$WNPRC_BRANCH" = "SNAPSHOT" ] ; then B="" ; else B=",branch:"${WNPRC_B
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
-FROM wnprcehr/tomcat:tomcat9_${LABKEY_VERSION}_${WNPRC_BRANCH}
+FROM wnprcehr/tomcat:tomcat9_${LABKEY_VERSION}${TOMCAT_IMAGE}
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

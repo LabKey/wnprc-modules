@@ -16,13 +16,13 @@ export const TaskPane: FC<any> = (props) =>{
     const {id, status, title, onStateChange, formType} = props;
 
     const [taskState, setTaskState] = useState<TaskValuesType>({
-        taskId: { value: id || Utils.generateUUID().toUpperCase(), error: "" },
-        taskTitle: { value: title, error: "" },
-        taskAssignedTo: { value: null, error: "" },
-        taskCategory: {value: 'task', error: ""},
-        taskDueDate: { value: new Date(), error: "" },
-        taskFormType: {value: formType, error: ""},
-        taskQCStateLabel: { value: status, error: "" },
+        taskid: { value: id || Utils.generateUUID().toUpperCase(), error: "" },
+        title: { value: title, error: "" },
+        assignedto: { value: null, error: "" },
+        category: {value: 'task', error: ""},
+        duedate: { value: new Date(), error: "" },
+        formtype: {value: formType, error: ""},
+        qcstate: { value: status, error: "" },
     });
 
     const [assignTypes, setAssignTypes] = useState<Array<any>>([]);
@@ -52,15 +52,15 @@ export const TaskPane: FC<any> = (props) =>{
             <div className={"default-form"}>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskId'}
+                        labelFor={'taskid'}
                         label={'Task Id'}
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={"taskId"}
+                        name={"taskid"}
                         id={`id_${'taskId'}`}
                         className="form-control"
-                        value={taskState.taskId.value}
+                        value={taskState.taskid.value}
                         onChange={(event) => handleInputChange(event, setTaskState)}
                         required={false}
                         autoFocus={false}
@@ -70,16 +70,16 @@ export const TaskPane: FC<any> = (props) =>{
                 </div>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskTitle'}
+                        labelFor={'title'}
                         label={'Title'}
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name="taskTitle"
+                        name="title"
                         id={`id_${'taskTitle'}`}
                         className="form-control"
                         onChange={(event) => handleInputChange(event, setTaskState)}
-                        value={taskState.taskTitle.value}
+                        value={taskState.title.value}
                         required={true}
                         autoFocus={false}
                     />
@@ -87,26 +87,26 @@ export const TaskPane: FC<any> = (props) =>{
 
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskAssignedTo'}
+                        labelFor={'assignedto'}
                         label={'Assigned To'}
                         className = {'panel-label'}
                     />
                     <DropdownSearch
                         options={assignTypes}
                         initialvalue={null}
-                        name="taskAssignedTo"
+                        name="assignedto"
                         id={`id_${'taskAssignedTo'}`}
                         classname="navbar__search-form"
                         required={true}
                         isClearable={true}
-                        value={taskState.taskAssignedTo.value}
+                        value={taskState.assignedto.value}
                         setState={setTaskState}
                     />
                 </div>
 
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskDueDate'}
+                        labelFor={'duedate'}
                         label={'Due Date'}
                         className = {'panel-label'}
                     />
@@ -115,10 +115,10 @@ export const TaskPane: FC<any> = (props) =>{
                         showTimeSelect
                         dateFormat="yyyy-MM-dd HH:mm"
                         todayButton="Today"
-                        selected={taskState.taskDueDate.value}
+                        selected={taskState.duedate.value}
                         className="form-control"
-                        name="taskDueDate"
-                        onChange={(date) => handleDateChange("taskDueDate",date,setTaskState)}
+                        name="duedate"
+                        onChange={(date) => handleDateChange("duedate",date,setTaskState)}
                         customInput={
                             <DateInput
                                 opendate={() => openDatepicker(calendarEl)}
@@ -129,15 +129,15 @@ export const TaskPane: FC<any> = (props) =>{
                 </div>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskQCStateLabel'}
+                        labelFor={'qcstate'}
                         label={'Status'}
                         className={'panel-label'}
                     />
                     <TextInput
-                        name="taskQCStateLabel"
+                        name="qcstate"
                         id={`id_${'taskQCStateLabel'}`}
                         className="form-control"
-                        value={taskState.taskQCStateLabel.value}
+                        value={taskState.qcstate.value}
                         onChange={(e) => handleInputChange(e,setTaskState)}
                         required={false}
                         autoFocus={false}

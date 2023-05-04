@@ -360,14 +360,21 @@ General validation helper function for form submission, currently only checks fo
 @props setErrorText see triggerSubmit() for more details
  */
 export const validate = async (animalInfoCache, formData, setShowModal, setErrorText) => {
+
+  // Check if formData is a single submission (rowObj) or batch (array<rowObj>)
+  if(!Array.isArray(formData)){
+    formData = [formData]
+  }
+
   return new Promise((resolve, reject) => {
     let promises = [];
     try
     {
       for (let record of formData) {
-        if (animalInfoCache && animalInfoCache[record["id"]["value"]]) {
-          let animalRecord = animalInfoCache[record["id"]["value"]];
+        if (animalInfoCache && animalInfoCache[record["Id"]["value"]]) {
+          let animalRecord = animalInfoCache[record["Id"]["value"]];
           if (animalRecord["calculated_status"] == "Dead") {
+
             setErrorText("Cannot update dead animal record " + record["id"]["value"]);
             setShowModal("none");
             setShowModal("error");
@@ -375,7 +382,7 @@ export const validate = async (animalInfoCache, formData, setShowModal, setError
             resolve(false);
           }
         } else {
-          promises.push(lookupAnimalInfo(record["id"]["value"]));
+          promises.push(lookupAnimalInfo(record["Id"]["value"]));
         }
       }
     } catch(err) {
@@ -389,7 +396,7 @@ export const validate = async (animalInfoCache, formData, setShowModal, setError
         {
           if (result["calculated_status"] == "Dead")
           {
-            setErrorText("Cannot update dead animal record: " + result["id"]);
+            setErrorText("Cannot update dead animal record: " + result["Id"]);
             resolve(false);
           }
         }
@@ -410,8 +417,39 @@ export const validate = async (animalInfoCache, formData, setShowModal, setError
 };
 
 /*
-Main submit handler for forms
+function to trigger validation on an animal
 
+@props animalInfoCache The cache of info per animal for validation
+@props formData Can be either rowObj or array<rowObj> if form is a single entry or batch
+@props setSubmitTextBody handles the submission text for showModal
+@props setShowModal handles the modal that appears when user clicks submit
+@props setErrorText handles error texts for showModal if any occur
+ */
+export const triggerValidation = async (
+    animalInfoCache,
+    formData,
+    setSubmitTextBody,
+    setShowModal,
+    setErrorText,
+) => {
+  //do some validation here
+
+  setSubmitTextBody("One moment. Performing validations...");
+  await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
+    if (!d) {
+      setShowModal("none");
+      setShowModal("error");
+      setSubmitTextBody("Submit values?");
+      return;
+    }
+  });
+}
+
+
+
+/*
+Main submit handler for forms
+TODO maybe remove function
 @props animalInfoCache The cache of info per animal for validation
 @props formData Can be either rowObj or array<rowObj> if form is a single entry or batch
 @props setSubmitTextBody handles the submission text for showModal
@@ -436,33 +474,25 @@ export const triggerSubmit = async (
     formData = [formData]
   }
   let jsonData;
+
   //do some validation here
-  setSubmitTextBody("One moment. Performing validations...");
-  await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
-    if (!d) {
-      setShowModal("none");
-      setShowModal("error");
-      setSubmitTextBody("Submit values?");
-      return;
-    }
+  await triggerValidation(animalInfoCache, formData, setShowModal, setErrorText, setSubmitTextBody);
+  setSubmitTextBody("Submitting...");
 
-    /*let command = wasSaved || editMode ? "update" : "insert";*/
-    setSubmitTextBody("Submitting...");
-
-    console.log('grouping stuff... but skipping group cmds');
-    try {
-      console.log('grouping stuff')
-      let itemsToInsert = groupCommands(formData);
-      console.log('setting up stuff')
-      console.log("items: ", itemsToInsert);
-      jsonData = setupJsonData(itemsToInsert, schemaName, queryName);
-    }catch(err) {
-      console.log(err);
-      console.log(JSON.stringify(err))
-      return;
-    }
-    console.log("jsonData: ", jsonData);
-    console.log('calling save rows');
+  console.log('grouping stuff... but skipping group cmds');
+  try {
+    console.log('grouping stuff')
+    let itemsToInsert = groupCommands(formData);
+    console.log('setting up stuff')
+    console.log("items: ", itemsToInsert);
+    jsonData = setupJsonData(itemsToInsert, schemaName, queryName);
+  }catch(err) {
+    console.log(err);
+    console.log(JSON.stringify(err))
+    return;
+  }
+  console.log("jsonData: ", jsonData);
+  console.log('calling save rows');
 
     /*
     saveRowsDirect(jsonData)
@@ -482,9 +512,21 @@ export const triggerSubmit = async (
             console.log(e);
             setSubmitTextBody(e.exception);
         }); */
-  });
   return jsonData;
 }
+
+export const generateFormData = (schemaName, queryName, command, state) => {
+  const rows = [{}];
+  Object.keys(state).forEach(key => {
+    rows[0][key] = state[key].value;
+  });
+  return {
+    schemaName,
+    queryName,
+    command,
+    rows,
+  };
+};
 
 /*
 TODO create special handler for task submission (this is special)
@@ -522,12 +564,34 @@ export const generateRestraint = (
     queryName: "restraints",
     command: command,
     rows: [{
-      Id: formState.id.value,
+      Id: formState.Id.value,
       date: restraintState.restraintDate.value,
       objectid: restraintState.restraintObjectId.value,
       remark: restraintState.restraintRemark.value,
       restraintType: restraintState.restraintType.value,
       taskid: taskState.taskId.value,
     }]
+  });
+}
+
+export const getTask = (taskId: string): Promise<any> => {
+  return new Promise ((resolve, reject) => {
+    let config: SelectRowsOptions = {
+      schemaName: "study",
+      queryName: "demographics",
+      columns: ["rowid,taskid,title,assignedto,duedate,qcstate"],
+      filterArray: [Filter.create("rowid", taskId, Filter.Types.EQUAL)],
+    };
+    labkeyActionSelectWithPromise(config)
+        .then((data) => {
+          if (data["rows"][0]) {
+            resolve(data["rows"][0])
+          } else {
+            reject(data);
+          }
+        })
+        .catch((data) => {
+          reject(data);
+        });
   });
 }

@@ -10,15 +10,16 @@ import { RestraintPaneTypes } from '../typings/restraintPaneTypes';
 import { Utils } from '@labkey/api';
 
 export const RestraintPane: FC<any> = (props) => {
-    const {onStateChange, objectId, taskState} = props;
+    const {onStateChange, objectId} = props;
     const [restraintTypes, setRestraintTypes]  = useState<Array<any>>([]);
 
     const [resState, setResState] = useState<RestraintPaneTypes>({
-        restraintAnimalId: {error: '', value: ''},
-        restraintDate: {error: '', value: new Date()},
-        restraintObjectId: {error: '', value: objectId || Utils.generateUUID().toUpperCase()},
-        restraintRemark: {error: '', value: ''},
+        Id: {error: '', value: ''},
+        date: {error: '', value: new Date()},
+        objectid: {error: '', value: objectId || Utils.generateUUID().toUpperCase()},
+        remark: {error: '', value: ''},
         restraintType: {error: '', value: ''},
+        taskid: {error: '', value: ""},
     });
 
     // Update higher form state
@@ -62,16 +63,16 @@ export const RestraintPane: FC<any> = (props) => {
 
                 <div className={'panel-input-row'}>
                         <InputLabel
-                            labelFor="restraintRemark"
+                            labelFor="remark"
                             label="Remark"
                             className={"panel-label"}
                         />
                         <textarea
-                            name="restraintRemark"
+                            name="remark"
                             id={`id_${"restraintRemark"}`}
                             className="form-control"
                             rows={3}
-                            value={resState.restraintRemark.value}
+                            value={resState.remark.value}
                             onChange={(event) => handleInputChange(event, setResState)}
                             required={false}
                             autoFocus={false}

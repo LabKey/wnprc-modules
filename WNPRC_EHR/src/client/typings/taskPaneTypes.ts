@@ -1,11 +1,11 @@
 export type StatusStates = | "In Progress" | "Review Required" | "Completed";
 
 export type TaskValuesType = {
-    taskId: { value: string, error: string };
-    taskDueDate: { value: Date, error: string };
-    taskAssignedTo: { value: number, error: string };
-    taskCategory: { value: string, error: string };
-    taskTitle: { value: string, error: string };
-    taskFormType: { value: string, error: string };
-    taskQCStateLabel: { value: string, error: string };
+    taskid: { value: string, error: string };
+    duedate: { value: Date, error: string };
+    assignedto: { value: number, error: string };
+    category: { value: string, error: string };
+    title: { value: string, error: string };
+    formtype: { value: string, error: string };
+    qcstate: { value: string, error: string };
 };

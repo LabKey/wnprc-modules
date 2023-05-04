@@ -3,14 +3,16 @@ import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 
 // Main react component
-import {ResearchUltrasoundFormContainer} from './ResearchUltrasoundFormContainer';
+import { ResearchUltrasounds } from './ResearchUltrasounds';
+
 // Import stylesheets
 import '../wnprc_ehr.scss';
+
 
 const render = () => {
     ReactDOM.render(
         <AppContainer>
-            <ResearchUltrasoundFormContainer />
+            <ResearchUltrasounds />
         </AppContainer>,
         document.getElementById('app')
     )

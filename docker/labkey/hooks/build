@@ -25,8 +25,13 @@ then
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
+    GENERAL_LK_VERSION=${LK_VERSION//./} 
+    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"     
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
+    B=",branch:"${SHORT_BRANCH_NAME}
     TOMCAT_IMAGE="_${SHORT_BRANCH_NAME}"
+    W="`wget -qO- --http-user="${teamcityUser}" --http-password="${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`"
+    echo -e "build number "${W}
     
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"

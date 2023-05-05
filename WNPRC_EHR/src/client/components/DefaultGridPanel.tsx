@@ -1,3 +1,5 @@
+// noinspection TypeScriptValidateTypes
+
 import React, { FC, useEffect, useState } from 'react';
 
 import { produce } from 'immer';
@@ -14,8 +16,8 @@ import {
 // Any props you might use will go here
 interface myProps {
     formType: string;
-
     input?: string;
+    cellStyle?: any;
 }
 
 
@@ -31,11 +33,14 @@ const DefaultGridPanelImpl: FC<Props> = ({
     actions,
     queryModels,
     formType,
-    input
+    input,
+    cellStyle,
     }) => {
 
     //declare any states here
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
+    console.log(cellStyle);
+    const styleColumn = cellStyle.column;
 
     useEffect(() => {
         if(queryModels?.containersModel?.queryInfo) {
@@ -43,14 +48,14 @@ const DefaultGridPanelImpl: FC<Props> = ({
             const { queryInfo } = containersModel;
 
             // Add custom cell renderer to column
-            const oldColumn = queryInfo.getColumn("date");
+            const oldColumn = queryInfo.getColumn(styleColumn);
             const newColumn = new QueryColumn({...oldColumn, ...{"cell": cellRenderer}});
 
             // Add the new column to the list of columns and add to QueryInfo
             // Note: QueryInfo and the columns list are currently defined with ImmutableJS, this is likely to change
             // in future versions to immer, so these lines will need to be changed when that conversion happens
             const oldColumns = queryInfo.get("columns");
-            const newQueryInfo = queryInfo.set("columns", oldColumns.set("date", newColumn));
+            const newQueryInfo = queryInfo.set("columns", oldColumns.set(styleColumn, newColumn));
 
             // Update QueryModel with new QueryInfo
             setQueryModel(
@@ -62,15 +67,25 @@ const DefaultGridPanelImpl: FC<Props> = ({
     },[queryModels?.containersModel]);
 
     const cellRenderer = (data, row, col, rowIndex, columnIndex) => {
+        const value = data.get('value');
+        const backgroundClr = value === cellStyle.green
+            ? "rgb(144,219,130)"
+            : value === cellStyle.red
+            ? "rgb(250,119,102)"
+            : null;
         return (
-            <div style={{backgroundColor: 'red'}}>{data.get('formattedValue')}</div>
+            <div style={{
+                backgroundColor: backgroundClr,
+                padding: 5,
+            }}
+            >
+                {value}
+            </div>
         );
     };
 
     const onRefreshGrid = () => {
-
         const { containersModel } = queryModels;
-
         actions.loadModel(containersModel.id);
     };
 

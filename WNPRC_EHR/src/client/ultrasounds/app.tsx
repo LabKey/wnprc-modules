@@ -16,6 +16,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
             queryName = {"ResearchUltrasoundsInfo"}
             formType = {"Research Ultrasounds"}
             input = {"researchUltrasoundsEntry"}
+            cellStyle={{
+                column: "reviewcompleted",
+                green: "Yes",
+                red: "No",
+            }}
         />,
         document.getElementById('app')
     );

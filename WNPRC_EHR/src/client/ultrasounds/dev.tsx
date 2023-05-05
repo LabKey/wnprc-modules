@@ -16,6 +16,11 @@ const render = () => {
                 queryName = {"ResearchUltrasoundsInfo"}
                 formType = {"Research Ultrasounds"}
                 input = {"researchUltrasoundsEntry"}
+                cellStyle={{
+                    column: "reviewcompleted",
+                    green: "Yes",
+                    red: "No",
+                }}
             />
         </AppContainer>,
         document.getElementById('app')

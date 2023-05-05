@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tables xmlns="http://labkey.org/data/xml">
   <table tableName="viral_loads" tableDbType="TABLE">
-    <description>Loaded via ETL from or_viral_loads query on EHR</description>
+    <description>Loaded via ETL from lists.rsehr_viral_loads query on EHR</description>
     <columns>
       <column columnName="Id">
         <datatype>varchar</datatype>
@@ -93,7 +93,7 @@
         <datatype>integer</datatype>
         <columnTitle>Funding string</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
-        <required>true</required>
+        <required>false</required>
         <fk>
           <fkDbSchema>wnprc_virology</fkDbSchema>
           <fkTable>grant_accounts</fkTable>

@@ -75,7 +75,7 @@
                 <permission>ADMIN</permission>
             </editPermissions>
         </propertyDescriptor>
-        <propertyDescriptor name="EHRViralLoadAssayDataContainerPath">
+        <propertyDescriptor name="EHRViralLoadAssayDataPath">
             <canSetPerContainer>false</canSetPerContainer>
             <description>Folder path to the viral load assay data on EHR</description>
             <editPermissions>

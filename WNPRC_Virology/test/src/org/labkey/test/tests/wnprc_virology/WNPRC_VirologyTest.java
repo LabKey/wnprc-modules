@@ -89,10 +89,12 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final String ACCOUNT_STR_2 = "acct106";
     private static final String ACCOUNT_STR_3 = "acct107";
     private static final String ACCOUNT_STR_4 = "acct108";
-    private static final String ANIMAL_ID = "testanimal1";
-    private static final String ANIMAL_ID_2 = "testanimal2"; //associated w linked folder 3
-    private static final String ANIMAL_ID_3 = "testanimal3"; //associated w linked folder 3
-    private static final String ANIMAL_ID_4 = "testanimal4"; //associated w linked folder 4
+    //note that these subject ids rely on WNPRC_TEMPLATE_DATA var in ViralLoadAssayTest.java
+    private static final String ANIMAL_ID = "Subject2";
+    private static final String ANIMAL_ID_2 = "Subject11"; //associated w linked folder 3 account 106
+    private static final String ANIMAL_ID_3 = "Subject12"; //associated w linked folder 3 account 107
+    private static final String ANIMAL_ID_4 = "Subject13"; //associated w linked folder 4 account 108
+    private static final String ANIMAL_ID_4b = "Subject14"; //associated w linked folder 4 account 108
 
     private static final String LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema";
     private static final String A_SECOND_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_2";
@@ -185,7 +187,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRNotificationEmailReplyTo", RSEHR_EMAIL_CONTACT_INFO));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataContainerPath", getProjectName()));
+        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataPath", getProjectName()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadQCList", PROJECT_NAME_EHR));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", PROJECT_NAME_EHR));
         _test.setModuleProperties(properties);
@@ -225,6 +227,13 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         ETLHelper _etlHelperRSEHR = new ETLHelper(this, getProjectNameRSEHR());
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         _etlHelperRSEHR.runETL(RSEHR_ACCOUNTS_ETL_ID);
+
+        // set up ETL connection for RSEHR to EHR
+        navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
+        _rconnHelper.goToManageRemoteConnections();
+        _rconnHelper.createConnection(EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
+        ETLHelper _etlHelperEHR = new ETLHelper(this, PROJECT_NAME_RSEHR);
+        _etlHelperEHR.runETL(RSEHR_VIRAL_LOAD_DATA_ETL_ID);
 
         // set up ETL connection for EHR to RSEHR
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
@@ -452,8 +461,8 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         _test.clickButton("Update Accounts");
         waitForText("Accounts successfully updated!");
         navigateToFolder(PROJECT_NAME_RSEHR, A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
-        waitForText(ANIMAL_ID_2);
-        assertTextPresent(ANIMAL_ID_2);
+        waitForText(ANIMAL_ID_3);
+        assertTextPresent(ANIMAL_ID_3);
         assertTextNotPresent(ANIMAL_ID);
     }
 
@@ -508,7 +517,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
         Locator.XPathLocator RSEHRQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
         click(RSEHRQCStateSelectItem);
-        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("10099");
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("1000");
         Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
@@ -528,9 +537,9 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         waitAndClick(Locator.linkContainingText("[EHR Server] Viral load results completed on"));
         assertTextPresent("2 sample(s)");
         waitAndClick(Locator.linkWithText("link"));
-        waitForText(ANIMAL_ID_2);
-        assertTextPresent(ANIMAL_ID_2);
-        assertTextNotPresent(ANIMAL_ID); //this should test the experiment # filtering
+        waitForText(ANIMAL_ID_3);
+        assertTextPresent(ANIMAL_ID_3);
+        assertTextPresent(ANIMAL_ID);
 
     }
 
@@ -577,7 +586,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
         Locator.XPathLocator RSEHRQCStateSelectItem = Locator.tagContainingText("li", RSEHR_QC_CODE).notHidden().withClass("x4-boundlist-item");
         click(RSEHRQCStateSelectItem);
-        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("10100");
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("1000");
         Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
@@ -594,9 +603,9 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         assertTextPresent("2 sample(s)");
         waitAndClick(Locator.linkWithText("link"));
         impersonate(TEST_USER_2);
-        waitForText(ANIMAL_ID_3);
-        assertTextPresent(ANIMAL_ID_3);
+        waitForText(ANIMAL_ID_4);
         assertTextPresent(ANIMAL_ID_4);
+        assertTextPresent(ANIMAL_ID_4b);
         stopImpersonating();
 
     }

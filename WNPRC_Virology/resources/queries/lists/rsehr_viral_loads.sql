@@ -21,7 +21,7 @@ SELECT
     v.run.exptNumber as experiment_number,
     vsq.funding_string as account,
     GROUP_CONCAT(DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
-FROM Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadAssayDataContainerPath')}.assay.Viral_Loads."LC480 Viral Load Test".Data v
+FROM Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadAssayDataPath')}.assay.Viral_Loads.Viral_Load.Data v
 
 -- join on QPCR_QC_list to only include results from qPCR runs that pass QC
 INNER JOIN Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadQCList')}.lists.QPCR_QC_list q

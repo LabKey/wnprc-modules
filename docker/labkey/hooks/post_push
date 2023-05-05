@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "docker tag $DOCKER_TAG"
 GIT_HUB_TAG="docker/$DOCKER_TAG"
 
 WNPRC_REPO="wnprcehr/labkey"
@@ -12,6 +13,7 @@ if [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then
     echo "Pushing image to SNAPSHOT repo, version " ${BASH_REMATCH[1]}
     #WNPRC_REPO+=snapshot
+    GIT_HUB_TAG="docker/"${BASH_REMATCH[1]}"_refs/heads/release"${BASH_REMATCH[1]}"-SNAPSHOT"
     docker tag $IMAGE_NAME "wnprcehr/labkeysnapshot:"${BASH_REMATCH[1]}
     docker push "wnprcehr/labkeysnapshot":${BASH_REMATCH[1]}
 
@@ -23,6 +25,7 @@ then
 
 else
     echo "Pushing develop branch"
+    GIT_HUB_TAG="docker/"${BASH_REMATCH[1]}"_refs/develop"
     docker tag $IMAGE_NAME "wnprcehr/labkey:"${BASH_REMATCH[1]}_develop
     docker push "wnprcehr/labkey:"${BASH_REMATCH[1]}_develop
 

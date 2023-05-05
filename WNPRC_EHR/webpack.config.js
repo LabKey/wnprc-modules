@@ -198,5 +198,5 @@ let waterMonitoringConfig = function wp(env) {
 };
 
 module.exports = [
-    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig, waterMonitoringConfig
+    breedingConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig, waterMonitoringConfig
 ];

@@ -9,6 +9,8 @@ PROD_REGEX="^([0-9]{2}\.[0-9]{1,2})_refs_heads_release([0-9]{2}\.[0-9]{1,2})-SNA
 
 LK_VERSION=""
 
+LABKEY_TEAMCITY_BUILD=
+
 if [[ $DOCKER_TAG =~ $DEVBRANCH_REGEX ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
@@ -31,7 +33,12 @@ then
     B=",branch:"${SHORT_BRANCH_NAME}
     TOMCAT_IMAGE="_${SHORT_BRANCH_NAME}"
     W="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`"
-    echo -e "build number "${W}
+    X="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`"
+    Y="${LABKEY_TEAMCITY_BUILD:-$X}"
+    echo -e "value of Y " ${Y}
+    Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LABKEY_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" 
+    
+    echo -e "build number "${Z}
     
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"

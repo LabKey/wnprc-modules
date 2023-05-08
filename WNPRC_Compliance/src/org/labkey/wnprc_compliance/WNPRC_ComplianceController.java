@@ -1,7 +1,7 @@
 package org.labkey.wnprc_compliance;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.Marshal;
@@ -18,6 +18,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -371,7 +372,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
 
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter).toJSONObjectArray()) {
+            for(JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter))) {
                 String type = row.getString("type");
 
                 List<JSONObject> rows = results.get(type);
@@ -420,7 +421,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 card.put("container", getContainer().getId());
                 card.put("exempt", true);
 
-                cardUpdater.upsert(card);
+                cardUpdater.upsert(card.toMap());
 
                 json.put("success", true);
 
@@ -449,7 +450,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
 
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter).toJSONObjectArray()) {
+            for(JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter))) {
                 String type = row.getString("type");
 
                 List<JSONObject> rows = results.get(type);
@@ -484,7 +485,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
             List<JSONObject> rows = new ArrayList<>();
             int resultCount = 0;
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, form.getTable(), filter).toJSONObjectArray()) {
+            for(JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, form.getTable(), filter))) {
                 if (resultCount < resultLimit)
                 {
                     rows.add(row);
@@ -537,7 +538,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     tbClearance.put("id", tbform.id);
                     tbClearance.put("date", tbform.date);
                     tbClearance.put("container", getContainer().getId());
-                    clearancesToUpdate.add(tbClearance);
+                    clearancesToUpdate.add(tbClearance.toMap());
                 }
 
                 tbClearanceUpdater.upsert(clearancesToUpdate);
@@ -564,7 +565,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
             List<JSONObject> rows = new ArrayList<>();
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapMeaslesClearances", filter).toJSONObjectArray()) {
+            for(JSONObject row : JsonUtil.toJSONObjectList(factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapMeaslesClearances", filter))) {
                 rows.add(row);
             }
 
@@ -591,7 +592,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 personToCard.put("personid", form.personId);
                 personToCard.put("container", getContainer().getId());
 
-                cardUpdater.upsert(personToCard);
+                cardUpdater.upsert(personToCard.toMap());
 
                 json.put("success", true);
 
@@ -636,22 +637,22 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     tbClearance.put("date", form.date);
                     tbClearance.put("comment", form.notes);
                     tbClearance.put("container", getContainer().getId());
-                    tBsToUpdate.add(tbClearance);
+                    tBsToUpdate.add(tbClearance.toMap());
 
                     // Update the pending clearance to point to the completed one.
                     JSONObject pendingTbClearance = new JSONObject();
                     pendingTbClearance.put("id", pendingTBId);
                     pendingTbClearance.put("tbclearance_id", tbClearanceId);
                     pendingTbClearance.put("container", getContainer().getId());
-                    pendingTBsToUpdate.add(pendingTbClearance);
+                    pendingTBsToUpdate.add(pendingTbClearance.toMap());
 
-                    JSONObject[] rows = queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "persons_pending_tb_clearances", new SimplerFilter("clearance_id", CompareType.EQUAL, pendingTBId)).toJSONObjectArray();
+                    JSONObject[] rows = JsonUtil.toJSONObjectList(queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "persons_pending_tb_clearances", new SimplerFilter("clearance_id", CompareType.EQUAL, pendingTBId))).toArray(new JSONObject[0]);
 
                     JSONObject tbMap = new JSONObject();
                     tbMap.put("person_id", rows[0].getString("person_id"));
                     tbMap.put("clearance_id", tbClearanceId);
                     tbMap.put("container", getContainer().getId());
-                    tbMapsToUpdate.add(tbMap);
+                    tbMapsToUpdate.add(tbMap.toMap());
                 }
 
                 tbUpdater.upsert(tBsToUpdate);

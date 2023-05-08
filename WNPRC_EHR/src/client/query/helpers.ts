@@ -577,15 +577,37 @@ export const generateRestraint = (
 export const getTask = (taskId: string): Promise<any> => {
   return new Promise ((resolve, reject) => {
     let config: SelectRowsOptions = {
-      schemaName: "study",
-      queryName: "demographics",
+      schemaName: "ehr",
+      queryName: "tasks",
       columns: ["rowid,taskid,title,assignedto,duedate,qcstate"],
       filterArray: [Filter.create("rowid", taskId, Filter.Types.EQUAL)],
     };
     labkeyActionSelectWithPromise(config)
         .then((data) => {
           if (data["rows"][0]) {
-            resolve(data["rows"][0])
+            resolve(data["rows"][0]);
+          } else {
+            reject(data);
+          }
+        })
+        .catch((data) => {
+          reject(data);
+        });
+  });
+}
+
+export const getQCLabel = (rowId: number): Promise<any> => {
+  return new Promise ((resolve, reject) => {
+    let config: SelectRowsOptions = {
+      schemaName: "core",
+      queryName: "QCState",
+      columns: ["Label"],
+      filterArray: [Filter.create("rowid", rowId, Filter.Types.EQUAL)],
+    };
+    labkeyActionSelectWithPromise(config)
+        .then((data) => {
+          if (data["rows"][0]) {
+            resolve(data["rows"][0]);
           } else {
             reject(data);
           }

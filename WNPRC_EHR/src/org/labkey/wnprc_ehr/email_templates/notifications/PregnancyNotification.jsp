@@ -1,13 +1,14 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.util.Path" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
-<%@ page import="org.json.old.JSONArray" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.wnprc_ehr.TriggerScriptHelper" %>
 <%@ page import="org.labkey.wnprc_ehr.notification.PregnancyNotification" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JSONObject params = (JSONObject) getModelBean();
@@ -69,7 +70,7 @@
 <h3>Pregnancy Information</h3>
 <%
     JSONArray pregnancies = queryFactory.selectRows("study", "pregnancies", objectidFilter);
-    JSONObject pregnancy = pregnancies.length() > 0 ? pregnancies.toJSONObjectArray()[0] : new JSONObject();
+    JSONObject pregnancy = pregnancies.length() > 0 ? JsonUtil.toJSONObjectList(pregnancies).get(0) : new JSONObject();
 
     String dateOfConception = pregnancy.getString("date_conception");
     String dateDue = pregnancy.getString("date_due");

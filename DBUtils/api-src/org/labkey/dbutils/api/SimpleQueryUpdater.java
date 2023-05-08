@@ -1,6 +1,6 @@
 package org.labkey.dbutils.api;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;

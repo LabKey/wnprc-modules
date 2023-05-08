@@ -8,8 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
 import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -247,7 +247,7 @@ public class TriggerScriptHelper {
                 }
 
                 for (JSONObject existingMeasurement : existingMeasurements) {
-                    rowsToDelete.add(existingMeasurement);
+                    rowsToDelete.add(existingMeasurement.toMap());
                 }
 
                 for (Double newMeasurement : newMeasurements) {
@@ -261,7 +261,7 @@ public class TriggerScriptHelper {
                     newRow.put("ultrasound_id", updatedRow.get("ultrasound_id"));
                     newRow.put("taskid", updatedRow.get("taskid"));
                     newRow.put("QCStateLabel", updatedRow.get("QCStateLabel"));
-                    rowsToInsert.add(newRow);
+                    rowsToInsert.add(newRow.toMap());
                 }
             }
 
@@ -299,7 +299,7 @@ public class TriggerScriptHelper {
             JSONObject row = new JSONObject();
             row.put("lsid", lsid);
             row.put("outcome", true);
-            updateRows.add(row);
+            updateRows.add(row.toMap());
         }
 
         try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that breeding encounter outcome can be changed to true")) {
@@ -321,7 +321,7 @@ public class TriggerScriptHelper {
         List<Map<String, Object>> updateRows = new ArrayList<>();
         for (JSONObject row : ultrasounds) {
             row.put("followup_required", false);
-            updateRows.add(row);
+            updateRows.add(row.toMap());
         }
 
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
@@ -523,7 +523,7 @@ public class TriggerScriptHelper {
         encounter.put("remark", remark.toString());
         encounter.put("outcome", false);
         List<Map<String, Object>> rows = new ArrayList<>();
-        rows.add(encounter);
+        rows.add(encounter.toMap());
         return rows;
     }
 
@@ -575,7 +575,7 @@ public class TriggerScriptHelper {
         openEncounter.put("remark", openEncounter.getString("remark") != null ? openEncounter.getString("remark") + remark : remark.toString());
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        rows.add(openEncounter);
+        rows.add(openEncounter.toMap());
         return rows;
     }
 
@@ -625,7 +625,7 @@ public class TriggerScriptHelper {
         row4.put("reason", "Breeding ended");
         row4.put("performedby", "person1");
         row4.put("sex", "f");
-        testData.add(row4);
+        testData.add(row4.toMap());
 
         //male 1a - end
         JSONObject row5 = new JSONObject();
@@ -638,7 +638,7 @@ public class TriggerScriptHelper {
         row5.put("reason", "Breeding ended");
         row5.put("performedby", "person1");
         row5.put("sex", "m");
-        testData.add(row5);
+        testData.add(row5.toMap());
 
         //male 1b - end
         JSONObject row6 = new JSONObject();
@@ -651,7 +651,7 @@ public class TriggerScriptHelper {
         row6.put("reason", "Breeding ended");
         row6.put("performedby", "person1");
         row6.put("sex", "m");
-        testData.add(row6);
+        testData.add(row6.toMap());
 
         //female 1 - start
         JSONObject row1 = new JSONObject();
@@ -664,7 +664,7 @@ public class TriggerScriptHelper {
         row1.put("reason", "Breeding");
         row1.put("performedby", "person1");
         row1.put("sex", "f");
-        testData.add(row1);
+        testData.add(row1.toMap());
 
         //male 1a - start
         JSONObject row2 = new JSONObject();
@@ -677,7 +677,7 @@ public class TriggerScriptHelper {
         row2.put("reason", "Breeding");
         row2.put("performedby", "person1");
         row2.put("sex", "m");
-        testData.add(row2);
+        testData.add(row2.toMap());
 
         //male 1b - start
         JSONObject row3 = new JSONObject();
@@ -690,7 +690,7 @@ public class TriggerScriptHelper {
         row3.put("reason", "Breeding");
         row3.put("performedby", "person1");
         row3.put("sex", "m");
-        testData.add(row3);
+        testData.add(row3.toMap());
 
         //female 2a - start
         JSONObject row7 = new JSONObject();
@@ -703,7 +703,7 @@ public class TriggerScriptHelper {
         row7.put("reason", "Breeding");
         row7.put("performedby", "person1");
         row7.put("sex", "f");
-        testData.add(row7);
+        testData.add(row7.toMap());
 
         //female 2b - start
         JSONObject row8 = new JSONObject();
@@ -716,7 +716,7 @@ public class TriggerScriptHelper {
         row8.put("reason", "Breeding");
         row8.put("performedby", "person1");
         row8.put("sex", "f");
-        testData.add(row8);
+        testData.add(row8.toMap());
 
         //male 2 - start
         JSONObject row9 = new JSONObject();
@@ -729,7 +729,7 @@ public class TriggerScriptHelper {
         row9.put("reason", "Breeding");
         row9.put("performedby", "person1");
         row9.put("sex", "m");
-        testData.add(row9);
+        testData.add(row9.toMap());
 
         //male 3 - start
         JSONObject row13 = new JSONObject();
@@ -742,7 +742,7 @@ public class TriggerScriptHelper {
         row13.put("reason", "Breeding");
         row13.put("performedby", "person1");
         row13.put("sex", "m");
-        testData.add(row13);
+        testData.add(row13.toMap());
 
         //female 2b - end
         JSONObject row11 = new JSONObject();
@@ -755,7 +755,7 @@ public class TriggerScriptHelper {
         row11.put("reason", "Breeding ended");
         row11.put("performedby", "person1");
         row11.put("sex", "f");
-        testData.add(row11);
+        testData.add(row11.toMap());
 
         //male 2 - end
         JSONObject row12 = new JSONObject();
@@ -768,7 +768,7 @@ public class TriggerScriptHelper {
         row12.put("reason", "Breeding ended");
         row12.put("performedby", "person1");
         row12.put("sex", "m");
-        testData.add(row12);
+        testData.add(row12.toMap());
 
         //female 2a/3 - end/start
         JSONObject row10 = new JSONObject();
@@ -781,7 +781,7 @@ public class TriggerScriptHelper {
         row10.put("reason", "Breeding");
         row10.put("performedby", "person1");
         row10.put("sex", "f");
-        testData.add(row10);
+        testData.add(row10.toMap());
 
         return testData;
     }
@@ -1547,7 +1547,7 @@ public class TriggerScriptHelper {
                     scheduledAnimalRecord.put("project", project);
                     scheduledAnimalRecord.put("mlsperKg",animalCondition.get("mlsPerKg"));
 
-                    rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+                    rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord.toMap());
 
                     try
                     {
@@ -2162,7 +2162,7 @@ public class TriggerScriptHelper {
         scheduledAnimalRecord.put("project", project);
         scheduledAnimalRecord.put("mlsPerKg", "20");
 
-        rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+        rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord.toMap());
         //ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterScheduledAnimals");
         //service = ti.getUpdateService();
 

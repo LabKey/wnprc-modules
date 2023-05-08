@@ -1,8 +1,8 @@
 package org.labkey.wnprc_ehr.email;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;

@@ -8,31 +8,41 @@ import DropdownSearch from './DropdownSearch';
 import DateInput from './DateInput';
 import { ActionURL, Utils } from '@labkey/api';
 import DatePicker from 'react-datepicker';
-import {openDatepicker, handleDateChange, handleInputChange, findDropdownOptions} from '../query/helpers';
+import { openDatepicker, handleDateChange, handleInputChange, findDropdownOptions, getQCLabel } from '../query/helpers';
 import { TaskValuesType } from '../typings/taskPaneTypes';
 
 export const TaskPane: FC<any> = (props) =>{
 
-    const {id, status, title, onStateChange, formType} = props;
+    const {id, status, title, onStateChange, formType, prevTask} = props;
+    console.log("prevTask: ", prevTask);
 
     const [taskState, setTaskState] = useState<TaskValuesType>({
-        taskid: { value: id || Utils.generateUUID().toUpperCase(), error: "" },
-        title: { value: title, error: "" },
-        assignedto: { value: null, error: "" },
+        taskid: { value: prevTask.taskid || Utils.generateUUID().toUpperCase(), error: "" },
+        rowid: {value: prevTask.rowid || undefined, error: ""},
+        title: { value: prevTask.title || title, error: "" },
+        assignedto: { value: prevTask.assignedto || null, error: "" },
         category: {value: 'task', error: ""},
-        duedate: { value: new Date(), error: "" },
-        formtype: {value: formType, error: ""},
-        qcstate: { value: status, error: "" },
+        duedate: { value: prevTask.duedate ? new Date(prevTask.duedate) : new Date(), error: "" },
+        formtype: {value: prevTask.formType || formType, error: ""},
+        qcstate: { value: prevTask.qcstate || 2, error: "" },
     });
 
     const [assignTypes, setAssignTypes] = useState<Array<any>>([]);
-
+    const [dataFetching, setDataFetching] = useState(true);
     let calendarEl = useRef(null);
+    const [qcStateLabel, setQCStateLabel] = useState("");
 
     // Updates state in form container
     useEffect(() => {
         onStateChange(taskState);
     }, [taskState]);
+
+    useEffect(() => {
+        getQCLabel(taskState.qcstate.value).then((r) => {
+            setQCStateLabel(r.Label);
+            setDataFetching(false);
+        });
+    }, []);
 
     // Finds users for dropdown
     useEffect(() => {
@@ -44,6 +54,11 @@ export const TaskPane: FC<any> = (props) =>{
         findDropdownOptions(config,setAssignTypes,'UserId', 'DisplayName');
     }, []);
 
+    if(dataFetching){
+        return <div>Loading...</div>;
+    }
+    console.log(qcStateLabel);
+
     return(
         <>
             <div className="panel-heading">
@@ -52,20 +67,20 @@ export const TaskPane: FC<any> = (props) =>{
             <div className={"default-form"}>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'taskid'}
+                        labelFor={'rowid'}
                         label={'Task Id'}
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={"taskid"}
-                        id={`id_${'taskId'}`}
+                        name={"rowid"}
+                        id={`id_${'rowid'}`}
                         className="form-control"
-                        value={taskState.taskid.value}
+                        value={taskState.rowid.value}
                         onChange={(event) => handleInputChange(event, setTaskState)}
                         required={false}
                         autoFocus={false}
                         readOnly={true}
-                        type={id ? "text": "hidden"}
+                        type={prevTask ? "text": "hidden"}
                     />
                 </div>
                 <div className={"panel-input-row"}>
@@ -137,8 +152,8 @@ export const TaskPane: FC<any> = (props) =>{
                         name="qcstate"
                         id={`id_${'taskQCStateLabel'}`}
                         className="form-control"
-                        value={taskState.qcstate.value}
-                        onChange={(e) => handleInputChange(e,setTaskState)}
+                        value={qcStateLabel}
+                        defaultValue={taskState.qcstate.value}
                         required={false}
                         autoFocus={false}
                         readOnly={true}

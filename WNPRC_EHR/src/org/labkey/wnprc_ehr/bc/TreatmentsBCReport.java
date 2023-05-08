@@ -6,10 +6,11 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.LocalDateTime;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 
 import java.text.SimpleDateFormat;
@@ -53,7 +54,7 @@ public class TreatmentsBCReport extends BusinessContinuityExcelReport {
         headerStyle.setFont(font);
 
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
-        List<JSONObject> treatments = Arrays.asList(queryFactory.selectRows("wnprc", "BCTreatments").toJSONObjectArray());
+        List<JSONObject> treatments = JsonUtil.toJSONObjectList(queryFactory.selectRows("wnprc", "BCTreatments"));
 
         Map<String, Map<String, Map<String, List<JSONObject>>>> areas = new HashMap<>();
         for (JSONObject treatment: treatments) {
@@ -139,7 +140,7 @@ public class TreatmentsBCReport extends BusinessContinuityExcelReport {
                     List<JSONObject> animalsInCage = cages.get(cage);
 
                     for (JSONObject treatment : animalsInCage) {
-                        CaseInsensitiveMapWrapper valueMap = new CaseInsensitiveMapWrapper<Object>(treatment);
+                        CaseInsensitiveMapWrapper valueMap = new CaseInsensitiveMapWrapper<Object>(treatment.toMap());
 
                         // Create a row for the treatment
                         rowNumber += 1;

@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.json.old.JSONArray" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="java.util.UUID" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Comparator" %>
@@ -64,7 +64,7 @@
     JSONObject userAccessWater = new JSONObject();
 
     for(JSONObject json : waterAccess){
-        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json.toMap());
 
         String allowUser = String.valueOf(map.get("alloweduser"));
         if (userAccessWater.isNull(allowUser)){
@@ -91,7 +91,7 @@
     List<JSONObject> husbandryAssigned = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_assigned"));
 
     for (JSONObject json : husbandryAssigned) {
-        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json.toMap());
         JSONObject waterInfo = new JSONObject();
 
         if (map.get("category") != null) {

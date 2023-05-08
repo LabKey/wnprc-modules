@@ -6,7 +6,7 @@ import org.jooq.Record;
 import org.jooq.RecordContext;
 import org.jooq.TableRecord;
 import org.jooq.impl.DefaultRecordListener;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.audit.AbstractAuditTypeProvider;
 import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.data.Container;
@@ -155,12 +155,12 @@ public class RecordListener extends DefaultRecordListener {
 
         // Set new record values
         JSONObject newRecordValues = RecordUtils.getJSON(record);
-        event.setNewRecordMap(AbstractAuditTypeProvider.encodeForDataMap(container, newRecordValues));
+        event.setNewRecordMap(AbstractAuditTypeProvider.encodeForDataMap(container, newRecordValues.toMap()));
 
         if (!opType.equals(OpType.INSERT) && mapToOriginalRecordValues.containsKey(record)) {
             Record oldRecord = mapToOriginalRecordValues.get(record);
             JSONObject oldRecordValues = RecordUtils.getJSON(oldRecord);
-            event.setOldRecordMap(AbstractAuditTypeProvider.encodeForDataMap(container, oldRecordValues));
+            event.setOldRecordMap(AbstractAuditTypeProvider.encodeForDataMap(container, oldRecordValues.toMap()));
             mapToOriginalRecordValues.remove(record);
         }
 

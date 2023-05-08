@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.pages.husbandry;
 
-import org.json.old.JSONArray;
+import org.json.JSONArray;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.Portal;

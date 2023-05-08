@@ -23,8 +23,8 @@ import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -1628,7 +1628,7 @@ public class WNPRC_EHRController extends SpringActionController
                             waterAmountRecord.put("assignedTo", event.getAssignedTo());
                             waterAmountRecord.put("frequency", event.getFrequency());
                             waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
-                            rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
+                            rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord.toMap());
 
 
                             service = ti.getUpdateService();
@@ -1651,7 +1651,7 @@ public class WNPRC_EHRController extends SpringActionController
                         SimpleQueryUpdater waterAmountTable = new SimpleQueryUpdater(getUser(),getContainer(),"study", "waterAmount");
                         JSONObject rowToDelete = new JSONObject();
                         rowToDelete.put("objectId", event.getObjectId());
-                        waterAmountTable.delete(rowToDelete);
+                        waterAmountTable.delete(rowToDelete.toMap());
 
                         
 
@@ -1713,7 +1713,7 @@ public class WNPRC_EHRController extends SpringActionController
                         if (event.isSkipWaterRegulationCheck()){
                             waterOrderRecord.put("skipWaterRegulationCheck", true);
                         }
-                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
+                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord.toMap());
 
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
@@ -1790,7 +1790,7 @@ public class WNPRC_EHRController extends SpringActionController
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
                         waterOrderRecord.put("skipWaterRegulationCheck", true);
-                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
+                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord.toMap());
 
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
@@ -1822,7 +1822,7 @@ public class WNPRC_EHRController extends SpringActionController
 
 
 
-                    taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
+                    taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord.toMap());
 
                     ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
                     service = ti.getUpdateService();
@@ -1843,7 +1843,7 @@ public class WNPRC_EHRController extends SpringActionController
                     waterOrderRow.put("assignedTo", event.getAssignedTo());
                     waterOrderRow.put("waterSource","regulated");
 
-                    rowToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRow);
+                    rowToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRow.toMap());
 
                     ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                     service = ti.getUpdateService();

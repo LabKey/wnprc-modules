@@ -16,7 +16,7 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
@@ -247,7 +247,7 @@ public class BehaviorNotification extends ColonyAlertsNotification
             {
                 String category = rs.getString("category");
                 msg.append("<tr><td>" + category + "</td><td><a href='" + urlBase + "&query.Id/numPaired/category~eq=" + category + "'>" + rs.getInt("totalAnimals") + "</a></td><td>");
-                if (oldValueMap.containsKey(category))
+                if (oldValueMap.has(category))
                 {
                     msg.append(oldValueMap.get(category));
                 }

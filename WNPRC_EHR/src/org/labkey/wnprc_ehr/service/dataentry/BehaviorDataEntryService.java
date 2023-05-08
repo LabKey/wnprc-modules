@@ -2,7 +2,7 @@ package org.labkey.wnprc_ehr.service.dataentry;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.ehr.EHRService;
@@ -11,6 +11,7 @@ import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
@@ -99,7 +100,7 @@ public class BehaviorDataEntryService extends SecurityEscalatedService
 
         List<Map<String, Object>> rowsToUpdate = new ArrayList<>();
 
-        for (JSONObject assignment : queryFactory.selectRows("study", "CurrentBehaviorAssignments", idFilter).toJSONObjectArray())
+        for (JSONObject assignment : JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "CurrentBehaviorAssignments", idFilter)))
         {
             // Build our row map
             Map<String, Object> rowMap = new HashMap<>();

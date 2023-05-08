@@ -1,13 +1,14 @@
 <%@ page import="com.google.common.base.Joiner" %>
 <%@ page import="org.apache.commons.lang3.ObjectUtils" %>
-<%@ page import="org.json.old.JSONArray" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <style type="text/css">
@@ -38,7 +39,8 @@
     // Get a string to display the weight(s)
     JSONArray weights = queryFactory.selectRows("study", "weight", taskFilter);
     List<String> weightList = new ArrayList();
-    for(JSONObject weightRecord : weights.toJSONObjectArray()) {
+    for(JSONObject weightRecord : JsonUtil
+            .toJSONObjectList(weights)) {
         String weight = weightRecord.getString("weight");
 
         if (weight == null) {
@@ -66,7 +68,7 @@
     else if (alopecias.length() > 1) {
         List<String> alopeciaStrings = new ArrayList<>();
 
-        for (JSONObject alo : alopecias.toJSONObjectArray()) {
+        for (JSONObject alo : JsonUtil.toJSONObjectList(alopecias)) {
             alopeciaStrings.add(alo.optString("score", NOT_SPECIFIED));
         }
 
@@ -261,7 +263,7 @@
                 </thead>
                 <tbody>
                 <%
-                    for (JSONObject organ_weight : organ_weights.toJSONObjectArray()) {
+                    for (JSONObject organ_weight : JsonUtil.toJSONObjectList(organ_weights)) {
                 %>
                 <tr>
                     <td><%=h(organ_weight.optString("tissue_fs_meaning"))%></td>

@@ -1,6 +1,6 @@
 package org.labkey.webutils.api.json;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 
 import java.util.Comparator;
 

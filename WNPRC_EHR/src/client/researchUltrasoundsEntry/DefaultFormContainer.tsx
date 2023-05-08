@@ -31,7 +31,12 @@ interface formProps {
 }
 
 /*
-TODO Turn this into a default form component, it should already have the task pane and animal info pane. Pass in others
+Default form container that handles tasks and animal info, add other components as needed.
+
+@param {string} taskId Task rowid if visiting a previous form
+@param {Component[]} components Any extra components needed for the form
+@param {string} taskType The type of task that the form is for
+@param {string} taskTitle The title of the task that the form is for
  */
 export const DefaultFormContainer: FC<formProps> = (props) => {
 
@@ -42,8 +47,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
     // States required for tasks
-    const [taskStatus, setTaskStatus] = useState("In Progress");
+    const [prevTask, setPrevTask] = useState({});
     const [taskPaneState, setTaskPaneState] = useState({});
+
+    const [dataFetching, setDataFetching] = useState(true);
     // States for each component passed in as a prop
     const [componentStates, setComponentStates] = useState(
         {
@@ -62,15 +69,26 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [formData, setFormData] = useState({
             lsid: { value: "", error: "" },
             command: { value: "insert", error: "" },
-            QCStateLabel: { value: taskStatus, error: "" },
+            QCStateLabel: { value: "", error: "" },
         }
     );
+
+    useEffect(() => {
+        if(taskId) {
+            getTask(taskId).then((result) => {
+                console.log(result);
+                setPrevTask(result);
+                setDataFetching(false);
+            });
+        }else {
+            setDataFetching(false);
+        }
+    },[]);
 
 
     useEffect(() => {
         handleChildStateChange("TaskPane",taskPaneState);
     },[taskPaneState])
-
 
     const updateSyncedValues = (syncedValues, currentComponent) => {
         let updatedState = {...componentStates};
@@ -143,11 +161,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     /*
     TODO Write a way for the form to auto fill if under review from a task id
      */
-    if(taskId){
-        const taskObj = getTask(taskId);
 
+    if(dataFetching){
+        return <div>loading...</div>;
     }
-
     return (
             <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
                 {showModal == "error" && (
@@ -159,9 +176,9 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 <form className={'default-form'} onSubmit={handleSubmit}>
                     <div className="col-xs-6 panel panel-portal panel-portal-left">
                         <TaskPane
+                            prevTask={prevTask}
                             id={taskId}
                             title={taskTitle}
-                            status={taskStatus}
                             onStateChange={setTaskPaneState}
                             formType={taskType}
                         />

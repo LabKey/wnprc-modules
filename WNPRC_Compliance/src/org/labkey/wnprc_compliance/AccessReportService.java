@@ -3,7 +3,7 @@ package org.labkey.wnprc_compliance;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -16,6 +16,7 @@ import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
@@ -71,7 +72,7 @@ public class AccessReportService {
         // Check to make sure we haven't done this already.
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         SimpleFilter filter = new SimplerFilter("date", CompareType.DATE_EQUAL, generatedOn);
-        JSONObject[] existingRows = queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "access_reports", filter).toJSONObjectArray();
+        JSONObject[] existingRows = JsonUtil.toJSONObjectList(queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "access_reports", filter)).toArray(new JSONObject[0]);
         if (existingRows.length > 0) {
             throw new ApiUsageException("This report has already been uploaded.");
         }
@@ -140,7 +141,7 @@ public class AccessReportService {
                     cardInfoJSON.put("info4", cardInfo.getInfo3());
                     cardInfoJSON.put("container", container.getId());
 
-                    cardInfos.put(cardNumber, cardInfoJSON);
+                    cardInfos.put(cardNumber, cardInfoJSON.toMap());
 
                     JSONObject accessInfoJSON = new JSONObject();
                     accessInfoJSON.put("report_id", reportid);
@@ -152,7 +153,7 @@ public class AccessReportService {
                     accessInfoJSON.put("last_entered", accessInfo.getLastEntered());
                     accessInfoJSON.put("enabled", accessInfo.isEnabled());
 
-                    accessData.add(accessInfoJSON);
+                    accessData.add(accessInfoJSON.toMap());
                 }
 
             }
@@ -164,7 +165,7 @@ public class AccessReportService {
             reportRecord.put("report_id", reportid);
             reportRecord.put("date", generatedOn);
             reportRecord.put("container", container.getId());
-            updater.upsert(reportRecord);
+            updater.upsert(reportRecord.toMap());
 
             List<Map<String, Object>> cardsList = new ArrayList<>();
             SimpleQueryUpdater cardsUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "cards");
@@ -172,7 +173,7 @@ public class AccessReportService {
                 JSONObject json = new JSONObject();
                 json.put("card_id", cardNumber);
                 json.put("container", container.getId());
-                cardsList.add(json);
+                cardsList.add(json.toMap());
             }
             cardsUpdater.upsert(cardsList);
 

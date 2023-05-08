@@ -1,10 +1,11 @@
 package org.labkey.wnprc_ehr.dataentry.validators;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
@@ -29,7 +30,7 @@ public class ProjectVerifier {
 
     private JSONObject getProjectRecord() throws InvalidProjectException {
         SimplerFilter filter = new SimplerFilter("project", CompareType.EQUAL, Integer.parseInt(projectid));
-        JSONObject[] records = new SimpleQueryFactory(user, container).selectRows("ehr", "project", filter).toJSONObjectArray();
+        JSONObject[] records = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("ehr", "project", filter)).toArray(new JSONObject[0]);
 
         if (records.length > 0) {
             return records[0];
@@ -97,7 +98,7 @@ public class ProjectVerifier {
         filter.addClause(orClause);
         filter.addAllClauses(new SimplerFilter("project", CompareType.EQUAL, Integer.parseInt(projectid)));
 
-        JSONObject[] assignmentsOnDate = new SimpleQueryFactory(user, container).selectRows("study", "assignment", filter).toJSONObjectArray();
+        JSONObject[] assignmentsOnDate = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("study", "assignment", filter)).toArray(new JSONObject[0]);
 
         SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 

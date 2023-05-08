@@ -1,6 +1,6 @@
 package org.labkey.webutils.api;
 
-import org.json.old.JSONArray;
+import org.json.JSONArray;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.webutils.api.model.JspPageModel;

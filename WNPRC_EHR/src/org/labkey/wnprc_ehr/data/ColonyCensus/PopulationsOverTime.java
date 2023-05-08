@@ -4,7 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.webutils.api.json.ConvertibleToJSON;
 
 import java.util.ArrayList;

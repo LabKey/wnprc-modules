@@ -7,5 +7,6 @@ export type TaskValuesType = {
     category: { value: string, error: string };
     title: { value: string, error: string };
     formtype: { value: string, error: string };
-    qcstate: { value: string, error: string };
+    qcstate: { value: number, error: string };
+    rowid: {value: number, error: string};
 };

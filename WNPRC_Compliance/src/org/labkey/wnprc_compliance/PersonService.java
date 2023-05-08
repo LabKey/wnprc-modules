@@ -1,6 +1,6 @@
 package org.labkey.wnprc_compliance;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
@@ -41,7 +41,7 @@ public class PersonService {
         newPerson.put("notes", form.description);
         newPerson.put("container", container.getId());
 
-        queryUpdater.upsert(newPerson);
+        queryUpdater.upsert(newPerson.toMap());
 
         for (Integer cardId : form.cardNumbers) {
             SimpleQueryUpdater mapUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "persons_to_cards");
@@ -50,7 +50,7 @@ public class PersonService {
             map.put("personid", personId);
             map.put("cardid", cardId);
             map.put("container", container.getId());
-            mapUpdater.upsert(map);
+            mapUpdater.upsert(map.toMap());
         }
 
         for (Integer userId : form.userIds) {
@@ -60,7 +60,7 @@ public class PersonService {
             map.put("personid",  personId);
             map.put("userid",    userId);
             map.put("container", container.getId());
-            mapUpdater.upsert(map);
+            mapUpdater.upsert(map.toMap());
         }
 
 
@@ -78,13 +78,13 @@ public class PersonService {
         requirementInfo.put("date", form.dateCompleted);
         requirementInfo.put("comment",   form.notes);
         requirementInfo.put("container", container.getId());
-        queryUpdater.upsert(requirementInfo);
+        queryUpdater.upsert(requirementInfo.toMap());
 
         JSONObject lookupInfo = new JSONObject();
         lookupInfo.put("person_id",    personId);
         lookupInfo.put("clearance_id", requirementId);
         lookupInfo.put("container",    container.getId());
-        lookupQueryUpdater.upsert(lookupInfo);
+        lookupQueryUpdater.upsert(lookupInfo.toMap());
 
         return requirementId;
     }

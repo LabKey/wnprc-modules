@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.query.BatchValidationException;
@@ -185,12 +185,12 @@ public class EmailServerConfig implements ConvertibleToJSON {
         }
 
         // Check to make sure that if "port" exists, it is an integer
-        if (config.containsKey("port") && config.get("port") != null && !(config.get("port") instanceof Integer)) {
+        if (config.has("port") && config.get("port") != null && !(config.get("port") instanceof Integer)) {
             throw new IllegalArgumentException("port must be an integer");
         }
 
         // Grab the port, if there is one.
-        Integer port = (config.containsKey("port") && config.get("port") != null) ? config.getInt("port") : null;
+        Integer port = (config.has("port") && config.get("port") != null) ? config.getInt("port") : null;
 
         // Try to find a matching protocol
         Protocol protocol = null;
@@ -291,7 +291,7 @@ public class EmailServerConfig implements ConvertibleToJSON {
         JSONObject json = this.toJSON();
         json.put("container", container.getEntityId().toString());
 
-        queryUpdater.upsert(json);
+        queryUpdater.upsert(json.toMap());
     }
 
     /**

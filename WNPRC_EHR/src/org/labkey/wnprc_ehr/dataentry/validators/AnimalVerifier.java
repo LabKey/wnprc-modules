@@ -1,9 +1,10 @@
 package org.labkey.wnprc_ehr.dataentry.validators;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
@@ -24,7 +25,7 @@ public class AnimalVerifier {
 
     private JSONObject getDemoRecord() throws InvalidAnimalIdException {
         SimplerFilter idFilter = new SimplerFilter("Id", CompareType.EQUAL, animalId);
-        JSONObject[] demoRecords = new SimpleQueryFactory(user, container).selectRows("study", "demographics", idFilter).toJSONObjectArray();
+        JSONObject[] demoRecords = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("study", "demographics", idFilter)).toArray(new JSONObject[0]);
 
         if (demoRecords.length > 0) {
             return demoRecords[0];

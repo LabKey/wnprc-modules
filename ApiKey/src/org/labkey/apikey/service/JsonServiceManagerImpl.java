@@ -2,7 +2,7 @@ package org.labkey.apikey.service;
 
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.jetbrains.annotations.Nullable;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.apikey.api.ApiKey;

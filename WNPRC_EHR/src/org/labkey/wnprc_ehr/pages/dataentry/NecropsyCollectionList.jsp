@@ -1,5 +1,5 @@
-<%@ page import="org.json.old.JSONArray" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
@@ -10,6 +10,7 @@
 <%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -68,8 +69,8 @@
     <%
         JSONObject task = tasks.getJSONObject(0);
         JSONObject necropsy = necropsies.getJSONObject(0);
-        JSONObject[] tissueSamples = queryFactory.selectRows("study", "tissue_samples", taskFilter).toJSONObjectArray();
-        JSONObject[] organWeights  = queryFactory.selectRows("study", "organ_weights",  taskFilter).toJSONObjectArray();
+        JSONObject[] tissueSamples = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "tissue_samples", taskFilter)).toArray(new JSONObject[0]);
+        JSONObject[] organWeights  = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "organ_weights", taskFilter)).toArray(new JSONObject[0]);
 
         Timestamp necropsyDate = (Timestamp) necropsy.get("date");
         String necropsyDisplayDate;

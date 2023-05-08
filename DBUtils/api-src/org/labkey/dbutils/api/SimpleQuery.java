@@ -1,7 +1,7 @@
 package org.labkey.dbutils.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DisplayColumn;
@@ -202,7 +202,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
                         rowJSONObject.put(key, rowMap.get(key));
                     }
 
-                    rows.add(rowJSONObject);
+                    rows.add(rowJSONObject.toMap());
                 } while (rs.next());
             }
         }

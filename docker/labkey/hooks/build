@@ -11,39 +11,48 @@ LK_VERSION=""
 
 LABKEY_TEAMCITY_BUILD=
 
+LK_VERSION=${BASH_REMATCH[1]}
+GENERAL_LK_VERSION=${LK_VERSION//./} 
+LABKEY_SNAPSHOT="-SNAPSHOT-"
+LABKEY_DISTRIBUTION="wisc"
+LABKEY_FILE_NAME="UWisc.tar.gz"
+B=""
+
 if [[ $DOCKER_TAG =~ $DEVBRANCH_REGEX ]]
 then
-    LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME="develop"
     TOMCAT_IMAGE="_develop"
-
+    LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2"  
+    echo -e "Building develop branch ";
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
-then
-    LK_VERSION=${BASH_REMATCH[1]}
+then    
+    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME="SNAPSHOT"
     TOMCAT_IMAGE=""
-
+    echo -e "LabKey Version: " ${LK_VERSION};
+    echo -e "Branch: " ${SHORT_BRANCH_NAME};
 #Docker tag for SNAPSHOT and FB
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
-    LK_VERSION=${BASH_REMATCH[1]}
-    GENERAL_LK_VERSION=${LK_VERSION//./} 
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
     TOMCAT_IMAGE="_${SHORT_BRANCH_NAME}"
-    W="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`"
-    X="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`"
-    Y="${LABKEY_TEAMCITY_BUILD:-$X}"
-    echo -e "value of Y " ${Y}
-    Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LABKEY_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" 
-    
-    echo -e "build number "${Z}
-    
+    echo -e "LabKey Version: " ${LK_VERSION};
+    echo -e "Branch: " ${SHORT_BRANCH_NAME};
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
     exit 1
 fi
+
+W="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`"
+X="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`"
+echo -e "value of X " ${X}
+Y="${LABKEY_TEAMCITY_BUILD:-$X}"
+echo -e "value of Y " ${Y}
+Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LK_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" 
+    
+echo -e "build number "${Z}
 
 # Some debugging info
 echo "LabKey version: $LK_VERSION"

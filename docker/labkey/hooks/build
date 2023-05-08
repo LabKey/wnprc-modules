@@ -10,7 +10,10 @@ PROD_REGEX="^([0-9]{2}\.[0-9]{1,2})_refs_heads_release([0-9]{2}\.[0-9]{1,2})-SNA
 LABKEY_TEAMCITY_BUILD=
 
 LK_VERSION=${BASH_REMATCH[1]}
+echo -e "LK_Version at start " ${LK_VERSION}
 GENERAL_LK_VERSION=${LK_VERSION//./} 
+echo -e "LK_Version after  "${LK_VERSION}
+echo -e "GENERAL LK " ${GENERAL_LK_VERSION}
 LABKEY_SNAPSHOT="-SNAPSHOT-"
 LABKEY_DISTRIBUTION="wisc"
 LABKEY_FILE_NAME="UWisc.tar.gz"
@@ -27,8 +30,8 @@ then
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME="SNAPSHOT"
     TOMCAT_IMAGE=""
-    echo -e "LabKey Version: " ${LK_VERSION};
-    echo -e "Branch: " ${SHORT_BRANCH_NAME};
+    echo -e "LabKey Version: " ${LK_VERSION}
+    echo -e "Branch: " ${SHORT_BRANCH_NAME}
 #Docker tag for SNAPSHOT and FB
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
@@ -36,8 +39,8 @@ then
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
     TOMCAT_IMAGE="_"${SHORT_BRANCH_NAME}
-    echo -e "LabKey Version: " ${LK_VERSION};
-    echo -e "Branch: " ${SHORT_BRANCH_NAME};
+    echo -e "LabKey Version: " ${LK_VERSION}
+    echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
     exit 1

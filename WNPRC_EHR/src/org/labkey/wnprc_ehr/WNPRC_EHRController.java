@@ -1567,9 +1567,10 @@ public class WNPRC_EHRController extends SpringActionController
                     transaction.commit();
                     response.put("success", true);
                 }
-                catch (BatchValidationException e){
+                catch (BatchValidationException e)
+                {
                     response.put("success", false);
-                    response.put("errors", createResponseWriter().getJSON(e).get("errors"));
+                    response.put("errors", createResponseWriter().toJSON(e).get("errors"));
                     response.put("extraContext", extraContext);
                 }
                 catch (Exception e)
@@ -1580,8 +1581,8 @@ public class WNPRC_EHRController extends SpringActionController
 
             return response;
         }
-
     }
+
     //Starts a new water order one day after the end of the currently selected water order
     // This method is used on the WaterCalendar to easily modify existing water orders.
     @ActionNames("EnterNewWaterOrder")

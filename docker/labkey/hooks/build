@@ -46,6 +46,8 @@ then
     TOMCAT_IMAGE="_"${SHORT_BRANCH_NAME}
     echo -e "LabKey Version: " ${LK_VERSION}
     echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
+    echo -e "value of B " ${B}
+    echo -e "value of LabKet TC_CONF "${LABKEY_TEAMCITY_CONFIG}
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
     exit 1

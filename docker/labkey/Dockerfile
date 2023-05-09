@@ -6,8 +6,7 @@ FROM alpine:latest as download
 
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
-ARG WNPRC_BRANCH
-ARG LABKEY_VERSION
+ARG TEAMCITY_URL
 
 WORKDIR /tmp/labkey
 
@@ -16,30 +15,8 @@ ARG LABKEY_TEAMCITY_BUILD=
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
-RUN if [ "$WNPRC_BRANCH" = "SNAPSHOT" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
- && if [ "$WNPRC_BRANCH" = "develop" ] ; then \
-        echo -e "Building develop branch "; \
-        B=""; \
-        LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2" ; \
-        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
-        LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
-    else  \
-        echo -e "LabKey Version: " ${LABKEY_VERSION}; \
-        echo -e "Branch: " ${WNPRC_BRANCH}; \
-        GENERAL_LK_VERSION=${LABKEY_VERSION//./}; \
-        LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2" ; \
-        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
-        LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
-    fi \
-
- && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
- && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
- && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
- && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LABKEY_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" \
- && echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
- && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" ${Z} \
+RUN echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
+    && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" ${TEAMCITY_URL} \
   | tar -xz --strip-components=1
 
 # -----------------------------------------------------------------------------

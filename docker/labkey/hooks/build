@@ -16,6 +16,7 @@ B=""
 
 if [[ $DOCKER_TAG =~ $DEVBRANCH_REGEX ]]
 then
+    LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME="develop"
     TOMCAT_IMAGE="_develop"
     LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2"  
@@ -60,10 +61,10 @@ Y="${LABKEY_TEAMCITY_BUILD:-$X}"
 echo -e "value of Y " ${Y}
 Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LK_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" 
     
-echo -e "build number "${Z}
+echo -e "TEAMCTY_URL "${Z}
 
 # Some debugging info
 echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
-docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
+docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .

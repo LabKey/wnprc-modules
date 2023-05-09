@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "build ver 1.6"
+echo "build ver 1.7"
 
 # FB_REGEX will match if the docker tag looks like a feature branch, while
 # PROD_REGEX will match if the docker tag matches the format of a production build

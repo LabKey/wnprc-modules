@@ -23,11 +23,8 @@ then
     echo -e "Building develop branch ";
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then    
-    LK_VERSION=${BASH_REMATCH[1]}
-    echo -e "LK_Version at start " ${LK_VERSION}
-    GENERAL_LK_VERSION=${LK_VERSION//./} 
-    echo -e "LK_Version after  "${LK_VERSION}
-    echo -e "GENERAL LK " ${GENERAL_LK_VERSION}
+    LK_VERSION=${BASH_REMATCH[1]}    
+    GENERAL_LK_VERSION=${LK_VERSION//./}    
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME="SNAPSHOT"
     TOMCAT_IMAGE=""
@@ -37,18 +34,13 @@ then
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
-    echo -e "LK_Version at start " ${LK_VERSION}
-    GENERAL_LK_VERSION=${LK_VERSION//./} 
-    echo -e "LK_Version after  "${LK_VERSION}
-    echo -e "GENERAL LK " ${GENERAL_LK_VERSION}
+    GENERAL_LK_VERSION=${LK_VERSION//./}   
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
     TOMCAT_IMAGE="_"${SHORT_BRANCH_NAME}
     echo -e "LabKey Version: " ${LK_VERSION}
     echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
-    echo -e "value of B " ${B}
-    echo -e "value of LabKet TC_CONF "${LABKEY_TEAMCITY_CONFIG}
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
     exit 1

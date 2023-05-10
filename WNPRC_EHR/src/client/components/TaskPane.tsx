@@ -14,7 +14,6 @@ import { TaskValuesType } from '../typings/taskPaneTypes';
 export const TaskPane: FC<any> = (props) =>{
 
     const {id, status, title, onStateChange, formType, prevTask} = props;
-    console.log("prevTask: ", prevTask);
 
     const [taskState, setTaskState] = useState<TaskValuesType>({
         taskid: { value: prevTask.taskid || Utils.generateUUID().toUpperCase(), error: "" },
@@ -57,7 +56,6 @@ export const TaskPane: FC<any> = (props) =>{
     if(dataFetching){
         return <div>Loading...</div>;
     }
-    console.log(qcStateLabel);
 
     return(
         <>
@@ -153,7 +151,6 @@ export const TaskPane: FC<any> = (props) =>{
                         id={`id_${'taskQCStateLabel'}`}
                         className="form-control"
                         value={qcStateLabel}
-                        defaultValue={taskState.qcstate.value}
                         required={false}
                         autoFocus={false}
                         readOnly={true}

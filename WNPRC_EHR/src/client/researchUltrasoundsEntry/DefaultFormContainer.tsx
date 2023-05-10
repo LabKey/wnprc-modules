@@ -2,7 +2,7 @@ import * as React from "react";
 import { FC, useEffect, useState } from 'react';
 import "../theme/css/react-datepicker.css";
 import "../theme/css/index.css";
-import { generateFormData, getTask, triggerValidation } from '../query/helpers';
+import { generateFormData, getFormData, getTask, triggerValidation } from '../query/helpers';
 import AnimalInfoPane from "../components/AnimalInfoPane";
 import {TaskPane} from "../components/TaskPane";
 import ErrorModal from '../feeding/base/ErrorModal';
@@ -76,10 +76,13 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     useEffect(() => {
         if(taskId) {
             getTask(taskId).then((result) => {
-                console.log(result);
+                //console.log(result);
                 setPrevTask(result);
                 setDataFetching(false);
             });
+            // loop through components setting state
+
+
         }else {
             setDataFetching(false);
         }
@@ -197,6 +200,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                 return (
                                     <div key={ComponentType.name} className="col-xs-6 panel panel-portal panel-portal-beneath">
                                         <ComponentType
+                                            prevTaskId={taskId}
                                             setAnimalInfo={setAnimalInfo}
                                             setAnimalInfoState={setAnimalInfoState}
                                             setAnimalInfoCache={setAnimalInfoCache}

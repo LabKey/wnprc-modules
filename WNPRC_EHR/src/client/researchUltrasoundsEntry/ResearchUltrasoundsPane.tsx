@@ -5,22 +5,22 @@ import {
     getAnimalInfo,
     findDropdownOptions,
     findAccount,
-    findProjects
+    findProjects, getFormData, loadState
 } from '../query/helpers';
 import { Filter } from '@labkey/api';
 import BulkFormInput from '../components/BulkFormInput';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 export const ResearchUltrasoundsPane: FC<any> = (props) => {
-    const {setAnimalInfo, setAnimalInfoState, setAnimalInfoCache, onStateChange} = props;
+    const {setAnimalInfo, setAnimalInfoState, setAnimalInfoCache, onStateChange,prevTaskId} = props;
     // This state is strictly for the form values, more added later but these must be defined here
     const [state, setState] = useState({
-        Id: { value: "", error: "" },
-        date: { value: new Date(), error: "" },
-        pregnancyid: { value: "", error: "" },
-        project: { value: null, error: "" },
-        account: { value: "", error: "" },
-        taskid: {value: "", error: ""},
+            Id: { value: "", error: "" },
+            date: { value: new Date(), error: "" },
+            pregnancyid: { value: "", error: "" },
+            project: { value: null, error: "" },
+            account: { value: "", error: "" },
+            taskid: {value: "", error: ""},
     });
 
     // These states are options for dropdowns, not the value that is selected
@@ -28,6 +28,20 @@ export const ResearchUltrasoundsPane: FC<any> = (props) => {
     const [pregOptions, setPregOptions] = useState([]);
 
     let calendarEl = useRef(null);
+
+    useEffect(() => {
+        if(prevTaskId){
+            getFormData(prevTaskId,"study","research_ultrasounds").then((result) => {
+                setState(prevState => {
+                    let newState = {};
+                    for (let name in result) {
+                        newState[name] = { value: result[name], error: "" };
+                    }
+                    return { ...prevState, ...newState };
+                });
+            });
+        }
+    },[]);
 
     // Finds the animal info for the id on update and checks if valid for form submission
     useEffect(() => {
@@ -121,14 +135,14 @@ export const ResearchUltrasoundsPane: FC<any> = (props) => {
                         {name: "end_diastolic_cms", label: "End Diastolic (cm/s)", type: "text"},
                         {name: "nuchal_fold", label: "Nuchal Fold", type: "text"},
                         {name: "code", label: "SNOMED", type: "text"},
-                        {name: "performedBy", label: "Performed By", type: "text"},
+                        {name: "performedby", label: "Performed By", type: "text"},
                         {name: "findings", label: "Findings", type: "text"},
                         {name: "remark", label: "Remark", type: "textarea"}
                     ]
                     }
                     state={state}
                     setState={setState}
-                    required={["Id","performedBy"]}
+                    required={["Id","performedby"]}
                 />
             </div>
         </>

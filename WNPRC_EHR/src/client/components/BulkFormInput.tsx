@@ -141,7 +141,11 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         showTimeSelect
                         dateFormat="yyyy-MM-dd HH:mm"
                         todayButton="Today"
-                        selected={state[name].value}
+                        selected={
+                            (typeof state[name].value === 'string' || state[name].value instanceof String)
+                            ?  Date.parse(state[name].value)
+                            : state[name].value
+                        }
                         className="form-control"
                         name="dueDate"
                         onChange={(date) => handleDateChange(name, date, setState)}

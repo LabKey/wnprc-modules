@@ -1,7 +1,9 @@
 buildscript {
     repositories {
+        mavenCentral()
+        gradlePluginPortal()
         maven {
-            url "${artifactory_contextUrl}/plugins-release"
+            url "${artifactory_contextUrl}/plugins-release-no-proxy"
         }
         if (gradlePluginsVersion.contains("SNAPSHOT"))
         {
@@ -58,6 +60,8 @@ dependencies {
     implementation project(BuildUtils.getInternalProjectPath(project.gradle))
     implementation project(":server:modules:LabDevKitModules:LDK")
     implementation project(":server:modules:wnprc-modules:java2ts")
+
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ldap", depProjectConfig: 'published', depExtension: 'module')
 }
 
 project.evaluationDependsOn(BuildUtils.getInternalProjectPath(project.gradle))

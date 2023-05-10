@@ -46,7 +46,7 @@ public class wnprc_r24Module extends DefaultModule
     @Override
     public Double getSchemaVersion()
     {
-        return 20.000;
+        return 22.000;
     }
 
     @Override

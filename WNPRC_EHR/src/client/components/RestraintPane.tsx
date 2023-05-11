@@ -1,32 +1,46 @@
-import * as react from 'react';
 import { FC, useEffect, useState } from 'react';
 import { ConfigProps } from '../weight/typings/main';
-import { labkeyActionSelectWithPromise, handleInputChange, findDropdownOptions } from '../query/helpers';
+import { handleInputChange, findDropdownOptions, getFormData } from '../query/helpers';
 import InputLabel from './InputLabel';
-import TextInput from './TextInput';
 import * as React from 'react';
 import DropdownSearch from './DropdownSearch';
 import { RestraintPaneTypes } from '../typings/restraintPaneTypes';
 import { Utils } from '@labkey/api';
 
 export const RestraintPane: FC<any> = (props) => {
-    const {onStateChange, objectId} = props;
+    const {onStateChange, prevTaskId} = props;
     const [restraintTypes, setRestraintTypes]  = useState<Array<any>>([]);
 
     const [resState, setResState] = useState<RestraintPaneTypes>({
         Id: {error: '', value: ''},
         date: {error: '', value: new Date()},
-        objectid: {error: '', value: objectId || Utils.generateUUID().toUpperCase()},
+        objectid: {error: '', value: Utils.generateUUID().toUpperCase()},
         remark: {error: '', value: ''},
         restraintType: {error: '', value: ''},
         taskid: {error: '', value: ""},
     });
+
+    // Grab previous restraints data from task id if it exists
+    useEffect(() => {
+        if(prevTaskId){
+            getFormData(prevTaskId,"study","restraints").then((result) => {
+                setResState(prevState => {
+                    let newState = {};
+                    for (let name in result) {
+                        newState[name] = { value: result[name], error: "" };
+                    }
+                    return { ...prevState, ...newState };
+                });
+            });
+        }
+    },[]);
 
     // Update higher form state
     useEffect(() => {
         onStateChange(resState);
     },[resState]);
 
+    // Find options for restraint dropdown
     useEffect(() => {
         let config: ConfigProps = {
             schemaName: "ehr_lookups",
@@ -72,7 +86,7 @@ export const RestraintPane: FC<any> = (props) => {
                             id={`id_${"restraintRemark"}`}
                             className="form-control"
                             rows={3}
-                            value={resState.remark.value}
+                            value={resState.remark.value || ""}
                             onChange={(event) => handleInputChange(event, setResState)}
                             required={false}
                             autoFocus={false}

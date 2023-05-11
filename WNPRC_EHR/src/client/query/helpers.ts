@@ -201,7 +201,7 @@ export const insertTaskCommand = (taskid, title) => {
   return taskCommand;
 
 };
-/*
+
 export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: number, QCStateLabel: string): Array<TaskValuesType> => {
   return [{
     taskId: taskId,
@@ -212,11 +212,12 @@ export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: num
     formType: "Enter Water Daily Amount",
     QCStateLabel: QCStateLabel
   }];
-}; */
+};
 
 /*
 An expanded helper function for lookupAnimalInfo. This function updates the components animalInfo state.
-Caching has not been implemented yet.
+
+TODO test caching if used for bulk animal upload
 @param id The animal ID that the user is requesting
 @param setAnimalInfo A state setter for animalInfo
 @param setAnimalInfoState A state setter for animalInfoState
@@ -295,9 +296,10 @@ export const findDropdownOptions = (config, setState, value, display) => {
 
 
 /*
-Helper that finds the accounts associated with a project
+Helper that finds the account associated with a project
 
 @param projectId A project ID that you want to find the account of
+@returns {Object} Account associated with a project
  */
 export const findAccount = async (projectId) => {
   let config: SelectDistinctOptions = {
@@ -319,9 +321,10 @@ export const findAccount = async (projectId) => {
 /*
 Helper that finds the projects associated with an animal
 
-@param projectId A project ID that you want to find the account of
+@param animalId An animal ID that you want to find the projects of
+@returns {[Object]} Array of objects representing the projects associated with an animal ID
  */
-export const findProjects = async (animalId) => {
+export const findProjects = async (animalId: string) => {
   let config: SelectDistinctOptions = {
     schemaName: "study",
     queryName: "Assignment",
@@ -354,10 +357,11 @@ export const findProjects = async (animalId) => {
 /*
 General validation helper function for form submission, currently only checks for valid id, and living status
 
-@props animalInfoCache Cache of animalInfos to reference for validity
-@props formData Form data to validate, see triggerSubmit() for more details
-@props setShowModal  see triggerSubmit() for more details
-@props setErrorText see triggerSubmit() for more details
+@param animalInfoCache Cache of animalInfos to reference for validity
+@param formData Form data to validate, see triggerSubmit() for more details
+@param setShowModal  see triggerSubmit() for more details
+@param setErrorText see triggerSubmit() for more details
+@returns {Promise} Promise object representing a pass or fail validation check
  */
 export const validate = async (animalInfoCache, formData, setShowModal, setErrorText) => {
 
@@ -417,13 +421,13 @@ export const validate = async (animalInfoCache, formData, setShowModal, setError
 };
 
 /*
-function to trigger validation on an animal
+Function to trigger validation on an animal
 
-@props animalInfoCache The cache of info per animal for validation
-@props formData Can be either rowObj or array<rowObj> if form is a single entry or batch
-@props setSubmitTextBody handles the submission text for showModal
-@props setShowModal handles the modal that appears when user clicks submit
-@props setErrorText handles error texts for showModal if any occur
+@param animalInfoCache The cache of info per animal for validation
+@param formData Can be either rowObj or array<rowObj> if form is a single entry or batch
+@param setSubmitTextBody handles the submission text for showModal
+@param setShowModal handles the modal that appears when user clicks submit
+@param setErrorText handles error texts for showModal if any occur
  */
 export const triggerValidation = async (
     animalInfoCache,
@@ -432,7 +436,6 @@ export const triggerValidation = async (
     setShowModal,
     setErrorText,
 ) => {
-  //do some validation here
 
   setSubmitTextBody("One moment. Performing validations...");
   await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
@@ -450,13 +453,13 @@ export const triggerValidation = async (
 /*
 Main submit handler for forms
 TODO maybe remove function
-@props animalInfoCache The cache of info per animal for validation
-@props formData Can be either rowObj or array<rowObj> if form is a single entry or batch
-@props setSubmitTextBody handles the submission text for showModal
-@props setShowModal handles the modal that appears when user clicks submit
-@props setErrorText handles error texts for showModal if any occur
-@props schemaName Name of schema to submit to
-@props queryName Name of table of schema to submit to
+@param animalInfoCache The cache of info per animal for validation
+@param formData Can be either rowObj or array<rowObj> if form is a single entry or batch
+@param setSubmitTextBody handles the submission text for showModal
+@param setShowModal handles the modal that appears when user clicks submit
+@param setErrorText handles error texts for showModal if any occur
+@param schemaName Name of schema to submit to
+@param queryName Name of table of schema to submit to
 */
 
 export const triggerSubmit = async (
@@ -515,7 +518,16 @@ export const triggerSubmit = async (
   return jsonData;
 }
 
-export const generateFormData = (schemaName, queryName, command, state) => {
+/*
+Compiles a state object into a submission ready object for labkey saverows API call
+
+@param schemaName Name of schema for data to submit to
+@param queryName Name of query for data to submit to
+@param command Command of what to trigger for labkey saverows, insert or update
+@param state Data object to package for submission
+@returns {Object} New object ready for saverows
+ */
+export const generateFormData = (schemaName: string, queryName: string, command: string, state: object): object => {
   const rows = [{}];
   Object.keys(state).forEach(key => {
     rows[0][key] = state[key].value;
@@ -529,51 +541,11 @@ export const generateFormData = (schemaName, queryName, command, state) => {
 };
 
 /*
-TODO create special handler for task submission (this is special)
+Helper function that finds task data from a task ID
+
+@param taskId Task ID to find task information for
+@returns {Promise} Promise object representing the task data
  */
-export const generateTask = (
-    taskState,
-    command
-) => {
-
-  return({
-    schemaName: "ehr",
-    queryName: "tasks",
-    command: command,
-    rows: [{
-      taskId: taskState.taskId.value,
-      duedate: taskState.taskDueDate.value,
-      assignedTo: taskState.taskAssignedTo.value,
-      category: taskState.taskCategory.value,
-      title: taskState.taskTitle.value,
-      formType: taskState.taskFormType.value,
-      QCStateLabel: taskState.taskQCStateLabel.value
-    }],
-  });
-}
-
-export const generateRestraint = (
-    formState,
-    taskState,
-    restraintState,
-    command
-) => {
-
-  return({
-    schemaName: "study",
-    queryName: "restraints",
-    command: command,
-    rows: [{
-      Id: formState.Id.value,
-      date: restraintState.restraintDate.value,
-      objectid: restraintState.restraintObjectId.value,
-      remark: restraintState.restraintRemark.value,
-      restraintType: restraintState.restraintType.value,
-      taskid: taskState.taskId.value,
-    }]
-  });
-}
-
 export const getTask = (taskId: string): Promise<any> => {
   return new Promise ((resolve, reject) => {
     let config: SelectRowsOptions = {
@@ -596,6 +568,12 @@ export const getTask = (taskId: string): Promise<any> => {
   });
 }
 
+/*
+Helper function to find the label associated with a qc state number
+
+@param rowId The requested qc state row id to find the label for
+@returns {Promise} Promise object with the requested label
+ */
 export const getQCLabel = (rowId: number): Promise<any> => {
   return new Promise ((resolve, reject) => {
     let config: SelectRowsOptions = {
@@ -618,6 +596,14 @@ export const getQCLabel = (rowId: number): Promise<any> => {
   });
 }
 
+/*
+Helper function to get form data from a previous task
+
+@param taskId Task id of previously created task/form
+@param schemaName Schema name of the task/form that the taskId belongs to
+@param queryName Query name of the task/form that the taskId belongs to
+@returns {Promise} Promise object with the previous form data
+ */
 export const getFormData = (taskId: string, schemaName: string, queryName: string): Promise<any> => {
   return new Promise ((resolve, reject) => {
     let config: SelectRowsOptions = {
@@ -638,8 +624,4 @@ export const getFormData = (taskId: string, schemaName: string, queryName: strin
           reject(data);
         });
   });
-}
-
-export const loadState = () => {
-
 }

@@ -147,7 +147,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                             : state[name].value
                         }
                         className="form-control"
-                        name="dueDate"
+                        name={name}
                         onChange={(date) => handleDateChange(name, date, setState)}
                         customInput={
                             <DateInput

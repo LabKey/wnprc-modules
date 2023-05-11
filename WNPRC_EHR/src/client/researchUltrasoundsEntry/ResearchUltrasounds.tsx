@@ -6,7 +6,6 @@ import {RestraintPane} from '../components/RestraintPane';
 
 export const ResearchUltrasounds: FC<any> = (props) => {
     const taskid: string = LABKEY.ActionURL.getParameter('taskid');
-    console.log(taskid);
     return (
         <div>
             <DefaultFormContainer
@@ -19,7 +18,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                         main: true,
                         schemaName: "study",
                         queryName: "research_ultrasounds",
-                        command: "insert",
+                        command: taskid ? "update" : "insert",
                         syncedValues: {
                             TaskPane: ["taskid"],
                         },
@@ -28,7 +27,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                         type: RestraintPane,
                         schemaName: "study",
                         queryName: "restraints",
-                        command: "insert",
+                        command: taskid ? "update" : "insert",
                         syncedValues: {
                             ResearchUltrasoundsPane: ["Id"],
                             TaskPane: ["taskid"],

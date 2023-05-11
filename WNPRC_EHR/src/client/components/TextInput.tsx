@@ -16,24 +16,22 @@ interface TextInputProps {
   readOnly?: boolean;
   isValid?: boolean;
   type?: string;
-  defaultValue?: any;
 }
 
 const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
   const {
-    name,
-    id,
-    className,
-    value,
-    onChange,
-    onBlur,
-    onFocus,
-    required,
-    autoFocus,
-    readOnly,
-    isValid,
-    type,
-    defaultValue,
+      name,
+      id,
+      className,
+      value,
+      onChange,
+      onBlur,
+      onFocus,
+      required,
+      autoFocus,
+      readOnly,
+      isValid,
+      type,
   } = props;
   const borderColor = required && value === ''
       ? 'red'
@@ -55,7 +53,6 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
         required={required}
         autoFocus={autoFocus}
         readOnly={readOnly}
-        defaultValue={defaultValue}
       />
       {isValid === false ? (<div className={"required-text"}>Invalid</div>)
           : required && value === '' && ( <div className={"required-text"}>Required</div>

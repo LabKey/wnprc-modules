@@ -47,7 +47,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
     // States required for tasks
-    const [prevTask, setPrevTask] = useState({});
+    const [prevTask, setPrevTask] = useState(undefined);
     const [taskPaneState, setTaskPaneState] = useState({});
 
     const [dataFetching, setDataFetching] = useState(true);
@@ -76,13 +76,9 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     useEffect(() => {
         if(taskId) {
             getTask(taskId).then((result) => {
-                //console.log(result);
                 setPrevTask(result);
                 setDataFetching(false);
             });
-            // loop through components setting state
-
-
         }else {
             setDataFetching(false);
         }
@@ -161,10 +157,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         }));
     }
 
-    /*
-    TODO Write a way for the form to auto fill if under review from a task id
-     */
-
     if(dataFetching){
         return <div>loading...</div>;
     }
@@ -180,7 +172,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     <div className="col-xs-6 panel panel-portal panel-portal-left">
                         <TaskPane
                             prevTask={prevTask}
-                            id={taskId}
                             title={taskTitle}
                             onStateChange={setTaskPaneState}
                             formType={taskType}
@@ -214,7 +205,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                 return (
                                     <div key={ComponentType.name} className="col-xs-6 panel panel-portal panel-portal-beneath">
                                         <ComponentType
-                                            {...component.props}
+                                            prevTaskId={taskId}
                                             state={componentStates[ComponentType.name]}
                                             onStateChange={(newState) => handleChildStateChange(ComponentType.name, newState)}
                                         />

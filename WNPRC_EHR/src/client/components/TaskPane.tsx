@@ -15,32 +15,34 @@ export const TaskPane: FC<any> = (props) =>{
 
     const {id, status, title, onStateChange, formType, prevTask} = props;
 
+
     const [taskState, setTaskState] = useState<TaskValuesType>({
-        taskid: { value: prevTask.taskid || Utils.generateUUID().toUpperCase(), error: "" },
-        rowid: {value: prevTask.rowid || undefined, error: ""},
-        title: { value: prevTask.title || title, error: "" },
-        assignedto: { value: prevTask.assignedto || null, error: "" },
+        taskid: { value: prevTask?.taskid || Utils.generateUUID().toUpperCase(), error: "" },
+        rowid: {value: prevTask?.rowid || undefined, error: ""},
+        title: { value: prevTask?.title || title, error: "" },
+        assignedto: { value: prevTask?.assignedto || null, error: "" },
         category: {value: 'task', error: ""},
-        duedate: { value: prevTask.duedate ? new Date(prevTask.duedate) : new Date(), error: "" },
-        formtype: {value: prevTask.formType || formType, error: ""},
-        qcstate: { value: prevTask.qcstate || 2, error: "" },
+        duedate: { value: prevTask?.duedate ? new Date(prevTask?.duedate) : new Date(), error: "" },
+        formtype: {value: prevTask?.formType || formType, error: ""},
+        qcstate: { value: prevTask?.qcstate || 2, error: "" },
     });
 
     const [assignTypes, setAssignTypes] = useState<Array<any>>([]);
-    const [dataFetching, setDataFetching] = useState(true);
+    const [qcStateLabel, setQCStateLabel] = useState("In Progress");
     let calendarEl = useRef(null);
-    const [qcStateLabel, setQCStateLabel] = useState("");
 
     // Updates state in form container
     useEffect(() => {
         onStateChange(taskState);
     }, [taskState]);
 
+    // Finds prev QC label if a prev task was created
     useEffect(() => {
-        getQCLabel(taskState.qcstate.value).then((r) => {
-            setQCStateLabel(r.Label);
-            setDataFetching(false);
-        });
+        if(prevTask) {
+            getQCLabel(taskState.qcstate.value).then((r) => {
+                setQCStateLabel(r.Label);
+            });
+        }
     }, []);
 
     // Finds users for dropdown
@@ -52,10 +54,6 @@ export const TaskPane: FC<any> = (props) =>{
         };
         findDropdownOptions(config,setAssignTypes,'UserId', 'DisplayName');
     }, []);
-
-    if(dataFetching){
-        return <div>Loading...</div>;
-    }
 
     return(
         <>

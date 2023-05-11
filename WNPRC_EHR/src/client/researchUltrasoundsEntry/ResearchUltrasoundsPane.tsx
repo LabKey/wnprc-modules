@@ -5,7 +5,8 @@ import {
     getAnimalInfo,
     findDropdownOptions,
     findAccount,
-    findProjects, getFormData, loadState
+    findProjects,
+    getFormData
 } from '../query/helpers';
 import { Filter } from '@labkey/api';
 import BulkFormInput from '../components/BulkFormInput';
@@ -29,6 +30,7 @@ export const ResearchUltrasoundsPane: FC<any> = (props) => {
 
     let calendarEl = useRef(null);
 
+    // Loads previous form into state if the task already existed. ex. (Under review)
     useEffect(() => {
         if(prevTaskId){
             getFormData(prevTaskId,"study","research_ultrasounds").then((result) => {
@@ -65,14 +67,14 @@ export const ResearchUltrasoundsPane: FC<any> = (props) => {
         findDropdownOptions(config, setPregOptions, 'lsid','date_conception');
     }, [state.Id.value]);
 
-    // Find projects for animal id
+    // Find projects for animal id, update if id changes
     useEffect(() => {
         findProjects(state.Id.value).then(newProjects => {
             setProjectOptions(newProjects);
         });
     }, [state.Id.value]);
 
-    // Find account for project
+    // Find account for project, update if project changes
     useEffect(() => {
         // Clears account if project is also cleared
         if(state.project.value === null) {
@@ -85,7 +87,7 @@ export const ResearchUltrasoundsPane: FC<any> = (props) => {
         });
     }, [state.project.value]);
 
-    // Updates state in form container
+    // Updates state in higher form component
     useEffect(() => {
         onStateChange(state);
     },[state]);

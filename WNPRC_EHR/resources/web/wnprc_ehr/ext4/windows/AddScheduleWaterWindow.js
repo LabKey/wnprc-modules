@@ -183,8 +183,8 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             schemaName: 'study',
             queryName: 'waterScheduleCoalesced',
             parameters: {NumDays: 1, StartDate: new Date(selectedDate)},
-            sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'lsid,animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
+            sort: 'date,Id/curLocation/room,Id/curLocation/cage,Id',
+            columns: 'lsid,Id,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
             filterArray: filtersArray,
             scope: this,
             success: this.loadWater,
@@ -264,7 +264,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
         Ext4.Array.each(results.rows, function(sr){
             var row = new LDK.SelectRowsRow(sr);
-            let animalId = row.getValue('animalid');
+            let Id = row.getValue('Id');
             var dateCurrentTime = new Date();
             var modelDate = new Date (row.getDateValue('date'));
             modelDate.setHours(dateCurrentTime.getHours());
@@ -289,16 +289,16 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
             }
 
-            if (waterRecord.has(animalId) && waterRecord.get(animalId).raw.model == 'waterRecord'){  
-                previousVolume = waterRecord.get(animalId).get('volume');
-                previousTreatmentId = ';' + waterRecord.get(animalId).get('treatmentId');
-                previousDataSource = ';' + waterRecord.get(animalId).get('dataSource');
-                //waterObjects.push({treatmentId:waterRecord.get(animalId).get('treatmentId'), volume: waterRecord.get(animalId).get('volume')});
-                //waterObjects[animalId].push(waterObject);
+            if (waterRecord.has(Id) && waterRecord.get(Id).raw.model == 'waterRecord'){
+                previousVolume = waterRecord.get(Id).get('volume');
+                previousTreatmentId = ';' + waterRecord.get(Id).get('treatmentId');
+                previousDataSource = ';' + waterRecord.get(Id).get('dataSource');
+                //waterObjects.push({treatmentId:waterRecord.get(Id).get('treatmentId'), volume: waterRecord.get(Id).get('volume')});
+                //waterObjects[Id].push(waterObject);
             }
 
-            if (!waterObjects[animalId]){
-                waterObjects[animalId] = [];
+            if (!waterObjects[Id]){
+                waterObjects[Id] = [];
             }
 
             if (row.getValue('dataSource') == 'waterOrders' ){
@@ -311,10 +311,10 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 containsWaterOrder = true;
             }
 
-            waterObjects[animalId].push(waterObject);
+            waterObjects[Id].push(waterObject);
 
             var tempModel = this.targetStore.createModel({
-                Id:                 row.getValue('animalid'),
+                Id:                 row.getValue('Id'),
                 date:               modelDate,
                 volume:             row.getValue('volume') + previousVolume,
                 project:            row.getValue('project'),
@@ -324,17 +324,17 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 dataSource:         row.getValue('dataSource') + previousDataSource,
                 dateOrdered:        matchingDate,
                 model:              'waterRecord',
-                waterObjects:       waterObjects[animalId]
+                waterObjects:       waterObjects[Id]
 
 
             });
 
             tempModel.phantom = false;
-            waterRecord.set(animalId,tempModel);
+            waterRecord.set(Id,tempModel);
 
             if ( row.getValue('provideFruit') != 'none' && row.getValue('provideFruit') != null){
                 var fruitModel = this.targetStore.createModel({
-                    Id:                 row.getValue('animalid'),
+                    Id:                 row.getValue('Id'),
                     date:               modelDate,
                     provideFruit:       row.getValue('provideFruit'),
                     project:            row.getValue('project'),
@@ -347,7 +347,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
                 });
                 fruitModel.phantom = false;
-                waterRecord.set(animalId+'fruit',fruitModel);
+                waterRecord.set(Id+'fruit',fruitModel);
 
             }
 
@@ -444,7 +444,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
 
     getAnimals: function(){
-        let animalIds = this.down('#theForm').getAnimals.call(this);
+        let Ids = this.down('#theForm').getAnimals.call(this);
 
 
 

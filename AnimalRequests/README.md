@@ -37,6 +37,18 @@ More information about how the entire form works can be found in the documentati
 
 ## Release Notes
 
+### 1.4.0
+* Added new fields:
+  * Terminal for Dam (if pregnant)
+  * Terminal for Infant (if prengnat)
+  * Contacts
+  * Major Surgeries
+  * Unwanted Previous Exposures
+* Ajusted selenium test (included with virology PR)
+
+### 1.3.0
+* Added arrow connection
+
 ### 1.2.0
 
 #### Features

@@ -1,6 +1,11 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
    <columns>
        <column name="Id" />
+       <column name="Id/curLocation/location">
+           <properties>
+               <property name="columnTitle" value="Current Location"/>
+           </properties>
+       </column>
       <column name="Id/curLocation/area">
         <properties>
             <property name="columnTitle" value="Current Area"/>

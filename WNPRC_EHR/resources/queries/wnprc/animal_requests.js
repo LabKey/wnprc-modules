@@ -16,9 +16,16 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    //updates the project field if its an actual project
-    if (!isNaN(row.optionalproject)){
-        row.project = row.optionalproject
+
+    //only do this operation for an insert (oldRow is blank)
+    if (typeof(oldRow) == 'undefined') {
+        if (!!row.optionalproject && typeof(row.project) == 'undefined'){
+            //if the optional project is something other than a number (TBD) then we need to leave project blank
+            // because the ehr triggers.js requires it to be a number.
+            if (!isNaN(row.optionalproject)){
+                row.project = row.optionalproject
+            }
+        }
     }
 
     //sanity checks for date fields
@@ -65,10 +72,18 @@ function onAfterInsert(helper,errors,row){
     var rowid = row.rowId;
     var hostName = 'https://' + LABKEY.serverName;
     console.log ("animal_requests.js: New request submitted, rowid: "+ rowid);
-    var threadId = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(row, "/WNPRC/WNPRC_Units/Animal_Services/Assigns/Private/");
-    WNPRC.Utils.getJavaHelper().updateRow(row, threadId, "wnprc", "animal_requests", "internalthreadrowid");
-    var threadIdExternal = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(row, "/WNPRC/WNPRC_Units/Animal_Services/Assigns/Restricted/");
-    WNPRC.Utils.getJavaHelper().updateRow(row, threadIdExternal, "wnprc", "animal_requests", "externalthreadrowid");
+    LABKEY.Ajax.request({
+        url: LABKEY.ActionURL.buildURL('core', 'getModuleProperties', null),
+        method: 'POST',
+        jsonData: {moduleName: 'WNPRC_EHR', includePropertyValues: true},
+        success: LABKEY.Utils.getCallbackWrapper(function (response) {
+            console.log("animal_requests.js: creating message boards");
+            var threadIdInternal = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(row, response["values"]["AssignsSecureMessageBoardPrivateFolder"]["effectiveValue"]);
+            WNPRC.Utils.getJavaHelper().updateRow(row, threadIdInternal, "wnprc", "animal_requests", "internalthreadrowid");
+            var threadIdExternal = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(row,  response["values"]["AssignsSecureMessageBoardRestrictedFolder"]["effectiveValue"]);
+            WNPRC.Utils.getJavaHelper().updateRow(row, threadIdExternal, "wnprc", "animal_requests", "externalthreadrowid");
+        }, this),
+    });
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
 }
 

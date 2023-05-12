@@ -1736,7 +1736,7 @@ public class WNPRC_EHRController extends SpringActionController
                 catch (BatchValidationException e){
                     response.put("success", false);
 
-                    response.put("errors", createResponseWriter().getJSON(e).get("errors"));
+                    response.put("errors", createResponseWriter().toJSON(e).get("errors"));
                     response.put("extraContext", extraContext);
 
                 }

@@ -228,7 +228,7 @@ WNPRC_Virology.DatasetButtons = new function() {
                 queryName: 'vl_sample_queue',
                 viewName: 'Samples_for_isolation',
                 filterArray: filt,
-                requiredVersion: 21.11,
+                requiredVersion: 22.11,
                 success: function (response) {
                     let csvRows = [];
 

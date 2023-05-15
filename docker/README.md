@@ -114,6 +114,8 @@ Finally, in your `docker-compose` file edit the name of the labkey service, it s
 
 All the auxiliary LabKey instances can be manage via the manage_all_continers.sh script. This script accepts two values (-s || -d), s starts all the containers in the docker folder. Starts with the primary which contains postgres and than looks for any folder that starts with dev.
 
+You can spin up any of these instances individually by navigating to the parent folder hosting them (ex. /space/application/wnprc-modules/docker/). From there, you can use command-line prompts to navigate into the instance you'd like (usually beginning with "dev_"). You can also verify this is your desired instance by executing `vi docker-compose.yml` and checking if the info is correct. Once you've navigated into the instance you'd like and verified it, you can use the `docker-compose` commands listed in the previous section to spin them up or tear them down.
+
 ## Loading a Database Backup Using the Script
 
 Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder. Depending on resource on local machine or server, it is possible to increase the number of processors for the restore process. Change the number in line 132 right after -j option, by default is set to 4 processes.

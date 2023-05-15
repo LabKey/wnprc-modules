@@ -1227,7 +1227,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                                         matchingFound = true;
                                                         virologyResults.addRecord({
                                                             Id:             resultRow['Id'],
-                                                            date:           resultRow['Date'].replace(/-/g, '/'),
+                                                            date:           resultRow['Date'],
                                                             virus:          resultRow['Virus'],
                                                             method:         resultRow['Method'],
                                                             result:         resultRow['Result'],

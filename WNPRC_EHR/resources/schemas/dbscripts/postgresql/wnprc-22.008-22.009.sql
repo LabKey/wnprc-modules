@@ -1,1 +1,1 @@
-ALTER TABLE wnprc.animal_requests ALTER COLUMN principalinvestigatorold DROP NOT NULL;
+ALTER TABLE IF EXISTS wnprc.animal_requests ALTER COLUMN principalinvestigatorold DROP NOT NULL;

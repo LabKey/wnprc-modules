@@ -53,7 +53,6 @@ import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
-import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
 import java.sql.SQLException;
@@ -2256,19 +2255,6 @@ public class TriggerScriptHelper {
             }
         }
         return thestatus;
-    }
-
-    public void sendViralLoadQueueNotification(String[] keys, Map<String,Object> emailProps) throws SQLException
-    {
-        Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
-        String recordStatus = getVLStatus(user, viralLoadContainer, (Integer) emailProps.get("status"));
-        if ("08-complete-email-Zika_portal".equals(recordStatus)){
-            //_log.info("Using java helper to send email for viral load queue record: "+key);
-            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, user, viralLoadContainer, emailProps);
-            Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-            notification.sendManually(ehrContainer);
-        }
     }
 
     // Returns a list of vendor ids if they do not match the current enteredVendorId

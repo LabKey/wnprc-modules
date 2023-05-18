@@ -16,6 +16,9 @@ public class SelfRegistrationModule extends CodeOnlyModule
 {
     public static final String NAME = "SelfRegistration";
 
+    public static final String ISSUE_TRACKER_FOLDER_LOCATION = "RSEHRUserRegistrationFolder";
+    public static final String EMAIL_NOTIFICATION_SEND_TO_LIST = "RSEHRNewUserRegistrationEmailSendTo";
+
     @Override
     public String getName()
     {

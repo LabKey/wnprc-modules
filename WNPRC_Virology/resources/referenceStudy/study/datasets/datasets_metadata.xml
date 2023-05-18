@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables xmlns="http://labkey.org/data/xml">
+  <table tableName="viral_loads" tableDbType="TABLE">
+    <description>Loaded via ETL from lists.rsehr_viral_loads query on EHR</description>
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <url replaceMissing="blankValue">/study-participant.view?participantId=${ParticipantId/ParticipantId}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Participant</fkTable>
+          <fkColumnName>ParticipantId</fkColumnName>
+        </fk>
+        <scale>255</scale>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+        <nullable>false</nullable>
+        <formatString>Date</formatString>
+      </column>
+      <column columnName="Key">
+        <datatype>integer</datatype>
+        <columnTitle>Key</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="assay">
+        <datatype>varchar</datatype>
+        <columnTitle>Assay</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4002</scale>
+      </column>
+      <column columnName="sample_type">
+        <datatype>varchar</datatype>
+        <columnTitle>Nucleic Acid</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+      <column columnName="viral_load_average">
+        <datatype>varchar</datatype>
+        <columnTitle>Viral Load</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="viral_load_replicates">
+        <datatype>varchar</datatype>
+        <columnTitle>Viral Load Replicates</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+      <column columnName="source_type">
+        <datatype>varchar</datatype>
+        <columnTitle>Sample Source</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+      <column columnName="comment">
+        <datatype>varchar</datatype>
+        <columnTitle>Comment</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+      <column columnName="experiment_number">
+        <datatype>integer</datatype>
+        <columnTitle>Experiment Number</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="RNA_isolation_method">
+        <datatype>varchar</datatype>
+        <columnTitle>RNA Isolation Method</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+      <column columnName="account">
+        <datatype>integer</datatype>
+        <columnTitle>Funding string</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <required>false</required>
+        <fk>
+          <fkDbSchema>wnprc_virology</fkDbSchema>
+          <fkTable>grant_accounts</fkTable>
+          <fkColumnName>rowid</fkColumnName>
+        </fk>
+      </column>
+    </columns>
+    <tableTitle>Viral Loads - EHR</tableTitle>
+  </table>
+</tables>

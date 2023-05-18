@@ -1,0 +1,19 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <properties>
+        <propertyDescriptor name="RSEHRUserRegistrationFolder">
+            <canSetPerContainer>false</canSetPerContainer>
+            <description>Folder where the user registration list exists</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+
+        <propertyDescriptor name="RSEHRNewUserRegistrationEmailSendTo">
+        <canSetPerContainer>false</canSetPerContainer>
+        <description>Comma separated list of emails of whom to send the RSEHR user registration notification to</description>
+        <editPermissions>
+            <permission>ADMIN</permission>
+        </editPermissions>
+        </propertyDescriptor>
+    </properties>
+</module>

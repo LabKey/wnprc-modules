@@ -27,7 +27,7 @@ function init(event, errors) {
     })
 
     LABKEY.Query.selectRows({
-        schemaName: 'ehr_billing',
+        schemaName: 'ehr_billing_linked',
         queryName: 'aliases',
         columns: ["rowid", "alias"],
         success: function (data) {

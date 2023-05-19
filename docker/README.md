@@ -70,6 +70,15 @@ The LabKey build also requires the official Oracle Java Server JRE image, which 
 
 You will also need to login via the Docker CLI (`docker login`) with the shared username and password from KeePassX. Keep in mind that the username and password are both case-sensitive. Be advised that if you are using `sudo` to execute Docker commands as the super user, you'll need to `sudo docker login` as well.
 
+## Pulling the Latest Image from Docker Hub
+
+To pull the most recent version of a Docker image before deploying:
+  1. Connect to the test server (ex. `ssh yourUsername@ehr-ubuntest2.primate.wisc.edu`).
+  2. From any directory, run `docker ps` to see all current images (you can also run `docker-compose ps` to see only the active images).
+  3. Find the name of the image you'd like to update (ex. wnprcehr/labkeysnapshot:21.11) and run `docker pull wnprcehr/labkeysnapshot:21.11`.
+
+After running `docker pull`, you can verify your image is now on the correct version. To do this, navigate to the image in your test server (ex. `cd /space/application/wnprc-modules/docker/dev_update22_11`). Once inside, run `vi docker-compose.yml` and verify the file matches the docker hub tag for that image's current version.
+
 ## Deploying the Docker Compose Services
 
 To deploy the services, you again either use Gradle or use Docker Compose directly. To use Gradle, execute the following build tasks:

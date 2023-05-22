@@ -8,12 +8,17 @@ import DropdownSearch from './DropdownSearch';
 import DateInput from './DateInput';
 import { ActionURL, Utils } from '@labkey/api';
 import DatePicker from 'react-datepicker';
-import { openDatepicker, handleDateChange, handleInputChange, findDropdownOptions, getQCLabel } from '../query/helpers';
+import {
+    openDatepicker,
+    handleDateChange,
+    handleInputChange,
+    getQCLabel
+} from '../query/helpers';
 import { TaskValuesType } from '../typings/taskPaneTypes';
 
 export const TaskPane: FC<any> = (props) =>{
 
-    const {id, status, title, onStateChange, formType, prevTask} = props;
+    const { title, onStateChange, formType, prevTask} = props;
 
 
     const [taskState, setTaskState] = useState<TaskValuesType>({
@@ -31,6 +36,12 @@ export const TaskPane: FC<any> = (props) =>{
     const [qcStateLabel, setQCStateLabel] = useState("In Progress");
     let calendarEl = useRef(null);
 
+    let config: ConfigProps = {
+        schemaName: "core",
+        queryName: "PrincipalsWithoutAdmin",
+        columns: ["UserId","DisplayName"]
+    };
+
     // Updates state in form container
     useEffect(() => {
         onStateChange(taskState);
@@ -45,22 +56,12 @@ export const TaskPane: FC<any> = (props) =>{
         }
     }, []);
 
-    // Finds users for dropdown
-    useEffect(() => {
-        let config: ConfigProps = {
-            schemaName: "core",
-            queryName: "PrincipalsWithoutAdmin",
-            columns: ["DisplayName", "UserId"]
-        };
-        findDropdownOptions(config,setAssignTypes,'UserId', 'DisplayName');
-    }, []);
-
     return(
-        <>
+        <div className={"col-md-8 panel panel-portal form-row-wrapper"}>
             <div className="panel-heading">
                 <h3>Task</h3>
             </div>
-            <div className={"default-form"}>
+            <div className={"multi-col-form"}>
                 <div className={"panel-input-row"}>
                     <InputLabel
                         labelFor={'rowid'}
@@ -103,7 +104,7 @@ export const TaskPane: FC<any> = (props) =>{
                         className = {'panel-label'}
                     />
                     <DropdownSearch
-                        options={assignTypes}
+                        optConf={config}
                         initialvalue={null}
                         name="assignedto"
                         id={`id_${'taskAssignedTo'}`}
@@ -155,7 +156,7 @@ export const TaskPane: FC<any> = (props) =>{
                     />
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 

@@ -276,26 +276,6 @@ export const handleInputChange = (event, setState) => {
 };
 
 /*
-Helper that connects dropdown values to display names and puts them into an available options state.
-
-@param config Configuration for the query to be executed by labkeyActionSelectWithPromise
-@param setState A state setter for the options to be presented in a dropdown selector
-@param value The true value of the dropdown options
-@param display The display value of the dropdown options
- */
-export const findDropdownOptions = (config, setState, value, display) => {
-
-  labkeyActionSelectWithPromise(config).then(data => {
-    let temp = [];
-    data["rows"].forEach(item => {
-      temp.push({value: item[value], label: item[display]});
-    });
-    setState(temp);
-  });
-}
-
-
-/*
 Helper that finds the account associated with a project
 
 @param projectId A project ID that you want to find the account of
@@ -316,42 +296,6 @@ export const findAccount = async (projectId) => {
   };
   const data = await labkeyActionDistinctSelectWithPromise(config);
   return {value: data["values"][0], error: ""};
-}
-
-/*
-Helper that finds the projects associated with an animal
-
-@param animalId An animal ID that you want to find the projects of
-@returns {[Object]} Array of objects representing the projects associated with an animal ID
- */
-export const findProjects = async (animalId: string) => {
-  let config: SelectDistinctOptions = {
-    schemaName: "study",
-    queryName: "Assignment",
-    column: "project",
-    filterArray: [
-      Filter.create(
-          "Id",
-          animalId,
-          Filter.Types.EQUALS
-      )
-    ]
-  };
-
-  const data = await labkeyActionDistinctSelectWithPromise(config);
-
-  let temp = [];
-  // Default projects, these should always show
-  temp.push({value:300901, label:"300901"});
-  temp.push({value:400901, label:"400901"});
-
-  data["values"].forEach(item => {
-    // we don't want defaults added twice if an animal has already been in one
-    if (item === 300901 || item === 400901) return;
-    temp.push({value: item, label: item});
-  });
-
-  return temp;
 }
 
 /*
@@ -446,76 +390,6 @@ export const triggerValidation = async (
       return;
     }
   });
-}
-
-
-
-/*
-Main submit handler for forms
-TODO maybe remove function
-@param animalInfoCache The cache of info per animal for validation
-@param formData Can be either rowObj or array<rowObj> if form is a single entry or batch
-@param setSubmitTextBody handles the submission text for showModal
-@param setShowModal handles the modal that appears when user clicks submit
-@param setErrorText handles error texts for showModal if any occur
-@param schemaName Name of schema to submit to
-@param queryName Name of table of schema to submit to
-*/
-
-export const triggerSubmit = async (
-    animalInfoCache,
-    formData,
-    setSubmitTextBody,
-    setShowModal,
-    setErrorText,
-    schemaName,
-    queryName,
-    ): Promise<any> => {
-
-  // Check if formData is a single submission (rowObj) or batch (array<rowObj>)
-  if(!Array.isArray(formData)){
-    formData = [formData]
-  }
-  let jsonData;
-
-  //do some validation here
-  await triggerValidation(animalInfoCache, formData, setShowModal, setErrorText, setSubmitTextBody);
-  setSubmitTextBody("Submitting...");
-
-  console.log('grouping stuff... but skipping group cmds');
-  try {
-    console.log('grouping stuff')
-    let itemsToInsert = groupCommands(formData);
-    console.log('setting up stuff')
-    console.log("items: ", itemsToInsert);
-    jsonData = setupJsonData(itemsToInsert, schemaName, queryName);
-  }catch(err) {
-    console.log(err);
-    console.log(JSON.stringify(err))
-    return;
-  }
-  console.log("jsonData: ", jsonData);
-  console.log('calling save rows');
-
-    /*
-    saveRowsDirect(jsonData)
-        .then((data) => {
-            console.log('done!!');
-            console.log(JSON.stringify(data));
-            setSubmitTextBody("Success!");
-            wait(3, setSubmitTextBody).then(() => {
-                window.location.href = ActionURL.buildURL(
-                    "ehr",
-                    "executeQuery.view?schemaName=study&query.queryName=research_ultrasounds",
-                    ActionURL.getContainer()
-                );
-            });
-        })
-        .catch((e) => {
-            console.log(e);
-            setSubmitTextBody(e.exception);
-        }); */
-  return jsonData;
 }
 
 /*

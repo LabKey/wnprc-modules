@@ -150,11 +150,27 @@ select.form-control {
   max-width: 500px;
 }
 
+.form-wrapper {
+  padding: 15px;
+  position: relative;
+  display: flex;
+}
+
 .default-form {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: left;
-  align-items: stretch;
+  width: 100%;
+}
+
+.form-row-wrapper {
+  width: 95%;
+}
+
+.multi-col-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Adjust the number of columns as needed */
+  gap: 10px; /* Adjust the gap between columns */
 }
 
 .panel-input-row {
@@ -169,7 +185,8 @@ select.form-control {
 .panel-label {
   text-align: left;
   margin-right: 10px; /* add margin-right to separate from input */
-  width: 120px;
+  width: auto;
+  margin-left: 10px;
 }
 
 .panel-input-row input[type="text"] {
@@ -180,11 +197,13 @@ select.form-control {
 }
 
 .animal-info-pane {
-  position: fixed;
-  transform: translate(115%);
+  position: sticky;
+  max-width: 500px;
+  height: 100%;
+  top: 45px;
 }
 
-.panel-portal-left, .animal-info-pane {
+.panel-portal-left {
   max-width: 500px;
 }
 

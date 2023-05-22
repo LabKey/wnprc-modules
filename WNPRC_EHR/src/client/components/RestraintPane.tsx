@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { ConfigProps } from '../weight/typings/main';
-import { handleInputChange, findDropdownOptions, getFormData } from '../query/helpers';
+import { handleInputChange, getFormData } from '../query/helpers';
 import InputLabel from './InputLabel';
 import * as React from 'react';
 import DropdownSearch from './DropdownSearch';
@@ -9,7 +9,6 @@ import { Utils } from '@labkey/api';
 
 export const RestraintPane: FC<any> = (props) => {
     const {onStateChange, prevTaskId} = props;
-    const [restraintTypes, setRestraintTypes]  = useState<Array<any>>([]);
 
     const [resState, setResState] = useState<RestraintPaneTypes>({
         Id: {error: '', value: ''},
@@ -19,6 +18,12 @@ export const RestraintPane: FC<any> = (props) => {
         restraintType: {error: '', value: ''},
         taskid: {error: '', value: ""},
     });
+
+    const config: ConfigProps = {
+        schemaName: "ehr_lookups",
+        queryName: "restraint_type",
+        columns: ["type"]
+    };
 
     // Grab previous restraints data from task id if it exists
     useEffect(() => {
@@ -40,22 +45,12 @@ export const RestraintPane: FC<any> = (props) => {
         onStateChange(resState);
     },[resState]);
 
-    // Find options for restraint dropdown
-    useEffect(() => {
-        let config: ConfigProps = {
-            schemaName: "ehr_lookups",
-            queryName: "restraint_type",
-            columns: ["type", "code"]
-        };
-        findDropdownOptions(config,setRestraintTypes, 'type','type');
-    }, []);
-
     return(
         <>
             <div className="panel-heading">
                 <h3>Restraint</h3>
             </div>
-            <div className={"default-form"}>
+            <div className={"multi-col-form"}>
                 <div className={"panel-input-row"}>
                     <InputLabel
                         labelFor={"restraintType"}
@@ -63,7 +58,7 @@ export const RestraintPane: FC<any> = (props) => {
                         className = {'panel-label'}
                     />
                     <DropdownSearch
-                        options={restraintTypes}
+                        optConf={config}
                         initialvalue={null}
                         name="restraintType"
                         id={`id_${'restraintType'}`}

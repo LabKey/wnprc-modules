@@ -10,7 +10,9 @@ import {ContextProvider} from "./containers/App/ContextProvider";
 const render = () => {
     ReactDOM.render(
         <AppContainer>
+            <ContextProvider>
                 <EnterWeightFormContainer />
+            </ContextProvider>
         </AppContainer>,
         document.getElementById('app')
     )

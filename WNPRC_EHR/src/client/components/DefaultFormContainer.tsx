@@ -2,45 +2,60 @@ import * as React from "react";
 import { FC, useEffect, useState } from 'react';
 import "../theme/css/react-datepicker.css";
 import "../theme/css/index.css";
-import { generateFormData, getFormData, getTask, triggerValidation } from '../query/helpers';
-import AnimalInfoPane from "../components/AnimalInfoPane";
-import {TaskPane} from "../components/TaskPane";
+import { generateFormData, getTask, saveRowsDirect, triggerValidation, wait } from '../query/helpers';
+import AnimalInfoPane from "./AnimalInfoPane";
+import {TaskPane} from "./TaskPane";
 import ErrorModal from '../feeding/base/ErrorModal';
-import { InfoProps, infoStates } from './typings';
-
+import { InfoProps, infoStates } from '../researchUltrasoundsEntry/typings';
+import { ActionURL } from '@labkey/api';
 
 interface Component {
     type: React.FunctionComponent<any>;
     schemaName: string;
     queryName: string;
-    command: string;
     syncedValues?: {
         [key: string]: string[];
     };
     validation?: boolean;
-    main?: boolean;
+    custom?: boolean;
     props?: {
         [key: string]: any;
     };
+    title?: string;
+    inputPath?: string;
 }
 interface formProps {
     taskId?: string;
     taskType: string;
     taskTitle: string;
+    redirectQuery: string;
+    redirectSchema: string;
+    command: string;
     components: Component[];
 }
 
 /*
 Default form container that handles tasks and animal info, add other components as needed.
 
-@param {string} taskId Task rowid if visiting a previous form
+@param {string} taskId Task ID (not rowid) if visiting a previous form
 @param {Component[]} components Any extra components needed for the form
 @param {string} taskType The type of task that the form is for
 @param {string} taskTitle The title of the task that the form is for
+@param {string} command The command to execute, update or insert
+@param {string} redirectSchema The name of the schema to redirect the page to after successful submission
+@param {string} redirectQuery The name of the query to redirect the page to after successful submission
  */
 export const DefaultFormContainer: FC<formProps> = (props) => {
 
-    const {taskId, components, taskType, taskTitle} = props;
+    const {
+        taskId,
+        components,
+        taskType,
+        taskTitle,
+        command,
+        redirectSchema,
+        redirectQuery
+    } = props;
 
     // States required for animal info
     const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
@@ -65,13 +80,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [errorText, setErrorText] = useState<string>("");
     const [showModal, setShowModal] = useState<string>();
     const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
-    // State for formData
-    const [formData, setFormData] = useState({
-            lsid: { value: "", error: "" },
-            command: { value: "insert", error: "" },
-            QCStateLabel: { value: "", error: "" },
-        }
-    );
 
     useEffect(() => {
         if(taskId) {
@@ -84,11 +92,18 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         }
     },[]);
 
-
+    // This effect updates the task panes state in the componentStates state if it changes
     useEffect(() => {
         handleChildStateChange("TaskPane",taskPaneState);
     },[taskPaneState])
 
+    /*
+    This function makes sure values across components are synced if needed, ex. task ids
+
+    @param syncedValues JSON object that holds a property (component needed to sync) and array of fields to sync
+    @param currentComponent The current component to sync with other components according to what is described
+                            in syncedValues
+     */
     const updateSyncedValues = (syncedValues, currentComponent) => {
         let updatedState = {...componentStates};
         Object.keys(syncedValues).forEach((key) => {
@@ -107,18 +122,19 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
         const finalFormData = [];
-        const taskData = generateFormData("ehr", "tasks", "insert", taskPaneState);
+        // Create format to submit new task
+        const taskData = generateFormData("ehr", "tasks", command, taskPaneState);
         finalFormData.push(taskData);
 
-        components.map(async (component) => {
+        // For each component compile the state data into a format ready for submission
+        components.forEach(async (component) => {
             const ComponentType = component.type;
             const schemaName = component.schemaName;
             const queryName = component.queryName;
-            const command = component.command;
             const syncedValues = component.syncedValues;
             const validation = component.validation;
             let newData;
-            if(validation){
+            if(validation){ // runs if validation is required on component
                 await triggerValidation(
                     animalInfoCache,
                     componentStates[ComponentType.name],
@@ -127,7 +143,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     setErrorText
                 );
             }
-            if (syncedValues){
+            if (syncedValues){ // updates synced values across components to maintain matching fields ex. (taskid)
                 const newState = updateSyncedValues(syncedValues, ComponentType.name);
                 newData = generateFormData(
                     schemaName,
@@ -145,11 +161,35 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             }
             finalFormData.push(newData);
         });
-
-        console.log("FINAL DATA: ", finalFormData)
-
+        let jsonData = {commands: finalFormData}
+        console.log('calling save rows on: ', jsonData);
+        // save rows to database and redirect to desired schema/query
+        /*
+        saveRowsDirect(jsonData)
+            .then((data) => {
+                console.log('done!!');
+                console.log(JSON.stringify(data));
+                setSubmitTextBody("Success!");
+                wait(3, setSubmitTextBody).then(() => {
+                    window.location.href = ActionURL.buildURL(
+                        "ehr",
+                        `executeQuery.view?schemaName=${redirectSchema}&query.queryName=${redirectQuery}`,
+                        ActionURL.getContainer()
+                    );
+                });
+            })
+            .catch((e) => {
+                console.log(e);
+                setSubmitTextBody(e.exception);
+            });*/
     }
 
+    /*
+    Function that handles child state changes within component states
+
+    @param componentName Name of component to add new state to
+    @param newState New state of to add to component
+     */
     const handleChildStateChange = (componentName, newState) => {
         setComponentStates((prevState) => ({
             ...prevState,
@@ -157,11 +197,12 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         }));
     }
 
+    // Make sure if loading in from a taskId the render doesn't return before it fetches the previous task
     if(dataFetching){
         return <div>loading...</div>;
     }
     return (
-            <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
+            <div className={`form-wrapper ${false ? "saving" : ""}`}>
                 {showModal == "error" && (
                     <ErrorModal
                         errorText={errorText}
@@ -169,27 +210,18 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     />
                 )}
                 <form className={'default-form'} onSubmit={handleSubmit}>
-                    <div className="col-xs-6 panel panel-portal panel-portal-left">
-                        <TaskPane
-                            prevTask={prevTask}
-                            title={taskTitle}
-                            onStateChange={setTaskPaneState}
-                            formType={taskType}
-                        />
-                    </div>
-                    <div className="col-xs-5 panel panel-portal animal-info-pane">
-                        <div className="panel-heading">
-                            <h3>Animal Info</h3>
-                        </div>
-                        <AnimalInfoPane animalInfo={animalInfo} infoState={animalInfoState}/>
-                    </div>
+                    <TaskPane
+                        prevTask={prevTask}
+                        title={taskTitle}
+                        onStateChange={setTaskPaneState}
+                        formType={taskType}
+                    />
                     {
                         components.map((component) => {
-                            const { type: ComponentType, main } = component;
-
-                            if(main){
+                            const { type: ComponentType, custom, schemaName, queryName, title, inputPath } = component;
+                            if(custom){
                                 return (
-                                    <div key={ComponentType.name} className="col-xs-6 panel panel-portal panel-portal-beneath">
+                                    <div key={ComponentType.name} className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
                                             prevTaskId={taskId}
                                             setAnimalInfo={setAnimalInfo}
@@ -197,13 +229,17 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                             setAnimalInfoCache={setAnimalInfoCache}
                                             state={componentStates[ComponentType.name]}
                                             onStateChange={(newState) => handleChildStateChange(ComponentType.name,newState)}
+                                            schemaName={schemaName}
+                                            queryName={queryName}
+                                            title={title}
+                                            inputPath={inputPath}
                                         />
                                     </div>
                                 );
                             }
                             else {
                                 return (
-                                    <div key={ComponentType.name} className="col-xs-6 panel panel-portal panel-portal-beneath">
+                                    <div key={ComponentType.name} className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
                                             prevTaskId={taskId}
                                             state={componentStates[ComponentType.name]}
@@ -223,6 +259,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                         </button>
                     </div>
                 </form>
+                <AnimalInfoPane
+                    animalInfo={animalInfo}
+                    infoState={animalInfoState}
+                />
             </div>
     );
 

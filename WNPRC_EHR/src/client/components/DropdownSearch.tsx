@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import * as React from "react";
 import Select from 'react-select';
+import { labkeyActionSelectWithPromise } from '../query/helpers';
 
 interface PropTypes {
-    options: any;
+    optConf: any;
+    optDep?: any;
     name: any;
     id: string;
     classname: string;
@@ -21,7 +23,8 @@ interface PropTypes {
  */
 const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     const {
-        options,
+        optConf,
+        optDep,
         value,
         name,
         id,
@@ -33,6 +36,38 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         setState
     } = props;
 
+    const [optState, setOptState] = useState([]);
+
+    useEffect(() => {
+        labkeyActionSelectWithPromise(optConf).then(data => {
+            let options = [];
+            let value = optConf.columns[0];
+            let display = optConf.columns[1] || optConf.columns[0];
+            data["rows"].forEach(item => {
+                options.push({value: item[value], label: item[display]});
+            });
+
+            // If dropdown is for projects, add defaults
+            if(name === "project"){
+                options.push({value:300901, label:"300901"});
+                options.push({value:400901, label:"400901"});
+            }
+
+            // remove possible duplicates
+            const duplicatesRemovedArray = options.reduce((accumulator, currentObject) => {
+                const isDuplicate = accumulator.some(
+                    (obj) => obj.value === currentObject.value && obj.label === currentObject.label
+                );
+
+                if (!isDuplicate) {
+                    accumulator.push(currentObject);
+                }
+                return accumulator;
+            }, []);
+            setOptState(duplicatesRemovedArray);
+        });
+    }, optDep);
+
     const handleInputChange = (selectedOption, setState) => {
         const value = selectedOption ? selectedOption.value : null;
         setState((prevState) => ({
@@ -40,16 +75,15 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
             [name]: {value: value, error: ""}
         }));
     };
-
     return (
         <Select
         name={name}
         id={id}
-        value={options.find(option => option.value === value)}
+        value={optState.find(option => option.value === value)}
         className={classname}
         defaultValue={null}
         onChange={(event) => handleInputChange(event,setState)}
-        options={options}
+        options={optState}
         required={required}
         isClearable={isClearable}
         />

@@ -1,12 +1,11 @@
-//bulk rows add to component will need onChange handler and state management. Pass in names count number for cnt
 import * as React from 'react';
-import { FC } from 'react';
+import { FC, useRef } from 'react';
 import "../theme/css/index.css";
 import InputLabel from './InputLabel';
 import TextInput from './TextInput';
 import Checkbox from './Checkbox';
 import DropdownSearch from './DropdownSearch';
-import { handleDateChange, handleInputChange, openDatepicker } from '../query/helpers';
+import {handleDateChange, handleInputChange, openDatepicker } from '../query/helpers';
 import DatePicker from 'react-datepicker';
 import DateInput from './DateInput';
 import { ActionURL } from '@labkey/api';
@@ -15,7 +14,8 @@ interface BulkFormProps {
     inputField: any[];
     state: any;
     setState: any;
-    required: string[];
+    required?: string[];
+    options?: any;
 }
 /*
 Creates forms
@@ -26,7 +26,7 @@ Creates forms
 
  */
 const BulkFormInput: FC<BulkFormProps> = (props) => {
-    const {inputField, state,setState, required} = props;
+    const {inputField, state,setState, required, options} = props;
 
     const cnt = inputField.length;
 
@@ -104,7 +104,9 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
             );
         }
         else if(fieldType === "dropdown"){ // Dropdown field
-            const options = inputField[i].options;
+
+            const optConf = options[name][0];
+            const optDep = options[name][1];
             inputs.push(
                 <div key={id} className={"panel-input-row"}>
                     <InputLabel
@@ -113,7 +115,8 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         className = {'panel-label'}
                     />
                     <DropdownSearch
-                        options={options}
+                        optConf={optConf}
+                        optDep={optDep}
                         initialvalue={null}
                         name={name}
                         id={id}
@@ -127,7 +130,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
             );
         }
         else if(fieldType === "date"){
-            const calendarEl = inputField[i].calendarEl;
+            const calendarEl = useRef(null);
             inputs.push(
                 <div key={id} className="panel-input-row">
                     <InputLabel

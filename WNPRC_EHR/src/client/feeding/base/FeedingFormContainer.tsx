@@ -394,12 +394,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           </button>
         </form>
       </div>
-      <div className="col-xs-5 panel panel-portal animal-info-pane">
-        <div className="panel-heading">
-          <h3>Animal Info</h3>
-        </div>
-        <AnimalInfoPane animalInfo={animalInfo} infoState={animalInfoState} />
-      </div>
+      <AnimalInfoPane animalInfo={animalInfo} infoState={animalInfoState} />
       <div className="clear"></div>
     </div>
   );

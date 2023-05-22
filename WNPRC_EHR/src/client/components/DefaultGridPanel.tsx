@@ -5,9 +5,12 @@ import React, { FC, useEffect, useState } from 'react';
 import { produce } from 'immer';
 
 import {
+    ExtendedMap,
     GridPanel,
+    GridProps,
     InjectedQueryModels,
     QueryColumn,
+    QueryInfo,
     QueryModel,
     withQueryModels
 } from '@labkey/components';
@@ -51,23 +54,40 @@ const DefaultGridPanelImpl: FC<Props> = ({
             const oldColumn = queryInfo.getColumn(styleColumn);
             const newColumn = new QueryColumn({...oldColumn, ...{"cell": cellRenderer}});
 
-            // Add the new column to the list of columns and add to QueryInfo
-            // Note: QueryInfo and the columns list are currently defined with ImmutableJS, this is likely to change
-            // in future versions to immer, so these lines will need to be changed when that conversion happens
-            const oldColumns = queryInfo.get("columns");
-            const newQueryInfo = queryInfo.set("columns", oldColumns.set(styleColumn, newColumn));
+            /** Color a single column*/
+            // const oldColumns = queryInfo.columns;
+            // const newColumns = oldColumns.merge(oldColumns.set(styleColumn, newColumn));
+            // const newQueryInfo = new QueryInfo({...queryInfo, ...{"columns": newColumns}});
+            //
+            // // Update QueryModel with new QueryInfo
+            // setQueryModel(
+            //     produce<QueryModel>(draft => {
+            //         Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo}});
+            //     })
+            // );
+
+            /** Color all columns **/
+            const styledColumns = new ExtendedMap<string, QueryColumn>();
+            queryInfo.columns.forEach((column, key) => {
+                const newColumn2 = new QueryColumn({...column, ...{"cell": cellRenderer}});
+                styledColumns.set(key, newColumn2);
+            });
+            const newQueryInfo2 = new QueryInfo({...queryInfo, ...{"columns": styledColumns}});
 
             // Update QueryModel with new QueryInfo
             setQueryModel(
                 produce<QueryModel>(draft => {
-                    Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo}});
+                    Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo2}});
                 })
             );
         }
     },[queryModels?.containersModel]);
 
     const cellRenderer = (data, row, col, rowIndex, columnIndex) => {
-        const value = data.get('value');
+
+        // const value = data.get('value');
+        const value = row.get("reviewCompleted").get('value');
+
         const backgroundClr = value === cellStyle.green
             ? "rgb(144,219,130)"
             : value === cellStyle.red

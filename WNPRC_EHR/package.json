@@ -21,7 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@labkey/api": "1.19.2",
-    "@labkey/components": "2.332.0",
+    "@labkey/components": "2.337.0",
     "css-loader": "6.7.3",
     "bootstrap": "4.6.0",
     "dayjs": "1.11.7",

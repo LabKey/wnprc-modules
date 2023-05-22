@@ -18,9 +18,16 @@
                         </onClick>
                     </item>
 
+                    <includeScript>/clientapi/Ext4.lib.xml</includeScript>
+                    <includeScript>/wnprc_virology/datasetButtons.js</includeScript>
                     <item text="Batch Complete Samples" requiresSelection="true" requiresSelectionMinCount="2">
                         <onClick>
-                            WNPRC_EHR.DatasetButtons.batchCompleteRecords(dataRegion.name);
+                            WNPRC_Virology.DatasetButtons.batchCompleteRecords(dataRegion.name);
+                        </onClick>
+                    </item>
+                    <item text="Download Sample Sheet" requiresSelection="true">
+                        <onClick>
+                            WNPRC_Virology.DatasetButtons.downloadRecordsToCSV(dataRegion.name);
                         </onClick>
                     </item>
 

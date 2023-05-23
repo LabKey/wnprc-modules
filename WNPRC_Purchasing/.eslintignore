@@ -6,7 +6,7 @@ resources/web/gen
 src/java
 test/
 
-# white-list files
+# allow-list files
 !*.js
 !*.jsx
 !*.ts

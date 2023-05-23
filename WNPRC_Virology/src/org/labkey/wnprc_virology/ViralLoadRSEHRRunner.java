@@ -3,7 +3,7 @@ package org.labkey.wnprc_virology;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.old.JSONArray;
+import org.json.JSONArray;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
@@ -16,6 +16,7 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.wnprc_virology.security.permissions.WNPRCViralLoadReadPermission;
@@ -134,7 +135,7 @@ public class ViralLoadRSEHRRunner implements Job {
         SimpleQueryFactory sf = new SimpleQueryFactory(user,viralLoadContainer);
         JSONArray rowsToDelete = sf.selectRows("wnprc_virology", "folder_paths_with_readers");
         if (rowsToDelete.length() > 0)
-            qu.delete(rowsToDelete.toMapList());
+            qu.delete(JsonUtil.toMapList(rowsToDelete));
         if (rowsToInsert.size() > 0)
             qu.insert(rowsToInsert);
     }

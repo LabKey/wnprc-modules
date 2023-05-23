@@ -73,6 +73,7 @@ import org.openqa.selenium.UnhandledAlertException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -158,7 +159,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
+    //Note: if updating this file, also update VIROLOGY_RESULT_DATA variable to match it, that way we can test
+    // the api end point which converts xlsx to JSON as well as the frontend extJS after it gets uploaded.
     private static final String CORRECT_SAMPLE_FILE_NAME = "virologyResults_correct.xlsx";
+    private static final Map<String, Object> VIROLOGY_RESULT_DATA = new HashMap<>();
+    //shortcut to getting the file content in the xlsx file.
+
     private static final String INCORRECT_FORMAT_SAMPLE_FILE_NAME = "virologyResults_baddate.xlsx";
     private static final String NO_MATCHING_RECORDS_SAMPLE_FILE_NAME = "virologyResults_nomatch.xlsx";
     private static final File CORRECT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + CORRECT_SAMPLE_FILE_NAME);
@@ -489,6 +495,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE);
         _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE);
         _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE);
+
+        // set up the viral load hashmap to match CORRECT_SAMPLE_FILE
+        VIROLOGY_RESULT_DATA.put("Id", "test1993532");
+        VIROLOGY_RESULT_DATA.put("Date", "2022-07-22");
+        VIROLOGY_RESULT_DATA.put("Sample Type", "Blood - EDTA Whole Blood");
+        VIROLOGY_RESULT_DATA.put("Virus", "SRV 1,2,3,4,5");
+        VIROLOGY_RESULT_DATA.put("Method", "PCR");
+        VIROLOGY_RESULT_DATA.put("Result", "-");
+        VIROLOGY_RESULT_DATA.put("Qualifier", "Negative");
+        VIROLOGY_RESULT_DATA.put("Remark", "CRL");
+
 
         // set the location of the virology results upload location
         goToEHRFolder();
@@ -1609,6 +1626,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitForText(tableName);
         clickAndWait(Locator.bodyLinkContainingText(tableName));
+    }
+    public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert)
+    {
+        return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
     }
 
     //@Test - old ext form
@@ -2749,8 +2770,22 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsCommand sr = new SelectRowsCommand("study","Virology Results");
         sr.addFilter("taskid", VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        //check that the results got uploaded
         Assert.assertTrue(resp2.getRowCount().intValue() > 0);
+        //check that the data from in the excel file matches the results, this tests GetVirologyResultsFromFileAction action,
+        // as well as the logic the Import Results From File button in ehrGridFormPanel.js
+        Map<String, Object> resultRow = resp2.getRows().get(0);
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Id"), resultRow.get("Id"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Date"), convertToLocalDateViaSqlDate((Date) resultRow.get("date")).toString());
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Sample Type"), resultRow.get("source"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Virus"), resultRow.get("virus"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Method"), resultRow.get("method"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Result"), resultRow.get("result"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Qualifier"), resultRow.get("qualresult"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Remark"), resultRow.get("performing_lab"));
     }
+
+
 
     @Test
     public void testClinpathVirologyBulkUploadValidations()

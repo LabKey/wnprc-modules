@@ -13,8 +13,12 @@ import { DefaultGridPanel } from "./DefaultGridPanel";
 interface configProps {
     schemaName: string;
     queryName: string;
-    formType: string;
-    input?: string;
+    viewName: string;
+    input?: {
+        controller: string,
+        view: string,
+        formType: string
+    };
     cellStyle?: any;
 }
 
@@ -27,19 +31,19 @@ component.
 @param configProps The properties passed in, usually defining the schema, query, and insert form.
 */
 export const GridPanelConfig: FC<configProps> = ({
-    schemaName,
-    queryName,
-    formType,
-    input,
-    cellStyle,
-    }) => {
+                                                     schemaName,
+                                                     queryName,
+                                                     viewName,
+                                                     input,
+                                                     cellStyle,
+                                                 }) => {
 
     const serverContext = withAppUser(getServerContext());
     const queryConfigs = {
         containersModel: {
-            schemaQuery: new SchemaQuery(schemaName, queryName),
+            schemaQuery: new SchemaQuery(schemaName, queryName, viewName),
             containerFilter: Query.containerFilter.allFolders,
-            omittedColumns: [],
+            omittedColumns: ['SortOrder','Searchable','Type','Title','ContainerType','Workbook','IdPrefixedName'],
             includeTotalCount: true,
         }
     };
@@ -50,10 +54,10 @@ export const GridPanelConfig: FC<configProps> = ({
             <AppContextProvider>
                 <DefaultGridPanel
                     queryConfigs={queryConfigs}
-                    formType={formType}
-                    input = {input}
+                    input={input}
                     autoLoad
                     cellStyle={cellStyle}
+                    viewName={viewName}
                 />
             </AppContextProvider>
         </ServerContextProvider>

@@ -4,14 +4,13 @@ import { AppContainer } from 'react-hot-loader';
 import { App } from '@labkey/api';
 
 import {GridPanelConfig} from '../../components/GridPanelConfig';
+import { configProps } from '../configProps';
 
 App.registerApp<any>('breedingWebpart', (target: string) => {
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig
-                schemaName = {"study"}
-                queryName = {"PregnancyInfo"}
-                formType = {"Pregnancies"}
+                {...configProps}
             />
         </AppContainer>,
         document.getElementById(target)

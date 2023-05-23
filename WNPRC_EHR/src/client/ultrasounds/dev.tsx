@@ -3,24 +3,18 @@ import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 
 // Main react component
-import { GridPanelConfig } from '../components/GridPanelConfig';
-
+import  {GridPanelConfig}  from '../components/GridPanelConfig';
+// Grid Panel Props
+import { configProps } from './configProps';
 // Import stylesheets
-import "../wnprc_ehr.scss";
+import '../wnprc_ehr.scss';
+
 
 const render = () => {
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig
-                schemaName = {"study"}
-                queryName = {"ResearchUltrasoundsInfo"}
-                formType = {"Research Ultrasounds"}
-                input = {"researchUltrasoundsEntry"}
-                cellStyle={{
-                    column: "reviewcompleted",
-                    green: "Yes",
-                    red: "No",
-                }}
+                {...configProps}
             />
         </AppContainer>,
         document.getElementById('app')

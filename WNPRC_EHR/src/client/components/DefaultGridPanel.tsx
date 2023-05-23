@@ -18,9 +18,13 @@ import {
 
 // Any props you might use will go here
 interface myProps {
-    formType: string;
-    input?: string;
+    input?: {
+        controller: string,
+        view: string,
+        formType: string
+    };
     cellStyle?: any;
+    viewName?: string;
 }
 
 
@@ -33,41 +37,40 @@ type Props = myProps & InjectedQueryModels;
 // component directly, only the wrapped version below which we expose
 // to users as ExampleGridPanel.
 const DefaultGridPanelImpl: FC<Props> = ({
-    actions,
-    queryModels,
-    formType,
-    input,
-    cellStyle,
-    }) => {
+                                             actions,
+                                             queryModels,
+                                             input,
+                                             cellStyle,
+                                             viewName,
+                                         }) => {
 
     //declare any states here
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
-    console.log(cellStyle);
-    const styleColumn = cellStyle.column;
+
 
     useEffect(() => {
-        if(queryModels?.containersModel?.queryInfo) {
+        if(queryModels?.containersModel?.queryInfo && cellStyle) {
             const { containersModel } = queryModels;
             const { queryInfo } = containersModel;
-
+            const styleColumn = cellStyle.flagColumn.toLowerCase();
             // Add custom cell renderer to column
             const oldColumn = queryInfo.getColumn(styleColumn);
             const newColumn = new QueryColumn({...oldColumn, ...{"cell": cellRenderer}});
 
             /** Color a single column*/
-            // const oldColumns = queryInfo.columns;
-            // const newColumns = oldColumns.merge(oldColumns.set(styleColumn, newColumn));
-            // const newQueryInfo = new QueryInfo({...queryInfo, ...{"columns": newColumns}});
-            //
-            // // Update QueryModel with new QueryInfo
-            // setQueryModel(
-            //     produce<QueryModel>(draft => {
-            //         Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo}});
-            //     })
-            // );
+            const oldColumns = queryInfo.columns;
+            const newColumns = oldColumns.merge(oldColumns.set(styleColumn, newColumn));
+            const newQueryInfo = new QueryInfo({...queryInfo, ...{"columns": newColumns}});
+
+            // Update QueryModel with new QueryInfo
+            setQueryModel(
+                produce<QueryModel>(draft => {
+                    Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo}});
+                })
+            );
 
             /** Color all columns **/
-            const styledColumns = new ExtendedMap<string, QueryColumn>();
+            /*const styledColumns = new ExtendedMap<string, QueryColumn>();
             queryInfo.columns.forEach((column, key) => {
                 const newColumn2 = new QueryColumn({...column, ...{"cell": cellRenderer}});
                 styledColumns.set(key, newColumn2);
@@ -79,20 +82,20 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 produce<QueryModel>(draft => {
                     Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo2}});
                 })
-            );
+            );*/
         }
     },[queryModels?.containersModel]);
 
     const cellRenderer = (data, row, col, rowIndex, columnIndex) => {
 
         // const value = data.get('value');
-        const value = row.get("reviewCompleted").get('value');
+        const value = row.get(cellStyle.flagColumn).get('value');
 
         const backgroundClr = value === cellStyle.green
             ? "rgb(144,219,130)"
             : value === cellStyle.red
-            ? "rgb(250,119,102)"
-            : null;
+                ? "rgb(250,119,102)"
+                : null;
         return (
             <div style={{
                 backgroundColor: backgroundClr,
@@ -110,8 +113,8 @@ const DefaultGridPanelImpl: FC<Props> = ({
     };
 
     const onInsert = () => {
-        window.location = LABKEY.ActionURL.buildURL('wnprc_ehr', input , LABKEY.ActionURL.getContainer(), {
-            formType: formType,
+        window.location = LABKEY.ActionURL.buildURL(input.controller, input.view , LABKEY.ActionURL.getContainer(), {
+            formType: input.formType,
             returnUrl: window.location
         })
     };
@@ -134,13 +137,26 @@ const DefaultGridPanelImpl: FC<Props> = ({
 
     return (
         <div>
-            {queryModel?.queryInfo && <GridPanel
-                model={queryModel}
-                ButtonsComponent={renderGridButtons}
-                actions={actions}
-                asPanel={true}
-                showSearchInput={false}
-            />}
+            {queryModel?.queryInfo && cellStyle
+                ? <GridPanel
+                    model={queryModel}
+                    ButtonsComponent={renderGridButtons}
+                    actions={actions}
+                    asPanel={true}
+                    showSearchInput={false}
+                    allowSelections={true}
+                    allowViewCustomization={true}
+                />
+                : <GridPanel
+                    model={queryModels.containersModel}
+                    ButtonsComponent={renderGridButtons}
+                    actions={actions}
+                    asPanel={true}
+                    showSearchInput={false}
+                    allowSelections={true}
+                    allowViewCustomization={true}
+                />
+            }
         </div>
     );
 

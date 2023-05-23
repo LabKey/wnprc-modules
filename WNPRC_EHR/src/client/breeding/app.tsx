@@ -3,6 +3,8 @@ import * as ReactDom from 'react-dom';
 
 // Main react component
 import  {GridPanelConfig}  from '../components/GridPanelConfig';
+// Grid Panel Props
+import {configProps} from './configProps';
 
 // Import stylesheets
 import '../wnprc_ehr.scss';
@@ -10,9 +12,7 @@ import '../wnprc_ehr.scss';
 window.addEventListener('DOMContentLoaded', (event) => {
     ReactDom.render(
         <GridPanelConfig
-            schemaName = {"study"}
-            queryName = {"PregnancyInfo"}
-            formType = {"Pregnancies"}
+            {...configProps}
         />,
         document.getElementById('app')
     );

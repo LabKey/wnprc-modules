@@ -3,16 +3,14 @@ import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { App } from '@labkey/api';
 
-import { GridPanelConfig } from '../../components/GridPanelConfig';
+import {GridPanelConfig} from '../../components/GridPanelConfig';
+import { configProps } from '../configProps';
 
-App.registerApp<any>('researchUltrasoundsWebpart', (target: string) => {
+App.registerApp<any>('breedingWebpart', (target: string) => {
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig
-                schemaName = {"study"}
-                queryName = {"ResearchUltrasoundsInfo"}
-                formType = {"Research Ultrasounds"}
-                input = {"researchUltrasoundsEntry"}
+                {...configProps}
             />
         </AppContainer>,
         document.getElementById(target)

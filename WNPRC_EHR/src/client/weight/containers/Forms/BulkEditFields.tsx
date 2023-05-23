@@ -14,7 +14,7 @@ import {BulkEditFieldProps} from "../../typings/main"
  */
 const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
   const { fieldValues, restraints } = props;
-  const [date, setDate] = useState<object>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
   const [weight, setWeight] = useState<number>(null);
   const [remark, setRemark] = useState<string>("");
   const [restraint, setRestraint] = useState<string>("");
@@ -35,7 +35,7 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
     calendarEl.setOpen(true);
   };
 
-  const handleDateChange = (date: object): void => {
+  const handleDateChange = (date: Date): void => {
     setDate(date);
   };
 
@@ -52,7 +52,7 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
           <div className="col-xs-3">Date:</div>
           <div className="col-xs-9">
             <DatePicker
-              ref={r => (calendarEl = r)}
+              ref={r => (calendarEl.current = r)}
               showTimeSelect
               dateFormat="yyyy-MM-dd HH:mm"
               todayButton="Today"

@@ -1,0 +1,14 @@
+<html>
+<head>
+    <script type="text/javascript">
+        new LABKEY.WebPart({
+            partName: 'Wiki',
+            renderTo: 'assayInfo',
+            frame: 'none',
+            containerPath: LABKEY.getModuleProperty("wnprc_virology", "RSEHRPublicInfoPath"),
+            partConfig: {name: 'Information'}
+        }).render();
+    </script>
+</head>
+<div id="assayInfo"></div>
+</html>

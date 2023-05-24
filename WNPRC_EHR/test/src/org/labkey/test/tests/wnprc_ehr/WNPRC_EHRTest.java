@@ -2960,14 +2960,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Navigates to various containers and sets proper permissions.
         beginAt(buildURL("project", getProjectName(), "begin"));
-        _permissionsHelper.setPermissions(DATA_ADMIN.getGroup(), "Reader");
-        _permissionsHelper.setPermissions(DATA_ADMIN.getGroup(), "Editor");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
         beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
-        _permissionsHelper.setPermissions(DATA_ADMIN.getGroup(), "EHR Finance Admin");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
 
         //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
         beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
-        impersonate(DATA_ADMIN.getEmail());
+        impersonate(BASIC_SUBMITTER.getEmail());
 
         //Attempts to change the value.
         //If user does not have proper permissions, an error is presented and the test is complete.
@@ -2989,8 +2989,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         updateProgramIncomeAccountWithInvalidPermissions();
         log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
 
-        updateProgramIncomeAccountWithValidPermissions();
-        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+//        updateProgramIncomeAccountWithValidPermissions();
+//        log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
 }

@@ -6,7 +6,7 @@ import { App } from '@labkey/api';
 import {GridPanelConfig} from '../../components/GridPanelConfig';
 import { configProps } from '../configProps';
 
-App.registerApp<any>('breedingWebpart', (target: string) => {
+App.registerApp<any>('research_ultrasounds_webpart', (target: string) => {
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig

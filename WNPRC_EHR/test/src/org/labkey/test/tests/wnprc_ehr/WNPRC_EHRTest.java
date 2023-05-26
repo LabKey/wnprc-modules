@@ -2983,14 +2983,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Starting checkUpdateProgramIncomeAccount.");
 
-        navigateToBillingContainerWithInvalidPermissions();
-        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+//        navigateToBillingContainerWithInvalidPermissions();
+//        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+//
+//        updateProgramIncomeAccountWithInvalidPermissions();
+//        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
 
-        updateProgramIncomeAccountWithInvalidPermissions();
-        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
-
-//        updateProgramIncomeAccountWithValidPermissions();
-//        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+        updateProgramIncomeAccountWithValidPermissions();
+        log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
 }

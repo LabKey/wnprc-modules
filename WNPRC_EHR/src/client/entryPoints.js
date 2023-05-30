@@ -5,7 +5,7 @@ module.exports = {
         permission: 'read',
         path: './src/client/breeding'
     },{
-        name: 'breedingWebpart',
+        name: 'breeding_webpart',
         title: 'Breeding Webpart',
         permission: 'read',
         path: './src/client/breeding/webpart',
@@ -26,7 +26,7 @@ module.exports = {
         permission: 'read',
         path: './src/client/ultrasounds'
     },{
-        name: 'research_ultrasoundsWebpart',
+        name: 'research_ultrasounds_webpart',
         title: 'Research Ultrasounds Webpart',
         permission: 'read',
         path: './src/client/ultrasounds/webpart',

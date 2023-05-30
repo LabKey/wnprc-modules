@@ -4,7 +4,7 @@ import { App } from '@labkey/api';
 
 import {GridPanelConfig} from '../../components/GridPanelConfig';
 import { configProps } from '../configProps';
-App.registerApp<any>('breedingWebpart', target => {
+App.registerApp<any>('breeding_webpart', target => {
     ReactDOM.render(
         <GridPanelConfig
             {...configProps}

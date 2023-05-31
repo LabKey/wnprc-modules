@@ -2935,49 +2935,49 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 //        stopImpersonating();
 //    }
 
-//    @Test
-//    public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
-//        //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
-//
-//        //Impersonates a basic user and navigates to the restricted page via a direct URL.
-//        beginAt(buildURL("project", getContainerPath(), "begin"));
-//        impersonate(BASIC_SUBMITTER.getEmail());
-//        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
-//
-//        //Attempts to change the value.
-//        //Assumes an error is presented and the test is complete.
-//        fillAnInputByName("field1", "asdf");
-//        click(Locator.tagWithId("button","field1Button"));
-//        assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
-//
-//        //Exits function.
-//        stopImpersonating();
-//    }
-
     @Test
-    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
-        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+    public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
+        //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
 
-        //Navigates to various containers and sets proper permissions.
-        beginAt(buildURL("project", getProjectName(), "begin"));
-        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
-        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
-        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
-        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
-
-        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
-        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        //Impersonates a basic user and navigates to the restricted page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
         impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
 
         //Attempts to change the value.
-        //If user does not have proper permissions, an error is presented and the test is complete.
-        fillAnInputByName("field1", "testString");
+        //Assumes an error is presented and the test is complete.
+        fillAnInputByName("field1", "asdf");
         click(Locator.tagWithId("button","field1Button"));
+        assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
 
-        //Verifies value has been changed and exits.
-        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+        //Exits function.
         stopImpersonating();
     }
+
+//    @Test
+//    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
+//        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+//
+//        //Navigates to various containers and sets proper permissions.
+//        beginAt(buildURL("project", getProjectName(), "begin"));
+//        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+//        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+//        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+//        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
+//
+//        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
+//        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+//        impersonate(BASIC_SUBMITTER.getEmail());
+//
+//        //Attempts to change the value.
+//        //If user does not have proper permissions, an error is presented and the test is complete.
+//        fillAnInputByName("field1", "testString");
+//        click(Locator.tagWithId("button","field1Button"));
+//
+//        //Verifies value has been changed and exits.
+//        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+//        stopImpersonating();
+//    }
 
     private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
     {
@@ -2986,11 +2986,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 //        navigateToBillingContainerWithInvalidPermissions();
 //        log("Completed navigateToBillingContainerWithInvalidPermissions.");
 //
-//        updateProgramIncomeAccountWithInvalidPermissions();
-//        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
+        updateProgramIncomeAccountWithInvalidPermissions();
+        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
 
-        updateProgramIncomeAccountWithValidPermissions();
-        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+//        updateProgramIncomeAccountWithValidPermissions();
+//        log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
 }

@@ -1,8 +1,6 @@
 package org.labkey.test.tests.wnprc_virology;
 
-import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -22,7 +20,6 @@ import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
-import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.TestFileUtils;
@@ -32,16 +29,14 @@ import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.admin.CreateSubFolderPage;
 import org.labkey.test.pages.admin.SetFolderPermissionsPage;
-import org.labkey.test.tests.di.ETLHelper;
 import org.labkey.test.tests.external.labModules.ViralLoadAssayTest;
 import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.RemoteConnectionHelper;
 import org.labkey.test.util.SchemaHelper;
+import org.labkey.test.util.di.DataIntegrationHelper;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -105,7 +100,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
     protected final PortalHelper _portalHelper = new PortalHelper(this);
     protected final RemoteConnectionHelper _rconnHelper = new RemoteConnectionHelper(this);
-    protected final ETLHelper _etlHelper = new ETLHelper(this, PROJECT_NAME_EHR);
     protected final ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
@@ -151,12 +145,12 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     }
 
 
-    public void runEmailETL()
+    public void runEmailETL() throws CommandException, IOException
     {
         log("Populating rsehr_folders_accounts_and_vl_reader_emails before each test");
-        ETLHelper _etlHelperEHR = new ETLHelper(this, PROJECT_NAME_EHR);
+        DataIntegrationHelper _etlHelperEHR = new DataIntegrationHelper(PROJECT_NAME_EHR);
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
+        _etlHelperEHR.runTransformAndWait(EHR_EMAILS_ETL_ID);
     }
 
 
@@ -224,16 +218,16 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         _rconnHelper.goToManageRemoteConnections();
         _rconnHelper.createConnection(EHR_REMOTE_CONNECTION, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
-        ETLHelper _etlHelperRSEHR = new ETLHelper(this, getProjectNameRSEHR());
+        DataIntegrationHelper diHelperRSEHR = new DataIntegrationHelper(getProjectNameRSEHR());
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
-        _etlHelperRSEHR.runETL(RSEHR_ACCOUNTS_ETL_ID);
+        diHelperRSEHR.runTransformAndWait(RSEHR_ACCOUNTS_ETL_ID);
 
         // set up ETL connection for RSEHR to EHR
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
         _rconnHelper.goToManageRemoteConnections();
         _rconnHelper.createConnection(EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
-        ETLHelper _etlHelperEHR = new ETLHelper(this, PROJECT_NAME_RSEHR);
-        _etlHelperEHR.runETL(RSEHR_VIRAL_LOAD_DATA_ETL_ID);
+        DataIntegrationHelper diHelperEHR = new DataIntegrationHelper(PROJECT_NAME_RSEHR);
+        diHelperEHR.runTransformAndWait(RSEHR_VIRAL_LOAD_DATA_ETL_ID);
 
         // set up ETL connection for EHR to RSEHR
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
@@ -339,8 +333,8 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
         //run email etl
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        ETLHelper _etlHelperEHR = new ETLHelper(this, PROJECT_NAME_EHR);
-        _etlHelperEHR.runETL(EHR_EMAILS_ETL_ID);
+        DataIntegrationHelper diHelperEHR = new DataIntegrationHelper(PROJECT_NAME_EHR);
+        diHelperEHR.runTransformAndWait(EHR_EMAILS_ETL_ID);
 
     }
 

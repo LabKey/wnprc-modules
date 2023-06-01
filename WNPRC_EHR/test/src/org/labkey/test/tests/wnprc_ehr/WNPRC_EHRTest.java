@@ -2919,21 +2919,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
 
-//    @Test
-//    public void navigateToBillingContainerWithInvalidPermissions() {
-//        //This test verifies a user cannot access the Finance>Internal page without proper permissions.
-//
-//        //Impersonates a basic user and navigates to the Finance>Internal page via a direct URL.
-//        beginAt(buildURL("project", getContainerPath(), "begin"));
-//        impersonate(BASIC_SUBMITTER.getEmail());
-//        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
-//
-//        //Assumes an error is presented and the test is complete.
-//        assertTextPresent("Oops! An error has occurred.");
-//
-//        //Exits function.
-//        stopImpersonating();
-//    }
+    @Test
+    public void navigateToBillingContainerWithInvalidPermissions() {
+        //This test verifies a user cannot access the Finance>Internal page without proper permissions.
+
+        //Impersonates a basic user and navigates to the Finance>Internal page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+
+        //Assumes an error is presented and the test is complete.
+        assertTextPresent("Oops! An error has occurred.");
+
+        //Exits function.
+        stopImpersonating();
+    }
 
     @Test
     public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
@@ -2954,43 +2954,50 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         stopImpersonating();
     }
 
-//    @Test
-//    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
-//        //This test verifies a user can update the CreditToAccount module property with proper permissions.
-//
-//        //Navigates to various containers and sets proper permissions.
-//        beginAt(buildURL("project", getProjectName(), "begin"));
-//        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
-//        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
-//        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
-//        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
-//
-//        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
-//        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
-//        impersonate(BASIC_SUBMITTER.getEmail());
-//
-//        //Attempts to change the value.
-//        //If user does not have proper permissions, an error is presented and the test is complete.
-//        fillAnInputByName("field1", "testString");
-//        click(Locator.tagWithId("button","field1Button"));
-//
-//        //Verifies value has been changed and exits.
-//        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
-//        stopImpersonating();
-//    }
+    @Test
+    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
+        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+
+        //Navigates to various containers and sets corresponding permissions.
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
+
+        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+
+        //Attempts to change the value.
+        fillAnInputByName("field1", "testString");
+        click(Locator.tagWithId("button","field1Button"));
+
+        //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
+        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+
+        //Navigates to various containers and removes corresponding permissions.
+        stopImpersonating();
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.ReaderRole");
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.EditorRole");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin");
+
+    }
 
     private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
     {
         log("Starting checkUpdateProgramIncomeAccount.");
 
-//        navigateToBillingContainerWithInvalidPermissions();
-//        log("Completed navigateToBillingContainerWithInvalidPermissions.");
-//
+        navigateToBillingContainerWithInvalidPermissions();
+        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+
         updateProgramIncomeAccountWithInvalidPermissions();
         log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
 
-//        updateProgramIncomeAccountWithValidPermissions();
-//        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+        updateProgramIncomeAccountWithValidPermissions();
+        log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
 }

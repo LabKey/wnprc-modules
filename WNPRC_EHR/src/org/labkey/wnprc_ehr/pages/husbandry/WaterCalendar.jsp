@@ -705,27 +705,37 @@
                         if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
                         WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "TotalWater~isnonblank":true
+                            "date~lte": fetchInfo.end.format('Y-m-d')
+                            //"TotalWater~isnonblank":true
                         }).then(function (data) {
                             var events = data.rows;
 
                             successCallback(
                                     events.map(function (row) {
                                         let parsedTotalWater = 0;
-                                        if(row.TotalWater !== null){
+                                        let eventTitle = "";
+                                        if( row.conditionAtTime === 'regulated' ){
+                                            if ( row.TotalWater === null ){
+                                                row.TotalWater = 'none';
+                                            }
                                             parsedTotalWater = row.TotalWater;
+                                            eventTitle = row.Id + " Total: " + parsedTotalWater;
+                                        }else{
+                                            eventTitle = row.Id + " on Lixit";
                                         }
+
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.Id + " Total: " + parsedTotalWater,
+                                            title: eventTitle,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
                                             rawRowData: row
                                         };
 
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
+
+
+                                        if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
                                             eventObj.color = '#FFFFFF';
                                         }else{
                                             eventObj.color = '#EE2020'

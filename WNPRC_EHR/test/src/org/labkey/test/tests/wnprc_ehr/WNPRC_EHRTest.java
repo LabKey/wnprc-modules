@@ -2946,8 +2946,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Attempts to change the value.
         //Assumes an error is presented and the test is complete.
-        fillAnInputByName("field1", "asdf");
-        click(Locator.tagWithId("button","field1Button"));
+        fillAnInputByName("newCreditToAccountField", "asdf");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
         assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
 
         //Exits function.
@@ -2970,8 +2970,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         impersonate(BASIC_SUBMITTER.getEmail());
 
         //Attempts to change the value.
-        fillAnInputByName("field1", "testString");
-        click(Locator.tagWithId("button","field1Button"));
+        fillAnInputByName("newCreditToAccountField", "testString");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
 
         //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
         assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());

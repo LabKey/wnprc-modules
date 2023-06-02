@@ -17,37 +17,33 @@
             <td style="padding:5px">CreditToAccount</td>
             <td style="padding:5px" id="ctaCell1"></td>
             <td style="padding:5px" id="ctaCell2">
-                <form>
-                    <input type="text" id="field1" name="field1">
-                </form>
+                <input type="text" id="newCreditToAccountField" name="newCreditToAccountField">
             </td>
             <td style="padding:5px">
-                <button id="field1Button" onclick="updateField1()">Update CreditToAccount</button>
+                <button id="updateCreditToAccountButton" onclick="updateCreditToAccount()">Update CreditToAccount</button>
             </td>
         </tr>
         <tr>
             <td style="padding:5px">JETCSVSetting</td>
             <td style="padding:5px" id="jetcsvCell1"></td>
             <td style="padding:5px" id="jetcsvCell2">
-                <form>
-                    <input type="text" id="field2" name="field2">
-                </form>
+                <input type="text" id="newJETCSVSettingField" name="newJETCSVSettingField">
             </td>
             <td style="padding:5px">
-                <button id="field2Button" onclick="updateField2()">Update JETCSVSetting</button>
+                <button id="updateJETCSVSettingButton" onclick="updateJETCSVSetting()">Update JETCSVSetting</button>
             </td>
         </tr>
     </table>
 
     <script>
-        function updateField1() {
-            let field1NewValue = document.getElementById("field1").value;
-            setValues("CreditToAccount", "" + field1NewValue);
+        function updateCreditToAccount() {
+            let creditToAccountNewValue = document.getElementById("newCreditToAccountField").value;
+            setValues("CreditToAccount", "" + creditToAccountNewValue);
         }
 
-        function updateField2() {
-            let field2NewValue = document.getElementById("field2").value;
-            setValues("JETCSVSetting", "" + field2NewValue);
+        function updateJETCSVSetting() {
+            let jetCSVSettingNewValue = document.getElementById("newJETCSVSettingField").value;
+            setValues("JETCSVSetting", "" + jetCSVSettingNewValue);
         }
 
         //This function updates the view with the current values for 'CreditToAccount' and 'JetCsvSetting'.
@@ -56,9 +52,9 @@
                 url: LABKEY.ActionURL.buildURL('wnprc_billing', 'getProgramIncomeAccount', null, {}),
                 callback: function (config, success, xhr) {
                     if (success) {
-                        var jsonResponse = JSON.parse(xhr.responseText);
-                        var currentCreditToAccount = jsonResponse.creditToAccount;
-                        var currentJETCSVSetting = jsonResponse.jetCSVSetting;
+                        let jsonResponse = JSON.parse(xhr.responseText);
+                        let currentCreditToAccount = jsonResponse.creditToAccount;
+                        let currentJETCSVSetting = jsonResponse.jetCSVSetting;
                         document.getElementById("ctaCell1").innerHTML = currentCreditToAccount;
                         document.getElementById("jetcsvCell1").innerHTML = currentJETCSVSetting;
                     }
@@ -85,7 +81,7 @@
                             let moduleToUpdate = "wnprc_billing"
 
                             //Creates an object with the new module property values.
-                            var newProperties = [];
+                            let newProperties = [];
                             newProperties.push({
                                 container: parentContainer,
                                 value: newPropertyValue,
@@ -106,8 +102,12 @@
                                 callback: function (config, success, xhr) {
                                     if (success) {
                                         getValues();
-                                        document.getElementById("field1").value = "";
-                                        document.getElementById("field2").value = "";
+                                        if (propertyName == "CreditToAccount") {
+                                            document.getElementById("newCreditToAccountField").value = "";
+                                        }
+                                        else if (propertyName == "JETCSVSetting") {
+                                            document.getElementById("newJETCSVSettingField").value = "";
+                                        }
                                     }
                                     else {
                                         alert("Unable to update the program income account.  AJAX response failed.");

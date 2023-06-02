@@ -404,7 +404,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const wait = (time: number): Promise<any> => {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       let countdown: number = time;
       setInterval(() => {
         setSubmitBoxText("Success! Redirecting in..." + countdown);

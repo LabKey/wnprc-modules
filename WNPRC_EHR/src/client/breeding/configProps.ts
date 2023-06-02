@@ -6,5 +6,6 @@ export const configProps = {
         controller: "ehr",
         view: "dataEntryForm",
         formType : "Pregnancies"
-    }
+    },
+    filterConfig: {}
 }

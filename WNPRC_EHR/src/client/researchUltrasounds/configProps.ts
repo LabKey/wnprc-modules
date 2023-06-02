@@ -11,5 +11,6 @@ export const configProps = {
         flagColumn: "reviewCompleted",
         green: "Yes",
         red: "No",
-    }
+    },
+    filterConfig: {}
 }

@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import { Query, getServerContext } from '@labkey/api';
+import { Query, getServerContext, Filter } from '@labkey/api';
 import {
     SchemaQuery,
     ServerContextProvider,
@@ -20,6 +20,7 @@ interface configProps {
         formType: string
     };
     cellStyle?: any;
+    filterConfig?: any;
 }
 
 /*
@@ -31,12 +32,28 @@ component.
 @param configProps The properties passed in, usually defining the schema, query, and insert form.
 */
 export const GridPanelConfig: FC<configProps> = ({
-                                                     schemaName,
-                                                     queryName,
-                                                     viewName,
-                                                     input,
-                                                     cellStyle,
-                                                 }) => {
+    schemaName,
+    queryName,
+    viewName,
+    input,
+    cellStyle,
+    filterConfig
+    }) => {
+
+    const baseFilters = [];
+    if(filterConfig["inputType"] !== "none"){
+        if(filterConfig["inputType"] === "roomCage"){
+            baseFilters.push(Filter.create("area", filterConfig["area"], Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("room", filterConfig["room"], Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("cage", filterConfig["cage"], Filter.Types.EQUAL.getMultiValueFilter()));
+        }
+        else if (filterConfig["inputType"]=== "multiSubject"){
+            baseFilters.push(Filter.create("Id", filterConfig["subjects"], Filter.Types.EQUAL.getMultiValueFilter()));
+        }
+        else if(filterConfig["inputType"] === "singleSubject"){
+            baseFilters.push(Filter.create("Id", filterConfig["subjects"], Filter.Types.EQUAL));
+        }
+    }
 
     const serverContext = withAppUser(getServerContext());
     const queryConfigs = {
@@ -45,6 +62,7 @@ export const GridPanelConfig: FC<configProps> = ({
             containerFilter: Query.containerFilter.allFolders,
             omittedColumns: ['SortOrder','Searchable','Type','Title','ContainerType','Workbook','IdPrefixedName'],
             includeTotalCount: true,
+            baseFilters: baseFilters,
         }
     };
 

@@ -12,7 +12,7 @@
     "build": "npm run build-dev",
     "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
     "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
-    "clean": "rm -rf resources/web/gen && rm -rf resources/views/gen"
+    "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
   },
   "keywords": [],
   "author": "",

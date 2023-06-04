@@ -1,5 +1,13 @@
 require("ehr/triggers").initScript(this);
 
+function onInit(event, helper){
+    helper.setScriptOptions({
+        allowAnyId: true,
+        allowDeadIds: true,
+        skipIdFormatCheck: true,
+        allowDatesInDistantPast: true
+    });
+}
 function onUpsert(helper, scriptErrors, row, oldRow){
 
     //validate that the dam is female and alive
@@ -13,7 +21,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             callback: function (data) {
                 if (data) {
                     if (data['calculated_status'] && data['calculated_status'] !== 'Alive'){
-                        EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + row.Id + ') is not alive', 'ERROR');
+                        EHR.Server.Utils.addError(scriptErrors, 'id', 'This animal (' + row.Id + ') is not alive', 'INFO');
                     }
                 }
             }
@@ -46,7 +54,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                             EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not male', 'ERROR');
                         }
                         if (data['calculated_status'] && data.calculated_status !== 'Alive'){
-                            EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not alive', 'ERROR');
+                            EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not alive', 'INFO');
                         }
                     }
                 }

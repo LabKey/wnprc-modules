@@ -35,7 +35,7 @@ const renderSelectField = ({
         <div className={asyncValidating ? 'async-validating' : ''}>
             <label className="col-xs-5 form-control-label"> {label}{tooltip && (
                 <a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
-            <select {...required==true ? required : ''} className="col-xs-5 form-control-input" {...input}> {...options} </select>
+            <select {...required==true ? required : ''} className="col-xs-5 form-control-input" {...input}> {options} </select>
             {touched && ((error && <span>{error}</span>))}
         </div>
     </div>

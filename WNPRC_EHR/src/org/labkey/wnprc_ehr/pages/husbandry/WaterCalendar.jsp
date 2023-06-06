@@ -824,7 +824,7 @@
                     $('#waterInformation').collapse('hide');
                     $('#waterTotalInformation').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
-                    WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData.location.toString());
+                    WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData["Id/curLocation/location"].toString());
                 }else{
                     $('#waterInformation').collapse('show');
                     $('#waterTotalInformation').collapse('hide');

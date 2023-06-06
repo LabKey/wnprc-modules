@@ -17,9 +17,7 @@ SELECT
        waterSummary.performedConcat,
        odrwc.currentWaterCondition,
        waterSummary.project,
-       waterSummary.qcstate,
-       waterSummary.curRoom,
-       waterSummary.curCage
+       waterSummary.qcstate
 
 FROM ehr_lookups.calendar cal
  LEFT OUTER JOIN (SELECT drwc.Id AS Id,
@@ -45,8 +43,6 @@ LEFT OUTER JOIN(
     COALESCE(GROUP_CONCAT(iwg.performedby, ';'),'') AS performedConcat,
     MAX(iwg.project) AS project,
     COALESCE(MAX(iwg.qcstate),1) AS qcstate,
-    MAX(iwg.id.curLocation.room) as curRoom,
-    MAX(iwg.id.curLocation.cage) as curCage,
     FROM study.waterGiven iwg WHERE qcstate.label = 'Completed'
     GROUP BY iwg.Id, CAST(iwg.date AS DATE)
     )waterSummary

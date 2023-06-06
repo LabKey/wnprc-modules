@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="Id" />
+        <column name="Id/curLocation/location"/>
         <column name="date" />
         <column name="TotalWater" />
         <column name="provideFruit"/>

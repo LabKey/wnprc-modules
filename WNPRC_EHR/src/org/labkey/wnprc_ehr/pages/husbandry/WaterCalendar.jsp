@@ -721,6 +721,7 @@
                                             parsedTotalWater = row.TotalWater;
                                             eventTitle = row.Id + " Total: " + parsedTotalWater;
                                         }else{
+                                            row.TotalWater = 'Lixit'
                                             eventTitle = row.Id + " on Lixit";
                                         }
 

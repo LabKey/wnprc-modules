@@ -19,7 +19,6 @@ SELECT wtbd.Id as Id,
        waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,
        wtbd.qcstate,
-       wtbd.curRoom || '-' || wtbd.curCage AS location,
        'waterTotal' AS dataSource
 FROM study.waterTotalByDate wtbd
 

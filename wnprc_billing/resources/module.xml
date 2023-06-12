@@ -17,18 +17,18 @@
             <defaultValue>Please set module property BillingAddress</defaultValue>
         </propertyDescriptor>
         <propertyDescriptor name="CreditToAccount">
-            <canSetPerContainer>false</canSetPerContainer>
+            <canSetPerContainer>true</canSetPerContainer>
             <description>This is the Credit account information that will appear in the invoice header.</description>
             <editPermissions>
-                <permission>ADMIN</permission>
+                <permission>UPDATE</permission>
             </editPermissions>
             <defaultValue>Please set module property CreditToAccount</defaultValue>
         </propertyDescriptor>
         <propertyDescriptor name="JETCSVSetting">
-            <canSetPerContainer>false</canSetPerContainer>
+            <canSetPerContainer>true</canSetPerContainer>
             <description>Comma separated values for 'Department,Fund,Program,Project,Account' for the total/last row in JET CSV.</description>
             <editPermissions>
-                <permission>ADMIN</permission>
+                <permission>UPDATE</permission>
             </editPermissions>
             <defaultValue>Set Department,Set Fund,Set Program,Set Project,Set Account</defaultValue>
         </propertyDescriptor>

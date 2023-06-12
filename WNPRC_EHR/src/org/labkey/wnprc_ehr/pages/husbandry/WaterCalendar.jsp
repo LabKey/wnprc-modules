@@ -214,7 +214,7 @@
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {
-            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlsPerKgCal') {
+            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlsPerKgCal' && key != 'conditionAtTimeValue') {
                 WebUtils.VM.taskDetails[key](null);
             }
         }
@@ -298,7 +298,9 @@
                         <dt>Date:               </dt> <dd>{{displayDate}}</dd>
                         <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
                         <dt>Current Location:   </dt> <dd>{{location}}</dd>
-                        <dt>Total Volume:       </dt> <dd>{{volume}} ml</dd>
+                        <dt>Total Volume:       </dt> <dd><!-- ko if: conditionAtTimeValue() == 'regulated' -->{{volume}} ml<!-- /ko-->
+                                                          <!-- ko if: conditionAtTimeValue() == 'lixit' -->On Lixit<!-- /ko-->
+                                                      </dd>
                         <dt>ml Per Kg:          </dt> <dd>{{mlsPerKg}}</dd>
                     </dl>
                     <!-- ko if: mlsPerKgCal() -->
@@ -604,11 +606,12 @@
             eventSources:[
                     {
                         events: function (fetchInfo, successCallback, failureCallback) {
-                            console.log(" startStr" + fetchInfo.startStr);
+                            console.log(" startStr " + fetchInfo.startStr);
+                            console.log(" startStr " + fetchInfo.endStr);
 
                             console.log("inside eventSource " + allowProjects);
 
-                            if ($animalId == 'undefined' || $animalId == "null"){
+                            if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser,isAnimalCare);
 
@@ -702,11 +705,11 @@
                 },
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
+                        if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                         WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d')
-                            //"TotalWater~isnonblank":true
+                            "date~lte": fetchInfo.end.format('Y-m-d'),
+                            "date~lt":  new Date()
                         }).then(function (data) {
                             var events = data.rows;
 
@@ -724,7 +727,6 @@
                                             row.TotalWater = 'Lixit'
                                             eventTitle = row.Id + " on Lixit";
                                         }
-
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
                                             title: eventTitle,
@@ -733,9 +735,6 @@
                                             textColor: '#000000',
                                             rawRowData: row
                                         };
-
-
-
                                         if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
                                             eventObj.color = '#FFFFFF';
                                         }else{
@@ -745,7 +744,7 @@
                                     })
                             );
                             failureCallback((function (data){
-                                console.log("error from waterPrePivot general");
+                                console.log("error from waterTotalByDateWithWeight");
                             }))
 
                         })
@@ -755,31 +754,42 @@
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "TotalWater~isnonblank":true,
+                            "date~lt":  new Date(),
                             "Id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
-                                successCallback(events.map(function (row) {
-                                    let parsedTotalWater = 0;
-                                    if(row.TotalWater !== null){
-                                        parsedTotalWater = row.TotalWater;
-                                    }
-                                        var eventObj = {
-                                            id : LABKEY.Utils.generateUUID(),
-                                            title: row.Id + " Total: " + parsedTotalWater,
-                                            start: new Date(row.date),
-                                            textColor: '#000000',
-                                            allDay: true,
-                                            rawRowData: row
-                                        };
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#FFFFFF';
-                                        }else{
-                                            eventObj.color = '#EE2020'
-                                        }
+                                successCallback(
+                                        events.map(function (row) {
+                                            let parsedTotalWater = 0;
+                                            let eventTitle = "";
+                                            if(row.conditionAtTime === 'regulated') {
+                                                if (row.TotalWater === null) {
+                                                    row.TotalWater = 'none';
+                                                }
+                                                parsedTotalWater = row.TotalWater;
+                                                eventTitle = row.Id + " Total: " + parsedTotalWater;
+                                            }else{
+                                                row.TotalWater = 'Lixit'
+                                                eventTitle = row.Id + " on Lixit";
+
+                                            }
+                                            var eventObj = {
+                                                id : LABKEY.Utils.generateUUID(),
+                                                title: eventTitle,
+                                                start: new Date(row.date),
+                                                textColor: '#000000',
+                                                allDay: true,
+                                                rawRowData: row
+                                            };
+                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                                eventObj.color = '#FFFFFF';
+                                            }else{
+                                                eventObj.color = '#EE2020'
+                                            }
                                             return eventObj;
-                                    }));
+                                        })
+                                );
                                 failureCallback((function (data){
                                     console.log("error from waterTotalByDateWithWeight");
                                 }))
@@ -980,7 +990,8 @@
                 frequencyMeaningCoalesced:  ko.observable(),
                 displaytimeofday:           ko.observable(),
                 rawDate:                    ko.observable(),
-                mlsPerKg:                   ko.observable()
+                mlsPerKg:                   ko.observable(),
+                conditionAtTime:            ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -1282,7 +1293,11 @@
         });
 
         WebUtils.VM.taskDetails.mlsPerKgCal = ko.pureComputed(function(){
-            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20)
+            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20 || WebUtils.VM.taskDetails.conditionAtTime() === 'lixit')
+        });
+
+        WebUtils.VM.taskDetails.conditionAtTimeValue = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.conditionAtTime();
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel

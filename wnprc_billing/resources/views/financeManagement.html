@@ -83,7 +83,8 @@
                 },{
                     header: 'Other',
                     items: [
-                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})}
+                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})},
+                        {name: 'Update Program Income Account', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'updateProgramIncomeAccount', null)}
                     ]
                 }]
             }]

@@ -38,7 +38,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.apis:google-api-services-drive:v3-rev197-1.25.0",
+            "com.google.apis:google-api-services-drive:${googleApiServiceDriveVersion}",
             "Google Drive API Client Library for Java",
             "Google",
             "https://developers.google.com/api-client-library/java/apis/drive/v3",

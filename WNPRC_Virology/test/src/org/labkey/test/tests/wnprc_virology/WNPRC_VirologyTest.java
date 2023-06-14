@@ -169,7 +169,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     {
         //create EHR folder with sample queue, etc
         //check to delete first, helpful if the test fails and has to be re-run
-        if (_containerHelper.doesContainerExist(PROJECT_NAME_EHR));
+        if (_containerHelper.doesContainerExist(PROJECT_NAME_EHR))
         {
             _containerHelper.deleteProject(PROJECT_NAME_EHR);
         }

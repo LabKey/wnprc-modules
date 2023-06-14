@@ -76,6 +76,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File LIST_ARCHIVE_QC = TestFileUtils.getSampleData("VS_group_wiki_2023-04-26_14-36-16.lists.zip");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
+    private static final File LLOD_EHR_TSV = TestFileUtils.getSampleData("llod_ehr.tsv");
 
     private static WNPRC_VirologyTest _test;
 
@@ -151,6 +152,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         DataIntegrationHelper _etlHelperEHR = new DataIntegrationHelper(PROJECT_NAME_EHR);
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         _etlHelperEHR.runTransformAndWait(EHR_EMAILS_ETL_ID);
+        _etlHelperEHR.assertInEtlLogFile(_etlHelperEHR.getJobIdByTransformId(EHR_EMAILS_ETL_ID).toString(), "Successfully completed task");
     }
 
 
@@ -166,6 +168,11 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     protected void createProjectAndFolders(String type) throws IOException, CommandException
     {
         //create EHR folder with sample queue, etc
+        //check to delete first, helpful if the test fails and has to be re-run
+        if (_containerHelper.doesContainerExist(PROJECT_NAME_EHR));
+        {
+            _containerHelper.deleteProject(PROJECT_NAME_EHR);
+        }
         _containerHelper.createProject(PROJECT_NAME_EHR, type);
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
         _userHelper.createUser(ADMIN_USER);
@@ -189,6 +196,13 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
         List<Map<String, Object>> tsv2 = loadTsv(ALIASES_EHR_TSV);
+
+        //import llod data into viral load assay project
+        List<Map<String, Object>> tsv3 = loadTsv(LLOD_EHR_TSV);
+        navigateToFolder(getProjectName(), getProjectName());
+        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME));
+        insertTsvData(connection, "wnprc_virology", "assays_llod", tsv3, getProjectName());
+
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE);
         _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE_QC);
@@ -221,6 +235,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         DataIntegrationHelper diHelperRSEHR = new DataIntegrationHelper(getProjectNameRSEHR());
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         diHelperRSEHR.runTransformAndWait(RSEHR_ACCOUNTS_ETL_ID);
+        diHelperRSEHR.assertInEtlLogFile(diHelperRSEHR.getJobIdByTransformId(RSEHR_ACCOUNTS_ETL_ID).toString(), "Successfully completed task");
 
         // set up ETL connection for RSEHR to EHR
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
@@ -228,6 +243,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         _rconnHelper.createConnection(EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
         DataIntegrationHelper diHelperEHR = new DataIntegrationHelper(PROJECT_NAME_RSEHR);
         diHelperEHR.runTransformAndWait(RSEHR_VIRAL_LOAD_DATA_ETL_ID);
+        diHelperEHR.assertInEtlLogFile(diHelperEHR.getJobIdByTransformId(RSEHR_VIRAL_LOAD_DATA_ETL_ID).toString(), "Successfully completed task");
 
         // set up ETL connection for EHR to RSEHR
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
@@ -335,6 +351,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         DataIntegrationHelper diHelperEHR = new DataIntegrationHelper(PROJECT_NAME_EHR);
         diHelperEHR.runTransformAndWait(EHR_EMAILS_ETL_ID);
+        diHelperEHR.assertInEtlLogFile(diHelperEHR.getJobIdByTransformId(EHR_EMAILS_ETL_ID).toString(), "Successfully completed task");
 
     }
 
@@ -534,6 +551,9 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         waitForText(ANIMAL_ID_3);
         assertTextPresent(ANIMAL_ID_3);
         assertTextPresent(ANIMAL_ID);
+
+        //check for LLoD bolding
+        assertElementPresent(Locator.tagWithText("strong", "2.93E02"));
 
     }
 

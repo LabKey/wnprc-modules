@@ -1,0 +1,10 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="viral_loads" tableDbType="TABLE">
+                <javaCustomizer class = "org.labkey.wnprc_virology.table.WNPRC_VirologyCustomizer"/>
+            </table>
+        </tables>
+    </metadata>
+</query>
+

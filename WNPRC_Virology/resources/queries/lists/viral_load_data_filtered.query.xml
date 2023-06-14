@@ -1,7 +1,8 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="vl_sample_queue" tableDbType="NOT_IN_DB">
+            <table tableName="viral_load_data_filtered" tableDbType="NOT_IN_DB">
+                <javaCustomizer class = "org.labkey.wnprc_virology.table.WNPRC_VirologyCustomizer"/>
                 <columns>
                     <column columnName="folder_name">
                         <isHidden>true</isHidden>

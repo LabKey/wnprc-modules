@@ -3,8 +3,6 @@ import { ActionURL, Filter, Query, Utils } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { useState } from 'react';
-import { ModifyRowsCommands } from '../weight/typings/main';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -58,7 +56,6 @@ export const setupJsonData = (values: any[], schemaName: string, queryName: stri
 };
 
 export const saveRowsDirect = (jsonData: jsonDataType) => {
-
   return new Promise((resolve, reject) => {
     let options: SaveRowsOptions = {
       commands: jsonData.commands,
@@ -379,16 +376,20 @@ export const triggerValidation = async (
     setSubmitTextBody,
     setShowModal,
     setErrorText,
-) => {
+):Promise<boolean>  => {
 
   setSubmitTextBody("One moment. Performing validations...");
-  await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
-    if (!d) {
+  return await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
+    if (!d){
       setShowModal("none");
       setShowModal("error");
       setSubmitTextBody("Submit values?");
-      return;
+      return false;
     }
+    return true;
+  }).catch(e => {
+    console.error(e);
+    return false;
   });
 }
 

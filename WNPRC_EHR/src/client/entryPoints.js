@@ -24,12 +24,12 @@ module.exports = {
         name: 'research_ultrasounds',
         title: 'Research Ultrasounds',
         permission: 'read',
-        path: './src/client/ultrasounds'
+        path: './src/client/researchUltrasounds'
     },{
         name: 'research_ultrasounds_webpart',
         title: 'Research Ultrasounds Webpart',
         permission: 'read',
-        path: './src/client/ultrasounds/webpart',
+        path: './src/client/researchUltrasounds/webpart',
         generateLib: true
     },{
         name: 'weight',

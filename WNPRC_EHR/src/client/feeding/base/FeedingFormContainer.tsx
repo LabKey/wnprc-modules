@@ -206,7 +206,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         console.log(JSON.stringify(err))
       }
 
-      console.log('calling save rows');
+      console.log('calling save rows on: ', jsonData);
+      return;
       saveRowsDirect(jsonData)
         .then((data) => {
           console.log('done!!');

@@ -5,14 +5,14 @@ import "../theme/css/index.css";
 import { generateFormData, getTask, saveRowsDirect, triggerValidation, wait } from '../query/helpers';
 import AnimalInfoPane from "./AnimalInfoPane";
 import {TaskPane} from "./TaskPane";
-import ErrorModal from '../feeding/base/ErrorModal';
+import ErrorModal from '../components/ErrorModal';
 import { InfoProps, infoStates } from '../researchUltrasoundsEntry/typings';
 import { ActionURL } from '@labkey/api';
 
 interface Component {
     type: React.FunctionComponent<any>;
-    schemaName: string;
-    queryName: string;
+    schemaName?: string;
+    queryName?: string;
     syncedValues?: {
         [key: string]: string[];
     };
@@ -46,7 +46,6 @@ Default form container that handles tasks and animal info, add other components 
 @param {string} redirectQuery The name of the query to redirect the page to after successful submission
  */
 export const DefaultFormContainer: FC<formProps> = (props) => {
-
     const {
         taskId,
         components,
@@ -76,10 +75,11 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             TaskPane: {}
         }
     );
-    // States for pop-ups
+    // States for pop-ups/form checking
     const [errorText, setErrorText] = useState<string>("");
     const [showModal, setShowModal] = useState<string>();
     const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
+    const [validForm, setValidForm] = useState(true);
 
     useEffect(() => {
         if(taskId) {
@@ -103,7 +103,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     @param syncedValues JSON object that holds a property (component needed to sync) and array of fields to sync
     @param currentComponent The current component to sync with other components according to what is described
                             in syncedValues
-     */
+    */
     const updateSyncedValues = (syncedValues, currentComponent) => {
         let updatedState = {...componentStates};
         Object.keys(syncedValues).forEach((key) => {
@@ -118,16 +118,13 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         return updatedState;
     };
 
-    // Form submission handler
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const finalFormData = [];
-        // Create format to submit new task
-        const taskData = generateFormData("ehr", "tasks", command, taskPaneState);
-        finalFormData.push(taskData);
+    /*
+    Helper function to compile all the component states into form ready submission commands
 
-        // For each component compile the state data into a format ready for submission
-        components.forEach(async (component) => {
+    @param finalFormData Generated form data from generateFormData function
+    */
+    const processComponents = async (finalFormData: Array<any>) => {
+        const promises = components.map(async (component) => {
             const ComponentType = component.type;
             const schemaName = component.schemaName;
             const queryName = component.queryName;
@@ -141,7 +138,14 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     setSubmitTextBody,
                     setShowModal,
                     setErrorText
-                );
+                ).then((result) => {
+                    if(!result){
+                        setValidForm(false);
+                    }
+                }).catch(e => {
+                    console.error(e);
+                });
+
             }
             if (syncedValues){ // updates synced values across components to maintain matching fields ex. (taskid)
                 const newState = updateSyncedValues(syncedValues, ComponentType.name);
@@ -161,27 +165,47 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             }
             finalFormData.push(newData);
         });
-        let jsonData = {commands: finalFormData}
-        console.log('calling save rows on: ', jsonData);
-        // save rows to database and redirect to desired schema/query
-        /*
-        saveRowsDirect(jsonData)
-            .then((data) => {
-                console.log('done!!');
-                console.log(JSON.stringify(data));
-                setSubmitTextBody("Success!");
-                wait(3, setSubmitTextBody).then(() => {
-                    window.location.href = ActionURL.buildURL(
-                        "ehr",
-                        `executeQuery.view?schemaName=${redirectSchema}&query.queryName=${redirectQuery}`,
-                        ActionURL.getContainer()
-                    );
+        await Promise.all(promises);
+        return finalFormData;
+    };
+
+    // Form submission handler
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const finalFormData = [];
+        // Create format to submit new task
+        const taskData = generateFormData("ehr", "tasks", command, taskPaneState);
+        finalFormData.push(taskData);
+        processComponents(finalFormData).then((data) => {
+            // For each component compile the state data into a format ready for submission
+            if(!validForm){
+                return;
+            }
+            let jsonData = {commands: data}
+            console.log('calling save rows on: ', jsonData);
+            // save rows to database and redirect to desired schema/query
+            saveRowsDirect(jsonData)
+                .then((data) => {
+                    console.log('done!!');
+                    console.log(JSON.stringify(data));
+                    setSubmitTextBody("Success!");
+
+                    wait(3, setSubmitTextBody).then(() => {
+                        window.location.href = ActionURL.buildURL(
+                            "ehr",
+                            `executeQuery.view?schemaName=${redirectSchema}&query.queryName=${redirectQuery}`,
+                            ActionURL.getContainer()
+                        );
+                    });
+                })
+                .catch((e) => {
+                    console.log(e);
+                    setSubmitTextBody(e.exception);
                 });
-            })
-            .catch((e) => {
-                console.log(e);
+            }).catch(e => {
+                console.error(e);
                 setSubmitTextBody(e.exception);
-            });*/
+            });
     }
 
     /*
@@ -207,6 +231,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     <ErrorModal
                         errorText={errorText}
                         flipState={setShowModal}
+                        setErrorText={setErrorText}
                     />
                 )}
                 <form className={'default-form'} onSubmit={handleSubmit}>

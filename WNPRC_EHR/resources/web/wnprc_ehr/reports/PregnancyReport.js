@@ -13,7 +13,7 @@ EHR.reports.PregnancyReport = function (panel, tab) {
 
     const wp = new LABKEY.WebPart({
         partConfig: {subjects: (tab.filters.subjects || []).join(';')},
-        partName: 'Breeding',
+        partName: 'Pregnancies Webpart',
         renderTo: target.renderTarget,
         style: 'margin-bottom: 20px;'
     });

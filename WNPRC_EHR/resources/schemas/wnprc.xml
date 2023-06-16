@@ -325,4 +325,6 @@
             <column columnName="modified"/>
         </columns>
     </table>
+    <table tableName="keep_audit_dataset" tableDbType="TABLE"/>
+    <table tableName="nov212014" tableDbType="TABLE"/>
 </tables>

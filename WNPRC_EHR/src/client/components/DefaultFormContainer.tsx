@@ -11,18 +11,13 @@ import { ActionURL } from '@labkey/api';
 
 interface Component {
     type: React.FunctionComponent<any>;
-    schemaName?: string;
-    queryName?: string;
     syncedValues?: {
         [key: string]: string[];
     };
     validation?: boolean;
-    custom?: boolean;
-    props?: {
+    componentProps?: {
         [key: string]: any;
     };
-    title?: string;
-    inputPath?: string;
 }
 interface formProps {
     taskId?: string;
@@ -53,7 +48,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         taskTitle,
         command,
         redirectSchema,
-        redirectQuery
+        redirectQuery,
     } = props;
 
     // States required for animal info
@@ -126,8 +121,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const processComponents = async (finalFormData: Array<any>) => {
         const promises = components.map(async (component) => {
             const ComponentType = component.type;
-            const schemaName = component.schemaName;
-            const queryName = component.queryName;
+            const schemaName = component.componentProps.schemaName;
+            const queryName = component.componentProps.queryName;
             const syncedValues = component.syncedValues;
             const validation = component.validation;
             let newData;
@@ -243,21 +238,22 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     />
                     {
                         components.map((component) => {
-                            const { type: ComponentType, custom, schemaName, queryName, title, inputPath } = component;
-                            if(custom){
+                            // sub-component props
+                            const {
+                                type: ComponentType,
+                                componentProps
+                            } = component;
+                            if(ComponentType.name === "CustomInputPane"){
                                 return (
                                     <div key={ComponentType.name} className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
                                             prevTaskId={taskId}
+                                            componentProps={componentProps}
                                             setAnimalInfo={setAnimalInfo}
                                             setAnimalInfoState={setAnimalInfoState}
                                             setAnimalInfoCache={setAnimalInfoCache}
                                             state={componentStates[ComponentType.name]}
                                             onStateChange={(newState) => handleChildStateChange(ComponentType.name,newState)}
-                                            schemaName={schemaName}
-                                            queryName={queryName}
-                                            title={title}
-                                            inputPath={inputPath}
                                         />
                                     </div>
                                 );
@@ -267,6 +263,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                     <div key={ComponentType.name} className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
                                             prevTaskId={taskId}
+                                            componentProps={componentProps}
                                             state={componentStates[ComponentType.name]}
                                             onStateChange={(newState) => handleChildStateChange(ComponentType.name, newState)}
                                         />

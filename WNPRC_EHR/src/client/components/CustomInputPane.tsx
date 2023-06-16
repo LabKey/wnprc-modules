@@ -15,11 +15,16 @@ export const CustomInputPane: FC<any> = (props) => {
         setAnimalInfoCache,
         onStateChange,
         prevTaskId,
+        componentProps
+    } = props;
+
+    const {
         schemaName,
         queryName,
         title,
-        inputPath,
-    } = props;
+        inputPath
+    } = componentProps;
+
 
     const {inputs, initialState, requiredInputs, dropdownOptions} = require(`../${inputPath}/customInputs`);
 

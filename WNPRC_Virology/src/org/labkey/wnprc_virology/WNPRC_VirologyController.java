@@ -339,7 +339,7 @@ public class WNPRC_VirologyController extends SpringActionController
                 SQLFragment sql;
                 if (scope.getSqlDialect().isPostgreSQL())
                 {
-                    sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96;\n");
+                    sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96");
                     new SqlExecutor(scope).execute(sql);
                 }
                 tx.commit();

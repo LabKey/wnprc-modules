@@ -12,7 +12,6 @@ import org.labkey.api.ldk.table.AbstractTableCustomizer;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.text.DecimalFormat;
 
 public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
 {
@@ -35,7 +34,7 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
 
     private void customizeViralLoadFilteredTable(AbstractTableInfo table)
     {
-        String name = "viral_load_average";
+        String name = "below_llod";
         MutableColumnInfo col = (MutableColumnInfo) table.getColumn(name);
         if (null != col)
         {
@@ -43,6 +42,7 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
             //if we need to get more fancy in the future we can go with a ConditionalFormat
             // see the targetedms repo for an example:
             // https://github.com/LabKey/targetedms/blob/aae086c4217c7b7fc0b975c84cc9fb564ea91606/src/org/labkey/targetedms/query/PTMPercentsGroupedCustomizer.java#L223
+
             //col.setDisplayColumnFactory((boundCol) -> new CDRConditionalFormatDisplayColumn(boundCol));
             col.setDisplayColumnFactory(new DisplayColumnFactory()
             {
@@ -68,18 +68,21 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
         {
 
             StringBuilder htmlString = new StringBuilder();
-            DecimalFormat df = new DecimalFormat("0.##E00");
-            String asString = df.format(ctx.get("viral_load_average"));
-            if (ctx.get("below_llod").toString().contains("Yes"))
+            String llodCol = ctx.get("below_llod").toString();
+            if (llodCol.toString().contains("Yes"))
             {
+                int parenIdx = llodCol.indexOf("(");
+                String firstPart = llodCol.substring(0, parenIdx);
+                String lastPart = llodCol.substring(parenIdx);
                 htmlString.append("<strong>");
-                htmlString.append(asString);
+                htmlString.append(firstPart);
                 htmlString.append("</strong>");
+                htmlString.append(lastPart);
                 out.write(htmlString.toString());
             }
             else
             {
-                htmlString.append(asString);
+                htmlString.append(llodCol);
                 out.write(htmlString.toString());
             }
         }

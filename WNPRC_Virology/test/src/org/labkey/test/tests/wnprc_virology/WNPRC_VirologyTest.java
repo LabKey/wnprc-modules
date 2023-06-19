@@ -553,7 +553,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         assertTextPresent(ANIMAL_ID);
 
         //check for LLoD bolding
-        assertElementPresent(Locator.tagWithText("strong", "2.93E02"));
+        assertElementPresent(Locator.tagWithText("strong", "Yes"));
 
     }
 

@@ -43,9 +43,9 @@ export const GridPanelConfig: FC<configProps> = ({
     const baseFilters = [];
     if(filterConfig["inputType"] !== "none"){
         if(filterConfig["inputType"] === "roomCage"){
-            baseFilters.push(Filter.create("area", filterConfig["area"], Filter.Types.EQUAL.getMultiValueFilter()));
-            baseFilters.push(Filter.create("room", filterConfig["room"], Filter.Types.EQUAL.getMultiValueFilter()));
-            baseFilters.push(Filter.create("cage", filterConfig["cage"], Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("Id/curLocation/area", filterConfig["area"], Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("Id/curLocation/room", filterConfig["room"], Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("Id/curLocation/cage", filterConfig["cage"], Filter.Types.EQUAL.getMultiValueFilter()));
         }
         else if (filterConfig["inputType"]=== "multiSubject"){
             baseFilters.push(Filter.create("Id", filterConfig["subjects"], Filter.Types.EQUAL.getMultiValueFilter()));

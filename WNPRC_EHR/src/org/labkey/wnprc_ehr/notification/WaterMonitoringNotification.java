@@ -113,14 +113,28 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
 
+        TableInfo waterTotalByDateWithWeightReport = QueryService.get().getUserSchema(u,c,"study").getTable("waterTotalByDateWithWeight");
+
 
         SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
         orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"), 20, CompareType.LT).getClauses().get(0));
         orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"),null, CompareType.ISBLANK).getClauses().get(0));
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
         filter.addClause(orClause);
+        Set<FieldKey> colKeys = new HashSet<>();
+        colKeys.add(FieldKey.fromString("Id"));
+        colKeys.add(FieldKey.fromString("date"));
+        colKeys.add(FieldKey.fromString("mlsPerKg"));
+        colKeys.add(FieldKey.fromString("TotalWater"));
+        colKeys.add(FieldKey.fromString("project"));
+        colKeys.add(FieldKey.fromString("currentWaterCondition"));
+        colKeys.add(FieldKey.fromString("Id/curLocation/location"));
 
-        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("Id","date","mlsPerKg","TotalWater","project","currentWaterCondition"), filter, null);
+        final Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(waterTotalByDateWithWeightReport, colKeys);
+
+
+        TableSelector ts = new TableSelector(waterTotalByDateWithWeightReport, columns.values(), filter, null);
+        //TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("Id","date","mlsPerKg","TotalWater","project","currentWaterCondition"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
@@ -163,6 +177,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
+                    "<td style='padding: 5px; text-align: center;'><strong>Location</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>mlsPerKg</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Total Water Given</strong></td></tr>\n");
 
@@ -180,6 +195,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("Id"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("id_fs_curlocation_fs_location"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + mlsPerKg
                             + "</td><td style='padding: 5px; text-align: center;'> " + totalWater
                             +"</td></tr>" );
@@ -199,6 +215,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
+                    "<td style='padding: 5px; text-align: center;'><strong>Location</strong></td>" +
                     "<td style='padding: 5px; text-align: center;'><strong>Condition at Time</strong></td></tr>\n");
 
             for (Map.Entry<Integer,List<Map<String,Object>>> entry : lixitMap.entrySet()){
@@ -214,6 +231,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("Id"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("id_fs_curlocation_fs_location"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + condition
                             +"</td></tr>" );
                 }
@@ -234,7 +252,8 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             parameters.put("CheckDate", date);
 
             TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("waterScheduledAnimalWithOutEntries");
-            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","project"), null, null);
+            TableSelector ts = new TableSelector(ti,PageFlowUtil.set("Id","project","location"), null, null);
+            //TableSelector ts = new TableSelector(ti, null, null);
             ts.setNamedParameters(parameters);
 
             long total = ts.getRowCount();
@@ -246,10 +265,11 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             else
             {
                 msg.append("There are " + total + " animals in the system that have no records in water given dataset for " + date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
+                msg.append("Project   - AnimalID   -  Location <br>");
                 Map<String, Object>[] animalsWithOutEntries = ts.getMapArray();
                 for (Map<String, Object> mapItem : animalsWithOutEntries)
                 {
-                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + "<br>");
+                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + "  "  + ConvertHelper.convert(mapItem.get("location"), String.class)+ "<br>");
 
                 }
                 msg.append("<br>");

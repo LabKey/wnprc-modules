@@ -2,6 +2,7 @@ SELECT
 
 wsa.id,
 wsa.MostRecentWaterConditionDate,
+wsa.room || '-' || wsa.cage as location,
 (
     SELECT wsainner.project
     FROM study.waterScheduledAnimals wsainner
@@ -23,7 +24,10 @@ wsa.MostRecentWaterConditionDate,
 FROM(
     SELECT
         wsaouter.id as id,
-        max(wsaouter.date) AS MostRecentWaterConditionDate
+        max(wsaouter.date) AS MostRecentWaterConditionDate,
+        max(wsaouter.id.dataset.activehousing.room) AS room,
+        max(wsaouter.id.dataset.activehousing.cage) AS cage,
+
     FROM study.waterScheduledAnimals wsaouter
     WHERE wsaouter.qcstate.publicdata = true AND wsaouter.condition IS NOT NULL
     GROUP BY wsaouter.id

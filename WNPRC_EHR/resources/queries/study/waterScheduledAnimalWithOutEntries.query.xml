@@ -1,0 +1,33 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="waterScheduledAnimalsWithOutEntries" tableDbType="NOT_IN_DB" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="project">
+                        <columnTitle>Project</columnTitle>
+                    </column>
+                    <column columnName="location">
+                        <columnTitle>Location</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cage</fkTable>
+                            <fkColumnName>location</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

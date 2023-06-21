@@ -1,0 +1,27 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="damSireSuffixMatcher" tableDbType="TABLE">
+                <tableTitle>Dam Sire Suffix Matcher</tableTitle>
+                <columns>
+                    <column columnName="last_four"/>
+                    <column columnName="sire">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>Animal</fkTable>
+                            <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="dam">
+                    <fk>
+                        <fkDbSchema>study</fkDbSchema>
+                        <fkTable>Animal</fkTable>
+                        <fkColumnName>Id</fkColumnName>
+                    </fk>
+                    </column>
+                    <column columnName="frequency"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

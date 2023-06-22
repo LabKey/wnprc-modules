@@ -6,18 +6,20 @@
                 <columns>
                     <column columnName="last_four"/>
                     <column columnName="sire">
-                        <fk>
-                            <fkDbSchema>study</fkDbSchema>
-                            <fkTable>Animal</fkTable>
-                            <fkColumnName>Id</fkColumnName>
-                        </fk>
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Sire%2C-source&amp;
+                            query.Sire~in=${last_four}%3Brh${last_four}
+                        </url>
                     </column>
                     <column columnName="dam">
-                    <fk>
-                        <fkDbSchema>study</fkDbSchema>
-                        <fkTable>Animal</fkTable>
-                        <fkColumnName>Id</fkColumnName>
-                    </fk>
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Dam%2C-source&amp;
+                            query.Dam~in=${last_four}%3Brh${last_four}
+                        </url>
                     </column>
                     <column columnName="frequency"/>
                 </columns>

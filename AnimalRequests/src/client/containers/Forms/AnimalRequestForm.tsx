@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { FC } from 'react';
 import DatePicker from 'react-datepicker';
 
-import { Form, Field } from 'react-final-form'
-import arrayMutators from 'final-form-arrays'
+import { Form, Field } from 'react-final-form';
+import arrayMutators from 'final-form-arrays';
 import setFieldData from 'final-form-set-field-data';
 import createDecorator from 'final-form-calculate';
 
@@ -13,36 +13,33 @@ import {getEHRData} from '../../query/actions';
 
 const required = value => (value ? undefined : <span data-tooltip="Required">❗️</span>);
 
-const renderField = ({
-        input, label, warnings, tooltip, type, required, min,
-        meta: { touched, error, warning, asyncValidating }
-    }) => (
+const renderField = (props) => (
     <div className="row top-buffer">
-        <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
-            <input min={min} {...required==true ? required : ''} className={`col-xs-5 form-control-${type}`}  type={type} {...input} />
-            {touched && ((error && <span>{error}</span>))}
+        <div className={props.meta.asyncValidating ? 'async-validating' : ''}>
+            <label className="col-xs-5 form-control-label"> {props.label}{props.tooltip && (<a><sup><span id="help-tooltip" data-tooltip={props.tooltip}>?️</span></sup></a>)}: </label>
+            <input min={props.min} {...props.required==true ? props.required : ''} className={`col-xs-5 form-control-${props.type}`}  type={props.type} {...props.input} />
+            {props.meta.touched && ((props.meta.error && <span>{props.meta.error}</span>))}
         </div>
     </div>
 );
 
-const renderSelectField = ({
-       input, label, warnings, tooltip, type, options, required,
-       meta: { touched, error, warning, asyncValidating }
-    }) => (
-
-    <div className="row top-buffer">
-        <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-5 form-control-label"> {label}{tooltip && (
-                <a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
-            <select {...required==true ? required : ''} className="col-xs-5 form-control-input" {...input}> {options} </select>
-            {touched && ((error && <span>{error}</span>))}
+const renderSelectField = (props) => {
+    return(
+        <div className="row top-buffer">
+            <div className={props.meta.asyncValidating ? 'async-validating' : ''}>
+                <label className="col-xs-5 form-control-label"> {props.label}{props.tooltip && (
+                    <a><sup><span id="help-tooltip" data-tooltip={props.tooltip}>?️</span></sup></a>)}: </label>
+                <select {...props.required == true ? props.required : ''} className="col-xs-5 form-control-input" {...props.input}>
+                    {props.options}
+                </select>
+                {props.meta.touched && ((props.meta.error && <span>{props.meta.error}</span>))}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 {/*Have to use implicit props to workaround the typescript restrictions in FieldRenderProps (react-final-form lib)*/}
-const renderDateTimePicker = props => (
+const renderDateTimePicker = (props) => (
   <div className="row top-buffer">
       <label className="col-xs-5 form-control-label">{props.label}:</label>
       {/*We have to render the datepicker like this because it won't cooperate
@@ -59,15 +56,12 @@ const renderDateTimePicker = props => (
       </div>
   </div>
 );
-const renderTextArea = ({
-        input, label, warnings, tooltip, type, required,
-        meta: { touched, error, warning, asyncValidating }
-    }) => (
+const renderTextArea = (props) => (
     <div className="row top-buffer">
-        <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<a><sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup></a>)}: </label>
-            <textarea {...required==true ? required : ''} className={`col-xs-5 form-control-${type}`}  type={type} {...input} />
-            {touched && ((error && <span>{error}</span>))}
+        <div className={props.meta.asyncValidating ? 'async-validating' : ''}>
+            <label className="col-xs-5 form-control-label"> {props.label}{props.tooltip && (<a><sup><span id="help-tooltip" data-tooltip={props.tooltip}>?️</span></sup></a>)}: </label>
+            <textarea {...props.required==true ? props.required : ''} className={`col-xs-5 form-control-${props.type}`}  type={props.type} {...props.input} />
+            {props.meta.touched && ((props.meta.error && <span>{props.meta.error}</span>))}
         </div>
     </div>
 );
@@ -89,8 +83,8 @@ interface State {
 }
 
 export class AnimalRequestForm extends React.Component<any,State> {
-    constructor() {
-        super();
+    constructor(props: State) {
+        super(props);
         //this has to be an array of promises
         const dataArr = [
             getEHRData('ehr','investigatorsWithName', '', '', [], 'IncludeExternal'),
@@ -199,13 +193,13 @@ export class AnimalRequestForm extends React.Component<any,State> {
                 this.setState({[val['queryName']]: val['rows']});
             }
         }).then(() => {
-            this.setState({loading:false});
+            this.setState({...this.state,loading:false});
         });
     };
 
     async onSubmit(values) {
 
-        this.setState({submitted: true});
+        this.setState({...this.state,submitted: true});
         const QCState = "In Progress";
 
         submitAnimalRequest(values,QCState)
@@ -214,12 +208,10 @@ export class AnimalRequestForm extends React.Component<any,State> {
                 window.location = redirectUrl;
             }).catch((err) => {
                 alert(err.exception)
-                this.setState({submitted: false});
+                this.setState({...this.state,submitted: false});
             }
         );
     }
-
-
 
     render() {
 
@@ -238,15 +230,16 @@ export class AnimalRequestForm extends React.Component<any,State> {
 
         //component to conditionally render an input when "isnot" prop is NOT equal to "when" prop's input val
         //TODO generalize this into the Condition component below
-        const ConditionIsNot = ({ when, isnot, children }) => (
-            <Field name={when} subscription={{ value: true }}>
-                {({ input: { value } }) => (value !== isnot ? children : null)}
+
+        const ConditionIsNot = (props) => (
+            <Field name={props.when} subscription={{ value: true }}>
+                {({ input: { value } }) => (value !== props.isnot ? props.children : null)}
             </Field>
         );
         //component to conditionally render an input when "is" prop is equal to "when" prop's input val
-        const Condition = ({ when, is, children }) => (
-            <Field name={when} subscription={{ value: true }}>
-                {({ input: { value } }) => (value === is ? children : null)}
+        const Condition = (props) => (
+            <Field name={props.when} subscription={{ value: true }}>
+                {({ input: { value } }) => (value === props.is ? props.children : null)}
             </Field>
         );
 
@@ -266,17 +259,13 @@ export class AnimalRequestForm extends React.Component<any,State> {
                 decorators={[this.observer]}
                 render={({
                              handleSubmit,
-                             form: {
-                                 mutators: {push, pop, setFieldData}
-                             },
+                             form,
                              values,
-                             mutators,
                          }) => {
                         return (
                             <div className={`card content-wrapper ${submitted}`}>
                                 <div className="row content-wrapper-body">
                                     <div className="form-wrapper">
-
                                         <form onSubmit={handleSubmit}>
                                             {loading && <div className="loading" />}
                                             <div style={{display:display}} className="card-body">
@@ -398,7 +387,6 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         >
                                                         </Field>
                                                         </ConditionIsNot>
-
                                                         <Field
                                                             name="infectiousdisease"
                                                             label="Infectious Disease"
@@ -614,7 +602,6 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 </div>
                                             </div>
                                         </form>
-
                                     </div>
                                 </div>
                             </div>

@@ -8,7 +8,11 @@ import {
 
 const AppContext = createContext({} as ContextProps);
 
-const ContextProvider: React.FunctionComponent = ({ children }) => {
+interface contextProps {
+  children: React.ReactNode;
+}
+
+const ContextProvider: React.FunctionComponent<contextProps> = ({ children }) => {
   const [animalInfo, setAnimalInfo] = useState<AnimalInfoProps>(null);
   const [animalInfoState, setAnimalInfoState] = useState<AnimalInfoStates>("waiting");
   const [animalInfoCache, updateAnimalInfoCache] = useState<object>();

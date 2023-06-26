@@ -129,14 +129,22 @@ public class ViralLoadRSEHRRunner implements Job {
             Map<String, Object> mp = getEmailListAndFolderInfo(child);
             rowsToInsert.add(mp);
         }
-        User user = EHRService.get().getEHRUser(viralLoadContainer);
-        SimpleQueryUpdater qu = new SimpleQueryUpdater(user, viralLoadContainer, "wnprc_virology", "folder_paths_with_readers");
-        SimpleQueryFactory sf = new SimpleQueryFactory(user,viralLoadContainer);
-        JSONArray rowsToDelete = sf.selectRows("wnprc_virology", "folder_paths_with_readers");
-        if (rowsToDelete.length() > 0)
-            qu.delete(rowsToDelete.toMapList());
-        if (rowsToInsert.size() > 0)
-            qu.insert(rowsToInsert);
+        try
+        {
+            User user = EHRService.get().getEHRUser(viralLoadContainer);
+            SimpleQueryUpdater qu = new SimpleQueryUpdater(user, viralLoadContainer, "wnprc_virology", "folder_paths_with_readers");
+            SimpleQueryFactory sf = new SimpleQueryFactory(user,viralLoadContainer);
+            JSONArray rowsToDelete = sf.selectRows("wnprc_virology", "folder_paths_with_readers");
+            if (rowsToDelete.length() > 0)
+                qu.delete(rowsToDelete.toMapList());
+            if (rowsToInsert.size() > 0)
+                qu.insert(rowsToInsert);
+
+        }
+        catch (Exception e)
+        {
+            _log.warn(e.getMessage());
+        }
     }
 
     public static JobKey getJobKey() {

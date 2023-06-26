@@ -30,3 +30,7 @@ docker/ehrcron/scripts/pg_backup/lkbackup.ini
 */resources/web/*/gen/
 */resources/web/gen/
 */resources/views/gen/
+
+# log files from etls and folder imports
+*/resources/referenceStudy/etlLogs/
+*/resources/referenceStudy/*.log

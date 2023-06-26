@@ -9,6 +9,7 @@ import {
 
 
 import { DefaultGridPanel } from "./DefaultGridPanel";
+import dateInput from './DateInput';
 
 interface configProps {
     schemaName: string;
@@ -21,7 +22,6 @@ interface configProps {
     };
     cellStyle?: any;
     filterConfig?: any;
-    subjects?: any;
 }
 
 /*
@@ -39,22 +39,29 @@ export const GridPanelConfig: FC<configProps> = ({
     input,
     cellStyle,
     filterConfig,
-    subjects
     }) => {
-    console.log(subjects);
+
+    const subjects = filterConfig.subjects;
+    const filterDate = filterConfig.date;
+    const filterType = filterConfig.filters.inputType;
+
     const baseFilters = [];
-    if(filterConfig["inputType"] !== "none"){
-        if(filterConfig["inputType"] === "roomCage"){
-            baseFilters.push(Filter.create("Id/curLocation/area", filterConfig["area"], Filter.Types.EQUAL.getMultiValueFilter()));
-            baseFilters.push(Filter.create("Id/curLocation/room", filterConfig["room"], Filter.Types.EQUAL.getMultiValueFilter()));
-            baseFilters.push(Filter.create("Id/curLocation/cage", filterConfig["cage"], Filter.Types.EQUAL.getMultiValueFilter()));
+    const filterArray = [];
+    if(filterType !== "none"){
+        if(filterType === "roomCage"){
+            baseFilters.push(Filter.create("Id/curLocation/area", filterConfig.filters.area, Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("Id/curLocation/room", filterConfig.filters.room, Filter.Types.EQUAL.getMultiValueFilter()));
+            baseFilters.push(Filter.create("Id/curLocation/cage", filterConfig.filters.cage, Filter.Types.EQUAL.getMultiValueFilter()));
         }
-        else if (filterConfig["inputType"]=== "multiSubject"){
-            baseFilters.push(Filter.create("Id", filterConfig["subjects"], Filter.Types.EQUAL.getMultiValueFilter()));
+        else if (filterType === "multiSubject"){
+            baseFilters.push(Filter.create("Id", subjects, Filter.Types.EQUAL.getMultiValueFilter()));
         }
-        else if(filterConfig["inputType"] === "singleSubject"){
-            baseFilters.push(Filter.create("Id", filterConfig["subjects"], Filter.Types.EQUAL));
+        else if(filterType === "singleSubject"){
+            baseFilters.push(Filter.create("Id", subjects, Filter.Types.EQUAL));
         }
+    }
+    if(filterDate){
+        filterArray.push(Filter.create("date", filterDate, Filter.Types.EQUAL));
     }
 
     const serverContext = withAppUser(getServerContext());
@@ -65,6 +72,7 @@ export const GridPanelConfig: FC<configProps> = ({
             omittedColumns: ['SortOrder','Searchable','Type','Title','ContainerType','Workbook','IdPrefixedName'],
             includeTotalCount: true,
             baseFilters: baseFilters,
+            filterArray: filterArray
         }
     };
 

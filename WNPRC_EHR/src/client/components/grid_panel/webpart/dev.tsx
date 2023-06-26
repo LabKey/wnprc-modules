@@ -8,7 +8,15 @@ import { configProps } from '../configProps';
 import { getURLParameters } from '../../../query/helpers';
 
 App.registerApp<any>('grid_panel_webpart', (target: string, ctx: any) => {
-    configProps.filterConfig = getURLParameters(window.location.href);
+    configProps.schemaName = ctx.schemaName;
+    configProps.queryName = ctx.queryName;
+    configProps.viewName = ctx.viewName;
+    configProps.input.controller = ctx.inputController;
+    configProps.input.view = ctx.inputView;
+    configProps.input.formType = ctx.inputFormType;
+    configProps.filterConfig.subjects = JSON.parse(ctx.subjects);
+    configProps.filterConfig.date = ctx.date;
+    configProps.filterConfig.filters = JSON.parse(ctx.filters);
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig

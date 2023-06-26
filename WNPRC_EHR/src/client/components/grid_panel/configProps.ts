@@ -5,8 +5,11 @@ export const configProps = {
     input: {
         controller: "",
         view: "",
-        formType : ""
+        formType: ""
     },
-    filterConfig: {},
-    subjects: ""
+    filterConfig: {
+        subjects: "",
+        date: "",
+        filters: "",
+    },
 }

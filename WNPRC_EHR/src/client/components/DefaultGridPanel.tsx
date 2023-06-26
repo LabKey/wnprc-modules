@@ -47,7 +47,6 @@ const DefaultGridPanelImpl: FC<Props> = ({
     //declare any states here
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
 
-
     useEffect(() => {
         if(queryModels?.containersModel?.queryInfo && cellStyle) {
             const { containersModel } = queryModels;

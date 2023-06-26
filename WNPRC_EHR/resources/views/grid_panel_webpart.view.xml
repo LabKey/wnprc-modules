@@ -1,0 +1,8 @@
+<view xmlns="http://labkey.org/data/xml/view" title="View">
+    <permissions>
+        <permission name="read"/>
+    </permissions>
+    <dependencies>
+        <dependency path="gen/grid_panel_webpart"/>
+    </dependencies>
+</view>

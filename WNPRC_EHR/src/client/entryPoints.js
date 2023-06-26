@@ -1,5 +1,16 @@
 module.exports = {
     apps: [{
+        name: 'grid_panel',
+        title: 'Default Grid',
+        permission: 'read',
+        path: './src/client/components/grid_panel'
+    },{
+        name: 'grid_panel_webpart',
+        title: 'Default Grid Webpart',
+        permission: 'read',
+        path: './src/client/components/grid_panel/webpart',
+        generateLib: true
+    },{
         name: 'breeding',
         title: 'Pregnancies',
         permission: 'read',

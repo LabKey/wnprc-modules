@@ -1,0 +1,6 @@
+<script type="application/javascript">
+    +function() {
+        console.log(<%=webpartContext%>);
+        LABKEY.App.loadApp('grid_panel_webpart', <%=webpartContext%>.wrapperDivId, <%=webpartContext%>);
+    }();
+</script>

@@ -21,6 +21,7 @@ interface configProps {
     };
     cellStyle?: any;
     filterConfig?: any;
+    subjects?: any;
 }
 
 /*
@@ -37,9 +38,10 @@ export const GridPanelConfig: FC<configProps> = ({
     viewName,
     input,
     cellStyle,
-    filterConfig
+    filterConfig,
+    subjects
     }) => {
-
+    console.log(subjects);
     const baseFilters = [];
     if(filterConfig["inputType"] !== "none"){
         if(filterConfig["inputType"] === "roomCage"){

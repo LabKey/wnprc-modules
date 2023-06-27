@@ -61,7 +61,7 @@ export const GridPanelConfig: FC<configProps> = ({
         }
     }
     if(filterDate){
-        filterArray.push(Filter.create("date", filterDate, Filter.Types.EQUAL));
+        filterArray.push(Filter.create("date", filterDate, Filter.Types.DATE_EQUAL));
     }
 
     const serverContext = withAppUser(getServerContext());

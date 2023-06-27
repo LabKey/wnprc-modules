@@ -4,7 +4,7 @@ import * as ReactDom from 'react-dom';
 // Main react component
 import  {GridPanelConfig}  from '../GridPanelConfig';
 // Grid Panel Props
-import {configProps} from './configProps';
+import {gridConfig} from './configProps';
 
 // Import stylesheets
 import '../../wnprc_ehr.scss';
@@ -12,7 +12,7 @@ import '../../wnprc_ehr.scss';
 window.addEventListener('DOMContentLoaded', (event) => {
     ReactDom.render(
         <GridPanelConfig
-            {...configProps}
+            {...gridConfig}
         />,
         document.getElementById('app')
     );

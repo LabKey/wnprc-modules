@@ -1,4 +1,5 @@
-export const configProps = {
+import { configProps } from '../components/grid_panel/configProps';
+export const gridConfig: configProps = {
     schemaName: "study",
     queryName: "ResearchUltrasoundsInfo",
     viewName: "",
@@ -11,6 +12,5 @@ export const configProps = {
         flagColumn: "reviewCompleted",
         green: "Yes",
         red: "No",
-    },
-    filterConfig: {}
+    }
 }

@@ -9,20 +9,7 @@ import {
 
 
 import { DefaultGridPanel } from "./DefaultGridPanel";
-import dateInput from './DateInput';
-
-interface configProps {
-    schemaName: string;
-    queryName: string;
-    viewName: string;
-    input?: {
-        controller: string,
-        view: string,
-        formType: string
-    };
-    cellStyle?: any;
-    filterConfig?: any;
-}
+import { configProps } from './grid_panel/configProps';
 
 /*
 Grid Panel Configuration
@@ -40,28 +27,31 @@ export const GridPanelConfig: FC<configProps> = ({
     cellStyle,
     filterConfig,
     }) => {
-
-    const subjects = filterConfig.subjects;
-    const filterDate = filterConfig.date;
-    const filterType = filterConfig.filters.inputType;
-
     const baseFilters = [];
     const filterArray = [];
-    if(filterType !== "none"){
-        if(filterType === "roomCage"){
-            baseFilters.push(Filter.create("Id/curLocation/area", filterConfig.filters.area, Filter.Types.EQUAL.getMultiValueFilter()));
-            baseFilters.push(Filter.create("Id/curLocation/room", filterConfig.filters.room, Filter.Types.EQUAL.getMultiValueFilter()));
-            baseFilters.push(Filter.create("Id/curLocation/cage", filterConfig.filters.cage, Filter.Types.EQUAL.getMultiValueFilter()));
+    if(filterConfig) {
+        const subjects = filterConfig.subjects;
+        const filterDate = filterConfig.date;
+        const filterType = filterConfig.filters.inputType;
+
+
+        if (filterType !== "none") {
+            if (filterType === "roomCage") {
+                const area = filterConfig.filters.area.split(',');
+                const room = filterConfig.filters.room.split(',');
+                const cage = filterConfig.filters.cage.split(',');
+                if (area[0] !== "") baseFilters.push(Filter.create("Id/curLocation/area", area, Filter.Types.EQUAL.getMultiValueFilter()));
+                if (room[0] !== "") baseFilters.push(Filter.create("Id/curLocation/room", room, Filter.Types.EQUAL.getMultiValueFilter()));
+                if (cage[0] !== "") baseFilters.push(Filter.create("Id/curLocation/cage", cage, Filter.Types.EQUAL.getMultiValueFilter()));
+            } else if (filterType === "multiSubject") {
+                baseFilters.push(Filter.create("Id", filterConfig.filters.nonRemovable['0'].value, Filter.Types.EQUAL.getMultiValueFilter()));
+            } else if (filterType === "singleSubject") {
+                baseFilters.push(Filter.create("Id", subjects, Filter.Types.EQUAL));
+            }
         }
-        else if (filterType === "multiSubject"){
-            baseFilters.push(Filter.create("Id", subjects, Filter.Types.EQUAL.getMultiValueFilter()));
+        if (filterDate) {
+            filterArray.push(Filter.create("date", filterDate, Filter.Types.DATE_EQUAL));
         }
-        else if(filterType === "singleSubject"){
-            baseFilters.push(Filter.create("Id", subjects, Filter.Types.EQUAL));
-        }
-    }
-    if(filterDate){
-        filterArray.push(Filter.create("date", filterDate, Filter.Types.DATE_EQUAL));
     }
 
     const serverContext = withAppUser(getServerContext());

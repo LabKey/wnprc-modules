@@ -5,7 +5,7 @@ import { AppContainer } from 'react-hot-loader';
 // Main react component
 import  {GridPanelConfig}  from '../GridPanelConfig';
 // Grid Panel Props
-import { configProps } from './configProps';
+import { gridConfig } from './configProps';
 // Import stylesheets
 import '../../wnprc_ehr.scss';
 
@@ -14,7 +14,7 @@ const render = () => {
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig
-                {...configProps}
+                {...gridConfig}
             />
         </AppContainer>,
         document.getElementById('app')

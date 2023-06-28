@@ -39,11 +39,24 @@
     border-image: initial;
     padding-left: 15px;
     padding-right: 15px;
+    font-size: 1.3rem;
 }
 
 .col-xs-5.datepicker-wrapper {
     padding-left: 0;
     padding-right: 0;
+}
+
+.react-datepicker__aria-live {
+    position: absolute;
+    clip-path: circle(0);
+    border: 0;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    width: 1px;
+    white-space: nowrap;
 }
 /**/
 

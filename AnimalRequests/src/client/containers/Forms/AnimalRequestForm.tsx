@@ -44,8 +44,9 @@ const renderDateTimePicker = (props) => (
       <label className="col-xs-5 form-control-label">{props.label}:</label>
       {/*We have to render the datepicker like this because it won't cooperate
            And we also have to do some not-so-sexy css adjustments */}
-      <div className="col-xs-5 datepicker-wrapper " id={props.id}>
+      <div className="col-xs-5 datepicker-wrapper" id={props.id}>
           <DatePicker
+            wrapperClassName={"react-datepicker"}
             onChange={props.input.onChange}
             dateFormat="yyyy-MM-dd"
             selected={!props.input.value ? null : new Date(props.input.value)}

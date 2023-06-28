@@ -8,7 +8,6 @@
     "build-prod": "better-npm-run build-prod",
     "start": "better-npm-run build-style && better-npm-run build-watch",
     "clean": "better-npm-run clean",
-    "clean-build": "rimraf resources/web/AnimalRequests/gen && npm run build",
     "reallyClean": "better-npm-run reallyClean",
     "test": "better-npm-run build-jest-test"
   },

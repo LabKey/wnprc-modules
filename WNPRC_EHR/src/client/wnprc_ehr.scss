@@ -1,2 +1,6 @@
 @import "@labkey/components-scss";
 @import "@labkey/components-scss/labkeyserver-override";
+
+.grid-header-cell.grid-header-draggable {
+  min-width: 10px !important;
+}

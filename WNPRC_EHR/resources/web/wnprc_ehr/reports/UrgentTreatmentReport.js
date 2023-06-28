@@ -34,7 +34,7 @@ EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
         });
 
         wp.render();
-
+        tab.setHeight(1000);
     }
 
     //Location

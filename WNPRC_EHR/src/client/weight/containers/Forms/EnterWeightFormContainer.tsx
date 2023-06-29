@@ -576,8 +576,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   //when this is called, just get the id and set which modal to show
-  const handleShowModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    let target = e.target as HTMLInputElement
+  const handleShowModal = (e: any) => {
+    let target = e.target as HTMLInputElement;
     setShowModal(target.id);
   };
 

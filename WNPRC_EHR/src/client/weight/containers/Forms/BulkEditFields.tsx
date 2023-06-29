@@ -12,10 +12,10 @@ import {BulkEditFieldProps} from "../../typings/main"
 /**
  * A set of fields whose values are meant to be passed up to a parent modal.
  */
-const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
+const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = (props) => {
   const { fieldValues, restraints } = props;
   const [date, setDate] = useState<object>(new Date());
-  const [weight, setWeight] = useState<number>(null);
+  const [weight, setWeight] = useState<number>(undefined);
   const [remark, setRemark] = useState<string>("");
   const [restraint, setRestraint] = useState<string>("");
 

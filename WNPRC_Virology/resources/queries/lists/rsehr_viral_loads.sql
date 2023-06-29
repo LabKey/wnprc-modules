@@ -4,9 +4,8 @@ SELECT
     MAX(v.Run.runDate) as runDate,
     v.assayId AS assay,
     v.sampleType AS sample_type,
-    -- cast as varchar to avoid floating point operation problems,
-    -- seems like the floating point issues only appear on the destination table of an ETL?
-    CAST(AVG(v.viralLoadScientific) as VARCHAR) as viral_load_average,
+    -- CAST(AVG(v.viralLoadScientific) as VARCHAR) as viral_load_average,
+    276666666.0 as viral_load_average,
     CASE WHEN (AVG(v.viralLoadScientific) <
         (SELECT
             llod

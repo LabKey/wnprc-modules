@@ -8,7 +8,6 @@
                         <columnTitle>Viral Load Avg</columnTitle>
                         <conceptURI>http://cpas.labkey.com/laboratory#assayResult</conceptURI>
                         <measure>true</measure>
-                        <formatString>0.##E00</formatString>
                     </column>
                 </columns>
             </table>

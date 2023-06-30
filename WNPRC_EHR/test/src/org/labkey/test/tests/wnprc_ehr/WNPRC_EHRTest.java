@@ -2847,6 +2847,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = currentDate.format(formatter);
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
@@ -2875,10 +2878,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
         fillAnInputByName("contacts", "test@test.com");

@@ -47,6 +47,7 @@ const renderDateTimePicker = (props) => (
       <div className="col-xs-5 datepicker-wrapper" id={props.id}>
           <DatePicker
             wrapperClassName={"react-datepicker"}
+            popperPlacement={"right-end"}
             onChange={props.input.onChange}
             dateFormat="yyyy-MM-dd"
             selected={!props.input.value ? null : new Date(props.input.value)}

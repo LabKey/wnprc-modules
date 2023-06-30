@@ -8,8 +8,7 @@ import DateInput from "../../../components/DateInput";
 import { useRef } from "react";
 import DropdownOptions from "../../components/DropdownOptions";
 import {BulkEditFieldProps} from "../../typings/main"
-import * as events from 'events';
-
+import "../../../theme/css/index.css";
 /**
  * A set of fields whose values are meant to be passed up to a parent modal.
  */
@@ -65,6 +64,7 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = (props) => {
           <div className="col-xs-9">
             <DatePicker
               ref={r => (calendarEl = r)}
+              wrapperClassName={"react-datepicker"}
               showTimeSelect
               dateFormat="yyyy-MM-dd HH:mm"
               todayButton="Today"

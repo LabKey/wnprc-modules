@@ -379,7 +379,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     // (see saveWeights function)...
     let QCState: string = "";
     if (editMode) {
-      QCState = getQCStateByRowId(QCMap, formdata[0]["QCState"]);
+      QCState = getQCStateByRowId(QCMap, formdata[0]["QCState"].value);
     } else {
       QCState = "In Progress";
     }

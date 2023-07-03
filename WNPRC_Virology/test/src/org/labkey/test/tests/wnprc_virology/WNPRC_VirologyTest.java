@@ -97,6 +97,8 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final String A_THIRD_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_3";
     private static final String A_FOURTH_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_4";
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
+    private static final String COMPLETE_QC_STRING = "05-complete";
+    private static final Integer COMPLETE_QC_CODE = 5;
     private static final String ZIKA_QC_CODE = "08-complete-email-Zika_portal";
 
     protected final PortalHelper _portalHelper = new PortalHelper(this);
@@ -135,12 +137,12 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
     public void testTheStuff() throws Exception
     {
+        testBasicBatchComplete();
         testViralLoadRSEHRJob();
         testUpdateAccountsPage();
         testBatchCompleteAndSendRSERHEmail();
         testFolderAccountMapping();
         testBatchCompleteAndSendRSERHEmailToDiffUser();
-        testBatchCompleteAndSendZikaEmail();
         testLinkedSchemaDataWebpart();
 
     }
@@ -491,6 +493,34 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     public void testBatchCompleteAndSendRSEHRToSubscribers()
     {
         // should just throw this in an existing test
+    }
+
+    //test regular batch complete
+    public void testBasicBatchComplete() throws Exception
+    {
+        log("Select first 2 samples and batch complete");
+        navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
+        waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
+        DataRegionTable table = new DataRegionTable("query", this);
+        table.setFilter("Funding_string", "Equals", ACCOUNT_STR_3);
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "4")); //for some reason waitAndClickAndWait() didn't work here
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "5"));
+        waitAndClick(Locator.lkButton("Batch Complete Samples"));
+        //select the dropdown arrow to select qc state
+        waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
+        Locator.XPathLocator CompleteQCStateSelectItem = Locator.tagContainingText("li", COMPLETE_QC_STRING).notHidden().withClass("x4-boundlist-item");
+        click(CompleteQCStateSelectItem);
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("1000");
+        Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        click(Ext4Helper.Locators.ext4Button("Submit"));
+
+        SelectRowsCommand sr = new SelectRowsCommand("lists","vl_sample_queue");
+        sr.addFilter("status", COMPLETE_QC_CODE, Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), PROJECT_NAME_EHR);
+        Assert.assertTrue(resp.getRows().size() == 2);
+
     }
 
     public void testBatchCompleteAndSendRSERHEmail() throws Exception

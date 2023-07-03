@@ -125,7 +125,6 @@ WNPRC_Virology.DatasetButtons = new function() {
                                 for (var k = 0; k < statusStore.length; k++){
                                     statusStoreObj[statusStore[k].data.Key] = statusStore[k].data.Status;
                                 }
-                                var additionalChecksForStatuses = ["09-complete-email-RSEHR", "08-complete-email-Zika_portal"];
                                 var win = o.up('window');
                                 var form = win.down('form');
                                 var qc = form.getForm().findField('change-vl-qcstate').getValue();
@@ -145,7 +144,7 @@ WNPRC_Virology.DatasetButtons = new function() {
                                         avg_vl_positive_control == "" ||
                                         efficiency == null ||
                                         efficiency == "" )
-                                        && additionalChecksForStatuses.includes(statusStoreObj[qc])) {
+                                        && statusStoreObj[qc] == "09-complete-email-RSEHR") {
                                     alert ('Cannot complete record without an experiment number, positive control or efficiency value');
                                     return;
                                 }

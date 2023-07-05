@@ -1,6 +1,8 @@
 # Creating and Using Docker Images
 
-This folder contains a set of Docker images and a Docker Compose service definition to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), and the Gradle build file helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
+This folder contains a set of Docker images and a Docker Compose service definition to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), Docker images can be build locally or downloaded from Docker Hub [WNPRC Repo](https://hub.docker.com/orgs/wnprcehr/repositories).
+
+There are couple of ways to build images locally: 1. Using Docker build or 2. Using Gradle build file which helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
 
 Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. Before deploying the services with Compose, you will need to create this `.env` file (e.g., by copying and renaming `default.env`).
 
@@ -8,7 +10,7 @@ The following files need to be rename to use SSL certificates in your local deve
 
 ## Building the Custom Images
 
-To build the custom images from a stand-alone clone, navigate to the **docker** folder (**not** the repository root) and execute the following command:
+To build the custom images from a stand-alone clone of the wnprc-modules, navigate to the **docker** folder (**not** the repository root) and execute the following command:
 ```
 ./gradlew build
 ```

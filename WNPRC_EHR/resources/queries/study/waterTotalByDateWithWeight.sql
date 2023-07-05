@@ -15,6 +15,8 @@ SELECT wtbd.Id as Id,
        wtbd.volumeGivenInProcedure,
        wtbd.currentWaterCondition,
        waterScheduledAnimalsOuter.condition AS conditionAtTime,
+       waterScheduledAnimalsOuter.endDate as endDateCondition,
+
        CAST(waterScheduledAnimalsOuter.mlsperKg AS NUMERIC) AS InnerMlsPerKg,
        waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,

@@ -13,6 +13,7 @@
         <column name="volumeGivenInProcedure" />
         <column name="performedConcat" />
         <column name="currentWaterCondition" />
+        <column name="latestConditionDate" />
         <column name="project"/>
         <column name="qcstate" />
     </columns>

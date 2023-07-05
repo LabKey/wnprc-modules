@@ -1,7 +1,9 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="Id"/>
+        <column name="Id/lastHousing/location"/>
         <column name="Id/curLocation/location"/>
+        <column name="Id/Demographics/calculated_status"/>
         <column name="date"/>
         <column name="TotalWater"/>
         <column name="mlsPerKg"/>

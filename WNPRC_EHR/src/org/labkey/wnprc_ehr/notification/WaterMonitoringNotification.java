@@ -18,6 +18,7 @@ package org.labkey.wnprc_ehr.notification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -130,6 +131,8 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         colKeys.add(FieldKey.fromString("currentWaterCondition"));
         colKeys.add(FieldKey.fromString("Id/curLocation/location"));
 
+        String curLocationJdbcName = BaseColumnInfo.jdbcRsNameFromName("Id/curLocation/location");
+
         final Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(waterTotalByDateWithWeightReport, colKeys);
 
 
@@ -195,7 +198,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("Id"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("id_fs_curlocation_fs_location"),String.class)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get(curLocationJdbcName),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + mlsPerKg
                             + "</td><td style='padding: 5px; text-align: center;'> " + totalWater
                             +"</td></tr>" );
@@ -231,7 +234,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("Id"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("id_fs_curlocation_fs_location"),String.class)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get(curLocationJdbcName),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + condition
                             +"</td></tr>" );
                 }

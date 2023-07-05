@@ -88,10 +88,12 @@ public class WNPRC_PurchasingManager
 
         Resource resource = ModuleLoader.getInstance().getModule(WNPRC_PurchasingModule.class).getModuleResource(INITIAL_DATA_FOLDER + fileName);
         File dataFile = ((FileResource) resource).getFile();
-        TabLoader tabLoader = new TabLoader(dataFile, true);
-        List<Map<String, Object>> data = tabLoader.load();
 
-        insertData(c, user, table, data);
+        try (TabLoader tabLoader = new TabLoader(dataFile, true))
+        {
+            List<Map<String, Object>> data = tabLoader.load();
+            insertData(c, user, table, data);
+        }
     }
 
     public void insertData(Container c, User user, TableInfo table, List<Map<String, Object>> data)
@@ -256,49 +258,49 @@ public class WNPRC_PurchasingManager
                 row = new CaseInsensitiveHashMap<>();
                 row.put("requestRowId", insertedPurchasingReq.get(0).get("rowId"));
 
-                if (null == lineItem.get("lineItemNumber")) {
+                if (!lineItem.has("lineItemNumber")) {
                     lineItemErrors.addError(new PropertyValidationError("Required value for 'Line no.' not provided", "lineItemNumber"));
                 } else {
                     row.put("lineItemNumber", lineItem.get("lineItemNumber"));
                 }
-                if (null == lineItem.get("item"))
+                if (!lineItem.has("item"))
                     lineItemErrors.addError(new PropertyValidationError("Required value for 'Part no./Item description' not provided", "item"));
                 else
                     row.put("item", lineItem.get("item"));
 
-                if (null == lineItem.get("itemUnit"))
+                if (!lineItem.has("itemUnit"))
                     lineItemErrors.addError(new PropertyValidationError("Required value for 'Unit' not provided", "itemUnit"));
                 else
                     row.put("itemUnitId", lineItem.get("itemUnit"));
 
-                if (null == lineItem.get("unitCost"))
+                if (!lineItem.has("unitCost"))
                     lineItemErrors.addError(new PropertyValidationError("Required numeric value for 'Unit Cost' not provided", "unitCost"));
                 else
                     row.put("unitCost", lineItem.get("unitCost"));
 
-                if (null == lineItem.get("quantity"))
+                if (!lineItem.has("quantity"))
                     lineItemErrors.addError(new PropertyValidationError("Required numeric value for 'Quantity' not provided", "quantity"));
-                else if (Integer.valueOf(String.valueOf(lineItem.get("quantity"))) < 0)
+                else if (lineItem.getInt("quantity") < 0)
                     lineItemErrors.addError(new PropertyValidationError("'Quantity' value cannot be negative.", "quantity"));
                 else
-                    row.put("quantity", lineItem.get("quantity"));
+                    row.put("quantity", lineItem.getInt("quantity"));
 
-                if (null != lineItem.get("quantityReceived") && Integer.valueOf(String.valueOf(lineItem.get("quantityReceived"))) < 0)
+                if (null != lineItem.opt("quantityReceived") && lineItem.getInt("quantityReceived") < 0)
                     lineItemErrors.addError(new PropertyValidationError("'Quantity received' value cannot be negative.", "quantityReceived"));
-                else if (null != lineItem.get("quantityReceived"))
-                    row.put("quantityReceived", lineItem.get("quantityReceived"));
+                else if (null != lineItem.opt("quantityReceived"))
+                    row.put("quantityReceived", lineItem.getInt("quantityReceived"));
 
                 //if errors, then return errors
-                if(lineItemErrors.hasErrors())
+                if (lineItemErrors.hasErrors())
                 {
-                    lineItemErrors.addError(new PropertyValidationError("" + index, "rowIndex"));
+                    lineItemErrors.addError(new PropertyValidationError(String.valueOf(index), "rowIndex"));
                     validationErrors.add(lineItemErrors);
                     return validationErrors;
                 }
 
                 row.put("controlledSubstance", lineItem.get("controlledSubstance"));
 
-                if(!requestForm.getIsReorder() && null != lineItem.get("rowId"))
+                if (!requestForm.getIsReorder() && null != lineItem.opt("rowId"))
                 {
                     row.put("rowId", lineItem.get("rowId"));
                     updatedLineItemsData.add(row);

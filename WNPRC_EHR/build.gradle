@@ -105,7 +105,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.jsoup:jsoup:1.13.1",
+            "org.jsoup:jsoup:1.15.4",
             "jsoup: Java HTML Parser",
             "jsoup",
             "https://github.com/jhy/jsoup",

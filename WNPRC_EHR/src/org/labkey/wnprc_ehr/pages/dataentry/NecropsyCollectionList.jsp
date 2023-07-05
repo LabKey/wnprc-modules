@@ -2,6 +2,7 @@
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
@@ -10,7 +11,6 @@
 <%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -69,8 +69,8 @@
     <%
         JSONObject task = tasks.getJSONObject(0);
         JSONObject necropsy = necropsies.getJSONObject(0);
-        JSONObject[] tissueSamples = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "tissue_samples", taskFilter)).toArray(new JSONObject[0]);
-        JSONObject[] organWeights  = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "organ_weights", taskFilter)).toArray(new JSONObject[0]);
+        List<JSONObject> tissueSamples = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "tissue_samples", taskFilter));
+        List<JSONObject> organWeights  = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "organ_weights",  taskFilter));
 
         Timestamp necropsyDate = (Timestamp) necropsy.get("date");
         String necropsyDisplayDate;
@@ -122,7 +122,7 @@
         <h4>Antemortem Tissue Samples</h4>
         <hr class="sectionBar"/>
 
-        <% if (tissueSamples.length > 0) { %>
+        <% if (!tissueSamples.isEmpty()) { %>
         <table class="table">
             <thead>
                 <tr>
@@ -183,7 +183,7 @@
         <h4>Postmortem Tissue Samples</h4>
         <hr class="sectionBar"/>
 
-        <% if (tissueSamples.length > 0) { %>
+        <% if (!tissueSamples.isEmpty()) { %>
         <table class="table">
             <thead>
             <tr>
@@ -247,7 +247,7 @@
         <h4>Organ Weights</h4>
         <hr class="sectionBar"/>
 
-        <% if (organWeights.length > 0) { %>
+        <% if (!organWeights.isEmpty()) { %>
         <table class="table">
             <thead>
             <tr>

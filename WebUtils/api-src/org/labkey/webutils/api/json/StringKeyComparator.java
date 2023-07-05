@@ -8,7 +8,7 @@ import java.util.Comparator;
  * Created by jon on 4/15/16.
  */
 public class StringKeyComparator implements Comparator<JSONObject> {
-    private String key;
+    private final String key;
 
     public StringKeyComparator(String key) {
         this.key = key;

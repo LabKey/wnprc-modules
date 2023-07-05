@@ -113,7 +113,6 @@ import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
 import org.labkey.wnprc_ehr.notification.IrregularObsBehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
-import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
@@ -179,7 +178,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 22.001;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 22.009;
     }
 
     @Override
@@ -362,7 +361,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
-                new ViralLoadQueueNotification(this),
                 new WaterOrdersAlertNotification(this),
                 new WaterMonitoringAnimalWithOutEntriesNotification(this)
         );

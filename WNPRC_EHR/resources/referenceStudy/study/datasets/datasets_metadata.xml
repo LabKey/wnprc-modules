@@ -4143,82 +4143,129 @@
         <columnTitle>Id</columnTitle>
         <description>Subject identifier</description>
         <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
         <nullable>false</nullable>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
         <fk>
           <fkDbSchema>study</fkDbSchema>
           <fkTable>Animal</fkTable>
           <fkColumnName>Id</fkColumnName>
         </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>32</scale>
       </column>
       <column columnName="date">
         <datatype>timestamp</datatype>
         <columnTitle>Date</columnTitle>
         <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
         <nullable>false</nullable>
+        <formatString>Date</formatString>
       </column>
       <column columnName="seq">
         <datatype>integer</datatype>
         <columnTitle>Seq</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
         <isHidden>true</isHidden>
       </column>
       <column columnName="source">
         <datatype>varchar</datatype>
-        <columnTitle>Source</columnTitle>
+        <columnTitle>Sample Type</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>clinpath_sampletype</fkTable>
+          <fkColumnName>value</fkColumnName>
+        </fk>
+        <scale>0</scale>
       </column>
       <column columnName="result">
         <datatype>varchar</datatype>
         <columnTitle>Result</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>0</scale>
       </column>
       <column columnName="virus">
         <datatype>varchar</datatype>
         <columnTitle>Virus</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>virology_tests</fkTable>
+          <fkColumnName>testid</fkColumnName>
+        </fk>
+        <scale>0</scale>
       </column>
       <column columnName="method">
         <datatype>varchar</datatype>
         <columnTitle>Method</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>virology_method</fkTable>
+          <fkColumnName>value</fkColumnName>
+        </fk>
+        <scale>0</scale>
       </column>
       <column columnName="remark">
         <datatype>varchar</datatype>
         <inputType>textarea</inputType>
         <columnTitle>Remark</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>-1</scale>
       </column>
-      <column columnName="Description">
+      <column columnName="description">
         <datatype>varchar</datatype>
         <inputType>textarea</inputType>
         <columnTitle>Description</columnTitle>
-        <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
-        <isHidden>true</isHidden>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
         <shownInInsertView>false</shownInInsertView>
         <shownInUpdateView>false</shownInUpdateView>
         <shownInDetailsView>false</shownInDetailsView>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>4000</scale>
       </column>
       <column columnName="objectid">
         <datatype>entityid</datatype>
         <columnTitle>Key</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <isHidden>true</isHidden>
         <shownInInsertView>false</shownInInsertView>
         <shownInUpdateView>false</shownInUpdateView>
         <shownInDetailsView>false</shownInDetailsView>
+        <scale>100</scale>
         <isKeyField>true</isKeyField>
       </column>
-      <column columnName="parentId">
+      <column columnName="parentid">
         <datatype>varchar</datatype>
-        <columnTitle>Parent Id</columnTitle>
+        <columnTitle>Encounter Id</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <isHidden>true</isHidden>
-        <shownInInsertView>false</shownInInsertView>
         <shownInUpdateView>false</shownInUpdateView>
         <shownInDetailsView>false</shownInDetailsView>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>encounters</fkTable>
+          <fkColumnName>objectid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>400</scale>
       </column>
-      <column columnName="runId">
-        <datatype>varchar</datatype>
-        <columnTitle>Run Id</columnTitle>
-      </column>	  
       <column columnName="ts">
         <datatype>timestamp</datatype>
         <columnTitle>Last Changed</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
         <isHidden>true</isHidden>
         <shownInInsertView>false</shownInInsertView>
         <shownInUpdateView>false</shownInUpdateView>
@@ -4226,57 +4273,125 @@
       </column>
       <column columnName="taskid">
         <datatype>varchar</datatype>
-        <columnTitle>Taskid</columnTitle>
+        <columnTitle>Task Id</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
-        <isHidden>true</isHidden>
-        <shownInInsertView>false</shownInInsertView>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <shownInUpdateView>false</shownInUpdateView>
         <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/taskDetails.view?formtype=${taskid/formtype}&taskid=${taskid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>tasks</fkTable>
+          <fkColumnName>taskid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
       </column>
       <column columnName="project">
         <datatype>integer</datatype>
         <columnTitle>Project</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
-        <importAliases>
-          <importAlias>pno</importAlias>
-        </importAliases>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <dimension>false</dimension>
+        <measure>true</measure>
         <formatString>00000000</formatString>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>project</fkTable>
+          <fkColumnName>project</fkColumnName>
+        </fk>
       </column>
       <column columnName="account">
         <datatype>varchar</datatype>
         <columnTitle>Account</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>4000</scale>
       </column>
       <column columnName="performedby">
         <datatype>varchar</datatype>
         <columnTitle>Performed By</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>64</scale>
       </column>
       <column columnName="requestid">
         <datatype>varchar</datatype>
-        <columnTitle>Requestid</columnTitle>
+        <columnTitle>Request Id</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
-        <isHidden>true</isHidden>
-        <shownInInsertView>false</shownInInsertView>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <shownInUpdateView>false</shownInUpdateView>
         <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/requestDetails.view?formtype=${requestid/formtype}&requestid=${requestid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>requests</fkTable>
+          <fkColumnName>requestid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
       </column>
       <column columnName="enddate">
         <datatype>timestamp</datatype>
-        <columnTitle>Enddate</columnTitle>
+        <columnTitle>End Date</columnTitle>
         <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
         <isHidden>true</isHidden>
+        <formatString>DateTime</formatString>
       </column>
       <column columnName="units">
         <datatype>varchar</datatype>
         <columnTitle>Units</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
       </column>
-      <column columnName="qualResult">
+      <column columnName="qualresult">
         <datatype>varchar</datatype>
-        <columnTitle>Qual Result</columnTitle>
+        <columnTitle>Qualifier</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>qualitative_results</fkTable>
+          <fkColumnName>result</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="performing_lab">
+        <datatype>varchar</datatype>
+        <columnTitle>Performing Lab</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <fk>
+          <fkDbSchema>wnprc</fkDbSchema>
+          <fkTable>external_labs</fkTable>
+          <fkColumnName>code</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
       </column>
     </columns>
     <tableTitle>Virology Results</tableTitle>
+    <indices>
+      <index type="non-unique">
+        <column>taskid</column>
+      </index>
+      <index type="non-unique">
+        <column>objectid</column>
+      </index>
+      <index type="non-unique">
+        <column>parentid</column>
+      </index>
+      <index type="non-unique">
+        <column>requestid</column>
+      </index>
+      <index type="non-unique">
+        <column>participantsequencenum</column>
+      </index>
+    </indices>
   </table>
   <table tableName="arrival" tableDbType="TABLE">
     <description>Arrival of animals at WNPRC</description>
@@ -4549,6 +4664,9 @@
       <column columnName="projectedRelease">
         <datatype>timestamp</datatype>
         <columnTitle>Projected Release</columnTitle>
+      </column>
+      <column columnName="animal_request_rowid">
+        <datatype>integer</datatype>
       </column>
     </columns>
     <tableTitle>Assignment</tableTitle>
@@ -7800,5 +7918,452 @@
         <formatString>00000000</formatString>
       </column>
     </columns>
+  </table>
+  <table tableName="Cytology Manual Evaluation" tableDbType="TABLE">
+    <description>Cytology Manual Evaluation</description>
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+        <nullable>false</nullable>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>32</scale>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+        <nullable>false</nullable>
+        <formatString>yyyy-MM-dd</formatString>
+      </column>
+      <column columnName="sampleType">
+        <datatype>varchar</datatype>
+        <columnTitle>Sample Type</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>sample_types</fkTable>
+          <fkColumnName>value</fkColumnName>
+        </fk>
+        <scale>0</scale>
+      </column>
+      <column columnName="collectionMethod">
+        <datatype>varchar</datatype>
+        <columnTitle>Collection Method</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="sampleAppearance">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Sample Appearance</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="slidesMade">
+        <datatype>integer</datatype>
+        <columnTitle>Slides Made</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="slidesSubmitted">
+        <datatype>integer</datatype>
+        <columnTitle>Slides Submitted</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="stainType">
+        <datatype>varchar</datatype>
+        <columnTitle>Stain Type</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>stain_types</fkTable>
+          <fkColumnName>value</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="results">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Results</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="reviewedBy">
+        <datatype>varchar</datatype>
+        <columnTitle>Reviewed By</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <required>true</required>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="remark">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Remark</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>-1</scale>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <dimension>false</dimension>
+        <measure>true</measure>
+        <formatString>00000000</formatString>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>project</fkTable>
+          <fkColumnName>project</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="account">
+        <datatype>varchar</datatype>
+        <columnTitle>Account</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>4000</scale>
+      </column>
+      <column columnName="taskid">
+        <datatype>varchar</datatype>
+        <columnTitle>Task Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/taskDetails.view?formtype=${taskid/formtype}&taskid=${taskid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>tasks</fkTable>
+          <fkColumnName>taskid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
+      </column>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <scale>100</scale>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="description">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Description</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>4000</scale>
+      </column>
+      <column columnName="performedby">
+        <datatype>varchar</datatype>
+        <columnTitle>Performed By</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>64</scale>
+      </column>
+      <column columnName="enddate">
+        <datatype>timestamp</datatype>
+        <columnTitle>End Date</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+        <isHidden>true</isHidden>
+        <formatString>DateTime</formatString>
+      </column>
+      <column columnName="requestid">
+        <datatype>varchar</datatype>
+        <columnTitle>Request Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/requestDetails.view?formtype=${requestid/formtype}&requestid=${requestid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>requests</fkTable>
+          <fkColumnName>requestid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
+      </column>
+      <column columnName="parentid">
+        <datatype>varchar</datatype>
+        <columnTitle>Parent Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>encounters</fkTable>
+          <fkColumnName>objectid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>400</scale>
+      </column>
+      <column columnName="performing_lab">
+        <datatype>varchar</datatype>
+        <columnTitle>Performing Lab</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <fk>
+          <fkDbSchema>wnprc</fkDbSchema>
+          <fkTable>external_labs</fkTable>
+          <fkColumnName>code</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+    </columns>
+    <tableTitle>Cytology Manual Evaluation</tableTitle>
+    <indices>
+      <index type="non-unique">
+        <column>participantsequencenum</column>
+      </index>
+    </indices>
+  </table>
+  <table tableName="Cytology Automated Evaluation" tableDbType="TABLE">
+    <description>Automated cytology evaluation</description>
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+        <nullable>false</nullable>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>32</scale>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+        <nullable>false</nullable>
+        <formatString>yyyy-MM-dd</formatString>
+      </column>
+      <column columnName="sampleType">
+        <datatype>varchar</datatype>
+        <columnTitle>Sample Type</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <required>true</required>
+        <scale>0</scale>
+      </column>
+      <column columnName="collectionMethod">
+        <datatype>varchar</datatype>
+        <columnTitle>Collection Method</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="testid">
+        <datatype>varchar</datatype>
+        <columnTitle>Test Id</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>cytology_tests</fkTable>
+          <fkColumnName>testid</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="result">
+        <datatype>double</datatype>
+        <columnTitle>Result</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#double</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="units">
+        <datatype>varchar</datatype>
+        <columnTitle>Units</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <required>true</required>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="remark">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Remark</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>-1</scale>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <dimension>false</dimension>
+        <measure>true</measure>
+        <formatString>00000000</formatString>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>project</fkTable>
+          <fkColumnName>project</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="account">
+        <datatype>varchar</datatype>
+        <columnTitle>Account</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>4000</scale>
+      </column>
+      <column columnName="taskid">
+        <datatype>varchar</datatype>
+        <columnTitle>Task Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/taskDetails.view?formtype=${taskid/formtype}&taskid=${taskid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>tasks</fkTable>
+          <fkColumnName>taskid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
+      </column>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <scale>100</scale>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="description">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Description</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>4000</scale>
+      </column>
+      <column columnName="performedby">
+        <datatype>varchar</datatype>
+        <columnTitle>Performed By</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>64</scale>
+      </column>
+      <column columnName="enddate">
+        <datatype>timestamp</datatype>
+        <columnTitle>End Date</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+        <isHidden>true</isHidden>
+        <formatString>DateTime</formatString>
+      </column>
+      <column columnName="requestid">
+        <datatype>varchar</datatype>
+        <columnTitle>Request Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/requestDetails.view?formtype=${requestid/formtype}&requestid=${requestid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>requests</fkTable>
+          <fkColumnName>requestid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
+      </column>
+      <column columnName="parentid">
+        <datatype>varchar</datatype>
+        <columnTitle>Parent Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>encounters</fkTable>
+          <fkColumnName>objectid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>400</scale>
+      </column>
+      <column columnName="performing_lab">
+        <datatype>varchar</datatype>
+        <columnTitle>Performing Lab</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <fk>
+          <fkDbSchema>wnprc</fkDbSchema>
+          <fkTable>external_labs</fkTable>
+          <fkColumnName>code</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>4000</scale>
+      </column>
+    </columns>
+    <tableTitle>Cytology Automated Evaluation</tableTitle>
+    <indices>
+      <index type="non-unique">
+        <column>participantsequencenum</column>
+      </index>
+    </indices>
   </table>
 </tables>

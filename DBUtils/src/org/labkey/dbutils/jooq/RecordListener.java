@@ -22,9 +22,9 @@ import java.util.Map;
  * Created by jon on 3/29/17.
  */
 public class RecordListener extends DefaultRecordListener {
-    private Map<Record, Record> mapToOriginalRecordValues = new HashMap<>();
-    private Container container;
-    private User user;
+    private final Map<Record, Record> mapToOriginalRecordValues = new HashMap<>();
+    private final Container container;
+    private final User user;
 
     public enum ValueType {
         TIMESTAMP,

@@ -16,21 +16,21 @@ import java.util.Map;
  * Created by jon on 1/17/16.
  */
 public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>, JSONString, ConvertibleToJSON {
-    static private DateTimeComparator _dateTimeComparator = DateTimeComparator.getDateOnlyInstance();
+    static private final DateTimeComparator _dateTimeComparator = DateTimeComparator.getDateOnlyInstance();
 
-    private DateTime _date;
-    private DateTime _timestamp;
-    private String _id;
-    private EventType _eventType;
-    private Species _species;
-    private String _description;
+    private final DateTime _date;
+    private final DateTime _timestamp;
+    private final String _id;
+    private final EventType _eventType;
+    private final Species _species;
+    private final String _description;
 
     public enum EventType {
         Birth (1), Death (-1), Arrival (2), Departure (-2)
         ; // Semicolon required for methods/fields
 
         // Constructor that gets passed the value for the event.
-        private int _eventTypeCode;
+        private final int _eventTypeCode;
         EventType(int eventTypeCode) {
             _eventTypeCode = eventTypeCode;
         }
@@ -148,7 +148,8 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
     }
 
     @Override
-    public JSONObject toJSON() {
+    public JSONObject toJSON()
+    {
         JSONObject json = new JSONObject();
 
         json.put("species", _species);

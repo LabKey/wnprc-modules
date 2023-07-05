@@ -58,6 +58,7 @@ import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
+import org.labkey.test.util.core.webdav.WebDavUploadHelper;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -69,10 +70,12 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.UnhandledAlertException;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -80,9 +83,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -155,6 +161,22 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
+    //Note: if updating this file, also update VIROLOGY_RESULT_DATA variable to match it, that way we can test
+    // the api end point which converts xlsx to JSON as well as the frontend extJS after it gets uploaded.
+    private static final String CORRECT_SAMPLE_FILE_NAME = "virologyResults_correct.xlsx";
+    private static final Map<String, Object> VIROLOGY_RESULT_DATA = new HashMap<>();
+    //shortcut to getting the file content in the xlsx file.
+
+    private static final String INCORRECT_FORMAT_SAMPLE_FILE_NAME = "virologyResults_baddate.xlsx";
+    private static final String NO_MATCHING_RECORDS_SAMPLE_FILE_NAME = "virologyResults_nomatch.xlsx";
+    private static final File CORRECT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + CORRECT_SAMPLE_FILE_NAME);
+    private static final File INCORRECT_FORMAT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + INCORRECT_FORMAT_SAMPLE_FILE_NAME);
+    private static final File NO_MATCHING_RECORDS_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + NO_MATCHING_RECORDS_SAMPLE_FILE_NAME);
+    protected static final String VIROLOGY_CLINPATH_TASKID = "0ebd60fd-c6ac-102e-990b-48cf881b52cf";
+
+    private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
+    private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
+
     @Nullable
     @Override
     protected String getProjectName()
@@ -182,7 +204,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.initProject("EHR");
         initTest.createTestSubjects();
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
@@ -218,6 +240,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.addBillingPublicWebParts();
 
         initTest.uploadBillingDataAndVerify();
+
+        initTest.setupClinpathVirologySection();
+
+        initTest.setupAnimalRequests();
+
+        initTest.checkUpdateProgramIncomeAccount();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -395,32 +423,110 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 
-        log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
+        SelectRowsCommand sr = new SelectRowsCommand("ehr", "form_framework_types");
+        sr.addFilter(new Filter("queryname","feeding", Filter.Operator.EQUAL));
+        sr.addFilter(new Filter("framework","reactjs", Filter.Operator.EQUAL));
+        SelectRowsResponse resp = sr.execute(cn, EHR_FOLDER_PATH);
+        if (resp.getRowCount().intValue() == 0)
+        {
 
-        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+            log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
+
+            InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap = new HashMap<>();
+            rowMap.put("schemaname", "study");
+            rowMap.put("queryname", "feeding");
+            rowMap.put("framework", "reactjs");
+            rowMap.put("url", "/wnprc_ehr/feeding.view");
+            insertCmd.addRow(rowMap);
+
+            insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+            log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
+            log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+
+            InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap2 = new HashMap<>();
+            rowMap2.put("schemaname", "study");
+            rowMap2.put("queryname", "weight");
+            rowMap2.put("framework", "reactjs");
+            rowMap2.put("url", "/wnprc_ehr/weight.view");
+            insertCmd2.addRow(rowMap2);
+
+            insertCmd2.execute(cn, EHR_FOLDER_PATH);
+
+            log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+        } else
+        {
+            log("feeding/weight framework type already exists, no action needed");
+        }
+    }
+
+    public void setupClinpathVirologySection() throws IOException, CommandException
+    {
+        // update virology results section buttons
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        log("populating ehr.FormPanelSections with new clinpath file import button");
+        UpdateRowsCommand insertCmd = new UpdateRowsCommand("ehr", "FormPanelSections");
+        SelectRowsCommand sr = new SelectRowsCommand("ehr","FormPanelSections");
+        sr.addFilter("schemaName","study", Filter.Operator.EQUAL);
+        sr.addFilter("queryName","Virology Results", Filter.Operator.EQUAL);
+        sr.addFilter("formtype","Clinpath", Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        Integer rowid = null;
+        for (Map<String, Object> row : resp.getRows())
+        {
+            rowid = (Integer) row.get("rowid");
+        }
         Map<String,Object> rowMap = new HashMap<>();
-        rowMap.put("schemaname", "study");
-        rowMap.put("queryname", "feeding");
-        rowMap.put("framework", "reactjs");
-        rowMap.put("url","/wnprc_ehr/feeding.view");
+        rowMap.put("rowid",rowid);
+        rowMap.put("destination","formSections");
+        rowMap.put("formtype","Clinpath");
+        rowMap.put("xtype","ehr-gridformpanel");
+        rowMap.put("schemaName","study");
+        rowMap.put("sort_order",10);
+        rowMap.put("queryName","Virology Results");
+        rowMap.put("metadatasources","Task,Assay");
+        rowMap.put("buttons","add,requestdelete,copyfromclinpath,selectall,duplicate,bulk_edit,sortany,apply_template,save_template,import_results_from_file");
         insertCmd.addRow(rowMap);
-
         insertCmd.execute(cn, EHR_FOLDER_PATH);
 
-        log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
-        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+        // upload virology results excel file
+        goToEHRFolder();
+        goToModule("FileContent");
+        _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE);
+        _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE);
+        _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE);
 
-        InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap2 = new HashMap<>();
-        rowMap2.put("schemaname", "study");
-        rowMap2.put("queryname", "weight");
-        rowMap2.put("framework", "reactjs");
-        rowMap2.put("url", "/wnprc_ehr/weight.view");
-        insertCmd2.addRow(rowMap2);
+        // set up the viral load hashmap to match CORRECT_SAMPLE_FILE
+        VIROLOGY_RESULT_DATA.put("Id", "test1993532");
+        VIROLOGY_RESULT_DATA.put("Date", "2022-07-22");
+        VIROLOGY_RESULT_DATA.put("Sample Type", "Blood - EDTA Whole Blood");
+        VIROLOGY_RESULT_DATA.put("Virus", "SRV 1,2,3,4,5");
+        VIROLOGY_RESULT_DATA.put("Method", "PCR");
+        VIROLOGY_RESULT_DATA.put("Result", "-");
+        VIROLOGY_RESULT_DATA.put("Qualifier", "Negative");
+        VIROLOGY_RESULT_DATA.put("Remark", "CRL");
 
-        insertCmd2.execute(cn, EHR_FOLDER_PATH);
 
-        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+        // set the location of the virology results upload location
+        goToEHRFolder();
+        List<ModulePropertyValue> properties = new ArrayList<>();
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "VirologyResultsUploadFolder", EHR_FOLDER_PATH));
+        setModuleProperties(properties);
+    }
+
+    public void setupAnimalRequests()
+    {
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH, "Assigns", "Collaboration");
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "PrivateBoard", "Collaboration");
+        _containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Assigns", "RestrictedBoard", "Collaboration");
+        // set the location of the virology results upload location
+        goToEHRFolder();
+        List<ModulePropertyValue> properties = new ArrayList<>();
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "AssignsSecureMessageBoardPrivateFolder", ASSIGNS_MSG_BOARD_PRIVATE_PATH));
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "AssignsSecureMessageBoardRestrictedFolder", ASSIGNS_MSG_BOARD_RESTRICTED_PATH));
+        setModuleProperties(properties);
     }
 
     @Override
@@ -908,6 +1014,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String,Object> rowMap = new HashMap<>();
         rowMap.put("firstName", "Jon");
         rowMap.put("lastName", "Snow");
+        rowMap.put("investigatorType", "Core");
         rowMap.put("emailAddress", INVESTIGATOR_PRINCIPAL.getEmail());
         rowMap.put("userid", getUserId(INVESTIGATOR_PRINCIPAL.getEmail()));
         insertCmd.addRow(rowMap);
@@ -916,6 +1023,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap = new HashMap<>();
         rowMap.put("firstName", "Sansa");
         rowMap.put("lastName", "Stark");
+        rowMap.put("investigatorType", "External");
         rowMap.put("emailAddress", INVESTIGATOR.getEmail());
         rowMap.put("userid", getUserId(INVESTIGATOR.getEmail()));
         insertCmd.addRow(rowMap);
@@ -1520,6 +1628,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitForText(tableName);
         clickAndWait(Locator.bodyLinkContainingText(tableName));
+    }
+    public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert)
+    {
+        return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
     }
 
     //@Test - old ext form
@@ -2639,17 +2751,128 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return el;
     }
 
-    //@Test - comment out for now, need to fix qc state error on submit
+    @Test
+    public void testClinpathVirologyBulkUpload() throws IOException, CommandException
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","1"));
+        //for this one the click works but the function times out for some reason
+        //_extHelper.clickExtButton("Import");
+        click(Locator.extButton("Import"));
+        waitForElement(Locator.button("Submit Final"), WAIT_FOR_JAVASCRIPT);
+        click(Locator.extButton("Submit Final"));
+        click(Locator.extButton("Yes"));
+
+        // verify that the clinpath task with the above taskid has virology results
+        waitForElement(Locator.tagWithText("span", "Data Entry"));
+        SelectRowsCommand sr = new SelectRowsCommand("study","Virology Results");
+        sr.addFilter("taskid", VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        //check that the results got uploaded
+        Assert.assertTrue(resp2.getRowCount().intValue() > 0);
+        //check that the data from in the excel file matches the results, this tests GetVirologyResultsFromFileAction action,
+        // as well as the logic the Import Results From File button in ehrGridFormPanel.js
+        Map<String, Object> resultRow = resp2.getRows().get(0);
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Id"), resultRow.get("Id"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Date"), convertToLocalDateViaSqlDate((Date) resultRow.get("date")).toString());
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Sample Type"), resultRow.get("source"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Virus"), resultRow.get("virus"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Method"), resultRow.get("method"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Result"), resultRow.get("result"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Qualifier"), resultRow.get("qualresult"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Remark"), resultRow.get("performing_lab"));
+    }
+
+
+
+    @Test
+    public void testClinpathVirologyBulkUploadValidations()
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","2"));
+        click(Locator.extButton("Import"));
+        Assert.assertEquals("No matching clinpath records found.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
+    }
+
+    @Test
+    public void testClinpathVirologyBulkUploadPreviewAndDate()
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","0"));
+        //for this one the click works but the function times out for some reason
+        //_extHelper.clickExtButton("Import");
+        waitForText("Preview");
+        click(Locator.extButton("Preview"));
+        //get the popup window
+        String parentWindowHandler = getDriver().getWindowHandle();
+        String subWindowHandler = null;
+
+        Set<String> handles = getDriver().getWindowHandles();
+        // preview should generate a popup window
+        Assert.assertTrue(handles.size() > 1);
+        Iterator<String> iterator = handles.iterator();
+        // we can assume the popup window is the only other window other than the parent
+        String next = null;
+        while (iterator.hasNext()){
+            next = iterator.next();
+            if (!next.equals(parentWindowHandler))
+            {
+                subWindowHandler = next;
+            }
+        }
+        // switch to popup window
+        getDriver().switchTo().window(subWindowHandler);
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("bad-date-preview-err").findElement(getDriver()).getText());
+        getDriver().switchTo().window(parentWindowHandler);
+    }
+
+    @Test
+    public void testClinpathVirologyBulkUploadDateFormatValidation()
+    {
+        // go to clinpath task, import the virology results and submit
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Clinpath&taskid=" + VIROLOGY_CLINPATH_TASKID));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Clinpath");
+        waitForText("Import Results from File");
+        _extHelper.clickMenuButton("Import Results from File");
+        waitForText("Please select a file to import results from");
+        click(Locator.radioButtonByNameAndValue("fileselection","0"));
+        //for this one the click works but the function times out for some reason
+        //_extHelper.clickExtButton("Import");
+        waitForText("Import");
+        click(Locator.extButton("Import"));
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
+    }
+
+    @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
-        sleep(5000);
+        waitForText("Comments:");
         //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
 
-        fillAnInputByName("principalinvestigator", "Other");
-        fillAnInputByName("externalprincipalinvestigator", "Automated Test");
+        //this is dependent on the billing setup above which populates the investigators table
+        fillAnInputByName("principalinvestigator", "Snow, Jon");
         fillAnInputByName("numberofanimals", "23");
         fillAnInputByName("speciesneeded", "Cyno");
         fillAnInputByName("originneeded", "any");
@@ -2659,9 +2882,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("mhctype", "2");
         fillAnInputByName("viralstatus", "SPF4");
         fillAnInputByName("infectiousdisease", "Yes");
+        fillAnInputByName("majorsurgery", "Yes");
         fillAnInputByName("pregnantanimalsrequired", "Yes");
+        fillAnInputByName("pregnantanimalsrequiredterminfant", "Yes");
+        fillAnInputByName("pregnantanimalsrequiredtermdam", "Yes");
         fillAnInputByName("disposition", "Terminal");
         fillAnInputByName("executivecommitteeapproval", "Yes");
+        fillAnInputByName("previousexposures", "None");
         fillAnInputByName("optionalproject", "TBD");
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
@@ -2672,9 +2899,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         el.sendKeys("2022-02-11");
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
+        fillAnInputByName("contacts", "test@test.com");
 
         clickAndWait(Locator.tagWithId("button","submit-final"));
         assertTextPresent("Data Entry");
+        SelectRowsCommand sr = new SelectRowsCommand("wnprc","animal_requests");
+        sr.addFilter("numberofanimals",23, Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        Assert.assertTrue(resp.getRowCount().intValue() > 0);
     }
 
 
@@ -2689,4 +2921,87 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         return ANIMAL_HISTORY_URL;
     }
+
+
+    @Test
+    public void navigateToBillingContainerWithInvalidPermissions() {
+        //This test verifies a user cannot access the Finance>Internal page without proper permissions.
+
+        //Impersonates a basic user and navigates to the Finance>Internal page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+
+        //Assumes an error is presented and the test is complete.
+        assertTextPresent("Oops! An error has occurred.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
+        //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
+
+        //Impersonates a basic user and navigates to the restricted page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+
+        //Attempts to change the value.
+        //Assumes an error is presented and the test is complete.
+        fillAnInputByName("newCreditToAccountField", "asdf");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+        assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
+        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+
+        //Navigates to various containers and sets corresponding permissions.
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
+
+        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+
+        //Attempts to change the value.
+        fillAnInputByName("newCreditToAccountField", "testString");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+
+        //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
+        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+
+        //Navigates to various containers and removes corresponding permissions.
+        stopImpersonating();
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.ReaderRole");
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.EditorRole");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin");
+
+    }
+
+    private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
+    {
+        log("Starting checkUpdateProgramIncomeAccount.");
+
+        navigateToBillingContainerWithInvalidPermissions();
+        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithInvalidPermissions();
+        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithValidPermissions();
+        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+    }
+
 }

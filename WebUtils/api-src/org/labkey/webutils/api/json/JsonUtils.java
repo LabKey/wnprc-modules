@@ -15,7 +15,7 @@ public class JsonUtils {
     public static JSONArray sortJsonArray(JSONArray jsonArray, Comparator<JSONObject> comparator) {
         List<JSONObject> jsonList = getListFromJSONArray(jsonArray);
 
-        Collections.sort(jsonList, comparator);
+        jsonList.sort(comparator);
 
         return getJSONArrayFromList(jsonList);
     }
@@ -35,8 +35,9 @@ public class JsonUtils {
     public static JSONArray getJSONArrayFromList(List<JSONObject> jsonObjectList) {
         JSONArray jsonArray = new JSONArray();
 
-        for (int i = 0; i < jsonObjectList.size(); i++) {
-            jsonArray.put(jsonObjectList.get(i));
+        for (JSONObject jsonObject : jsonObjectList)
+        {
+            jsonArray.put(jsonObject);
         }
 
         return jsonArray;

@@ -1,13 +1,11 @@
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.util.Path" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.util.Path" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
-<%@ page import="org.labkey.wnprc_ehr.TriggerScriptHelper" %>
 <%@ page import="org.labkey.wnprc_ehr.notification.PregnancyNotification" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

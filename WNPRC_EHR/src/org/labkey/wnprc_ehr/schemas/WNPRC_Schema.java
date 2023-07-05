@@ -125,9 +125,6 @@ public class WNPRC_Schema extends SimpleUserSchema {
         JSONArray results = queryFactory.selectRows(NAME, table.tableName, filter);
 
         // Transform to a List
-        List<JSONObject> rows = new ArrayList<>();
-        rows.addAll(JsonUtils.getListFromJSONArray(results));
-
-        return rows;
+        return new ArrayList<>(JsonUtils.getListFromJSONArray(results));
     }
 }

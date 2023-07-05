@@ -16,10 +16,10 @@ import java.util.TreeMap;
  * Created by jon on 1/17/16.
  */
 public class PopulationsOverTime implements ConvertibleToJSON {
-    private DateTime _start;
-    private DateTime _end;
-    private ColonyCensus _colonyCensus;
-    private PopulationChangeEvent.Species _species;
+    private final DateTime _start;
+    private final DateTime _end;
+    private final ColonyCensus _colonyCensus;
+    private final PopulationChangeEvent.Species _species;
     private List<PopulationChangeEvent> _eventList = null;
 
 
@@ -155,7 +155,8 @@ public class PopulationsOverTime implements ConvertibleToJSON {
 
 
     @Override
-    public JSONObject toJSON() {
+    public JSONObject toJSON()
+    {
         JSONObject json = new JSONObject();
 
         List<PopulationChangeEvent> events = getEvents();

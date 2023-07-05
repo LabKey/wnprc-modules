@@ -140,7 +140,7 @@ public class TreatmentsBCReport extends BusinessContinuityExcelReport {
                     List<JSONObject> animalsInCage = cages.get(cage);
 
                     for (JSONObject treatment : animalsInCage) {
-                        CaseInsensitiveMapWrapper valueMap = new CaseInsensitiveMapWrapper<Object>(treatment.toMap());
+                        CaseInsensitiveMapWrapper valueMap = new CaseInsensitiveMapWrapper<>(treatment.toMap());
 
                         // Create a row for the treatment
                         rowNumber += 1;

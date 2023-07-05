@@ -109,7 +109,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
         filter.addClause(orClause);
 
-        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("animalId","date","mlsPerKg","TotalWater","project"), filter, null);
+        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("Id","date","mlsPerKg","TotalWater","project"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
@@ -147,7 +147,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
                      totalWater = ConvertHelper.convert(mapItem.get("TotalWater"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("TotalWater"),String.class);
 
                     msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("animalId"),String.class)
+                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("Id"),String.class)
                             + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
                             + "</td><td style='padding: 5px; text-align: center;'> " + mlsPerKg
                             + "</td><td style='padding: 5px; text-align: center;'> " + totalWater
@@ -193,7 +193,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
                 Map<String, Object>[] animalsWithOutEntries = ts.getMapArray();
                 for (Map<String, Object> mapItem : animalsWithOutEntries)
                 {
-                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("id"), String.class) + "<br>");
+                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + "<br>");
 
                 }
                 msg.append("<br>");

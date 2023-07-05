@@ -72,14 +72,13 @@ public class AccessReportService {
         // Check to make sure we haven't done this already.
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         SimpleFilter filter = new SimplerFilter("date", CompareType.DATE_EQUAL, generatedOn);
-        JSONObject[] existingRows = JsonUtil.toJSONObjectList(queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "access_reports", filter)).toArray(new JSONObject[0]);
-        if (existingRows.length > 0) {
+        List<JSONObject> existingRows = JsonUtil.toJSONObjectList(queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "access_reports", filter));
+        if (!existingRows.isEmpty()) {
             throw new ApiUsageException("This report has already been uploaded.");
         }
 
-
-        Set<String> areaNames = new HashSet();
-        Map<String, Map<String, Object>> cardInfos = new HashMap<>();
+        Set<String> areaNames = new HashSet<>();
+        Map<String, JSONObject> cardInfos = new HashMap<>();
         List<Map<String, Object>> accessData = new ArrayList<>();
 
         Pattern areaNamePattern = Pattern.compile("[\\s\\x00A0]*area: (.*)");
@@ -141,7 +140,7 @@ public class AccessReportService {
                     cardInfoJSON.put("info4", cardInfo.getInfo3());
                     cardInfoJSON.put("container", container.getId());
 
-                    cardInfos.put(cardNumber, cardInfoJSON.toMap());
+                    cardInfos.put(cardNumber, cardInfoJSON);
 
                     JSONObject accessInfoJSON = new JSONObject();
                     accessInfoJSON.put("report_id", reportid);
@@ -155,7 +154,6 @@ public class AccessReportService {
 
                     accessData.add(accessInfoJSON.toMap());
                 }
-
             }
         }
 
@@ -165,7 +163,7 @@ public class AccessReportService {
             reportRecord.put("report_id", reportid);
             reportRecord.put("date", generatedOn);
             reportRecord.put("container", container.getId());
-            updater.upsert(reportRecord.toMap());
+            updater.upsert(reportRecord);
 
             List<Map<String, Object>> cardsList = new ArrayList<>();
             SimpleQueryUpdater cardsUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "cards");
@@ -180,8 +178,7 @@ public class AccessReportService {
             SimpleQueryUpdater dataUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "access_report_data");
             dataUpdater.upsert(accessData);
 
-            List<Map<String, Object>> cardInfoList = new ArrayList<>();
-            cardInfoList.addAll(cardInfos.values());
+            List<Map<String, Object>> cardInfoList = new ArrayList<>(cardInfos.values().stream().map(JSONObject::toMap).toList());
             SimpleQueryUpdater cardInfoUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "card_info");
             cardInfoUpdater.upsert(cardInfoList);
 

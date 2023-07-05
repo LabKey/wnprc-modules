@@ -9,6 +9,8 @@ import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 
+import java.util.List;
+
 /**
  * Created by jon on 10/28/16.
  */
@@ -25,10 +27,10 @@ public class AnimalVerifier {
 
     private JSONObject getDemoRecord() throws InvalidAnimalIdException {
         SimplerFilter idFilter = new SimplerFilter("Id", CompareType.EQUAL, animalId);
-        JSONObject[] demoRecords = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("study", "demographics", idFilter)).toArray(new JSONObject[0]);
+        List<JSONObject> demoRecords = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("study", "demographics", idFilter));
 
-        if (demoRecords.length > 0) {
-            return demoRecords[0];
+        if (!demoRecords.isEmpty()) {
+            return demoRecords.get(0);
         }
         else {
             throw new InvalidAnimalIdException(String.format("%s does not exist", animalId));

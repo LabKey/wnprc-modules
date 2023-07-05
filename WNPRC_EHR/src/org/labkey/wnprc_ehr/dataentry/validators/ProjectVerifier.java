@@ -13,6 +13,7 @@ import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by jon on 12/6/16.
@@ -30,10 +31,10 @@ public class ProjectVerifier {
 
     private JSONObject getProjectRecord() throws InvalidProjectException {
         SimplerFilter filter = new SimplerFilter("project", CompareType.EQUAL, Integer.parseInt(projectid));
-        JSONObject[] records = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("ehr", "project", filter)).toArray(new JSONObject[0]);
+        List<JSONObject> records = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("ehr", "project", filter));
 
-        if (records.length > 0) {
-            return records[0];
+        if (!records.isEmpty()) {
+            return records.get(0);
         }
         else {
             throw new InvalidProjectException(String.format("%s does not exist", projectid));
@@ -98,11 +99,11 @@ public class ProjectVerifier {
         filter.addClause(orClause);
         filter.addAllClauses(new SimplerFilter("project", CompareType.EQUAL, Integer.parseInt(projectid)));
 
-        JSONObject[] assignmentsOnDate = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("study", "assignment", filter)).toArray(new JSONObject[0]);
+        List<JSONObject> assignmentsOnDate = JsonUtil.toJSONObjectList(new SimpleQueryFactory(user, container).selectRows("study", "assignment", filter));
 
         SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 
-        if (assignmentsOnDate.length > 0) {
+        if (!assignmentsOnDate.isEmpty()) {
             throw new InvalidProjectException(String.format(
                     "%s is already assigned to project %s on %s",
                     animalId,

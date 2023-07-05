@@ -21,7 +21,7 @@ import java.util.Set;
  * Created by jon on 11/15/16.
  */
 public class JsonServiceManagerImpl extends JsonServiceManager {
-    private Map<Module, CaseInsensitiveMap<String, JsonService>> moduleMap = new HashMap<>();
+    private final Map<Module, CaseInsensitiveMap<String, JsonService>> moduleMap = new HashMap<>();
 
     public JsonServiceManagerImpl() {}
 

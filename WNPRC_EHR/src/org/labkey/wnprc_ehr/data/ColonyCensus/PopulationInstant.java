@@ -30,7 +30,8 @@ public class PopulationInstant implements ConvertibleToJSON
     }
 
     @Override
-    public JSONObject toJSON() {
+    public JSONObject toJSON()
+    {
         JSONObject json = new JSONObject();
 
         json.put("date", _date);
@@ -38,5 +39,4 @@ public class PopulationInstant implements ConvertibleToJSON
 
         return json;
     }
-
 }

@@ -3,12 +3,12 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <style type="text/css">
@@ -39,8 +39,7 @@
     // Get a string to display the weight(s)
     JSONArray weights = queryFactory.selectRows("study", "weight", taskFilter);
     List<String> weightList = new ArrayList();
-    for(JSONObject weightRecord : JsonUtil
-            .toJSONObjectList(weights)) {
+    for (JSONObject weightRecord : JsonUtil.toJSONObjectList(weights)) {
         String weight = weightRecord.getString("weight");
 
         if (weight == null) {

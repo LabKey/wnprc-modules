@@ -72,10 +72,12 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
      */
     abstract protected HttpRequestInitializer getCredentials() throws Exception;
 
+    @Override
     public void setUser(User u) {
         user = u;
     }
 
+    @Override
     public void setContainer(Container c) {
         container = c;
     }
@@ -136,6 +138,7 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
         return getJsonEventList(events, calendarId, backgroundColor);
     }
 
+    @Override
     public JSONArray getEventsAsJson(String calendarId, String backgroundColor, EventType eventType, Date startDate, Date endDate) throws Exception {
         Calendar calendar = getCalendar();
         java.util.Calendar currentDate = java.util.Calendar.getInstance();

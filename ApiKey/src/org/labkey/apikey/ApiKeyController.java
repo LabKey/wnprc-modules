@@ -35,7 +35,7 @@ public class ApiKeyController extends SpringActionController
     public class BeginAction extends SimpleViewAction
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }

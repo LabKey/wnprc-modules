@@ -141,7 +141,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
         jsonError.put("message",  "");
 
         Results rs = null;
-        List<Map<String, Object>> rows = new ArrayList<>();
+        List<JSONObject> rows = new ArrayList<>();
         List<Map<String, Object>> columnMetadataArray = new ArrayList<>();
         List<Map<String, Object>> columnDisplayData = new ArrayList<>();
         try {

@@ -23,11 +23,12 @@ import java.util.Map;
  * Similarly to how {@link SimpleQuery} makes it simple to access data in tables, {@link SimpleQueryUpdater} makes
  * it easy to edit tables.
  */
-public class SimpleQueryUpdater {
-    private TableInfo tableInfo;
-    private QueryUpdateService service;
-    private User user;
-    private Container container;
+public class SimpleQueryUpdater
+{
+    private final TableInfo tableInfo;
+    private final QueryUpdateService service;
+    private final User user;
+    private final Container container;
 
     public SimpleQueryUpdater (User user, Container container, String schemaName, String tableName) {
         this.tableInfo = QueryService.get().getUserSchema(user, container, schemaName).getTable(tableName);
@@ -51,8 +52,13 @@ public class SimpleQueryUpdater {
         return this.upsert(rows);
     }
 
-    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
-        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+    public List<CaseInsensitiveMapWrapper<Object>> upsert(JSONObject json) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(json.toMap());
+        return this.upsert(rows);
+    }
+
+    public List<CaseInsensitiveMapWrapper<Object>> delete(JSONObject json) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(json.toMap());
         return this.delete(rows);
     }
 

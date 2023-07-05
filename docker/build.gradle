@@ -14,19 +14,24 @@ task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the eh
 task("buildTomcat", group: "Docker", type: Exec, description: "Generates the Tomcat docker image (with R)") {
     workingDir "$projectDir/tomcat"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/tomcat:18.3"
+    args "build", ".", "-t", "wnprcehr/tomcat:22.11"
 }
 
 task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrcron", "buildPostfix"]) { Task t ->
     doLast {
-        if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
-            t.project.exec {
-                workingDir "$projectDir/labkey"
-                executable "docker"
-                args "/hooks/build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:18.3", "--no-cache"
+        if (hasProperty('labkeyVersion')){
+            println labkeyVersion
+            if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
+                t.project.exec {
+                    workingDir "$projectDir/labkey"
+                    executable "docker"
+                    args "/hooks/build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", "--build-arg","LABKEY_VERSION=${labkeyVersion}", ".", "-t", "wnprcehr/labkey:22.11", "--no-cache"
+                }
+            } else {
+                logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
             }
         } else {
-            logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
+            logger.warn 'Must provide LabKey version via command line. (ex. ./gradlew buildLabkey -PlabkeyVersion=22.11)'
         }
     }
 }

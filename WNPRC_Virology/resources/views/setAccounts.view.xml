@@ -1,0 +1,9 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Update Accounts Panel">
+    <permissions>
+        <permission name="read"/>
+    </permissions>
+    <dependencies>
+        <dependency path="gen/DropdownSelect"/>
+        <!-- <dependency path="http://localhost:3001/DropdownSelect.js"/>-->
+    </dependencies>
+</view>

@@ -150,15 +150,16 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     command,
                     newState[ComponentType.name]
                 );
-            }else{
+                finalFormData.push(newData);
+            }else if (componentStates[ComponentType.name] !== null){
                 newData = generateFormData(
                     schemaName,
                     queryName,
                     command,
                     componentStates[ComponentType.name]
                 );
+                finalFormData.push(newData);
             }
-            finalFormData.push(newData);
         });
         await Promise.all(promises);
         return finalFormData;

@@ -1,6 +1,0 @@
-<webpart xmlns="http://labkey.org/data/xml/webpart" title="Pregnancies Webpart">
-    <view name="breeding_webpart"/>
-    <locations>
-        <location name="body"/>
-    </locations>
-</webpart>

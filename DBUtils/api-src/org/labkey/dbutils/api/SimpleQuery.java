@@ -202,7 +202,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
                         rowJSONObject.put(key, rowMap.get(key));
                     }
 
-                    rows.add(rowJSONObject.toMap());
+                    rows.add((JSONObject) rowJSONObject.toMap());
                 } while (rs.next());
             }
         }

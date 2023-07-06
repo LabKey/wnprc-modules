@@ -1,8 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" title="Pregnancies">
-    <permissions>
-        <permission name="read"/>
-    </permissions>
-    <dependencies>
-        <dependency path="gen/breeding_webpart"/>
-    </dependencies>
-</view>

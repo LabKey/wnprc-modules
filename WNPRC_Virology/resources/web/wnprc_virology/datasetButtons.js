@@ -63,9 +63,10 @@ WNPRC_Virology.DatasetButtons = new function() {
                                     xtype: 'labkey-store',
                                     schemaName: 'lists',
                                     queryName: 'status',
-                                    columns: 'Key,Status',
+                                    columns: 'Key,Status,Active',
                                     sort: 'Key',
                                     storeId: 'lists||status',
+                                    filterArray: [LABKEY.Filter.create('Active', true, LABKEY.Filter.Types.EQUALS)],
                                     //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
                                     autoLoad: true
                                 }),

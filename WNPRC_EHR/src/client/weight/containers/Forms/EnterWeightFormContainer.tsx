@@ -159,6 +159,14 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormIds();
   }, [ids]);
 
+  // Form should be saveable if only animalID is entered
+  useEffect(() => {
+    if(formdata[0]?.animalid && formdata[0].animalid.value === ''){
+      return;
+    }
+    setErrorLevel("saveable");
+  },[formdata]);
+
   //if we are in edit mode
   useEffect(() => {
     if (
@@ -809,7 +817,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               className={`btn btn-primary submit-btn ${saving ? "saving" : ""}`}
               id="save-draft-btn"
               onClick={e => onSave(e)}
-              disabled={errorLevel == "no-action"}
+              disabled={errorLevel === "no-action"}
             >
               Save Draft
             </button>

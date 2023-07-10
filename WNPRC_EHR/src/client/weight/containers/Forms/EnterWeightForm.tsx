@@ -136,7 +136,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
   const getAnimalInfo = (e: React.FormEvent<EventTarget>): void => {
     let target = e.target as HTMLInputElement;
-    if (target.name == "animalid" && e.nativeEvent.type != "focus") {
+    if (target.name == "animalid" && e.nativeEvent.type != "focusin") {
       if (target.value == "") {
         setAnimalError("Required");
         setAnyErrors(true);

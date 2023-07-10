@@ -159,14 +159,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormIds();
   }, [ids]);
 
-  // Form should be saveable if only animalID is entered
-  useEffect(() => {
-    if(formdata[0]?.animalid && formdata[0].animalid.value === ''){
-      return;
-    }
-    setErrorLevel("saveable");
-  },[formdata]);
-
   //if we are in edit mode
   useEffect(() => {
     if (
@@ -353,14 +345,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     copyformdata.forEach(item => {
       //don't validate against deleted / hidden items
       if (item["visibility"]["value"] != "hide-record"){
-        if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '') && item["animalid"]["value"] == ""){
-          setErrorLevel("no-action")
-        }
-        if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '' ) && item["animalid"]["value"] != ""){
-          setErrorLevel("saveable")
-        }
-        if ((typeof item["weight"]["value"] != 'undefined' &&  item["weight"]["value"] != '') && item["animalid"]["value"] != ""){
-          setErrorLevel("submittable")
+        if(item["animalid"]["value"] == ""){
+          setErrorLevel("no-action");
+        }else if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '')){
+          setErrorLevel("saveable");
+        }else if ((typeof item["weight"]["value"] != 'undefined' &&  item["weight"]["value"] != '')){
+          setErrorLevel("submittable");
         }
       }
     });
@@ -817,7 +807,11 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               className={`btn btn-primary submit-btn ${saving ? "saving" : ""}`}
               id="save-draft-btn"
               onClick={e => onSave(e)}
-              disabled={errorLevel === "no-action"}
+              disabled={
+                formdata.some((item) => {
+                  if (item.weight.value === "" || item.weight.value === undefined) return true;
+                })
+              }
             >
               Save Draft
             </button>

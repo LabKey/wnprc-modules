@@ -66,6 +66,7 @@ import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -2635,9 +2636,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
+        WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        Assert.assertTrue("Save button is enabled when it shouldn't be",button.isEnabled());
+        fillAnInput("animalid_0", "test333333");
+        Assert.assertTrue("Save button is enabled when it shouldn't be",button.isEnabled());
         addBatchByLocation();
         // look that the error text DOES NOT exist
         waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertFalse("Save button is disabled when it shouldn't be",button.isEnabled());
+        fillWeightForm(NEW_WEIGHT_VAL.toString(), 0);
+        Assert.assertFalse("Save button is disabled when it shouldn't be",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");

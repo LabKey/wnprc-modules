@@ -2637,15 +2637,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        // Test that save button is disabled if no entries
         Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
-        fillAnInput("animalid_0", "test333333");
-        Assert.assertFalse("Save button is enabled for incorrect id",button.isEnabled());
+        // Test that save button is disabled if single valid id is entered
+        fillAnInput("animalid_0", EXPECTED_ANIMALS_LOCAL[0]);
+        Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
         addBatchByLocation();
         // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
+        //waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertFalse("Save button is enabled with invalid ids",button.isEnabled());
+
+        for (int i = 0; i < 4; i++){
+            fillAnInput("animalid_" + i, EXPECTED_ANIMALS_LOCAL[0]);
+            sleep(500);
+        }
         Assert.assertTrue("Save button is disabled with valid ids",button.isEnabled());
-        fillWeightForm(NEW_WEIGHT_VAL.toString(), 0);
-        Assert.assertTrue("Save button is disabled when it shouldn't be",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");

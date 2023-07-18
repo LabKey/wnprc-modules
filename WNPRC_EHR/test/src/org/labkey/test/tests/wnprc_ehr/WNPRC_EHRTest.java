@@ -2641,6 +2641,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
         // Test that save button is disabled if single valid id is entered
         fillAnInput("animalid_0", EXPECTED_ANIMALS_LOCAL[0]);
+        waitUntilElementIsClickable("save-draft-btn");
         Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
         addBatchByLocation();
         // look that the error text DOES NOT exist
@@ -2651,6 +2652,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             fillAnInput("animalid_" + i, EXPECTED_ANIMALS_LOCAL[0]);
             sleep(500);
         }
+        waitUntilElementIsClickable("save-draft-btn");
         Assert.assertTrue("Save button is disabled with valid ids",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);

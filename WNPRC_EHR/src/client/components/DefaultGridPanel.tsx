@@ -11,9 +11,13 @@ import {
     InjectedQueryModels,
     QueryColumn,
     QueryInfo,
-    QueryModel,
+    QueryModel, selectRows,
     withQueryModels
 } from '@labkey/components';
+import { Filter } from '@labkey/api';
+import { labkeyActionSelectWithPromise } from '../query/helpers';
+import { Simulate } from 'react-dom/test-utils';
+import canPlay = Simulate.canPlay;
 
 
 // Any props you might use will go here
@@ -87,24 +91,42 @@ const DefaultGridPanelImpl: FC<Props> = ({
     },[queryModels?.containersModel]);
 
     const cellRenderer = (data, row, col, rowIndex, columnIndex) => {
+        if(cellStyle.type === "boolean"){
+            // const value = data.get('value');
+            const value = row.get(cellStyle.flagColumn).get('value');
 
-        // const value = data.get('value');
-        const value = row.get(cellStyle.flagColumn).get('value');
+            const backgroundClr = value === cellStyle.green
+                ? "rgb(144,219,130)"
+                : value === cellStyle.red
+                    ? "rgb(250,119,102)"
+                    : null;
+            return (
+                <div style={{
+                    backgroundColor: backgroundClr,
+                    padding: 5,
+                }}
+                >
+                    {data.get('value')}
+                </div>
+            );
+        }else if(cellStyle.type === "dataset"){
+            console.log(cellStyle.data);
+            const value = row.get(cellStyle.flagColumn).get('value');
 
-        const backgroundClr = value === cellStyle.green
-            ? "rgb(144,219,130)"
-            : value === cellStyle.red
-                ? "rgb(250,119,102)"
+            const backgroundClr = cellStyle.data.includes(value) ? "rgb(250,119,102)"
                 : null;
-        return (
-            <div style={{
-                backgroundColor: backgroundClr,
-                padding: 5,
-            }}
-            >
-                {data.get('value')}
-            </div>
-        );
+            return (
+                <div style={{
+                    backgroundColor: backgroundClr,
+                    padding: 5,
+                }}
+                >
+                    {data.get('value')}
+                </div>
+            );
+
+        }
+
     };
 
     const onRefreshGrid = () => {

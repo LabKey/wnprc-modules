@@ -6,16 +6,19 @@ import "../../../wnprc_ehr.scss";
 import {GridPanelConfig} from '../../GridPanelConfig';
 import { gridConfig } from '../configProps';
 App.registerApp<any>('grid_panel_webpart', (target: string, ctx: any) => {
-
     gridConfig.schemaName = ctx.schemaName;
     gridConfig.queryName = ctx.queryName;
     gridConfig.viewName = ctx.viewName;
     gridConfig.input.controller = ctx.inputController;
     gridConfig.input.view = ctx.inputView;
     gridConfig.input.formType = ctx.inputFormType;
-    gridConfig.filterConfig.subjects = JSON.parse(ctx.subjects);
+    gridConfig.filterConfig.subjects = ctx.subjects;
     gridConfig.filterConfig.date = ctx.date;
     gridConfig.filterConfig.filters = JSON.parse(ctx.filters);
+    gridConfig.cellStyle.flagColumn = ctx.styleFlagColumn;
+    gridConfig.cellStyle.type = ctx.styleType;
+    gridConfig.cellStyle.styleSchema = ctx.styleSchema;
+    gridConfig.cellStyle.styleQuery = ctx.styleQuery;
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig

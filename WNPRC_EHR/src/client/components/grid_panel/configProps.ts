@@ -25,4 +25,11 @@ export const gridConfig: configProps = {
         date: "",
         filters: "",
     },
+    cellStyle: {
+        flagColumn: "",
+        type: "",
+        styleSchema: "",
+        styleQuery: "",
+        data: [],
+    }
 }

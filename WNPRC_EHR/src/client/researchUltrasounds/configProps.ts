@@ -10,6 +10,7 @@ export const gridConfig: configProps = {
     },
     cellStyle: {
         flagColumn: "reviewCompleted",
+        type: "boolean",
         green: "Yes",
         red: "No",
     }

@@ -14,6 +14,10 @@ App.registerApp<any>('grid_panel_webpart', (target, ctx) => {
     gridConfig.filterConfig.subjects = ctx.subjects;
     gridConfig.filterConfig.date = ctx.date;
     gridConfig.filterConfig.filters = JSON.parse(ctx.filters);
+    gridConfig.cellStyle.flagColumn = ctx.styleFlagColumn;
+    gridConfig.cellStyle.type = ctx.styleType;
+    gridConfig.cellStyle.styleSchema = ctx.styleSchema;
+    gridConfig.cellStyle.styleQuery = ctx.styleQuery;
     ReactDOM.render(
         <GridPanelConfig
             {...gridConfig}

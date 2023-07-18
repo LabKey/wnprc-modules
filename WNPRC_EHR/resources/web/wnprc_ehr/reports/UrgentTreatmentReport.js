@@ -13,6 +13,10 @@ EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
             subjects: tab.filters.subjects,
             date: panel.getFilterArray(tab).removable[0].value,
             filters: JSON.stringify(tab.filters),
+            styleFlagColumn: "meaning",
+            styleType: "dataset",
+            styleSchema: "lists",
+            styleQuery: "Time sensitive treatments",
         };
         try {
             // according to the DOM spec, the mutation observer should be GC'd if/when the target node is removed

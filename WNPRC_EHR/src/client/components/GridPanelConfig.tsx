@@ -10,6 +10,7 @@ import {
 
 import { DefaultGridPanel } from "./DefaultGridPanel";
 import { configProps } from './grid_panel/configProps';
+import { labkeyActionSelectWithPromise } from '../query/helpers';
 
 /*
 Grid Panel Configuration
@@ -52,6 +53,21 @@ export const GridPanelConfig: FC<configProps> = ({
         if (filterDate) {
             filterArray.push(Filter.create("date", filterDate, Filter.Types.DATE_EQUAL));
         }
+    }
+
+    if(cellStyle.type === "dataset"){
+        let config = {
+            schemaName: cellStyle.styleSchema,
+            queryName: cellStyle.styleQuery,
+        };
+        labkeyActionSelectWithPromise(config).then((data) => {
+            console.log("Data:", data);
+            data.rows.forEach((row) => {
+                cellStyle.data.push(row.code);
+            });
+        }).catch((data)=> {
+            console.log("loading-unsuccess");
+        });
     }
 
     const serverContext = withAppUser(getServerContext());

@@ -122,32 +122,6 @@ public class TriggerScriptHelper
 
         String recordStatus = getVLStatus(_user, viralLoadContainer, (Integer) emailPropsCopy.get("status"));
 
-        String WNPRCVirologyZikaQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
-        if (WNPRCVirologyZikaQCStatusVal != null)
-        {
-            if (WNPRCVirologyZikaQCStatusVal.equals(recordStatus))
-            {
-
-                String WNPRCVirologyZikaPortalUrl = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer);
-                if (WNPRCVirologyZikaPortalUrl != null)
-                {
-                    String conjureURL = String.valueOf(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
-                    conjureURL = conjureURL + "&Dataset.experiment_number~eq=" + emailPropsCopy.get("experimentNumber");
-                    emailPropsCopy.put("portalURL", conjureURL);
-                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, false);
-                    notification.sendManually(viralLoadContainer);
-                }
-                else
-                {
-                    _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP + " module prop is not set, not sending email notification.");
-                }
-            }
-        } else
-        {
-            _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.ZIKA_PORTAL_QC_STATUS_STRING_PROP + " module prop is not set, not sending email notification.");
-        }
-
-
         String WNPRCVirologyRSEHRQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
         if (WNPRCVirologyRSEHRQCStatusVal != null)
         {

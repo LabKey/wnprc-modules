@@ -11,27 +11,42 @@ task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the eh
     args "build", ".", "-t", "wnprcehr/ehrcron:latest"
 }
 
-task("buildTomcat", group: "Docker", type: Exec, description: "Generates the Tomcat docker image (with R)") {
-    workingDir "$projectDir/tomcat"
-    executable "docker"
-    args "build", ".", "-t", "wnprcehr/tomcat:22.11"
+task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker image (with R)") { Task t ->
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            t.project.exec{
+                workingDir "$projectDir/tomcat"
+                executable "docker"
+                args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+            }
+        }else {
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
+        }
+    }
 }
 
 task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrcron", "buildPostfix"]) { Task t ->
     doLast {
-        if (hasProperty('labkeyVersion')){
-            println labkeyVersion
+        def dockerStr = providers.gradleProperty("dockerString")
+
+        if (dockerStr.present){
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
             if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
                 t.project.exec {
-                    workingDir "$projectDir/labkey"
-                    executable "docker"
-                    args "/hooks/build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", "--build-arg","LABKEY_VERSION=${labkeyVersion}", ".", "-t", "wnprcehr/labkey:22.11", "--no-cache"
+                    workingDir "$projectDir/labkey/hooks"
+                    commandLine "./build"
+                    environment = [ "teamcityUser": "${labkeyTeamcityUsername}", "teamCityPWD": "${labkeyTeamcityPassword}" ,  "DOCKER_TAG": dockerString ]
                 }
             } else {
                 logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
             }
         } else {
-            logger.warn 'Must provide LabKey version via command line. (ex. ./gradlew buildLabkey -PlabkeyVersion=22.11)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildLabkey -PdockerString=22.11_fb)'
         }
     }
 }
@@ -55,4 +70,23 @@ task("down", group: "Docker", type: Exec, description: "Shuts down the docker-co
     workingDir "$projectDir"
     executable "docker-compose"
     args "down"
+}
+
+task("downloadLabkey", group: "Docker", description: "Download Docker Images from Docker Hub") { Task t ->
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            t.project.exec {
+                workingDir "$projectDir/labkey/"
+                executable "docker"
+                args "pull", "wnprcehr/labkey:${dockerString}"
+            }
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadLabkey -PdockerString=22.11_fb)'
+        }
+    }
 }

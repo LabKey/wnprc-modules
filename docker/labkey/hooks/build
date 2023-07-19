@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "build ver 1.8"
+echo "user " $teamcityUser
+echo "docker_tag text " $DOCKER_TAG
 
 # FB_REGEX will match if the docker tag looks like a feature branch, while
 # PROD_REGEX will match if the docker tag matches the format of a production build
@@ -59,4 +61,12 @@ echo -e "TEAMCTY_URL "${Z}
 echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
-docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
+if [[ -z $IMAGE_NAME ]]
+then
+  IMAGE_NAME="wnprcehr/labkey:$DOCKER_TAG"
+  echo "value of IMAGE_NAME " ${IMAGE_NAME}
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME ../
+else
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
+fi
+

@@ -8,8 +8,7 @@ var helper = org.labkey.wnprc_virology.utils.TriggerScriptHelper.create(LABKEY.S
 
 var grantObj = {};
 var statuses = {};
-var zikaQCState = "08-complete-email-Zika_portal";
-var additionalChecksForStatuses = ["09-complete-email-RSEHR", "08-complete-email-Zika_portal"];
+var rsehrQCState = "09-complete-email-RSEHR";
 
 function init(event, errors) {
 
@@ -21,7 +20,7 @@ function init(event, errors) {
         success: function (res) {
             let result = res.rows;
             for (let k = 0; k < result.length; k++){
-                statuses[result[k].Key] = result[k].Status;
+                statuses[result[k].Status] = result[k].Key;
             }
         }
     })
@@ -61,31 +60,17 @@ function beforeInsert(row, errors) {
     }
 }
 
-function checkQC(qc) {
-    for (var k = 0; k < additionalChecksForStatuses.length; k++){
-        if (additionalChecksForStatuses[k] == statuses[qc]){
-            return true;
-        }
-    }
-    return false;
-}
 
 function beforeUpdate(row, oldRow, errors){
-    //we check for this as well in DatasetButtons.js but it's good to check again here on the server
-    // and also important for regular form updates
+    // Additional checks for RSEHR email content, if the RSEHR status col is being used in the batch complete
     if ((!row.experimentNumber ||
                     !row.positive_control ||
                     !row.vl_positive_control ||
                     !row.avg_vl_positive_control ||
                     !row.efficiency)
-            && checkQC(row.Status)
+            && statuses[rsehrQCState] == row.Status
             ) {
         errors.experimentNumber = 'Cannot complete a record without an experiment number, positive control or efficiency value';
-        return;
-    }
-
-    if (statuses[row.Status] == zikaQCState && !row.emails){
-        errors.emails = 'Notify column required for status = ' + zikaQCState;
         return;
     }
 }

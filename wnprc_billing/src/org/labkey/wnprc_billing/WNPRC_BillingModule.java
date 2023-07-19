@@ -30,6 +30,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.wnprc_billing.dataentry.ChargesFormType;
@@ -39,6 +40,8 @@ import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 import org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer;
+import org.labkey.wnprc_billing.security.permissions.EHRFinanceAdminPermission;
+import org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -85,6 +88,17 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
         addController(WNPRC_BillingController.NAME, WNPRC_BillingController.class);
         ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, new InvoicedItemsProcessingServiceImpl());
         BillingNotificationService.get().registerBillingNotificationProvider(WNPRCBillingNotificationProvider.get());
+
+        registerRoles();
+        registerPermissions();
+    }
+
+    private void registerRoles() {
+        RoleManager.registerRole(new EHRFinanceAdmin());
+    }
+
+    private void registerPermissions() {
+        RoleManager.registerPermission(new EHRFinanceAdminPermission());
     }
 
     @Override

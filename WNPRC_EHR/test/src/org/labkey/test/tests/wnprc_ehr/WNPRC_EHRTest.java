@@ -69,6 +69,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.UnhandledAlertException;
 
 import java.io.File;
 import java.io.IOException;
@@ -201,7 +202,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.initProject("EHR");
         initTest.createTestSubjects();
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
@@ -241,6 +242,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupClinpathVirologySection();
 
         initTest.setupAnimalRequests();
+
+        initTest.checkUpdateProgramIncomeAccount();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -418,32 +421,43 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 
-        log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
+        SelectRowsCommand sr = new SelectRowsCommand("ehr", "form_framework_types");
+        sr.addFilter(new Filter("queryname","feeding", Filter.Operator.EQUAL));
+        sr.addFilter(new Filter("framework","reactjs", Filter.Operator.EQUAL));
+        SelectRowsResponse resp = sr.execute(cn, EHR_FOLDER_PATH);
+        if (resp.getRowCount().intValue() == 0)
+        {
 
-        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap = new HashMap<>();
-        rowMap.put("schemaname", "study");
-        rowMap.put("queryname", "feeding");
-        rowMap.put("framework", "reactjs");
-        rowMap.put("url","/wnprc_ehr/feeding.view");
-        insertCmd.addRow(rowMap);
+            log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
 
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
+            InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap = new HashMap<>();
+            rowMap.put("schemaname", "study");
+            rowMap.put("queryname", "feeding");
+            rowMap.put("framework", "reactjs");
+            rowMap.put("url", "/wnprc_ehr/feeding.view");
+            insertCmd.addRow(rowMap);
 
-        log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
-        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+            insertCmd.execute(cn, EHR_FOLDER_PATH);
 
-        InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap2 = new HashMap<>();
-        rowMap2.put("schemaname", "study");
-        rowMap2.put("queryname", "weight");
-        rowMap2.put("framework", "reactjs");
-        rowMap2.put("url", "/wnprc_ehr/weight.view");
-        insertCmd2.addRow(rowMap2);
+            log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
+            log("Inserting weight as a reactjs form type into ehr.form_framework_types");
 
-        insertCmd2.execute(cn, EHR_FOLDER_PATH);
+            InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap2 = new HashMap<>();
+            rowMap2.put("schemaname", "study");
+            rowMap2.put("queryname", "weight");
+            rowMap2.put("framework", "reactjs");
+            rowMap2.put("url", "/wnprc_ehr/weight.view");
+            insertCmd2.addRow(rowMap2);
 
-        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+            insertCmd2.execute(cn, EHR_FOLDER_PATH);
+
+            log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+        } else
+        {
+            log("feeding/weight framework type already exists, no action needed");
+        }
     }
 
     public void setupClinpathVirologySection() throws IOException, CommandException
@@ -2903,4 +2917,87 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         return ANIMAL_HISTORY_URL;
     }
+
+
+    @Test
+    public void navigateToBillingContainerWithInvalidPermissions() {
+        //This test verifies a user cannot access the Finance>Internal page without proper permissions.
+
+        //Impersonates a basic user and navigates to the Finance>Internal page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+
+        //Assumes an error is presented and the test is complete.
+        assertTextPresent("Oops! An error has occurred.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
+        //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
+
+        //Impersonates a basic user and navigates to the restricted page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+
+        //Attempts to change the value.
+        //Assumes an error is presented and the test is complete.
+        fillAnInputByName("newCreditToAccountField", "asdf");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+        assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
+        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+
+        //Navigates to various containers and sets corresponding permissions.
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
+
+        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+
+        //Attempts to change the value.
+        fillAnInputByName("newCreditToAccountField", "testString");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+
+        //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
+        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+
+        //Navigates to various containers and removes corresponding permissions.
+        stopImpersonating();
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.ReaderRole");
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.EditorRole");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin");
+
+    }
+
+    private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
+    {
+        log("Starting checkUpdateProgramIncomeAccount.");
+
+        navigateToBillingContainerWithInvalidPermissions();
+        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithInvalidPermissions();
+        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithValidPermissions();
+        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+    }
+
 }

@@ -25,7 +25,7 @@ export const GridPanelConfig: FC<configProps> = ({
     queryName,
     viewName,
     input,
-    cellStyle,
+    cellStyles,
     filterConfig,
     }) => {
     const baseFilters = [];
@@ -54,19 +54,21 @@ export const GridPanelConfig: FC<configProps> = ({
             filterArray.push(Filter.create("date", filterDate, Filter.Types.DATE_EQUAL));
         }
     }
-
-    if(cellStyle.type === "dataset"){
-        let config = {
-            schemaName: cellStyle.styleSchema,
-            queryName: cellStyle.styleQuery,
-        };
-        labkeyActionSelectWithPromise(config).then((data) => {
-            console.log("Data:", data);
-            data.rows.forEach((row) => {
-                cellStyle.data.push(row.code);
-            });
-        }).catch((data)=> {
-            console.log("loading-unsuccess");
+    if(cellStyles) {
+        cellStyles.forEach((cell) => {
+            if (cell.flagData.type === "dataset") {
+                const config = {
+                    schemaName: cell.flagData.schemaName,
+                    queryName: cell.flagData.queryName,
+                };
+                labkeyActionSelectWithPromise(config).then((data) => {
+                    data.rows.forEach((row) => {
+                        cell.flagData.data.push(row.code);
+                    });
+                }).catch((data) => {
+                    console.log("loading-unsuccess");
+                });
+            }
         });
     }
 
@@ -90,7 +92,7 @@ export const GridPanelConfig: FC<configProps> = ({
                     queryConfigs={queryConfigs}
                     input={input}
                     autoLoad
-                    cellStyle={cellStyle}
+                    cellStyles={cellStyles}
                     viewName={viewName}
                 />
             </AppContextProvider>

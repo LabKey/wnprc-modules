@@ -27,7 +27,7 @@ interface myProps {
         view: string,
         formType: string
     };
-    cellStyle?: any;
+    cellStyles?: any;
     viewName?: string;
 }
 
@@ -44,7 +44,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                                              actions,
                                              queryModels,
                                              input,
-                                             cellStyle,
+                                             cellStyles,
                                              viewName,
                                          }) => {
 
@@ -52,16 +52,17 @@ const DefaultGridPanelImpl: FC<Props> = ({
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
 
     useEffect(() => {
-        if(queryModels?.containersModel?.queryInfo && cellStyle) {
+        if(queryModels?.containersModel?.queryInfo && cellStyles) {
             const { containersModel } = queryModels;
             const { queryInfo } = containersModel;
+            /*
             const styleColumn = cellStyle.flagColumn.toLowerCase();
             // Add custom cell renderer to column
             const oldColumn = queryInfo.getColumn(styleColumn);
             const newColumn = new QueryColumn({...oldColumn, ...{"cell": cellRenderer}});
 
 
-            /** Color a single column*/
+            // Color a single column
              const oldColumns = queryInfo.columns;
              const newColumns = oldColumns.merge(oldColumns.set(styleColumn, newColumn));
              const newQueryInfo = new QueryInfo({...queryInfo, ...{"columns": newColumns}});
@@ -72,9 +73,9 @@ const DefaultGridPanelImpl: FC<Props> = ({
                      Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo}});
                  })
              );
-
+              */
             /** Color all columns **/
-            /*const styledColumns = new ExtendedMap<string, QueryColumn>();
+            const styledColumns = new ExtendedMap<string, QueryColumn>();
             queryInfo.columns.forEach((column, key) => {
                 const newColumn2 = new QueryColumn({...column, ...{"cell": cellRenderer}});
                 styledColumns.set(key, newColumn2);
@@ -86,47 +87,40 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 produce<QueryModel>(draft => {
                     Object.assign(draft, {...containersModel, ...{'queryInfo': newQueryInfo2}});
                 })
-            );*/
+            );
         }
     },[queryModels?.containersModel]);
 
     const cellRenderer = (data, row, col, rowIndex, columnIndex) => {
-        if(cellStyle.type === "boolean"){
-            // const value = data.get('value');
-            const value = row.get(cellStyle.flagColumn).get('value');
-
-            const backgroundClr = value === cellStyle.green
-                ? "rgb(144,219,130)"
-                : value === cellStyle.red
-                    ? "rgb(250,119,102)"
-                    : null;
-            return (
-                <div style={{
-                    backgroundColor: backgroundClr,
-                    padding: 5,
-                }}
-                >
-                    {data.get('value')}
-                </div>
-            );
-        }else if(cellStyle.type === "dataset"){
-            console.log(cellStyle.data);
-            const value = row.get(cellStyle.flagColumn).get('value');
-
-            const backgroundClr = cellStyle.data.includes(value) ? "rgb(250,119,102)"
-                : null;
-            return (
-                <div style={{
-                    backgroundColor: backgroundClr,
-                    padding: 5,
-                }}
-                >
-                    {data.get('value')}
-                </div>
-            );
-
+        let backgroundClr = null;
+        const cellVal = data.get('value');
+        for(let i = 0; i < cellStyles.length; i++) {
+            if (cellStyles[i].cellColumns.includes(col.index)) {
+                const flagValue = row.get(cellStyles[i].flagData.flagColumn).get('value');
+                if(cellStyles[i].flagData.type === "dataset") {
+                    if (cellStyles[i].flagData.data.includes(flagValue) && cellVal !== null) {
+                        backgroundClr = cellStyles[i].flagData.color;
+                    }
+                }
+                else if(cellStyles[i].flagData.type === "boolean"){
+                    for(let j = 0; j < cellStyles[i].flagData.data.length; j++){
+                        if(cellStyles[i].flagData.data[j] === flagValue){
+                            backgroundClr = cellStyles[i].flagData.color[j];
+                        }
+                    }
+                }
+                break;
+            }
         }
-
+        return (
+            <div style={{
+                backgroundColor: backgroundClr,
+                padding: 5,
+            }}
+            >
+                {data.get('value')}
+            </div>
+        );
     };
 
     const onRefreshGrid = () => {
@@ -159,7 +153,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
 
     return (
         <div>
-            {queryModel?.queryInfo && cellStyle
+            {queryModel?.queryInfo && cellStyles
                 ? <GridPanel
                     model={queryModel}
                     ButtonsComponent={renderGridButtons}

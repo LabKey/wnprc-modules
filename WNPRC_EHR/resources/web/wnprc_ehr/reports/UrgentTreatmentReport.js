@@ -1,22 +1,33 @@
+
 Ext4.namespace('EHR.reports');
 EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
     const target = tab.add({xtype: 'ldk-contentresizingpanel'});
-
     const renderUrgent = () => {
         const config = {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
             viewName: 'Incomplete Treatments',
-            inputController: "ehr",
-            inputView: "manageTask",
-            inputFormType: "Treatments",
-            subjects: tab.filters.subjects,
-            date: panel.getFilterArray(tab).removable[0].value,
-            filters: JSON.stringify(tab.filters),
-            styleFlagColumn: "meaning",
-            styleType: "dataset",
-            styleSchema: "lists",
-            styleQuery: "Time sensitive treatments",
+            input: JSON.stringify({
+                controller:  "ehr",
+                view: "manageTask",
+                formType: "Treatments",
+            }),
+            cellStyles: JSON.stringify([{
+                cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],
+                flagData: {
+                    type: "dataset",
+                    flagColumn: "meaning",
+                    data: [],
+                    color: "rgb(250,119,102)",
+                    schemaName: "lists",
+                    queryName: "Time sensitive treatments"
+                }
+            }]),
+            filterConfig: JSON.stringify({
+                subjects: tab.filters.subjects,
+                date: panel.getFilterArray(tab).removable[0].value,
+                filters: tab.filters,
+            }),
         };
         try {
             // according to the DOM spec, the mutation observer should be GC'd if/when the target node is removed

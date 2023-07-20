@@ -8,10 +8,13 @@ export const gridConfig: configProps = {
         view: "dataEntryForm",
         formType: "Research Ultrasounds"
     },
-    cellStyle: {
-        flagColumn: "reviewCompleted",
-        type: "boolean",
-        green: "Yes",
-        red: "No",
-    }
+    cellStyles: [{
+        cellColumns: ["reviewCompleted"],
+        flagData: {
+            type: "boolean",
+            flagColumn: "reviewCompleted",
+            data: ["No", "Yes"],
+            color: ["rgb(250,119,102)","rgb(144,219,130)"]
+        }
+    }]
 }

@@ -1,10 +1,10 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="damSireSuffixMatcher" tableDbType="TABLE">
-                <tableTitle>Dam Sire Suffix Matcher</tableTitle>
+            <table tableName="validationSuiteSuffixCheckerRhesusIDDamSire" tableDbType="TABLE">
+                <tableTitle>VALIDATION SUITE: Suffix Checker (Rhesus - ID Dam/Sire)</tableTitle>
                 <columns>
-                    <column columnName="last_four"/>
+                    <column columnName="id"/>
                     <column columnName="sire">
                         <url>
                             /query/executeQuery.view?schemaName=study&amp;
@@ -21,7 +21,12 @@
                             query.Dam~in=${last_four}%3Brh${last_four}
                         </url>
                     </column>
+                    <column columnName="last_four">
+                        <columnTitle>ID Last Four Digits</columnTitle>
+                    </column>
                     <column columnName="frequency"/>
+                    <column columnName="species"/>
+                    <column columnName="gender"/>
                 </columns>
             </table>
         </tables>

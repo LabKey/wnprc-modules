@@ -6,7 +6,7 @@ EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
         const config = {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
-            viewName: 'Incomplete Treatments',
+            viewName: 'Urgent Treatments',
             input: JSON.stringify({
                 controller:  "ehr",
                 view: "manageTask",

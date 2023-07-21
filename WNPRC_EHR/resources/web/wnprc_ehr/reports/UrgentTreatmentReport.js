@@ -1,8 +1,11 @@
 
 Ext4.namespace('EHR.reports');
 EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
-    const target = tab.add({xtype: 'ldk-contentresizingpanel'});
+
     const renderUrgent = () => {
+        EHR.reports.waterGridCalendar(panel, tab);
+        const target = tab.add({xtype: 'ldk-contentresizingpanel'});
+
         const config = {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
@@ -47,7 +50,6 @@ EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
         });
 
         wp.render();
-        EHR.reports.waterGridCalendar(panel, tab);
     }
 
     //Location

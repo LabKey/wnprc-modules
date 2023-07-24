@@ -34,8 +34,6 @@ public class WNPRC_VirologyModule extends SpringModule
     public static final String RSEHR_PORTAL_URL_PROP = "RSEHRPortalPath";
     public static final String RSEHR_PARENT_FOLDER_STRING_PROP = "RSEHRViralLoadDataFolder";
     public static final String RSEHR_JOB_INTERVAL_PROP = "RSEHRJobInterval"; // in minutes
-    public static final String ZIKA_PORTAL_QC_STATUS_STRING_PROP = "ZikaPortalQCStatus";
-    public static final String ZIKA_PORTAL_URL_PROP = "ZikaPortalPath";
     //TODO: assemble notify list from ETL from RSEHR
     public static final String USE_RSEHR_FOLDER_PERMS_FOR_EMAIL = "virologyRSHEREmailMethod";
 

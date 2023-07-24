@@ -60,7 +60,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     public static final String RSEHR_PUBLIC_FOLDER_PATH = PROJECT_NAME_RSEHR + "/" + PROJECT_NAME_RSHER_PUBLIC;
     public static final String RSEHR_PORTAL_PATH = WebTestHelper.getBaseUrlWithoutContextPath();
     public static final String RSEHR_JOB_INTERVAL = "5";
-    public static final String ZIKA_PORTAL_PATH = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
     public static final String EHR_REMOTE_CONNECTION = "ProductionEHRServerFinance";
     public static final String EHR_EMAILS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsRSEHREmails";
@@ -96,7 +95,8 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final String A_THIRD_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_3";
     private static final String A_FOURTH_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_4";
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
-    private static final String ZIKA_QC_CODE = "08-complete-email-Zika_portal";
+    private static final String COMPLETE_QC_STRING = "05-complete";
+    private static final Integer COMPLETE_QC_CODE = 5;
 
     protected final PortalHelper _portalHelper = new PortalHelper(this);
     protected final RemoteConnectionHelper _rconnHelper = new RemoteConnectionHelper(this);
@@ -134,12 +134,12 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
     public void testTheStuff() throws Exception
     {
+        testBasicBatchComplete();
         testViralLoadRSEHRJob();
         testUpdateAccountsPage();
         testBatchCompleteAndSendRSERHEmail();
         testFolderAccountMapping();
         testBatchCompleteAndSendRSERHEmailToDiffUser();
-        testBatchCompleteAndSendZikaEmail();
         testLinkedSchemaDataWebpart();
 
     }
@@ -184,8 +184,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRViralLoadDataFolder", getProjectNameRSEHR()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPublicInfoPath", RSEHR_PUBLIC_FOLDER_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRJobInterval", RSEHR_JOB_INTERVAL));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRNotificationEmailReplyTo", RSEHR_EMAIL_CONTACT_INFO));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataPath", getProjectName()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadQCList", PROJECT_NAME_EHR));
@@ -403,39 +401,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         return null;
     }
 
-
-    public void testBatchCompleteAndSendZikaEmail() throws Exception
-    {
-        log("Select first 2 samples and batch complete");
-        //this clears out emails
-        enableEmailRecorder();
-        navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
-        //select all records and batch complete
-        waitAndClick(Locator.checkboxByNameAndValue(".select", "1")); //for some reason waitAndClickAndWait() didn't work here
-        waitAndClick(Locator.checkboxByNameAndValue(".select", "2"));
-        waitAndClick(Locator.lkButton("Batch Complete Samples"));
-        //select the dropdown arrow to select qc state
-        waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
-        Locator.XPathLocator ZikaQCStateSelectItem = Locator.tagContainingText("li", "08-complete-email-Zika_portal").notHidden().withClass("x4-boundlist-item");
-        click(ZikaQCStateSelectItem);
-        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
-
-        sleep(5000);
-        log("Check that the Zika notification email was sent");
-        goToModule("Dumbster");
-        assertTextPresent("[EHR Server] Viral load results completed on ");
-    }
-
-
-
-
-
     public void testFolderAccountMapping() throws Exception
     {
         //assert that the folders_accounts_mapping table was populated w folder name
@@ -490,6 +455,34 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     public void testBatchCompleteAndSendRSEHRToSubscribers()
     {
         // should just throw this in an existing test
+    }
+
+    //test regular batch complete
+    public void testBasicBatchComplete() throws Exception
+    {
+        log("Select first 2 samples and batch complete");
+        navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
+        waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
+        DataRegionTable table = new DataRegionTable("query", this);
+        table.setFilter("Funding_string", "Equals", ACCOUNT_STR_3);
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "4")); //for some reason waitAndClickAndWait() didn't work here
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "5"));
+        waitAndClick(Locator.lkButton("Batch Complete Samples"));
+        //select the dropdown arrow to select qc state
+        waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
+        Locator.XPathLocator CompleteQCStateSelectItem = Locator.tagContainingText("li", COMPLETE_QC_STRING).notHidden().withClass("x4-boundlist-item");
+        click(CompleteQCStateSelectItem);
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("1000");
+        Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        click(Ext4Helper.Locators.ext4Button("Submit"));
+
+        SelectRowsCommand sr = new SelectRowsCommand("lists","vl_sample_queue");
+        sr.addFilter("status", COMPLETE_QC_CODE, Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), PROJECT_NAME_EHR);
+        Assert.assertTrue(resp.getRows().size() == 2);
+
     }
 
     public void testBatchCompleteAndSendRSERHEmail() throws Exception

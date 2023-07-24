@@ -23,7 +23,7 @@ SELECT
     v.comment AS comment,
     v.run.exptNumber as experiment_number,
     vsq.funding_string as account,
-    GROUP_CONCAT( CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
+    GROUP_CONCAT( DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
     --COUNT(v.viralLoadScientific) AS replicate_count,
 FROM Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadAssayDataPath')}.assay.Viral_Loads.Viral_Load.Data v
 

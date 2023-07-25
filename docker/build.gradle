@@ -1,3 +1,6 @@
+//import org.gradle.nativeplatform.platform
+import org.gradle.internal.os.OperatingSystem
+
 apply plugin: 'idea'
 
 idea.module {
@@ -89,4 +92,53 @@ task("downloadLabkey", group: "Docker", description: "Download Docker Images fro
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadLabkey -PdockerString=22.11_fb)'
         }
     }
+}
+
+task("checkDocker") {Task t -> 
+   // standardOutput = new ByteArrayOutputStream()
+   def OS = OperatingSystem.current()
+
+    doFirst{
+        
+        println OS.toString()
+        
+        /* executable "docker"
+        args "info" */
+     }
+     doLast{
+        println OS.toString().contains("Mac") 
+        if (OS.toString().contains("Mac")){
+                t.project.exec {
+                    println "Opening Docker"                
+                    executable "open"
+                    args "-a", "docker"          
+                }
+
+            }else{
+                t.project.exec {
+                    println "Need to ran linux"
+                    executable "open"
+                    args "-a docker"   
+
+                }
+                
+            }         
+     }
+    /* doLast {
+        if (standardOutput.toString().contains("ERROR")){
+            println OperatingSystem.current()
+            if (OperatingSystem.current().isMacOSX()){
+                println "Opening Docker"
+                t.project.exec {
+                    executable "open"
+                    args "-a" "Docker"
+                }
+
+            }else{
+                println "Need to ran linux"
+            }
+
+        }
+        
+    } */
 }

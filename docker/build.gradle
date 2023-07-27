@@ -117,8 +117,8 @@ task("checkDocker") {Task t ->
             }else{
                 t.project.exec {
                     println "Need to ran linux"
-                    executable "open"
-                    args "-a docker"   
+                    executable "sytemctl"
+                    args "start", "docker"   
 
                 }
                 

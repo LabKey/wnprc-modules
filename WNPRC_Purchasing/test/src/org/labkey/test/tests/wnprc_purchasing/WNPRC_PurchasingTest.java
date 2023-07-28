@@ -687,7 +687,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         waitAndClickAndWait(Locator.linkWithText("All Requests"));
 
         table = new DataRegionTable("query", getDriver());
-        table.setFilter("requestNum", "Equals One Of (example usage: a;b;c)", requestId1 + ";" + requestId2);
+        table.setFilter("requestNum", "Equals One Of", requestId1 + ";" + requestId2);
         assertEquals("Incorrect order status", Arrays.asList("Order Received", "Order Received"), table.getColumnDataAsText("requestStatus"));
     }
 

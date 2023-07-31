@@ -3,6 +3,9 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="validationSuiteSuffixCheckerRhesusDamSireID" tableDbType="TABLE">
                 <tableTitle>VALIDATION SUITE: Suffix Checker (Rhesus - Dam/Sire ID)</tableTitle>
+                <description>
+                    This query checks Rhesus parents against Rhesus ID's for similarities (ex. ID's: rhxxyy and xxyy).
+                </description>
                 <columns>
                     <column columnName="sire">
                         <url>

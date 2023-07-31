@@ -1,3 +1,9 @@
+
+--This query checks Rhesus parents for similarities (ex. ID's: rhxxyy and xxyy).
+--This query combines the following 2 sub-queries:
+--  Query 1: This query checks for unique Rhesus sires with last four digits that match.
+--  Query 2: This query checks for unique Rhesus dams with last four digits that match.
+
 --Gets all (sires) grouped by their (last_four).
 --Uses a (frequency) variable to show how many (sires) are listed for each (last_four).
 SELECT last_four, sire, NULL AS dam, frequency, Species

@@ -5,9 +5,11 @@ docker/**/logs
 docker/**/.env
 docker/.gradle
 docker/dev_*/**
+docker/development/**
 docker/nginx/test-ehr*
 docker/nginx/cert.pem
 docker/nginx/key.pem
+docker/nginx/htpasswd
 docker/ehrcron/scripts/pg_backup/lkbackup.ini
 
 **/node_modules/

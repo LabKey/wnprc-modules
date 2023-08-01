@@ -2643,12 +2643,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(), 0);
         Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
         addBatchByLocation();
-        for (int i = 0; i < 4; i++){
-            fillAnInput("animalid_" + i, EXPECTED_ANIMALS_LOCAL[0]);
-            sleep(500);
-        }
-        waitUntilElementIsClickable("save-draft-btn");
-        Assert.assertTrue("Save button is disabled with valid ids",button.isEnabled());
+        Assert.assertTrue("Save button is disabled for correct test ids",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");

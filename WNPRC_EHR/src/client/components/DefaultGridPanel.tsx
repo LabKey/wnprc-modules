@@ -122,7 +122,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 padding: 5,
             }}
             >
-                {data.get('value')}
+                {data.get('formattedValue') ?? data.get('value')}
             </div>
         );
     };

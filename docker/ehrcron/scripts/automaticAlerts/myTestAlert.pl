@@ -1,20 +1,27 @@
 #!/usr/bin/env perl
 
-=head1 DESCRIPTION
+#Sets up environment.
+use MIME::Lite;
 
-This is a test script designed to run as a cron job.
+#Sets up variables.
+my $to = 'aschmidt34@wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
+my $subject = 'Test subject.';
+my $message = 'Test message.';
 
-=head1 LICENSE
+#Creates message.
+my $smtp = MIME::Lite->new(
+    To      => $to,
+    From    => $from,
+    Subject => $subject,
+    Type    => 'multipart/alternative'
+);
 
-This package and its accompanying libraries are free software; you can
-redistribute it and/or modify it under the terms of the GPL (either
-version 1, or at your option, any later version) or the Artistic
-License 2.0.
+#Adds data to message.
+$smtp->attach(
+    Encoding    => 'quoted-printable',
+    Data        => $message
+);
 
-=head1 AUTHOR
-
-Alex Schmidt
-
-=cut
-
-#config options:
+#Sends message.
+$smtp->send();

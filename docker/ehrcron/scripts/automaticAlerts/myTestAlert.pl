@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 
 #Sets up environment.
+use Net::SMTP;
 use MIME::Lite;
 
 #Sets up variables.

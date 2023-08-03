@@ -55,7 +55,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
     @Override
     public String getName()
     {
-        return "Water Monitoring";
+        return "Water Monitoring 2";
     }
 
     private static final Logger _log = LogManager.getLogger(WaterMonitoringNotification.class);

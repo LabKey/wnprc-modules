@@ -1,5 +1,5 @@
 Ext4.namespace('EHR.reports');
-EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
+EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
 
     const renderUrgent = () => {
         EHR.reports.waterGridCalendar(panel, tab);
@@ -8,7 +8,7 @@ EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
         const config = {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
-            viewName: 'Urgent Treatments',
+            viewName: 'Incomplete Treatments',
             cellStyles: JSON.stringify([{
                 cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],
                 flagData: {

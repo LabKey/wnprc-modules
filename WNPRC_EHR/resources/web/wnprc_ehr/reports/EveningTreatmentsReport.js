@@ -1,14 +1,13 @@
 Ext4.namespace('EHR.reports');
-EHR.reports.UrgentTreatmentsReport = function (panel, tab) {
+EHR.reports.EveningTreatmentsReport = function (panel, tab) {
 
     const renderUrgent = () => {
-        EHR.reports.waterGridCalendar(panel, tab);
         const target = tab.add({xtype: 'ldk-contentresizingpanel'});
 
         const config = {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
-            viewName: 'Urgent Treatments',
+            viewName: 'Night Treatments',
             cellStyles: JSON.stringify([{
                 cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],
                 flagData: {

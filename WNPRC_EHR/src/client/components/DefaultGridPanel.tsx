@@ -29,6 +29,7 @@ interface myProps {
     };
     cellStyles?: any;
     viewName?: string;
+    title?: string;
 }
 
 
@@ -46,6 +47,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                                              input,
                                              cellStyles,
                                              viewName,
+                                             title
                                          }) => {
 
     //declare any states here
@@ -166,6 +168,8 @@ const DefaultGridPanelImpl: FC<Props> = ({
                     showSearchInput={false}
                     allowSelections={true}
                     allowViewCustomization={true}
+                    title={title}
+
                 />
                 : <GridPanel
                     model={queryModels.containersModel}
@@ -175,6 +179,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                     showSearchInput={false}
                     allowSelections={true}
                     allowViewCustomization={true}
+                    title={title}
                 />
             }
         </div>

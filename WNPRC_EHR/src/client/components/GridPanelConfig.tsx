@@ -27,6 +27,7 @@ export const GridPanelConfig: FC<configProps> = ({
     input,
     cellStyles,
     filterConfig,
+    title,
     }) => {
     const baseFilters = [];
     const filterArray = [];
@@ -94,6 +95,7 @@ export const GridPanelConfig: FC<configProps> = ({
                     autoLoad
                     cellStyles={cellStyles}
                     viewName={viewName}
+                    title={title}
                 />
             </AppContextProvider>
         </ServerContextProvider>

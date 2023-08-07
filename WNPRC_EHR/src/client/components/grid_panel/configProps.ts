@@ -2,6 +2,7 @@ export interface configProps {
     schemaName: string;
     queryName: string;
     viewName: string;
+    title?: string;
     input?: {
         controller: string,
         view: string,

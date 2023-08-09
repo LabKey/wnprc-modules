@@ -268,7 +268,7 @@ public class WNPRC_VirologyController extends SpringActionController
                         "       </columns>" +
                         "  </table>\n" +
                         "</tables>";
-                QueryService.get().createLinkedSchema(getUser(), c,containerName + "LinkedSchema", viralLoadContainer.getId(), "lists", metadata, _sourceDataTableName, null);
+                QueryService.get().createLinkedSchema(getUser(), c,"vl_rsehr_data_linked_schema", viralLoadContainer.getId(), "lists", metadata, _sourceDataTableName, null);
 
             }
 

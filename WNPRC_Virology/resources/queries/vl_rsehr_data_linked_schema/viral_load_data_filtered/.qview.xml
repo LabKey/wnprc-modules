@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" canOverride="false">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="assay" />
+        <column name="sample_type" />
+        <column name="viral_load_average" />
+        <column name="below_llod" />
+        <column name="viral_load_replicates" />
+        <column name="source_type" />
+        <column name="comment" />
+        <column name="experiment_number" />
+        <column name="rna_isolation_method" />
+        <column name="account" />
+    </columns>
+</customView>

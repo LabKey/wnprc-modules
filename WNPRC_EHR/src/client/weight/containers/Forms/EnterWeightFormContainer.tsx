@@ -17,7 +17,7 @@ import {
   getQCStateMap,
   labkeyActionSelectWithPromise
 } from "../../query/actions";
-import {saveRowsDirect} from "../../../query/helpers";
+import { lookupAnimalInfo, saveRowsDirect } from '../../../query/helpers';
 import { Button } from "react-bootstrap";
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 import EnterWeightForm from "./EnterWeightForm";
@@ -65,6 +65,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   const [showModal, setShowModal] = useState<string>();
   const [errorLevel, setErrorLevel] = useState<FormErrorLevels>("no-action");
   const [singleEditMode, setSingleEditMode] = useState(false);
+  const [enableSave, setEnableSave] = useState<boolean>(false);
 
   const formEl = useRef(null);
 
@@ -101,7 +102,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     });
 
     setFormDataInAppContext(copyformdata);
-    onValidate();
     setBulkEditUsedInAppContext();
   };
   const triggerIds = (ids: any) => {
@@ -159,6 +159,42 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormIds();
   }, [ids]);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const results = await Promise.all(
+            formdata.map(async (entry) => {
+              try {
+                const info = await lookupAnimalInfo(entry.animalid.value);
+                return info["calculated_status"] === "Alive";
+              } catch (error) {
+                return false;
+              }
+            })
+        );
+        if (results.length === 0 || results.includes(false)) {
+          setEnableSave(false);
+        } else {
+          setEnableSave(true);
+        }
+      } catch (error) {
+        return;
+      }
+    })();
+  }, [formdata]);
+
+  useEffect(() => {
+    let check = false;
+    formdata.forEach((entry) => {
+      if (entry.weight.value === "" || entry.weight.value === undefined) {
+        setErrorLevel("submittable");
+        check = true;
+      }
+    });
+    if(!check){
+      setErrorLevel("no-action");
+    }
+  },[formdata]);
   //if we are in edit mode
   useEffect(() => {
     if (
@@ -340,25 +376,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }
   };
 
-  const onValidate = (): void => {
-    let copyformdata: Array<RowObj> = [...formdata];
-    copyformdata.forEach(item => {
-      //don't validate against deleted / hidden items
-      if (item["visibility"]["value"] != "hide-record"){
-        if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '') && item["animalid"]["value"] == ""){
-          setErrorLevel("no-action")
-        }
-        if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '' ) && item["animalid"]["value"] != ""){
-          setErrorLevel("saveable")
-        }
-        if ((typeof item["weight"]["value"] != 'undefined' &&  item["weight"]["value"] != '') && item["animalid"]["value"] != ""){
-          setErrorLevel("submittable")
-        }
-      }
-    });
-
-  };
-
   const changeActionToUpdate = (): void => {
     let copyformdata: Array<RowObj> = [...formdata];
     copyformdata.forEach(item => {
@@ -379,7 +396,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     // (see saveWeights function)...
     let QCState: string = "";
     if (editMode) {
-      QCState = getQCStateByRowId(QCMap, formdata[0]["QCState"]);
+      QCState = getQCStateByRowId(QCMap, formdata[0]["QCState"].value);
     } else {
       QCState = "In Progress";
     }
@@ -404,7 +421,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const wait = (time: number): Promise<any> => {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       let countdown: number = time;
       setInterval(() => {
         setSubmitBoxText("Success! Redirecting in..." + countdown);
@@ -576,8 +593,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   //when this is called, just get the id and set which modal to show
-  const handleShowModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    let target = e.target as HTMLInputElement
+  const handleShowModal = (e: any) => {
+    let target = e.target as HTMLInputElement;
     setShowModal(target.id);
   };
 
@@ -778,7 +795,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                             }
                             //the validity of this record is no longer valid, so set the error level to whatever it was
                             setFormDataInAppContext(copyformdata);
-                            onValidate();
                           });
                         }}
                       >
@@ -801,7 +817,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               className={`btn btn-primary submit-btn ${saving ? "saving" : ""}`}
               id="submit-all-btn"
               onClick={e => onSubmit(e)}
-              disabled={errorLevel !== "submittable"}
+              disabled={errorLevel === "submittable" || !enableSave}
             >
               Submit all
             </button>
@@ -809,7 +825,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               className={`btn btn-primary submit-btn ${saving ? "saving" : ""}`}
               id="save-draft-btn"
               onClick={e => onSave(e)}
-              disabled={errorLevel == "no-action"}
+              disabled={!enableSave}
             >
               Save Draft
             </button>
@@ -817,11 +833,11 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               className={`btn btn-primary submit-btn ${saving ? "saving" : ""}`}
               id="submit-review-btn"
               onClick={e => onSubmitForReview(e)}
-              disabled={errorLevel !== "submittable"}
+              disabled={errorLevel === "submittable" || !enableSave}
             >
               Submit for Review
             </button>
-            {errorLevel !== "submittable" &&
+            {errorLevel === "submittable" &&
             <div>
               <span id="invalid-tooltip" data-tooltip={"Fill in missing information for boxes outlined in red."}>⚠️</span>
             </div>

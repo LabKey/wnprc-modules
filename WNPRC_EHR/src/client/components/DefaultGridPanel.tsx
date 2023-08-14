@@ -54,10 +54,6 @@ const DefaultGridPanelImpl: FC<Props> = ({
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
 
     useEffect(() => {
-        actions.setMaxRows(queryModel.id, 100);
-    }, []);
-
-    useEffect(() => {
         if(queryModels?.containersModel?.queryInfo && cellStyles) {
             const { containersModel } = queryModels;
             const { queryInfo } = containersModel;

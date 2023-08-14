@@ -81,7 +81,8 @@ export const GridPanelConfig: FC<configProps> = ({
             omittedColumns: ['SortOrder','Searchable','Type','Title','ContainerType','Workbook','IdPrefixedName'],
             includeTotalCount: true,
             baseFilters: baseFilters,
-            filterArray: filterArray
+            filterArray: filterArray,
+            maxRows: 100,
         }
     };
 

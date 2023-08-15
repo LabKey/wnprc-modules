@@ -226,13 +226,6 @@ select[id^="restraint"] {
 /**
   React datepicker overrides
  */
-.react-datepicker-wrapper {
-  width: 100%;
-}
-
-.react-datepicker__input-container {
-  width: 100%;
-}
 
 .react-datepicker__input-container > input {
   width: 100%;
@@ -242,12 +235,7 @@ select[id^="restraint"] {
   border-image: initial;
   padding-left: 15px;
   padding-right: 15px;
-  font-size: 1.3rem;
-}
-
-.col-xs-5.datepicker-wrapper {
-  padding-left: 0;
-  padding-right: 0;
+  font-size: 14px;
 }
 
 .react-datepicker__aria-live {
@@ -261,3 +249,25 @@ select[id^="restraint"] {
   width: 1px;
   white-space: nowrap;
 }
+
+/* Close button for react bootstrap submit modal */
+.btn-close {
+  position: absolute;
+  right: 32px;
+  top: 2px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+  border-width: 0px;
+  background: rgba(0,0,0,0.0);
+}
+.btn-close:hover {
+  opacity: 1;
+}
+
+.btn-close:after {
+  display: inline-block;
+  content: "\00d7";
+  font-size: 30px;
+}
+

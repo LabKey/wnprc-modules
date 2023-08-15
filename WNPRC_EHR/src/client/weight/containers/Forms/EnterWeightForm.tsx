@@ -270,13 +270,13 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
         </div>
         <div className="col-xs-9">
           <DatePicker
+            wrapperClassName={"react-datepicker"}
             ref={r => (calendarEl = r)}
             showTimeSelect
             onChangeRaw={handleRawDateChange}
             dateFormat="yyyy-MM-dd HH:mm"
             todayButton="Today"
             selected={date}
-            className="form-control"
             name="date"
             id={`date_${index}`}
             onChange={handleDateChange}

@@ -1,5 +1,5 @@
 import * as React from "react";
-import SubmitModal from "./SubmitModal";
+import SubmitModal from "../../components/SubmitModal";
 import { useContext, useEffect, useState } from "react";
 import { labkeyActionSelectWithPromise } from "../query/actions";
 import { AppContext } from "../containers/App/ContextProvider";

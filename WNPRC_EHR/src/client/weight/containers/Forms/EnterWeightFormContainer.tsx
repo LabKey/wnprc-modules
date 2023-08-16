@@ -28,7 +28,7 @@ import {
 } from "../../query/helpers";
 //import {setupJsonData} from "../../../query/helpers";
 import BatchModal from "../../components/BatchModal";
-import SubmitModal from "../../components/SubmitModal";
+import SubmitModal from "../../../components/SubmitModal";
 import BulkEditModal from "../../components/BulkEditModal";
 import Spinner from "../../../components/Spinner";
 import SubmitForReviewModal from "../../components/SubmitForReviewModal";

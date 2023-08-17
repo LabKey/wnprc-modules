@@ -7,7 +7,7 @@ EHR.reports.MasterTreatmentsReport = function (panel, tab) {
         const config = {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
-            viewName: '',
+            viewName: 'Master Treatments',
             title: 'Master Treatments',
             cellStyles: JSON.stringify([{
                 cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],

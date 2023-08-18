@@ -11,6 +11,7 @@ App.registerApp<any>('grid_panel_webpart', (target: string, ctx: any) => {
         input: ctx.input ? JSON.parse(ctx.input) : undefined,
         cellStyles: ctx.cellStyles ? JSON.parse(ctx.cellStyles) : undefined,
         filterConfig: ctx.filterConfig ? JSON.parse(ctx.filterConfig) : undefined,
+        columnStyles: ctx.columnStyles ? JSON.parse(ctx.columnStyles) : undefined,
     };
     ReactDOM.render(
         <AppContainer>

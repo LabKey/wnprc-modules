@@ -223,3 +223,9 @@ select[id^="restraint"] {
     cursor: pointer;
   }
 }
+/*
+Styling for the treatments remarks column in the grid panel component
+ */
+.remark-column-style {
+  width: 250px !important;
+}

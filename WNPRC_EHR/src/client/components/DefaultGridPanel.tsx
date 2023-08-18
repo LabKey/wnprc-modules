@@ -16,9 +16,7 @@ import {
 } from '@labkey/components';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
-import { Simulate } from 'react-dom/test-utils';
-import canPlay = Simulate.canPlay;
-
+import "../theme/css/index.css";
 
 // Any props you might use will go here
 interface myProps {
@@ -30,6 +28,7 @@ interface myProps {
     cellStyles?: any;
     viewName?: string;
     title?: string;
+    columnStyles?: any;
 }
 
 
@@ -47,7 +46,8 @@ const DefaultGridPanelImpl: FC<Props> = ({
                                              input,
                                              cellStyles,
                                              viewName,
-                                             title
+                                             title,
+                                             columnStyles
                                          }) => {
 
     //declare any states here
@@ -119,6 +119,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 backgroundColor: backgroundClr,
                 padding: 5,
             }}
+                 className={columnStyles[`${col.index}`]}
             >
                 {data.get('formattedValue') ?? data.get('value')}
             </div>

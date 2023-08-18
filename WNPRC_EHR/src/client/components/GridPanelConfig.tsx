@@ -28,6 +28,7 @@ export const GridPanelConfig: FC<configProps> = ({
     cellStyles,
     filterConfig,
     title,
+    columnStyles,
     }) => {
     const baseFilters = [];
     const filterArray = [];
@@ -48,7 +49,7 @@ export const GridPanelConfig: FC<configProps> = ({
             } else if (filterType === "multiSubject") {
                 baseFilters.push(Filter.create("Id", filterConfig.filters.nonRemovable['0'].value, Filter.Types.EQUAL.getMultiValueFilter()));
             } else if (filterType === "singleSubject") {
-                baseFilters.push(Filter.create("Id", subjects, Filter.Types.EQUAL));
+                baseFilters.push(Filter.create("Id", subjects[0], Filter.Types.EQUAL));
             }
         }
         if (filterDate) {
@@ -97,6 +98,7 @@ export const GridPanelConfig: FC<configProps> = ({
                     cellStyles={cellStyles}
                     viewName={viewName}
                     title={title}
+                    columnStyles={columnStyles}
                 />
             </AppContextProvider>
         </ServerContextProvider>

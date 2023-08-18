@@ -36,6 +36,7 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
             viewName: 'Incomplete Treatments',
+            columnStyles: JSON.stringify({remark: "remark-column-style"}),
             cellStyles: JSON.stringify([{
                 cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],
                 flagData: {

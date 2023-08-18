@@ -3,6 +3,7 @@ export interface configProps {
     queryName: string;
     viewName: string;
     title?: string;
+    columnStyles?: any;
     input?: {
         controller: string,
         view: string,

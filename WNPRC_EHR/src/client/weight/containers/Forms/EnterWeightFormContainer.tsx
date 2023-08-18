@@ -110,6 +110,13 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setBatchAddUsedInAppContext();
   };
 
+  const deleteAll = () => {
+    setFormDataInAppContext([]);
+    setAnimalInfo(null);
+    setInfoState("waiting");
+    flipModalState();
+  }
+
   useEffect(() => {
     if (location.length == 0) {
       return;
@@ -691,13 +698,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         <Button
           variant="primary"
           className="wnprc-secondary-btn"
-          id="delete-record"
+          id="delete-all"
           disabled={singleEditMode}
-          onClick={() => {
-            setFormDataInAppContext([]);
-            setAnimalInfo(null);
-            setInfoState("waiting");
-          }}
+          onClick={handleShowModal}
         >
           Delete All
         </Button>
@@ -733,6 +736,16 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
             flipState={flipModalState}
           />
         )}
+        {showModal == "delete-all" && (
+        <SubmitModal
+            name={"delete-all"}
+            title="Delete All"
+            submitAction={deleteAll}
+            bodyText={"Delete All Records?"}
+            submitText="Yes"
+            flipState={flipModalState}
+            enabled={true}
+        />)}
         <form className="weights-form" ref={formEl}>
 
           {locloading ? (

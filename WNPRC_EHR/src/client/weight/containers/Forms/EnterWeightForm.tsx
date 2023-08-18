@@ -35,7 +35,8 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     liftUpAnimalInfo,
     liftUpVal,
     liftUpErrorLevel,
-    liftUpValidation
+    liftUpValidation,
+    triggerReportFormValidity
   } = props;
   const [prevweight, setPrevWeight] = useState<number>(null);
   const [animalInfo, setAnimalInfo] = useState<AnimalInfoProps>(null);
@@ -80,6 +81,15 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   },[anyErrors]);
 
 
+
+  const handleKeyDown = (event:React.KeyboardEvent<HTMLInputElement>) => {
+    // trigger html form validation when the return key is pressed. this restores desired behavior that was otherwise captured by
+    // the html 'required' fields when the form was able to submit, since then, the submit buttons have been disabled
+    // and the form submit does not get triggered unless basic validation is passing
+    if (event.key === 'Enter') {
+      triggerReportFormValidity();
+    }
+  }
   //validate items to set error levels which determine which buttons are disabled
   const validateItems = (name: string, value: string | number | object) => {
     if (value == "" && name == "animalid") {
@@ -254,6 +264,9 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
             onBlur={e => {
               checkWeights(e);
             }}
+            onKeyDown={handleKeyDown}
+            /* disables scrolling on this input, prevents weight from accidentally being changed */
+            onWheel={(e:React.UIEvent<HTMLElement>)=> {(e.target as HTMLInputElement).blur()}}
             required
           />
           {weightWarning && (

@@ -8,7 +8,7 @@ EHR.reports.MasterTreatmentsReport = function (panel, tab) {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
             viewName: 'Master Treatments',
-            title: 'Master Treatments',
+            columnStyles: JSON.stringify({remark: "remark-column-style"}),
             cellStyles: JSON.stringify([{
                 cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],
                 flagData: {

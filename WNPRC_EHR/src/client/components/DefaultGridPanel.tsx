@@ -119,7 +119,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 backgroundColor: backgroundClr,
                 padding: 5,
             }}
-                 className={columnStyles[`${col.index}`]}
+                 className={(columnStyles && columnStyles.hasOwnProperty(col.index)) ? columnStyles[col.index] : undefined}
             >
                 {data.get('formattedValue') ?? data.get('value')}
             </div>

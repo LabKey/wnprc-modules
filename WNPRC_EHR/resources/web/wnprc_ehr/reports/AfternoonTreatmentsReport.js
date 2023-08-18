@@ -36,6 +36,7 @@ EHR.reports.AfternoonTreatmentsReport = function (panel, tab) {
             schemaName: 'study',
             queryName: 'treatmentSchedule',
             viewName: 'PM Treatments',
+            columnStyles: JSON.stringify({remark: "remark-column-style"}),
             cellStyles: JSON.stringify([{
                 cellColumns: ["meaning", "TimeOfDay", "frequency", "remark"],
                 flagData: {

@@ -221,7 +221,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalWaterCalendar.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/UrgentTreatmentReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/IncompleteTreatmentsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/MorningTreatmentsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/AfternoonTreatmentsReport.js"), this);

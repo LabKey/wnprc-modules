@@ -66,6 +66,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   const [errorLevel, setErrorLevel] = useState<FormErrorLevels>("no-action");
   const [singleEditMode, setSingleEditMode] = useState(false);
   const [enableSave, setEnableSave] = useState<boolean>(false);
+  const [allExpanded, setAllExpanded] = useState<boolean>(true);
 
   const formEl = useRef(null);
 
@@ -150,6 +151,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         }
       });
       setFormDataInAppContext(animaldata);
+      setAllExpanded(false);
       setLocLoading(false);
       setErrorLevel("saveable");
     });
@@ -520,6 +522,19 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormDataInAppContext(copyformdata);
   };
 
+
+  const toggleExpandAllRecords = () => {
+    let copyformdata: Array<RowObj> = [...formdata];
+    copyformdata.forEach((item) => {
+      if (allExpanded) {
+        item["collapsed"]["value"] = true;
+      } else {
+        item["collapsed"]["value"] = false;
+      }
+    })
+    setAllExpanded(!allExpanded);
+    setFormDataInAppContext(copyformdata);
+  }
   const toggleCollapse = (item: RowObj, i) => {
     let copyitem: RowObj = Object.assign({},item);
     copyitem["collapsed"]["value"] = false;
@@ -664,6 +679,14 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           onClick={handleShowModal}
         >
           Add Batch
+        </Button>
+        <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="expand-all"
+            onClick={ () => {toggleExpandAllRecords()}}
+        >
+          {allExpanded ? "Collapse All" : "Expand All"}
         </Button>
         <Button
           variant="primary"

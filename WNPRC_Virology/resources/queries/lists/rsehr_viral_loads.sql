@@ -25,7 +25,8 @@ SELECT
     --adding RNA col on a DB from 20230524: 37,493 records versus 37,398 before adding it
     q.RNA_isolation_method as RNA_isolation_method,
     vsq.funding_string as account,
-    GROUP_CONCAT( CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
+    --requires an explicit CAST into NUMERIC, as LabKey SQL does not check data types for function arguments
+    GROUP_CONCAT(DISTINCT CAST(ROUND(v.viralLoadScientific, 3) as NUMERIC), ' ; ') as viral_load_replicates
     --COUNT(v.viralLoadScientific) AS replicate_count,
 FROM Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadAssayDataPath')}.assay.Viral_Loads.Viral_Load.Data v
 
@@ -38,7 +39,7 @@ LEFT JOIN Site.{substitutePath moduleProperty('WNPRC_Virology', 'virologyEHRVLSa
     ON vsq.Id = v.subjectId AND vsq.Sample_date = v.date
 
 WHERE
-    (q.QC_Pass = true OR v.viralLoadScientific = 0.0) AND v.subjectId NOT LIKE '%STD_%' AND v.subjectId NOT LIKE '%CTL%' AND v.subjectId NOT LIKE '%PosControl%' AND v.subjectId NOT LIKE '%NegControl%' AND v.subjectId NOT LIKE '%negative%'
+    (q.QC_Pass = true OR v.viralLoadScientific = 0.0) AND vsq.status.Status != '10-never submitted' AND v.subjectId NOT LIKE '%STD_%' AND v.subjectId NOT LIKE '%CTL%' AND v.subjectId NOT LIKE '%PosControl%' AND v.subjectId NOT LIKE '%NegControl%' AND v.subjectId NOT LIKE '%negative%'
 
 -- groupBy viral load so these can be averaged
 GROUP BY

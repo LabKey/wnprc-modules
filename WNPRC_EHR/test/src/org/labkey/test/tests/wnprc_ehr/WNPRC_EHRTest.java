@@ -66,6 +66,7 @@ import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -2649,9 +2650,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
+        WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        // Test that save button is disabled if no entries
+        Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
+        // Test that save button is disabled if single valid id is entered
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
+        Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
         addBatchByLocation();
-        // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertTrue("Save button is disabled for correct test ids",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");
@@ -2861,6 +2867,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = currentDate.format(formatter);
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
@@ -2889,10 +2898,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
         fillAnInputByName("contacts", "test@test.com");

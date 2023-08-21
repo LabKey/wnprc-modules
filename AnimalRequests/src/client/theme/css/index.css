@@ -39,11 +39,24 @@
     border-image: initial;
     padding-left: 15px;
     padding-right: 15px;
+    font-size: 1.3rem;
 }
 
 .col-xs-5.datepicker-wrapper {
     padding-left: 0;
     padding-right: 0;
+}
+
+.react-datepicker__aria-live {
+    position: absolute;
+    clip-path: circle(0);
+    border: 0;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    width: 1px;
+    white-space: nowrap;
 }
 /**/
 
@@ -123,7 +136,7 @@ select {
     border-radius: 1px;
     -moz-appearance: none;
     -webkit-appearance: none;
-    background: url(/_images/arrow_down.png) right no-repeat !important;
+    background: url(../../../../../../platform/internal/webapp/_images/arrow_down.png) right no-repeat !important;
     text-transform: Capitalize !important;
 
 }
@@ -133,8 +146,8 @@ select {
     text-align: center;
     display: block;
     position: relative;
-    background: url(/_images/ajax-loading.gif) left no-repeat !important;
-    background-size: fill;
+    background: url(../../../../../../platform/internal/webapp/_images/ajax-loading.gif) left no-repeat !important;
+    background-size: cover;
     font-size: 2em;
     padding: 20px 0 0 0;
     z-index: 3;

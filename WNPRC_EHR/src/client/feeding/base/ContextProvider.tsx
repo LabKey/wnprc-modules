@@ -15,7 +15,11 @@ import {
 
 const AppContext = createContext({} as ContextProps);
 
-const ContextProvider: React.FunctionComponent = ({ children }) => {
+interface contextProps {
+  children: React.ReactNode;
+}
+
+const ContextProvider: React.FunctionComponent<contextProps> = ({ children }) => {
   const [queryDetails, setQueryDetails] = useState(null);
   //introduce type of field here?
   const [formData, setFormData] = useState<Array<RowObj>>([

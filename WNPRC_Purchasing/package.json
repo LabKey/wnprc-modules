@@ -17,16 +17,16 @@
     "tsx"
   ],
   "dependencies": {
-    "@labkey/components": "2.146.0",
-    "@labkey/api": "1.10.0"
+    "@labkey/components": "2.242.9",
+    "@labkey/api": "~1.16.1",
+    "react-bootstrap": "~0.33.1",
+    "immer": "~9.0.6",
+    "font-awesome": "~4.7.0",
+    "immutable": "~3.8.2"
   },
   "devDependencies": {
-    "@labkey/build": "6.0.0",
-    "react-bootstrap": "0.33.1",
-    "immer": "9.0.6",
-    "immutable": "3.8.2",
-    "font-awesome": "4.7.0",
-    "@labkey/eslint-config-base": "0.0.8",
-    "@labkey/eslint-config-react": "0.0.8"
+    "@labkey/build": "6.3.2",
+    "@labkey/eslint-config-base": "0.0.12",
+    "@labkey/eslint-config-react": "0.0.12"
   }
 }

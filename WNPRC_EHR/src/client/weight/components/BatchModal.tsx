@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as React from "react";
 import { labkeyActionSelectWithPromise } from "../query/actions";
 import Select from "react-select";
-import SubmitModal from "./SubmitModal";
+import SubmitModal from "../../components/SubmitModal";
 import { ConfigProps, BatchModalProps } from "../typings/main";
 
 

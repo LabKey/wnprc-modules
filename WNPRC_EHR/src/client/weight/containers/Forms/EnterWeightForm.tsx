@@ -5,8 +5,9 @@ import "../../../theme/css/index.css";
 import "../../../theme/css/tooltip.css";
 import {
   enteredWeightIsGreaterThanPrevWeight,
-  enteredWeightIsLessThanPrevWeight
-} from "../../query/helpers";
+  enteredWeightIsLessThanPrevWeight,
+  jumpToNextRecordOnEnter
+} from '../../query/helpers';
 import { useEffect, useState } from "react";
 import { labkeyActionSelectWithPromise } from "../../query/actions";
 import { useRef, useContext } from "react";
@@ -82,13 +83,8 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
 
 
-  const handleKeyDown = (event:React.KeyboardEvent<HTMLInputElement>) => {
-    // trigger html form validation when the return key is pressed. this restores desired behavior that was otherwise captured by
-    // the html 'required' fields when the form was able to submit, since then, the submit buttons have been disabled
-    // and the form submit does not get triggered unless basic validation is passing
-    if (event.key === 'Enter') {
-      triggerReportFormValidity();
-    }
+  const handleKeyDown = (event : React.KeyboardEvent<HTMLInputElement>) => {
+    jumpToNextRecordOnEnter(event);
   }
   //validate items to set error levels which determine which buttons are disabled
   const validateItems = (name: string, value: string | number | object) => {

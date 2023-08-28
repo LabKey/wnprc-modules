@@ -35,7 +35,7 @@ let feedingConfig = function wp(env) {
     return {
         mode: process.env.NODE_ENV,
         devtool: 'source-map',
-        entry: './src/client/feeding/base/App.tsx',
+        entry: './src/client/feeding/base/app.tsx',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',
@@ -68,7 +68,7 @@ var abstractConfig = function wp(env) {
     return {
         mode: process.env.NODE_ENV,
         devtool: 'source-map',
-        entry: './src/client/abstract/base/App.tsx',
+        entry: './src/client/abstract/base/app.tsx',
         externals: {
             jquery: 'jQuery',
             urijs: 'URI',

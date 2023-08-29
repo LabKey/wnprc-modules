@@ -90,7 +90,7 @@
 }
 
 .loading {
-  background-image: url("/_images/ajax-loading.gif");
+  background-image: url("../../../../../../platform/core/webapp/_images/ajax-loading.gif");
   background-size: 25px 25px;
   background-repeat: no-repeat;
   opacity: 0;
@@ -223,3 +223,51 @@ select[id^="restraint"] {
     cursor: pointer;
   }
 }
+/**
+  React datepicker overrides
+ */
+
+.react-datepicker__input-container > input {
+  width: 100%;
+  min-height: 1px;
+  height: 27px;
+  border: 1px solid rgb(166,166,166);
+  border-image: initial;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: 14px;
+}
+
+.react-datepicker__aria-live {
+  position: absolute;
+  clip-path: circle(0);
+  border: 0;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  width: 1px;
+  white-space: nowrap;
+}
+
+/* Close button for react bootstrap submit modal */
+.btn-close {
+  position: absolute;
+  right: 32px;
+  top: 2px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+  border-width: 0px;
+  background: rgba(0,0,0,0.0);
+}
+.btn-close:hover {
+  opacity: 1;
+}
+
+.btn-close:after {
+  display: inline-block;
+  content: "\00d7";
+  font-size: 30px;
+}
+

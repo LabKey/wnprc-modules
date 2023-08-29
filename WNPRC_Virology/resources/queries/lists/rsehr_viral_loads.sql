@@ -23,7 +23,8 @@ SELECT
     v.comment AS comment,
     v.run.exptNumber as experiment_number,
     vsq.funding_string as account,
-    GROUP_CONCAT( DISTINCT CAST(v.viralLoadScientific AS BIGINT ), ' ; ') AS viral_load_replicates,
+    --requires an explicit CAST into NUMERIC, as LabKey SQL does not check data types for function arguments
+    GROUP_CONCAT(DISTINCT CAST(ROUND(v.viralLoadScientific, 3) as NUMERIC), ' ; ') as viral_load_replicates
     --COUNT(v.viralLoadScientific) AS replicate_count,
 FROM Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadAssayDataPath')}.assay.Viral_Loads.Viral_Load.Data v
 

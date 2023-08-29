@@ -50,7 +50,7 @@ export function buildQCMap(data: any): qcMapType {
   return qcmap;
 }
 
-export function getQCStateByRowId(qcmap: qcMapType, rowid: number): string {
+export const getQCStateByRowId = (qcmap: qcMapType, rowid: number): string => {
   if (!qcmap) {
     return null;
   }

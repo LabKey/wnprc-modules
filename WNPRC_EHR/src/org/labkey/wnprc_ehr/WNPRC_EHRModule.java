@@ -102,22 +102,7 @@ import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
-import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
-import org.labkey.wnprc_ehr.notification.BehaviorNotification;
-import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
-import org.labkey.wnprc_ehr.notification.DeathNotification;
-import org.labkey.wnprc_ehr.notification.FoodCompletedProblemsNotification;
-import org.labkey.wnprc_ehr.notification.FoodNotCompletedNotification;
-import org.labkey.wnprc_ehr.notification.FoodNotStartedNoonNotification;
-import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
-import org.labkey.wnprc_ehr.notification.IrregularObsBehaviorNotification;
-import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
-import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
-import org.labkey.wnprc_ehr.notification.VvcNotification;
-import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
-import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
-import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
-import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
+import org.labkey.wnprc_ehr.notification.*;
 import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
@@ -364,7 +349,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new IrregularObsBehaviorNotification(this),
                 new WaterOrdersAlertNotification(this),
                 new WaterMonitoringAnimalWithOutEntriesNotification(this),
-                new WaterMonitoringNotification(this)
+                new WaterMonitoringNotification(this),
+                new ValidationSuiteNotification(this)
         );
 
         for (Notification notification : notifications)

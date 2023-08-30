@@ -33,7 +33,10 @@
         <datatype>integer</datatype>
         <columnTitle>Key</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <isHidden>true</isHidden>
+        <measure>true</measure>
         <isKeyField>true</isKeyField>
+        <isAutoInc>true</isAutoInc>
       </column>
       <column columnName="assay">
         <datatype>varchar</datatype>
@@ -50,8 +53,14 @@
         <scale>4000</scale>
       </column>
       <column columnName="viral_load_average">
+        <datatype>double</datatype>
+        <columnTitle>Viral Load Avg</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#double</rangeURI>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="below_llod">
         <datatype>varchar</datatype>
-        <columnTitle>Viral Load</columnTitle>
+        <columnTitle>Below LLoD?</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
       </column>

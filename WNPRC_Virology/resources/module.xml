@@ -51,23 +51,6 @@
             </editPermissions>
         </propertyDescriptor>
 
-
-        <propertyDescriptor name="ZikaPortalQCStatus">
-            <canSetPerContainer>false</canSetPerContainer>
-            <description>QC Status string used to send Zika notification emails</description>
-            <editPermissions>
-                <permission>ADMIN</permission>
-            </editPermissions>
-        </propertyDescriptor>
-
-        <propertyDescriptor name="ZikaPortalPath">
-            <canSetPerContainer>false</canSetPerContainer>
-            <description>URL where the data lives on the zika portal. Used in the email notification to link users to the correct dataset on the open research portal.</description>
-            <editPermissions>
-                <permission>ADMIN</permission>
-            </editPermissions>
-        </propertyDescriptor>
-
         <propertyDescriptor name="RSEHRNotificationEmailReplyTo">
             <canSetPerContainer>false</canSetPerContainer>
             <description>Email for who to contact about RSEHR questions, used in body of RSEHR email notification</description>

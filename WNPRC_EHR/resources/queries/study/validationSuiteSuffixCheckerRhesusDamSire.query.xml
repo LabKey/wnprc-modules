@@ -1,0 +1,35 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="validationSuiteSuffixCheckerRhesusDamSire" tableDbType="TABLE">
+                <tableTitle>VALIDATION SUITE: Suffix Checker (Rhesus - Dam/Sire)</tableTitle>
+                <description>
+                    This query checks Rhesus parents for similarities (ex. ID's: rhxxyy and xxyy).
+                </description>
+                <columns>
+                    <column columnName="last_four">
+                        <columnTitle>ID Last Four Digits</columnTitle>
+                    </column>
+                    <column columnName="sire">
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Sire%2C-source&amp;
+                            query.Sire~in=${last_four}%3Brh${last_four}
+                        </url>
+                    </column>
+                    <column columnName="dam">
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Dam%2C-source&amp;
+                            query.Dam~in=${last_four}%3Brh${last_four}
+                        </url>
+                    </column>
+                    <column columnName="frequency"/>
+                    <column columnName="species"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

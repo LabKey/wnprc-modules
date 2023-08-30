@@ -1,0 +1,12 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="last_four"/>
+        <column name="sire"/>
+        <column name="dam"/>
+        <column name="frequency"/>
+        <column name="species"/>
+    </columns>
+    <sorts>
+        <sort column="last_four" descending="false"/>
+    </sorts>
+</customView>

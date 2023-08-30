@@ -104,7 +104,8 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
         </div>
         <div className="col-xs-9">
           <DatePicker
-            ref={(r) => (calendarEl.current = r)}
+            wrapperClassName={"react-datepicker"}
+            ref={(r) => (calendarEl = r)}
             showTimeSelect
             onChangeRaw={handleRawDateChange}
             dateFormat="yyyy-MM-dd HH:mm"

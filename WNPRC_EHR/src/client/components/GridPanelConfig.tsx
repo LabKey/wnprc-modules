@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import * as React from 'react';
 import { Query, getServerContext, Filter } from '@labkey/api';
 import {
     SchemaQuery,
@@ -11,6 +11,7 @@ import {
 import { DefaultGridPanel } from "./DefaultGridPanel";
 import { configProps } from './grid_panel/configProps';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
+import { FC } from 'react';
 
 /*
 Grid Panel Configuration
@@ -73,7 +74,6 @@ export const GridPanelConfig: FC<configProps> = ({
             }
         });
     }
-
     const serverContext = withAppUser(getServerContext());
     const queryConfigs = {
         containersModel: {

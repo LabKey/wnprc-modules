@@ -124,6 +124,7 @@ import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
 import org.labkey.wnprc_ehr.security.roles.WNPRCAnimalRequestsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRUrgentTreatmentsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.wnprc_ehr.updates.ModuleUpdate;
@@ -439,6 +440,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
         RoleManager.registerRole(new WNPRCAnimalRequestsRole());
+        RoleManager.registerRole(new WNPRCEHRUrgentTreatmentsRole());
     }
 
     public Set<Container> getWNPRCStudyContainers() {

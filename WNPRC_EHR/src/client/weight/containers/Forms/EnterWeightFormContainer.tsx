@@ -214,6 +214,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }
     //set the ask id
     setEditMode(true);
+    setAllExpanded(false);
 
     //if there's no task id, then we don't have to update the task table... just update the records
     //or more generally if we are in edit mode, we don't have ot update the task id...
@@ -421,9 +422,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       changeActionToUpdate();
       window.scrollTo(0,0);
       setEndTimeInAppContext(new Date());
-    }).catch(()=>{
+    }).catch((e)=>{
       setWasError(true);
-      setErrorText("Error during operation.");
+      setErrorText("Error during operation. " + e.exception);
       window.scrollTo(0,0);
     });
 

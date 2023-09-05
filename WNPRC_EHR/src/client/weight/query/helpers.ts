@@ -172,18 +172,17 @@ export const generateUUID = () => {
 };
 
 // Restores a desired behavior on the card-based react forms:
-// Given a keyboard event (w/ assoc element target), and naming scheme of the input id as "id_{idx}"
-// where idx is the index of the record in the form, jump to the next record, same field, when 'Enter' is pressed.
-export const jumpToNextRecordOnEnter = (event : React.KeyboardEvent<HTMLInputElement>) => {
+// Given a keyboard event (w/ assoc element target), and naming scheme of the input id as event.target.id + id_separator + record_index
+// where record_index is the index of the record in the form, jump to the next record, same field, when 'Enter' is pressed.
+export const jumpToNextRecordOnEnter = (event : React.KeyboardEvent<HTMLInputElement>, record_index: number, id_seperator : string = "") => {
   if (event.key === 'Enter'){
     let the_event = event.target as HTMLInputElement
-    let id_sep : string = "_";
     let curr_field_id : string = the_event.id;
 
     let next_field_el = document.getElementById(
-        curr_field_id.substring(0,curr_field_id.indexOf(id_sep))
-        + id_sep +
-        (parseInt(curr_field_id.substring(curr_field_id.indexOf(id_sep)+1)) + 1).toString()
+        curr_field_id.substring(0,curr_field_id.indexOf(id_seperator))
+        + id_seperator +
+        (record_index + 1).toString()
     )
 
     if (next_field_el) {

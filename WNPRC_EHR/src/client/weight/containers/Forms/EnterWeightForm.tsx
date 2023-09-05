@@ -84,7 +84,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
 
   const handleKeyDown = (event : React.KeyboardEvent<HTMLInputElement>) => {
-    jumpToNextRecordOnEnter(event);
+    jumpToNextRecordOnEnter(event, index, "_");
   }
   //validate items to set error levels which determine which buttons are disabled
   const validateItems = (name: string, value: string | number | object) => {

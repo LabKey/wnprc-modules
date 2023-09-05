@@ -2438,6 +2438,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
+        //make sure we are done saving things
+        waitForText("My Tasks");
+        //navigate to the weights table to click on the task id
         navigateToWeightsTable();
         Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();

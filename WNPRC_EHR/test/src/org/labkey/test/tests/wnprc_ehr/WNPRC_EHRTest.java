@@ -3009,4 +3009,29 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
+    @Test
+    public void testReactGridPanel() throws UnhandledAlertException {
+        log("Starting testReactGridPanel.");
+        log("Testing grid panel renders for full webpage");
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "research_ultrasounds"));
+        WebElement reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue(reactComp.isDisplayed());
+
+        log("Testing grid panel renders for web parts");
+        goToEHRFolder();
+        waitAndClickAndWait(Locator.linkWithText("Animal History"));
+        AnimalHistoryPage<AnimalHistoryPage> animalHistoryPage = new AnimalHistoryPage<>(getDriver());
+        animalHistoryPage
+                .selectSingleAnimalSearch()
+                .searchFor(MORE_ANIMAL_IDS[0])
+                .clickCategoryTab("Today At Center")
+                .clickReportTab("Treatments - Incomplete");
+
+        waitForElement(Locator.byClass(".grid-panel"));
+        reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue("Grid Panel webpart failed to render in animal history",reactComp.isDisplayed());
+
+        log("Completed testReactGridPanel.");
+    }
+
 }

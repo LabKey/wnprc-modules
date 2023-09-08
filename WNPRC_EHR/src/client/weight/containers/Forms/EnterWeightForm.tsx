@@ -36,8 +36,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     liftUpAnimalInfo,
     liftUpVal,
     liftUpErrorLevel,
-    liftUpValidation,
-    triggerReportFormValidity
+    liftUpValidation
   } = props;
   const [prevweight, setPrevWeight] = useState<number>(null);
   const [animalInfo, setAnimalInfo] = useState<AnimalInfoProps>(null);

@@ -625,10 +625,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setShowModal("none");
   };
 
-  const triggerReportFormValidity = () => {
-    formEl.current.reportValidity();
-  }
-
   const triggerUpAnyErrors = e => {
     setErrorLevel(e);
   };
@@ -809,7 +805,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                               infoState={liftUpInfoState}
                               liftUpErrorLevel={triggerUpAnyErrors}
                               liftUpValidation={liftUpValidationState}
-                              triggerReportFormValidity={triggerReportFormValidity}
                             />
                           </div>
                         </div>

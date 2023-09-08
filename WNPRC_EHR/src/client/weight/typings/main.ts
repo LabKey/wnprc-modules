@@ -128,7 +128,6 @@ export interface WeightFormProps {
     liftUpAnimalInfo: (animalInfo: AnimalInfoProps) => void;
     liftUpErrorLevel: (errorLevel: string) => void;
     liftUpValidation: (name: string, value: any, index: number) => void;
-    triggerReportFormValidity: () => void;
 }
 
 export interface ModifyRowsCommands {

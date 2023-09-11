@@ -45,6 +45,7 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
@@ -154,6 +155,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
     public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
+    private static User _currentUser;
 
     /**
      * Logger for logging the logs
@@ -471,13 +473,13 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public static Container getDefaultContainer() {
         if (ContainerManager.getForPath("/WNPRC") == null) {
-            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC");
+            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC", _currentUser);
         }
         Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
 
         Container ehrContainer = wnprcContainer.getChild("EHR");
         if (ehrContainer == null) {
-            ContainerManager.createContainer(wnprcContainer, "EHR");
+            ContainerManager.createContainer(wnprcContainer, "EHR",_currentUser);
             ehrContainer = wnprcContainer.getChild("EHR");
         }
 

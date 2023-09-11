@@ -277,6 +277,7 @@ public class SelfRegistrationController extends SpringActionController
         private static final String containerPath = "/PrivateTest";
         private static final String schemaName = "issues";
         private static final String issueTable = "userregistrations";
+        private static User _currentUser;
 
         // creates fields in issue tracker
         public static void createTextFields(Domain d, String[] fields, User user) throws ChangePropertyDescriptorException
@@ -297,7 +298,7 @@ public class SelfRegistrationController extends SpringActionController
         {
             // create container
             Container rootContainer = ContainerManager.getRoot();
-            Container container = ContainerManager.createContainer(rootContainer,"PrivateTest");
+            Container container = ContainerManager.createContainer(rootContainer,"PrivateTest", _currentUser);
             Group group = GroupManager.getGroup(rootContainer, "Guests", GroupEnumType.SITE);
             if (null == group)
             {
@@ -308,7 +309,7 @@ public class SelfRegistrationController extends SpringActionController
             RoleManager.getAllRoles();
             //what is the roleName for submitter?
             policy.addRoleAssignment(group, SubmitterRole.class);
-            SecurityPolicyManager.savePolicy(policy);
+            SecurityPolicyManager.savePolicy(policy, _currentUser);
 
             // ensure the issue module is enabled for this folder
             Module issueModule = ModuleLoader.getInstance().getModule("Issues");

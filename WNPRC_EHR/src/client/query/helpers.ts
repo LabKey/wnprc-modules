@@ -68,7 +68,7 @@ export const saveRowsDirect = (jsonData: jsonDataType) => {
 };
 
 export const wait = (time: number, updateFn: any) => {
-  return new Promise(resolve => {
+  return new Promise<void>(resolve => {
     let countdown = time;
     setInterval(() => {
       updateFn("Success! Redirecting in..." + countdown);

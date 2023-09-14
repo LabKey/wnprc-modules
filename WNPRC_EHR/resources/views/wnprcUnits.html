@@ -15,7 +15,8 @@ function createNavMenu()
             ]},
             {header: 'Colony Management',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/Issue_Tracker/start.view?'},
+                {name: 'Colony Mgmt Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/ColonyManagement-Public/begin.view'},
+                {name: 'Animal Relocation Request', url: 'https://go.wisc.edu/p9ap0o'},
                 {name: 'Colony Mgmt Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/begin.view?'},
                 {name: 'Water Calendar',      url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'WaterCalendar',  'WNPRC/EHR')},
             ]},
@@ -30,8 +31,6 @@ function createNavMenu()
                 {name: 'Compliance Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/begin.view?'},
                 {name: 'Trainers Only**', url: '<%=contextPath%>/EHR_ComplianceDB/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Trainers/training.view?'},
                 {name: 'Safety Data Sheets (SDS)', url: '<%=contextPath%>/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1229'},
-                {name: 'Policies', url: '<%=contextPath%>/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1387'},
-                {name: 'Management Reports', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Management%20Reports/begin.view?'},
                 {name: 'Injury/Exposure Documents', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=postExposure'},
                 {name: 'Read and Certify SOPs (PowerDMS)', url: 'https://go.wisc.edu/mkg850'},
                 {name: 'Request Training', url: 'https://go.wisc.edu/36i793'},
@@ -109,7 +108,8 @@ function createNavMenu()
             ]},
             {header: 'Purchasing Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Purchasing/Issue_Tracker/start.view?'}
+                {name: 'WNPRC Purchasing Portal (New)', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/WNPRC%20Purchasing/begin.view'},
+                {name: 'Issue Tracker (Legacy)', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Purchasing/Issue_Tracker/start.view'}
             ]}
         ]
     });

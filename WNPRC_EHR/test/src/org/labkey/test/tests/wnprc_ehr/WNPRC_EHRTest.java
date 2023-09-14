@@ -66,12 +66,15 @@ import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.UnhandledAlertException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -157,7 +160,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
+    //Note: if updating this file, also update VIROLOGY_RESULT_DATA variable to match it, that way we can test
+    // the api end point which converts xlsx to JSON as well as the frontend extJS after it gets uploaded.
     private static final String CORRECT_SAMPLE_FILE_NAME = "virologyResults_correct.xlsx";
+    private static final Map<String, Object> VIROLOGY_RESULT_DATA = new HashMap<>();
+    //shortcut to getting the file content in the xlsx file.
+
     private static final String INCORRECT_FORMAT_SAMPLE_FILE_NAME = "virologyResults_baddate.xlsx";
     private static final String NO_MATCHING_RECORDS_SAMPLE_FILE_NAME = "virologyResults_nomatch.xlsx";
     private static final File CORRECT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + CORRECT_SAMPLE_FILE_NAME);
@@ -202,7 +210,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder(initTest.getProjectName());
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
@@ -254,6 +262,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupClinpathVirologySection();
 
         initTest.setupAnimalRequests();
+
+        initTest.checkUpdateProgramIncomeAccount();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -464,32 +474,43 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 
-        log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
+        SelectRowsCommand sr = new SelectRowsCommand("ehr", "form_framework_types");
+        sr.addFilter(new Filter("queryname","feeding", Filter.Operator.EQUAL));
+        sr.addFilter(new Filter("framework","reactjs", Filter.Operator.EQUAL));
+        SelectRowsResponse resp = sr.execute(cn, EHR_FOLDER_PATH);
+        if (resp.getRowCount().intValue() == 0)
+        {
 
-        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap = new HashMap<>();
-        rowMap.put("schemaname", "study");
-        rowMap.put("queryname", "feeding");
-        rowMap.put("framework", "reactjs");
-        rowMap.put("url","/wnprc_ehr/feeding.view");
-        insertCmd.addRow(rowMap);
+            log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
 
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
+            InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap = new HashMap<>();
+            rowMap.put("schemaname", "study");
+            rowMap.put("queryname", "feeding");
+            rowMap.put("framework", "reactjs");
+            rowMap.put("url", "/wnprc_ehr/feeding.view");
+            insertCmd.addRow(rowMap);
 
-        log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
-        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+            insertCmd.execute(cn, EHR_FOLDER_PATH);
 
-        InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap2 = new HashMap<>();
-        rowMap2.put("schemaname", "study");
-        rowMap2.put("queryname", "weight");
-        rowMap2.put("framework", "reactjs");
-        rowMap2.put("url", "/wnprc_ehr/weight.view");
-        insertCmd2.addRow(rowMap2);
+            log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
+            log("Inserting weight as a reactjs form type into ehr.form_framework_types");
 
-        insertCmd2.execute(cn, EHR_FOLDER_PATH);
+            InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap2 = new HashMap<>();
+            rowMap2.put("schemaname", "study");
+            rowMap2.put("queryname", "weight");
+            rowMap2.put("framework", "reactjs");
+            rowMap2.put("url", "/wnprc_ehr/weight.view");
+            insertCmd2.addRow(rowMap2);
 
-        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+            insertCmd2.execute(cn, EHR_FOLDER_PATH);
+
+            log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+        } else
+        {
+            log("feeding/weight framework type already exists, no action needed");
+        }
     }
 
     public void setupClinpathVirologySection() throws IOException, CommandException
@@ -527,6 +548,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE);
         _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE);
         _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE);
+
+        // set up the viral load hashmap to match CORRECT_SAMPLE_FILE
+        VIROLOGY_RESULT_DATA.put("Id", "test1993532");
+        VIROLOGY_RESULT_DATA.put("Date", "2022-07-22");
+        VIROLOGY_RESULT_DATA.put("Sample Type", "Blood - EDTA Whole Blood");
+        VIROLOGY_RESULT_DATA.put("Virus", "SRV 1,2,3,4,5");
+        VIROLOGY_RESULT_DATA.put("Method", "PCR");
+        VIROLOGY_RESULT_DATA.put("Result", "-");
+        VIROLOGY_RESULT_DATA.put("Qualifier", "Negative");
+        VIROLOGY_RESULT_DATA.put("Remark", "CRL");
+
 
         // set the location of the virology results upload location
         goToEHRFolder();
@@ -1648,6 +1680,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText(tableName);
         clickAndWait(Locator.bodyLinkContainingText(tableName));
     }
+    public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert)
+    {
+        return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
+    }
 
     //@Test - old ext form
     public void testWeightDataEntry()
@@ -2666,9 +2702,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
+        WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        // Test that save button is disabled if no entries
+        Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
+        // Test that save button is disabled if single valid id is entered
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
+        Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
         addBatchByLocation();
-        // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertTrue("Save button is disabled for correct test ids",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");
@@ -2787,8 +2828,22 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsCommand sr = new SelectRowsCommand("study","Virology Results");
         sr.addFilter("taskid", VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        //check that the results got uploaded
         Assert.assertTrue(resp2.getRowCount().intValue() > 0);
+        //check that the data from in the excel file matches the results, this tests GetVirologyResultsFromFileAction action,
+        // as well as the logic the Import Results From File button in ehrGridFormPanel.js
+        Map<String, Object> resultRow = resp2.getRows().get(0);
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Id"), resultRow.get("Id"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Date"), convertToLocalDateViaSqlDate((Date) resultRow.get("date")).toString());
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Sample Type"), resultRow.get("source"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Virus"), resultRow.get("virus"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Method"), resultRow.get("method"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Result"), resultRow.get("result"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Qualifier"), resultRow.get("qualresult"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Remark"), resultRow.get("performing_lab"));
     }
+
+
 
     @Test
     public void testClinpathVirologyBulkUploadValidations()
@@ -2864,6 +2919,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = currentDate.format(formatter);
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
@@ -2892,10 +2950,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
         fillAnInputByName("contacts", "test@test.com");
@@ -2920,4 +2978,87 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         return ANIMAL_HISTORY_URL;
     }
+
+
+    @Test
+    public void navigateToBillingContainerWithInvalidPermissions() {
+        //This test verifies a user cannot access the Finance>Internal page without proper permissions.
+
+        //Impersonates a basic user and navigates to the Finance>Internal page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+
+        //Assumes an error is presented and the test is complete.
+        assertTextPresent("Oops! An error has occurred.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
+        //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
+
+        //Impersonates a basic user and navigates to the restricted page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+
+        //Attempts to change the value.
+        //Assumes an error is presented and the test is complete.
+        fillAnInputByName("newCreditToAccountField", "asdf");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+        assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
+        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+
+        //Navigates to various containers and sets corresponding permissions.
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
+
+        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+
+        //Attempts to change the value.
+        fillAnInputByName("newCreditToAccountField", "testString");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+
+        //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
+        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+
+        //Navigates to various containers and removes corresponding permissions.
+        stopImpersonating();
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.ReaderRole");
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.EditorRole");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin");
+
+    }
+
+    private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
+    {
+        log("Starting checkUpdateProgramIncomeAccount.");
+
+        navigateToBillingContainerWithInvalidPermissions();
+        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithInvalidPermissions();
+        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithValidPermissions();
+        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+    }
+
 }

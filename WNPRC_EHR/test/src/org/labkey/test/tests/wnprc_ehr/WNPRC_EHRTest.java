@@ -42,6 +42,7 @@ import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.bootstrap.ModalDialog;
 import org.labkey.test.components.ext4.Window;
+import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
@@ -70,6 +71,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 import java.io.IOException;
@@ -572,15 +574,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void fillWeightForm(String weightVal, Integer index)
     {
-        fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
+        String animalId = ANIMAL_SUBSET_EHR_TEST[index];
+        fillAnInput("animalid_" + index, animalId );
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
 
         //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
 //        el2.sendKeys(Keys.TAB);
 //        el2.sendKeys(Keys.TAB);
 
-        fillAnInput("remark_"+ index.toString(), "Entered from automated test");
-        fillAnInput("restraint_" + index.toString(), "T");
+        fillAnInput("remark_"+ index, "Entered from automated test");
+        fillAnInput("restraint_" + index, "T");
+        waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 
     public void waitUntilElementIsClickable(String id)
@@ -2352,35 +2356,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testWeightSubmitForReview() throws IOException, CommandException
     {
+        String reviewer = "EHR Full Submitters";
         navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
         waitUntilElementIsClickable("submit-review-btn");
         clickNewButton("submit-review-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        selectOptionByText(Locator.name("reviewers").findElement(modalDialog), "EHR Full Submitters"); //index 2
+        Select assignedTo = SelectWrapper.Select(Locator.name("reviewers")).find(modalDialog);
+        waitForElement(Locator.tagWithText("option", reviewer), WAIT_FOR_PAGE);
+        assignedTo.selectByVisibleText(reviewer);
+        WebElement selectedOption = assignedTo.getFirstSelectedOption();
+        String reviewerValue = selectedOption.getAttribute("value");
         modalDialog.dismiss("Submit final");
 
-//        clickNewButton("submit-review-btn");
-//        sleep(1000);
-//        //waitForElement(Locator.id("reviewers"),10000);
-//        waitForText("Submit for Review");
-
-//        WebElement c = Locator.id("reviewers").findElement(getDriver());
-//        TestLogger.log(FULL_SUBMITTER.getGroup());
-//
-//        Select select = new Select(c);
-//        sleep(1000);
-//        select.selectByIndex(2);
-//        List<WebElement> l = select.getAllSelectedOptions();
-//        WebElement option = l.get(0);
-//        String defaultItem = option.getAttribute("value");
-//        TestLogger.log(defaultItem);
-//        //System.out.println(defaultItem );
-//
-//        sleep(1000);
-//        clickNewButton("submit-final");
-//        waitForText("Success");
-//
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
@@ -2391,7 +2379,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse t = fetchTaskData(taskid);
         //assert that this task's assigned to is the same as info entered above
         Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("assignedto");
-        Assert.assertEquals(null, "EHR Full Submitters", id.get("value").toString());
+        Assert.assertEquals(null, reviewerValue, id.get("value").toString());
 
         testWeightToRestraintObjectIdRelationship();
     }
@@ -2648,14 +2636,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
-        WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        WebElement button = Locator.tagWithId("button", "save-draft-btn").findElement(getDriver());
         // Test that save button is disabled if no entries
-        Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
+        Assert.assertFalse("Save button is enabled with no data", button.isEnabled());
         // Test that save button is disabled if single valid id is entered
         fillWeightForm(WEIGHT_VAL.toString(), 0);
-        Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
+        Assert.assertTrue("Save button is disabled for correct id", button.isEnabled());
         addBatchByLocation();
-        Assert.assertTrue("Save button is disabled for correct test ids",button.isEnabled());
+        Assert.assertTrue("Save button is disabled for correct test ids", button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");

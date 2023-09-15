@@ -587,9 +587,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 
-    public void waitUntilElementIsClickable(String id)
+    public WebElement waitUntilElementIsClickable(String id)
     {
-        shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
+        return shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
     }
 
     public void clickNewButton(String id)
@@ -2286,7 +2286,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillFeedingForm(FEEDING_AMT.toString(), 0);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchFeedingData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("amount");
@@ -2307,7 +2307,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(),0);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
         assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
@@ -2324,7 +2324,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(LOW_VAL.toString(),0);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2366,7 +2366,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assignedTo.selectByVisibleText(reviewer);
         WebElement selectedOption = assignedTo.getFirstSelectedOption();
         String reviewerValue = selectedOption.getAttribute("value");
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2422,7 +2422,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(),1);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2451,8 +2451,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("remove-record-btn_1");
         sleep(2000);
         clickNewButton("submit-all-btn");
-        modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
         //verify that it was deleted by counting that task has only 1 record in it
         //do a a query to get weights filtered by taskid
         SelectRowsResponse r2 =  fetchWeightDataGivenTaskRowId(id.get("value").toString());
@@ -2523,7 +2523,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("submit-bulk");
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
@@ -2576,7 +2576,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         /*WebElement el2 = fillAnInput("restraint_0", "T");*/
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2606,7 +2606,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(),0);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         navigateToWeightsTable();
         DataRegionTable table = new DataRegionTable("query", getDriver());
@@ -2622,8 +2622,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         }
         fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
         clickNewButton("submit-all-btn");
-        modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
-        modalDialog.dismiss("Submit final");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");

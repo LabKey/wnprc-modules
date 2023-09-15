@@ -594,8 +594,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void clickNewButton(String id)
     {
-        waitUntilElementIsClickable(id);
-        Locator.tagWithId("button", id).findElement(getDriver()).click();
+        waitUntilElementIsClickable(id).click();
     }
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException

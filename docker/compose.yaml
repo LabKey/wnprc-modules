@@ -73,7 +73,7 @@ services:
                   -Dmsql.user=${LK_MSQL_USER} -Dmsql.pass=${LK_MSQL_PASS} -Dmsql.url=\"${LK_MSQL_URL}\" \
                   -Dlabkey.masterEncryptionKey=${LK_MASTER_ENCRYPTION_KEY} \
 		          -Darrow.user=${LK_ARROW_USER} -Darrow.pass=${LK_ARROW_PASS} -Darrow.url=\"${LK_ARROW_URL}\" \
-                  -Dlog4j2.formatMsgNoLookups=true -Dserver.email.address=${SERVER_EMAIL_ADDRESS}"
+                  -Dlog4j2.formatMsgNoLookups=true -Dserver.email.address=${LK_SERVER_EMAIL_ADDRESS}"
       LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
       LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
       LK_BASE_URL: ${LK_BASE_URL}

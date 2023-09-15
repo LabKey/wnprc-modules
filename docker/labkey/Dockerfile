@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # HELPER IMAGE (to download LabKey)
-ARG LABKEY_VERSION
+ARG LK_VERSION
 ARG TOMCAT_IMAGE
 FROM alpine:latest as download
 
@@ -21,7 +21,7 @@ RUN echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
-FROM wnprcehr/tomcat:tomcat9_${LABKEY_VERSION}${TOMCAT_IMAGE}
+FROM wnprcehr/tomcat:tomcat9_${LK_VERSION}${TOMCAT_IMAGE}
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

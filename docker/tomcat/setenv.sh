@@ -1,0 +1,1 @@
+JAVA_OPTS="$JAVA_OPTS -Xms4g -Xmx4g -XX:-HeapDumpOnOutOfMemoryError"

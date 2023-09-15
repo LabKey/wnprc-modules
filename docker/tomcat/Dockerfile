@@ -46,6 +46,9 @@ COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
 # adding Tomcat custom login pattern
 COPY server9_0_54.xml conf/server.xml
 
+# adding Tomcat memory options
+COPY setenv.sh  bin/setenv.sh
+
 RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 

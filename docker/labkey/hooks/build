@@ -63,7 +63,7 @@ echo "Branch name: $SHORT_BRANCH_NAME"
 
 if [[ -z $IMAGE_NAME ]]
 then
-  IMAGE_NAME="wnprcehr/labkey:$DOCKER_TAG"
+  IMAGE_NAME="wnprcehr/labkey:${LK_VERSION}_${SHORT_BRANCH_NAME}"
   echo "value of IMAGE_NAME " ${IMAGE_NAME}
   docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME ../
 else

@@ -1,6 +1,5 @@
 #!/bin/bash
-echo "build ver 1.8"
-echo "user " $teamcityUser
+echo "build ver 1.9"
 echo "docker_tag text " $DOCKER_TAG
 
 # FB_REGEX will match if the docker tag looks like a feature branch, while
@@ -69,4 +68,3 @@ then
 else
   docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
 fi
-

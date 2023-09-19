@@ -44,8 +44,8 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
                     flagColumn: "meaning",
                     data: [],
                     color: "rgb(250,119,102)",
-                    schemaName: "lists",
-                    queryName: "Time sensitive treatments"
+                    schemaName: "wnprc",
+                    queryName: "urgent_treatments"
                 }
             }]),
             filterConfig: JSON.stringify({

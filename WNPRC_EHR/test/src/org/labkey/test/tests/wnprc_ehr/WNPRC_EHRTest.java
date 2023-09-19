@@ -2435,6 +2435,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
+        //make sure we are done saving things
+        waitForText("My Tasks");
+        //navigate to the weights table to click on the task id
         navigateToWeightsTable();
         Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
@@ -2509,13 +2512,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testAddBatchIds()
+    public void testAddBatchIds() throws IOException, CommandException
     {
         navigateToWeights();
         addBatchByIds();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
             assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
         }
+        // test the navigating to next weight by hitting enter
+        for (Integer i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
+            WebElement el2 = fillAnInput("weight_" + i, "0.489");
+            if (i < ANIMAL_SUBSET_EHR_TEST.length-1)
+            {
+                el2.sendKeys(Keys.ENTER);
+            }
+        }
+
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, 0.489, wt.get("value"));
+
     }
 
     @Test

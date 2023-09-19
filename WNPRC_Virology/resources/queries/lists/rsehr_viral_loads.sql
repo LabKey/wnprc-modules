@@ -34,7 +34,7 @@ INNER JOIN Site.{substitutePath moduleProperty('WNPRC_Virology', 'EHRViralLoadQC
 
 -- join on vl_sample_queue to pull in the account # (funding string) for filtering results out on rsehr
 LEFT JOIN Site.{substitutePath moduleProperty('WNPRC_Virology', 'virologyEHRVLSampleQueueFolderPath')}.lists.vl_sample_queue vsq
-    ON vsq.Id = v.subjectId AND vsq.Sample_date = v.date
+    ON vsq.Id = v.subjectId AND vsq.Sample_date = v.date AND vsq.experimentNumber = CAST(v.run.exptNumber as INTEGER)
 
 WHERE
     (q.QC_Pass = true OR v.viralLoadScientific = 0.0) AND vsq.status.Status != '10-never submitted' AND v.subjectId NOT LIKE '%STD_%' AND v.subjectId NOT LIKE '%CTL%' AND v.subjectId NOT LIKE '%PosControl%' AND v.subjectId NOT LIKE '%NegControl%' AND v.subjectId NOT LIKE '%negative%'

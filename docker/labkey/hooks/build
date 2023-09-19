@@ -39,7 +39,7 @@ then
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
-    TOMCAT_IMAGE="_"${SHORT_BRANCH_NAME}
+    TOMCAT_IMAGE=${SHORT_BRANCH_NAME}
     echo -e "LabKey Version: " ${LK_VERSION}
     echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
 else
@@ -64,7 +64,7 @@ if [[ -z $IMAGE_NAME ]]
 then
   IMAGE_NAME="wnprcehr/labkey:${LK_VERSION}_${SHORT_BRANCH_NAME}"
   echo "value of IMAGE_NAME " ${IMAGE_NAME}
-  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME ../
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME ../
 else
-  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME .
 fi

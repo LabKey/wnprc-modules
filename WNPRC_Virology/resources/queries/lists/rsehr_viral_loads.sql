@@ -22,8 +22,7 @@ SELECT
     v.sourceMaterial.type AS source_type,
     v.comment AS comment,
     v.run.exptNumber as experiment_number,
-    --adding RNA col on a DB from 20230524: 18,303 records versus 18274  before adding it
-    --q.RNA_isolation_method as RNA_isolation_method,
+    q.Nucleic_acid_isolation_method as Nucleic_acid_isolation_method,
     vsq.funding_string as account,
     --requires an explicit CAST into NUMERIC, as LabKey SQL does not check data types for function arguments
     GROUP_CONCAT(DISTINCT CAST(ROUND(v.viralLoadScientific, 3) as NUMERIC), ' ; ') as viral_load_replicates
@@ -43,5 +42,5 @@ WHERE
 
 -- groupBy viral load so these can be averaged
 GROUP BY
-    --v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string, q.RNA_isolation_method
-    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string
+    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string, q.Nucleic_acid_isolation_method
+    --v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string

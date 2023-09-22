@@ -54,16 +54,30 @@ task("buildEhrCronPlug", group: "DockerPlugin", type:DockerBuildImage){
 
 task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker image (with R)") { Task t ->
     doLast {
+        if (!project.hasProperty("nocache")){
+            ext.nocache = "false"
+        }
         def dockerStr = providers.gradleProperty("dockerString")
         if (dockerStr.present)
         {
             println dockerStr.get()
             String dockerString = dockerStr.get()
-            t.project.exec{
+            println nocache
+            if (nocache.equals("true")){
+                println "building image without cache"
+                t.project.exec{
+                workingDir "$projectDir/tomcat"
+                executable "docker"
+                args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                }
+            }else{
+                t.project.exec{
                 workingDir "$projectDir/tomcat"
                 executable "docker"
                 args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                }
             }
+            
         }else {
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
         }
@@ -85,9 +99,9 @@ task("buildTomcatPlug", group: "DockerPlugin", type: DockerBuildImage){
 }
 
 //Building LabKey with hooks/build for consistancy with Docker Hub and used of environment variables duirng the build process
-//Source: https://heapandstack.wordpress.com/2014/06/02/environment-variables-in-gradle/
-//Source: https://stackoverflow.com/questions/36322536/how-to-set-an-environment-variable-from-a-gradle-build
-task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrCron", "buildPostfix"]) { Task t ->
+//Source: https://stackoverflow.com/questions/36322536/how-to-set-an-environment-variable-from-a-gradle-build / https://stackoverflow.com/a/63140816
+task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image") { Task t ->
+//task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrCron", "buildPostfix"]) { Task t ->
     doLast {
         def dockerStr = providers.gradleProperty("dockerString")
 
@@ -95,11 +109,10 @@ task("buildLabkey", group: "Docker", description: "Generates the LabKey docker i
             println dockerStr.get()
             String dockerString = dockerStr.get()
             if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
-                def envVariables = ['teamcityUser':"${labkeyTeamcityUsername}",'teamCityPWD':"${labkeyTeamcityPassword}",'DOCKER_TAG':"${dockerString}"]
                 t.project.exec {
                     workingDir "$projectDir/labkey/hooks"
                     commandLine "./build"
-                    environment envVariables
+                    environment += ['teamcityUser':"${labkeyTeamcityUsername}",'teamCityPWD':"${labkeyTeamcityPassword}",'DOCKER_TAG':"${dockerString}"]
                 }
             } else {
                 logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
@@ -242,15 +255,15 @@ task("downloadAllPlug", group: "Docker", description: "Download all the docker i
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "$projectDir"
-    executable "docker compose"
-    args "up", "-d"
+    executable "docker"
+    args "compose", "up", "-d"
     environment CATALINA_OPTS: "-ea -Ddevmode=true"
 }
 
 task("down", group: "Docker", type: Exec, description: "Shuts down the docker-compose environment (labkey + postgres)") {
     workingDir "$projectDir"
-    executable "docker-compose"
-    args "down"
+    executable "docker"
+    args "compose", "down"
 }
 
 

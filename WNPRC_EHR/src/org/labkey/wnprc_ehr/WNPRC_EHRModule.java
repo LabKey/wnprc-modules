@@ -268,6 +268,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         //override pages
         EHRService.get().registerActionOverride("dataEntry", this, "views/dataEntry.html");
+        EHRService.get().registerActionOverride("populateInitialData", this, "views/populateInitialData.html");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));

@@ -44,9 +44,6 @@ services:
     image: wnprcehr/postfix:$POSTFIX_VERSION
     depends_on:
       - "mailcatcher"
-    volumes:
-      - "/run/secrets/server-certificate:/etc/postfix/certs/ehr.pem"
-      - "${NGINX_SERVER_KEY_FILE}:/etc/postfix/certs/ehr.key"
     environment:
       MAIL_SERVER:
       TZ: America/Chicago

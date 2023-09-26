@@ -52,7 +52,7 @@ task("buildEhrCronPlug", group: "DockerPlugin", type:DockerBuildImage){
     images.add("wnprcehr/ehrcron:latest")
 }
 
-task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker image (with R)") { Task t ->
+task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker image (with R)", dependsOn:[ "checkDocker", "dockerLogin"]) { Task t ->
     doLast {
         if (!project.hasProperty("nocache")){
             ext.nocache = "false"

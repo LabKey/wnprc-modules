@@ -66,6 +66,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   const [errorLevel, setErrorLevel] = useState<FormErrorLevels>("no-action");
   const [singleEditMode, setSingleEditMode] = useState(false);
   const [enableSave, setEnableSave] = useState<boolean>(false);
+  const [allExpanded, setAllExpanded] = useState<boolean>(true);
 
   const formEl = useRef(null);
 
@@ -109,6 +110,13 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setBatchAddUsedInAppContext();
   };
 
+  const deleteAll = () => {
+    setFormDataInAppContext([]);
+    setAnimalInfo(null);
+    setInfoState("waiting");
+    flipModalState();
+  }
+
   useEffect(() => {
     if (location.length == 0) {
       return;
@@ -150,6 +158,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         }
       });
       setFormDataInAppContext(animaldata);
+      setAllExpanded(false);
       setLocLoading(false);
       setErrorLevel("saveable");
     });
@@ -205,6 +214,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }
     //set the ask id
     setEditMode(true);
+    setAllExpanded(false);
 
     //if there's no task id, then we don't have to update the task table... just update the records
     //or more generally if we are in edit mode, we don't have ot update the task id...
@@ -412,9 +422,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       changeActionToUpdate();
       window.scrollTo(0,0);
       setEndTimeInAppContext(new Date());
-    }).catch(()=>{
+    }).catch((e)=>{
       setWasError(true);
-      setErrorText("Error during operation.");
+      setErrorText("Error during operation. " + e.exception);
       window.scrollTo(0,0);
     });
 
@@ -520,6 +530,19 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormDataInAppContext(copyformdata);
   };
 
+
+  const toggleExpandAllRecords = () => {
+    let copyformdata: Array<RowObj> = [...formdata];
+    copyformdata.forEach((item) => {
+      if (allExpanded) {
+        item["collapsed"]["value"] = true;
+      } else {
+        item["collapsed"]["value"] = false;
+      }
+    })
+    setAllExpanded(!allExpanded);
+    setFormDataInAppContext(copyformdata);
+  }
   const toggleCollapse = (item: RowObj, i) => {
     let copyitem: RowObj = Object.assign({},item);
     copyitem["collapsed"]["value"] = false;
@@ -662,15 +685,19 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           Add Batch
         </Button>
         <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="expand-all"
+            onClick={ () => {toggleExpandAllRecords()}}
+        >
+          {allExpanded ? "Collapse All" : "Expand All"}
+        </Button>
+        <Button
           variant="primary"
           className="wnprc-secondary-btn"
-          id="delete-record"
+          id="delete-all"
           disabled={singleEditMode}
-          onClick={() => {
-            setFormDataInAppContext([]);
-            setAnimalInfo(null);
-            setInfoState("waiting");
-          }}
+          onClick={handleShowModal}
         >
           Delete All
         </Button>
@@ -706,6 +733,16 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
             flipState={flipModalState}
           />
         )}
+        {showModal == "delete-all" && (
+        <SubmitModal
+            name={"delete-all"}
+            title="Delete All"
+            submitAction={deleteAll}
+            bodyText={"Delete All Records?"}
+            submitText="Yes"
+            flipState={flipModalState}
+            enabled={true}
+        />)}
         <form className="weights-form" ref={formEl}>
 
           {locloading ? (
@@ -716,7 +753,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                 .filter(item => item.command.value != "delete")
                 .map((item, i) => (
                   <div className={`row ${item.visibility.value}`} key={i}>
-                    <div className="col-xs-10">
+                    <div className="col-xs-11">
                       <div className="row card" key={i}>
                         <div
                           className={`card-header ${item.validated.value ? "valid" : "invalid"}`}
@@ -773,7 +810,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-xs-2">
+                    <div className="col-xs-1">
                       <button
                         className="remove-record-button"
                         id={`remove-record-btn_${i}`}
@@ -800,8 +837,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          width="48"
-                          height="48"
+                          width="32"
+                          height="32"
                           viewBox="0 0 24 24"
                         >
                           <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
@@ -839,7 +876,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
             </button>
             {errorLevel === "submittable" &&
             <div>
-              <span id="invalid-tooltip" data-tooltip={"Fill in missing information for boxes outlined in red."}>⚠️</span>
+              <span id="invalid-tooltip" data-tooltip={"Fill in missing information for boxes marked with ❗"}>⚠️ </span>
             </div>
             }
           </div>

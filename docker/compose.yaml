@@ -45,7 +45,7 @@ services:
     depends_on:
       - "mailcatcher"
     volumes:
-      - "${NGINX_SERVER_CER_FILE}:/etc/postfix/certs/ehr.pem"
+      - "/run/secrets/server-certificate:/etc/postfix/certs/ehr.pem"
       - "${NGINX_SERVER_KEY_FILE}:/etc/postfix/certs/ehr.key"
     environment:
       MAIL_SERVER:
@@ -137,10 +137,10 @@ secrets:
   master_encryption_pwd:
     file: ${LK_MASTER_ENCRYPTION}
   server-certificate:
-    environment: ${NGINX_SERVER_CER_FILE}
+    file: ${NGINX_SERVER_CER_FILE}
   server-key:
-    environment: ${NGINX_SERVER_KEY_FILE}
+    file: ${NGINX_SERVER_KEY_FILE}
   server-pass:
-    environment: ${NGINX_SERVER_PASS_FILE}
+    file: ${NGINX_SERVER_PASS_FILE}
   server-htpasswd:
-    environment: ${MAIL_CATCHER_HTPASSWD_FILE}
+    file: ${MAIL_CATCHER_HTPASSWD_FILE}

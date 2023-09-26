@@ -287,9 +287,62 @@ select[id^="restraint"] {
   left: calc(100% + 5px);
 }
 
-/*
-Text input box is red if required
- */
-.required-text {
+.react-error-text {
   margin-left: 10px;
+}
+
+/* checkbox styling */
+.checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  margin-right: 6px;
+}
+
+.checkbox-custom.required {
+  border: 1px solid red;
+}
+.checkbox-container input[type="checkbox"]:checked + .checkbox-custom {
+  background-color: #007bff;
+}
+
+/* Additional styling for the checkmark */
+.checkbox-container input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 11px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-left: 6px;
+  margin-top: 2px;
+}
+
+.text-input {
+  display: flex;
+}
+
+.date-controller {
+  display: flex;
+}
+
+.date-controller-error .react-datepicker__input-container input {
+  border: 1px solid red;
+}
+
+.dropdown-controller {
+  display: flex;
 }

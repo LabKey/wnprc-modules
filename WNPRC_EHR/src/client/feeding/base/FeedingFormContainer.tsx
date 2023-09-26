@@ -16,7 +16,7 @@ import {
   sleep,
   wait,
 } from "../../query/helpers";
-import AnimalInfoPane from "../../components/AnimalInfoPane";
+import AnimalInfoPane from "../../weight/components/AnimalInfoPane";
 import BatchModal from "../../components/BatchModal";
 import BulkEditModal from "../../components/BulkEditModal";
 import BulkEditFields from "./BulkEditFields";

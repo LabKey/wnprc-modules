@@ -1,13 +1,3 @@
-export interface ConfigProps {
-  schemaName: string;
-  queryName: string;
-  columns?: any;
-  sort?: string;
-  containerPath?: string;
-  filterArray?: Array<any>;
-}
-
-
 export interface InfoProps {
   Id: string;
   _labkeyurl_Id: string;

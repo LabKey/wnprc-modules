@@ -1,48 +1,47 @@
 import * as React from 'react';
-import { FC, useRef } from 'react';
+import { FC } from 'react';
 import "../theme/css/index.css";
 import InputLabel from './InputLabel';
 import TextInput from './TextInput';
 import Checkbox from './Checkbox';
 import DropdownSearch from './DropdownSearch';
-import {handleDateChange, handleInputChange, openDatepicker } from '../query/helpers';
-import DatePicker from 'react-datepicker';
-import DateInput from './DateInput';
-import { ActionURL } from '@labkey/api';
+import ControlledDateInput from './ControlledDateInput';
+import TextAreaInput from './TextAreaInput';
+import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 
 interface BulkFormProps {
     inputField: any[];
-    state: any;
-    setState: any;
-    required?: string[];
-    options?: any;
+    compName: string;
+    prevForm: any;
+    dropdownOptions?: any;
 }
 /*
-Creates forms
+Form creation helper
 @props inputField array of fields that describe themselves
-@props state State management for form/row
-@props setState State setter for changing inputs
-@props required determines if the field is required or not
+@props prevForm object describing the previous form data if needed
+@props dropdownOptions function for obtaining the options needed for dropdown menus
+@props compName string for the name of the component that the fields belong to
 
  */
 const BulkFormInput: FC<BulkFormProps> = (props) => {
-    const {inputField, state,setState, required, options} = props;
-
-    const cnt = inputField.length;
+    const {inputField, prevForm, dropdownOptions, compName} = props;
+    const {watch} = useFormContext();
 
     const inputs = [];
 
-
     // Go through fields assigning divs depending on types
     // Date, Text, TextArea, Checkbox, Dropdown,
-    for (let i = 0; i < cnt; i++) {
-        const id = `id_${i}`;
-        let name = inputField[i].name;
-        let label = inputField[i].label;
-        const isRequired = required.includes(name);
-        let fieldType = inputField[i].type;
-
+    for (let i = 0; i < inputField.length; i++) {
+        const id = `${compName}_${i}`;
+        const name = inputField[i].name;
+        const label = inputField[i].label;
+        const isRequired = inputField[i].required;
+        const fieldType = inputField[i].type;
+        const validation = inputField[i].validation;
+        const watchVar = inputField[i].watch;
+        const autoFill = inputField[i].autoFill;
         // Text field
+        // Tells the form to expose the animal Id input with name "Id" to a global state
         if(fieldType === "text"){
             inputs.push(
                 <div key={id} className={"panel-input-row"}>
@@ -52,13 +51,13 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={name}
+                        name={name === "Id" ?`global.${name}` : `${compName}.${name}`}
                         id={id}
-                        className="form-control"
-                        value={state[name]?.value || ""}
-                        onChange={(event) => handleInputChange(event,setState)}
+                        className={"form-control"}
+                        value={prevForm?.[name] ?? ""}
                         required={isRequired}
-                        autoFocus={false}
+                        validation={validation}
+                        autoFill={autoFill}
                     />
                 </div>
             );
@@ -71,15 +70,13 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         label={label}
                         className={"panel-label"}
                     />
-                    <textarea
-                        name={name}
+                    <TextAreaInput
+                        name={`${compName}.${name}`}
                         id={id}
-                        className="form-control"
-                        rows={3}
-                        value={state[name]?.value || ""}
-                        onChange={(event) => handleInputChange(event,setState)}
+                        className={"form-control"}
+                        value={prevForm?.[name] ?? ""}
                         required={isRequired}
-                        autoFocus={false}
+                        validation={validation}
                     />
                 </div>
             );
@@ -93,20 +90,20 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         className={"panel-label"}
                     />
                     <Checkbox
-                        name={name}
+                        name={`${compName}.${name}`}
                         id={id}
-                        className="form-control"
-                        value={state[name]?.value || ""}
-                        onChange={(event) => handleInputChange(event,setState)}
+                        validation={validation}
+                        className={"form-control"}
+                        value={prevForm?.[name] ?? ""}
                         required={isRequired}
                     />
             </div>
             );
         }
         else if(fieldType === "dropdown"){ // Dropdown field
-
-            const optConf = options[name][0];
-            const optDep = options[name][1];
+            const watchState = watch(watchVar as FieldPathValue<FieldValues, any>);
+            const optConf = typeof inputField[i].options === 'function' ? inputField[i].options(watchState) : inputField[i].options;
+            //const optDep = watch(options[name].dependency as FieldPathValue<FieldValues, any>);
             inputs.push(
                 <div key={id} className={"panel-input-row"}>
                     <InputLabel
@@ -116,21 +113,19 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                     />
                     <DropdownSearch
                         optConf={optConf}
-                        optDep={optDep}
-                        initialvalue={null}
-                        name={name}
+                        optDep={watchState}
+                        initialValue={prevForm?.[name] ?? null}
+                        name={`${compName}.${name}`}
                         id={id}
-                        classname="navbar__search-form"
+                        classname={"navbar__search-form"}
                         required={isRequired}
                         isClearable={true}
-                        value={state[name]?.value || ""}
-                        setState={setState}
+                        validation={validation}
                     />
                 </div>
             );
         }
         else if(fieldType === "date"){
-            const calendarEl = useRef(null);
             inputs.push(
                 <div key={id} className="panel-input-row">
                     <InputLabel
@@ -138,26 +133,12 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         label={label}
                         className={'panel-label'}
                     />
-                    <DatePicker
+                    <ControlledDateInput
+                        name={`${compName}.${name}`}
                         id={id}
-                        ref={(r) => (calendarEl.current = r)}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
-                        todayButton="Today"
-                        selected={
-                            (typeof state[name].value === 'string' || state[name].value instanceof String)
-                            ?  Date.parse(state[name].value)
-                            : state[name].value
-                        }
-                        className="form-control"
-                        name={name}
-                        onChange={(date) => handleDateChange(name, date, setState)}
-                        customInput={
-                            <DateInput
-                                opendate={() => openDatepicker(calendarEl)}
-                                iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
-                        }
-                        popperClassName={"my-datepicker-popper"}
+                        date={prevForm?.[name]?.value ? new Date(prevForm[name]?.value) : new Date()}
+                        required={isRequired}
+                        validation={validation}
                     />
                 </div>
             );

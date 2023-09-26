@@ -1,19 +1,61 @@
 import { Filter } from '@labkey/api';
+import { lookupAnimalInfo, findAccount } from '../query/helpers';
+import { InfoProps } from './typings';
 
-export const initialState = {
-        Id: { value: "", error: "" },
-        date: { value: new Date(), error: "" },
-        pregnancyid: { value: "", error: "" },
-        project: { value: null, error: "" },
-        account: { value: "", error: "" },
-        taskid: {value: "", error: ""},
-    };
+const validateId = (value: string) => {
+    return lookupAnimalInfo(value).then((data: InfoProps) => {
+        if(data.calculated_status === "Alive"){
+            return true;
+        }
+        return "Animal is not valid";
+    }).catch((error) => {
+        console.log("validate error: ", error);
+        return "Animal is not valid";
+    });
+
+}
+
+const pregOptions = (lsid: string) => {
+    return ({
+        schemaName: "study",
+        queryName: "pregnancyConceptionDate",
+        columns: ["lsid", "date_conception"],
+        filterArray: [
+            Filter.create(
+                "lsid",
+                lsid,
+                Filter.Types.CONTAINS
+            )
+        ]
+    });
+}
+const projectOptions = (id: string) => {
+    return ({
+        schemaName: "study",
+        queryName: "Assignment",
+        columns: ["project"],
+        filterArray: [
+            Filter.create(
+                "Id",
+                id,
+                Filter.Types.EQUALS
+            )
+        ]
+    });
+}
+const restraintOptions = {
+    schemaName: "ehr_lookups",
+    queryName: "restraint_type",
+    columns: ["type"]
+}
+
+
 export const inputs = [
-      {name: "Id", label: "Id", type: "text"},
+      {name: "Id", label: "Id", type: "text", required: true, validation: validateId},
       {name: "date", label: "Date", type: "date"},
-      {name: "pregnancyid", label: "Pregnancy (Conc. Date)", type: "dropdown"},
-      {name: "project", label: "Project", type: "dropdown"},
-      {name: "account", label: "Account", type: "text"},
+      {name: "pregnancyid", label: "Pregnancy (Conc. Date)", type: "dropdown", watch: 'global.Id', options: pregOptions},
+      {name: "project", label: "Project", type: "dropdown", watch: 'global.Id', options: projectOptions},
+      {name: "account", label: "Account", type: "text", autoFill: {watch: "ResearchPane.project", search: findAccount}},
       {name: "fetal_heartbeat", label: "Fetal HB", type: "checkbox"},
       {name: "crown_rump_mm", label: "Crown Rump (mm)", type: "text"},
       {name: "biparietal_diameter_mm", label: "Biparietal Diameter (mm)", type: "text"},
@@ -46,37 +88,33 @@ export const inputs = [
       {name: "end_diastolic_cms", label: "End Diastolic (cm/s)", type: "text"},
       {name: "nuchal_fold", label: "Nuchal Fold", type: "text"},
       {name: "code", label: "SNOMED", type: "text"},
-      {name: "performedby", label: "Performed By", type: "text"},
+      {name: "performedby", label: "Performed By", type: "text", required: true},
       {name: "findings", label: "Findings", type: "text"},
       {name: "remark", label: "Remark", type: "textarea"}
-  ];
-export const requiredInputs = ["Id", "performedby"];
+];
 
-export const dropdownOptions = (state) => {
-      return {
-        pregnancyid: [{
-          schemaName: "study",
-          queryName: "pregnancyConceptionDate",
-          columns: ["lsid", "date_conception"],
-          filterArray: [
-            Filter.create(
-                "lsid",
-                state.Id.value,
-                Filter.Types.CONTAINS
-            )
-          ]
-        }, [state.Id.value]],
-        project: [{
-          schemaName: "study",
-          queryName: "Assignment",
-          columns: ["project"],
-          filterArray: [
-            Filter.create(
-                "Id",
-                state.Id.value,
-                Filter.Types.EQUALS
-            )
-          ]
-        }, [state.Id.value]]
-      }
-};
+export const restraintInputs = [
+    {name: "restraintType", label: "Restraint Type", type: "dropdown", options: restraintOptions},
+    {name: "restraintRemark", label: "Remark", type: "textarea"},
+]
+
+export const reviewInputs = [
+    {name: "Id", label: "Id", type: "text", required: true},
+    {name: "date", label: "Date", type: "date"},
+    {name: "head", label: "Head", type: "checkbox"},
+    {name: "falx", label: "Falx", type: "checkbox"},
+    {name: "thalamus", label: "Thalamus", type: "checkbox"},
+    {name: "lateral_ventricles", label: "Lateral Ventricles", type: "checkbox"},
+    {name: "choroid_plexus", label: "Choroid Plexus", type: "checkbox"},
+    {name: "eye", label: "Eye", type: "checkbox"},
+    {name: "profile", label: "Profile", type: "checkbox"},
+    {name: "four_chamber_heart", label: "Four Chamber Heart", type: "checkbox"},
+    {name: "diaphragm", label: "Diaphragm", type: "checkbox"},
+    {name: "stomach", label: "Stomach", type: "checkbox"},
+    {name: "bowel", label: "Bowel", type: "checkbox"},
+    {name: "bladder", label: "Bladder", type: "checkbox"},
+    {name: "findings", label: "Findings", type: "textarea"},
+    {name: "placenta_notes", label: "Placenta Notes", type: "textarea"},
+    {name: "remarks", label: "Other/Comments", type: "textarea"},
+    {name: "completed", label: "Interpretation Completed", type: "checkbox", required: true},
+];

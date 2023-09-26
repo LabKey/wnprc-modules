@@ -165,7 +165,7 @@ export const lookupAnimalInfo = (id:string) => {
     };
     labkeyActionSelectWithPromise(config)
       .then((data) => {
-        if (data["rows"][0]) {
+        if (data["rows"].length === 1) {
           resolve(data["rows"][0])
         } else {
           reject(data);
@@ -278,7 +278,7 @@ Helper that finds the account associated with a project
 @param projectId A project ID that you want to find the account of
 @returns {Object} Account associated with a project
  */
-export const findAccount = async (projectId) => {
+export const findAccount = async (projectId: string) => {
   let config: SelectDistinctOptions = {
     schemaName: "ehr",
     queryName: "project",
@@ -292,7 +292,7 @@ export const findAccount = async (projectId) => {
     ]
   };
   const data = await labkeyActionDistinctSelectWithPromise(config);
-  return {value: data["values"][0], error: ""};
+  return data["values"][0];
 }
 
 /*
@@ -484,7 +484,6 @@ export const getFormData = (taskId: string, schemaName: string, queryName: strin
     let config: SelectRowsOptions = {
       schemaName: schemaName,
       queryName: queryName,
-      columns: [],
       filterArray: [Filter.create("taskid", taskId, Filter.Types.EQUAL)],
     };
     labkeyActionSelectWithPromise(config)

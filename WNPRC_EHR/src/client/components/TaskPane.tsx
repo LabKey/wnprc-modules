@@ -1,61 +1,43 @@
 import * as React from "react";
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import TextInput from './TextInput';
 import InputLabel from './InputLabel';
 import "../theme/css/index.css";
 import { ConfigProps } from '../weight/typings/main';
 import DropdownSearch from './DropdownSearch';
-import DateInput from './DateInput';
-import { ActionURL, Utils } from '@labkey/api';
-import DatePicker from 'react-datepicker';
-import {
-    openDatepicker,
-    handleDateChange,
-    handleInputChange,
-    getQCLabel
-} from '../query/helpers';
-import { TaskValuesType } from '../typings/taskPaneTypes';
+import { getQCLabel } from '../query/helpers';
+import ControlledDateInput from './ControlledDateInput';
+import { useFormContext } from 'react-hook-form';
 
 export const TaskPane: FC<any> = (props) =>{
+    const { title, prevTask} = props;
 
-    const { title, onStateChange, formType, prevTask} = props;
+    const {setValue} = useFormContext();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-
-    const [taskState, setTaskState] = useState<TaskValuesType>({
-        taskid: { value: prevTask?.taskid || Utils.generateUUID().toUpperCase(), error: "" },
-        rowid: {value: prevTask?.rowid || undefined, error: ""},
-        title: { value: prevTask?.title || title, error: "" },
-        assignedto: { value: prevTask?.assignedto || null, error: "" },
-        category: {value: 'task', error: ""},
-        duedate: { value: prevTask?.duedate ? new Date(prevTask?.duedate) : new Date(), error: "" },
-        formtype: {value: prevTask?.formType || formType, error: ""},
-        qcstate: { value: prevTask?.qcstate || 2, error: "" },
-    });
-
-    const [assignTypes, setAssignTypes] = useState<Array<any>>([]);
-    const [qcStateLabel, setQCStateLabel] = useState("In Progress");
-    let calendarEl = useRef(null);
-
-    let config: ConfigProps = {
+    const config: ConfigProps = {
         schemaName: "core",
         queryName: "PrincipalsWithoutAdmin",
-        columns: ["UserId","DisplayName"]
+        columns: ["UserId", "DisplayName"]
     };
-
-    // Updates state in form container
-    useEffect(() => {
-        onStateChange(taskState);
-    }, [taskState]);
 
     // Finds prev QC label if a prev task was created
     useEffect(() => {
         if(prevTask) {
-            getQCLabel(taskState.qcstate.value).then((r) => {
-                setQCStateLabel(r.Label);
+            console.log("PT: ", prevTask);
+            getQCLabel(prevTask.qcstate).then((r) => {
+                setValue("TaskPane.qcstate",r.Label);
             });
+
+            setIsLoading(false);
+        }else{
+            setIsLoading(false);
         }
     }, []);
 
+    if(isLoading){
+        return <div>Loading...</div>
+    }
     return(
         <div className={"col-md-8 panel panel-portal form-row-wrapper"}>
             <div className="panel-heading">
@@ -64,94 +46,75 @@ export const TaskPane: FC<any> = (props) =>{
             <div className={"multi-col-form"}>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'rowid'}
+                        labelFor={'taskRowId'}
                         label={'Task Id'}
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={"rowid"}
-                        id={`id_${'rowid'}`}
+                        name={`TaskPane.rowid`}
+                        id={'taskRowId'}
                         className="form-control"
-                        value={taskState.rowid.value}
-                        onChange={(event) => handleInputChange(event, setTaskState)}
+                        value={prevTask?.rowid || undefined}
                         required={false}
-                        autoFocus={false}
                         readOnly={true}
                         type={prevTask ? "text": "hidden"}
                     />
                 </div>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'title'}
+                        labelFor={'taskTitle'}
                         label={'Title'}
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name="title"
-                        id={`id_${'taskTitle'}`}
+                        name={"TaskPane.title"}
+                        id={"taskTitle"}
                         className="form-control"
-                        onChange={(event) => handleInputChange(event, setTaskState)}
-                        value={taskState.title.value}
+                        value={prevTask?.title || title}
                         required={true}
-                        autoFocus={false}
                     />
                 </div>
 
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'assignedto'}
+                        labelFor={'taskAssignedTo'}
                         label={'Assigned To'}
                         className = {'panel-label'}
                     />
                     <DropdownSearch
+                        initialValue={prevTask?.assignedto || undefined}
                         optConf={config}
-                        initialvalue={null}
-                        name="assignedto"
-                        id={`id_${'taskAssignedTo'}`}
+                        name={"TaskPane.assignedto"}
+                        id={"taskAssignedTo"}
                         classname="navbar__search-form"
                         required={true}
                         isClearable={true}
-                        value={taskState.assignedto.value}
-                        setState={setTaskState}
                     />
                 </div>
-
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'duedate'}
+                        labelFor={'taskDueDate'}
                         label={'Due Date'}
                         className = {'panel-label'}
                     />
-                    <DatePicker
-                        ref={(r) => (calendarEl.current = r)}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
-                        todayButton="Today"
-                        selected={taskState.duedate.value}
-                        className="form-control"
-                        name="duedate"
-                        onChange={(date) => handleDateChange("duedate",date,setTaskState)}
-                        customInput={
-                            <DateInput
-                                opendate={() => openDatepicker(calendarEl)}
-                                iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
-                        }
-                        popperClassName={"my-datepicker-popper"}
+                    <ControlledDateInput
+                        name={"TaskPane.duedate"}
+                        id={"taskDueDate"}
+                        date={prevTask?.duedate ? new Date(prevTask.duedate) : new Date()}
                     />
                 </div>
                 <div className={"panel-input-row"}>
                     <InputLabel
-                        labelFor={'qcstate'}
+                        labelFor={'taskQCStateLabel'}
                         label={'Status'}
                         className={'panel-label'}
                     />
                     <TextInput
-                        name="qcstate"
-                        id={`id_${'taskQCStateLabel'}`}
-                        className="form-control"
-                        value={qcStateLabel}
+                        name={"TaskPane.qcstate"}
+                        id={'taskQCStateLabel'}
+                        className={"form-control"}
+                        value={prevTask?.qcstate || "In Progress"}
                         required={false}
-                        autoFocus={false}
                         readOnly={true}
                     />
                 </div>

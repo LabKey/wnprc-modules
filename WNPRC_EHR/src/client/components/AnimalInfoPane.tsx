@@ -1,6 +1,10 @@
 import * as React from "react";
 import { Table } from "react-bootstrap";
 import Spinner from "./Spinner";
+import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { getAnimalInfo } from '../query/helpers';
+import { infoStates } from '../researchUltrasoundsEntry/typings';
 
 interface InfoProps {
   Id: string;
@@ -17,17 +21,30 @@ interface InfoProps {
 }
 
 interface PaneProps {
-  animalInfo: InfoProps;
-  infoState?: string;
+  setAnimalInfoCache?: any;
 }
 
 /**
  * Displays animal info given a successful state.
  */
-const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
-  const { animalInfo, infoState } = props;
+const AnimalInfoPane: React.FunctionComponent<PaneProps> = (props) => {
+  const { setAnimalInfoCache } = props;
 
-  if (infoState == "waiting") {
+  const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
+  const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
+
+  // Watch the animal Id which should be stored as "global.Id" automatically
+  const {watch} = useFormContext();
+  const animalId = watch("global.Id" as FieldPathValue<FieldValues, any>);
+
+  useEffect(() => {
+    if(animalId === undefined){
+      return;
+    }
+    getAnimalInfo(animalId, setAnimalInfo, setAnimalInfoState, setAnimalInfoCache);
+  },[animalId]);
+
+  if (animalInfoState == "waiting") {
     return (
         <div className="col-xs-5 panel panel-portal animal-info-pane">
           <div className="panel-heading">
@@ -37,7 +54,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
         </div>);
   }
 
-  if (infoState == "loading-unsuccess") {
+  if (animalInfoState == "loading-unsuccess") {
     return (
         <div className="col-xs-5 panel panel-portal animal-info-pane">
           <div className="panel-heading">
@@ -47,7 +64,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
         </div>);
   }
 
-  if (infoState == "loading") {
+  if (animalInfoState == "loading") {
     return (
         <div className="col-xs-5 panel panel-portal animal-info-pane">
           <div className="panel-heading">
@@ -60,7 +77,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
     );
   }
 
-  if (infoState == "loading-success") {
+  if (animalInfoState == "loading-success") {
     return (
         <div className="col-xs-5 panel panel-portal animal-info-pane">
           <div className="panel-heading">

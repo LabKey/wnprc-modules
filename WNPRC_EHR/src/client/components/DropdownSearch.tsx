@@ -69,7 +69,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
             setOptState(duplicatesRemovedArray);
             setIsLoading(false);
         });
-    }, optDep || []);
+    }, [optDep] || []);
 
 
     if(isLoading) {

@@ -51,7 +51,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={name === "Id" ?`global.${name}` : `${compName}.${name}`}
+                        name={`${compName}.${name}`}
                         id={id}
                         className={"form-control"}
                         value={prevForm?.[name] ?? ""}

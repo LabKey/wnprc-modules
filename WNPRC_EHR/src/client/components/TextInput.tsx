@@ -39,7 +39,7 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
       validation,
       autoFill,
   } = props;
-    const {register, formState: {errors}, trigger, watch, setValue} = useFormContext();
+    const {register, formState: {errors}, trigger, watch, resetField, setValue} = useFormContext();
     const [stateName, fieldName] = name.split('.');
     const borderColor = errors?.[stateName]?.[fieldName] ? 'red' : null;
     const watchVar:watchVarType = autoFill ? watch(autoFill.watch as FieldPathValue<FieldValues, any>) as watchVarType : undefined;
@@ -58,8 +58,8 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
         if(watchVar === undefined) {
             return;
         }
-        else if(watchVar === null){ // reset text input to null if dropdown is set to null
-            setValue(name, null);
+        else if(watchVar === null){ // reset text input if dropdown is set to null
+            resetField(name);
         }
         else if(autoFill){ // autofill input based on dropdown
             autoFill.search(watchVar.value).then((data) => {

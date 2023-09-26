@@ -5,6 +5,7 @@ import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { getAnimalInfo } from '../query/helpers';
 import { infoStates } from '../researchUltrasoundsEntry/typings';
+import { id } from '@labkey/api/dist/labkey/Utils';
 
 interface InfoProps {
   Id: string;
@@ -33,9 +34,21 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = (props) => {
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
   const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
 
-  // Watch the animal Id which should be stored as "global.Id" automatically
-  const {watch} = useFormContext();
-  const animalId = watch("global.Id" as FieldPathValue<FieldValues, any>);
+  const {watch, control, formState} = useFormContext();
+  // Finds the components state that houses the animal Id field
+  const idState = (() => {
+    for (const key in control._fields) {
+      if (control._fields.hasOwnProperty(key)) {
+        const subState = control._fields[key];
+        if(subState.hasOwnProperty("Id")) {
+          return key;
+        }
+      }
+    }
+    // If the property is not found, return null.
+    return null;
+  })();
+  const animalId = idState === null ? undefined : watch(`${idState}.Id` as FieldPathValue<FieldValues, any>);
 
   useEffect(() => {
     if(animalId === undefined){

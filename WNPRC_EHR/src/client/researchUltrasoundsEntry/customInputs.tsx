@@ -8,8 +8,7 @@ const validateId = (value: string) => {
             return true;
         }
         return "Animal is not valid";
-    }).catch((error) => {
-        console.log("validate error: ", error);
+    }).catch(() => {
         return "Animal is not valid";
     });
 
@@ -53,8 +52,8 @@ const restraintOptions = {
 export const inputs = [
       {name: "Id", label: "Id", type: "text", required: true, validation: validateId},
       {name: "date", label: "Date", type: "date"},
-      {name: "pregnancyid", label: "Pregnancy (Conc. Date)", type: "dropdown", watch: 'global.Id', options: pregOptions},
-      {name: "project", label: "Project", type: "dropdown", watch: 'global.Id', options: projectOptions},
+      {name: "pregnancyid", label: "Pregnancy (Conc. Date)", type: "dropdown", watch: 'ResearchPane.Id', options: pregOptions},
+      {name: "project", label: "Project", type: "dropdown", watch: 'ResearchPane.Id', options: projectOptions},
       {name: "account", label: "Account", type: "text", autoFill: {watch: "ResearchPane.project", search: findAccount}},
       {name: "fetal_heartbeat", label: "Fetal HB", type: "checkbox"},
       {name: "crown_rump_mm", label: "Crown Rump (mm)", type: "text"},

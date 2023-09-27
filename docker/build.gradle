@@ -268,36 +268,15 @@ task("down", group: "Docker", type: Exec, description: "Shuts down the docker-co
 
 
 
-task("checkDocker") {Task t -> 
-   // standardOutput = new ByteArrayOutputStream()
-   def OS = OperatingSystem.current()
+task("privilegecheckDocker", type: Exec){
+    commandLine "service docker start"
+}
 
-    doFirst{
-        
-        println OS.toString()
-        
-        /* executable "docker"
-        args "info" */
-     }
-     doLast{
-        println OS.toString().contains("Mac") 
-        if (OS.toString().contains("Mac")){
-                t.project.exec {
-                    println "Opening Docker"                
-                    executable "open"
-                    args "-a", "docker"          
-                }
-
-        }else{
-                t.project.exec {
-                    println "Need to ran linux"
-                    executable "service"
-                    args "docker", "start"   
-
-                }
-                
-        }         
-     }
+task("checkDocker") { 
+    doLast{
+        openDocker()
+    }
+    
     /* doLast {
         if (standardOutput.toString().contains("ERROR")){
             println OperatingSystem.current()
@@ -315,5 +294,21 @@ task("checkDocker") {Task t ->
         }
         
     } */
+}
+
+void openDocker(){
+    def OS = OperatingSystem.current()
+    println OS.toString()
+    
+    if (OS.toString().contains("Mac")){
+        exec {
+            commandLine 'open', '-a', 'docker'
+        }
+    }else{
+        exec{
+            commandLine "echo $sudo_password | sudo -S " + tasks.privilegecheckDocker.commandLine.join(" ")
+        }
+
+    }
 }
 

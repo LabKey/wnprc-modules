@@ -32,8 +32,8 @@ task ("dockerLogin", group: "Docker" , dependsOn: "checkDocker"){ Task t ->
     doLast {     
         if (project.hasProperty('dockerhubUsername') && project.hasProperty('dockerhubPassword')) {
             t.project.exec {
-                commandLine "docker"
-                args "login", "--username", "${dockerhubUsername}", "--password", "${dockerhubPassword}"
+                commandLine 'docker', 'login'
+                args "--username", "${dockerhubUsername}", "--password", "${dockerhubPassword}"
             }
         } else {
             logger.warn 'To download images from DockerHub, you must specify a username and password in your ~/.gradle/gradle.properties file.'
@@ -306,7 +306,8 @@ void openDocker(){
         }
     }else{
         exec{
-            commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
+             commandLine 'service', 'docker', 'status'
+            //commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
         }
 
     }

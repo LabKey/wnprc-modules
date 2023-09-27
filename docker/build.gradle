@@ -269,7 +269,7 @@ task("down", group: "Docker", type: Exec, description: "Shuts down the docker-co
 
 
 task("privilegecheckDocker", type: Exec){
-    commandLine "service docker start"
+    commandLine 'service', 'docker', 'start'
 }
 
 task("checkDocker") { 
@@ -306,7 +306,7 @@ void openDocker(){
         }
     }else{
         exec{
-            commandLine "echo $sudo_password | sudo -S " + tasks.privilegecheckDocker.commandLine.join(" ")
+            commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
         }
 
     }

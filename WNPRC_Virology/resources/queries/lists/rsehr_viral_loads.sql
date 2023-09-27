@@ -6,7 +6,7 @@ SELECT
     v.sampleType AS sample_type,
     -- cast as varchar to avoid floating point operation problems,
     -- seems like the floating point issues only appear on the destination table of an ETL?
-    CAST(TRUNCATE(AVG(CAST(ROUND(v.viralLoadScientific, 3) as NUMERIC)),5) as VARCHAR) as viral_load_average,
+    AVG(v.viralLoadScientific) as viral_load_average,
     CASE WHEN (AVG(v.viralLoadScientific) <
         (SELECT
             llod

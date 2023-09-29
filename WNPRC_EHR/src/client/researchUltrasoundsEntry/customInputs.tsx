@@ -53,7 +53,7 @@ export const inputs = [
       {name: "Id", label: "Id", type: "text", required: true, validation: validateId},
       {name: "date", label: "Date", type: "date"},
       {name: "pregnancyid", label: "Pregnancy (Conc. Date)", type: "dropdown", watch: 'ResearchPane.Id', options: pregOptions},
-      {name: "project", label: "Project", type: "dropdown", watch: 'ResearchPane.Id', options: projectOptions},
+      {name: "project", label: "Project", type: "dropdown", watch: 'ResearchPane.Id', options: projectOptions, defaultOpts: [{value:300901, label:"300901"},{value:400901, label:"400901"}]},
       {name: "account", label: "Account", type: "text", autoFill: {watch: "ResearchPane.project", search: findAccount}},
       {name: "fetal_heartbeat", label: "Fetal HB", type: "checkbox"},
       {name: "crown_rump_mm", label: "Crown Rump (mm)", type: "text"},
@@ -94,11 +94,11 @@ export const inputs = [
 
 export const restraintInputs = [
     {name: "restraintType", label: "Restraint Type", type: "dropdown", options: restraintOptions},
-    {name: "restraintRemark", label: "Remark", type: "textarea"},
+    {name: "remark", label: "Remark", type: "textarea"},
 ]
 
 export const reviewInputs = [
-    {name: "Id", label: "Id", type: "text", required: true},
+    {name: "Id", label: "Id", type: "text", required: true, autoFill: {watch: "ResearchPane.Id"}},
     {name: "date", label: "Date", type: "date"},
     {name: "head", label: "Head", type: "checkbox"},
     {name: "falx", label: "Falx", type: "checkbox"},

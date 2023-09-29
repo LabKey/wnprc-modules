@@ -11,8 +11,10 @@ import {
 } from './customInputs';
 export const ResearchUltrasounds: FC<any> = (props) => {
     const taskid: string = LABKEY.ActionURL.getParameter('taskid');
+
     const formType: string = LABKEY.ActionURL.getParameter('formType');
-    let components: any[] = [
+    const reviewRequired = formType ? !formType.includes('Review') : true;
+    const components: any[] = [
         {
             type: InstructionsPane,
             name: "InstructionsPane",
@@ -27,10 +29,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
         },{
             type: CustomInputPane,
             name: "ResearchPane",
-            syncedValues: {
-                TaskPane: ["taskid"],
-            },
-            validation: true,
+            required: ["TaskPane.qcstate"],
             componentProps: {
                 title: "Research Ultrasounds",
                 schemaName: "study",
@@ -40,6 +39,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
         },{
             type: CustomInputPane,
             name: "RestraintPane",
+            required: ["ResearchPane.Id","ResearchPane.date", "TaskPane.qcstate"],
             componentProps: {
                 schemaName: "study",
                 queryName: "restraints",
@@ -52,12 +52,8 @@ export const ResearchUltrasounds: FC<any> = (props) => {
         const review = {
             type: CustomInputPane,
             name: "ReviewPane",
-            commandOverride: "insert",
-            syncedValues: {
-                TaskPane: ["taskid"],
-                ResearchPane: ["Id"]
-            },
-            validation: true,
+            required: ["TaskPane.qcstate"],
+            commandOverride: 'insert',
             componentProps: {
                 title: "Ultrasound Review",
                 schemaName: "study",
@@ -72,6 +68,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
         <div>
             <DefaultFormContainer
                 taskId={taskid}
+                reviewRequired={reviewRequired}
                 taskTitle={"Research Ultrasounds"}
                 taskType={"Research Ultrasounds"}
                 command={taskid ? "update" : "insert"}

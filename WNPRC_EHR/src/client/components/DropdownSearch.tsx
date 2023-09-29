@@ -14,6 +14,7 @@ interface PropTypes {
     required: boolean;
     isClearable?: boolean;
     validation?: any;
+    defaultOpts?: any;
 }
 
 /**
@@ -30,7 +31,8 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         initialValue,
         required,
         isClearable,
-        validation
+        validation,
+        defaultOpts
     } = props;
     const {control, formState: {errors}} = useFormContext();
     const [optState, setOptState] = useState([]);
@@ -49,10 +51,11 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                     setDefaultValue({value: item[value], label: item[display]});
                 }
             });
-            // If dropdown is for projects, add defaults
-            if(name === "project"){
-                options.push({value:300901, label:"300901"});
-                options.push({value:400901, label:"400901"});
+
+            if(defaultOpts) {
+                defaultOpts.forEach((option) => {
+                    options.push(option);
+                });
             }
 
             // remove possible duplicates
@@ -80,7 +83,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
             <Controller
                 control={control}
                 name={name}
-                defaultValue={defaultValue as FieldPathValue<FieldValues, any>}
+                defaultValue={defaultValue?.value as FieldPathValue<FieldValues, any>}
                 rules={{
                     validate: validation,
                     required: required ? "This field is required" : false
@@ -89,11 +92,11 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                     <Select
                         ref={ref}
                         id={id}
-                        value={value}
+                        value={optState.find((c) => c.value === value)}
                         className={classname}
                         getOptionLabel={x => x.label}
                         getOptionValue={x => x.value}
-                        onChange={onChange}
+                        onChange={(selectedOption) => {onChange(selectedOption?.value ? selectedOption.value : null);}}
                         options={optState}
                         isClearable={isClearable}
                         styles={{

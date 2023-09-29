@@ -37,8 +37,8 @@ export const CustomInputPane: FC<any> = (props) => {
                     return { ...prevState, ...newState };
                 });
                 setIsLoading(false);
-            }).catch((data) => {
-
+            }).catch(() => {
+                setIsLoading(false);
             });
         }else{
             setIsLoading(false);

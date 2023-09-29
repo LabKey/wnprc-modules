@@ -405,7 +405,7 @@ Compiles a state object into a submission ready object for labkey saverows API c
 export const generateFormData = (schemaName: string, queryName: string, command: string, state: object): object => {
   const rows = [{}];
   Object.keys(state).forEach(key => {
-    rows[0][key] = state[key].value;
+    rows[0][key] = state[key];
   });
   return {
     schemaName,

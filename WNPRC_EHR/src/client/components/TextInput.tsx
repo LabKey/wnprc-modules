@@ -20,9 +20,6 @@ interface TextInputProps {
   autoFill?: any;
 }
 
-// Type casting for the watch variable, must come from a dropdown currently
-type watchVarType = {value: any, label: string}
-
 const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
   const {
       name,
@@ -42,7 +39,7 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
     const {register, formState: {errors}, trigger, watch, resetField, setValue} = useFormContext();
     const [stateName, fieldName] = name.split('.');
     const borderColor = errors?.[stateName]?.[fieldName] ? 'red' : null;
-    const watchVar:watchVarType = autoFill ? watch(autoFill.watch as FieldPathValue<FieldValues, any>) as watchVarType : undefined;
+    const watchVar = autoFill ? watch(autoFill.watch as FieldPathValue<FieldValues, any>)  : undefined;
 
     // Trigger validation on load-in once to show required inputs
     useEffect(() => {
@@ -62,9 +59,15 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
             resetField(name);
         }
         else if(autoFill){ // autofill input based on dropdown
-            autoFill.search(watchVar.value).then((data) => {
-                setValue(name, data);
-            });
+            if(autoFill.search) {
+                autoFill.search(watchVar).then((data) => {
+                    setValue(name, data);
+                });
+            }
+            else{
+                setValue(name, watchVar);
+                trigger(name);
+            }
         }
     }, [watchVar]);
 

@@ -40,6 +40,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
         const validation = inputField[i].validation;
         const watchVar = inputField[i].watch;
         const autoFill = inputField[i].autoFill;
+        const defaultOpts = inputField[i].defaultOpts;
         // Text field
         // Tells the form to expose the animal Id input with name "Id" to a global state
         if(fieldType === "text"){
@@ -102,8 +103,9 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
         }
         else if(fieldType === "dropdown"){ // Dropdown field
             const watchState = watch(watchVar as FieldPathValue<FieldValues, any>);
-            const optConf = typeof inputField[i].options === 'function' ? inputField[i].options(watchState) : inputField[i].options;
-            //const optDep = watch(options[name].dependency as FieldPathValue<FieldValues, any>);
+            const optConf = typeof inputField[i].options === 'function'
+                ? inputField[i].options(watchState)
+                : inputField[i].options;
             inputs.push(
                 <div key={id} className={"panel-input-row"}>
                     <InputLabel
@@ -113,6 +115,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                     />
                     <DropdownSearch
                         optConf={optConf}
+                        defaultOpts={defaultOpts}
                         optDep={watchState}
                         initialValue={prevForm?.[name] ?? null}
                         name={`${compName}.${name}`}

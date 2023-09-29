@@ -2,24 +2,28 @@ import * as React from "react";
 import { FC, useEffect, useState } from 'react';
 import "../theme/css/react-datepicker.css";
 import "../theme/css/index.css";
-import { generateFormData, getTask, saveRowsDirect, triggerValidation, wait } from '../query/helpers';
+import {
+    generateFormData,
+    getTask,
+    labkeyActionDistinctSelectWithPromise,
+    saveRowsDirect,
+    triggerValidation,
+    wait
+} from '../query/helpers';
 import AnimalInfoPane from "./AnimalInfoPane";
 import {TaskPane} from "./TaskPane";
 import ErrorModal from '../components/ErrorModal';
 import { InfoProps, infoStates } from '../researchUltrasoundsEntry/typings';
-import { ActionURL } from '@labkey/api';
+import { ActionURL, Filter, Utils } from '@labkey/api';
 import {isEmpty} from "lodash";
 import { useForm, FormProvider } from 'react-hook-form';
+import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 
 interface Component {
     type: React.FunctionComponent<any>;
     name: string;
-    key?: string;
+    required?: any;
     commandOverride?: string;
-    syncedValues?: {
-        [key: string]: string[];
-    };
-    validation?: boolean;
     componentProps?: {
         [key: string]: any;
     };
@@ -32,6 +36,7 @@ interface formProps {
     redirectSchema: string;
     command: string;
     components: Component[];
+    reviewRequired: boolean;
 }
 
 /*
@@ -54,6 +59,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         command,
         redirectSchema,
         redirectQuery,
+        reviewRequired
     } = props;
 
     const methods = useForm({mode: "onChange"});
@@ -66,27 +72,16 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [prevTask, setPrevTask] = useState(undefined);
 
     const [dataFetching, setDataFetching] = useState(true);
-    // States for each component passed in as a prop
-    const [componentStates, setComponentStates] = useState(
-        {
-            ...components.reduce((acc, component) => {
-                acc[component.name] = null;
-                return acc;
-            }, {}),
-            TaskPane: {}
-        }
-    );
+
     // States for pop-ups/form checking
     const [errorText, setErrorText] = useState<string>("");
     const [showModal, setShowModal] = useState<string>();
     const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
-    const [validForm, setValidForm] = useState(true);
 
     useEffect(() => {
         if(taskId) {
             getTask(taskId).then((result) => {
                 setPrevTask(result);
-                console.log("PT: ", result);
                 setDataFetching(false);
             });
         }else {
@@ -95,75 +90,38 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     },[]);
 
 
-
-    /*
-    This function makes sure values across components are synced if needed, ex. task ids
-
-    @param syncedValues JSON object that holds a property (component needed to sync) and array of fields to sync
-    @param currentComponent The current component to sync with other components according to what is described
-                            in syncedValues
-    */
-    const updateSyncedValues = (syncedValues, currentComponent) => {
-        let updatedState = {...componentStates};
-        Object.keys(syncedValues).forEach((key) => {
-            if(!componentStates[key] || isEmpty(componentStates[key])) return;
-            const toChange = syncedValues[key];
-            toChange.forEach((value) => {
-                if(!updatedState[currentComponent]) return;
-                updatedState[currentComponent] = {
-                ...updatedState[currentComponent],
-                        [value]: {value: componentStates[key][value].value, error: ""}
-                }
-            });
-        });
-        return updatedState;
-    };
-
     /*
     Helper function to compile all the component states into form ready submission commands
 
-    @param finalFormData Generated form data from generateFormData function
+    @param finalFormData Array of generated form data to pass into the labkey saverows function
+    @param newTaskId string of the previous taskId or new one if the form is being created for the first time
+    @param currentFormData object containing the current data for the form, equal to react-hook-form control._fields object
     */
-    const processComponents = async (finalFormData: Array<any>) => {
+    const processComponents = async (finalFormData: Array<any>, newTaskId: string, currentFormData: any) => {
         const promises = components.map(async (component) => {
             const componentName = component.name;
             const schemaName = component.componentProps.schemaName;
             const queryName = component.componentProps.queryName;
-            const syncedValues = component.syncedValues;
-            const validation = component.validation;
-            const commandOveride = component.commandOverride;
-            let newData;
-            if(validation){ // runs if validation is required on component
-                await triggerValidation(
-                    animalInfoCache,
-                    componentStates[componentName],
-                    setSubmitTextBody,
-                    setShowModal,
-                    setErrorText
-                ).then((result) => {
-                    if(!result){
-                        setValidForm(false);
-                    }
-                }).catch(e => {
-                    console.error(e);
-                });
+            const requiredFields = component.required;
+            //Override command in-case form is under review and needs update and insert commands.
+            const commandOverride = component.commandOverride;
 
-            }
-            if (syncedValues){ // updates synced values across components to maintain matching fields ex. (taskid)
-                const newState = updateSyncedValues(syncedValues, componentName);
-                newData = generateFormData(
+            if(currentFormData[componentName] !== null && currentFormData[componentName] !== undefined){
+                // sync up task id
+                const tempNewData = currentFormData[componentName];
+                tempNewData.taskid = newTaskId;
+                if(requiredFields){
+                    requiredFields.forEach((field) => {
+                        const [stateName, fieldName] = field.split(".");
+                        tempNewData[fieldName] = currentFormData[stateName][fieldName];
+                    })
+                }
+                // generate submission command for component
+                const newData = generateFormData(
                     schemaName,
                     queryName,
-                    commandOveride !== undefined ? commandOveride : command,
-                    newState[componentName]
-                );
-                finalFormData.push(newData);
-            }else if (componentStates[componentName] !== null){
-                newData = generateFormData(
-                    schemaName,
-                    queryName,
-                    command,
-                    componentStates[componentName]
+                    commandOverride ? commandOverride : command,
+                    tempNewData
                 );
                 finalFormData.push(newData);
             }
@@ -173,22 +131,26 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     };
 
     // Form submission handler
-    // TODO Tasks qc state switches between text and numbers because we diplay the text version, make sure you submit the number version again
-    //
-    const handleSubmit = (data) => {
+    const handleSubmit = async (data) => {
         //event.preventDefault();
         console.log("Data: ", data);
-
-        return;
         const finalFormData = [];
+        //Switch from label qcstate to number format
+        // generate task/object IDs
+        const newTaskId = taskId ? taskId : Utils.generateUUID().toUpperCase();
+        //finalize (ehr/tasks) submission
+        const tempTaskData = data.TaskPane;
+        tempTaskData.taskid = newTaskId;
+        tempTaskData.category = 'task';
+        tempTaskData.formType = taskType;
+        tempTaskData.qcstate = reviewRequired ? 4 : 1;
+        data.TaskPane = tempTaskData;
         // Create format to submit new task
-        //const taskData = generateFormData("ehr", "tasks", command, taskPaneState);
-        //finalFormData.push(taskData);
-        processComponents(finalFormData).then((data) => {
+        const taskData = generateFormData("ehr", "tasks", command, tempTaskData);
+        finalFormData.push(taskData);
+        processComponents(finalFormData, newTaskId, data ).then((data) => {
             // For each component compile the state data into a format ready for submission
-            if(!validForm){
-                return;
-            }
+
             let jsonData = {commands: data}
             console.log('calling save rows on: ', jsonData);
             // save rows to database and redirect to desired schema/query
@@ -214,19 +176,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 console.error(e);
                 setSubmitTextBody(e.exception);
             });
-    }
-
-    /*
-    Function that handles child state changes within component states
-
-    @param componentName Name of component to add new state to
-    @param newState New state of to add to component
-     */
-    const handleChildStateChange = (componentName, newState, syncedValues?) => {
-        setComponentStates((prevState) => ({
-            ...prevState,
-            [componentName]: newState,
-        }));
     }
 
     // Make sure if loading in from a taskId the render doesn't return before it fetches the previous task

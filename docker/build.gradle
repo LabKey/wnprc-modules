@@ -28,31 +28,33 @@ docker {
 }
 
 //Login into Docker without using plugin
-task ("dockerLogin", group: "Docker" , dependsOn: "checkDocker"){ Task t ->
-    doLast {     
-        if (project.hasProperty('dockerhubUsername') && project.hasProperty('dockerhubPassword')) {
-            t.project.exec {
-                commandLine 'docker', 'login'
-                args "--username", "${dockerhubUsername}", "--password", "${dockerhubPassword}"
-            }
-        } else {
-            logger.warn 'To download images from DockerHub, you must specify a username and password in your ~/.gradle/gradle.properties file.'
-        }
-    }
+tasks.register('dockerLogin', Exec){
+    commandLine "docker", "login", "--username", "${dockerhubUsername}", "--password", "${dockerhubPassword}"
+}
+configure(dockerLogin){
+    dependsOn 'checkDocker'
+    group  'Docker'
+    description 'Login into Docker Hub'
+    onlyIf { project.hasProperty('dockerhubUsername') && project.hasProperty('dockerhubPassword') }
 }
 
-task("buildEhrCron", group: "Docker", type: Exec, description: "Generates the ehrcron docker image") {
+tasks.register("buildEhrCron", Exec) {
     workingDir "$projectDir/ehrcron"
     executable "docker"
     args "build", ".", "-t", "wnprcehr/ehrcron:latest"
 }
-
-task("buildEhrCronPlug", group: "DockerPlugin", type:DockerBuildImage){
-    inputDir.set(file("ehrcron/"))
-    images.add("wnprcehr/ehrcron:latest")
+configure(buildEhrCron){
+    group = 'Docker'
+    description = "Generates the ehrcron docker image"
 }
 
-task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker image (with R)", dependsOn:[ "checkDocker", "dockerLogin"]) { Task t ->
+tasks.register("buildEhrCronPlug", DockerBuildImage){
+    inputDir.set(file("ehrcron/"))
+    images.add("wnprcehr/ehrcron:latest")
+    group 'DockerPlugin'
+}
+
+tasks.register("buildTomcat") { Task t ->
     doLast {
         if (!project.hasProperty("nocache")){
             ext.nocache = "false"
@@ -66,15 +68,15 @@ task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker i
             if (nocache.equals("true")){
                 println "building image without cache"
                 t.project.exec{
-                workingDir "$projectDir/tomcat"
-                executable "docker"
-                args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                    workingDir "$projectDir/tomcat"
+                    executable "docker"
+                    args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
                 }
             }else{
                 t.project.exec{
-                workingDir "$projectDir/tomcat"
-                executable "docker"
-                args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                    workingDir "$projectDir/tomcat"
+                    executable "docker"
+                    args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
                 }
             }
             
@@ -82,9 +84,12 @@ task("buildTomcat", group: "Docker", description: "Generates the Tomcat docker i
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
         }
     }
+    group 'Docker'
+    description 'Generates the Tomcat docker image (with R)'
+    dependsOn  "checkDocker", "dockerLogin"
 } 
 
-task("buildTomcatPlug", group: "DockerPlugin", type: DockerBuildImage){
+tasks.register("buildTomcatPlug", DockerBuildImage){
     def dockerStr = providers.gradleProperty("dockerString")
     if (dockerStr.present){
         println dockerStr.get()
@@ -95,12 +100,13 @@ task("buildTomcatPlug", group: "DockerPlugin", type: DockerBuildImage){
     }else {
         logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
     }
+    group 'DockerPlugin'
     
 }
 
 //Building LabKey with hooks/build for consistancy with Docker Hub and used of environment variables duirng the build process
 //Source: https://stackoverflow.com/questions/36322536/how-to-set-an-environment-variable-from-a-gradle-build / https://stackoverflow.com/a/63140816
-task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image") { Task t ->
+tasks.register("buildLabkey") { Task t ->
 //task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrCron", "buildPostfix"]) { Task t ->
     doLast {
         def dockerStr = providers.gradleProperty("dockerString")
@@ -121,23 +127,33 @@ task("buildLabkey", group: "Docker", description: "Generates the LabKey docker i
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildLabkey -PdockerString=22.11_fb_???)'
         }
     }
+    group 'Docker'
+     description 'Generates the LabKey docker image'
 }
 
- task("buildPostfix", group: "Docker", type: Exec, description: "Generates the postfix docker image") {
+ tasks.register("buildPostfix", Exec) {
     workingDir "$projectDir/postfix"
     executable "docker"
     args "build", ".", "-t", "wnprcehr/postfix:latest"
+    group 'Docker'
+    description 'Generates the postfix docker image'
 } 
 
-task("buildPostfixPlug", group: "DockerPlugin", type:DockerBuildImage){
+tasks.register("buildPostfixPlug", DockerBuildImage){
     inputDir.set(file("postfix/"))
     images.add("wnprcehr/postfix:latest")
+    group 'DockerPlugin'
 }
 
-task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" ] )
+tasks.register("build"){
+    group 'Docker'
+    description 'Generates all the docker images in the subfolders'
+    dependsOn "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" 
+
+}
 
 //Two tasks to download LabKey from docker hub, first one does not use plugin
-task("downloadLabkey", group: "Docker", description: "Download Docker Images from Docker Hub", dependsOn:[ "checkDocker", "dockerLogin" ]) { Task t ->
+tasks.register("downloadLabkey") { Task t ->
     doLast {
         def dockerStr = providers.gradleProperty("dockerString")
         if (dockerStr.present)
@@ -154,8 +170,11 @@ task("downloadLabkey", group: "Docker", description: "Download Docker Images fro
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadLabkey -PdockerString=22.11_fb)'
         }
     }
+    group 'Docker' 
+    description 'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
 }
-task("downloadLabkeyPlug", group: "DockerPlugin", type: DockerPullImage, dependsOn: "checkDocker"){
+tasks.register("downloadLabkeyPlug", DockerPullImage){
     image = "wnprcehr/labkeysnapshot:${dockerString}"
     
     onComplete{
@@ -170,10 +189,12 @@ task("downloadLabkeyPlug", group: "DockerPlugin", type: DockerPullImage, depends
     }
     doLast{
         println "image pulled"     
-    }   
+    }
+    group 'DockerPlugin'
+    dependsOn 'checkDocker'
 }
 
-task("downloadEhrcron", group: "Docker", description: "Download Docker Images from Docker Hub", dependsOn:[ "checkDocker", "dockerLogin" ]) { Task t ->
+tasks.register("downloadEhrcron") { Task t ->
     doLast {
         def dockerStr = providers.gradleProperty("dockerString")
         if (dockerStr.present)
@@ -189,9 +210,12 @@ task("downloadEhrcron", group: "Docker", description: "Download Docker Images fr
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PdockerString=22.11_fb)'
         }
     }
+    group 'Docker'
+    description 'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
 }
 
-task("downloadEhrcronPlug", group: "DockerPlugin", type: DockerPullImage, dependsOn: "checkDocker"){
+tasks.register("downloadEhrcronPlug", DockerPullImage){
     image = "wnprcehr/ehrcronprod:${dockerString}"
     
     onComplete{
@@ -206,10 +230,12 @@ task("downloadEhrcronPlug", group: "DockerPlugin", type: DockerPullImage, depend
     }
     doLast{
         println "image pulled"     
-    }   
+    }
+    group 'DockerPlugin' 
+    dependsOn 'checkDocker'
 }
 
-task("downloadPostfix", group: "Docker", description: "Download Docker Images from Docker Hub", dependsOn:[ "checkDocker", "dockerLogin" ]) { Task t ->
+tasks.register("downloadPostfix") { Task t ->
     doLast {
         def dockerStr = providers.gradleProperty("dockerString")
         if (dockerStr.present)
@@ -225,9 +251,12 @@ task("downloadPostfix", group: "Docker", description: "Download Docker Images fr
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PdockerString=22.11_fb)'
         }
     }
+    group 'Docker'
+    description  'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
 }
 
-task("downloadPostfixPlug", group: "DockerPlugin", type: DockerPullImage, dependsOn: "checkDocker"){
+tasks.register("downloadPostfixPlug",DockerPullImage){
     image = "wnprcehr/postfix:${dockerString}"
     
     onComplete{
@@ -242,40 +271,76 @@ task("downloadPostfixPlug", group: "DockerPlugin", type: DockerPullImage, depend
     }
     doLast{
         println "image pulled"     
-    }   
+    }
+    group 'DockerPlugin'
+    dependsOn 'checkDocker'
 }
 
 
 
-task("downloadAll", group: "Docker", description: "Download all the docker images to ran LabKey/EHR", dependsOn: [ "downloadLabkey", "downloadEhrcron", "downloadPostfix" ] )
+tasks.register("downloadAll"){
+    group 'Docker'
+    description 'Download all the docker images to ran LabKey/EHR'
+    dependsOn "downloadLabkey", "downloadEhrcron", "downloadPostfix"
 
-task("downloadAllPlug", group: "Docker", description: "Download all the docker images to ran LabKey/EHR", dependsOn: [ "downloadLabkeyPlug", "downloadEhrcronPlug", "downloadPostfixPlug" ] )
+}
+
+tasks.register("downloadAllPlug"){
+    group 'Docker'
+    description 'Download all the docker images to ran LabKey/EHR'
+    dependsOn "downloadLabkeyPlug", "downloadEhrcronPlug", "downloadPostfixPlug"
+}
 
 
 
-task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
+tasks.register("up", Exec) {
     workingDir "$projectDir"
     executable "docker"
     args "compose", "up", "-d"
     environment CATALINA_OPTS: "-ea -Ddevmode=true"
+    group 'Docker'
+    description 'Starts the docker-compose environment (labkey + postgres)'
 }
 
-task("down", group: "Docker", type: Exec, description: "Shuts down the docker-compose environment (labkey + postgres)") {
+tasks.register("down", Exec) {
     workingDir "$projectDir"
     executable "docker"
     args "compose", "down"
+    group 'Docker'
+    description 'Shuts down the docker-compose environment (labkey + postgres)'
+}
+
+tasks.register("upSecondary", Exec) {
+    workingDir "$projectDir/${directory}"
+    executable "docker"
+    args "compose", "up", "-d"
+    environment CATALINA_OPTS: "-ea -Ddevmode=true"
+    group 'Docker'
+    description 'Starts the docker-compose environment (labkey + postgres)'
 }
 
 
-
-task("privilegecheckDocker", type: Exec){
-    commandLine 'service', 'docker', 'start'
-}
-
-task("checkDocker") { 
-    doLast{
-        openDocker()
+tasks.register("checkDocker") { 
+  doLast{
+    def OS = OperatingSystem.current()
+    println OS.toString()
+    
+    if (OS.toString().contains("Mac")){
+        exec {
+            commandLine 'open', '-a', 'docker'
+        }
+    }else{
+        exec{
+             commandLine 'service', 'docker', 'status'
+            //commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
+        }
     }
+  }
+    
+
+    /* doLast{
+        openDocker()
+    } */
     
     /* doLast {
         if (standardOutput.toString().contains("ERROR")){
@@ -309,7 +374,5 @@ void openDocker(){
              commandLine 'service', 'docker', 'status'
             //commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
         }
-
     }
 }
-

@@ -96,7 +96,6 @@ export const GridPanelConfig: FC<configProps> = ({
                     input={input}
                     autoLoad
                     cellStyles={cellStyles}
-                    viewName={viewName}
                     title={title}
                     columnStyles={columnStyles}
                 />

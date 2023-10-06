@@ -53,3 +53,15 @@ export const selectRowsSql = (id) => {
         });
     });
 };
+
+export const findAccountByProject = (project, state) => {
+    let account = '';
+    let projectsAndAccounts = state.animal_requests_active_projects;
+    for (let i = 0; i < projectsAndAccounts.length; i++){
+        if (projectsAndAccounts[i]['project'] == project){
+            account = projectsAndAccounts[i]['account'];
+            break;
+        }
+    }
+    return account;
+}

@@ -91,9 +91,9 @@
         <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
       </column>
-      <column columnName="RNA_isolation_method">
+      <column columnName="nucleic_acid_isolation_method">
         <datatype>varchar</datatype>
-        <columnTitle>RNA Isolation Method</columnTitle>
+        <columnTitle>Nucleic Acid Isolation Method</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
         <scale>4000</scale>

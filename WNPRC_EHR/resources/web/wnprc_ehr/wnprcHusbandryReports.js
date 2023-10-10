@@ -16,6 +16,7 @@ EHR.reports.waterGridCalendar = function (panel, tab) {
         queryName: 'WaterScheduleCoalesced',
         parameters: {'NumDays': '180', 'StartDate': reportStartDate},
         filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable,
         frame: true
 
     });

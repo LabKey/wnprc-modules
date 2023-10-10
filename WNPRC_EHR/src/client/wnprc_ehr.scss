@@ -1,0 +1,12 @@
+@import "@labkey/components-scss";
+@import "@labkey/components-scss/labkeyserver-override";
+
+/* Width of grid panel columns*/
+.grid-header-cell.grid-header-draggable {
+  min-width: 10px !important;
+}
+
+/* Height of grid panel table*/
+.table-responsive {
+  min-height: 1600px;
+}

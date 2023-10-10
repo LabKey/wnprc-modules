@@ -1164,7 +1164,7 @@ EHR.reports['abstract'] = function(panel, tab){
             listeners: {
                 afterrender: {
                     fn: function () {
-                        LABKEY.requiresScript("/wnprc_ehr/gen/abstract.js",true, function() {
+                        LABKEY.requiresScript("/gen/abstract.js",true, function() {
                             Abstract.renderAnimalAbstract(animalId, randNum)
                         });
                     }

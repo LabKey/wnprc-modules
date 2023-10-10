@@ -1,0 +1,6 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="Default Grid Webpart">
+    <view name="grid_panel_webpart"/>
+    <locations>
+        <location name="body"/>
+    </locations>
+</webpart>

@@ -1,0 +1,26 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="remark"/>
+        <column name="CurrentRoom">
+        </column>
+        <column name="CurrentCage">
+        </column>
+        <column name="Id"/>
+        <column name="meaning"/>
+        <column name="route"/>
+        <column name="volume2"/>
+        <column name="conc2"/>
+        <column name="startdate"/>
+        <column name="TimeOfDay"/>
+        <column name="frequency"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+        <sort column="SortOrder" descending="false"/>
+        <sort column="CurrentRoom" descending="false"/>
+        <sort column="CurrentCage" descending="false"/>
+    </sorts>
+    <filters>
+        <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
+    </filters>
+</customView>

@@ -38,7 +38,7 @@ configure(dockerLogin){
     dependsOn 'checkDocker'
     group  'Docker'
     description 'Login into Docker Hub'
-    onlyIf { project.hasProperty('dockerhubUsername') && project.hasProperty('dockerhubPassword') }
+    onlyIf { project.hasProperty('dockerhubUsername') && project.hasProperty('dockertokenpath') }
 }
 
 tasks.register("buildEhrCron", Exec) {

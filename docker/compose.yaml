@@ -48,7 +48,7 @@ services:
       MAIL_SERVER:
       TZ: America/Chicago
       SERVER_CERT: /run/secrets/server-certificate
-      SERVER_KEY: /run/secrets/server-key
+      SERVER_KEY:  /run/secrets/server-key
     expose:
       - "1025"
     networks:

@@ -1,5 +1,6 @@
 plugins {
     id 'com.bmuschko.docker-remote-api' version '9.3.1'
+     id 'idea'
 }
 
 
@@ -27,9 +28,11 @@ docker {
     }
 }
 
-//Login into Docker without using plugin
+//Login into Docker without using plugin, done via a bash script that reads a token file using cat
+//Source:https://docs.docker.com/engine/reference/commandline/login/
 tasks.register('dockerLogin', Exec){
-    commandLine "docker", "login", "--username", "${dockerhubUsername}", "--password", "${dockerhubPassword}"
+    commandLine "./dockerLogin.sh"
+    args "--tokenPath", "${dockertokenpath}", "--username", "${dockerhubUsername}"
 }
 configure(dockerLogin){
     dependsOn 'checkDocker'
@@ -145,7 +148,7 @@ tasks.register("buildPostfixPlug", DockerBuildImage){
     group 'DockerPlugin'
 }
 
-tasks.register("build"){
+tasks.register("buildAll"){
     group 'Docker'
     description 'Generates all the docker images in the subfolders'
     dependsOn "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" 

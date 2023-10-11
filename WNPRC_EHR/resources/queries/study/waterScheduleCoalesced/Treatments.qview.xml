@@ -25,5 +25,7 @@
     </sorts>
     <filters>
         <filter column="dateOrdered" operator="dategte" value="-30d"/>
+        <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
+        <filter column="qctate/Label" operator="neqornull" value="Completed"/>
     </filters>
 </customView>

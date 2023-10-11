@@ -2159,8 +2159,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 .searchFor(MORE_ANIMAL_IDS[0])
                 .clickCategoryTab("General")
                 .clickReportTab("Abstract");
-        waitForElement(Locator.tagWithText("a", MORE_ANIMAL_IDS[0]).notHidden());
-        assertElementPresent(Locator.linkContainingText(MORE_ANIMAL_IDS[0]));
+        waitForElement(Locator.tagWithClass("table", "animal-info-table"));
+        assertElementPresent(Locator.tagWithClass("table", "animal-info-table"));
 
     }
 

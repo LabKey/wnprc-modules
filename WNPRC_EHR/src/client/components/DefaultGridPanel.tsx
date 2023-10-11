@@ -57,7 +57,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
             /** Color all columns **/
             const styledColumns = new ExtendedMap<string, QueryColumn>();
             queryInfo.columns.forEach((column, key) => {
-                if((column.name === cellStyles[0].flagData.flagColumn)){
+                if((column.name === cellStyles[0].flagData.flagColumn || columnStyles.hasOwnProperty(column.name))){
                     const newColumn2 = new QueryColumn({...column, ...{"cell": cellRenderer}});
                     styledColumns.set(key, newColumn2);
                 }else{

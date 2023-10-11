@@ -5,7 +5,6 @@ EHR.reports.PregnancyReport = function (panel, tab) {
         schemaName: 'study',
         queryName: 'PregnancyInfo',
         viewName: '',
-        columnStyles: JSON.stringify({remark: "remark-column-style"}),
         filterConfig: JSON.stringify({
             subjects: tab.filters.subjects,
             filters: tab.filters,

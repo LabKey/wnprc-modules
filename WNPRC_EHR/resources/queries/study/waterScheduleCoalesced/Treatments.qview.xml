@@ -10,6 +10,11 @@
         <column name="waterSource"/>
         <column name="assignedTo"/>
         <column name="provideFruit"/>
+        <column name="qcstate/Label">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
     </columns>
     <sorts>
         <sort column="date" descending="false"/>

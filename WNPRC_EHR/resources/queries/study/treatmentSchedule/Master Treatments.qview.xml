@@ -11,6 +11,7 @@
         <column name="volume2"/>
         <column name="conc2"/>
         <column name="startdate"/>
+        <column name="enddate"/>
         <column name="TimeOfDay"/>
         <column name="frequency"/>
     </columns>

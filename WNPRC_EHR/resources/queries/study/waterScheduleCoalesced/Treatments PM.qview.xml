@@ -21,5 +21,6 @@
     <filters>
         <filter column="dateOrdered" operator="dategte" value="-30d"/>
         <filter column="timeofday" operator="eq" value="PM"/>
+        <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
     </filters>
 </customView>

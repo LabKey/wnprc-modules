@@ -30,7 +30,8 @@ module.exports = {
         name: 'abstract',
         title: 'Abstract',
         permission: 'read',
-        path: './src/client/abstract/base'
+        path: './src/client/abstract/base',
+        generateLib: true
     },{
         name: 'research_ultrasounds',
         title: 'Research Ultrasounds',

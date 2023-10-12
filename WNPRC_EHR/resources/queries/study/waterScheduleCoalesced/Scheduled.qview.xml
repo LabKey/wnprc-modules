@@ -21,6 +21,7 @@
         <sort column="Id"/>
     </sorts>
     <filters>
-    <filter column="qcstate/label" operator="eq" value="Scheduled"/>
+        <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
+        <filter column="qcstate/label" operator="eq" value="Scheduled"/>
     </filters>
 </customView>

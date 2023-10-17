@@ -59,6 +59,7 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
 {
     //Sets up class variables.
     NotificationToolkit notificationToolkit = new NotificationToolkit();
+    NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
 
     public ValidationSuiteNotification(Module owner)
     {
@@ -83,7 +84,28 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     @Override
     public String getMessageBodyHTML(final Container c, User u)
     {
-        StringBuilder messageBody = this.createNotification(c, u);
+
+        //Creates return string.
+        StringBuilder messageBody = new StringBuilder();
+
+        //Creates CSS.
+        messageBody.append(styleToolkit.beginStyle());
+        messageBody.append(styleToolkit.setBasicTableStyle());
+        messageBody.append(styleToolkit.setColumnBackgroundColor(1, "#d9d9d9"));
+        messageBody.append(styleToolkit.setColumnTextColor(1, "red"));
+        messageBody.append(styleToolkit.endStyle());
+
+        //Creates header.
+        messageBody.append(notificationToolkit.createHTMLHeader("Similar Names"));
+
+        //Adds body text.
+        messageBody.append("This is a list of all Dams and Sires with similar names.  " +
+                "Please reach out via the ticket tracker if you find any names that need to be updated.");
+
+        //Adds table.
+        messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusDamSire", "notificationView"));
+
+        //Returns string.
         return messageBody.toString();
     }
 
@@ -91,9 +113,7 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     @Override
     public String getCronString()
     {
-        return "0 0 13 * * ?";
-//        String testCronString = notificationToolkit.createCronString(new String[]{"16", "18", "21"});
-//        return testCronString;
+        return(notificationToolkit.createCronString(new String[]{"15"}));
     }
     @Override
     public String getScheduleDescription()
@@ -101,44 +121,4 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
         return "daily at 1PM";
     }
 
-
-    //
-    public StringBuilder createNotification(Container c, User u) {
-
-        //Gets number of notifications.
-
-        final StringBuilder msg = new StringBuilder();
-
-        //Gets ID matches.
-        final StringBuilder msgIDCount = new StringBuilder("" + (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusID") / 2));
-        final StringBuilder msgIDHeader = new StringBuilder(notificationToolkit.createHeader("<br>ID Checks (" + msgIDCount + ")" + ":<br>"));
-        final StringBuilder msgID = new StringBuilder(notificationToolkit.getDataFromTable(c, u, "validationSuiteSuffixCheckerRhesusID", new String[]{"id"}, new String[]{"ID: "}, "last_four"));
-        final StringBuilder msgIDSpaced = new StringBuilder(notificationToolkit.addSpaceEveryOtherLine(msgID.toString()));
-
-        //Gets Dam & Sire matches.
-        final StringBuilder msgDamSireCount = new StringBuilder("" + (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusDamSire") / 2));
-        final StringBuilder msgDamSireHeader = new StringBuilder(notificationToolkit.createHeader("<br>Dam & Sire Checks (" + msgDamSireCount + ")" + ":<br>"));
-        final StringBuilder msgDamSire = new StringBuilder(notificationToolkit.getDataFromTable(c, u, "validationSuiteSuffixCheckerRhesusDamSire", new String[]{"dam", "sire"}, new String[]{"Dam: ", "Sire: "}, "last_four"));
-        final StringBuilder msgDamSireSpaced = new StringBuilder(notificationToolkit.addSpaceEveryOtherLine(msgDamSire.toString()));
-
-        //Gets Dam/Sire & ID matches.
-        final StringBuilder msgDamSireIDCount = new StringBuilder("" + (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusDamSireID") / 2));
-        final StringBuilder msgDamSireIDHeader = new StringBuilder(notificationToolkit.createHeader("<br>ID & Dam/Sire Checks (" + msgDamSireIDCount + ")" + ":<br>"));
-        final StringBuilder msgDamSireID = new StringBuilder(notificationToolkit.getDataFromTable(c, u, "validationSuiteSuffixCheckerRhesusDamSireID", new String[]{"id", "dam", "sire"}, new String[]{"ID: ", "Dam: ", "Sire: "}, "last_four"));
-        final StringBuilder msgDamSireIDSpaced = new StringBuilder(notificationToolkit.addSpaceEveryOtherLine(msgDamSireID.toString()));
-
-        //Gets ID & Dam/Sire matches.
-        final StringBuilder msgIDDamSireCount = new StringBuilder("" + (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusIDDamSire") / 2));
-        final StringBuilder msgIDDamSireHeader = new StringBuilder(notificationToolkit.createHeader("<br>Dam/Sire & ID Checks (" + msgIDDamSireCount + ")" + ":<br>"));
-        final StringBuilder msgIDDamSire = new StringBuilder(notificationToolkit.getDataFromTable(c, u, "validationSuiteSuffixCheckerRhesusIDDamSire", new String[]{"id", "dam", "sire"}, new String[]{"ID: ", "Dam: ", "Sire: "}, "last_four"));
-        final StringBuilder msgIDDamSireSpaced = new StringBuilder(notificationToolkit.addSpaceEveryOtherLine(msgIDDamSire.toString()));
-
-        //Creates return message.
-        msg.append("" + msgIDHeader + msgIDSpaced
-                + msgDamSireHeader + msgDamSireSpaced
-                + msgDamSireIDHeader + msgDamSireIDSpaced
-                + msgIDDamSireHeader + msgIDDamSireSpaced
-        );
-        return msg;
-    }
 }

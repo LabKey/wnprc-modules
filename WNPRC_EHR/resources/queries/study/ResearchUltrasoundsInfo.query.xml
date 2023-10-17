@@ -9,6 +9,7 @@
                 <columns>
                     <column columnName="objectid">
                         <!--<isHidden>true</isHidden>-->
+                        <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="Id">
                         <columnTitle>Id</columnTitle>

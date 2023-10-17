@@ -57,7 +57,6 @@ import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
-import org.labkey.test.util.core.webdav.WebDavUploadHelper;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -66,10 +65,10 @@ import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.UnhandledAlertException;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +85,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -202,17 +200,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.initProject("EHR");
         initTest.createTestSubjects();
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-
 
         initTest.createFinanceManagementFolders();
         initTest.clickFolder("Private");
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
 
+        initTest.populateInitialData();
         initTest.updateEHRFormFrameworkTypes();
 
         initTest.loadBloodBilledByLookup();
@@ -2161,8 +2159,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 .searchFor(MORE_ANIMAL_IDS[0])
                 .clickCategoryTab("General")
                 .clickReportTab("Abstract");
-        waitForElement(Locator.tagWithText("a", MORE_ANIMAL_IDS[0]).notHidden());
-        assertElementPresent(Locator.linkContainingText(MORE_ANIMAL_IDS[0]));
+        waitForElement(Locator.tagWithClass("table", "animal-info-table"));
+        assertElementPresent(Locator.tagWithClass("table", "animal-info-table"));
 
     }
 
@@ -2437,6 +2435,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
+        //make sure we are done saving things
+        waitForText("My Tasks");
+        //navigate to the weights table to click on the task id
         navigateToWeightsTable();
         Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
@@ -2511,13 +2512,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testAddBatchIds()
+    public void testAddBatchIds() throws IOException, CommandException
     {
         navigateToWeights();
         addBatchByIds();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
             assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
         }
+        // test the navigating to next weight by hitting enter
+        for (Integer i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
+            WebElement el2 = fillAnInput("weight_" + i, "0.489");
+            if (i < ANIMAL_SUBSET_EHR_TEST.length-1)
+            {
+                el2.sendKeys(Keys.ENTER);
+            }
+        }
+
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, 0.489, wt.get("value"));
+
     }
 
     @Test
@@ -2649,9 +2671,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
+        WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        // Test that save button is disabled if no entries
+        Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
+        // Test that save button is disabled if single valid id is entered
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
+        Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
         addBatchByLocation();
-        // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertTrue("Save button is disabled for correct test ids",button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");
@@ -2861,6 +2888,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = currentDate.format(formatter);
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
@@ -2889,10 +2919,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
         fillAnInputByName("contacts", "test@test.com");
@@ -2998,6 +3028,31 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         updateProgramIncomeAccountWithValidPermissions();
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
+    }
+
+    @Test
+    public void testReactGridPanel() throws UnhandledAlertException {
+        log("Starting testReactGridPanel.");
+        log("Testing grid panel renders for full webpage");
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "research_ultrasounds"));
+        WebElement reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue(reactComp.isDisplayed());
+
+        log("Testing grid panel renders for web parts");
+        goToEHRFolder();
+        waitAndClickAndWait(Locator.linkWithText("Animal History"));
+        AnimalHistoryPage<AnimalHistoryPage> animalHistoryPage = new AnimalHistoryPage<>(getDriver());
+        animalHistoryPage
+                .selectSingleAnimalSearch()
+                .searchFor(MORE_ANIMAL_IDS[0])
+                .clickCategoryTab("Today At Center")
+                .clickReportTab("Treatments - Incomplete");
+
+        waitForElement(Locator.byClass(".grid-panel"));
+        reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue("Grid Panel webpart failed to render in animal history",reactComp.isDisplayed());
+
+        log("Completed testReactGridPanel.");
     }
 
 }

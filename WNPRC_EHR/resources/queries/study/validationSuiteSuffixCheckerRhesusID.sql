@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+=======
+
+--This query checks Rhesus ID's for similarities (ex. ID's: rhxxyy and xxyy).
+--This query combines the following 2 sub-queries:
+--  Query 1: This query checks for unique male Rhesus ID's with last four digits that match.
+--  Query 2: This query checks for unique female Rhesus ID's with last four digits that match.
+
+>>>>>>> release22.11-SNAPSHOT
 --Gets all (male) (ids) grouped by their (last_four).
 SELECT last_four, id, species, gender
 FROM (
@@ -71,4 +80,9 @@ WHERE last_four IN (
          )
     GROUP BY last_four
     HAVING COUNT(*) >= 2
+<<<<<<< HEAD
 )
+=======
+)
+ORDER BY last_four
+>>>>>>> release22.11-SNAPSHOT

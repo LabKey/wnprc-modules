@@ -1,16 +1,17 @@
 // React
 import * as React from 'react';
-import * as ReactDom from 'react-dom';
-import * as jQuery from 'jquery';
+import * as ReactDOM from 'react-dom';
 
 // Components
 import EnterWeightFormContainer from "./containers/Forms/EnterWeightFormContainer";
 import {ContextProvider} from "./containers/App/ContextProvider";
-jQuery(() => {
-    ReactDom.render(
-      <ContextProvider>
-                <EnterWeightFormContainer />
-      </ContextProvider>,
+
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    ReactDOM.render(
+        <ContextProvider>
+            <EnterWeightFormContainer />
+        </ContextProvider>,
         document.getElementById('app')
-    );
+    )
 });

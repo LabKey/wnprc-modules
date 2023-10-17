@@ -61,7 +61,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     public static final String RSEHR_PUBLIC_FOLDER_PATH = PROJECT_NAME_RSEHR + "/" + PROJECT_NAME_RSHER_PUBLIC;
     public static final String RSEHR_PORTAL_PATH = WebTestHelper.getBaseUrlWithoutContextPath();
     public static final String RSEHR_JOB_INTERVAL = "5";
-    public static final String ZIKA_PORTAL_PATH = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
     public static final String EHR_REMOTE_CONNECTION = "ProductionEHRServerFinance";
     public static final String EHR_EMAILS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsRSEHREmails";
@@ -76,6 +75,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final File LIST_ARCHIVE = TestFileUtils.getSampleData("vl_sample_queue_design_and_sampledata.zip");
     private static final File LIST_ARCHIVE_QC = TestFileUtils.getSampleData("VS_group_wiki_2023-04-26_14-36-16.lists.zip");
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
+    private static final File LLOD_EHR_TSV = TestFileUtils.getSampleData("llod_ehr.tsv");
 
     private static WNPRC_VirologyTest _test;
 
@@ -96,7 +96,8 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final String A_THIRD_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_3";
     private static final String A_FOURTH_LINKED_SCHEMA_FOLDER_NAME = "test_linked_schema_4";
     private static final String RSEHR_QC_CODE = "09-complete-email-RSEHR";
-    private static final String ZIKA_QC_CODE = "08-complete-email-Zika_portal";
+    private static final String COMPLETE_QC_STRING = "05-complete";
+    private static final Integer COMPLETE_QC_CODE = 5;
 
     protected final PortalHelper _portalHelper = new PortalHelper(this);
     protected final RemoteConnectionHelper _rconnHelper = new RemoteConnectionHelper(this);
@@ -134,12 +135,12 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
     public void testTheStuff() throws Exception
     {
+        testBasicBatchComplete();
         testViralLoadRSEHRJob();
         testUpdateAccountsPage();
         testBatchCompleteAndSendRSERHEmail();
         testFolderAccountMapping();
         testBatchCompleteAndSendRSERHEmailToDiffUser();
-        testBatchCompleteAndSendZikaEmail();
         testLinkedSchemaDataWebpart();
 
     }
@@ -151,6 +152,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         DataIntegrationHelper _etlHelperEHR = new DataIntegrationHelper(PROJECT_NAME_EHR);
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         _etlHelperEHR.runTransformAndWait(EHR_EMAILS_ETL_ID);
+        _etlHelperEHR.assertInEtlLogFile(_etlHelperEHR.getJobIdByTransformId(EHR_EMAILS_ETL_ID).toString(), "Successfully completed task");
     }
 
 
@@ -166,6 +168,11 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     protected void createProjectAndFolders(String type) throws IOException, CommandException
     {
         //create EHR folder with sample queue, etc
+        //check to delete first, helpful if the test fails and has to be re-run
+        if (_containerHelper.doesContainerExist(PROJECT_NAME_EHR))
+        {
+            _containerHelper.deleteProject(PROJECT_NAME_EHR);
+        }
         _containerHelper.createProject(PROJECT_NAME_EHR, type);
         _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
         _userHelper.createUser(ADMIN_USER);
@@ -178,8 +185,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRViralLoadDataFolder", getProjectNameRSEHR()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRPublicInfoPath", RSEHR_PUBLIC_FOLDER_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRJobInterval", RSEHR_JOB_INTERVAL));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalQCStatus", ZIKA_QC_CODE));
-        properties.add(new ModulePropertyValue(MODULE_NAME, "/", "ZikaPortalPath", ZIKA_PORTAL_PATH));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "RSEHRNotificationEmailReplyTo", RSEHR_EMAIL_CONTACT_INFO));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataPath", getProjectName()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadQCList", PROJECT_NAME_EHR));
@@ -189,6 +194,13 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
         List<Map<String, Object>> tsv2 = loadTsv(ALIASES_EHR_TSV);
+
+        //import llod data into viral load assay project
+        List<Map<String, Object>> tsv3 = loadTsv(LLOD_EHR_TSV);
+        navigateToFolder(getProjectName(), getProjectName());
+        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME));
+        insertTsvData(connection, "wnprc_virology", "assays_llod", tsv3, getProjectName());
+
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE);
         _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE_QC);
@@ -221,6 +233,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         DataIntegrationHelper diHelperRSEHR = new DataIntegrationHelper(getProjectNameRSEHR());
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         diHelperRSEHR.runTransformAndWait(RSEHR_ACCOUNTS_ETL_ID);
+        diHelperRSEHR.assertInEtlLogFile(diHelperRSEHR.getJobIdByTransformId(RSEHR_ACCOUNTS_ETL_ID).toString(), "Successfully completed task");
 
         // set up ETL connection for RSEHR to EHR
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
@@ -228,6 +241,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         _rconnHelper.createConnection(EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
         DataIntegrationHelper diHelperEHR = new DataIntegrationHelper(PROJECT_NAME_RSEHR);
         diHelperEHR.runTransformAndWait(RSEHR_VIRAL_LOAD_DATA_ETL_ID);
+        diHelperEHR.assertInEtlLogFile(diHelperEHR.getJobIdByTransformId(RSEHR_VIRAL_LOAD_DATA_ETL_ID).toString(), "Successfully completed task");
 
         // set up ETL connection for EHR to RSEHR
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
@@ -335,6 +349,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
         DataIntegrationHelper diHelperEHR = new DataIntegrationHelper(PROJECT_NAME_EHR);
         diHelperEHR.runTransformAndWait(EHR_EMAILS_ETL_ID);
+        diHelperEHR.assertInEtlLogFile(diHelperEHR.getJobIdByTransformId(EHR_EMAILS_ETL_ID).toString(), "Successfully completed task");
 
     }
 
@@ -386,39 +401,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     {
         return null;
     }
-
-
-    public void testBatchCompleteAndSendZikaEmail() throws Exception
-    {
-        log("Select first 2 samples and batch complete");
-        //this clears out emails
-        enableEmailRecorder();
-        navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
-        //select all records and batch complete
-        waitAndClick(Locator.checkboxByNameAndValue(".select", "1")); //for some reason waitAndClickAndWait() didn't work here
-        waitAndClick(Locator.checkboxByNameAndValue(".select", "2"));
-        waitAndClick(Locator.lkButton("Batch Complete Samples"));
-        //select the dropdown arrow to select qc state
-        waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
-        Locator.XPathLocator ZikaQCStateSelectItem = Locator.tagContainingText("li", "08-complete-email-Zika_portal").notHidden().withClass("x4-boundlist-item");
-        click(ZikaQCStateSelectItem);
-        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
-
-        sleep(5000);
-        log("Check that the Zika notification email was sent");
-        goToModule("Dumbster");
-        assertTextPresent("[EHR Server] Viral load results completed on ");
-    }
-
-
-
-
 
     public void testFolderAccountMapping() throws Exception
     {
@@ -476,6 +458,34 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         // should just throw this in an existing test
     }
 
+    //test regular batch complete
+    public void testBasicBatchComplete() throws Exception
+    {
+        log("Select first 2 samples and batch complete");
+        navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
+        waitAndClickAndWait(Locator.linkWithText("vl_sample_queue"));
+        DataRegionTable table = new DataRegionTable("query", this);
+        table.setFilter("Funding_string", "Equals", ACCOUNT_STR_3);
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "4")); //for some reason waitAndClickAndWait() didn't work here
+        waitAndClick(Locator.checkboxByNameAndValue(".select", "5"));
+        waitAndClick(Locator.lkButton("Batch Complete Samples"));
+        //select the dropdown arrow to select qc state
+        waitAndClick(Locator.xpath("//div[contains(@class, 'x4-trigger-index-0')]"));
+        Locator.XPathLocator CompleteQCStateSelectItem = Locator.tagContainingText("li", COMPLETE_QC_STRING).notHidden().withClass("x4-boundlist-item");
+        click(CompleteQCStateSelectItem);
+        Locator.name("enter-experiment-number-inputEl").findElement(getDriver()).sendKeys("1000");
+        Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
+        clickAndWait(Ext4Helper.Locators.ext4Button("Submit"));
+
+        SelectRowsCommand sr = new SelectRowsCommand("lists","vl_sample_queue");
+        sr.addFilter("status", COMPLETE_QC_CODE, Filter.Operator.EQUAL);
+        SelectRowsResponse resp = sr.execute(createDefaultConnection(), PROJECT_NAME_EHR);
+        Assert.assertTrue(resp.getRows().size() == 2);
+
+    }
+
     public void testBatchCompleteAndSendRSERHEmail() throws Exception
     {
         //first add another account 107 to A_THIRD_LINKED_SCHEMA_FOLDER_NAME
@@ -516,7 +526,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
+        clickAndWait(Ext4Helper.Locators.ext4Button("Submit"));
 
         sleep(10000);
         log("Check that the RSEHR notification email was sent");
@@ -534,6 +544,9 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         waitForText(ANIMAL_ID_3);
         assertTextPresent(ANIMAL_ID_3);
         assertTextPresent(ANIMAL_ID);
+
+        //check for LLoD bolding
+        assertElementPresent(Locator.tagWithText("strong", "Yes"));
 
     }
 
@@ -585,7 +598,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
+        clickAndWait(Ext4Helper.Locators.ext4Button("Submit"));
 
         sleep(5000);
         log("Check that the RSEHR notification email was sent");

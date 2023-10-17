@@ -1,0 +1,18 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="viral_loads" tableDbType="TABLE">
+                <javaCustomizer class = "org.labkey.wnprc_virology.table.WNPRC_VirologyCustomizer"/>
+                <columns>
+                    <column columnName="viral_load_average">
+                        <columnTitle>Viral Load Avg</columnTitle>
+                        <conceptURI>http://cpas.labkey.com/laboratory#assayResult</conceptURI>
+                        <measure>true</measure>
+                        <formatString>0.##E00</formatString>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>
+

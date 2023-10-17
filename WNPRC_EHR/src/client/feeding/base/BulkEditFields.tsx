@@ -45,7 +45,7 @@ const BulkEditFields: React.FunctionComponent<any> = (props) => {
           <div className="col-xs-3">Date:</div>
           <div className="col-xs-9">
             <DatePicker
-              ref={(r) => (calendarEl = r)}
+              ref={(r) => (calendarEl.current = r)}
               showTimeSelect
               dateFormat="yyyy-MM-dd HH:mm"
               todayButton="Today"

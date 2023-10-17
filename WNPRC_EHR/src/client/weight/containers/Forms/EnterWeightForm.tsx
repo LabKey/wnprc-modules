@@ -5,8 +5,9 @@ import "../../../theme/css/index.css";
 import "../../../theme/css/tooltip.css";
 import {
   enteredWeightIsGreaterThanPrevWeight,
-  enteredWeightIsLessThanPrevWeight
-} from "../../query/helpers";
+  enteredWeightIsLessThanPrevWeight,
+  jumpToNextRecordOnEnter
+} from '../../query/helpers';
 import { useEffect, useState } from "react";
 import { labkeyActionSelectWithPromise } from "../../query/actions";
 import { useRef, useContext } from "react";
@@ -16,6 +17,7 @@ import DropdownOptions from "../../components/DropdownOptions";
 import {Filter, ActionURL} from "@labkey/api"
 import {AnimalInfoStates, AnimalInfoProps, ConfigProps, FormErrorLevels} from "../../../typings/main";
 import {WeightFormProps} from "../../typings/main";
+import { sleep } from '../../../query/helpers';
 
 /**
  * Main modal which holds the values for the fields in the weight dataset,
@@ -79,6 +81,10 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   },[anyErrors]);
 
 
+
+  const handleKeyDown = (event : React.KeyboardEvent<HTMLInputElement>) => {
+    jumpToNextRecordOnEnter(event, index, "_");
+  }
   //validate items to set error levels which determine which buttons are disabled
   const validateItems = (name: string, value: string | number | object) => {
     if (value == "" && name == "animalid") {
@@ -135,7 +141,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
   const getAnimalInfo = (e: React.FormEvent<EventTarget>): void => {
     let target = e.target as HTMLInputElement;
-    if (target.name == "animalid" && e.nativeEvent.type != "focus") {
+    if (target.name == "animalid" && e.nativeEvent.type != "focusin") {
       if (target.value == "") {
         setAnimalError("Required");
         setAnyErrors(true);
@@ -175,14 +181,14 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     labkeyActionSelectWithPromise(config).then(data => {
       //cache animal info
       if (data["rows"][0]) {
-        setAnimalInfo(data["rows"][0]);
+        setAnimalInfo({...data["rows"][0]});
         setPrevWeight(data["rows"][0]["Id/MostRecentWeight/MostRecentWeight"]);
-        infoState("loading-success");
+        setAnimalInfoState("loading-success");
         validateItems("animalid", animalid);
         setAnimalError("");
       } else {
         //TODO propagate up animal not found issue?
-        infoState("loading-unsuccess");
+        setAnimalInfoState("loading-unsuccess");
         setAnimalError("Animal Not Found");
         validateItems("animalid", animalid)
       }
@@ -253,6 +259,9 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
             onBlur={e => {
               checkWeights(e);
             }}
+            onKeyDown={handleKeyDown}
+            /* disables scrolling on this input, prevents weight from accidentally being changed */
+            onWheel={(e:React.UIEvent<HTMLElement>)=> {(e.target as HTMLInputElement).blur()}}
             required
           />
           {weightWarning && (
@@ -269,13 +278,13 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
         </div>
         <div className="col-xs-9">
           <DatePicker
+            wrapperClassName={"react-datepicker"}
             ref={r => (calendarEl = r)}
             showTimeSelect
             onChangeRaw={handleRawDateChange}
             dateFormat="yyyy-MM-dd HH:mm"
             todayButton="Today"
             selected={date}
-            className="form-control"
             name="date"
             id={`date_${index}`}
             onChange={handleDateChange}

@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+=======
+
+--This query checks Rhesus ID's against Rhesus parents for similarities (ex. ID's: rhxxyy and xxyy).
+--This query combines the following 2 sub-queries:
+--  Query 1: This query gets male Rhesus ID's beginning with 'rh' and checks them against Rhesus sires.
+--  Query 2: This query gets female Rhesus ID's beginning with 'rh' and checks them against Rhesus dams.
+
+>>>>>>> release22.11-SNAPSHOT
 --Gets all (male id's) and (sires) grouped by their (last_four).
 SELECT id, sire, dam, last_four, frequency, species, gender
 FROM (
@@ -74,4 +83,9 @@ WHERE last_four IN (
          )
     GROUP BY last_four
     HAVING COUNT(*) >= 2
+<<<<<<< HEAD
 )
+=======
+)
+ORDER BY last_four
+>>>>>>> release22.11-SNAPSHOT

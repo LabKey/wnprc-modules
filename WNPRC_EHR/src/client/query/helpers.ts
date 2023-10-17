@@ -296,104 +296,6 @@ export const findAccount = async (projectId: string) => {
 }
 
 /*
-General validation helper function for form submission, currently only checks for valid id, and living status
-
-@param animalInfoCache Cache of animalInfos to reference for validity
-@param formData Form data to validate, see triggerSubmit() for more details
-@param setShowModal  see triggerSubmit() for more details
-@param setErrorText see triggerSubmit() for more details
-@returns {Promise} Promise object representing a pass or fail validation check
- */
-export const validate = async (animalInfoCache, formData, setShowModal, setErrorText) => {
-
-  // Check if formData is a single submission (rowObj) or batch (array<rowObj>)
-  if(!Array.isArray(formData)){
-    formData = [formData]
-  }
-
-  return new Promise((resolve, reject) => {
-    let promises = [];
-    try
-    {
-      for (let record of formData) {
-        if (animalInfoCache && animalInfoCache[record["Id"]["value"]]) {
-          let animalRecord = animalInfoCache[record["Id"]["value"]];
-          if (animalRecord["calculated_status"] == "Dead") {
-
-            setErrorText("Cannot update dead animal record " + record["id"]["value"]);
-            setShowModal("none");
-            setShowModal("error");
-            //return false;
-            resolve(false);
-          }
-        } else {
-          promises.push(lookupAnimalInfo(record["Id"]["value"]));
-        }
-      }
-    } catch(err) {
-      console.log(JSON.stringify(err));
-    }
-    Promise.all(promises).then((results) => {
-
-      try
-      {
-        for (let result of results)
-        {
-          if (result["calculated_status"] == "Dead")
-          {
-            setErrorText("Cannot update dead animal record: " + result["Id"]);
-            resolve(false);
-          }
-        }
-      } catch (err) {
-        console.log(JSON.stringify(err));
-      }
-      resolve(true);
-    }).catch((d)=>{
-      if (d.rows.length == 0){
-        setErrorText("One or more animals not found. Unable to submit records.")
-      } else {
-        setErrorText("Unknown error. Unable to submit records.")
-      }
-      console.log(d);
-      resolve(false);
-    });
-  });
-};
-
-/*
-Function to trigger validation on an animal
-
-@param animalInfoCache The cache of info per animal for validation
-@param formData Can be either rowObj or array<rowObj> if form is a single entry or batch
-@param setSubmitTextBody handles the submission text for showModal
-@param setShowModal handles the modal that appears when user clicks submit
-@param setErrorText handles error texts for showModal if any occur
- */
-export const triggerValidation = async (
-    animalInfoCache,
-    formData,
-    setSubmitTextBody,
-    setShowModal,
-    setErrorText,
-):Promise<boolean>  => {
-
-  setSubmitTextBody("One moment. Performing validations...");
-  return await validate(animalInfoCache, formData, setShowModal, setErrorText).then((d) => {
-    if (!d){
-      setShowModal("none");
-      setShowModal("error");
-      setSubmitTextBody("Submit values?");
-      return false;
-    }
-    return true;
-  }).catch(e => {
-    console.error(e);
-    return false;
-  });
-}
-
-/*
 Compiles a state object into a submission ready object for labkey saverows API call
 
 @param schemaName Name of schema for data to submit to
@@ -490,6 +392,42 @@ export const getFormData = (taskId: string, schemaName: string, queryName: strin
         .then((data) => {
           if (data["rows"][0]) {
             resolve(data["rows"][0]);
+          } else {
+            reject(data);
+          }
+        })
+        .catch((data) => {
+          reject(data);
+        });
+  });
+}
+
+/*
+Helper function to find the lsid for a given schema/query and task id
+
+@param schemaName string of the name for the schema to search
+@param queryName string of the name for the query to search
+@param taskId string of the task id to search for corresponding lsid
+@returns Promise string of lsid value
+ */
+export const getLsid = (schemaName: string, queryName: string, taskId: string): Promise<string> => {
+  const config: SelectDistinctOptions = {
+    schemaName: schemaName,
+    queryName: queryName,
+    column: "lsid",
+    filterArray: [
+      Filter.create(
+          "taskid",
+          taskId,
+          Filter.Types.EQUALS
+      )
+    ]
+  }
+  return new Promise ((resolve, reject) => {
+    labkeyActionDistinctSelectWithPromise(config)
+        .then((data) => {
+          if (data.values[0]) {
+            resolve(data.values[0]);
           } else {
             reject(data);
           }

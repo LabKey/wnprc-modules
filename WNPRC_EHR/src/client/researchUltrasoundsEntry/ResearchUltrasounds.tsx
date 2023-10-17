@@ -67,7 +67,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
     return (
         <div>
             <DefaultFormContainer
-                taskId={taskid}
+                prevTaskId={taskid}
                 reviewRequired={reviewRequired}
                 taskTitle={"Research Ultrasounds"}
                 taskType={"Research Ultrasounds"}

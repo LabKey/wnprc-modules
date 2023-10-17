@@ -56,6 +56,7 @@ export const inputs = [
       {name: "project", label: "Project", type: "dropdown", watch: 'ResearchPane.Id', options: projectOptions, defaultOpts: [{value:300901, label:"300901"},{value:400901, label:"400901"}]},
       {name: "account", label: "Account", type: "text", autoFill: {watch: "ResearchPane.project", search: findAccount}},
       {name: "fetal_heartbeat", label: "Fetal HB", type: "checkbox"},
+      {name: "beats_per_minute", label: "BPM", type: "text"},
       {name: "crown_rump_mm", label: "Crown Rump (mm)", type: "text"},
       {name: "biparietal_diameter_mm", label: "Biparietal Diameter (mm)", type: "text"},
       {name: "head_circumference_mm", label: "Head Circumference (mm)", type: "text"},

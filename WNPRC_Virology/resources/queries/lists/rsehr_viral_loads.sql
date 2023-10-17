@@ -6,7 +6,7 @@ SELECT
     v.sampleType AS sample_type,
     -- cast as varchar to avoid floating point operation problems,
     -- seems like the floating point issues only appear on the destination table of an ETL?
-    CAST(AVG(v.viralLoadScientific) as VARCHAR) as viral_load_average,
+    AVG(v.viralLoadScientific) as viral_load_average,
     CASE WHEN (AVG(v.viralLoadScientific) <
         (SELECT
             llod
@@ -22,6 +22,7 @@ SELECT
     v.sourceMaterial.type AS source_type,
     v.comment AS comment,
     v.run.exptNumber as experiment_number,
+    q.Nucleic_acid_isolation_method as Nucleic_acid_isolation_method,
     vsq.funding_string as account,
     --requires an explicit CAST into NUMERIC, as LabKey SQL does not check data types for function arguments
     GROUP_CONCAT(DISTINCT CAST(ROUND(v.viralLoadScientific, 3) as NUMERIC), ' ; ') as viral_load_replicates
@@ -41,4 +42,5 @@ WHERE
 
 -- groupBy viral load so these can be averaged
 GROUP BY
-    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string
+    v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string, q.Nucleic_acid_isolation_method
+    --v.sourceMaterial.type, v.sampleType, v.subjectId, v.date, v.assayId, v.comment, v.run.exptNumber, vsq.funding_string

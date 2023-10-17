@@ -34,7 +34,7 @@ import Spinner from "../../../components/Spinner";
 import SubmitForReviewModal from "../../components/SubmitForReviewModal";
 import { AppContext } from "../App/ContextProvider";
 import CustomAlert from "../../components/CustomAlert";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {ActionURL, Utils, Security, Filter} from "@labkey/api";
 import {AnimalInfoStates, FormErrorLevels} from "../../../typings/main";
 import { Command, CommandType } from "@labkey/api/dist/labkey/query/Rows";

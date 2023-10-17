@@ -8,11 +8,11 @@ import DateInput from "../../../components/DateInput";
 import { useRef } from "react";
 import DropdownOptions from "../../components/DropdownOptions";
 import {BulkEditFieldProps} from "../../typings/main"
-
+import "../../../theme/css/index.css";
 /**
  * A set of fields whose values are meant to be passed up to a parent modal.
  */
-const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
+const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = (props) => {
   const { fieldValues, restraints } = props;
   const [date, setDate] = useState<Date>(new Date());
   const [weight, setWeight] = useState<number>(null);
@@ -43,6 +43,17 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
     setRestraint(restraint);
   };
 
+  const handleWeightChange = (e: any): void => {
+    const inputValue = e.target.value;
+    const parsedValue = parseFloat(inputValue);
+
+    if (!Number.isNaN(parsedValue)) {
+      setWeight(parsedValue);
+    } else {
+      setWeight(undefined);
+    }
+  }
+
   let calendarEl = useRef(null);
 
   return (
@@ -53,6 +64,7 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
           <div className="col-xs-9">
             <DatePicker
               ref={r => (calendarEl.current = r)}
+              wrapperClassName={"react-datepicker"}
               showTimeSelect
               dateFormat="yyyy-MM-dd HH:mm"
               todayButton="Today"
@@ -71,11 +83,9 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
               className="form-control"
               id="weight-bulk"
               type="number"
-              value={weight}
+              value={weight !== undefined ? weight : ""}
               min={0}
-              onChange={e => {
-                setWeight(parseFloat(e.target.value));
-              }}
+              onChange={e => handleWeightChange(e)}
               required
             />
           </div>

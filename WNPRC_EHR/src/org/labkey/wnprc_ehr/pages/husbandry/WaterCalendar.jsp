@@ -71,7 +71,7 @@
     }
 
     String userid = String.valueOf(getUser().getUserId());
-    boolean isAdmin =  getUser().isInSiteAdminGroup();
+    boolean isAdmin =  getUser().hasSiteAdminPermission();
 
     JSONObject husbandryAssignmentLookup = new JSONObject();
     List<JSONObject> husbandryAssigned = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_assigned"));
@@ -95,8 +95,8 @@
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group complianceGroup = GroupManager.getGroup(getContainer(), "compliance (LDAP)", GroupEnumType.SITE);
     Group animalCare = GroupManager.getGroup(getContainer(),"animalcare (LDAP)",GroupEnumType.SITE);
-    boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
-    boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
+    boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().hasSiteAdminPermission();
+    boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().hasSiteAdminPermission();
     boolean isAnimalCare = getUser().isInGroup(animalCare.getUserId());
     String container = getContainer().getEncodedPath();
 

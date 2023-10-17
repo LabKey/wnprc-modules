@@ -39,6 +39,12 @@ RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
 
+ #Remove Tomcat default folders
+ RUN rm -rf /usr/local/tomcat/webapps/docs \
+            /usr/local/tomcat/webapps/examples \
+            /usr/local/tomcat/webapps/host-manager \
+            /usr/local/tomcat/webapps/manager
+
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost
 COPY ROOT.xml conf/Catalina/localhost/ROOT.xml

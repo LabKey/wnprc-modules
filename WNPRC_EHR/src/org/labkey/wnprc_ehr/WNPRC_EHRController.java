@@ -1007,7 +1007,7 @@ public class WNPRC_EHRController extends SpringActionController
                     String[] authorizedGroups = authorizedGroupsString.trim().split("\\s*,\\s*");
                     for (int j = 0; j < authorizedGroups.length; j++) {
                         Group authorizedGroup = GroupManager.getGroup(getContainer(), authorizedGroups[j], GroupEnumType.SITE);
-                        if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().isInSiteAdminGroup()) {
+                        if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().hasSiteAdminPermission()) {
                             authorizedCalendars.add(queryResults[i]);
                             break;
                         }

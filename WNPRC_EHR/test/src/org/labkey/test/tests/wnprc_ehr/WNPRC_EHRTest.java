@@ -40,7 +40,9 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
+import org.labkey.test.components.bootstrap.ModalDialog;
 import org.labkey.test.components.ext4.Window;
+import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
@@ -58,7 +60,6 @@ import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
-import org.labkey.test.util.core.webdav.WebDavUploadHelper;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -67,14 +68,13 @@ import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.UnhandledAlertException;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -88,7 +88,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -548,6 +547,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void navigateToWeights()
     {
         beginAt(buildURL("wnprc_ehr", getContainerPath(), "weight"));
+        waitForElement(Locator.id("submit-all-btn"), defaultWaitForPage);
     }
 
     public void navigateToAnimalRequestForm()
@@ -574,25 +574,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void fillWeightForm(String weightVal, Integer index)
     {
-        fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
+        String animalId = ANIMAL_SUBSET_EHR_TEST[index];
+        fillAnInput("animalid_" + index, animalId );
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
 
         //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
 //        el2.sendKeys(Keys.TAB);
 //        el2.sendKeys(Keys.TAB);
 
-        fillAnInput("remark_"+ index.toString(), "Entered from automated test");
-        fillAnInput("restraint_" + index.toString(), "T");
+        fillAnInput("remark_"+ index, "Entered from automated test");
+        fillAnInput("restraint_" + index, "T");
+        waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 
-    public void waitUntilElementIsClickable(String id)
+    public WebElement waitUntilElementIsClickable(String id)
     {
-        shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
+        return shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
     }
 
-    public void clickNewButton(String id){
-        WebElement o = Locator.tagWithId("button",id).findElement(getDriver());
-        o.click();
+    public void clickNewButton(String id)
+    {
+        waitUntilElementIsClickable(id).click();
     }
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
@@ -1078,6 +1080,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickButton("Submit",0);
 
         log("Verify row insert in ehr_billing.dataAccess.");
+        waitForText("Stark, Sansa");
         List<String> actualRowData = dataAccessTable.getRowDataAsText(0, "investigatorid", "userId", "project", "alldata");
         List<String> expectedRowData = Arrays.asList("Stark, Sansa", "investigator", "640991", "No");
         assertEquals("Data access row not inserted as expected: " , expectedRowData, actualRowData);
@@ -2280,12 +2283,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //navigate to weights form and fill it out
         beginAt(buildURL("project", getContainerPath(), "begin"));
         navigateToFeeding();
-        fillFeedingForm(FEEDING_AMT.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
+        fillFeedingForm(FEEDING_AMT.toString(), 0);
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success", 1, 50000);
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchFeedingData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("amount");
@@ -2304,10 +2305,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
         clickNewButton("submit-all-btn");
-        clickAndWait(Locator.tagWithId("button","submit-final"));
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
         assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
@@ -2322,10 +2322,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(LOW_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
+
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
@@ -2350,35 +2350,23 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         cmd.setSorts(Arrays.asList(new Sort("duedate", Sort.Direction.DESCENDING), new Sort("created", Sort.Direction.DESCENDING)));
 
         return cmd.execute(cn, EHR_FOLDER_PATH);
-
     }
 
     @Test
     public void testWeightSubmitForReview() throws IOException, CommandException
     {
+        String reviewer = "EHR Full Submitters";
         navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
         waitUntilElementIsClickable("submit-review-btn");
         clickNewButton("submit-review-btn");
-        sleep(1000);
-        //waitForElement(Locator.id("reviewers"),10000);
-        waitForText("Submit for Review");
-
-        WebElement c = Locator.id("reviewers").findElement(getDriver());
-        TestLogger.log(FULL_SUBMITTER.getGroup());
-
-        Select select = new Select(c);
-        sleep(1000);
-        select.selectByIndex(2);
-        List<WebElement> l = select.getAllSelectedOptions();
-        WebElement option = l.get(0);
-        String defaultItem = option.getAttribute("value");
-        TestLogger.log(defaultItem);
-        //System.out.println(defaultItem );
-
-        sleep(1000);
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        Select assignedTo = SelectWrapper.Select(Locator.name("reviewers")).find(modalDialog);
+        waitForElement(Locator.tagWithText("option", reviewer), WAIT_FOR_PAGE);
+        assignedTo.selectByVisibleText(reviewer);
+        WebElement selectedOption = assignedTo.getFirstSelectedOption();
+        String reviewerValue = selectedOption.getAttribute("value");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2390,7 +2378,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse t = fetchTaskData(taskid);
         //assert that this task's assigned to is the same as info entered above
         Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("assignedto");
-        Assert.assertEquals(null, defaultItem, id.get("value").toString());
+        Assert.assertEquals(null, reviewerValue, id.get("value").toString());
 
         testWeightToRestraintObjectIdRelationship();
     }
@@ -2432,11 +2420,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(),0);
         clickNewButton("add-record");
         fillWeightForm(WEIGHT_VAL.toString(),1);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
-        waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
@@ -2464,8 +2451,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("remove-record-btn_1");
         sleep(2000);
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
         //verify that it was deleted by counting that task has only 1 record in it
         //do a a query to get weights filtered by taskid
         SelectRowsResponse r2 =  fetchWeightDataGivenTaskRowId(id.get("value").toString());
@@ -2534,10 +2521,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         el.sendKeys(WEIGHT_VAL.toString());
         WebElement el2 = fillAnInput("restraint-bulk", "T");
         clickNewButton("submit-bulk");
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
@@ -2588,10 +2574,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         /*WebElement el2 = fillAnInput("restraint_0", "T");*/
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2602,7 +2587,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> rt = (Map<String, Object>) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
         testWeightToRestraintObjectIdRelationship();
-
     }
 
     public void navigateToWeightsTable()
@@ -2620,10 +2604,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         navigateToWeightsTable();
         DataRegionTable table = new DataRegionTable("query", getDriver());
@@ -2638,10 +2621,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             sleep(500);
         }
         fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2653,9 +2635,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
+        WebElement button = Locator.tagWithId("button", "save-draft-btn").findElement(getDriver());
+        // Test that save button is disabled if no entries
+        Assert.assertFalse("Save button is enabled with no data", button.isEnabled());
+        // Test that save button is disabled if single valid id is entered
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
+        Assert.assertTrue("Save button is disabled for correct id", button.isEnabled());
         addBatchByLocation();
-        // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertTrue("Save button is disabled for correct test ids", button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");
@@ -2865,6 +2852,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = currentDate.format(formatter);
         navigateToFolder(PROJECT_NAME,FOLDER_NAME);
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
@@ -2893,10 +2883,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
         fillAnInputByName("contacts", "test@test.com");

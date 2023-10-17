@@ -42,7 +42,7 @@ public class DatasetImportHelperIntegrationTest extends Assert
     @Before
     public void createContainer()
     {
-        _container = ContainerManager.ensureContainer(JunitUtil.getTestContainer(), TEST_CONTAINER_NAME,_user);
+        _container = ContainerManager.ensureContainer(JunitUtil.getTestContainer(), TEST_CONTAINER_NAME, TestContext.get().getUser());
         _user = TestContext.get().getUser();
     }
 

@@ -155,7 +155,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
     public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
-    private static User _currentUser;
 
     /**
      * Logger for logging the logs
@@ -270,6 +269,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         //override pages
         EHRService.get().registerActionOverride("dataEntry", this, "views/dataEntry.html");
+        EHRService.get().registerActionOverride("populateInitialData", this, "views/populateInitialData.html");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
@@ -473,13 +473,13 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public static Container getDefaultContainer() {
         if (ContainerManager.getForPath("/WNPRC") == null) {
-            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC", _currentUser);
+            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC", User.getAdminServiceUser());
         }
         Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
 
         Container ehrContainer = wnprcContainer.getChild("EHR");
         if (ehrContainer == null) {
-            ContainerManager.createContainer(wnprcContainer, "EHR",_currentUser);
+            ContainerManager.createContainer(wnprcContainer, "EHR", User.getAdminServiceUser());
             ehrContainer = wnprcContainer.getChild("EHR");
         }
 

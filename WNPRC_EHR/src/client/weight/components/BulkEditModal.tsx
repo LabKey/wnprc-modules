@@ -1,7 +1,7 @@
 import { useState } from "react";
 import * as React from "react";
 import BulkEditFields from "../containers/Forms/BulkEditFields";
-import SubmitModal from "./SubmitModal";
+import SubmitModal from "../../components/SubmitModal";
 import {BulkEditFormValues, BulkEditModalProps} from "../typings/main";
 
 /**

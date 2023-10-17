@@ -1,0 +1,19 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="urgent_treatments" tableDbType="TABLE">
+                <tableTitle>Time Sensitive Treatments</tableTitle>
+                <columns>
+                    <column columnName="rowid"/>
+                    <column columnName="code"/>
+                    <column columnName="instructions"/>
+                    <column columnName="container"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modifiedby"/>
+                    <column columnName="modified"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,5 +1,5 @@
 import { immerable } from 'immer';
-import { Map } from 'immutable';
+import { Map as ImmutableMap } from 'immutable';
 import {PROGRAM_DEFAULT_VAL} from "./constants";
 
 export class VendorModel {
@@ -159,7 +159,7 @@ export class DocumentAttachmentModel {
     [immerable] = true;
 
     readonly savedFiles?: SavedFileModel[];
-    readonly filesToUpload?: Map<string, File>;
+    readonly filesToUpload?: ImmutableMap<string, File>;
 
     constructor(values?: Partial<DocumentAttachmentModel>) {
         Object.assign(this, values);

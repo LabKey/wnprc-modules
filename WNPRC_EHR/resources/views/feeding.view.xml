@@ -1,8 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Feeding">
-    <permissions>
-        <permission name="login"/>
-    </permissions>
-    <dependencies>
-        <dependency path="wnprc_ehr/gen/feeding.js"/>
-    </dependencies>
-</view>

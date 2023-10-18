@@ -146,4 +146,15 @@
             <column columnName="modified"/>
         </columns>
     </table>
+    <table tableName="nucleic_acid_isolation_method" tableDbType="TABLE">
+        <columns>
+            <column columnName="Key"/>
+            <column columnName="RNA_isolation_method"/>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
 </tables>

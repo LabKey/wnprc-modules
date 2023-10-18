@@ -66,8 +66,10 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     public static final String EHR_EMAILS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsRSEHREmails";
     public static final String RSEHR_REMOTE_CONNECTION = "RSEHRServerVirology";
     public static final String RSEHR_ACCOUNTS_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_GrantAccounts";
+    public static final String RSEHR_NUCLEIC_ACID_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoadsNucleicAcidList";
     public static final String RSEHR_VIRAL_LOAD_DATA_ETL_ID = "{" + MODULE_NAME + "}/WNPRC_ViralLoads";
     public static final String EHR_REMOTE_VIRAL_LOAD_CONNECTION_NAME = "ProductionEHRServerVirology";
+    public static final String EHR_REMOTE_WIKI_CONNECTION_NAME = "ProductionEHRServerVirologyQC";
     public static final String RSEHR_EMAIL_CONTACT_INFO = "virologyservices@primate.wisc.edu";
     public static final String TEST_USER = "test_wnprc_virology@test.com";
     public static final String TEST_USER_2 = "test_wnprc_virology_2@test.com";
@@ -234,6 +236,13 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         navigateToFolder(getProjectNameRSEHR(), getProjectNameRSEHR());
         diHelperRSEHR.runTransformAndWait(RSEHR_ACCOUNTS_ETL_ID);
         diHelperRSEHR.assertInEtlLogFile(diHelperRSEHR.getJobIdByTransformId(RSEHR_ACCOUNTS_ETL_ID).toString(), "Successfully completed task");
+
+        // set up ETL connection for RSEHR to EHR
+        navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
+        _rconnHelper.goToManageRemoteConnections();
+        _rconnHelper.createConnection(EHR_REMOTE_WIKI_CONNECTION_NAME, WebTestHelper.getBaseURL(),PROJECT_NAME_EHR);
+        diHelperRSEHR.runTransformAndWait("{" + MODULE_NAME + "}/WNPRC_ViralLoadsNucleicAcidList");
+        diHelperRSEHR.assertInEtlLogFile(diHelperRSEHR.getJobIdByTransformId(RSEHR_NUCLEIC_ACID_ETL_ID).toString(), "Successfully completed task");
 
         // set up ETL connection for RSEHR to EHR
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);

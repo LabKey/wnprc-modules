@@ -1,0 +1,14 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>EHR -> RSEHR nucleic isolation method ETL</name>
+    <description>This ETL copies the nuclelic isolation method list over to RSEHR</description>
+    <transforms>
+        <transform id="nucleic_acid_isolation_method-rsehr" type="RemoteQueryTransformStep">
+            <source queryName="RNA_isolation_method" remoteSource="ProductionEHRServerVirologyQC" schemaName="lists"/>
+            <destination queryName="nucleic_acid_isolation_method" schemaName="wnprc_virology" targetOption="truncate">
+            </destination>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 15 22 ? * *"/>
+    </schedule>
+</etl>

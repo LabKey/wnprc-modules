@@ -48,7 +48,7 @@ public class WNPRC_VirologyModule extends SpringModule
     @Override
     public Double getSchemaVersion()
     {
-        return 22.110;
+        return 22.111;
     }
 
     @Override

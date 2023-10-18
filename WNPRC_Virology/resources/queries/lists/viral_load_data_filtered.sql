@@ -9,7 +9,7 @@ SELECT vl.Id,
        vl.source_type,
        vl.comment,
        vl.experiment_number,
-       vl.nucleic_acid_isolation_method,
+       CAST(vl.nucleic_acid_isolation_method as VARCHAR) as nucleic_acid_isolation_method,
        vl.account,
        mp.account as mpaccount,
        mp.folder_name

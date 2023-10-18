@@ -57,6 +57,7 @@ public class WNPRC_VirologyController extends SpringActionController
     private static Logger _log = LogManager.getLogger(WNPRC_VirologyController.class);
 
     private static final String _sourceDataTableName = "viral_load_data_filtered";
+    private static final String _nucleicListTableName = "RNA_isolation_method";
 
     public WNPRC_VirologyController()
     {
@@ -256,19 +257,9 @@ public class WNPRC_VirologyController extends SpringActionController
                         _sourceDataTableName +
                         "\" tableDbType=\"NOT_IN_DB\">\n" +
                         "    <filters ref=\"client-filter\"/>\n" +
-                        "       <columns>\n" +
-                        "          <column columnName=\"account\">\n" +
-                        "             <fk>\n" +
-                        "                <fkDbSchema>wnprc_virology_linked</fkDbSchema>\n" +
-                        "                <fkTable>grant_accounts</fkTable>\n" +
-                        "                <fkColumnName>rowid</fkColumnName>\n" +
-                        "                <fkDisplayColumnName>alias</fkDisplayColumnName>\n" +
-                        "             </fk>\n" +
-                        "          </column>\n" +
-                        "       </columns>" +
                         "  </table>\n" +
                         "</tables>";
-                QueryService.get().createLinkedSchema(getUser(), c,containerName + "LinkedSchema", viralLoadContainer.getId(), "lists", metadata, _sourceDataTableName, null);
+                QueryService.get().createLinkedSchema(getUser(), c, "lists_linked_schema", viralLoadContainer.getId(), "lists", metadata, _sourceDataTableName, null);
 
             }
 
@@ -319,7 +310,7 @@ public class WNPRC_VirologyController extends SpringActionController
             }
             Container viralLoadContainer = ContainerManager.getForPath(containerPath);
             Container c = getContainer();
-            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts, folders_accounts_mappings", null);
+            QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts, folders_accounts_mappings, nucleic_acid_isolation_method", null);
             return null;
         }
 

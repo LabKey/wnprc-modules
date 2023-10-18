@@ -29,6 +29,14 @@
                         <measure>true</measure>
                         <formatString>0.##E00</formatString>
                     </column>
+           <column columnName="nucleic_acid_isolation_method">
+               <fk>
+                   <fkDbSchema>wnprc_virology_linked</fkDbSchema>
+                   <fkTable>nucleic_acid_isolation_method</fkTable>
+                   <fkColumnName>Key</fkColumnName>
+                   <fkDisplayColumnName>RNA_isolation_method</fkDisplayColumnName>
+               </fk>
+           </column>
                 </columns>
             </table>
         </tables>

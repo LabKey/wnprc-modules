@@ -19,12 +19,13 @@ public class WeightSection extends SlaveFormSection {
         Set<String> fields = new HashSet<>();
 
         fields.add("Id");
+        fields.add("project");
 
         return fields;
     }
 
     @Override
     protected List<String> getFieldNames() {
-        return Arrays.asList("Id", "date", "weight", "remark");
+        return Arrays.asList("Id", "project", "date", "weight", "remark");
     }
 }

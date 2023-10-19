@@ -99,11 +99,26 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
         messageBody.append(notificationToolkit.createHTMLHeader("Similar Names"));
 
         //Adds body text.
-        messageBody.append("This is a list of all Dams and Sires with similar names.  " +
+        messageBody.append("This is a list of all Dams, Sires, and Animal ID's with similar names.  " +
                 "Please reach out via the ticket tracker if you find any names that need to be updated.");
 
-        //Adds table.
-        messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusDamSire", "notificationView"));
+        //Adds tables.
+        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusDamSire", "notificationView") > 0) {
+            messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusDamSire", "notificationView"));
+            messageBody.append("<br>");
+        }
+        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusDamSireID", "notificationView") > 0) {
+            messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusDamSireID", "notificationView"));
+            messageBody.append("<br>");
+        }
+        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusID", "notificationView") > 0) {
+            messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusID", "notificationView"));
+            messageBody.append("<br>");
+        }
+        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusIDDamSire", "notificationView") > 0) {
+            messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusIDDamSire", "notificationView"));
+            messageBody.append("<br>");
+        }
 
         //Returns string.
         return messageBody.toString();

@@ -77,9 +77,5 @@ WHERE last_four IN (
          )
     GROUP BY last_four
     HAVING COUNT(*) >= 2
-<<<<<<< HEAD
-)
-=======
 )
 ORDER BY last_four
->>>>>>> release22.11-SNAPSHOT

@@ -15,6 +15,11 @@
                 <property name="columnTitle" value="Dam"/>
             </properties>
         </column>
+        <column name="id">
+            <properties>
+                <property name="columnTitle" value="ID"/>
+            </properties>
+        </column>
         <column name="frequency">
             <properties>
                 <property name="columnTitle" value="Frequency"/>

@@ -5,19 +5,9 @@
                 <property name="columnTitle" value="ID Last Four"/>
             </properties>
         </column>
-        <column name="sire">
+        <column name="id">
             <properties>
-                <property name="columnTitle" value="Sire"/>
-            </properties>
-        </column>
-        <column name="dam">
-            <properties>
-                <property name="columnTitle" value="Dam"/>
-            </properties>
-        </column>
-        <column name="frequency">
-            <properties>
-                <property name="columnTitle" value="Frequency"/>
+                <property name="columnTitle" value="ID"/>
             </properties>
         </column>
         <column name="species">

@@ -1,0 +1,45 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="viral_load_data_filtered" tableDbType="NOT_IN_DB">
+                <javaCustomizer class = "org.labkey.wnprc_virology.table.WNPRC_VirologyCustomizer"/>
+                <columns>
+                    <column columnName="folder_name">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Key">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="mpaccount">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>Account</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc_virology_linked</fkDbSchema>
+                            <fkTable>grant_accounts</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>alias</fkDisplayColumnName>
+                        </fk>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="viral_load_average">
+                        <columnTitle>Viral Load Avg</columnTitle>
+                        <conceptURI>http://cpas.labkey.com/laboratory#assayResult</conceptURI>
+                        <measure>true</measure>
+                        <formatString>0.##E00</formatString>
+                    </column>
+           <column columnName="nucleic_acid_isolation_method">
+               <fk>
+                   <fkDbSchema>wnprc_virology_linked</fkDbSchema>
+                   <fkTable>nucleic_acid_isolation_method</fkTable>
+                   <fkColumnName>Key</fkColumnName>
+                   <fkDisplayColumnName>RNA_isolation_method</fkDisplayColumnName>
+               </fk>
+           </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>
+

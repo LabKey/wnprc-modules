@@ -91,9 +91,10 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                 render={({field: { onChange, value, name, ref }}) => (
                     <Select
                         ref={ref}
-                        id={id}
+                        inputId={id}
                         value={optState.find((c) => c.value === value)}
                         className={classname}
+                        classNamePrefix={'react-hook-select'}
                         getOptionLabel={x => x.label}
                         getOptionValue={x => x.value}
                         onChange={(selectedOption) => {onChange(selectedOption?.value ? selectedOption.value : null);}}

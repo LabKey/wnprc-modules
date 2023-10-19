@@ -70,8 +70,10 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.JavascriptExecutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -550,6 +552,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.id("submit-all-btn"), defaultWaitForPage);
     }
 
+    public void navigateToResearchUltrasounds()
+    {
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "researchUltrasoundsEntry"));
+        waitForElement(Locator.id("submit-btn"), defaultWaitForPage);
+    }
+
     public void navigateToAnimalRequestForm()
     {
         beginAt(buildURL("animalrequests", getContainerPath(), "app"));
@@ -595,6 +603,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void clickNewButton(String id)
     {
         waitUntilElementIsClickable(id).click();
+    }
+
+    /* Helper function to select react-select dropdown components
+    *  @param id string id of dropdown component
+    *  @param option int number for which option to select starting at 0
+    */
+    public void selectDropdownOption(String id, int option)
+    {
+        clickNewButton(id);
+        String parentPartialId = "react-select";
+        String parentXPath = "//*[starts-with(@id, '" + parentPartialId + "') and contains(@id, '-listbox')]";
+        String childXPath = parentXPath + "//div[contains(@id, 'option-" + option + "')]";
+        WebElement childElement = waitForElement(Locator.xpath(childXPath));
+        childElement.click();
     }
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
@@ -2994,4 +3016,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
+    @Test
+    public void testReactFormValidation() throws UnhandledAlertException {
+        log("Starting react form validation test");
+        navigateToResearchUltrasounds();
+        Actions actions = new Actions(getDriver());
+
+        selectDropdownOption("taskAssignedTo", 3);
+        //JavascriptExecutor jse = (JavascriptExecutor)getDriver();
+        //WebElement input01 = Locator.name("ResearchPane.Id").findElement(getDriver());
+
+        //jse.executeScript("arguments[0].value='" + ANIMAL_SUBSET_EHR_TEST[0] + "';", input01);
+
+        /*
+        WebElement input01 = Locator.name("ResearchPane.Id").findElement(getDriver());
+        actions.moveToElement(input01)
+               .click()
+               .clear()
+               .sendKeys(ANIMAL_SUBSET_EHR_TEST[0])
+               .build()
+               .perform();
+        */
+        WebElement input01 = Locator.name("ResearchPane.Id").findElement(getDriver());
+        input01.click();
+        input01.clear();
+        input01.sendKeys(ANIMAL_SUBSET_EHR_TEST[0]);
+
+        //fillAnInputByName("ResearchPane.Id", ANIMAL_SUBSET_EHR_TEST[0]);
+
+        log("Completed validation test");
+    }
 }

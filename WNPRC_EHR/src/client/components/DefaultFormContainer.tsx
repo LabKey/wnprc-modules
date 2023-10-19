@@ -227,6 +227,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                             <button
                                 type="submit"
                                 className={`btn btn-primary submit-btn ${false ? "saving" : ""}`}
+                                id={"submit-btn"}
                             >
                                 Submit For Review
                             </button>

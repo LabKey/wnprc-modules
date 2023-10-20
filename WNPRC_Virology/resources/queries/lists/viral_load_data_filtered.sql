@@ -9,7 +9,7 @@ SELECT vl.Id,
        vl.source_type,
        vl.comment,
        vl.experiment_number,
-       vl.rna_isolation_method,
+       vl.nucleic_acid_isolation_method,
        vl.account,
        mp.account as mpaccount,
        mp.folder_name

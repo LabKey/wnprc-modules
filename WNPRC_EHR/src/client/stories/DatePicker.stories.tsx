@@ -32,7 +32,7 @@ export const ToStorybook = () => {
     };
     return (
         <DatePicker
-            ref={r => (calendarEl = r)}
+            ref={r => (calendarEl.current = r)}
             showTimeSelect
             onChangeRaw={handleRawDateChange}
             dateFormat="yyyy-MM-dd HH:mm"

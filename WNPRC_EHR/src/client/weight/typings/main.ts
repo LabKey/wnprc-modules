@@ -119,7 +119,7 @@ export interface SubmitModalProps {
 export interface WeightFormProps {
     animalid?: string;
     weight?: number;
-    date?: object;
+    date?: Date;
     restraint?: string;
     remark?: string;
     index?: number;

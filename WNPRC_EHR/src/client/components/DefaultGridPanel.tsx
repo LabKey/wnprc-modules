@@ -6,15 +6,12 @@ import { produce } from 'immer';
 import {
     ExtendedMap,
     GridPanel,
-    GridProps,
     InjectedQueryModels,
     QueryColumn,
     QueryInfo,
-    QueryModel, selectRows,
+    QueryModel,
     withQueryModels
 } from '@labkey/components';
-import { Filter } from '@labkey/api';
-import { labkeyActionSelectWithPromise } from '../query/helpers';
 import "../theme/css/index.css";
 
 // Any props you might use will go here

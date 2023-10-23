@@ -19,11 +19,13 @@
         dependencies.add("clientapi/ext4");
         dependencies.add("fullcalendar");
         dependencies.add("/webutils/lib/webutils_core/api.js");
-        dependencies.add("/wnprc_ehr/gen/waterMonitoringSystem.js");
+
 
         dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");
         dependencies.add("https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js");
         //dependencies.add("/mypath/mydependency.js");
+        //Adding typescript to water monitoring system for a future version.
+        // dependencies.add("/gen/waterMonitoringSystem.js");
     }
 %>
 

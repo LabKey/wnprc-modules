@@ -75,7 +75,7 @@
   background-color: #fff;
   color: #000;
   border: 1px solid #aeaeae;
-  border-radius: 0.3rem;
+  border-radius: 0;
   display: inline-block;
   position: relative;
 }

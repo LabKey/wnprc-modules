@@ -22,6 +22,7 @@ import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsyDeliveryOptionTable;
 import org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCEHRUrgentTreatmentsEditPermission;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +82,14 @@ public class WNPRC_Schema extends SimpleUserSchema {
             vvc.addPermissionMapping(InsertPermission.class, EHRRequestPermission.class);
 
             return vvc.init();
+        }
+        else if (name.equalsIgnoreCase("urgent_treatments"))
+        {
+            CustomPermissionsTable ut = new CustomPermissionsTable(this,_dbSchema.getTable(name),cf);
+            ut.addPermissionMapping(UpdatePermission.class, WNPRCEHRUrgentTreatmentsEditPermission.class);
+            ut.addPermissionMapping(InsertPermission.class, WNPRCEHRUrgentTreatmentsEditPermission.class);
+
+            return ut.init();
         }
         else {
             return super.createTable(name, cf);

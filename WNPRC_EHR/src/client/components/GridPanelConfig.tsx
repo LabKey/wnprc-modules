@@ -40,7 +40,7 @@ export const GridPanelConfig: FC<configProps> = ({
 
 
         if (filterType !== "none") {
-            if (filterType === "roomCage") {
+            if (filterType === "roomCage" && filterConfig.filters.room !== null) {
                 //const area = filterConfig.filters.area.split(',');
                 const room = filterConfig.filters.room.split(',');
                 const cage = filterConfig.filters.cage.split(',');

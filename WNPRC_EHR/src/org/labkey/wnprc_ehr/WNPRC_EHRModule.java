@@ -125,6 +125,7 @@ import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
 import org.labkey.wnprc_ehr.security.roles.WNPRCAnimalRequestsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRUrgentTreatmentsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.wnprc_ehr.updates.ModuleUpdate;
@@ -179,7 +180,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 22.009;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 22.010;
     }
 
     @Override
@@ -222,6 +223,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalWaterCalendar.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/IncompleteTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/MorningTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/AfternoonTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/EveningTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/MasterTreatmentsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
@@ -436,6 +442,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
         RoleManager.registerRole(new WNPRCAnimalRequestsRole());
+        RoleManager.registerRole(new WNPRCEHRUrgentTreatmentsRole());
     }
 
     public Set<Container> getWNPRCStudyContainers() {

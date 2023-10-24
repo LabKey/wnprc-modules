@@ -14,7 +14,7 @@ SELECT ru.objectid
             ELSE 'No Associated Pregnancy'
        END AS gestation_day
       ,ru.project
-      ,(SELECT r.restraintType FROM restraints r WHERE ru.taskid = r.taskid) as restraint
+      ,res.restraintType as restraint
       ,ru.fetal_heartbeat
       ,ru.performedby
       ,ru.remark
@@ -32,4 +32,6 @@ SELECT ru.objectid
       END AS reviewCompleted
       ,ru.taskid
   FROM research_ultrasounds ru
+LEFT JOIN (SELECT restraintType, taskid FROM restraints) as res
+ON ru.taskid = res.taskid
 ORDER BY ru.date DESC

@@ -476,7 +476,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Locator.name("enter-positive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
+        clickAndWait(Ext4Helper.Locators.ext4Button("Submit"));
 
         SelectRowsCommand sr = new SelectRowsCommand("lists","vl_sample_queue");
         sr.addFilter("status", COMPLETE_QC_CODE, Filter.Operator.EQUAL);
@@ -525,7 +525,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
+        clickAndWait(Ext4Helper.Locators.ext4Button("Submit"));
 
         sleep(10000);
         log("Check that the RSEHR notification email was sent");
@@ -597,7 +597,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         Locator.name("enter-vlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("enter-avgvlpositive-control-inputEl").findElement(getDriver()).sendKeys("2");
         Locator.name("efficiency-inputEl").findElement(getDriver()).sendKeys("2");
-        click(Ext4Helper.Locators.ext4Button("Submit"));
+        clickAndWait(Ext4Helper.Locators.ext4Button("Submit"));
 
         sleep(5000);
         log("Check that the RSEHR notification email was sent");

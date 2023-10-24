@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 
 import { produce } from 'immer';
-
+import {Query} from '@labkey/api'
 import {
     ExtendedMap,
     GridPanel,
@@ -16,6 +16,8 @@ import "../theme/css/index.css";
 
 // Any props you might use will go here
 interface myProps {
+    schemaName: string;
+    queryName: string
     input?: {
         controller: string,
         view: string,
@@ -36,13 +38,15 @@ type Props = myProps & InjectedQueryModels;
 // component directly, only the wrapped version below which we expose
 // to users as ExampleGridPanel.
 const DefaultGridPanelImpl: FC<Props> = ({
-                                             actions,
-                                             queryModels,
-                                             input,
-                                             cellStyles,
-                                             title,
-                                             columnStyles
-                                         }) => {
+    actions,
+    queryModels,
+    input,
+    cellStyles,
+    title,
+    columnStyles,
+    queryName,
+    schemaName
+    }) => {
 
     //declare any states here
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
@@ -132,6 +136,15 @@ const DefaultGridPanelImpl: FC<Props> = ({
         })
     };
 
+    const onPrint = () => {
+        const { containersModel } = queryModels;
+        const printParams = Query.buildQueryParams(schemaName, queryName, containersModel.filterArray, "date,room,cage");
+
+        window.open(LABKEY.ActionURL.buildURL('query', 'printRows', LABKEY.ActionURL.getContainer(),{
+            ...printParams
+        }));
+    }
+
     // This is an example of a custom button bar element in your GridPanel that can interact with the QueryModel.
     const renderGridButtons = () => {
         return (
@@ -147,6 +160,18 @@ const DefaultGridPanelImpl: FC<Props> = ({
         )
     };
 
+    const renderRightGridButtons = () => {
+        return (
+            <div className={'labkey-button-bar'}>
+                <button className={'btn btn-default'} onClick={onPrint}>
+                    <span className={'fa fa-print'}>
+                    </span>
+                </button>
+
+            </div>
+        )
+    };
+
 
     return (
         <div>
@@ -154,6 +179,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 ? <GridPanel
                     model={queryModel}
                     ButtonsComponent={renderGridButtons}
+                    ButtonsComponentRight={renderRightGridButtons}
                     actions={actions}
                     asPanel={true}
                     showSearchInput={false}

@@ -3016,33 +3016,32 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
+    public void TypeInField(String name, String value){
+        WebElement element = getDriver().findElement(Locator.name(name));
+        element.clear();
+
+        for (int i = 0; i < value.length(); i++){
+            char c = value.charAt(i);
+            sleep(1000);
+            String s = String.valueOf(c);
+            element.sendKeys(s);
+        }
+    }
     @Test
     public void testReactFormValidation() throws UnhandledAlertException {
         log("Starting react form validation test");
         navigateToResearchUltrasounds();
-        Actions actions = new Actions(getDriver());
 
         selectDropdownOption("taskAssignedTo", 3);
-        //JavascriptExecutor jse = (JavascriptExecutor)getDriver();
-        //WebElement input01 = Locator.name("ResearchPane.Id").findElement(getDriver());
 
-        //jse.executeScript("arguments[0].value='" + ANIMAL_SUBSET_EHR_TEST[0] + "';", input01);
+        TypeInField("ResearchPane.Id", PROJECT_MEMBER_ID);
 
-        /*
-        WebElement input01 = Locator.name("ResearchPane.Id").findElement(getDriver());
-        actions.moveToElement(input01)
-               .click()
-               .clear()
-               .sendKeys(ANIMAL_SUBSET_EHR_TEST[0])
-               .build()
-               .perform();
-        */
-        WebElement input01 = Locator.name("ResearchPane.Id").findElement(getDriver());
-        input01.click();
-        input01.clear();
-        input01.sendKeys(ANIMAL_SUBSET_EHR_TEST[0]);
-
-        //fillAnInputByName("ResearchPane.Id", ANIMAL_SUBSET_EHR_TEST[0]);
+        selectDropdownOption("ResearchPane_3", 1);
+        // assert that project is correct
+        // assert that account for project is correct
+        checkCheckbox(Locator.name("fetal_heartbeat"));
+        //assert that checkbox was clicked
+        TypeInField("ResearchPane.beats_per_minute", "100");
 
         log("Completed validation test");
     }

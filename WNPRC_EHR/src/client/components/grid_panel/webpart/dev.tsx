@@ -1,21 +1,18 @@
-import React from 'react';
+import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { App } from '@labkey/api';
 import "../../../wnprc_ehr.scss";
 import {GridPanelConfig} from '../../GridPanelConfig';
-import { gridConfig } from '../configProps';
+import { configProps } from '../configProps';
 App.registerApp<any>('grid_panel_webpart', (target: string, ctx: any) => {
-
-    gridConfig.schemaName = ctx.schemaName;
-    gridConfig.queryName = ctx.queryName;
-    gridConfig.viewName = ctx.viewName;
-    gridConfig.input.controller = ctx.inputController;
-    gridConfig.input.view = ctx.inputView;
-    gridConfig.input.formType = ctx.inputFormType;
-    gridConfig.filterConfig.subjects = JSON.parse(ctx.subjects);
-    gridConfig.filterConfig.date = ctx.date;
-    gridConfig.filterConfig.filters = JSON.parse(ctx.filters);
+    const gridConfig: configProps = {
+        ...ctx,
+        input: ctx.input ? JSON.parse(ctx.input) : undefined,
+        cellStyles: ctx.cellStyles ? JSON.parse(ctx.cellStyles) : undefined,
+        filterConfig: ctx.filterConfig ? JSON.parse(ctx.filterConfig) : undefined,
+        columnStyles: ctx.columnStyles ? JSON.parse(ctx.columnStyles) : undefined,
+    };
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig

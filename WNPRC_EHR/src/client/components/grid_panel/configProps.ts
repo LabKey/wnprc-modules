@@ -2,27 +2,27 @@ export interface configProps {
     schemaName: string;
     queryName: string;
     viewName: string;
+    title?: string;
+    columnStyles?: any;
     input?: {
         controller: string,
         view: string,
         formType: string
     };
-    cellStyle?: any;
-    filterConfig?: any;
-}
-
-export const gridConfig: configProps = {
-    schemaName: "",
-    queryName: "",
-    viewName: "",
-    input: {
-        controller: "",
-        view: "",
-        formType: ""
-    },
-    filterConfig: {
-        subjects: "",
-        date: "",
-        filters: "",
-    },
+    cellStyles?: [{
+        cellColumns: any[];
+        flagData: {
+            type: string;
+            flagColumn: string;
+            data: any[];
+            color: string | string[];
+            schemaName?: string;
+            queryName?: string;
+        };
+    }];
+    filterConfig?: {
+        subjects: any;
+        date: any;
+        filters: any;
+    };
 }

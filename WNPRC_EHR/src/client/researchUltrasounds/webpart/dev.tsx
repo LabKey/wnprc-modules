@@ -4,13 +4,13 @@ import { AppContainer } from 'react-hot-loader';
 import { App } from '@labkey/api';
 
 import {GridPanelConfig} from '../../components/GridPanelConfig';
-import { configProps } from '../configProps';
+import { gridConfig } from '../configProps';
 
 App.registerApp<any>('research_ultrasounds_webpart', (target: string) => {
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig
-                {...configProps}
+                {...gridConfig}
             />
         </AppContainer>,
         document.getElementById(target)

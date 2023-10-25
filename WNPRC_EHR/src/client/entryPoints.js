@@ -1,12 +1,23 @@
 module.exports = {
     apps: [{
+        name: 'grid_panel',
+        title: 'Default Grid',
+        permission: 'read',
+        path: './src/client/components/grid_panel'
+    },{
+        name: 'grid_panel_webpart',
+        title: 'Default Grid Webpart',
+        permission: 'read',
+        path: './src/client/components/grid_panel/webpart',
+        generateLib: true
+    },{
         name: 'breeding',
         title: 'Pregnancies',
         permission: 'read',
         path: './src/client/breeding'
     },{
         name: 'breeding_webpart',
-        title: 'Breeding Webpart',
+        title: 'Pregnancies Webpart',
         permission: 'read',
         path: './src/client/breeding/webpart',
         generateLib: true
@@ -19,7 +30,8 @@ module.exports = {
         name: 'abstract',
         title: 'Abstract',
         permission: 'read',
-        path: './src/client/abstract/base'
+        path: './src/client/abstract/base',
+        generateLib: true
     },{
         name: 'research_ultrasounds',
         title: 'Research Ultrasounds',
@@ -36,10 +48,5 @@ module.exports = {
         title: 'Weight',
         permission: 'login',
         path: './src/client/weight'
-    },{
-        name: 'researchUltrasoundsEntry',
-        title: 'Research Ultrasounds Data Entry',
-        permission: 'login',
-        path: './src/client/researchUltrasoundsEntry'
     }]
 };

@@ -5,8 +5,9 @@ import "../../../theme/css/index.css";
 import "../../../theme/css/tooltip.css";
 import {
   enteredWeightIsGreaterThanPrevWeight,
-  enteredWeightIsLessThanPrevWeight
-} from "../../query/helpers";
+  enteredWeightIsLessThanPrevWeight,
+  jumpToNextRecordOnEnter
+} from '../../query/helpers';
 import { useEffect, useState } from "react";
 import { labkeyActionSelectWithPromise } from "../../query/actions";
 import { useRef, useContext } from "react";
@@ -80,6 +81,10 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   },[anyErrors]);
 
 
+
+  const handleKeyDown = (event : React.KeyboardEvent<HTMLInputElement>) => {
+    jumpToNextRecordOnEnter(event, index, "_");
+  }
   //validate items to set error levels which determine which buttons are disabled
   const validateItems = (name: string, value: string | number | object) => {
     if (value == "" && name == "animalid") {
@@ -254,6 +259,9 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
             onBlur={e => {
               checkWeights(e);
             }}
+            onKeyDown={handleKeyDown}
+            /* disables scrolling on this input, prevents weight from accidentally being changed */
+            onWheel={(e:React.UIEvent<HTMLElement>)=> {(e.target as HTMLInputElement).blur()}}
             required
           />
           {weightWarning && (

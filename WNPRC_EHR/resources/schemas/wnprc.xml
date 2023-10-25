@@ -325,4 +325,16 @@
             <column columnName="modified"/>
         </columns>
     </table>
+    <table tableName="urgent_treatments" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="code"/>
+            <column columnName="instructions"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

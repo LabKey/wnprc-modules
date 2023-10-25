@@ -1,4 +1,5 @@
-import {Modal,Button} from 'react-bootstrap';
+import {Button} from 'react-bootstrap';
+import {Modal} from 'react-bootstrap';
 import { useState } from "react";
 import * as React from "react";
 import Spinner from "./Spinner";

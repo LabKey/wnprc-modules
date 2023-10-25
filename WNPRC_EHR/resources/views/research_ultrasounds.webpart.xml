@@ -1,0 +1,6 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="Research Ultrasounds Webpart">
+    <view name="research_ultrasounds_webpart"/>
+    <locations>
+        <location name="body"/>
+    </locations>
+</webpart>

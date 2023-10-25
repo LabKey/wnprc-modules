@@ -5,12 +5,14 @@ import { AppContainer } from 'react-hot-loader';
 // Main react component
 import  {GridPanelConfig}  from '../GridPanelConfig';
 // Grid Panel Props
-import { gridConfig } from './configProps';
+import { configProps } from './configProps';
 // Import stylesheets
 import '../../wnprc_ehr.scss';
 
 
 const render = () => {
+    const gridConfig: configProps = {queryName: '', schemaName: '', viewName: ''};
+
     ReactDOM.render(
         <AppContainer>
             <GridPanelConfig

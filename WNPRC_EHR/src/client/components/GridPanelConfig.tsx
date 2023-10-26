@@ -6,8 +6,6 @@ import {
     withAppUser,
     AppContextProvider
 } from '@labkey/components';
-
-
 import { DefaultGridPanel } from "./DefaultGridPanel";
 import { configProps } from './grid_panel/configProps';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
@@ -89,8 +87,6 @@ export const GridPanelConfig: FC<configProps> = ({
         <ServerContextProvider initialContext={serverContext}>
             <AppContextProvider>
                 <DefaultGridPanel
-                    schemaName={schemaName}
-                    queryName={queryName}
                     queryConfigs={queryConfigs}
                     input={input}
                     autoLoad

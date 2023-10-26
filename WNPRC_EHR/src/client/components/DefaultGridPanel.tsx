@@ -16,8 +16,6 @@ import "../theme/css/index.css";
 
 // Any props you might use will go here
 interface myProps {
-    schemaName: string;
-    queryName: string
     input?: {
         controller: string,
         view: string,
@@ -43,9 +41,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
     input,
     cellStyles,
     title,
-    columnStyles,
-    queryName,
-    schemaName
+    columnStyles
     }) => {
 
     //declare any states here
@@ -140,7 +136,11 @@ const DefaultGridPanelImpl: FC<Props> = ({
         const { containersModel } = queryModels;
         const view = containersModel.currentView;
         const newFilterArray = containersModel.filterArray.concat(view.filters);
-        const printParams = Query.buildQueryParams(schemaName, queryName, newFilterArray, "");
+        const printParams = Query.buildQueryParams(
+            containersModel.schemaQuery.schemaName,
+            containersModel.schemaQuery.queryName,
+            newFilterArray,
+            "");
 
         window.open(LABKEY.ActionURL.buildURL('query', 'printRows', LABKEY.ActionURL.getContainer(),{
             ...printParams
@@ -193,6 +193,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 : <GridPanel
                     model={queryModels.containersModel}
                     ButtonsComponent={renderGridButtons}
+                    ButtonsComponentRight={renderRightGridButtons}
                     actions={actions}
                     asPanel={true}
                     showSearchInput={false}

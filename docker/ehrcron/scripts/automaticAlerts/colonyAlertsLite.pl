@@ -196,7 +196,7 @@ $results = LabKey::Query::selectRows(
     -schemaName => 'study',
     -queryName => 'Demographics',
     -filterArray => [
-    	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
+    	['calculated_status', 'eq', 'Alive'],
     	['Id/curLocation/room/room', 'isblank', ''],
     ],
     -requiredVersion => 8.3,
@@ -211,7 +211,7 @@ if(@{$results->{rows}}){
     };
     	
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals that lack an active housing record.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room/room~isblank&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";#
+	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room/room~isblank&query.calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";#
 	$email_html .= "<hr>\n";			
 }
 

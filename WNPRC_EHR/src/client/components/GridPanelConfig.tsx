@@ -31,7 +31,6 @@ export const GridPanelConfig: FC<configProps> = ({
     }) => {
     const filterArray = [];
     if(filterConfig) {
-        const subjects = filterConfig.subjects;
         const filterDate = filterConfig.date;
         const filterType = filterConfig.filters.inputType;
 
@@ -46,6 +45,7 @@ export const GridPanelConfig: FC<configProps> = ({
             } else if (filterType === "multiSubject") {
                 filterArray.push(Filter.create("Id", filterConfig.filters.nonRemovable['0'].value, Filter.Types.EQUAL.getMultiValueFilter()));
             } else if (filterType === "singleSubject") {
+                const subjects = filterConfig.filters.subjects;
                 filterArray.push(Filter.create("Id", subjects[0], Filter.Types.EQUAL));
             }
         }

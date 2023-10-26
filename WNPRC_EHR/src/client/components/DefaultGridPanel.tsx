@@ -138,7 +138,9 @@ const DefaultGridPanelImpl: FC<Props> = ({
 
     const onPrint = () => {
         const { containersModel } = queryModels;
-        const printParams = Query.buildQueryParams(schemaName, queryName, containersModel.filterArray, "date,room,cage");
+        const view = containersModel.currentView;
+        const newFilterArray = containersModel.filterArray.concat(view.filters);
+        const printParams = Query.buildQueryParams(schemaName, queryName, newFilterArray, "");
 
         window.open(LABKEY.ActionURL.buildURL('query', 'printRows', LABKEY.ActionURL.getContainer(),{
             ...printParams

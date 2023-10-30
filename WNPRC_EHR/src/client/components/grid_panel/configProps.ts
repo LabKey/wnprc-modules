@@ -21,7 +21,6 @@ export interface configProps {
         };
     }];
     filterConfig?: {
-        subjects: any;
         date: any;
         filters: any;
     };

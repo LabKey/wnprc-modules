@@ -2,19 +2,16 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 
 import { produce } from 'immer';
-
+import {Query} from '@labkey/api'
 import {
     ExtendedMap,
     GridPanel,
-    GridProps,
     InjectedQueryModels,
     QueryColumn,
     QueryInfo,
-    QueryModel, selectRows,
+    QueryModel,
     withQueryModels
 } from '@labkey/components';
-import { Filter } from '@labkey/api';
-import { labkeyActionSelectWithPromise } from '../query/helpers';
 import "../theme/css/index.css";
 
 // Any props you might use will go here
@@ -39,13 +36,13 @@ type Props = myProps & InjectedQueryModels;
 // component directly, only the wrapped version below which we expose
 // to users as ExampleGridPanel.
 const DefaultGridPanelImpl: FC<Props> = ({
-                                             actions,
-                                             queryModels,
-                                             input,
-                                             cellStyles,
-                                             title,
-                                             columnStyles
-                                         }) => {
+    actions,
+    queryModels,
+    input,
+    cellStyles,
+    title,
+    columnStyles
+    }) => {
 
     //declare any states here
     const [queryModel, setQueryModel] = useState<QueryModel>(queryModels.containersModel);
@@ -57,7 +54,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
             /** Color all columns **/
             const styledColumns = new ExtendedMap<string, QueryColumn>();
             queryInfo.columns.forEach((column, key) => {
-                if((column.name === cellStyles[0].flagData.flagColumn)){
+                if((column.name === cellStyles[0].flagData.flagColumn || columnStyles?.hasOwnProperty(column.name))){
                     const newColumn2 = new QueryColumn({...column, ...{"cell": cellRenderer}});
                     styledColumns.set(key, newColumn2);
                 }else{
@@ -135,6 +132,21 @@ const DefaultGridPanelImpl: FC<Props> = ({
         })
     };
 
+    const onPrint = () => {
+        const { containersModel } = queryModels;
+        const view = containersModel.currentView;
+        const newFilterArray = containersModel.filterArray.concat(view.filters);
+        const printParams = Query.buildQueryParams(
+            containersModel.schemaQuery.schemaName,
+            containersModel.schemaQuery.queryName,
+            newFilterArray,
+            "");
+
+        window.open(LABKEY.ActionURL.buildURL('query', 'printRows', LABKEY.ActionURL.getContainer(),{
+            ...printParams
+        }));
+    }
+
     // This is an example of a custom button bar element in your GridPanel that can interact with the QueryModel.
     const renderGridButtons = () => {
         return (
@@ -150,6 +162,18 @@ const DefaultGridPanelImpl: FC<Props> = ({
         )
     };
 
+    const renderRightGridButtons = () => {
+        return (
+            <div className={'labkey-button-bar'}>
+                <button className={'btn btn-default'} onClick={onPrint}>
+                    <span className={'fa fa-print'}>
+                    </span>
+                </button>
+
+            </div>
+        )
+    };
+
 
     return (
         <div>
@@ -157,6 +181,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 ? <GridPanel
                     model={queryModel}
                     ButtonsComponent={renderGridButtons}
+                    ButtonsComponentRight={renderRightGridButtons}
                     actions={actions}
                     asPanel={true}
                     showSearchInput={false}
@@ -168,6 +193,7 @@ const DefaultGridPanelImpl: FC<Props> = ({
                 : <GridPanel
                     model={queryModels.containersModel}
                     ButtonsComponent={renderGridButtons}
+                    ButtonsComponentRight={renderRightGridButtons}
                     actions={actions}
                     asPanel={true}
                     showSearchInput={false}

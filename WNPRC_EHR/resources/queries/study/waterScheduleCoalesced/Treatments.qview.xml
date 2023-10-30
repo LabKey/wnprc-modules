@@ -10,6 +10,11 @@
         <column name="waterSource"/>
         <column name="assignedTo"/>
         <column name="provideFruit"/>
+        <column name="qcstate/Label">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
     </columns>
     <sorts>
         <sort column="date" descending="false"/>
@@ -20,5 +25,7 @@
     </sorts>
     <filters>
         <filter column="dateOrdered" operator="dategte" value="-30d"/>
+        <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
+        <filter column="qctate/Label" operator="neqornull" value="Completed"/>
     </filters>
 </customView>

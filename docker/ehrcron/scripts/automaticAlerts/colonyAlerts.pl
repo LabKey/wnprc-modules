@@ -275,7 +275,7 @@ $results = LabKey::Query::selectRows(
     -queryName => 'Demographics',
     -sort => 'Id',
     -filterArray => [
-    	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
+    	['calculated_status', 'eq', 'Alive'],
     	['Id/curLocation/room/room', 'isblank', ''],
     ],
     -requiredVersion => 8.3,
@@ -290,7 +290,7 @@ if(@{$results->{rows}}){
         $email_html .= $row->{'Id'}."<br>";
     };
     	
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room~isblank&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room~isblank&query.calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }
 

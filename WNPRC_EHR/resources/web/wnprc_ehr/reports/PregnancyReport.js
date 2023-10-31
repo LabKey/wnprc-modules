@@ -6,7 +6,6 @@ EHR.reports.PregnancyReport = function (panel, tab) {
         queryName: 'PregnancyInfo',
         viewName: 'pregnancies_all',
         filterConfig: JSON.stringify({
-            subjects: tab.filters.subjects,
             filters: tab.filters,
         }),
     };

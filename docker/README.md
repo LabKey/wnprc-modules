@@ -102,6 +102,7 @@ The LabKey build depends on the Tomcat image, which can be dowload from Docker H
 You will also need to login via the Docker CLI (`docker login`) with your username and password from the Docker website. Be advised that if you are using `sudo` to execute Docker commands as the super user, you'll need to `sudo docker login` as well.
 
 ## Deploying the Docker Compose Services
+Docker images including LabKey version number and branch are control by variables defined in the .env file. The compose (i.e. `compose.yml`) file has the following string for the LabKey service `wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}`. LK_PROD has to be empty except for the production environment which gets replace with **SNAPSHOT**, LK_VERSION gets replace with the version of LabKey that is going to be used (i.e. 22.11) and LK_FB get the name of the branch to test, in production this variable is empty.
 
 To deploy the services, you again either use Gradle or use Docker Compose directly. To use Gradle, execute the following build tasks:
 ```

@@ -108,7 +108,7 @@
                 <nullable>true</nullable>
             </column>
             <column columnName="DateDisabled">
-                <datatype>timestamp</datatype>
+                <datatype>DATETIME</datatype>
                 <columnTitle>Date</columnTitle>
                 <nullable>true</nullable>
                 <formatString>Date</formatString>

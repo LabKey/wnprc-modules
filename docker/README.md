@@ -2,29 +2,63 @@
 
 This folder contains a set of Docker images and a Docker Compose service definition to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), and the Gradle build file helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
 
-Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. Before deploying the services with Compose, you will need to create this `.env` file (e.g., by copying and renaming `default.env`).
+Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. All the variables in the `default.env` file has a prefix to the corresponding service (e.g. LK = labkey, PG = postgres) and they are all organized alphabetically to make it easier to group all variablas that affect the different service. Before deploying the services with Compose, you will need to create this `.env` file (e.g., by copying and renaming `default.env`).
 
 The following files need to be rename to use SSL certificates in your local development machine: `cert.pem.default` and `key.pem.default` both files have to be rename to remove the .default . The names have to match the names in `.env` file.
+
+## Downloading Docker Images from Docker Hub
+
+WNPRC maintains a service contract with Docker Hub. This allows the IDS unit to build images in this cloud service thus not requiring to locally build images in our production server, test environment and developer machines. The contract allows for five accounts to be associated with the WNPRCEHR Organization. The  `idsshared` account can be used to download and access our private labkey images (i.e. [labkeysnapshot](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/general) and [labkey](https://hub.docker.com/repository/docker/wnprcehr/labkey/general)), the token for that account can be found in `Keypass-IDS.kdbx` in the `wnprc.dirve.wisc.edu` shared folder.
+
+All the docker images can be downloaded from Docker Hub using the following commands, user has to be login into Docker Hub. It is best to use a token or a password saved on the `~/.gradle/gradle.properties` by adding the following lines.
+
+```
+dockerhubUsername=idsshared
+dockerhubPassword=<dockerPassword>
+dockertokenpath=<dockerhubToken>
+```
+
+Gradle tasks to interact with Docker have two versions, one using a [plugin](https://github.com/bmuschko/gradle-docker-plugin) and the second one uses direct command line via the Docker CLI. All the tasks defined in the `build.gradle` file have the two flavors. The following command downloads all the custom images manage by the IDS unit.
+
+```
+./gradlew downloadAll
+./gradlew downloadAllPlug
+```
+
+To download a specific images from a feature branch use the following commands replacing the name of the branch inside the brackets:
+```
+./gradlew downloadLabkey -PdockerString=<XX.YY_fb_name>
+./gradlew dowloadLabkeyPlug -PdockerString=<XX.YY_fb_name>
+
+./gradlew downloadEhrcron -PdockerString=<XX.YY_fb_name> 
+./gradlew downloadEhrcronPlug -PdockerString=<XX.YY_fb_name>
+```
+
+For a list of all the task use the follwowing commands:
+
+```
+./gradlew tasks
+```
 
 ## Building the Custom Images
 
 To build the custom images from a stand-alone clone, navigate to the **docker** folder (**not** the repository root) and execute the following command:
 ```
-./gradlew build
+./gradlew buildAll -PdockerString=<XX.YY_fb_name>
 ```
-From a clone embedded inside a LabKey SVN checkout, you will need to execute the command from the LabKey root, with the appropriate adjustments to the project path:
+From a clone embedded inside a LabKey platform source code, you will need to execute the command from the LabKey root, with the appropriate adjustments to the project path:
 ```
-./gradlew :externalModules:wnprc-modules:docker:build
+./gradlew :externalModules:wnprc-modules:docker:buildall -PdockerString=<XX.YY_fb_name>
 ```
-Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`).
+Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`) and all have corresponding tasks using the pluging (e.g. `buildEhrcronPlug`, `buildPostfixPlug`). The Labkey images depends on a hook (`docker/labkey/hooks/build`) which is used in Docker Hub to correctly interprete GitHub branches naming convencion. This same hook is used by the gradle task to download the correct LabKey installer and create the Docker image. This build tasks does not have a companion option using the plugin.
 
 Other than using Gradle, the images can each be built directly using Docker by executing a command like this:
 ```
 docker build -t wnprcehr/ehrcron:vX.X.X ehrcron
 ```
-If  changes are only committed to TeamCity or a new based LabKey build needs to be create, use --no-cache option.
+If  changes are only committed to TeamCity or a new based LabKey build needs to be create, use --no-cache option. Obtain the URL to download the installer from TeamCity.
 ```
-docker build --no-cache -t wnprcehr/labkey:vX.X.X labkey
+docker build --build-arg LABKEY_TEAMCITY_USERNAME=<teamcityUser> --build-arg LABKEY_TEAMCITY_PASSWORD=<teamCityPWD> --build-arg TEAMCITY_URL=<Z> --build-arg TOMCAT_IMAGE=<TOMCAT_IMAGE> --build-arg LK_VERSION=<LK_VERSION> --no-cache --rm=true -t wnprcehr/labkey:XX.YY labkey
 ```
 
 #### Special Instructions for the LabKey Image
@@ -35,8 +69,8 @@ The following build arguments are available for use. The ones that have default 
 LABKEY_TEAMCITY_USERNAME
 LABKEY_TEAMCITY_PASSWORD
 LK_VERSION=21.11
-LABKEY_IS_PREMIUM=true
-WNPRC_BRANCH=master
+TOMCAT_IMAGE
+TEAMCITY_URL
 ```
 
 The LabKey Docker image requires some extra information in order to download the latest build of LabKey from LabKey's TeamCity server--specifically *your* TeamCity credentials.
@@ -59,14 +93,11 @@ If you want to build an images for an specific branch within Github, you should 
 docker build \
     --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
-    --build-arg WNPRC_BRANCH=develop \
+    --build-arg TOMCAT_IMAGE=fb_ \
     -t wnprcehr/labkeyDev:XX.X labkey
 ```
 
-The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:
-
-  1. An account on the [Docker store](https://store.docker.com)
-  1. A "purchased" copy of the (free) [Oracle Java 8 SE (Server JRE)](https://store.docker.com/images/oracle-serverjre-8) image.
+The LabKey build depends on the Tomcat image, which can be dowload from Docker Hub or build locally. 
 
 You will also need to login via the Docker CLI (`docker login`) with your username and password from the Docker website. Be advised that if you are using `sudo` to execute Docker commands as the super user, you'll need to `sudo docker login` as well.
 
@@ -83,16 +114,16 @@ To deploy the services, you again either use Gradle or use Docker Compose direct
 To use Docker Compose, you can execute commands like the following (*from this directory*, where your `.env` file is located):
 ```
 # for spinning up all the services
-docker-compose up -d
+docker compose up -d
 
 # for tearing down all the services*
-docker-compose down
+docker compose down
 
 # for spinning up just one of the services (e.g., postgres)
-docker-compose up -d postgres
+docker compose up -d postgres
 
 # for taking down just one of the services (e.g., postgres)
-docker-compose stop postgres
+docker compose stop postgres
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
@@ -110,7 +141,7 @@ In the `.env` file, edit the following variables: `LK_DANGER_PORT` to other numb
 
 In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `docker-compose` and `.env` files.
 
-Finally, in your `docker-compose` file edit the name of the labkey service, it should be unique, therefore check other development folder for all the names used.
+Finally, in your `compose.yml` file edit the name of the labkey service, it should be unique, therefore check other development folder for all the names used.
 
 All the auxiliary LabKey instances can be manage via the manage_all_continers.sh script. This script accepts two values (-s || -d), s starts all the containers in the docker folder. Starts with the primary which contains postgres and than looks for any folder that starts with dev.
 

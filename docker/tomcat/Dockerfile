@@ -12,7 +12,7 @@ ENV LANG en_US.utf8
 RUN  yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 #RUN yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 #RUN yum-config-manager --enable ol7_latest ol7_optional_latest
-#RUN yum update -y
+RUN yum update -y
 RUN yum -y -q install \
     #for R
     texinfo-tex \

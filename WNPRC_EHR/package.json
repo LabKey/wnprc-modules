@@ -37,8 +37,8 @@
     "urijs": "^1.19.11"
   },
   "devDependencies": {
-    "@labkey/components": "2.339.0",
-    "@labkey/build": "6.3.2",
+    "@labkey/components": "2.349.6",
+    "@labkey/build": "6.13.0",
     "@babel/core": "7.22.5",
     "@types/react": "~16.14.23",
     "@types/react-bootstrap": "~0.32.32",

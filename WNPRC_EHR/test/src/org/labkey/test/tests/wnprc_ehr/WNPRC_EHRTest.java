@@ -90,6 +90,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
@@ -552,7 +553,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void navigateToResearchUltrasounds()
     {
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "researchUltrasoundsEntry"));
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "research_ultrasounds_entry"));
         waitForElement(Locator.id("submit-btn"), defaultWaitForPage);
     }
 
@@ -3080,14 +3081,55 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         selectDropdownOption("taskAssignedTo", 3);
 
+        //assert qc state is "In Progress"
+        assertEquals(
+                "Failed QCState test",
+                "In Progress",
+                getDriver().findElement(By.id("taskQCStateLabel")).getAttribute("value")
+        );
+
         TypeInField("ResearchPane.Id", PROJECT_MEMBER_ID);
+        // assert that animalInfoPane works for valid ID
+        waitForElement(Locator.byClass("animal-info-table"));
+        assertElementPresent(Locator.byClass("animal-info-table"));
 
         selectDropdownOption("ResearchPane_3", 1);
         // assert that project is correct
-        // assert that account for project is correct
-        checkCheckbox(Locator.name("fetal_heartbeat"));
-        //assert that checkbox was clicked
+        WebElement testProject = getDriver().findElements(By.className("react-hook-select__value-container")).get(1);
+        WebElement projectInput = testProject.findElement(By.cssSelector("div[class*='singleValue']"));
+        assertEquals(
+                "Failed project test",
+                "640991",
+                projectInput.getText()
+        );
+        // assert that account for project is correct: acct101
+        assertEquals(
+                "Failed account test",
+                "acct101",
+                getDriver().findElement(By.id("ResearchPane_4")).getAttribute("value")
+        );
+        // select and deselect checkbox
+        WebElement label = getDriver().findElement(By.className("checkbox-container"));
+        WebElement span = label.findElement(By.className("checkbox-custom"));
+        span.click();
+        // assert checkbox is selected
+        assertTrue(
+                "Failed checkbox test, element should be selected",
+                getDriver().findElement(By.id("ResearchPane_5")).isSelected()
+        );
+        span.click();
+        // assert checkbox is not selected
+        assertFalse(
+                "Failed checkbox test, element should not be selected",
+                getDriver().findElement(By.id("ResearchPane_5")).isSelected()
+        );
+
+
+
         TypeInField("ResearchPane.beats_per_minute", "100");
+        TypeInField("ResearchPane.performedby", "tester");
+        selectDropdownOption("RestraintPane_0", 0);
+        TypeInField("RestraintPane.remark", "testing");
 
         log("Completed validation test");
     }

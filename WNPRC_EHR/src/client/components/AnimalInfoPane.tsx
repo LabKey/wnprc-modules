@@ -5,7 +5,6 @@ import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { getAnimalInfo } from '../query/helpers';
 import { infoStates } from '../researchUltrasoundsEntry/typings';
-import { id } from '@labkey/api/dist/labkey/Utils';
 
 interface InfoProps {
   Id: string;

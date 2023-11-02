@@ -5,17 +5,15 @@ import InputLabel from './InputLabel';
 import '../theme/css/index.css';
 import { ConfigProps } from '../weight/typings/main';
 import DropdownSearch from './DropdownSearch';
-import { getQCLabel, labkeyActionDistinctSelectWithPromise, labkeyActionSelectWithPromise } from '../query/helpers';
+import { labkeyActionSelectWithPromise } from '../query/helpers';
 import ControlledDateInput from './ControlledDateInput';
 import { Controller, FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
-import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { Filter } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 export const TaskPane: FC<any> = (props) =>{
     const { title, prevTask} = props;
 
-    const {setValue, control} = useFormContext();
+    const { control } = useFormContext();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [qcOptions, setQCOptions] = useState<any>({});
 
@@ -132,7 +130,7 @@ export const TaskPane: FC<any> = (props) =>{
                     <Controller
                         name={"TaskPane.qcstate" as  FieldPathValue<FieldValues, any>}
                         control={control}
-                        defaultValue={prevTask?.qcstate || 2 as FieldPathValue<FieldValues, any>}
+                        defaultValue={prevTask?.qcstate || getQCRow("In Progress") as FieldPathValue<FieldValues, any>}
                         render={({field: {onChange, value}}) => (
                             <div className={"text-input"}>
                                 <input

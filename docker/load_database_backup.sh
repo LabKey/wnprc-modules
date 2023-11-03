@@ -13,7 +13,7 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
-        -p|--project)  ## the name of the docker-compose project
+        -p|--project)  ## the name of the docker compose project
             export COMPOSE_PROJECT_NAME="$2"
             shift
             shift
@@ -98,12 +98,12 @@ if [[ -z $dbname ]]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Take down the entire docker-compose project, including the network and volumes
+# Take down the entire docker compose project, including the network and volumes
 # then build a new postgresql configuration using the specified one as a base.
 #-------------------------------------------------------------------------------
 
 if [[ -z $dock ]]; then
-  docker-compose -f docker-compose.prod.yml -f docker-compose.yml down -v
+  docker compose -f production.yaml -f compose.yaml down -v
   if [[ ! -e .env ]]; then
       cp default.env .env
   fi
@@ -116,9 +116,10 @@ if [[ -z $dock ]]; then
       -e "s/^.*synchronous_commit *=.*$/synchronous_commit = off/" \
       -e "s/^.*wal_level *=.*$/wal_level = minimal/" \
       -e "s/^.*full_page_writes *=.*$/full_page_writes = off/" \
-      -e "s/^.*checkpoint_segments *=.*$/checkpoint_segments = 64/" \
+      -e "s/^.*max_wal_size *=.*$/max_wal_size = 2048/" \
+      -e "s/^.*min_wal_size *=.*$/min_wal_size = 160/" \
       -e "s/^.*max_wal_senders *=.*$/max_wal_senders = 0/" \
-      -e "s/^.*wal_keep_segments *=.*$/wal_keep_segments = 0/" \
+      -e "s/^.*wal_keep_size *=.*$/wal_keep_size = 0/" \
       -e "s/^.*archive_mode *=.*$/archive_mode = off/" \
       -e "s/^.*autovacuum *=.*$/autovacuum = off/" \
       -e "s/^.*log_min_duration_statement *=.*$/log_min_duration_statement = -1/" \
@@ -135,8 +136,8 @@ if [[ -z $dock ]]; then
       -e "s/^.*maintenance_work_mem *=.*$/maintenance_work_mem = 1GB/" \
       $conf > $tmpdir/pg_restore.conf
   export PG_CONF_FILE=$tmpdir/pg_restore.conf
-  docker-compose up -d postgres
-  pgport=$(docker-compose port postgres 5432)
+  docker compose up -d postgres
+  pgport=$(docker compose port postgres 5432)
 fi
 
 #-------------------------------------------------------------------------------
@@ -144,7 +145,7 @@ fi
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
   echo -n 'Waiting for postgres to start ... '
-  docker-compose exec postgres /bin/bash -c 'count=0;while [ $count -lt 120 ]; do if psql -U postgres -c "\l" &>/dev/null; then sleep 3; break; fi; sleep 1; let count=count+1; done;' &>/dev/null
+  docker compose exec postgres /bin/bash -c 'count=0;while [ $count -lt 120 ]; do if psql -U postgres -c "\l" &>/dev/null; then sleep 3; break; fi; sleep 1; let count=count+1; done;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
 #-------------------------------------------------------------------------------
@@ -170,9 +171,9 @@ fi
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
   echo -n 'Preparing database and roles ... '
-  docker-compose exec postgres psql -U postgres -c "drop database if exists ${dbname};" &>/dev/null
-  docker-compose exec postgres psql -U postgres -c "create database ${dbname};" &>/dev/null
-  docker-compose exec postgres psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
+  docker compose exec postgres psql -U postgres -c "drop database if exists ${dbname};" &>/dev/null
+  docker compose exec postgres psql -U postgres -c "create database ${dbname};" &>/dev/null
+  docker compose exec postgres psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 else
   echo -n 'Preparing database and roles ... '
@@ -189,7 +190,7 @@ if [[ $tablespace ]]; then
   echo -n 'Setting tablespace to: '
   echo $tablespace
   if [[ -z $dock ]]; then
-    docker-compose exec postgres psql -U postgres -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
+    docker compose exec postgres psql -U postgres -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
   else
     ${pgpath}psql -h localhost -U postgres -p "${pgport#*:}" -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
   fi
@@ -249,11 +250,11 @@ XXX
 fi
 
 #-------------------------------------------------------------------------------
-# Tear down and re-start the docker-compose environment using the 'regular'
+# Tear down and re-start the docker compose environment using the 'regular'
 # postgresql configuration rather than the 'restore' one
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
-  docker-compose down -v
+  docker compose down -v
   unset PG_CONF_FILE
-  docker-compose up -d postgres
+  docker compose up -d postgres
 fi

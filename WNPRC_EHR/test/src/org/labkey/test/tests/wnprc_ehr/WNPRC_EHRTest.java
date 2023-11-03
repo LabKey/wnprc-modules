@@ -3095,7 +3095,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         selectDropdownOption("ResearchPane_3", 1);
         // assert that project is correct
-        WebElement testProject = getDriver().findElements(By.className("react-hook-select__value-container")).get(1);
+        WebElement testProject = getDriver().findElements(By.className("react-hook-select__value-container")).get(2);
         WebElement projectInput = testProject.findElement(By.cssSelector("div[class*='singleValue']"));
         assertEquals(
                 "Failed project test",
@@ -3130,6 +3130,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         TypeInField("ResearchPane.performedby", "tester");
         selectDropdownOption("RestraintPane_0", 0);
         TypeInField("RestraintPane.remark", "testing");
+
+        // submit form
+        click(Locator.byClass("submit-btn"));
+
+        // assert successful submission
+
 
         log("Completed validation test");
     }

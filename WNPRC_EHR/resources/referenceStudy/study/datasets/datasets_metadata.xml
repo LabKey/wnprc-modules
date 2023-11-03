@@ -6182,7 +6182,7 @@
         <shownInDetailsView>false</shownInDetailsView>
         <isKeyField>true</isKeyField>
       </column>
-      <column columnName="sire">
+      <column columnName="sireid">
         <datatype>varchar</datatype>
         <columnTitle>Sire</columnTitle>
       </column>
@@ -6190,7 +6190,7 @@
         <datatype>varchar</datatype>
         <columnTitle>Method</columnTitle>
       </column>
-      <column columnName="conception">
+      <column columnName="date_conception">
         <datatype>timestamp</datatype>
         <columnTitle>Conception</columnTitle>
       </column>

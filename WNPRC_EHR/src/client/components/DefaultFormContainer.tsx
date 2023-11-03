@@ -160,7 +160,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             let jsonData = {commands: data}
             console.log('calling save rows on: ', jsonData);
             // save rows to database and redirect to desired schema/query
-            /*saveRowsDirect(jsonData)
+            saveRowsDirect(jsonData)
                 .then((data) => {
                     console.log('done!!');
                     console.log(JSON.stringify(data));
@@ -177,7 +177,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 .catch((e) => {
                     console.log(e);
                     setSubmitTextBody(e.exception);
-                });*/
+                });
             }).catch(e => {
                 console.error(e);
                 setSubmitTextBody(e.exception);

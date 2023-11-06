@@ -618,6 +618,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         childElement.click();
     }
 
+    public SelectRowsResponse fetchData(String schemaName, String queryName, List<String> columns) throws IOException, CommandException
+    {
+        Connection cn = createDefaultConnection();
+        SelectRowsCommand cmd = new SelectRowsCommand(schemaName, queryName);
+        cmd.setRequiredVersion(9.1);
+        cmd.setColumns(columns);
+        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
+        cmd.setMaxRows(100);
+        return cmd.execute(cn, EHR_FOLDER_PATH);
+    }
+
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
     {
         Connection cn = createDefaultConnection();
@@ -3075,7 +3086,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         }
     }
     @Test
-    public void testReactFormValidation() throws UnhandledAlertException {
+    public void testReactFormValidation() throws UnhandledAlertException, IOException, CommandException {
         log("Starting react form validation test");
         navigateToResearchUltrasounds();
 
@@ -3134,8 +3145,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // submit form
         click(Locator.byClass("submit-btn"));
 
-        // assert successful submission
 
+        // get data submitted
+        SelectRowsResponse taskData = fetchData("ehr", "tasks", Arrays.asList("taskid", "title"));
+        Map<String, Object> wt = (Map<String, Object>) taskData.getRows();
+        // assert successful submission
 
         log("Completed validation test");
     }

@@ -1,11 +1,18 @@
-FROM eclipse-temurin:17.0.1_12-jdk-centos7
+FROM eclipse-temurin:17-jdk-centos7
 
 ENV LANG en_US.utf8
 
 # copy in some additional yum repositories
+#RUN yum install epel-release
+#RUN yum install -y oraclelinux-release-el7
+#RUN yum-config-manager --enable software_collections
+#RUN yum install -y oracle-softwarecollection-release-el7
+#RUN /usr/bin/ol_yum_configure.sh
 #COPY public-yum-ol7.repo /etc/yum.repos.d
-RUN yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum-config-manager --enable ol7_optional_latest
+RUN  yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#RUN yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#RUN yum-config-manager --enable ol7_latest ol7_optional_latest
+#RUN yum update -y
 RUN yum -y -q install \
     #for R
     texinfo-tex \
@@ -51,6 +58,9 @@ COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
 
 # adding Tomcat custom login pattern
 COPY server9_0_54.xml conf/server.xml
+
+# adding Tomcat memory options
+COPY setenv.sh /usr/local/tomcat/bin/setenv.sh
 
 RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml

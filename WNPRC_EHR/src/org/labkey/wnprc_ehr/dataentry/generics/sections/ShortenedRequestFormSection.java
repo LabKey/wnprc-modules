@@ -19,7 +19,7 @@ public class ShortenedRequestFormSection extends RequestFormSection
         if ( maxItemsPerColumn != null )
         {
             // Make the form appear in two columns
-            JSONObject formConfig = new JSONObject(ret.get("formConfig"));
+            JSONObject formConfig = new JSONObject(ret.get("formConfig").toString());
             formConfig.put("maxItemsPerCol", maxItemsPerColumn);
             ret.put("formConfig", formConfig);
         }

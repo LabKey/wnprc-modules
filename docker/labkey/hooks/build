@@ -1,5 +1,6 @@
 #!/bin/bash
-echo "build ver 1.5"
+echo "build ver 1.9"
+echo "docker_tag text " $DOCKER_TAG
 
 # FB_REGEX will match if the docker tag looks like a feature branch, while
 # PROD_REGEX will match if the docker tag matches the format of a production build
@@ -7,34 +8,63 @@ DEVBRANCH_REGEX="^([0-9]{2}\.[0-9]{1,2})_refs_heads_develop"
 FB_REGEX="^([0-9]{2}\.[0-9]{1,2})_(.*)"
 PROD_REGEX="^([0-9]{2}\.[0-9]{1,2})_refs_heads_release([0-9]{2}\.[0-9]{1,2})-SNAPSHOT"
 
-LK_VERSION=""
+LABKEY_TEAMCITY_BUILD=""
+
+LABKEY_SNAPSHOT="-SNAPSHOT-"
+LABKEY_DISTRIBUTION="wisc"
+LABKEY_FILE_NAME="UWisc.tar.gz"
+B=""
 
 if [[ $DOCKER_TAG =~ $DEVBRANCH_REGEX ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME="develop"
     TOMCAT_IMAGE="_develop"
-
+    LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2"  
+    echo -e "Building develop branch ";
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
-then
-    LK_VERSION=${BASH_REMATCH[1]}
+then    
+    LK_VERSION=${BASH_REMATCH[1]}    
+    GENERAL_LK_VERSION=${LK_VERSION//./}    
+    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME="SNAPSHOT"
     TOMCAT_IMAGE=""
-
+    echo -e "LabKey Version: " ${LK_VERSION}
+    echo -e "Branch: " ${SHORT_BRANCH_NAME}
 #Docker tag for SNAPSHOT and FB
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
+    GENERAL_LK_VERSION=${LK_VERSION//./}   
+    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
-    TOMCAT_IMAGE="_${SHORT_BRANCH_NAME}"
-    
+    B=",branch:"${SHORT_BRANCH_NAME}
+    TOMCAT_IMAGE=${SHORT_BRANCH_NAME}
+    echo -e "LabKey Version: " ${LK_VERSION}
+    echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
     exit 1
 fi
 
+W="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`"
+X="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`"
+echo -e "value of X " ${X}
+Y="${LABKEY_TEAMCITY_BUILD:-$X}"
+echo -e "value of Y " ${Y}
+Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LK_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" 
+    
+echo -e "TEAMCTY_URL "${Z}
+
 # Some debugging info
 echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
-docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LABKEY_VERSION=$LK_VERSION --rm=true -t $IMAGE_NAME .
+if [[ -z $IMAGE_NAME ]]
+then
+  IMAGE_NAME="wnprcehr/labkey:${LK_VERSION}_${SHORT_BRANCH_NAME}"
+  echo "value of IMAGE_NAME " ${IMAGE_NAME}
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME ../
+else
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME .
+fi

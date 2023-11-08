@@ -391,6 +391,47 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
 
     }
+
+    protected void animalOnLixit(Container c,User u, StringBuilder msg){
+
+        TableInfo ti = QueryService.get().getUserSchema(u,c,"study").getTable("demographicsMostRecentWaterCondition");
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("MostRecentWaterCondition"),"lixit",CompareType.EQUAL);
+
+        Set<FieldKey> columns = new HashSet<>();
+        columns.add(FieldKey.fromString("Id"));
+        columns.add(FieldKey.fromString("MostRecentWaterConditionDate"));
+        columns.add(FieldKey.fromString("MostRecentWaterCondition"));
+
+        final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
+
+        TableSelector ts = new TableSelector(ti,colMap.values(), filter,null);
+        long total = ts.getRowCount();
+
+        if(total > 0){
+            msg.append("<p><b>There are "+total+ " animal in water controlled protocol that are on Lixit/Ad lib</b><br>");
+        }
+
+        Map<String,Object>[] animalsOnLixit= ts.getMapArray();
+        StringBuilder animalsLixitTable = new StringBuilder();
+        animalsLixitTable.append("<br><strong> Animals on Lixit /Ad lib</strong>");
+        animalsLixitTable.append("<table border=1 style='border-collapse: collapse;'>");
+        animalsLixitTable.append("<tr><td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
+                "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
+                "<td style='padding: 5px; text-align: center;'><strong>Current Water Condition</strong></td></tr>\n");
+
+        for (Map<String,Object> lixitRecord: animalsOnLixit){
+            LocalDateTime objectDateTime = ConvertHelper.convert(lixitRecord.get("MostRecentWaterConditionDate"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            animalsLixitTable.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(lixitRecord.get("Id"),String.class)
+                    + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
+                    + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(lixitRecord.get("MostRecentWaterCondition"),String.class) +"</td></tr>" );
+        }
+        animalsLixitTable.append("</table>");
+
+        msg.append(animalsLixitTable);
+
+    }
     private StringBuilder createTable (List<Map<String,Object>> listOfDBObjects, String assignedTo){
         StringBuilder returnTable = new StringBuilder();
         returnTable.append("<br><strong>"+ assignedTo +"</strong>");

@@ -488,7 +488,8 @@
                 </div>
                 <div id="waterTotalLegend" class="pull-left">
 
-                    <span style="color:red">&#x2589;</span><span>Total Water < 20 mL/Kg</span>
+                    <span style="color:red">&#x2589;</span><span>Total Water < 10 mL/Kg</span>
+                    <span style="color:orange">&#x2589;</span><span>Total Water < 20 mL/Kg or set point</span>
                     <span style="color:white">&#x2589;</span><span>Total Water >= 20 mL/Kg</span>
 
                 </div>
@@ -764,7 +765,11 @@
                                         };
                                         if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
                                             eventObj.color = '#FFFFFF';
-                                        }else{
+                                        }
+                                        else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                            eventObj.color = '#FF7F50';
+                                        }
+                                        else{
                                             eventObj.color = '#EE2020'
                                         }
                                         return eventObj;
@@ -824,7 +829,10 @@
                                             };
                                             if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
                                                 eventObj.color = '#FFFFFF';
-                                            }else{
+                                            }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                                eventObj.color = '#FF7F50';
+                                            }
+                                            else{
                                                 eventObj.color = '#EE2020'
                                             }
                                             return eventObj;

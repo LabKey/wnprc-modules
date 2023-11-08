@@ -47,6 +47,9 @@ public class WaterMonitoringAnimalWithOutEntriesSupervisorNotification extends W
         //Check animals that did not get any water for today and the last five days.
         findAnimalsWithWaterEntries(c,u,msg,numDays);
 
+        //Animals on water restricted protocols that are on Lixit
+        animalOnLixit(c,u,msg);
+
         return msg.toString();
     }
 

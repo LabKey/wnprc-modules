@@ -14,6 +14,7 @@ SELECT wtbd.Id as Id,
        wtbd.volumeGivenInImage,
        wtbd.volumeGivenInProcedure,
        wtbd.currentWaterCondition,
+       wtbd.remarksConcat,
        waterScheduledAnimalsOuter.condition AS conditionAtTime,
        waterScheduledAnimalsOuter.endDate as endDateCondition,
 

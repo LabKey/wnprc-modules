@@ -1,0 +1,145 @@
+networks:
+  network1:
+    driver: bridge
+    name: sharedservices
+
+services:
+  postgres:
+    image: postgres:$PG_VERSION
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    container_name: postgres
+    shm_size: 4g
+    restart: always
+    volumes:
+      - "${PG_CONF_FILE}:/conf/postgresql.conf"
+      - "${PG_DATA_DIR}:/var/lib/postgresql/data"
+      - "${PG_HBA_FILE}:/conf/pg_hba.conf"
+      - "${PG_LOG_DIR}:/logs"
+    ports:
+      - "${PG_PORT}:5432"
+    expose:
+      - "5432"
+    networks:
+      - network1
+    environment:
+      TZ: America/Chicago
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
+    command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
+    stop_signal: SIGTERM
+    stop_grace_period: "120s"
+
+  mailcatcher:
+    image: schickling/mailcatcher:master
+    networks:
+      - network1
+    environment:
+      TZ: America/Chicago
+
+  mailserver:
+    image: wnprcehr/postfix:$POSTFIX_VERSION
+    depends_on:
+      - "mailcatcher"
+    environment:
+      MAIL_SERVER:
+      TZ: America/Chicago
+      SERVER_CERT: /run/secrets/server-certificate
+      SERVER_KEY:  /run/secrets/server-key
+    expose:
+      - "1025"
+    networks:
+      - network1
+    secrets:
+      - server-certificate
+      - server-key
+
+  labkey:
+    image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}
+    container_name: labkey
+    depends_on:
+      mailserver:
+        condition: service_started
+      postgres:
+         condition: service_healthy
+    restart: always
+    volumes:
+      - "${LK_FILES_DIR}:/space/files"
+      - "${LK_LOG_DIR}:/usr/local/tomcat/logs"
+      - "${LK_MODULE_DEPLOY_DIR}:/usr/local/modules"
+      - "${LK_SESSION_DIR}:/usr/local/labkey/sessions"
+    expose:
+      - "8080"
+    networks:
+      - network1
+    environment:
+      CATALINA_OPTS:
+      JAVA_OPTS: "${LK_JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
+                  -Dmsql.user=${LK_MSQL_USER} -Dmsql.pass=${LK_MSQL_PASS} -Dmsql.url=\"${LK_MSQL_URL}\" -Darrow.user=${LK_ARROW_USER} \
+                  -Darrow.pass=${LK_ARROW_PASS} -Darrow.url=\"${LK_ARROW_URL}\" \
+                  -Dlog4j2.formatMsgNoLookups=true -Dserver.email.address=${LK_SERVER_EMAIL_ADDRESS}"
+      LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
+      LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
+      LK_MS_VALUE: ${LK_MS_VALUE}
+      LK_MX_VALUE: ${LK_MX_VALUE}
+      LK_MASTER_ENCRYPTION_FILE: /run/secrets/master_encryption_pwd
+      LK_BASE_URL: ${LK_BASE_URL}
+      PG_NAME:
+      PG_PASS:
+      PG_USER:
+      TZ: America/Chicago
+    secrets:
+      - master_encryption_pwd
+
+  nginx:
+    image: nginx:1.25
+    depends_on:
+      - "labkey"
+    volumes:
+      - "${NGINX_TEMPLATES}:/etc/nginx/templates"
+      - "${NGINX_WELL_KNOWN_DIR}:/usr/share/nginx/html"
+    ports:
+      - "${LK_DANGER_PORT}:80"
+      - "${LK_SECURE_PORT}:443"
+      - "${MAIL_CATCHER_PORT}:1080"
+      - "${CADVISOR_PORT}:8080"
+    networks:
+      - network1
+    environment:
+      TZ: America/Chicago
+      NGINX_SERVER_CER: /run/secrets/server-certificate
+      NGINX_SERVER_KEY: /run/secrets/server-key
+      NGINX_SERVER_PASS: /run/secrets/server-pass
+      HT_PASSWORD: /run/secrets/server-htpasswd
+    secrets:
+      - server-certificate
+      - server-key
+      - server-pass
+      - server-htpasswd
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    depends_on:
+      - "postgres"
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - network1
+
+secrets:
+  master_encryption_pwd:
+    file: ${LK_MASTER_ENCRYPTION}
+  server-certificate:
+    file: ${NGINX_SERVER_CER_FILE}
+  server-key:
+    file: ${NGINX_SERVER_KEY_FILE}
+  server-pass:
+    file: ${NGINX_SERVER_PASS_FILE}
+  server-htpasswd:
+    file: ${MAIL_CATCHER_HTPASSWD_FILE}

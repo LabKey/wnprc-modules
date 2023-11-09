@@ -403,7 +403,7 @@
                                             String altmeaning = "";
                                             for(JSONObject frequency : husbandryFrequencyList) {
                                                 if ( frequency.getString("altmeaning") != null && !frequency.getString("altmeaning").trim().equals("")) {
-                                                     rowid= frequency.getString("rowid");
+                                                     rowid= String.valueOf(frequency.getInt("rowid"));
                                                      altmeaning = frequency.getString("altmeaning");
                                         %>
                                            <option value="<%=h(rowid)%>"><%=h(altmeaning)%></option>

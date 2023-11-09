@@ -38,7 +38,7 @@
     String defaultAssignedUserID = "";
     String defaultAssignedDisplayName = "";
     if (defaultGroup.length() == 1) {
-        defaultAssignedUserID = defaultGroup.getJSONObject(0).getString("userid");
+        defaultAssignedUserID = String.valueOf(defaultGroup.getJSONObject(0).getInt("userid"));
         defaultAssignedDisplayName = defaultGroup.getJSONObject(0).getString("displayname");
     }
 
@@ -247,7 +247,7 @@
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
                                         String userid = pathologist.getString("userid");
-                                        String internaluserid = pathologist.getString("internaluserid");
+                                        Integer internaluserid = pathologist.getInt("internaluserid");
                                 %>
                                 <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
                                 <%
@@ -265,7 +265,7 @@
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
                                         String userid = pathologist.getString("userid");
-                                        String internaluserid = pathologist.getString("internaluserid");
+                                        Integer internaluserid = pathologist.getInt("internaluserid");
                                 %>
                                 <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
                                 <%

@@ -138,7 +138,6 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
                     </column>
                     <column columnName="provideFruit">
@@ -146,7 +145,6 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>husbandry_fruit</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
 
                     </column>

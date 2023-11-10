@@ -101,7 +101,7 @@ tasks.register("buildTomcatPlug", DockerBuildImage){
         images.add("wnprcehr/tomcat:tomcat9_${dockerString}")
 
     }else {
-        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
+        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcatPlug -PdockerString=22.11_fb)'
     }
     group 'DockerPlugin'
     
@@ -269,7 +269,49 @@ tasks.register("downloadPostfixPlug",DockerPullImage){
             println 'downloading image' 
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcronPlug -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadPostfixPlug -PdockerString=22.11_fb)'
+        }
+    }
+    doLast{
+        println "image pulled"     
+    }
+    group 'DockerPlugin'
+    dependsOn 'checkDocker'
+}
+
+tasks.register("downloadTomcat"){
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            t.project.exec {
+                executable "docker"
+                args "pull", "wnprcehr/tomcat:tomcat9_${dockerString}"
+            }
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcat -PdockerString=22.11_fb)'
+        }
+    }
+    group 'Docker'
+    description  'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
+
+}
+
+tasks.register("downloadTomcatPlug",DockerPullImage){
+    image = "wnprcehr/tomcat:tomcat9_${dockerString}"
+    
+    onComplete{
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println 'downloading image' 
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcatPlug -PdockerString=22.11_fb)'
         }
     }
     doLast{

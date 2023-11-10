@@ -39,7 +39,7 @@ then
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
-    TOMCAT_IMAGE=${SHORT_BRANCH_NAME}
+    TOMCAT_IMAGE=_${SHORT_BRANCH_NAME}
     echo -e "LabKey Version: " ${LK_VERSION}
     echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
 else

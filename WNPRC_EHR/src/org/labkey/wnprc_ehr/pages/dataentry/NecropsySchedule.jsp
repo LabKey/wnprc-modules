@@ -247,9 +247,9 @@
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
                                         String userid = pathologist.getString("userid");
-                                        Integer internaluserid = pathologist.getInt("internaluserid");
+                                        int internaluserid = pathologist.getInt("internaluserid");
                                 %>
-                                <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
+                                <option value="<%=internaluserid%>"><%=h(userid)%></option>
                                 <%
                                     }
                                 %>
@@ -265,9 +265,9 @@
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
                                         String userid = pathologist.getString("userid");
-                                        Integer internaluserid = pathologist.getInt("internaluserid");
+                                        int internaluserid = pathologist.getInt("internaluserid");
                                 %>
-                                <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
+                                <option value="<%=internaluserid%>"><%=h(userid)%></option>
                                 <%
                                     }
                                 %>

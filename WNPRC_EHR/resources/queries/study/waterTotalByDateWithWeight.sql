@@ -22,6 +22,7 @@ SELECT wtbd.Id as Id,
        waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,
        wtbd.qcstate,
+       COALESCE(CAST(wtbd.TotalWater/weigthDates.weight AS NUMERIC), 0) AS zeroOrmlsPerKg,
        'waterTotal' AS dataSource
 FROM study.waterTotalByDate wtbd
 

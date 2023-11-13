@@ -18,6 +18,9 @@ idea.module {
     excludeDirs += file("logs")
 }
 
+def buildType=''
+def branch = ''
+
 //Registering credential to use the bmuschko plugin to use docker
 docker {
     url = 'unix:///var/run/docker.sock'
@@ -41,6 +44,44 @@ configure(dockerLogin){
     onlyIf { project.hasProperty('dockerhubUsername') && project.hasProperty('dockertokenpath') }
 }
 
+tasks.register("processbranchName"){
+    def dockerStr = providers.gradleProperty("branchName")
+    
+    
+        if (dockerStr.present)
+        {
+             def branchName = dockerStr.get()
+            if (branchName ==~ /^(?<year>[0-9]{2})\.(?<version>[0-9]{1,2})_fb_(?<fb>.*)/){
+                def (_,year,version, fb) = (branchName =~ /^(?<year>[0-9]{2})\.(?<version>[0-9]{1,2})_fb_(?<fb>.*)/)[0]
+                buildType = 'fb'
+
+                project.ext.set('labkeyYear',year)
+                println(project.labkeyYear)
+                project.ext.set('labkeyMonth',version)
+                println(project.labkeyMonth)
+                project.ext.set('labkeyFB',fb)
+                println(project.labkeyFB)
+                branch=project.labkeyYear+project.labkeyMonth+'_'+project.labkeyFB;
+            }
+            else if (branchName ==~ /^release[0-9]{2}\.[0-9]{1,2}-SNAPSHOT/){
+                def (_,year,version) = (branchName =~ /^release(?<year>[0-9]{2})\.(?<version>[0-9]{1,2})-SNAPSHOT/)[0]
+                buildType = 'SNAPSHOT'
+                project.ext.set('labkeyYear',year)
+                println(project.labkeyYear)
+                project.ext.set('labkeyMonth',version)
+                println(project.labkeyMonth)
+                branch=project.labkeyYear+'.'+project.labkeyMonth;
+
+            }else{
+                println "no match"
+            }
+
+        }else{
+            println "'Must provide docker string via command line. (ex. ./gradlew processbranchName -PbranchName=22.11_fb)'"
+        }
+
+}
+
 tasks.register("buildEhrCron", Exec) {
     workingDir "$projectDir/ehrcron"
     executable "docker"
@@ -62,91 +103,216 @@ tasks.register("buildTomcat") { Task t ->
         if (!project.hasProperty("nocache")){
             ext.nocache = "false"
         }
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
-            println dockerStr.get()
-            String dockerString = dockerStr.get()
+            //String branch = ""
+            println buildType
+            switch (buildType){
+                case 'fb':
+                    println 'Tomcat fb'
+                    branch=project.labkeyYear+'.'+project.labkeyMonth+'_'+project.labkeyFB;
+                    break;
+                case 'SNAPSHOT':
+                    println 'Tomcat SNAPSHOT'
+                    branch=project.labkeyYear+'.'+project.labkeyMonth;
+                    break;
+                default:
+                    branch=project.labkeyVersion;
+                    break;
+            }
             println nocache
             if (nocache.equals("true")){
                 println "building image without cache"
                 t.project.exec{
                     workingDir "$projectDir/tomcat"
                     executable "docker"
-                    args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                    args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_"+branch
                 }
             }else{
                 t.project.exec{
                     workingDir "$projectDir/tomcat"
                     executable "docker"
-                    args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                    args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_"+branch
                 }
             }
             
         }else {
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PbranchName=22.11_fb)'
         }
     }
+    
+}
+configure(buildTomcat){
     group 'Docker'
     description 'Generates the Tomcat docker image (with R)'
-    dependsOn  "checkDocker", "dockerLogin"
+    dependsOn  "checkDocker", "dockerLogin", "processbranchName"
+    onlyIf {buildType != ''}
 } 
 
 tasks.register("buildTomcatPlug", DockerBuildImage){
-    def dockerStr = providers.gradleProperty("dockerString")
+    def dockerStr = providers.gradleProperty("branchName")
     if (dockerStr.present){
-        println dockerStr.get()
-        String dockerString = dockerStr.get()
+      //  String branch = ""
+        println buildType
+        switch (buildType){
+            case 'fb':
+                println 'Tomcat fb'
+                branch=project.labkeyYear+project.labkeyMonth+'_'+project.labkeyFB;
+                break;
+            case 'SNAPSHOT':
+                println 'Tomcat SNAPSHOT'
+                branch=project.labkeyYear+'.'+project.labkeyMonth;
+                break;
+            default:
+                branch=project.labkeyVersion;
+                break;
+        }
         inputDir.set(file("tomcat/"))
-        images.add("wnprcehr/tomcat:tomcat9_${dockerString}")
+        images.add("wnprcehr/tomcat:tomcat9_${branch}")
 
     }else {
-        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcatPlug -PdockerString=22.11_fb)'
-    }
-    group 'DockerPlugin'
-    
+        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcatPlug -PbranchName=22.11_fb)'
+    }    
 }
+configure(buildTomcatPlug){
+    group 'DockerPlugin'
+    description 'Generates the Tomcat docker image (with R)'
+    dependsOn  "checkDocker", "dockerLogin", "processbranchName"
+} 
 
 //Building LabKey with hooks/build for consistancy with Docker Hub and used of environment variables duirng the build process
 //Source: https://stackoverflow.com/questions/36322536/how-to-set-an-environment-variable-from-a-gradle-build / https://stackoverflow.com/a/63140816
 tasks.register("buildLabkey") { Task t ->
 //task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrCron", "buildPostfix"]) { Task t ->
     doLast {
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
 
         if (dockerStr.present){
             println dockerStr.get()
-            String dockerString = dockerStr.get()
+            //String branchName = dockerStr.get()
+            String branchName = ''
+            if (buildType == 'fb'){
+                 branchName = project.labkeyYear+'.'+project.labkeyMonth+'_'+project.labkeyFB
+                 println branchName
+            }
+            else if (buildType == 'SNAPSHOT'){
+                //Matching the string used by Teamcity (^([0-9]{2}\.[0-9]{1,2})_refs_heads_release([0-9]{2}\.[0-9]{1,2})-SNAPSHOT)
+                //In order for gradle and Docker Hub to work in a similar fashion
+                branchName = project.labkeyYear+'.'+project.labkeyMonth+'_refs_heads_release'+project.labkeyYear+'.'+project.labkeyMonth+'-SNAPSHOT'
+                println branchName
+            }
+            else {
+
+            }
+            
+            println branchName
             if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
                 t.project.exec {
                     workingDir "$projectDir/labkey/hooks"
                     commandLine "./build"
-                    environment += ['teamcityUser':"${labkeyTeamcityUsername}",'teamCityPWD':"${labkeyTeamcityPassword}",'DOCKER_TAG':"${dockerString}"]
+                    environment += ['teamcityUser':"${labkeyTeamcityUsername}",'teamCityPWD':"${labkeyTeamcityPassword}",'DOCKER_TAG':"${branchName}"]
                 }
             } else {
                 logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
             }
         } else {
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildLabkey -PdockerString=22.11_fb_???)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildLabkey -PbranchName=22.11_fb_???)'
         }
-    }
+    }    
+}
+configure(buildLabkey){
+    dependsOn 'processbranchName'
     group 'Docker'
-     description 'Generates the LabKey docker image'
+    description 'Generates the LabKey docker image'
+
 }
 
- tasks.register("buildPostfix", Exec) {
-    workingDir "$projectDir/postfix"
-    executable "docker"
-    args "build", ".", "-t", "wnprcehr/postfix:latest"
+ tasks.register("buildPostfix") { Task t ->
+    doLast{
+        def dockerStr = providers.gradleProperty("branchName")
+        if (dockerStr.present){
+            //String branch = ""
+                println 'build type '+buildType
+                switch (buildType){
+                    case 'fb':
+                        println 'Tomcat fb'
+                        branch=project.labkeyYear+project.labkeyMonth+'_'+project.labkeyFB;
+                        break;
+                    case 'SNAPSHOT':
+                        println 'Tomcat SNAPSHOT'
+                        branch=project.labkeyYear+'.'+project.labkeyMonth;
+                        break;
+                    default:
+                        branch=project.labkeyVersion;
+                        break;
+                }
+            t.project.exec {
+                workingDir "$projectDir/postfix"
+                executable "docker"
+                args "build", ".", "-t", "wnprcehr/postfix:"+branch
+            }
+        }
+    }
+}
+configure(buildPostfix){
+    dependsOn 'processbranchName'
     group 'Docker'
     description 'Generates the postfix docker image'
+
 } 
 
 tasks.register("buildPostfixPlug", DockerBuildImage){
-    inputDir.set(file("postfix/"))
-    images.add("wnprcehr/postfix:latest")
-    group 'DockerPlugin'
+     inputDir.set(file("postfix/"))
+    doLast{
+        println 'postfix branch ' + branch + ' '+ buildType
+        images.add("wnprcehr/postfix:"+branch)   
+    }
+    
 }
+configure(buildPostfixPlug){
+    dependsOn 'processbranchName'
+    group 'DockerPlugin'
+    description 'Generates the postfix docker image'
+
+} 
+/* tasks.register("tagPostfixPlug", DockerTagImage){
+    //dependsOn buildPostfixPlug
+    repository="wnprcehr/postfix"
+    println 'postfix branch '+ branch
+    tag = branch
+    targetImageId buildPostfixPlug.getImageId()         
+    
+    //String branch = ""
+    doFirst{
+        def dockerStr = providers.gradleProperty("branchName")
+        if (dockerStr.present){
+            
+                println buildType
+                switch (buildType){
+                    case 'fb':
+                        println 'Tomcat fb'
+                        branch=project.labkeyYear+project.labkeyMonth+'_'+project.labkeyFB;
+                        break;
+                    case 'SNAPSHOT':
+                        println 'Tomcat SNAPSHOT'
+                        branch=project.labkeyYear+'.'+project.labkeyMonth;
+                        break;
+                    default:
+                        branch=project.labkeyVersion;
+                        break;
+                }
+
+        }
+    }
+    doLast{
+    
+    }
+
+}
+configure(tagPostfixPlug){
+   
+} */
 
 tasks.register("buildAll"){
     group 'Docker'
@@ -158,36 +324,36 @@ tasks.register("buildAll"){
 //Two tasks to download LabKey from docker hub, first one does not use plugin
 tasks.register("downloadLabkey") { Task t ->
     doLast {
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println dockerStr.get()
-            String dockerString = dockerStr.get()
+            String branchName = dockerStr.get()
             t.project.exec {
                 workingDir "$projectDir/labkey/"
                 executable "docker"
-                args "pull", "wnprcehr/labkeysnapshot:${dockerString}"
+                args "pull", "wnprcehr/labkeysnapshot:"+project.labkeyYear+'.'+project.labkeyMonth
             }
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadLabkey -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadLabkey -PbranchName=22.11_fb)'
         }
     }
     group 'Docker' 
     description 'Download Docker Images from Docker Hub'
-    dependsOn "checkDocker", "dockerLogin"
+    dependsOn "checkDocker", "dockerLogin", "processbranchName"
 }
 tasks.register("downloadLabkeyPlug", DockerPullImage){
-    image = "wnprcehr/labkeysnapshot:${dockerString}"
+    image = "wnprcehr/labkeysnapshot:${branchName}"
     
     onComplete{
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println 'downloading image' 
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew dockerPullLabkey -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew dockerPullLabkey -PbranchName=22.11_fb)'
         }
     }
     doLast{
@@ -199,18 +365,18 @@ tasks.register("downloadLabkeyPlug", DockerPullImage){
 
 tasks.register("downloadEhrcron") { Task t ->
     doLast {
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println dockerStr.get()
-            String dockerString = dockerStr.get()
+            String branchName = dockerStr.get()
             t.project.exec {
                 executable "docker"
-                args "pull", "wnprcehr/ehrcronprod:${dockerString}"
+                args "pull", "wnprcehr/ehrcronprod:${branchName}"
             }
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PbranchName=22.11_fb)'
         }
     }
     group 'Docker'
@@ -219,16 +385,16 @@ tasks.register("downloadEhrcron") { Task t ->
 }
 
 tasks.register("downloadEhrcronPlug", DockerPullImage){
-    image = "wnprcehr/ehrcronprod:${dockerString}"
+    image = "wnprcehr/ehrcronprod:${branchName}"
     
     onComplete{
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println 'downloading image' 
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcronPlug -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcronPlug -PbranchName=22.11_fb)'
         }
     }
     doLast{
@@ -240,18 +406,18 @@ tasks.register("downloadEhrcronPlug", DockerPullImage){
 
 tasks.register("downloadPostfix") { Task t ->
     doLast {
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println dockerStr.get()
-            String dockerString = dockerStr.get()
+            String branchName = dockerStr.get()
             t.project.exec {
                 executable "docker"
-                args "pull", "wnprcehr/postfix:${dockerString}"
+                args "pull", "wnprcehr/postfix:${branchName}"
             }
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PbranchName=22.11_fb)'
         }
     }
     group 'Docker'
@@ -260,16 +426,16 @@ tasks.register("downloadPostfix") { Task t ->
 }
 
 tasks.register("downloadPostfixPlug",DockerPullImage){
-    image = "wnprcehr/postfix:${dockerString}"
+    image = "wnprcehr/postfix:${branchName}"
     
     onComplete{
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println 'downloading image' 
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadPostfixPlug -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadPostfixPlug -PbranchName=22.11_fb)'
         }
     }
     doLast{
@@ -281,18 +447,18 @@ tasks.register("downloadPostfixPlug",DockerPullImage){
 
 tasks.register("downloadTomcat"){
     doLast {
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println dockerStr.get()
-            String dockerString = dockerStr.get()
+            String branchName = dockerStr.get()
             t.project.exec {
                 executable "docker"
-                args "pull", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                args "pull", "wnprcehr/tomcat:tomcat9_${branchName}"
             }
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcat -PdockerString=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcat -PbranchName=22.11_fb)'
         }
     }
     group 'Docker'
@@ -302,16 +468,17 @@ tasks.register("downloadTomcat"){
 }
 
 tasks.register("downloadTomcatPlug",DockerPullImage){
-    image = "wnprcehr/tomcat:tomcat9_${dockerString}"
+    image = "wnprcehr/tomcat:tomcat9_${branchName}"
     
     onComplete{
-        def dockerStr = providers.gradleProperty("dockerString")
+        def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
             println 'downloading image' 
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcatPlug -PdockerString=22.11_fb)'
+
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcatPlug -PbranchName=22.11_fb)'
         }
     }
     doLast{
@@ -320,8 +487,6 @@ tasks.register("downloadTomcatPlug",DockerPullImage){
     group 'DockerPlugin'
     dependsOn 'checkDocker'
 }
-
-
 
 tasks.register("downloadAll"){
     group 'Docker'

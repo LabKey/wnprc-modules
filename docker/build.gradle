@@ -477,6 +477,7 @@ tasks.register("downloadTomcatPlug",DockerPullImage){
             println 'downloading image' 
         }
         else{
+
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcatPlug -PbranchName=22.11_fb)'
         }
     }
@@ -486,8 +487,6 @@ tasks.register("downloadTomcatPlug",DockerPullImage){
     group 'DockerPlugin'
     dependsOn 'checkDocker'
 }
-
-
 
 tasks.register("downloadAll"){
     group 'Docker'

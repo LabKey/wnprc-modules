@@ -34,7 +34,7 @@ The following build arguments are available for use. The ones that have default 
 ```
 LABKEY_TEAMCITY_USERNAME
 LABKEY_TEAMCITY_PASSWORD
-LABKEY_VERSION=21.11
+LK_VERSION=21.11
 LABKEY_IS_PREMIUM=true
 WNPRC_BRANCH=master
 ```
@@ -106,7 +106,7 @@ We created a folder called `development` in this repo. This folder contains a si
  1. `nginx/nginx.conf`
  1. `docker-compose.yml`
 
-In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which Labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
+In the `.env` file, edit the following variables: `LK_DANGER_PORT` to other number than 8080, this is the port which Labkey service will use outside the Docker container. `LK_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
 
 In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `docker-compose` and `.env` files.
 

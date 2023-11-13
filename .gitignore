@@ -5,6 +5,7 @@ docker/**/logs
 docker/**/.env
 docker/.gradle
 docker/dev_*/**
+docker/secrets/*.txt
 docker/nginx/test-ehr*
 docker/nginx/cert.pem
 docker/nginx/key.pem

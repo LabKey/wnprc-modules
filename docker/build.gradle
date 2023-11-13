@@ -1,3 +1,16 @@
+plugins {
+    id 'com.bmuschko.docker-remote-api' version '9.3.1'
+     id 'idea'
+}
+
+
+//import org.gradle.nativeplatform.platform
+import org.gradle.internal.os.OperatingSystem
+
+// Import task types
+import com.bmuschko.gradle.docker.tasks.image.*
+
+
 apply plugin: 'idea'
 
 idea.module {
@@ -5,49 +18,364 @@ idea.module {
     excludeDirs += file("logs")
 }
 
-task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the ehrcron docker image") {
+//Registering credential to use the bmuschko plugin to use docker
+docker {
+    url = 'unix:///var/run/docker.sock'
+    registryCredentials {
+        url = 'https://index.docker.io/v1/'
+        username = "${dockerhubUsername}"
+        password = "${dockerhubPassword}"
+    }
+}
+
+//Login into Docker without using plugin, done via a bash script that reads a token file using cat
+//Source:https://docs.docker.com/engine/reference/commandline/login/
+tasks.register('dockerLogin', Exec){
+    commandLine "./dockerLogin.sh"
+    args "--tokenPath", "${dockertokenpath}", "--username", "${dockerhubUsername}"
+}
+configure(dockerLogin){
+    dependsOn 'checkDocker'
+    group  'Docker'
+    description 'Login into Docker Hub'
+    onlyIf { project.hasProperty('dockerhubUsername') && project.hasProperty('dockertokenpath') }
+}
+
+tasks.register("buildEhrCron", Exec) {
     workingDir "$projectDir/ehrcron"
     executable "docker"
     args "build", ".", "-t", "wnprcehr/ehrcron:latest"
 }
-
-task("buildTomcat", group: "Docker", type: Exec, description: "Generates the Tomcat docker image (with R)") {
-    workingDir "$projectDir/tomcat"
-    executable "docker"
-    args "build", ".", "-t", "wnprcehr/tomcat:18.3"
+configure(buildEhrCron){
+    group = 'Docker'
+    description = "Generates the ehrcron docker image"
 }
 
-task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrcron", "buildPostfix"]) { Task t ->
+tasks.register("buildEhrCronPlug", DockerBuildImage){
+    inputDir.set(file("ehrcron/"))
+    images.add("wnprcehr/ehrcron:latest")
+    group 'DockerPlugin'
+}
+
+tasks.register("buildTomcat") { Task t ->
     doLast {
-        if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
-            t.project.exec {
-                workingDir "$projectDir/labkey"
-                executable "docker"
-                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:18.3", "--no-cache"
+        if (!project.hasProperty("nocache")){
+            ext.nocache = "false"
+        }
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            println nocache
+            if (nocache.equals("true")){
+                println "building image without cache"
+                t.project.exec{
+                    workingDir "$projectDir/tomcat"
+                    executable "docker"
+                    args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                }
+            }else{
+                t.project.exec{
+                    workingDir "$projectDir/tomcat"
+                    executable "docker"
+                    args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_${dockerString}"
+                }
             }
-        } else {
-            logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
+            
+        }else {
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
         }
     }
+    group 'Docker'
+    description 'Generates the Tomcat docker image (with R)'
+    dependsOn  "checkDocker", "dockerLogin"
+} 
+
+tasks.register("buildTomcatPlug", DockerBuildImage){
+    def dockerStr = providers.gradleProperty("dockerString")
+    if (dockerStr.present){
+        println dockerStr.get()
+        String dockerString = dockerStr.get()
+        inputDir.set(file("tomcat/"))
+        images.add("wnprcehr/tomcat:tomcat9_${dockerString}")
+
+    }else {
+        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PdockerString=22.11_fb)'
+    }
+    group 'DockerPlugin'
+    
 }
 
-task("buildPostfix", group: "Docker", type: Exec, description: "Generates the postfix docker image") {
+//Building LabKey with hooks/build for consistancy with Docker Hub and used of environment variables duirng the build process
+//Source: https://stackoverflow.com/questions/36322536/how-to-set-an-environment-variable-from-a-gradle-build / https://stackoverflow.com/a/63140816
+tasks.register("buildLabkey") { Task t ->
+//task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrCron", "buildPostfix"]) { Task t ->
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+
+        if (dockerStr.present){
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
+                t.project.exec {
+                    workingDir "$projectDir/labkey/hooks"
+                    commandLine "./build"
+                    environment += ['teamcityUser':"${labkeyTeamcityUsername}",'teamCityPWD':"${labkeyTeamcityPassword}",'DOCKER_TAG':"${dockerString}"]
+                }
+            } else {
+                logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
+            }
+        } else {
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildLabkey -PdockerString=22.11_fb_???)'
+        }
+    }
+    group 'Docker'
+     description 'Generates the LabKey docker image'
+}
+
+ tasks.register("buildPostfix", Exec) {
     workingDir "$projectDir/postfix"
     executable "docker"
     args "build", ".", "-t", "wnprcehr/postfix:latest"
+    group 'Docker'
+    description 'Generates the postfix docker image'
+} 
+
+tasks.register("buildPostfixPlug", DockerBuildImage){
+    inputDir.set(file("postfix/"))
+    images.add("wnprcehr/postfix:latest")
+    group 'DockerPlugin'
 }
 
-task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" ] )
+tasks.register("buildAll"){
+    group 'Docker'
+    description 'Generates all the docker images in the subfolders'
+    dependsOn "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" 
 
-task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
+}
+
+//Two tasks to download LabKey from docker hub, first one does not use plugin
+tasks.register("downloadLabkey") { Task t ->
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            t.project.exec {
+                workingDir "$projectDir/labkey/"
+                executable "docker"
+                args "pull", "wnprcehr/labkeysnapshot:${dockerString}"
+            }
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadLabkey -PdockerString=22.11_fb)'
+        }
+    }
+    group 'Docker' 
+    description 'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
+}
+tasks.register("downloadLabkeyPlug", DockerPullImage){
+    image = "wnprcehr/labkeysnapshot:${dockerString}"
+    
+    onComplete{
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println 'downloading image' 
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew dockerPullLabkey -PdockerString=22.11_fb)'
+        }
+    }
+    doLast{
+        println "image pulled"     
+    }
+    group 'DockerPlugin'
+    dependsOn 'checkDocker'
+}
+
+tasks.register("downloadEhrcron") { Task t ->
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            t.project.exec {
+                executable "docker"
+                args "pull", "wnprcehr/ehrcronprod:${dockerString}"
+            }
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PdockerString=22.11_fb)'
+        }
+    }
+    group 'Docker'
+    description 'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
+}
+
+tasks.register("downloadEhrcronPlug", DockerPullImage){
+    image = "wnprcehr/ehrcronprod:${dockerString}"
+    
+    onComplete{
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println 'downloading image' 
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcronPlug -PdockerString=22.11_fb)'
+        }
+    }
+    doLast{
+        println "image pulled"     
+    }
+    group 'DockerPlugin' 
+    dependsOn 'checkDocker'
+}
+
+tasks.register("downloadPostfix") { Task t ->
+    doLast {
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println dockerStr.get()
+            String dockerString = dockerStr.get()
+            t.project.exec {
+                executable "docker"
+                args "pull", "wnprcehr/postfix:${dockerString}"
+            }
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PdockerString=22.11_fb)'
+        }
+    }
+    group 'Docker'
+    description  'Download Docker Images from Docker Hub'
+    dependsOn "checkDocker", "dockerLogin"
+}
+
+tasks.register("downloadPostfixPlug",DockerPullImage){
+    image = "wnprcehr/postfix:${dockerString}"
+    
+    onComplete{
+        def dockerStr = providers.gradleProperty("dockerString")
+        if (dockerStr.present)
+        {
+            println 'downloading image' 
+        }
+        else{
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcronPlug -PdockerString=22.11_fb)'
+        }
+    }
+    doLast{
+        println "image pulled"     
+    }
+    group 'DockerPlugin'
+    dependsOn 'checkDocker'
+}
+
+
+
+tasks.register("downloadAll"){
+    group 'Docker'
+    description 'Download all the docker images to ran LabKey/EHR'
+    dependsOn "downloadLabkey", "downloadEhrcron", "downloadPostfix"
+
+}
+
+tasks.register("downloadAllPlug"){
+    group 'Docker'
+    description 'Download all the docker images to ran LabKey/EHR'
+    dependsOn "downloadLabkeyPlug", "downloadEhrcronPlug", "downloadPostfixPlug"
+}
+
+
+
+tasks.register("up", Exec) {
     workingDir "$projectDir"
-    executable "docker-compose"
-    args "up", "-d"
+    executable "docker"
+    args "compose", "up", "-d"
     environment CATALINA_OPTS: "-ea -Ddevmode=true"
+    group 'Docker'
+    description 'Starts the docker-compose environment (labkey + postgres)'
 }
 
-task("down", group: "Docker", type: Exec, description: "Shuts down the docker-compose environment (labkey + postgres)") {
+tasks.register("down", Exec) {
     workingDir "$projectDir"
-    executable "docker-compose"
-    args "down"
+    executable "docker"
+    args "compose", "down"
+    group 'Docker'
+    description 'Shuts down the docker-compose environment (labkey + postgres)'
+}
+
+tasks.register("upSecondary", Exec) {
+    workingDir "$projectDir/${directory}"
+    executable "docker"
+    args "compose", "up", "-d"
+    environment CATALINA_OPTS: "-ea -Ddevmode=true"
+    group 'Docker'
+    description 'Starts the docker-compose environment (labkey + postgres)'
+}
+
+
+tasks.register("checkDocker") { 
+  doLast{
+    def OS = OperatingSystem.current()
+    println OS.toString()
+    
+    if (OS.toString().contains("Mac")){
+        exec {
+            commandLine 'open', '-a', 'docker'
+        }
+    }else{
+        exec{
+             commandLine 'service', 'docker', 'status'
+            //commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
+        }
+    }
+  }
+    
+
+    /* doLast{
+        openDocker()
+    } */
+    
+    /* doLast {
+        if (standardOutput.toString().contains("ERROR")){
+            println OperatingSystem.current()
+            if (OperatingSystem.current().isMacOSX()){
+                println "Opening Docker"
+                t.project.exec {
+                    executable "open"
+                    args "-a" "Docker"
+                }
+
+            }else{
+                println "Need to ran linux"
+            }
+
+        }
+        
+    } */
+}
+
+void openDocker(){
+    def OS = OperatingSystem.current()
+    println OS.toString()
+    
+    if (OS.toString().contains("Mac")){
+        exec {
+            commandLine 'open', '-a', 'docker'
+        }
+    }else{
+        exec{
+             commandLine 'service', 'docker', 'status'
+            //commandLine 'echo $sudo_password | sudo -S ' + tasks.privilegecheckDocker.commandLine.join(" ")
+        }
+    }
 }

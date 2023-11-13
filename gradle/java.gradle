@@ -26,7 +26,7 @@ import org.labkey.gradle.util.BuildUtils
 sourceSets {
     api {
         java { srcDirs = ['api-src'] }
-        output.resourcesDir = "${project.buildDir}/api-classes"
+        output.resourcesDir = project.layout.buildDirectory.file("api-classes")
     }
     main {
         java { srcDirs = ["src"] }

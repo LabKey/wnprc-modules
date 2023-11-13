@@ -738,7 +738,7 @@
                                                 row.TotalWater = 'Dead'
                                                 eventTitle = row.id + row['Id/Demographics/calculated_status']
                                             }
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
+                                            else if (row['Id/Demographics/calculated_status'] === 'Alive'){
                                                 parsedTotalWater = row.TotalWater;
                                                 eventTitle = row.Id + " Total: " + parsedTotalWater;
                                             }else{

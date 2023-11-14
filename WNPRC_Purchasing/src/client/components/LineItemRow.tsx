@@ -1,6 +1,6 @@
 import React, {FC, memo, useCallback, useEffect, useMemo, useState} from 'react';
 import { Col, Row } from 'react-bootstrap';
-import produce, { Draft } from 'immer';
+import { produce, Draft } from 'immer';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 

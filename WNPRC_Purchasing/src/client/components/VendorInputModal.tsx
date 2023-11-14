@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 
-import produce, { Draft } from 'immer';
+import { Draft, produce } from 'immer';
 
 import { VendorModel } from '../model';
 

@@ -23,4 +23,8 @@
     <sorts>
         <sort column="date" descending="true"/>
     </sorts>
+    <filters>
+        <filter column="zeroOrmlsPerKg" operator="lte" value="10"/>
+        <filter column="currentWaterCondition" operator="eq" value="regulated"/>
+    </filters>
 </customView>

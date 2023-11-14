@@ -116,6 +116,7 @@ import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesSupervisorNotification;
 import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
 import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
@@ -369,7 +370,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
                 new WaterOrdersAlertNotification(this),
-                new WaterMonitoringAnimalWithOutEntriesNotification(this)
+                new WaterMonitoringAnimalWithOutEntriesNotification(this),
+                new WaterMonitoringAnimalWithOutEntriesSupervisorNotification(this)
         );
 
         for (Notification notification : notifications)

@@ -1,7 +1,7 @@
 networks:
   networkExt:
-    external:
-      name: sharedservices
+    name: sharedservices
+    external: true
 
 services:
   labkeydev:

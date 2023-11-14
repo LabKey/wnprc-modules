@@ -201,7 +201,12 @@ fi
 # Actually restore the database, using a background proc so we can track progress
 #-------------------------------------------------------------------------------
 echo -n "Restoring database from $filepath ...  0%"
-${pgpath}pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
+if [[ -z $prod ]]; then
+    ${pgpath}pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
+else
+     ${pgpath}pg_restore -l $filepath > $tmpdir/pg_restore.list
+fi
+
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
 ${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &

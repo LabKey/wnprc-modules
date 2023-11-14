@@ -5,3 +5,5 @@
 !netrc
 !ssmtp.conf
 !scripts/
+!Dockerfile
+!hooks/

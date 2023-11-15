@@ -31,12 +31,14 @@ COPY relays         /etc/postfix/relays
 COPY replacingSecrets.sh /etc/replacingSecrets.sh
 RUN chmod +x /etc/replacingSecrets.sh
 
+RUN 
+
 # Configure postfix to use the config files we just copied in.  Also, disable TLS, tell postfix to send anything that
 # didn't get rejected by the filters, and always bcc "mail_spy@example.com".  This is a safe domain that will never
 # route anywhere effectively.  This is done so that production containers can override the transport configuration but
 # still route example.com to a mailcatcher instance.  This allows administrators to always have a view on what e-mails
 # are getting sent out
-RUN postconf    transport_maps=hash:/etc/postfix/transport               \
+RUN postconf    transport_maps=hash:/etc/postfix/transport                \
                 smtpd_relay_restrictions=reject_unauth_destination        \
                 relay_domains=pcre:/etc/postfix/relays                    \
                 always_bcc=mail_spy@example.com                           \
@@ -46,16 +48,18 @@ RUN postconf    transport_maps=hash:/etc/postfix/transport               \
                 smtpd_tls_key_file=@@server.key@@                         \
                 # recommanded for log details                             
                 smtpd_tls_loglevel=1                                      \
+                maillog_file=/var/log/postfix.log                         \
+                maillog_file_permission=0664 #                            \
                 # recommanded for tracing TLS headers
                 smtpd_tls_received_header=yes                             \
-                smtpd_tls_exclude_ciphers=NULL,aNULL,RC4,3DES,eNULL,DHE_EXPORT \
-                smtpd_tls_mandatory_ciphers=high   \
-                smtpd_tls_ciphers=high                                              \
-                smtpd_tls_protocols= >=TLSv1                                       \
-                smtpd_tls_mandatory_protocols= >=TLSv1                             \
+                smtpd_tls_exclude_ciphers=NULL,aNULL,RC4,3DES,eNULL,DHE_EXPORT        \
+                smtpd_tls_mandatory_ciphers=high                                      \
+                smtpd_tls_ciphers=high                                                \
+                smtpd_tls_protocols= >=TLSv1                                          \
+                smtpd_tls_mandatory_protocols= >=TLSv1                                \
                 # TLS, DNSSEC and DANE for SMTP client outbound email
-                smtp_tls_session_cache_database=btree:/var/lib/postfix/smtp_scache  \
-                smtp_tls_security_level=dane                                        \
+                smtp_tls_session_cache_database=btree:/var/lib/postfix/smtp_scache    \
+                smtp_tls_security_level=dane                                          \
                 smtp_dns_support_level=dnssec                                   
 
 CMD envsubst < /etc/postfix/transport.template > /etc/postfix/transport && postmap hash:/etc/postfix/transport && postmap /etc/postfix/header_checks && /etc/replacingSecrets.sh &&/usr/bin/supervisord -c /etc/supervisor/supervisord.conf

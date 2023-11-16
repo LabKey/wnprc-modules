@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body onload = "getValues()">
+<body id="body">
 
     <table id="myTable" style="border: 1px solid black; font-size: 15px; width: 800px; text-align: center">
         <tr>
@@ -20,7 +20,7 @@
                 <input type="text" id="newCreditToAccountField" name="newCreditToAccountField">
             </td>
             <td style="padding:5px">
-                <button id="updateCreditToAccountButton" onclick="updateCreditToAccount()">Update CreditToAccount</button>
+                <button id="updateCreditToAccountButton">Update CreditToAccount</button>
             </td>
         </tr>
         <tr>
@@ -30,12 +30,18 @@
                 <input type="text" id="newJETCSVSettingField" name="newJETCSVSettingField">
             </td>
             <td style="padding:5px">
-                <button id="updateJETCSVSettingButton" onclick="updateJETCSVSetting()">Update JETCSVSetting</button>
+                <button id="updateJETCSVSettingButton">Update JETCSVSetting</button>
             </td>
         </tr>
     </table>
 
-    <script>
+    <script type="text/javascript" nonce="<%=scriptNonce%>">
+        LABKEY.Utils.onReady(function(){
+            document.getElementById("updateCreditToAccountButton")['onclick'] = updateCreditToAccount;
+            document.getElementById("updateJETCSVSettingButton")['onclick'] = updateJETCSVSetting;
+            document.getElementById("body")['onload'] = getValues;
+        });
+
         function updateCreditToAccount() {
             let creditToAccountNewValue = document.getElementById("newCreditToAccountField").value;
             setValues("CreditToAccount", "" + creditToAccountNewValue);

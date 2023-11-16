@@ -205,7 +205,7 @@
                 return new Date(d);
             });
             var pops  = dates.map(function(key) {
-                return data[key];
+                return data[key]["population"];
             });
 
             return {

@@ -19,9 +19,9 @@ SELECT
     'Water Given (Total)' AS dataset,
     'watertotal' AS DataSetName,
     CASE
-         WHEN (remark IS NOT NULL AND remark !='') THEN
+         WHEN (remarksConcat IS NOT NULL AND remarksConcat !='') THEN
              ('Sum of all water given for the day.' || CHR(10)
-                 || remark)
+                 || remarksConcat)
              ELSE
             'Sum of all water given for the day.'
     END AS remark,

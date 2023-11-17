@@ -39,6 +39,9 @@
                     <column columnName="InnerMlsPerKg">
                         <columnTitle>Allowed MlsPerKg</columnTitle>
                     </column>
+                    <column columnName="remarksConcat">
+                        <columnTitle>Water Given Remarks</columnTitle>
+                    </column>
 
                 </columns>
             </table>

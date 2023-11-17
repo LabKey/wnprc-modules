@@ -5,6 +5,7 @@ package org.labkey.wnprc_ehr.notification;
 //import org.labkey.api.data.TableSelector;
 //import org.labkey.api.data.Selector;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -20,16 +21,22 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.ldk.notification.Notification;
+import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.CustomViewInfo;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserPrincipal;
+import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Path;
+import org.labkey.api.view.ActionURL;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.wnprc_ehr.WNPRC_EHREmail;
 //import org.labkey.remoteapi.query.Sort;
@@ -38,6 +45,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -58,8 +66,13 @@ import org.labkey.api.query.QueryService;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.notification.NotificationToolkit;
 
+import javax.mail.Message;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import static org.labkey.api.search.SearchService._log;
+import javax.mail.Address;
+import java.util.UUID;
 
 
 public class NotificationToolkit {
@@ -82,7 +95,7 @@ public class NotificationToolkit {
         String[] headersArray = myQviewParameters.columnTitles.toArray(new String[0]);
 
         //Gets variables.
-        int numRows = tableAsList.size();
+        int numRows = tableAsList.size();   //TODO: Fix this, I should check table size here without creating the list, right?  Should be able to create a tableSelector and get count.
         int numColumns = headersArray.length;
 
         StringBuilder tempTable = new StringBuilder();
@@ -237,6 +250,341 @@ public class NotificationToolkit {
 
         //Returns string.
         return largeString.toString();
+    }
+
+
+    /**
+     * Gets a timestamp with the current date & time.
+     * @return  A string representing the current date & time.
+     */
+    public final String getCurrentTime() {
+        return AbstractEHRNotification._dateTimeFormat.format(new Date());
+    }
+
+    /**
+     * Sends the email notification.
+     * @param currentNotification   The java notification to be sent.
+     * @param currentUser           The current user.
+     * @param currentContainer      The current container.
+     */
+    public void sendNotification(Notification currentNotification, User currentUser, Container currentContainer) {
+
+        //Retrieves email details.
+        Collection<UserPrincipal> recipients = NotificationService.get().getRecipients(currentNotification, currentContainer);
+        String emailSubject = currentNotification.getEmailSubject(currentContainer);
+        String notificationLogName = currentNotification.getName();
+        String emailBody = currentNotification.getMessageBodyHTML(currentContainer, currentUser);
+
+        //Logs email notification attempt.
+        _log.info(notificationLogName + ": sending email...");
+
+        //Attempts to send email.
+        try{
+            //Creates message details.
+            MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();
+            msg.setFrom(NotificationService.get().getReturnEmail(currentContainer));
+            msg.setSubject(emailSubject);
+
+            //Creates a list of recipients.
+            List<String> emailRecipients = new ArrayList<>();
+            for (UserPrincipal u : recipients) {
+                List<Address> addresses = NotificationService.get().getEmailsForPrincipal(u);
+                if (addresses != null) {
+                    for (Address a : addresses) {
+                        if (a.toString() != null) {
+                            emailRecipients.add(a.toString());
+                        }
+                    }
+                }
+            }
+
+            //Logs an error if there are no recipients.
+            if (emailRecipients.size() == 0) {
+                _log.warn(notificationLogName + ": no recipients, unable to send EHR trigger script email.");
+            }
+            //Sends email.
+            else {
+                msg.setRecipients(Message.RecipientType.TO, StringUtils.join(emailRecipients, ","));
+                msg.setEncodedHtmlContent(emailBody);
+                MailHelper.send(msg, currentUser, currentContainer);
+            }
+        }
+        //Logs an error if email cannot be sent.
+        catch (Exception e) {
+            _log.error(notificationLogName + ": unable to send email from EHR trigger script.", e);
+        }
+
+    }
+
+    /**
+     * Creates an HTML formatted hyperlink.
+     * @param displayText   Text displayed by the hyperlink.
+     * @param url           URL navigated to by the hyperlink.
+     * @return              An String containing an HTML-formatted hyperlink.
+     */
+    public String createHyperlink(String displayText, String url) {
+        return("<a href=\"" + url + "\">" + displayText + "</a>");
+    }
+
+    /**
+     * Gets an animal's weight as a 9-digit number with trailing zeroes removed.
+     * @param currentContainer  The current container.
+     * @param currentUser       The current user.
+     * @param animalID          The animal ID to check the weight for.
+     * @return                  A string representing the animal's weight.
+     */
+    public String getWeightFromAnimalID(Container currentContainer, User currentUser, String animalID) {
+        //Gets the full animal weight.
+        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", "id", animalID, new String[]{"weight"});
+        if (!weightRow.isEmpty()) {
+            String fullWeight = weightRow.get(0);
+            //Gets animal weight rounded to 9 digits.
+            String nineDigitWeight = StringUtils.substring(fullWeight, 0, 9);
+            //Removes any trailing zeroes.
+            BigDecimal strippedValue = new BigDecimal(nineDigitWeight).stripTrailingZeros();
+            //Adds weight symbol.
+            String returnWeight = "" + strippedValue + "kg";
+            return returnWeight;
+        }
+        else {
+            return "";
+        }
+//
+//
+//
+//        //Sets up variables.
+//        StringBuilder returnWeight = new StringBuilder();
+//        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString("id"), animalID, CompareType.EQUAL);
+//        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "study").getTable("Weight"), queryFilter, null);
+//
+//        //Gets weight from table.
+//        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+//            @Override
+//            public void exec(ResultSet rs) throws SQLException {
+//                returnWeight.append(rs.getString("weight"));
+//            }
+//        });
+//
+//        //Returns weight.
+//        return returnWeight.toString();
+    }
+
+    /**
+     * Retrieves the replacement fee for a given cause of death.
+     * @param currentContainer  The current container.
+     * @param currentUser       The current user.
+     * @param causeOfDeath      The cause of death.
+     * @return                  A string containing one of the following 3 statements:
+     *                              1. "Animal replacement fee to be paid (causeOfDeath death)".
+     *                              2. "No animal replacement fee to be paid (causeOfDeath death)".
+     *                              3. "".
+     */
+    public String getAnimalReplacementFee(Container currentContainer, User currentUser, String causeOfDeath) {
+        //Sets up variables.
+        StringBuilder returnFee = new StringBuilder();
+        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString("Value"), causeOfDeath, CompareType.EQUAL);
+        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "ehr_lookups").getTable("death_cause"), queryFilter, null);
+
+        //Gets fee type from table.
+        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+            @Override
+            public void exec(ResultSet rs) throws SQLException {
+                returnFee.append(rs.getString("Category"));
+            }
+        });
+
+        //Returns fee.
+        //TODO: Ask Daniel if this an empty fee (instead of 'fee' or 'no fee') should be 'no fee'.
+        if (returnFee.toString().equals("Fee")) {
+            return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+        }
+        else if (returnFee.toString().equals("No Fee")) {
+            return ("No animal replacement fee to be paid (" + causeOfDeath + " death)");
+        }
+        else {
+            return "";
+        }
+//        if (returnFee.toString().equals("null")) {
+//            return "";
+//        }
+//        else {
+//            return returnFee.toString();
+//        }
+    }
+
+    /**
+     * Checks the first two characters of an animal's id to determine if the ID belongs to a prenatal animal.
+     * @param idToCheck Animal ID to check.
+     * @return          A Boolean representing if the ID is prenatal or not.
+     */
+    public Boolean checkIfPrenatalID(String idToCheck) {
+        if (idToCheck != null) {
+            if (idToCheck.length() > 2) {
+                String idPrefix = "" + idToCheck.charAt(0) + idToCheck.charAt(1);
+                if (idPrefix.equals("pd")) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Gets an animal's sex from their id.
+     * @param c         The current container.
+     * @param u         The current user.
+     * @param animalID  The animal ID to check.
+     * @return          A string representing the animal's sex.
+     */
+    public String getSexFromAnimalID(Container c, User u, String animalID) {
+        //Gets the animal's gender code from their ID.
+        ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", "id", animalID, new String[]{"gender"});
+        if (!demographicTableRow.isEmpty()) {
+            String animalSexCode = demographicTableRow.get(0);
+            //Gets the gender meaning from the gender code.
+            ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", "code", animalSexCode, new String[]{"meaning"});
+            if (!genderTableRow.isEmpty()) {
+                String animalSexMeaning = genderTableRow.get(0);
+                return animalSexMeaning;
+            }
+            else {
+                return "";
+            }
+        }
+        else {
+            return "";
+        }
+    }
+
+    /**
+     * Retrieves a specific row from a specific table with only necessary columns.
+     * The schema, tableName, and column names can be found through the Query Schema Browser.
+     *      EXAMPLE GOAL: Get animal rh1234's weight and gender.
+     *      EXAMPLE USE: getTableRowAsList(c, u, "study", "demographics", "id", "rh1234", new String[]{"weight", "gender"});
+     *      EXAMPLE RETURNS: [1.234, male]
+     * @param currentContainer  The current container.
+     * @param currentUser       The current user.
+     * @param schema            The current schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName         The specific table's name.
+     * @param columnName        The name of the column holding the columnValue that specifies the target row (ex "id").
+     * @param columnValue       The value under the columnName that corresponds to the target row (ex. "rh1234").
+     * @param columnsToGet      The names of the columns in this row the user wants data for (ex. "weight", "gender", "species", etc.).
+     * @return                  A list of Strings holding the values for each column in columnsToGet for our target row.
+     */
+    public ArrayList<String> getTableRowAsList(Container currentContainer, User currentUser, String schema, String tableName, String columnName, String columnValue, String[] columnsToGet) {
+        //Sets up variables.
+        ArrayList<String> returnRow = new ArrayList<String>();
+        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString(columnName), columnValue, CompareType.EQUAL);
+        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName), queryFilter, null);
+
+        //Gets weight from table.
+        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+            @Override
+            public void exec(ResultSet rs) throws SQLException {
+                for (int i = 0; i < columnsToGet.length; i++) {
+                    returnRow.add(rs.getString(columnsToGet[i]));
+                }
+            }
+        });
+
+        return returnRow;
+    }
+
+    /**
+     * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's necropsy.
+     * It contains the following data (returning blank strings for non-existent data):
+     *  If necropsy exists (true/false).
+     *  Necropsy case number.
+     *  Necropsy task id hyperlink.
+     *  Necropsy date.
+     *  Necropsy time of death.
+     *  Necropsy type of death.
+     *  Necropsy grant number.
+     *  Necropsy manner of death.
+     *  Necropsy animal weight.
+     *  Necropsy animal replacement fee.
+     */
+    public static class DeathNecropsyObject {
+        Boolean necropsyExists = false;
+        String necropsyCaseNumber = "";
+        String necropsyTaskIdHyperlink = "";
+        String necropsyDate = "";
+        String necropsyTimeOfDeath = "";
+        String necropsyTypeOfDeath = "";
+        String necropsyGrantNumber = "";
+        String necropsyMannerOfDeath = "";
+        String animalWeight = "";
+        String animalReplacementFee = "";
+
+        public DeathNecropsyObject(Container c, User u, String animalID, String hostName) {
+            NotificationToolkit notificationToolkit = new NotificationToolkit();
+            if (notificationToolkit.getTableRowCount(c, u, "Necropsy", "notificationView") > 0) {
+                String[] targetColumns = {"caseno", "taskid", "date", "timeofdeath", "causeofdeath", "account", "mannerofdeath"};
+                ArrayList<String> necropsyTableRow = notificationToolkit.getTableRowAsList(c, u, "study", "necropsy", "id", animalID, targetColumns);
+                //Necropsy does exist.
+                if (!necropsyTableRow.isEmpty()) {
+                    this.necropsyExists = true;
+                    //Gets necropsy data.
+                    this.necropsyCaseNumber = necropsyTableRow.get(0);
+                    this.necropsyDate = necropsyTableRow.get(2);
+                    this.necropsyTimeOfDeath = necropsyTableRow.get(3);
+                    this.necropsyTypeOfDeath = necropsyTableRow.get(4);
+                    this.necropsyGrantNumber = necropsyTableRow.get(5);
+                    this.necropsyMannerOfDeath = necropsyTableRow.get(6);
+                    this.animalWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
+
+//                    //Gets animal weight rounded to 7 digits.
+//                    String tempWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
+//                    String nineDigitWeight = StringUtils.substring(tempWeight, 0, 9);
+//                    this.animalWeight = nineDigitWeight + " kg";
+
+                    //Gets animal replacement fee.
+                    //TODO: What should I return when this is null?  Currently I just have it return a blank string.
+                    if (necropsyTypeOfDeath != null) {
+                        this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath);
+                    }
+
+                    //Creates task id with hyperlink.
+                    String necropsyTaskID = necropsyTableRow.get(1);
+                    String taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view").toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
+                    String taskRowID = "";
+                    ArrayList<String> taskRow = notificationToolkit.getTableRowAsList(c, u, "ehr", "tasks", "taskid", necropsyTaskID, new String[]{"rowid"});
+                    if (!taskRow.isEmpty()) {
+                        taskRowID = taskRow.get(0);
+                    }
+                    this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskURL);
+                }
+            }
+        }
+    }
+
+    /**
+     * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's demographics.
+     * It contains the following data (returning blank strings for non-existent data):
+     *  Animal ID hyperlink.
+     *  Animal sex.
+     */
+    public static class DeathDemographicObject {
+        String animalIdHyperlink = "";
+        String animalSex = "";
+        public DeathDemographicObject(Container c, User u, String animalID) {
+            NotificationToolkit notificationToolkit = new NotificationToolkit();
+            //Gets hyperlink for animal id in animal history abstract.
+            String animalAbstractURL = new Path(ActionURL.getBaseServerURL(), "ehr", "animalHistory.view", c.getPath()).toString() + "?#subjects:c19007&inputType:singleSubject&showReport:1&activeReport:abstract";
+            this.animalIdHyperlink = notificationToolkit.createHyperlink(animalID, animalAbstractURL);
+
+            //Gets animal sex.
+            String animalsex = notificationToolkit.getSexFromAnimalID(c, u, animalID);
+            this.animalSex = animalsex;
+        }
     }
 
 

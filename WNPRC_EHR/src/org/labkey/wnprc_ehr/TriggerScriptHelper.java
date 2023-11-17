@@ -181,16 +181,19 @@ public class TriggerScriptHelper {
         return map;
     }
 
-    public void sendDeathNotification(final List<String> ids) {
-
-        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
+    public void sendDeathNotification(final List<String> ids, String hostName) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(ehr), container)){
             _log.info("Notification service is not enabled, will not send death notification");
             return;
         }
         for (String id : ids) {
-            DeathNotification idNotification = new DeathNotification();
-            idNotification.setParam(DeathNotification.idParamName, id);
-            idNotification.sendManually(container, user);
+//            DeathNotification idNotification = new DeathNotification();
+//            idNotification.setParam(DeathNotification.idParamName, id);
+//            idNotification.sendManually(container, user);
+            _log.info("Using java helper to send email for animal death record: "+ id);
+            DeathNotification notification = new DeathNotification(ehr, id, user, hostName);
+            notification.sendManually(container, user);
         }
     }
 

@@ -57,19 +57,25 @@ import org.labkey.wnprc_ehr.notification.NotificationToolkit;
  */
 public class ValidationSuiteNotification extends AbstractEHRNotification
 {
-    //Sets up class variables.
+    //Class variables.
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
 
+
+
+    //Constructors
     public ValidationSuiteNotification(Module owner)
     {
         super(owner);
     }
 
+
+
+    //Notification Details
     @Override
     public String getName()
     {
-        return "Validation Suite";
+        return "(Updated) Validation Suite";
     }
     @Override
     public String getDescription()
@@ -79,8 +85,22 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     @Override
     public String getEmailSubject(Container c)
     {
-        return "Validation Suite Check: " + AbstractEHRNotification._dateTimeFormat.format(new Date());
+        return "Validation Suite Check: " + notificationToolkit.getCurrentTime();
     }
+    @Override
+    public String getScheduleDescription()
+    {
+        return "Daily at 3PM.";
+    }
+    @Override
+    public String getCronString()
+    {
+        return(notificationToolkit.createCronString(new String[]{"15"}));
+    }
+
+
+
+    //Message Creation
     @Override
     public String getMessageBodyHTML(final Container c, User u)
     {
@@ -122,18 +142,6 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
 
         //Returns string.
         return messageBody.toString();
-    }
-
-    //DEFAULT
-    @Override
-    public String getCronString()
-    {
-        return(notificationToolkit.createCronString(new String[]{"15"}));
-    }
-    @Override
-    public String getScheduleDescription()
-    {
-        return "daily at 1PM";
     }
 
 }

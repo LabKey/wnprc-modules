@@ -60,8 +60,9 @@ public class EnhancedJsonResponse extends JSONObject implements ApiResponse {
         else if (object instanceof JSONArray jsonArray) {
             List<Object> list = new ArrayList<>();
 
-            for( Object value : jsonArray.toList()) {
-                list.add(parseJsonObject(value));
+            for (Object o : jsonArray)
+            {
+                list.add(parseJsonObject(o));
             }
 
             return list;

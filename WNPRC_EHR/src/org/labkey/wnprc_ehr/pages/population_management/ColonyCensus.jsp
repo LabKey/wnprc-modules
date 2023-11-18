@@ -7,7 +7,7 @@
 
 <%
     ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
-    Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
+    Map<String, Map<String, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
 %>
 
 <style>

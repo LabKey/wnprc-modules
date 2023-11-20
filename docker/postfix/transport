@@ -1,2 +1,2 @@
 example.com smtp:[mailcatcher]:1025
-* $MAIL_SERVER
+* $POSTFIX_MAIL_SERVER

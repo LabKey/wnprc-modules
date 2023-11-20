@@ -2125,7 +2125,10 @@ public class TriggerScriptHelper {
 
                 Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
                 updateWaterOrder.put("lsid", lsid);
-                updateWaterOrder.put("enddate", startDate);
+                //closing water order the day before, new lixit orders have to be completed the first time.
+                java.time.LocalDateTime newEndDate = java.time.LocalDateTime.ofInstant(startDate.toInstant(),ZoneId.systemDefault());
+                newEndDate.minusDays(1);
+                updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
                 updateWaterOrder.put("skipWaterRegulationCheck", true);
                 toUpdate.add(updateWaterOrder);
 

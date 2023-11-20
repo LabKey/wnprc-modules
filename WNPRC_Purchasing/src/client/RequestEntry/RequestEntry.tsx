@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import produce, { Draft } from 'immer';
+import { Draft, produce} from 'immer';
 import { ActionURL, Filter, getServerContext } from '@labkey/api';
 import { Alert, LoadingSpinner } from '@labkey/components';
 

@@ -1,0 +1,3 @@
+if /^http:\/\/labkey:8080/\/
+/^http:\/\/labkey:8080\// REPLACE https:\/\/ehr.primate.wisc.edu\/
+endif

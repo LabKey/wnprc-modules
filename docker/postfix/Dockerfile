@@ -25,6 +25,7 @@ EXPOSE 1025
 # intended recipients  By default, it routes everything to "mailcatcher" on port 1025.  The relays file tells postfix
 # which domains to accept and forward.  The default configuration accepts all domains.
 COPY header_checks  /etc/postfix/header_checks
+COPY body_checks    /etc/postfix/body_checks
 COPY transport      /etc/postfix/transport.template
 COPY relays         /etc/postfix/relays
 
@@ -39,6 +40,7 @@ RUN postconf  -e transport_maps=hash:/etc/postfix/transport              \
                 always_bcc=mail_spy@example.com                         \
                 smtpd_use_tls=yes                                        \
                 smtp_header_checks=regexp:/etc/postfix/header_checks    \
+                smtp_body_checks=regexp:/etc/postfix/body_checks        \
                 smtpd_tls_cert_file=/etc/postfix/certs/ehr.pem         \
                 smtpd_tls_key_file=/etc/postfix/certs/ehr.key           \
                 smtpd_tls_security_level=encrypt                                \

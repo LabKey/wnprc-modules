@@ -6,8 +6,6 @@ import {
     withAppUser,
     AppContextProvider
 } from '@labkey/components';
-
-
 import { DefaultGridPanel } from "./DefaultGridPanel";
 import { configProps } from './grid_panel/configProps';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
@@ -31,26 +29,24 @@ export const GridPanelConfig: FC<configProps> = ({
     title,
     columnStyles,
     }) => {
-    const baseFilters = [];
     const filterArray = [];
     if(filterConfig) {
-        const subjects = filterConfig.subjects;
         const filterDate = filterConfig.date;
         const filterType = filterConfig.filters.inputType;
 
-
         if (filterType !== "none") {
-            if (filterType === "roomCage") {
-                const area = filterConfig.filters.area.split(',');
+            if (filterType === "roomCage" && filterConfig.filters.room !== null) {
+                //const area = filterConfig.filters.area.split(',');
                 const room = filterConfig.filters.room.split(',');
                 const cage = filterConfig.filters.cage.split(',');
-                if (area[0] !== "") baseFilters.push(Filter.create("Id/curLocation/area", area, Filter.Types.EQUAL.getMultiValueFilter()));
-                if (room[0] !== "") baseFilters.push(Filter.create("Id/curLocation/room", room, Filter.Types.EQUAL.getMultiValueFilter()));
-                if (cage[0] !== "") baseFilters.push(Filter.create("Id/curLocation/cage", cage, Filter.Types.EQUAL.getMultiValueFilter()));
+                //if (area[0] !== "") filterArray.push(Filter.create("Id/curLocation/area", area, Filter.Types.EQUAL.getMultiValueFilter()));
+                if (room[0] !== "") filterArray.push(Filter.create("Id/curLocation/room", room, Filter.Types.EQUAL.getMultiValueFilter()));
+                if (cage[0] !== "") filterArray.push(Filter.create("Id/curLocation/cage", cage, Filter.Types.EQUAL.getMultiValueFilter()));
             } else if (filterType === "multiSubject") {
-                baseFilters.push(Filter.create("Id", filterConfig.filters.nonRemovable['0'].value, Filter.Types.EQUAL.getMultiValueFilter()));
+                filterArray.push(Filter.create("Id", filterConfig.filters.nonRemovable['0'].value, Filter.Types.EQUAL.getMultiValueFilter()));
             } else if (filterType === "singleSubject") {
-                baseFilters.push(Filter.create("Id", subjects[0], Filter.Types.EQUAL));
+                const subjects = filterConfig.filters.subjects;
+                filterArray.push(Filter.create("Id", subjects[0], Filter.Types.EQUAL));
             }
         }
         if (filterDate) {
@@ -81,7 +77,6 @@ export const GridPanelConfig: FC<configProps> = ({
             containerFilter: Query.containerFilter.allFolders,
             omittedColumns: ['SortOrder','Searchable','Type','Title','ContainerType','Workbook','IdPrefixedName'],
             includeTotalCount: true,
-            baseFilters: baseFilters,
             filterArray: filterArray,
             maxRows: 100,
         }

@@ -49,7 +49,6 @@ EHR.reports.AfternoonTreatmentsReport = function (panel, tab) {
                 }
             }]),
             filterConfig: JSON.stringify({
-                subjects: tab.filters.subjects,
                 date: panel.getFilterArray(tab).removable[0].value,
                 filters: tab.filters,
             }),

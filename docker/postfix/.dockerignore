@@ -7,3 +7,5 @@
 !supervisord.conf
 !transport
 !header_checks
+!replacingSecrets.sh
+!Dockerfile

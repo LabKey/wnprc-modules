@@ -12,11 +12,22 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
         reportStartDate = reportStartDate.format(LABKEY.extDefaultDateFormat)
 
         let config = panel.getQWPConfig({
-            title: 'Water Treatments',
+            title: 'Incomplete Water Treatments',
             schemaName: 'study',
             queryName: 'WaterScheduleCoalesced',
             viewName: 'Treatments',
             parameters: {'NumDays': '180', 'StartDate': reportStartDate},
+            filters: filterArray.nonRemovable,
+            removeableFilters: filterArray.removable,
+            frame: true
+
+        });
+        let configWaterTotal = panel.getQWPConfig({
+            title: 'Water Below Limit (10ml/Kg)',
+            schemaName: 'study',
+            queryName: 'waterTotalByDateWithWeight',
+            viewName: 'tooLittleWater',
+            //parameters: {'NumDays': '180', 'StartDate': reportStartDate},
             filters: filterArray.nonRemovable,
             removeableFilters: filterArray.removable,
             frame: true
@@ -29,6 +40,11 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
             queryConfig: config
 
         });
+        tab.add({
+            xtype: 'ldk-querypanel',
+            style: 'margin-bottom:20px;',
+            queryConfig: configWaterTotal
+        })
 
         target = tab.add({xtype: 'ldk-contentresizingpanel'});
 
@@ -49,7 +65,6 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
                 }
             }]),
             filterConfig: JSON.stringify({
-                subjects: tab.filters.subjects,
                 date: panel.getFilterArray(tab).removable[0].value,
                 filters: tab.filters,
             }),

@@ -9,7 +9,7 @@
                 <updateUrl />
                 <deleteUrl />
                 <columns>
-                    <column columnName="animalId">
+                    <column columnName="Id">
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
                             <fkTable>animal</fkTable>

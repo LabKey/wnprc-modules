@@ -1,17 +1,12 @@
-import {
-    labkeyActionSelectWithPromise,
-} from "./actions";
-import {Filter, Utils} from "@labkey/api";
-
-import { CommandType } from "@labkey/api/dist/labkey/query/Rows";
+import { CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import {
     Commands,
     DataRowsPerCommandType,
     ModifyRowsCommands,
     TaskValuesType,
     WaterAmountValuesType
-} from "../typings/main";
-import {InsertValuesWithCommand, RowObj} from "../../../../../weight/typings/main";
+} from '../typings/main';
+import { InsertValuesWithCommand, RowObj } from '../../weight/typings/main';
 
 export const setupWaterAmountValues = (values: Object, QCStateLabel: string, taskId: string): Array<WaterAmountValuesType> => {
     let valuesToInsert: Array<WaterAmountValuesType> = [];

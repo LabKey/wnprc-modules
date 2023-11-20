@@ -1,4 +1,4 @@
-import {setupTaskValues, setupWaterAmountValues} from "../org/labkey/wnprc_ehr/pages/query/pageHelpers";
+import {setupTaskValues, setupWaterAmountValues} from "./query/pageHelpers";
 
 declare const Ext4: any;
 declare const LABKEY: any;
@@ -7,7 +7,7 @@ import * as $ from 'jquery';
 import * as URI from 'urijs';
 
 import {groupCommands, saveRowsDirect,setupJsonData,insertTaskCommand} from "../query/helpers";
-import {RowObj, ContextProviderProps, WaterAmountValuesType,TaskValuesType} from "../../src/org/labkey/wnprc_ehr/pages/typings/main";
+import {RowObj, ContextProviderProps, WaterAmountValuesType,TaskValuesType} from "./typings/main";
 import { ConfigProps } from "../typings/main";
 import {ActionURL, Utils, Security, Filter} from "@labkey/api";
 import { Command, CommandType } from "@labkey/api/dist/labkey/query/Rows";

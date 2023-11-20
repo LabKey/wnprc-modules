@@ -49,3 +49,9 @@ configurations.all {
             force "com.google.http-client:google-http-client:${googleHttpClientVersion}"
         }
 }
+
+// Declare atypical npm build output directory for Gradle to correctly cache output
+List.of(project.tasks.named("npm_run_build-prod"), project.tasks.named("npm_run_build"))
+        .forEach(task -> task.configure {
+            outputs.dir(project.file("./resources/web/wnprc_ehr/gen"))
+        })

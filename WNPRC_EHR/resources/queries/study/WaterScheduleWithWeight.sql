@@ -13,6 +13,7 @@ SELECT
     provideFruit AS provideFruit,
     provideFruitTitle AS provideFruitTitle,
     dataSource AS dataSource,
+    waterSource AS conditionAtTime,
     assignedTo AS assignedToCoalesced,
     assignedToTitle AS assignedToTitleCoalesced,
     frequency AS frequencyCoalesced,

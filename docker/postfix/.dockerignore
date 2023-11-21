@@ -8,3 +8,4 @@
 !transport
 !header_checks
 !replacingSecrets.sh
+!Dockerfile

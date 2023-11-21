@@ -8,6 +8,8 @@ DEVBRANCH_REGEX="^([0-9]{2}\.[0-9]{1,2})_refs_heads_develop"
 FB_REGEX="^([0-9]{2}\.[0-9]{1,2})_(.*)"
 PROD_REGEX="^([0-9]{2}\.[0-9]{1,2})_refs_heads_release([0-9]{2}\.[0-9]{1,2})-SNAPSHOT"
 
+GRADLE_IMAGE=""
+
 LABKEY_TEAMCITY_BUILD=""
 
 LABKEY_SNAPSHOT="-SNAPSHOT-"
@@ -22,15 +24,17 @@ then
     TOMCAT_IMAGE="_develop"
     LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2"  
     echo -e "Building develop branch ";
+    GRADLE_IMAGE="wnprcehr/labkey${SHORT_BRANCH_NAME}:${LK_VERSION}"
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then    
     LK_VERSION=${BASH_REMATCH[1]}    
     GENERAL_LK_VERSION=${LK_VERSION//./}    
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
-    SHORT_BRANCH_NAME="SNAPSHOT"
+    SHORT_BRANCH_NAME="snapshot"
     TOMCAT_IMAGE=""
     echo -e "LabKey Version: " ${LK_VERSION}
     echo -e "Branch: " ${SHORT_BRANCH_NAME}
+    GRADLE_IMAGE="wnprcehr/labkey${SHORT_BRANCH_NAME}:${LK_VERSION}"
 #Docker tag for SNAPSHOT and FB
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
@@ -39,9 +43,10 @@ then
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
-    TOMCAT_IMAGE=${SHORT_BRANCH_NAME}
+    TOMCAT_IMAGE="_"${SHORT_BRANCH_NAME}
     echo -e "LabKey Version: " ${LK_VERSION}
     echo -e "Feature Branch: " ${SHORT_BRANCH_NAME}
+    GRADLE_IMAGE="wnprcehr/labkey:${LK_VERSION}_${SHORT_BRANCH_NAME}"
 else
     echo "ERROR: DOCKER_TAG ($DOCKER_TAG) did not match the pattern of a feature branch or a production branch"
     exit 1
@@ -61,8 +66,8 @@ echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
 if [[ -z $IMAGE_NAME ]]
-then
-  IMAGE_NAME="wnprcehr/labkey:${LK_VERSION}_${SHORT_BRANCH_NAME}"
+then  
+  IMAGE_NAME=${GRADLE_IMAGE}
   echo "value of IMAGE_NAME " ${IMAGE_NAME}
   docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg TOMCAT_IMAGE=$TOMCAT_IMAGE --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME ../
 else

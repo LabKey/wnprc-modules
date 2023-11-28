@@ -174,19 +174,19 @@ public class ColonyCensus {
         Collections.sort(datesInOrder);
         for(LocalDate date: datesInOrder) {
             rollingTotal = rollingTotal + deltasPerDate.get(date);
-            populationPerDate.put(date, new PopulationInstant(date, rollingTotal));
+            populationPerDate.put(date, new PopulationInstant(date.toString(), rollingTotal));
         }
 
         return populationPerDate;
     }
 
-    public Map<LocalDate, PopulationInstant> getPopulationPerMonthForSpecies(PopulationChangeEvent.Species species) {
+    public Map<String, PopulationInstant> getPopulationPerMonthForSpecies(PopulationChangeEvent.Species species) {
         TreeMap<LocalDate, PopulationInstant> populationPerDay = getPopulationOverTimeForSpecies(species);
-        Map<LocalDate, PopulationInstant> populationPerMonth = new HashMap<>();
+        Map<String, PopulationInstant> populationPerMonth = new HashMap<>();
 
         for( LocalDate date : populationPerDay.descendingKeySet()) {
             // Map each date to the last of the month.
-            LocalDate monthOnly = new LocalDate(date.getYear(), date.getMonthOfYear(), date.dayOfMonth().getMaximumValue());
+            String monthOnly = new LocalDate(date.getYear(), date.getMonthOfYear(), date.dayOfMonth().getMaximumValue()).toString();
 
             // Grab count so far or initialize at zero.
             PopulationInstant populationForMonth = populationPerMonth.get(monthOnly);
@@ -200,11 +200,11 @@ public class ColonyCensus {
         return populationPerMonth;
     }
 
-    public Map<String, Map<LocalDate, PopulationInstant>> getPopulationsPerMonthForAllSpecies() {
-        Map<String, Map<LocalDate, PopulationInstant>> populations = new HashMap<>();
+    public Map<String, Map<String, PopulationInstant>> getPopulationsPerMonthForAllSpecies() {
+        Map<String, Map<String, PopulationInstant>> populations = new HashMap<>();
 
         for(PopulationChangeEvent.Species species : PopulationChangeEvent.Species.values()) {
-            Map<LocalDate, PopulationInstant> populationInstantMap = getPopulationPerMonthForSpecies(species);
+            Map<String, PopulationInstant> populationInstantMap = getPopulationPerMonthForSpecies(species);
             populations.put( species.toString(), populationInstantMap );
         }
 

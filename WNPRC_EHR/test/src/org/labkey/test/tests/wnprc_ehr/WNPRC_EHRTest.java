@@ -3045,7 +3045,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         dr.clickRowDetails(0);
 
         //Saves data from most recent necropsy.
-        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
         String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
         String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
         String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
@@ -3056,7 +3059,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotification").withText("Run Report In Browser"));
 
         //Validates necessary info.
-        assertTextPresent("Animal ID:", necropsyIDHyperlink);
+        assertTextPresent("Animal ID:", necropsyID);
         assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
         assertTextPresent("Date of Necropsy:", necropsyDate);
         assertTextPresent("Grant #:", necropsyAccount);
@@ -3079,7 +3082,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Navigates to dumbster.
         goToModule("Dumbster");
-        assertTextPresent("Prenatal Death Notification: pd986");
+        assertTextPresent("Prenatal Death Notification: pd9876");
     }
 
     private void checkJavaNotificationsFunctionality() throws UnhandledAlertException {

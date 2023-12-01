@@ -33,9 +33,10 @@ SELECT
   max(bloodSch.objectid) AS sourceRecord,
   max(bloodSch.taskid) AS taskid,
   sum(bloodSch.num_tubes) AS tubes,
-  bloodSch.performedby
+  bloodSch.performedby,
+  bloodSch.billedby.value as billedby
 FROM studyLinked.BloodSchedule bloodSch -- linked schema studyLinked is expected in Private folder. Use studyLinked.template.xml to create this linked schema
 WHERE CAST(bloodSch.date AS date) >= CAST(StartDate AS date) AND CAST(bloodSch.date AS date) <= CAST(EndDate AS date)
 AND bloodSch.qcstate.publicdata = true
-AND bloodSch.billedby.value = 'a'
-GROUP BY bloodSch.date, bloodSch.id, bloodSch.project.account, bloodSch.billedby.value, bloodSch.performedby
+--AND bloodSch.billedby.value = 'a'
+GROUP BY bloodSch.date, bloodSch.id, bloodSch.project.account, bloodSch.billedby.value, bloodSch.performedby, bloodSch.billedby.value

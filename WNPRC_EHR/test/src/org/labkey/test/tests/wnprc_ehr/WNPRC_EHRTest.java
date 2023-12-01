@@ -18,6 +18,7 @@ package org.labkey.test.tests.wnprc_ehr;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.Nullable;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -120,12 +121,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
     private final File CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesGroupCategoryError.tsv");
-    private static final int CHARGE_RATES_NUM_ROWS = 9;
-    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 8;
+    private static final int CHARGE_RATES_NUM_ROWS = 11;
+    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 10;
 
     private final File CHARGEABLE_ITEMS_RATES_UPDATE_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesUpdate.tsv");
-    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 12;
-    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 11;
+    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 14;
+    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 13;
 
     private final File CHARGEABLE_ITEM_CATEGORIES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemCategories.tsv");
 
@@ -198,8 +199,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
-        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
+        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
         initTest.initProject("EHR");
         initTest.createTestSubjects();
         initTest.clickFolder("EHR");
@@ -246,6 +247,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
     }
+
+
+    @AfterClass
+    public static void cleanTheStuff()
+    {
+        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
+        initTest.goToEHRFolder();
+        initTest.goToModule("FileContent");
+        FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(initTest);
+        _fileBrowserHelper.deleteFile(CORRECT_SAMPLE_FILE_NAME);
+        _fileBrowserHelper.deleteFile(INCORRECT_FORMAT_SAMPLE_FILE_NAME);
+        _fileBrowserHelper.deleteFile(NO_MATCHING_RECORDS_SAMPLE_FILE_NAME);
+    }
+
 
     private void uploadBillingDataAndVerify() throws Exception
     {
@@ -962,19 +977,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         switchToWindow(1);
 
         DataRegionTable invoicedItemsByProject = new DataRegionTable("query", getDriver());
-        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "46.00",	"$1,028.95");
+        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "51.00",	"$1,101.75");
         actualRowData = invoicedItemsByProject.getRowDataAsText(0, "invoiceId/billingPeriodStart", "invoiceId/billingPeriodEnd", "project", "numItems", "total");
         assertEquals("Wrong row data for invoicedItemsByProject ", expectedRowData, actualRowData);
 
         log("Validating Summary By Item's total sum value");
         clickAndWait(Locator.linkContainingText("Summary By Item"));
-        assertTextPresent("Sum", "$1,028.95");
+        assertTextPresent("Sum", "$1,101.75");
 
         goBack();
 
         clickAndWait(Locator.linkContainingText("All Items"));
         DataRegionTable invoicedItems = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", 5, invoicedItems.getDataRowCount());
+        assertEquals("Wrong row count", 7, invoicedItems.getDataRowCount());
         log("Validating Totals");
         assertTextPresent("$806.00", "$13.00", "$1.95", "$195.00");
 
@@ -1419,7 +1434,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
-        assertTextPresent("Blood draws", 2);
+        assertTextPresent("Blood draws", 4);
         assertTextPresent("Per diems", 1);
         assertTextPresent("Medicine A per dose", 2);
         assertTextPresent("vaccine supplies", 4);
@@ -1427,7 +1442,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitForText("Chargeable Items");
         clickAndWait(Locator.bodyLinkContainingText("Chargeable Items"));
-        assertTextPresent("Blood draws", 2);
+        assertTextPresent("Blood draws", 4);
         assertTextPresent("Per diems", 1);
         assertTextPresent("Medicine A per dose", 2);
         assertTextPresent("vaccine supplies", 3);
@@ -1536,14 +1551,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
+        testReports("Invoiced Items", 9, "test2312318","640991" , "$19.50", "$15.00",
                 "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
     }
 
     private void testSummaryReports()
     {
         testReports("Invoice Runs", 1, "2010-10-01", "2010-10-31");
-        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$32.75", "$285.00");
+        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$105.55", "$285.00");
     }
 
     private void testReports(String linkText, int numRows, String... texts)
@@ -2240,7 +2255,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void testPaymentsReceived()
     {
         String date = LocalDateTime.now().format(_dateTimeFormatter);
-        String amount = "1028.95";
+        String amount = "1,101.75";
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         Locator invoiceLink = Locator.bodyLinkContainingText("Invoice");
         waitForElement(invoiceLink);
@@ -2270,7 +2285,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable auditTable =  new DataRegionTable("query", this);
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
         Assertions.assertThat(auditLog).as("Audit entry for ehr_billing.invoice")
-                .contains("paymentamountreceived:  \u00BB 1028.95")
+                .contains("paymentamountreceived:  \u00BB 1101.75")
                 .contains("balancedue:  \u00BB 0.0");
     }
 

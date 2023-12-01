@@ -11,7 +11,8 @@ SELECT * FROM
       pf.tubes,
       COALESCE(a.tier_rate.tierRate, 0) AS tierRate,
       a.tier_rate.isActive AS isTierRateActive,
-      pf.performedby
+      pf.performedby,
+      pf.billedby
     FROM wnprc_billing.procedureFees pf
       INNER JOIN ehr_billing.aliases a ON a.alias = pf.account
   ) accountsInAliases WHERE accountsInAliases.isTierRateActive IS NULL OR accountsInAliases.isTierRateActive = true
@@ -29,7 +30,8 @@ SELECT
   pf.tubes,
   0 AS tierRate,
   true AS isTierRateActive,
-  pf.performedby
+  pf.performedby,
+  pf.billedby
 FROM wnprc_billing.procedureFees pf
   LEFT JOIN ehr_billing.aliases a ON a.alias = pf.account 
   WHERE a.alias IS NULL

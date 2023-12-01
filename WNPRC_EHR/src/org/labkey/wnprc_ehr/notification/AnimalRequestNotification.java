@@ -157,10 +157,12 @@ public class AnimalRequestNotification extends AbstractEHRNotification
         //Sets data.
         String currentDate = AbstractEHRNotification._dateFormat.format(now);
         String currentTime = AbstractEHRNotification._timeFormat.format(now);
-        String singleRequestURL = (new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "").toString()) + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + rowId;
-        String singleRequestHyperlink = notificationToolkit.createHyperlink("here", singleRequestURL);
-        String allRequestsURL = (new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "").toString()) + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
-        String allRequestsHyperlink = notificationToolkit.createHyperlink("here", allRequestsURL);
+        Path singleRequestURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
+        String singleRequestUrlAsString = singleRequestURL.toString() + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + rowId;
+        String singleRequestHyperlink = notificationToolkit.createHyperlink("here", singleRequestUrlAsString);
+        Path allRequestsURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
+        String allRequestsUrlAsString = allRequestsURL.toString() + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
+        String allRequestsHyperlink = notificationToolkit.createHyperlink("here", allRequestsUrlAsString);
 
         //Creates message info.
         msg.append("<p>There was a new animal request submitted on: " + currentDate + " at " + currentTime + ".</p>");

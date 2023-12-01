@@ -123,19 +123,19 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
                 "Please reach out via the ticket tracker if you find any names that need to be updated.");
 
         //Adds tables.
-        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusDamSire", "notificationView") > 0) {
+        if (notificationToolkit.getTableRowCount(c, u, "study", "validationSuiteSuffixCheckerRhesusDamSire", "notificationView") > 0) {
             messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusDamSire", "notificationView"));
             messageBody.append("<br>");
         }
-        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusDamSireID", "notificationView") > 0) {
+        if (notificationToolkit.getTableRowCount(c, u, "study", "validationSuiteSuffixCheckerRhesusDamSireID", "notificationView") > 0) {
             messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusDamSireID", "notificationView"));
             messageBody.append("<br>");
         }
-        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusID", "notificationView") > 0) {
+        if (notificationToolkit.getTableRowCount(c, u, "study", "validationSuiteSuffixCheckerRhesusID", "notificationView") > 0) {
             messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusID", "notificationView"));
             messageBody.append("<br>");
         }
-        if (notificationToolkit.getTableRowCount(c, u, "validationSuiteSuffixCheckerRhesusIDDamSire", "notificationView") > 0) {
+        if (notificationToolkit.getTableRowCount(c, u, "study", "validationSuiteSuffixCheckerRhesusIDDamSire", "notificationView") > 0) {
             messageBody.append(notificationToolkit.getTableAsHTML(c, u, "validationSuiteSuffixCheckerRhesusIDDamSire", "notificationView"));
             messageBody.append("<br>");
         }

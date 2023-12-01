@@ -29,6 +29,7 @@ import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.CustomViewInfo;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
@@ -189,7 +190,7 @@ public class NotificationToolkit {
      * @param qViewName The name of the desired custom qview for the given table.  If using default, enter "" instead of null.
      * @return          The number of rows in the given table.  If none, returns 0.
      */
-    public final long getTableRowCount(Container c, User u, String tableName, String qViewName) {
+    public final long getTableRowCount(Container c, User u, String schema, String tableName, String qViewName) {
 
         //Creates variables.
         StringBuilder returnString = new StringBuilder();
@@ -202,7 +203,7 @@ public class NotificationToolkit {
         Sort mySort = myQview.querySort;
 
         //Gets table.
-        TableSelector ts = new TableSelector(QueryService.get().getUserSchema(u, c, "study").getTable(tableName), myFilter, mySort);
+        TableSelector ts = new TableSelector(QueryService.get().getUserSchema(u, c, schema).getTable(tableName), myFilter, mySort);
 
         //Returns table count.
         return(ts.getRowCount());
@@ -335,7 +336,7 @@ public class NotificationToolkit {
      */
     public String getWeightFromAnimalID(Container currentContainer, User currentUser, String animalID) {
         //Gets the full animal weight.
-        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", "id", animalID, new String[]{"weight"});
+        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", new Sort("-weight"), "id", animalID, new String[]{"weight"});
         if (!weightRow.isEmpty()) {
             String fullWeight = weightRow.get(0);
             //Gets animal weight rounded to 9 digits.
@@ -349,24 +350,6 @@ public class NotificationToolkit {
         else {
             return "";
         }
-//
-//
-//
-//        //Sets up variables.
-//        StringBuilder returnWeight = new StringBuilder();
-//        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString("id"), animalID, CompareType.EQUAL);
-//        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "study").getTable("Weight"), queryFilter, null);
-//
-//        //Gets weight from table.
-//        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-//            @Override
-//            public void exec(ResultSet rs) throws SQLException {
-//                returnWeight.append(rs.getString("weight"));
-//            }
-//        });
-//
-//        //Returns weight.
-//        return returnWeight.toString();
     }
 
     /**
@@ -446,11 +429,11 @@ public class NotificationToolkit {
      */
     public String getSexFromAnimalID(Container c, User u, String animalID) {
         //Gets the animal's gender code from their ID.
-        ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", "id", animalID, new String[]{"gender"});
+        ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", null, "id", animalID, new String[]{"gender"});
         if (!demographicTableRow.isEmpty()) {
             String animalSexCode = demographicTableRow.get(0);
             //Gets the gender meaning from the gender code.
-            ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", "code", animalSexCode, new String[]{"meaning"});
+            ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", null, "code", animalSexCode, new String[]{"meaning"});
             if (!genderTableRow.isEmpty()) {
                 String animalSexMeaning = genderTableRow.get(0);
                 return animalSexMeaning;
@@ -467,33 +450,38 @@ public class NotificationToolkit {
     /**
      * Retrieves a specific row from a specific table with only necessary columns.
      * The schema, tableName, and column names can be found through the Query Schema Browser.
-     *      EXAMPLE GOAL: Get animal rh1234's weight and gender.
-     *      EXAMPLE USE: getTableRowAsList(c, u, "study", "demographics", "id", "rh1234", new String[]{"weight", "gender"});
+     *      EXAMPLE GOAL: Get animal rh1234's weight and gender, sorted by descending weight.
+     *      EXAMPLE USE: getTableRowAsList(c, u, "study", "demographics", new Sort("-weight"), "id", "rh1234", new String[]{"weight", "gender"});
      *      EXAMPLE RETURNS: [1.234, male]
      * @param currentContainer  The current container.
      * @param currentUser       The current user.
      * @param schema            The current schema (ex. "ehr", "study", "ehr_lookups", etc.).
      * @param tableName         The specific table's name.
-     * @param columnName        The name of the column holding the columnValue that specifies the target row (ex "id").
-     * @param columnValue       The value under the columnName that corresponds to the target row (ex. "rh1234").
+     * @param tableSort         (Optional) The type of Sort applied to the table.
+     * @param targetColumnName  The name of the column holding the columnValue that specifies the target row (ex "id").
+     * @param targetColumnValue The value under the columnName that corresponds to the target row (ex. "rh1234").
      * @param columnsToGet      The names of the columns in this row the user wants data for (ex. "weight", "gender", "species", etc.).
      * @return                  A list of Strings holding the values for each column in columnsToGet for our target row.
      */
-    public ArrayList<String> getTableRowAsList(Container currentContainer, User currentUser, String schema, String tableName, String columnName, String columnValue, String[] columnsToGet) {
+    public ArrayList<String> getTableRowAsList(Container currentContainer, User currentUser, String schema, String tableName, Sort tableSort, String targetColumnName, String targetColumnValue, String[] columnsToGet) {
         //Sets up variables.
         ArrayList<String> returnRow = new ArrayList<String>();
-        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString(columnName), columnValue, CompareType.EQUAL);
-        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName), queryFilter, null);
+        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString(targetColumnName), targetColumnValue, CompareType.EQUAL);
+        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName), queryFilter, tableSort);
 
-        //Gets weight from table.
-        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-            @Override
-            public void exec(ResultSet rs) throws SQLException {
-                for (int i = 0; i < columnsToGet.length; i++) {
-                    returnRow.add(rs.getString(columnsToGet[i]));
+        //Gets row from table.
+        if (myTable != null) {
+            myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                @Override
+                public void exec(ResultSet rs) throws SQLException {
+                    if (rs != null) {
+                        for (int i = 0; i < columnsToGet.length; i++) {
+                            returnRow.add(rs.getString(columnsToGet[i]));
+                        }
+                    }
                 }
-            }
-        });
+            });
+        }
 
         return returnRow;
     }
@@ -526,9 +514,11 @@ public class NotificationToolkit {
 
         public DeathNecropsyObject(Container c, User u, String animalID, String hostName) {
             NotificationToolkit notificationToolkit = new NotificationToolkit();
-            if (notificationToolkit.getTableRowCount(c, u, "Necropsy", "notificationView") > 0) {
+            if (notificationToolkit.getTableRowCount(c, u, "study", "Necropsy", "notificationView") > 0) {
                 String[] targetColumns = {"caseno", "taskid", "date", "timeofdeath", "causeofdeath", "account", "mannerofdeath"};
-                ArrayList<String> necropsyTableRow = notificationToolkit.getTableRowAsList(c, u, "study", "necropsy", "id", animalID, targetColumns);
+
+                ArrayList<String> necropsyTableRow = notificationToolkit.getTableRowAsList(c, u, "study", "necropsy", null, "id", animalID, targetColumns);
+
                 //Necropsy does exist.
                 if (!necropsyTableRow.isEmpty()) {
                     this.necropsyExists = true;
@@ -541,11 +531,6 @@ public class NotificationToolkit {
                     this.necropsyMannerOfDeath = necropsyTableRow.get(6);
                     this.animalWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
 
-//                    //Gets animal weight rounded to 7 digits.
-//                    String tempWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
-//                    String nineDigitWeight = StringUtils.substring(tempWeight, 0, 9);
-//                    this.animalWeight = nineDigitWeight + " kg";
-
                     //Gets animal replacement fee.
                     //TODO: What should I return when this is null?  Currently I just have it return a blank string.
                     if (necropsyTypeOfDeath != null) {
@@ -554,13 +539,17 @@ public class NotificationToolkit {
 
                     //Creates task id with hyperlink.
                     String necropsyTaskID = necropsyTableRow.get(1);
-                    String taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view").toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
+                    Path taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view");
+                    String taskUrlAsString = taskURL.toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
                     String taskRowID = "";
-                    ArrayList<String> taskRow = notificationToolkit.getTableRowAsList(c, u, "ehr", "tasks", "taskid", necropsyTaskID, new String[]{"rowid"});
-                    if (!taskRow.isEmpty()) {
-                        taskRowID = taskRow.get(0);
+
+                    if (notificationToolkit.getTableRowCount(c, u, "ehr", "tasks", "") > 0) {
+                        ArrayList<String> taskRow = notificationToolkit.getTableRowAsList(c, u, "ehr", "tasks", null, "taskid", necropsyTaskID, new String[]{"rowid"});
+                        if (!taskRow.isEmpty()) {
+                            taskRowID = taskRow.get(0);
+                        }
+                        this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
                     }
-                    this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskURL);
                 }
             }
         }
@@ -578,8 +567,9 @@ public class NotificationToolkit {
         public DeathDemographicObject(Container c, User u, String animalID) {
             NotificationToolkit notificationToolkit = new NotificationToolkit();
             //Gets hyperlink for animal id in animal history abstract.
-            String animalAbstractURL = new Path(ActionURL.getBaseServerURL(), "ehr", "animalHistory.view", c.getPath()).toString() + "?#subjects:c19007&inputType:singleSubject&showReport:1&activeReport:abstract";
-            this.animalIdHyperlink = notificationToolkit.createHyperlink(animalID, animalAbstractURL);
+            Path animalAbstractURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view");
+            String animalAbstractUrlAsString = animalAbstractURL.toString() + "?#subjects:" + animalID + "&inputType:singleSubject&showReport:1&activeReport:abstract";
+            this.animalIdHyperlink = notificationToolkit.createHyperlink(animalID, animalAbstractUrlAsString);
 
             //Gets animal sex.
             String animalsex = notificationToolkit.getSexFromAnimalID(c, u, animalID);

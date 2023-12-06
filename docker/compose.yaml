@@ -2,6 +2,7 @@ networks:
   network1:
     driver: bridge
     name: sharedservices
+    attachable: true
 
 services:
   postgres:
@@ -41,9 +42,12 @@ services:
       TZ: America/Chicago
 
   mailserver:
-    image: wnprcehr/postfix:$POSTFIX_VERSION${LK_FB}
+    image: wnprcehr/postfix:$POSTFIX_VERSION
     depends_on:
       - "mailcatcher"
+    volumes:
+      - "${NGINX_SERVER_CER_FILE}:/etc/postfix/certs/ehr.pem"
+      - "${NGINX_SERVER_KEY_FILE}:/etc/postfix/certs/ehr.key"
     environment:
       POSTFIX_MAIL_SERVER:
       TZ: America/Chicago

@@ -20,6 +20,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'}
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Overdue Weight Alerts';
@@ -83,7 +84,7 @@ else {
         $email_html .= $row->{'Id'}."<br>";
     };
 
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank"."'>Click here to view these animals</a></p>";
+    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank"."'>Click here to view these animals</a></p>";
     $email_html .= '<hr>';
 }
 
@@ -107,7 +108,7 @@ $results = LabKey::Query::selectRows(
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: The following animals have not been weighed in the past 60 days:</b><br>";
 			
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.viewName=Weight Detail&query.queryName=Demographics&query.Id/MostRecentWeight/DaysSinceWeight~gt=60&query.calculated_status~eq=Alive"."'>Click here to view them</a><p>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.viewName=Weight Detail&query.queryName=Demographics&query.Id/MostRecentWeight/DaysSinceWeight~gt=60&query.calculated_status~eq=Alive"."'>Click here to view them</a><p>\n";
 	
 	my $summary = {};
     foreach my $row (@{$results->{rows}}){   

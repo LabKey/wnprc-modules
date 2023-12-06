@@ -21,6 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'}
 
 my $studyContainer = 'WNPRC/EHR/';
 
@@ -72,7 +73,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." current or scheduled blood draws for animals not currently at WNPRC.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.date~dategte=$datestr&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.date~dategte=$datestr&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }
 
@@ -98,7 +99,7 @@ if(@{$results->{rows}}){
         $email_html .= $row->{'Id'}."<br>";
     };
 
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=DailyOverDraws&query.viewName=Blood Summary&query.date~dategte=$datestr&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=DailyOverDraws&query.viewName=Blood Summary&query.date~dategte=$datestr&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";
 }
 else {
@@ -133,7 +134,7 @@ else {
 #        $email_html .= $row->{'Id'}."<br>";
 #    };
 #
-#	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.viewName=Blood Summary&query.date~dategte=$datestr&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive&query.BloodRemaining/AvailBlood~lt=0"."'>Click here to view them</a><br>\n";
+#	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.viewName=Blood Summary&query.date~dategte=$datestr&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive&query.BloodRemaining/AvailBlood~lt=0"."'>Click here to view them</a><br>\n";
 #	$email_html .= "<hr>\n";
 #}
 
@@ -159,7 +160,7 @@ if(@{$results->{rows}}){
         $email_html .= $row->{'Id'}."<br>";
     };
 
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dategte=$datestr"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dategte=$datestr"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";
 }
 else {
@@ -189,7 +190,7 @@ if(@{$results->{rows}}){
         $email_html .= $row->{'Id'}."<br>";
     };
 	
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dateeq=$datestr"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dateeq=$datestr"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }	
 
@@ -211,7 +212,7 @@ if(@{$results->{rows}}){
 #
 #if(@{$results->{rows}}){
 #	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." blood draws requested that have not been approved or denied yet.</b><br>";
-#	$email_html .= "<p><a href='".$baseUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:BloodDrawRequests"."'>Click here to view them</a><br>\n";
+#	$email_html .= "<p><a href='".$printableUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:BloodDrawRequests"."'>Click here to view them</a><br>\n";
 #	$email_html .= "<hr>\n";
 #}
 
@@ -233,7 +234,7 @@ if(@{$results->{rows}}){
 #
 #if(@{$results->{rows}}){
 #	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." blood draws requested that have not been assigned to SPI or Animal Care.</b><br>";
-#	$email_html .= "<p><a href='".$baseUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:BloodDrawRequests'>Click here to view them</a><br>\n";
+#	$email_html .= "<p><a href='".$printableUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:BloodDrawRequests'>Click here to view them</a><br>\n";
 #	$email_html .= "<hr>\n";
 #}
 
@@ -288,7 +289,7 @@ else {
 		}     
     };
 
-	my $url = "<a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.date~dateeq=$datestr&query.Id/DataSet/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a></p>\n";
+	my $url = "<a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.date~dateeq=$datestr&query.Id/DataSet/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a></p>\n";
 	$email_html .= "There are ".@{$results->{rows}}." scheduled blood draws for $datestr.  $complete have been completed.  $url<p>\n";		
 
 		if(!$incomplete){

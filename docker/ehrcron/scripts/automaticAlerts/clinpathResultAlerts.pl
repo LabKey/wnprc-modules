@@ -21,6 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'}
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Clinpath Results';
@@ -80,7 +81,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){	
 	$email_html .= "There are ".@{$results->{rows}}." completed requests since $yesterday. Below is a summary.  Click the animal ID for more detail.  <br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Clinpath Runs&query.viewName=Plus Room&query.taskid/datecompleted~dategte=".$yesterday."&&query.taskid/datecompleted~nonblank"."'>Click here to view them</a><p>\n";	
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Clinpath Runs&query.viewName=Plus Room&query.taskid/datecompleted~dategte=".$yesterday."&&query.taskid/datecompleted~nonblank"."'>Click here to view them</a><p>\n";	
 	
 	my $summary = {};
     foreach my $row (@{$results->{rows}}){
@@ -113,7 +114,7 @@ if(@{$results->{rows}}){
 			$email_html .= "<table border=1><tr><td>Id</td><td>Collect Date</td><td>Service Requested</td><td>Requestor</td><td>Date Reviewed</td><td>Reviewed By</td></tr>";
 			foreach my $rec (@{$$rooms{$room}}){
 				no warnings 'uninitialized'; # some of these values appear to be empty occasionally... - clay, 26 Mar 2018
-				$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td><td>".$$rec{date}."</td><td>".$$rec{'serviceRequested'}."</td><td>".($$rec{'requestid/description'} ? $$rec{'requestid/description'} : '')."</td><td>".($$rec{'dateReviewed'} ? $$rec{'dateReviewed'} : '')."</td><td".($$rec{'reviewedBy'} ? '' : ' style=background:red;').">".($$rec{'reviewedBy'} ? $$rec{'reviewedBy'} : '')."</td></tr>";
+				$email_html .= "<tr><td><a href='".$printableUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td><td>".$$rec{date}."</td><td>".$$rec{'serviceRequested'}."</td><td>".($$rec{'requestid/description'} ? $$rec{'requestid/description'} : '')."</td><td>".($$rec{'dateReviewed'} ? $$rec{'dateReviewed'} : '')."</td><td".($$rec{'reviewedBy'} ? '' : ' style=background:red;').">".($$rec{'reviewedBy'} ? $$rec{'reviewedBy'} : '')."</td></tr>";
 			}
 						
 			$email_html .= "</table><p>\n";	    	

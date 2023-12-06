@@ -47,7 +47,7 @@
               type="javax.sql.DataSource"
               username="${arrow.user}"
               password="${arrow.pass}"
-              driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+              driverClassName="net.sourceforge.jtds.jdbc.Driver"
               url="${arrow.url}"
               maxTotal="20"
               maxIdle="10"

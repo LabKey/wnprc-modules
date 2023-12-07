@@ -52,6 +52,7 @@ import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
+import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
@@ -183,17 +184,26 @@ public class TriggerScriptHelper {
 
     public void sendDeathNotification(final List<String> ids, String hostName) {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(ehr), container)){
+        //Sends original death notification.
+        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
             _log.info("Notification service is not enabled, will not send death notification");
             return;
         }
         for (String id : ids) {
-//            DeathNotification idNotification = new DeathNotification();
-//            idNotification.setParam(DeathNotification.idParamName, id);
-//            idNotification.sendManually(container, user);
-            _log.info("Using java helper to send email for animal death record: "+ id);
-            DeathNotification notification = new DeathNotification(ehr, id, user, hostName);
-            notification.sendManually(container, user);
+            DeathNotification idNotification = new DeathNotification();
+            idNotification.setParam(DeathNotification.idParamName, id);
+            idNotification.sendManually(container, user);
+        }
+        //If notification service is enabled AND deathNotificationRevamp is enabled, then send the notification.
+        if (NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotificationRevamp(ehr), container)){
+            for (String id : ids) {
+                _log.info("Using java helper to send email for animal death record: "+ id);
+                DeathNotificationRevamp notification = new DeathNotificationRevamp(ehr, id, user, hostName);
+                notification.sendManually(container, user);
+            }
+        }
+        else {
+            _log.info("Notification service is not enabled, will not send death notification");
         }
     }
 

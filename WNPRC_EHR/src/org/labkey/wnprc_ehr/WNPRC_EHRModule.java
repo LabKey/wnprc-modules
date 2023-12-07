@@ -358,7 +358,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public void registerNotifications() {
         List<Notification> notifications = Arrays.asList(
                 new BehaviorNotification(this),
-                new DeathNotification(this),
+                new DeathNotification(),
+                new DeathNotificationRevamp(this),
                 new ColonyAlertsNotification(this),
                 new TreatmentAlertsNotification(this),
                 new VvcNotification(this),

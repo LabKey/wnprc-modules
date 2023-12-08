@@ -339,13 +339,18 @@ public class NotificationToolkit {
         ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", new Sort("-weight"), "id", animalID, new String[]{"weight"});
         if (!weightRow.isEmpty()) {
             String fullWeight = weightRow.get(0);
-            //Gets animal weight rounded to 9 digits.
-            String nineDigitWeight = StringUtils.substring(fullWeight, 0, 9);
-            //Removes any trailing zeroes.
-            BigDecimal strippedValue = new BigDecimal(nineDigitWeight).stripTrailingZeros();
-            //Adds weight symbol.
-            String returnWeight = "" + strippedValue + "kg";
-            return returnWeight;
+            if (fullWeight != null) {
+                //Gets animal weight rounded to 9 digits.
+                String nineDigitWeight = StringUtils.substring(fullWeight, 0, 9);
+                //Removes any trailing zeroes.
+                BigDecimal strippedValue = new BigDecimal(nineDigitWeight).stripTrailingZeros();
+                //Adds weight symbol.
+                String returnWeight = "" + strippedValue + "kg";
+                return returnWeight;
+            }
+            else {
+                return "";
+            }
         }
         else {
             return "";
@@ -428,23 +433,36 @@ public class NotificationToolkit {
      * @return          A string representing the animal's sex.
      */
     public String getSexFromAnimalID(Container c, User u, String animalID) {
-        //Gets the animal's gender code from their ID.
-        ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", null, "id", animalID, new String[]{"gender"});
-        if (!demographicTableRow.isEmpty()) {
-            String animalSexCode = demographicTableRow.get(0);
-            //Gets the gender meaning from the gender code.
-            ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", null, "code", animalSexCode, new String[]{"meaning"});
-            if (!genderTableRow.isEmpty()) {
-                String animalSexMeaning = genderTableRow.get(0);
-                return animalSexMeaning;
-            }
-            else {
-                return "";
+        String animalSexCode = "";
+        String animalSexMeaning = "";
+
+        //Gets sex from prenatal id.
+        if (checkIfPrenatalID(animalID)) {
+            ArrayList<String> prenatalDeathRow = getTableRowAsList(c, u, "study", "prenatal", null, "id", animalID, new String[]{"gender"});
+            if (!prenatalDeathRow.isEmpty()) {
+                animalSexCode = prenatalDeathRow.get(0);
             }
         }
+        //Gets sex from non-prenatal id.
         else {
-            return "";
+            ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", null, "id", animalID, new String[]{"gender"});
+            if (!demographicTableRow.isEmpty()) {
+                animalSexCode = demographicTableRow.get(0);
+            }
         }
+
+        //Gets the gender meaning from the gender code.
+        if (animalSexCode != null) {
+            if (!animalSexCode.equals("") && !animalSexCode.equals("null")) {
+                ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", null, "code", animalSexCode, new String[]{"meaning"});
+                if (!genderTableRow.isEmpty()) {
+                    animalSexMeaning = genderTableRow.get(0);
+                }
+            }
+        }
+
+        //Returns animal sex.
+        return animalSexMeaning;
     }
 
     /**
@@ -464,25 +482,27 @@ public class NotificationToolkit {
      * @return                  A list of Strings holding the values for each column in columnsToGet for our target row.
      */
     public ArrayList<String> getTableRowAsList(Container currentContainer, User currentUser, String schema, String tableName, Sort tableSort, String targetColumnName, String targetColumnValue, String[] columnsToGet) {
-        //Sets up variables.
         ArrayList<String> returnRow = new ArrayList<String>();
-        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString(targetColumnName), targetColumnValue, CompareType.EQUAL);
-        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName), queryFilter, tableSort);
+        //Verifies table contains data before attempting to retrieve row.
+        if (getTableRowCount(currentContainer, currentUser, schema, tableName, "") > 0) {
+            //Sets up variables.
+            SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString(targetColumnName), targetColumnValue, CompareType.EQUAL);
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName), queryFilter, tableSort);
 
-        //Gets row from table.
-        if (myTable != null) {
-            myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-                @Override
-                public void exec(ResultSet rs) throws SQLException {
-                    if (rs != null) {
-                        for (int i = 0; i < columnsToGet.length; i++) {
-                            returnRow.add(rs.getString(columnsToGet[i]));
+            //Gets row from table.
+            if (myTable != null) {
+                myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                    @Override
+                    public void exec(ResultSet rs) throws SQLException {
+                        if (rs != null) {
+                            for (int i = 0; i < columnsToGet.length; i++) {
+                                returnRow.add(rs.getString(columnsToGet[i]));
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
-
         return returnRow;
     }
 
@@ -512,9 +532,9 @@ public class NotificationToolkit {
         String animalWeight = "";
         String animalReplacementFee = "";
 
-        public DeathNecropsyObject(Container c, User u, String animalID, String hostName) {
+        public DeathNecropsyObject(Container c, User u, String animalID, String hostName, Boolean withHtmlPlaceHolders) {
             NotificationToolkit notificationToolkit = new NotificationToolkit();
-            if (notificationToolkit.getTableRowCount(c, u, "study", "Necropsy", "notificationView") > 0) {
+            if (notificationToolkit.getTableRowCount(c, u, "study", "Necropsy", "notificationView") > 0) {  //Added this if/else check to getTableRowAsList(), I can remove this after testing.
                 String[] targetColumns = {"caseno", "taskid", "date", "timeofdeath", "causeofdeath", "account", "mannerofdeath"};
 
                 ArrayList<String> necropsyTableRow = notificationToolkit.getTableRowAsList(c, u, "study", "necropsy", null, "id", animalID, targetColumns);
@@ -542,14 +562,70 @@ public class NotificationToolkit {
                     Path taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view");
                     String taskUrlAsString = taskURL.toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
                     String taskRowID = "";
-
-                    if (notificationToolkit.getTableRowCount(c, u, "ehr", "tasks", "") > 0) {
+                    if (notificationToolkit.getTableRowCount(c, u, "ehr", "tasks", "") > 0) {  //Added this if/else check to getTableRowAsList(), I can remove this after testing.
                         ArrayList<String> taskRow = notificationToolkit.getTableRowAsList(c, u, "ehr", "tasks", null, "taskid", necropsyTaskID, new String[]{"rowid"});
                         if (!taskRow.isEmpty()) {
                             taskRowID = taskRow.get(0);
                         }
                         this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
                     }
+                }
+            }
+            if (withHtmlPlaceHolders) {
+                String placeholderText = "<em>Not Specified</em>";
+                if (this.necropsyCaseNumber == null) {
+                    this.necropsyCaseNumber = placeholderText;
+                }
+                else if (this.necropsyCaseNumber.equals("") || this.necropsyCaseNumber.equals("null")) {
+                    this.necropsyCaseNumber = placeholderText;
+                }
+                if (this.necropsyTaskIdHyperlink == null) {
+                    this.necropsyTaskIdHyperlink = placeholderText;
+                }
+                else if (this.necropsyTaskIdHyperlink.equals("") || this.necropsyTaskIdHyperlink.equals("null")) {
+                    this.necropsyTaskIdHyperlink = placeholderText;
+                }
+                if (this.necropsyDate == null) {
+                    this.necropsyDate = placeholderText;
+                }
+                else if (this.necropsyDate.equals("") || this.necropsyDate.equals("null")) {
+                    this.necropsyDate = placeholderText;
+                }
+                if (this.necropsyTimeOfDeath == null) {
+                    this.necropsyTimeOfDeath = placeholderText;
+                }
+                else if (this.necropsyTimeOfDeath.equals("") || this.necropsyTimeOfDeath.equals("null")) {
+                    this.necropsyTimeOfDeath = placeholderText;
+                }
+                if (this.necropsyTypeOfDeath == null) {
+                    this.necropsyTypeOfDeath = placeholderText;
+                }
+                else if (this.necropsyTypeOfDeath.equals("") || this.necropsyTypeOfDeath.equals("null")) {
+                    this.necropsyTypeOfDeath = placeholderText;
+                }
+                if (this.necropsyGrantNumber == null) {
+                    this.necropsyGrantNumber = placeholderText;
+                }
+                else if (this.necropsyGrantNumber.equals("") || this.necropsyGrantNumber.equals("null")) {
+                    this.necropsyGrantNumber = placeholderText;
+                }
+                if (this.necropsyMannerOfDeath == null) {
+                    this.necropsyMannerOfDeath = placeholderText;
+                }
+                else if (this.necropsyMannerOfDeath.equals("") || this.necropsyMannerOfDeath.equals("null")) {
+                    this.necropsyMannerOfDeath = placeholderText;
+                }
+                if (this.animalWeight == null) {
+                    this.animalWeight = placeholderText;
+                }
+                else if (this.animalWeight.equals("") || this.animalWeight.equals("null")) {
+                    this.animalWeight = placeholderText;
+                }
+                if (this.animalReplacementFee == null) {
+                    this.animalReplacementFee = placeholderText;
+                }
+                else if (this.animalReplacementFee.equals("") || this.animalReplacementFee.equals("null")) {
+                    this.animalReplacementFee = placeholderText;
                 }
             }
         }
@@ -564,7 +640,10 @@ public class NotificationToolkit {
     public static class DeathDemographicObject {
         String animalIdHyperlink = "";
         String animalSex = "";
-        public DeathDemographicObject(Container c, User u, String animalID) {
+        String animalDam = "";
+        String animalSire = "";
+        String animalConception = "";
+        public DeathDemographicObject(Container c, User u, String animalID, Boolean withHtmlPlaceHolders) {
             NotificationToolkit notificationToolkit = new NotificationToolkit();
             //Gets hyperlink for animal id in animal history abstract.
             Path animalAbstractURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view");
@@ -574,6 +653,52 @@ public class NotificationToolkit {
             //Gets animal sex.
             String animalsex = notificationToolkit.getSexFromAnimalID(c, u, animalID);
             this.animalSex = animalsex;
+
+            //Gets prenatal information if necessary.
+            if (notificationToolkit.checkIfPrenatalID(animalID)) {
+                ArrayList<String> prenatalDeathRow = notificationToolkit.getTableRowAsList(c, u, "study", "prenatal", null, "id", animalID, new String[]{"dam", "sire", "conception"});
+                if (!prenatalDeathRow.isEmpty())
+                {
+                    this.animalDam = prenatalDeathRow.get(0);
+                    this.animalSire = prenatalDeathRow.get(1);
+                    this.animalConception = prenatalDeathRow.get(2);
+                }
+            }
+
+            //Adds HTML placeholders for empty fields.
+            if (withHtmlPlaceHolders) {
+                String placeholderText = "<em>Not Specified</em>";
+                if (this.animalIdHyperlink == null) {
+                    this.animalIdHyperlink = placeholderText;
+                }
+                else if (this.animalIdHyperlink.equals("") || this.animalIdHyperlink.equals("null")) {
+                    this.animalIdHyperlink = placeholderText;
+                }
+                if (this.animalSex == null) {
+                    this.animalSex = placeholderText;
+                }
+                else if (this.animalSex.equals("") || this.animalSex.equals("null")) {
+                    this.animalSex = placeholderText;
+                }
+                if (this.animalDam == null) {
+                    this.animalDam = placeholderText;
+                }
+                else if (this.animalDam.equals("") || this.animalDam.equals("null")) {
+                    this.animalDam = placeholderText;
+                }
+                if (this.animalSire == null) {
+                    this.animalSire = placeholderText;
+                }
+                else if (this.animalSire.equals("") || this.animalSire.equals("null")) {
+                    this.animalSire = placeholderText;
+                }
+                if (this.animalConception == null) {
+                    this.animalConception = placeholderText;
+                }
+                else if (this.animalConception.equals("") || this.animalConception.equals("null")) {
+                    this.animalConception = placeholderText;
+                }
+            }
         }
     }
 

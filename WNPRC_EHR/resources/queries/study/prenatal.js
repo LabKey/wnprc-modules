@@ -46,6 +46,8 @@ function setDescription(row, helper){
     return description;
 }
 
+//TODO: Decide if we should keep this function.
+//Checks the 'study' > 'Prenatal Deaths' query to see if this animal exists already.
 function hasAnimalNotificationBeenSent(animalID) {
     var retValue = 0;
     LABKEY.Query.selectRows({
@@ -66,6 +68,9 @@ function hasAnimalNotificationBeenSent(animalID) {
     });
     return retValue;
 }
+
+//TODO: Decide if we should keep this function.
+//Updates the 'study' > 'Prenatal Deaths' query with this animal ID.
 function addNotificationIndicator(animalID) {
     var updObj = {Id:animalID};
     LABKEY.Query.selectRows({
@@ -103,13 +108,13 @@ function addNotificationIndicator(animalID) {
 
 //This is called when the prenatal death record is officially submitted.
 function onComplete(event, errors, helper){
+    console.log("prenatal.js: ONCOMPLETE (correct version)");
 
     //Notification revamp method.
     //Gets ID's.
     var ids = helper.getRows().map(function (row) {
         return row.row.id;
     });
-
     //Sends notification.
     var hostName = 'https://' + LABKEY.serverName;
     WNPRC.Utils.getJavaHelper().sendDeathNotification(ids, hostName);

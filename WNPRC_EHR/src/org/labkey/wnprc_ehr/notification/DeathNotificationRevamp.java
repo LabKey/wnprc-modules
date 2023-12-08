@@ -109,8 +109,8 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String[]> necropsiesInOrder = notificationToolkit.getTableAsList(c, u, "necropsy", "mostRecentNecropsy");
             deathID = necropsiesInOrder.get(0)[0].toString();
         }
-        NotificationToolkit.DeathDemographicObject deathDemographicObject = new NotificationToolkit.DeathDemographicObject(c, u, deathID);
-        NotificationToolkit.DeathNecropsyObject deathNecropsyObject = new NotificationToolkit.DeathNecropsyObject(c, u, deathID, hostName);
+        NotificationToolkit.DeathDemographicObject deathDemographicObject = new NotificationToolkit.DeathDemographicObject(c, u, deathID, true);
+        NotificationToolkit.DeathNecropsyObject deathNecropsyObject = new NotificationToolkit.DeathNecropsyObject(c, u, deathID, hostName, true);
 
         //Creates CSS.
         messageBody.append(styleToolkit.beginStyle());
@@ -124,6 +124,12 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
         messageBody.append(notificationToolkit.createHTMLHeader("Demographic Information"));
         messageBody.append("<p><b>Animal ID:</b> " + deathDemographicObject.animalIdHyperlink + "</p>");
         messageBody.append("<p><b>Sex:</b> " + deathDemographicObject.animalSex + "</p>");
+        //Adds prenatal demographic information.
+        if (notificationToolkit.checkIfPrenatalID(deathID)) {
+            messageBody.append("<p><b>Dam:</b> " + deathDemographicObject.animalDam + "</p>");
+            messageBody.append("<p><b>Sire:</b> " + deathDemographicObject.animalSire + "</p>");
+            messageBody.append("<p><b>Conception:</b> " + deathDemographicObject.animalConception + "</p>");
+        }
 
         //Displays the necropsy data (if it exists).
         messageBody.append(notificationToolkit.createHTMLHeader("Necropsy Information"));

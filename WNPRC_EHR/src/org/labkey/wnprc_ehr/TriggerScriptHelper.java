@@ -185,24 +185,33 @@ public class TriggerScriptHelper {
     public void sendDeathNotification(final List<String> ids, String hostName) {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         //Sends original death notification.
-        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
-            _log.info("Notification service is not enabled, will not send death notification");
-            return;
-        }
-        for (String id : ids) {
-            DeathNotification idNotification = new DeathNotification();
-            idNotification.setParam(DeathNotification.idParamName, id);
-            idNotification.sendManually(container, user);
-        }
-        //If notification service is enabled AND deathNotificationRevamp is enabled, then send the notification.
-        if (NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotificationRevamp(ehr), container)){
-            for (String id : ids) {
-                _log.info("Using java helper to send email for animal death record: "+ id);
-                DeathNotificationRevamp notification = new DeathNotificationRevamp(ehr, id, user, hostName);
-                notification.sendManually(container, user);
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends original Death Notification.
+            //Remove this if-else when new notification is approved.
+            if (NotificationService.get().isActive(new DeathNotification(), container)) {
+                for (String id : ids) {
+                    DeathNotification idNotification = new DeathNotification();
+                    idNotification.setParam(DeathNotification.idParamName, id);
+                    idNotification.sendManually(container, user);
+                }
+            }
+            else {
+                _log.info("Death Notification is not enabled, will not send death notification");
+            }
+
+            //Sends revamped Death Notification.
+            if (NotificationService.get().isActive(new DeathNotificationRevamp(ehr), container)) {
+                for (String id : ids) {
+                    _log.info("Using java helper to send email for animal death record: "+ id);
+                    DeathNotificationRevamp notification = new DeathNotificationRevamp(ehr, id, user, hostName);
+                    notification.sendManually(container, user);
+                }
+            }
+            else {
+                _log.info("Death Notification Revamp is not enabled, will not send death notification");
             }
         }
-        else {
+        else if (!NotificationService.get().isServiceEnabled()) {
             _log.info("Notification service is not enabled, will not send death notification");
         }
     }

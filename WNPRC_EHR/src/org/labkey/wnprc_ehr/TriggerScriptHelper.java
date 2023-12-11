@@ -50,6 +50,7 @@ import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
@@ -184,7 +185,7 @@ public class TriggerScriptHelper {
 
     public void sendDeathNotification(final List<String> ids, String hostName) {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        //Sends original death notification.
+        //Verifies 'Notification Service' is enabled before sending notification.
         if (NotificationService.get().isServiceEnabled()){
             //Sends original Death Notification.
             //Remove this if-else when new notification is approved.
@@ -808,10 +809,34 @@ public class TriggerScriptHelper {
     }
 
     public void sendAnimalRequestNotification(Integer rowid, String hostName){
-        _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
-        notification.sendManually(container, user);
+
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends original Animal Request Notification.
+            //Remove this if-else when new notification is approved.
+            if (NotificationService.get().isActive(new AnimalRequestNotification(ehr), container)) {
+                _log.info("Using java helper to send email for animal request record: "+rowid);
+                AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Animal Request Notification is not enabled, will not send animal request notification");
+            }
+
+            //Sends revamped Animal Request Notification.
+            if (NotificationService.get().isActive(new AnimalRequestNotificationRevamp(ehr), container)) {
+                _log.info("Using java helper to send animal request notification revamp for animal request record: "+rowid);
+                AnimalRequestNotificationRevamp notification = new AnimalRequestNotificationRevamp(ehr, rowid, user, hostName);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Animal Request Notification Revamp is not enabled, will not send animal request notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send animal request notification");
+        }
     }
     public void sendAnimalRequestNotificationUpdate(Integer rowid, Map<String,Object> row, Map<String,Object> oldRow, String hostName){
         _log.info("Using java helper to send email for animal request record: "+rowid);

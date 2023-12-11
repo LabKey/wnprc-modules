@@ -75,7 +75,7 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     @Override
     public String getName()
     {
-        return "(Updated) Validation Suite";
+        return "Validation Suite Notification";
     }
     @Override
     public String getDescription()
@@ -96,6 +96,11 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     public String getCronString()
     {
         return(notificationToolkit.createCronString(new String[]{"15"}));
+    }
+    @Override
+    public String getCategory()
+    {
+        return "Revamped Notifications";
     }
 
 

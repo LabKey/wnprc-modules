@@ -21,7 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
-my $printableUrl = $ENV{'PERL_LINK_URL'}
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Clinpath Results';

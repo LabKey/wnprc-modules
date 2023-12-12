@@ -22,7 +22,7 @@ my $from = 'ehr-do-not-reply@primate.wisc.edu';
 
 
 my $baseUrl = $ENV{'LK_BASE_URL'};
-my $printableUrl = $ENV{'PERL_LINK_URL'}
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 my $default_container='/WNPRC/EHR/';
 my $dataExists = 0;
 getHeavyInfants();

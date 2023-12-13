@@ -3056,7 +3056,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Runs death notification in the browser.
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
-        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotification").withText("Run Report In Browser"));
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
 
         //Validates necessary info.
         assertTextPresent("Animal ID:", necropsyID);
@@ -3098,12 +3098,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
         //Enables all notification that we will be testing.
-        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotification");
+        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
 //        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
         //NEW TRY:
-        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotification").withText("Manage Subscribed Users/Groups"), 0);
+        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotificationRevamp").withText("Manage Subscribed Users/Groups"), 0);
         log("Attempting to select combo box item: EHR Administrators");
         _ext4Helper.selectComboBoxItem("Add User Or Group:", "EHR Administrators");
         log("Successfully selected combo box item: EHR Administrators");

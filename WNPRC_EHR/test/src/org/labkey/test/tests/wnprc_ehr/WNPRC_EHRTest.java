@@ -211,7 +211,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
 
         initTest.populateInitialData();
-//        initTest.updateEHRFormFrameworkTypes();
+        initTest.updateEHRFormFrameworkTypes();
 
         initTest.loadBloodBilledByLookup();
         initTest.addFinanceRelatedWebParts();
@@ -235,7 +235,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder("PI Portal");
         initTest.addBillingPublicWebParts();
 
-//        initTest.uploadBillingDataAndVerify();
+        initTest.uploadBillingDataAndVerify();
 
         initTest.setupClinpathVirologySection();
 

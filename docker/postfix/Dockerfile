@@ -5,14 +5,12 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # The gettext package contains the envsubst command needed for the run command of this image.
 RUN apt-get update                      \
- && apt-get -qq install -y supervisor   \
-                           postfix      \
+ && apt-get -qq install -y postfix      \
                            postfix-pcre \
                            gettext      \
  && apt-get clean
 
 # Copy in supervisord configuration and a shell script to run postfix
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY postfix.sh       /opt/postfix.sh
 RUN chmod u+x /opt/postfix.sh
 

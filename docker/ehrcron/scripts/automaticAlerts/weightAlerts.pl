@@ -22,6 +22,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Weight Drops';
@@ -85,7 +86,7 @@ else {
         $email_html .= $row->{'Id'}."<br>";
     };
 
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank"."'>Click here to view these animals</a></p>";
+    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank"."'>Click here to view these animals</a></p>";
     $email_html .= '<hr>';
 }
 
@@ -154,13 +155,13 @@ sub processWeights {
 			my $rooms = $$summary{$area};			
 			foreach my $room (sort(keys %$rooms)){
 				foreach my $rec (@{$$rooms{$room}{records}}){			
-					$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:abstract'>".$$rec{Id}."</a></td><td>$area</td><td>$room</td><td>".$$rec{'Id/curLocation/cage'}."</td><td>".$$rec{LatestWeight}."</td><td>".$$rec{LatestWeightDate}."</td><td>".$$rec{weight}."</td><td>".$$rec{date}."</td><td>".$$rec{PctChange}."</td><td>".$$rec{IntervalInDays}."</td></tr>";
+					$email_html .= "<tr><td><a href='".$printableUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:abstract'>".$$rec{Id}."</a></td><td>$area</td><td>$room</td><td>".$$rec{'Id/curLocation/cage'}."</td><td>".$$rec{LatestWeight}."</td><td>".$$rec{LatestWeightDate}."</td><td>".$$rec{weight}."</td><td>".$$rec{date}."</td><td>".$$rec{PctChange}."</td><td>".$$rec{IntervalInDays}."</td></tr>";
 				}								  	
 			}			
 		}
 		
 		$email_html .= "</table><p>\n";	  	    	
-#		$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.PctChange~$pctFilter=$pct&query.IntervalInDays~gte=".$min."&query.IntervalInDays~lte=".$max."&query.LatestWeightDate~dategte=$threeDaysAgo'>Click here to view these animals</a></p>";
+#		$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.PctChange~$pctFilter=$pct&query.IntervalInDays~gte=".$min."&query.IntervalInDays~lte=".$max."&query.LatestWeightDate~dategte=$threeDaysAgo'>Click here to view these animals</a></p>";
 	    $email_html .= '<hr>';
 	}
 }

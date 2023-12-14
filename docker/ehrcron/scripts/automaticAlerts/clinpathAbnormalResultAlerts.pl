@@ -21,6 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 
 my $studyContainer = 'WNPRC/EHR/';
 
@@ -114,7 +115,7 @@ if(@{$results->{rows}}){
 }
 	
 $email_html .= "There have been ".@{$results->{rows}}." clinpath tasks completed since $lastRunFormatted. <br>";
-$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ClinpathRefRange&query.date~dategte=".$lastRunMinusAWeek."&query.taskid/datecompleted~gte=".$lastRunFormatted."&query.taskid/datecompleted~nonblank&query.qcstate/PublicData~eq=true"."'>Click here to view them</a><p>\n";	
+$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ClinpathRefRange&query.date~dategte=".$lastRunMinusAWeek."&query.taskid/datecompleted~gte=".$lastRunFormatted."&query.taskid/datecompleted~nonblank&query.qcstate/PublicData~eq=true"."'>Click here to view them</a><p>\n";	
 
 $email_html .= "<p>Listed below are the abnormal records.</p>\n";
 	
@@ -136,7 +137,7 @@ foreach my $area (sort(keys %$summary)){
 				$color = '#E3170D';	
 			}
 			
-			$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td>".
+			$email_html .= "<tr><td><a href='".$printableUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td>".
 			"<td>".$$rec{date}."</td>".		
 			"<td>".$$rec{'taskid/datecompleted'}."</td>".						
 			"<td>".$$rec{testId}."</td>".

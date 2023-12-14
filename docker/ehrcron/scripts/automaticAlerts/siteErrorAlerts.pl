@@ -21,6 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'}
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Site Error Alerts';
@@ -84,7 +85,7 @@ if(@{$results->{rows}}){
 	$doSend = 1;
 	$email_html .= "<b>WARNING: There were ".(@{$results->{rows}})." client errors since $lastRun:</b>";
 
-    $email_html .= "<p><a href='".$baseUrl."query/Shared/executeQuery.view?schemaName=auditlog&query.queryName=audit&query.date~dategte=".$lastRun."&query.viewName=EHR Client Errors'>Click here to them</a></p>\n";
+    $email_html .= "<p><a href='".$printableUrl."query/Shared/executeQuery.view?schemaName=auditlog&query.queryName=audit&query.date~dategte=".$lastRun."&query.viewName=EHR Client Errors'>Click here to them</a></p>\n";
     $email_html .= '<hr>';
 }
 

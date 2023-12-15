@@ -46,6 +46,7 @@ my $log_file = File::Spec->catfile($folder, 'deleteLog.txt');
 
 my $default_container = '/WNPRC/EHR';
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 
 # Find today's date to append to filenames
 my $tm = localtime;

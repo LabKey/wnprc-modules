@@ -35,4 +35,3 @@ MAIL_SERVER=mailserver
 0      15,17,19 *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
 30     13,20    *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
 10     15       *     *       *         root   $ALERT_DIR/weightAlerts.pl > /dev/null
-45     12, 13, 14, 15, 16, 17, 18       *     *       *         root   $ALERT_DIR/myTestAlert.pl > /dev/null

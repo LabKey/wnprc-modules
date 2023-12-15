@@ -66,7 +66,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
     @Override
     public String getName()
     {
-        return "Water Monitoring 2";
+        return "Water Monitoring";
     }
 
     public String getCategory(){

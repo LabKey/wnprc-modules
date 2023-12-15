@@ -15,8 +15,6 @@ var logger = WNPRC.Logger;
 exports.init = function (EHR) {
     // Here is the list of trigger scripts to execute:
     var scriptsToLoad = [
-        // "study/Deaths.js",
-        // "study/PrenatalDeaths.js",
         "study/Necropsies.js"
         /*,
         "wnprc/vvc.js"*/

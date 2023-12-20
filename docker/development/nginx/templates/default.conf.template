@@ -13,21 +13,19 @@ server {
     }
 
 }
-
 # Websocket proxying configuration
 map $http_upgrade $connection_upgrade {
         default upgrade;
         ''      close;
 }
-
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
 
     server_name _;
 
-    ssl_certificate /usr/local/ssl/cert.pem;
-    ssl_certificate_key /usr/local/ssl/key.pem;
-    ssl_password_file /usr/local/ssl/key.pass;
+    ssl_certificate         ${NGINX_SERVER_CER};
+    ssl_certificate_key     ${NGINX_SERVER_KEY};
+    ssl_password_file       ${NGINX_SERVER_PASS};
 
     # Turn on OCSP stapling as recommended at
     # https://community.letsencrypt.org/t/integration-guide/13123
@@ -55,12 +53,12 @@ server {
 
     location / {
         # proxy commands go here as in your port 80 configuration
-        proxy_pass http://labkeydev:8080;
+        proxy_pass http://${LK_NAME}:8080;
     }
 
     location /_websocket {
         # configuration to enable use of websockets using nginx
-        proxy_pass http://labkeydev:8080;
+        proxy_pass http://${LK_NAME}:8080;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;

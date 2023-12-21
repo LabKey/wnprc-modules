@@ -83,11 +83,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -2832,27 +2830,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //_extHelper.clickExtButton("Import");
         waitForText("Preview");
         click(Locator.extButton("Preview"));
-        //get the popup window
-        String parentWindowHandler = getDriver().getWindowHandle();
-        String subWindowHandler = null;
-
-        Set<String> handles = getDriver().getWindowHandles();
-        // preview should generate a popup window
-        Assert.assertTrue(handles.size() > 1);
-        Iterator<String> iterator = handles.iterator();
-        // we can assume the popup window is the only other window other than the parent
-        String next = null;
-        while (iterator.hasNext()){
-            next = iterator.next();
-            if (!next.equals(parentWindowHandler))
-            {
-                subWindowHandler = next;
-            }
-        }
-        // switch to popup window
-        getDriver().switchTo().window(subWindowHandler);
+        switchToWindow(1);
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("bad-date-preview-err").findElement(getDriver()).getText());
-        getDriver().switchTo().window(parentWindowHandler);
+        switchToMainWindow();
     }
 
     @Test

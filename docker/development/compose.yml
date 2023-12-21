@@ -47,7 +47,7 @@ services:
     networks:
       - networkExt
     environment:
-      LK_NAME:
+      LK_SERVICE_NAME: ${LK_SERVICE_NAME}
       NGINX_SERVER_CER: /run/secrets/server-certificate
       NGINX_SERVER_KEY: /run/secrets/server-key
       NGINX_SERVER_PASS: /run/secrets/server-pass

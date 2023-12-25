@@ -1,8 +1,10 @@
-version: "3.5"
+networks:
+  sharedservices:
+    external: true
 
 services:
   perlscripts:
-    image: wnprcehr/ehrcron$PERL_PROD:$LK_VERSION
+    image: wnprcehr/ehrcron$PERL_PROD:$LK_VERSION${LK_FB}
     depends_on:
       - "labkey"
     volumes:
@@ -14,6 +16,7 @@ services:
     environment:
       PERL_PG_NAME: "${PERL_PG_NAME}"
       PERL_PG_USER: "${PERL_PG_USER}"
+      PERL_LINK_URL: "${PERL_LINK_URL}"
       LK_BACKGROUND_USER:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL: "${LK_BASE_URL}"

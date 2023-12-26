@@ -6,7 +6,6 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
 
     apiExternal "org.apache.commons:commons-collections4:${commonsCollections4Version}"
-    implementation "javax.servlet:jsp-api:2.0"
     implementation files(apiJar)
 
     BuildUtils.addExternalDependency(

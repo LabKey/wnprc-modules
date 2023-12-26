@@ -1,5 +1,7 @@
 package org.labkey.webutils.api.action;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.PermissionCheckableAction;
 import org.labkey.api.module.Module;
@@ -9,9 +11,6 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.webutils.api.JspPage;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by jon on 8/30/16.

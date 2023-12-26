@@ -1,18 +1,15 @@
 package org.labkey.selfregistration;
 
+import jakarta.mail.Message;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.MailHelper;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.mail.Message;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static org.labkey.api.search.SearchService._log;
 

@@ -4,8 +4,7 @@
 package org.labkey.apikey.model.jooq;
 
 
-import javax.annotation.Generated;
-
+import jakarta.annotation.Generated;
 import org.jooq.UniqueKey;
 import org.jooq.impl.AbstractKeys;
 import org.labkey.apikey.model.jooq.tables.AllowedServices;

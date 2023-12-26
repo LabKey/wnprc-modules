@@ -6,7 +6,6 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:wnprc-modules:ApiKey", depProjectConfig: 'published', depExtension: 'module')
 
-    implementation "javax.servlet:jsp-api:2.0"
     implementation project(path: "${project.parent.path}:ApiKey", configuration: "apiJarFile")
 
     BuildUtils.addExternalDependency(

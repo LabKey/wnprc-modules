@@ -1,5 +1,6 @@
 package org.labkey.deviceproxy;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
@@ -17,7 +18,6 @@ import org.labkey.deviceproxy.service.DeviceProxyService;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

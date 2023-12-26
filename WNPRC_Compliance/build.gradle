@@ -7,7 +7,6 @@ dependencies {
     implementation project(path: "${project.parent.path}:DBUtils", configuration: "apiJarFile")
     implementation project("${project.parent.path}:DBUtils")
     implementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
-    implementation "javax.servlet:jsp-api:2.0"
 
     BuildUtils.addExternalDependency(
         project,

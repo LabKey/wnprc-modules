@@ -4,16 +4,15 @@
 package org.labkey.apikey.model.jooq.tables.records;
 
 
-import java.sql.Timestamp;
-
-import javax.annotation.Generated;
-
+import jakarta.annotation.Generated;
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record4;
 import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.labkey.apikey.model.jooq.tables.KeyRevocations;
+
+import java.sql.Timestamp;
 
 
 /**

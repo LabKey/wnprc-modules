@@ -20,6 +20,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Admin Alerts';
@@ -98,7 +99,7 @@ $results = LabKey::Query::selectRows(
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There were ".(@{$results->{rows}})." client errors since $yesterday:</b>";
 
-    $email_html .= "<p><a href='".$baseUrl."query/Shared/executeQuery.view?schemaName=auditlog&query.queryName=audit&query.viewName=EHR Client Errors&query.date~dategte=".$yesterday."&key1~neq=LabKey Server Backup'>Click here to them</a></p>\n";
+    $email_html .= "<p><a href='".$printableUrl."query/Shared/executeQuery.view?schemaName=auditlog&query.queryName=audit&query.viewName=EHR Client Errors&query.date~dategte=".$yesterday."&key1~neq=LabKey Server Backup'>Click here to them</a></p>\n";
     $email_html .= '<hr>';
 }
 

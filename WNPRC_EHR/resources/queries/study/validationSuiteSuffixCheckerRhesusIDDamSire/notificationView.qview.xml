@@ -1,0 +1,37 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="last_four">
+            <properties>
+                <property name="columnTitle" value="ID Last Four"/>
+            </properties>
+        </column>
+        <column name="sire">
+            <properties>
+                <property name="columnTitle" value="Sire"/>
+            </properties>
+        </column>
+        <column name="dam">
+            <properties>
+                <property name="columnTitle" value="Dam"/>
+            </properties>
+        </column>
+        <column name="id">
+            <properties>
+                <property name="columnTitle" value="ID"/>
+            </properties>
+        </column>
+        <column name="frequency">
+            <properties>
+                <property name="columnTitle" value="Frequency"/>
+            </properties>
+        </column>
+        <column name="species">
+            <properties>
+                <property name="columnTitle" value="Species"/>
+            </properties>
+        </column>
+    </columns>
+    <sorts>
+        <sort column="last_four" descending="false"/>
+    </sorts>
+</customView>

@@ -21,6 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Incomplete Treatments';
@@ -74,7 +75,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: The following rooms do not have any obs for today as of $timestr.</b> ";
-	$email_html .= "<a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=ehr&query.queryName=RoomsWithoutObsToday"."'>Click here to view them</a><p>\n";
+	$email_html .= "<a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=ehr&query.queryName=RoomsWithoutObsToday"."'>Click here to view them</a><p>\n";
 
     foreach my $row (@{$results->{rows}}){
     	$email_html .= $row->{'room'}."<br>";
@@ -101,7 +102,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." scheduled treatments where the animal is not assigned to the project.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=treatmentSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dateeq=$datestr"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=treatmentSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dateeq=$datestr"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";
 }
 
@@ -169,7 +170,7 @@ sub processTreatments {
 			}
 	    };
 
-		my $url = "<a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=treatmentSchedule&query.timeofday~eq=$timeofday&query.date~dateeq=$datestr&query.Id/DataSet/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a></p>\n";
+		my $url = "<a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=treatmentSchedule&query.timeofday~eq=$timeofday&query.date~dateeq=$datestr&query.Id/DataSet/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a></p>\n";
 		$email_html .= "There are ".@{$results->{rows}}." scheduled $timeofday treatments.  $complete have been completed.  $url<p>\n";
 
 		if($timeOfDay >= $minTime){
@@ -234,7 +235,7 @@ if(!@{$results->{rows}}){
 	$email_html .= "All entered treatments given match what was ordered.<hr>";
 }
 else {
-	$email_html .= "<a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=TreatmentsThatDiffer&query.date~dateeq=$datestr"."'>Click here to view them</a><p />\n";
+	$email_html .= "<a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=TreatmentsThatDiffer&query.date~dateeq=$datestr"."'>Click here to view them</a><p />\n";
 
 	my $summary = {};
     foreach my $row (@{$results->{rows}}){
@@ -313,7 +314,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." active treatments for animals not currently at WNPRC.</b>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Treatment Orders&query.enddate~isblank&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Treatment Orders&query.enddate~isblank&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
 	$email_html .= "<hr>\n";
 }
 
@@ -333,7 +334,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." unresolved problems for animals not currently at WNPRC.</b>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Problem List&query.enddate~isblank&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Problem List&query.enddate~isblank&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
 	$email_html .= "<hr>\n";
 }
 

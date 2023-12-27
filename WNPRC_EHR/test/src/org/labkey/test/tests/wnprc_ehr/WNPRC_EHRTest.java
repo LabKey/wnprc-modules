@@ -83,11 +83,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -245,6 +243,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
+
+        initTest.checkJavaNotificationsFunctionality();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -2832,27 +2832,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //_extHelper.clickExtButton("Import");
         waitForText("Preview");
         click(Locator.extButton("Preview"));
-        //get the popup window
-        String parentWindowHandler = getDriver().getWindowHandle();
-        String subWindowHandler = null;
-
-        Set<String> handles = getDriver().getWindowHandles();
-        // preview should generate a popup window
-        Assert.assertTrue(handles.size() > 1);
-        Iterator<String> iterator = handles.iterator();
-        // we can assume the popup window is the only other window other than the parent
-        String next = null;
-        while (iterator.hasNext()){
-            next = iterator.next();
-            if (!next.equals(parentWindowHandler))
-            {
-                subWindowHandler = next;
-            }
-        }
-        // switch to popup window
-        getDriver().switchTo().window(subWindowHandler);
+        switchToWindow(1);
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("bad-date-preview-err").findElement(getDriver()).getText());
-        getDriver().switchTo().window(parentWindowHandler);
+        switchToMainWindow();
     }
 
     @Test
@@ -3016,6 +2998,95 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         updateProgramIncomeAccountWithValidPermissions();
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
+    }
+
+    @Test
+    public void testJavaDeathNotification() throws UnhandledAlertException {
+        //Navigates to the Necropsies table.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
+        waitForText("Necropsies");
+        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
+
+        //Views data from the most recent necropsy.
+        DataRegionTable dr = new DataRegionTable("query", getDriver());
+        dr.clickRowDetails(0);
+
+        //Saves data from most recent necropsy.
+        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
+        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
+        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
+
+        //Runs death notification in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+
+        //Validates necessary info.
+        assertTextPresent("Animal ID:", necropsyID);
+        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
+        assertTextPresent("Date of Necropsy:", necropsyDate);
+        assertTextPresent("Grant #:", necropsyAccount);
+    }
+
+    @Test
+    public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+        //Navigates to the "Enter Prenatal Death" page.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
+        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Prenatal Death"));
+
+        //Enters Prenatal Death record.
+        _helper.setDataEntryField("Id", "pd9876");
+        log("Attempting to select combo box item: female");
+        _extHelper.selectComboBoxItem("Gender:", "female" + "\u00A0");
+        log("Successfully selected combo box item: female");
+        click(Locator.buttonContainingText("Force Submit"));
+        clickAndWait(Locator.buttonContainingText("Yes"));
+
+        //Navigates to dumbster.
+        goToModule("Dumbster");
+        assertTextPresent("Prenatal Death Notification: pd9876");
+    }
+
+    private void checkJavaNotificationsFunctionality() throws UnhandledAlertException {
+        log("Starting checkJavaNotificationsFunctionality.");
+        //Navigates to home to get a fresh start.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+
+        //Navigates to admin notifications page.
+        EHRAdminPage ehrAdminPage = EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
+
+        //Updates the notification user and reply email.
+        notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
+
+        //Enables all notification that we will be testing.
+        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+
+        //Adds notification recipients.
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
+        //NEW TRY:
+        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotificationRevamp").withText("Manage Subscribed Users/Groups"), 0);
+        log("Attempting to select combo box item: EHR Administrators");
+        _ext4Helper.selectComboBoxItem("Add User Or Group:", "EHR Administrators");
+        log("Successfully selected combo box item: EHR Administrators");
+        clickButton("Close", 0);
+
+        //Enables dumbster.
+        _containerHelper.enableModules(Arrays.asList("Dumbster"));
+
+        log("Started testJavaDeathNotification.");
+        testJavaDeathNotification();
+        log("Completed testJavaDeathNotification.");
+
+        log("Started testJavaPrenatalDeathNotification.");
+        testJavaPrenatalDeathNotification();
+        log("Completed testJavaPrenatalDeathNotification.");
     }
 
     @Test

@@ -94,10 +94,10 @@ configure(modules) {
 
     apply plugin: 'java'
     if (file("${project.projectDir}/src").exists()) {
-        apply plugin: 'org.labkey.module'
+        apply plugin: 'org.labkey.build.module'
         apply from: "${wnprcDir}/gradle/java.gradle"
     } else {
-        apply plugin: 'org.labkey.fileModule'
+        apply plugin: 'org.labkey.build.fileModule'
     }
 }
 

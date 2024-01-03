@@ -1,0 +1,22 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="last_four">
+            <properties>
+                <property name="columnTitle" value="ID Last Four"/>
+            </properties>
+        </column>
+        <column name="id">
+            <properties>
+                <property name="columnTitle" value="ID"/>
+            </properties>
+        </column>
+        <column name="species">
+            <properties>
+                <property name="columnTitle" value="Species"/>
+            </properties>
+        </column>
+    </columns>
+    <sorts>
+        <sort column="last_four" descending="false"/>
+    </sorts>
+</customView>

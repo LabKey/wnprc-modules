@@ -2,6 +2,7 @@ networks:
   network1:
     driver: bridge
     name: sharedservices
+    attachable: true
 
 services:
   postgres:
@@ -45,7 +46,7 @@ services:
     depends_on:
       - "mailcatcher"
     environment:
-      MAIL_SERVER:
+      POSTFIX_MAIL_SERVER:
       TZ: America/Chicago
       SERVER_CERT: /run/secrets/server-certificate
       SERVER_KEY:  /run/secrets/server-key

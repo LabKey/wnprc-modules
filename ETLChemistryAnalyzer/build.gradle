@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'org.labkey.module'
+apply plugin: 'org.labkey.build.module'
 compileJava {
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 

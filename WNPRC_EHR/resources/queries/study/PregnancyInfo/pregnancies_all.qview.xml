@@ -20,4 +20,7 @@
         <column name="outcome_date"/>
         <column name="infantid"/>
     </columns>
+    <sorts>
+        <sort column="date_conception" descending="true"/>
+    </sorts>
 </customView>

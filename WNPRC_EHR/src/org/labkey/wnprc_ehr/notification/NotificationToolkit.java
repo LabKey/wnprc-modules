@@ -1,79 +1,45 @@
 package org.labkey.wnprc_ehr.notification;
 
-//import org.labkey.api.data.Container;
-//import org.labkey.api.security.User;
-//import org.labkey.api.data.TableSelector;
-//import org.labkey.api.data.Selector;
 
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.FilterInfo;
-import org.labkey.api.data.Results;
-import org.labkey.api.data.ResultsImpl;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.CustomViewInfo;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
-import org.labkey.remoteapi.query.Filter;
-import org.labkey.wnprc_ehr.WNPRC_EHREmail;
-//import org.labkey.remoteapi.query.Sort;
+import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
-
-import org.labkey.api.query.QueryService;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
-import org.labkey.wnprc_ehr.notification.NotificationToolkit;
-
-import javax.mail.Message;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 import static org.labkey.api.search.SearchService._log;
-import javax.mail.Address;
-import java.util.UUID;
 
 
 public class NotificationToolkit {

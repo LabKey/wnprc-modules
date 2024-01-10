@@ -244,7 +244,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.enableDeathNotification();
+        initTest.deathNotificationSetup();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -3063,7 +3063,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed testJavaPrenatalDeathNotification.");
     }
 
-    private void enableDeathNotification() throws UnhandledAlertException {
+    private void deathNotificationSetup() throws UnhandledAlertException {
         log("Starting checkJavaNotificationsFunctionality.");
         //Navigates to home to get a fresh start.
         beginAt(buildURL("project", getContainerPath(), "begin"));
@@ -3076,7 +3076,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
         //Enables all notification that we will be testing.
-        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
 //        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");

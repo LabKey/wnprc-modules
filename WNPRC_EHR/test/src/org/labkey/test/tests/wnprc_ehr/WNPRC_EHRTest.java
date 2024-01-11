@@ -243,7 +243,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.checkJavaNotificationsFunctionality();
+        initTest.deathNotificationSetup();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -3034,6 +3034,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     @Test
     public void testJavaDeathNotification() throws UnhandledAlertException {
+
+        log("Started testJavaDeathNotification.");
+
         //Navigates to the Necropsies table.
         beginAt(buildURL("project", getContainerPath(), "begin"));
         beginAt("/ehr/" + getContainerPath() + "/datasets.view");
@@ -3063,10 +3066,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
         assertTextPresent("Date of Necropsy:", necropsyDate);
         assertTextPresent("Grant #:", necropsyAccount);
+
+        log("Completed testJavaDeathNotification.");
     }
 
     @Test
     public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+
+        log("Started testJavaPrenatalDeathNotification.");
+
         //Navigates to the "Enter Prenatal Death" page.
         beginAt(buildURL("project", getContainerPath(), "begin"));
         waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
@@ -3083,9 +3091,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Navigates to dumbster.
         goToModule("Dumbster");
         assertTextPresent("Prenatal Death Notification: pd9876");
+
+        log("Completed testJavaPrenatalDeathNotification.");
     }
 
-    private void checkJavaNotificationsFunctionality() throws UnhandledAlertException {
+    private void deathNotificationSetup() throws UnhandledAlertException {
         log("Starting checkJavaNotificationsFunctionality.");
         //Navigates to home to get a fresh start.
         beginAt(buildURL("project", getContainerPath(), "begin"));
@@ -3098,7 +3108,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
         //Enables all notification that we will be testing.
-        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
 //        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
@@ -3111,14 +3121,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));
-
-        log("Started testJavaDeathNotification.");
-        testJavaDeathNotification();
-        log("Completed testJavaDeathNotification.");
-
-        log("Started testJavaPrenatalDeathNotification.");
-        testJavaPrenatalDeathNotification();
-        log("Completed testJavaPrenatalDeathNotification.");
     }
 
     @Test

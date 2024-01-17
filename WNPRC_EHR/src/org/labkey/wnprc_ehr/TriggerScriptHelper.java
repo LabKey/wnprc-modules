@@ -185,7 +185,8 @@ public class TriggerScriptHelper {
 
     public void sendDeathNotification(final List<String> ids, String hostName) {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
             //Sends original Death Notification.
             //Remove this if-else when new notification is approved.
             if (NotificationService.get().isActive(new DeathNotification(), container)) {
@@ -210,6 +211,10 @@ public class TriggerScriptHelper {
             else {
                 _log.info("Death Notification Revamp is not enabled, will not send death notification");
             }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send death notification");
+        }
     }
 
     public void sendPregnancyNotification(final List<String> ids, final List<String> objectids) {

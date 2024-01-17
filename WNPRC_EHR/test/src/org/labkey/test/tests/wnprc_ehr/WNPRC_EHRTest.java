@@ -3096,7 +3096,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     private void deathNotificationSetup() throws UnhandledAlertException {
-        log("Starting checkJavaNotificationsFunctionality.");
+        log("Starting deathNotificationSetup.");
         //Navigates to home to get a fresh start.
         beginAt(buildURL("project", getContainerPath(), "begin"));
 
@@ -3104,23 +3104,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         EHRAdminPage ehrAdminPage = EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
         NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
 
-        //Updates the notification user and reply email.
-        notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
+        //Enable LDK Site Notification
+        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+        click(Locator.tagWithText("li", "Enabled"));
+        clickButtonContainingText("Save");
+        waitForText("Success");
+        clickButtonContainingText("OK");
+        waitForText("Notification Site Admin");
 
-        //Enables all notification that we will be testing.
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
-
-        //Adds notification recipients.
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
-        //NEW TRY:
-        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotificationRevamp").withText("Manage Subscribed Users/Groups"), 0);
-        log("Attempting to select combo box item: EHR Administrators");
-        _ext4Helper.selectComboBoxItem("Add User Or Group:", "EHR Administrators");
-        log("Successfully selected combo box item: EHR Administrators");
-        clickButton("Close", 0);
-
-        //Enables dumbster.
-        _containerHelper.enableModules(Arrays.asList("Dumbster"));
+        log("Completed deathNotificationSetup.");
     }
 
     @Test

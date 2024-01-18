@@ -3086,9 +3086,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Enable LDK Site Notification
         beginAt(buildURL("ldk", "notificationSiteAdmin"));
+        waitForText("Notification Site Admin");
         click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
         click(Locator.tagWithText("li", "Enabled"));
-        clickButtonContainingText("Save");
+        click(Locator.tagWithText("span", "Save"));
         waitForText("Success");
         clickButtonContainingText("OK");
         waitForText("Notification Site Admin");

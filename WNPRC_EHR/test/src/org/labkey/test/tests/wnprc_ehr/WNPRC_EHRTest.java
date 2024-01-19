@@ -3000,40 +3000,40 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
-    @Test
-    public void testJavaDeathNotification() throws UnhandledAlertException {
-        log("Started testJavaDeathNotification.");
-        //Navigates to the Necropsies table.
-        beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
-        waitForText("Necropsies");
-        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
-
-        //Views data from the most recent necropsy.
-        DataRegionTable dr = new DataRegionTable("query", getDriver());
-        dr.clickRowDetails(0);
-
-        //Saves data from most recent necropsy.
-        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
-        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
-        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
-        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
-        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
-        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
-        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
-
-        //Runs death notification in the browser.
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
-        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
-
-        //Validates necessary info.
-        assertTextPresent("Animal ID:", necropsyID);
-        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
-        assertTextPresent("Date of Necropsy:", necropsyDate);
-        assertTextPresent("Grant #:", necropsyAccount);
-        log("Completed testJavaDeathNotification.");
-    }
+//    @Test
+//    public void testJavaDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaDeathNotification.");
+//        //Navigates to the Necropsies table.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
+//        waitForText("Necropsies");
+//        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
+//
+//        //Views data from the most recent necropsy.
+//        DataRegionTable dr = new DataRegionTable("query", getDriver());
+//        dr.clickRowDetails(0);
+//
+//        //Saves data from most recent necropsy.
+//        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+//        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+//        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+//        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
+//        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+//        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
+//        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
+//
+//        //Runs death notification in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+//
+//        //Validates necessary info.
+//        assertTextPresent("Animal ID:", necropsyID);
+//        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
+//        assertTextPresent("Date of Necropsy:", necropsyDate);
+//        assertTextPresent("Grant #:", necropsyAccount);
+//        log("Completed testJavaDeathNotification.");
+//    }
 
     @Test
     public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {

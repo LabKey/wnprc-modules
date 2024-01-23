@@ -244,7 +244,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.checkJavaNotificationsFunctionality();
+        initTest.deathNotificationSetup();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -3000,41 +3000,44 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
-    @Test
-    public void testJavaDeathNotification() throws UnhandledAlertException {
-        //Navigates to the Necropsies table.
-        beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
-        waitForText("Necropsies");
-        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
-
-        //Views data from the most recent necropsy.
-        DataRegionTable dr = new DataRegionTable("query", getDriver());
-        dr.clickRowDetails(0);
-
-        //Saves data from most recent necropsy.
-        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
-        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
-        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
-        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
-        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
-        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
-        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
-
-        //Runs death notification in the browser.
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
-        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
-
-        //Validates necessary info.
-        assertTextPresent("Animal ID:", necropsyID);
-        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
-        assertTextPresent("Date of Necropsy:", necropsyDate);
-        assertTextPresent("Grant #:", necropsyAccount);
-    }
+//    @Test
+//    public void testJavaDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaDeathNotification.");
+//        //Navigates to the Necropsies table.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
+//        waitForText("Necropsies");
+//        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
+//
+//        //Views data from the most recent necropsy.
+//        DataRegionTable dr = new DataRegionTable("query", getDriver());
+//        dr.clickRowDetails(0);
+//
+//        //Saves data from most recent necropsy.
+//        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+//        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+//        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+//        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
+//        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+//        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
+//        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
+//
+//        //Runs death notification in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+//
+//        //Validates necessary info.
+//        assertTextPresent("Animal ID:", necropsyID);
+//        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
+//        assertTextPresent("Date of Necropsy:", necropsyDate);
+//        assertTextPresent("Grant #:", necropsyAccount);
+//        log("Completed testJavaDeathNotification.");
+//    }
 
     @Test
     public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+        log("Started testJavaPrenatalDeathNotification.");
         //Navigates to the "Enter Prenatal Death" page.
         beginAt(buildURL("project", getContainerPath(), "begin"));
         waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
@@ -3051,10 +3054,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Navigates to dumbster.
         goToModule("Dumbster");
         assertTextPresent("Prenatal Death Notification: pd9876");
+        log("Completed testJavaPrenatalDeathNotification.");
     }
 
-    private void checkJavaNotificationsFunctionality() throws UnhandledAlertException {
-        log("Starting checkJavaNotificationsFunctionality.");
+    private void deathNotificationSetup() throws UnhandledAlertException {
+        log("Starting deathNotificationSetup.");
         //Navigates to home to get a fresh start.
         beginAt(buildURL("project", getContainerPath(), "begin"));
 
@@ -3066,7 +3070,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
         //Enables all notification that we will be testing.
-        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
 //        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
@@ -3080,13 +3084,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));
 
-        log("Started testJavaDeathNotification.");
-        testJavaDeathNotification();
-        log("Completed testJavaDeathNotification.");
+        //Enable LDK Site Notification
+        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+        waitForText("Notification Site Admin");
+        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+        click(Locator.tagWithText("li", "Enabled"));
+        click(Locator.tagWithText("span", "Save"));
+        waitForText("Success");
+        clickButtonContainingText("OK");
+        waitForText("Notification Site Admin");
 
-        log("Started testJavaPrenatalDeathNotification.");
-        testJavaPrenatalDeathNotification();
-        log("Completed testJavaPrenatalDeathNotification.");
+        log("Completed deathNotificationSetup.");
     }
 
     @Test

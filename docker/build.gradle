@@ -368,12 +368,31 @@ tasks.register("downloadEhrcron") { Task t ->
         def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
         {
-            println dockerStr.get()
-            String branchName = dockerStr.get()
-            t.project.exec {
-                executable "docker"
-                args "pull", "wnprcehr/ehrcronprod:${branchName}"
+            switch (buildType){
+                case 'fb':
+                    println 'Tomcat fb'
+                    branch=project.labkeyYear+'.'+project.labkeyMonth+'_'+project.labkeyFB;
+                    break;
+                case 'SNAPSHOT':
+                    println 'Tomcat SNAPSHOT'
+                    branch=project.labkeyYear+'.'+project.labkeyMonth;
+                    break;
+                default:
+                    branch=project.labkeyVersion;
+                    break;
             }
+            if (project.prod){
+                t.project.exec {
+                    executable "docker"
+                    args "pull", "wnprcehr/ehrcronprod:"+branch
+                }
+            }else{
+                t.project.exec {
+                    executable "docker"
+                    args "pull", "wnprcehr/ehrcron:"+branch
+                }
+            }
+            
         }
         else{
             logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadEhrcron -PbranchName=22.11_fb)'
@@ -381,7 +400,7 @@ tasks.register("downloadEhrcron") { Task t ->
     }
     group 'Docker'
     description 'Download Docker Images from Docker Hub'
-    dependsOn "checkDocker", "dockerLogin"
+    dependsOn "checkDocker", "dockerLogin", "processbranchName"
 }
 
 tasks.register("downloadEhrcronPlug", DockerPullImage){

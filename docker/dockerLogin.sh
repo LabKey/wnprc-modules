@@ -23,7 +23,7 @@ done
 set -- "${args[@]}"
 
 if [[ $path ]]; then
-    cat $path.dockertoken.txt | docker login --username $username --password-stdin
+    cat "${path}dockertoken.txt" | docker login --username $username --password-stdin
 else
     echo -n 'Must provide path to token file and username for DockerHub'
 fi

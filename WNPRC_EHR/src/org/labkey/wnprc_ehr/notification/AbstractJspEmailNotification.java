@@ -14,7 +14,7 @@ import org.labkey.api.util.MailHelper;
 import org.labkey.wnprc_ehr.WNPRC_EHREmail;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
-import javax.mail.Message;
+import jakarta.mail.Message;
 import java.util.List;
 
 /**

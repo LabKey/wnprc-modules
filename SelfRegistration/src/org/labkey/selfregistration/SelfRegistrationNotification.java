@@ -8,7 +8,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.MailHelper;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.mail.Message;
+import jakarta.mail.Message;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

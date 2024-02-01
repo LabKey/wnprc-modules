@@ -4,7 +4,7 @@
 package org.labkey.deviceproxy.model.jooq.tables.records;
 
 
-import javax.annotation.Generated;
+import jakarta.annotation.Generated;
 
 import org.jooq.Field;
 import org.jooq.Record1;

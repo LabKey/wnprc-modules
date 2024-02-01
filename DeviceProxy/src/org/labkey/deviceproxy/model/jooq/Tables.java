@@ -4,7 +4,7 @@
 package org.labkey.deviceproxy.model.jooq;
 
 
-import javax.annotation.Generated;
+import jakarta.annotation.Generated;
 
 import org.labkey.deviceproxy.model.jooq.tables.AllowedService;
 import org.labkey.deviceproxy.model.jooq.tables.AuthMethod;

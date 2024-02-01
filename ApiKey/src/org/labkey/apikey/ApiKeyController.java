@@ -19,7 +19,7 @@ import org.labkey.apikey.api.exception.InvalidApiKey;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class ApiKeyController extends SpringActionController
 {

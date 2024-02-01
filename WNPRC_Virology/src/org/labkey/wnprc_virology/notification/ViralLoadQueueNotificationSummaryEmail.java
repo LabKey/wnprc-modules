@@ -14,8 +14,8 @@ import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
-import javax.mail.Address;
-import javax.mail.Message;
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

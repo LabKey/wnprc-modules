@@ -10,8 +10,8 @@ import org.labkey.api.view.template.PageConfig;
 import org.labkey.webutils.api.JspPage;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Created by jon on 8/30/16.

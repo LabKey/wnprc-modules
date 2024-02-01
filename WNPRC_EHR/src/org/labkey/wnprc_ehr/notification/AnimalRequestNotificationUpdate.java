@@ -15,8 +15,8 @@ import org.labkey.wnprc_ehr.TriggerScriptHelper;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
 
-import javax.mail.Address;
-import javax.mail.Message;
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;

@@ -21,8 +21,8 @@ import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
-import javax.mail.Address;
-import javax.mail.Message;
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

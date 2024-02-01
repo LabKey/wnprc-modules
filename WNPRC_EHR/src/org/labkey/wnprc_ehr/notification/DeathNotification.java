@@ -7,7 +7,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 
-import javax.mail.Address;
+import jakarta.mail.Address;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

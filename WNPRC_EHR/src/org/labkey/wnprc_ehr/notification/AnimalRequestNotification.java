@@ -10,8 +10,8 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.mail.Address;
-import javax.mail.Message;
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;

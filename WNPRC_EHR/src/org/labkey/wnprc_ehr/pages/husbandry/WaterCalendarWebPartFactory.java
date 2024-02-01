@@ -8,7 +8,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.webutils.api.JspPage;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 public class WaterCalendarWebPartFactory extends BaseWebPartFactory{

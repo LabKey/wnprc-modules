@@ -1,8 +1,9 @@
 import * as React from "react";
 import { FC } from 'react';
-import { DefaultFormContainer } from '../components/DefaultFormContainer';
-import { CustomInputPane } from '../components/CustomInputPane';
-import {InstructionsPane} from '../components/InstructionsPane';
+import { DefaultFormContainer } from '../../components/DefaultFormContainer';
+import { CustomInputPane } from '../../components/CustomInputPane';
+import {InstructionsPane} from '../../components/InstructionsPane';
+import {ActionURL} from '@labkey/api';
 
 import {
     inputs,
@@ -10,9 +11,10 @@ import {
     restraintInputs,
 } from './customInputs';
 export const ResearchUltrasounds: FC<any> = (props) => {
-    const taskid: string = LABKEY.ActionURL.getParameter('taskid');
+    const taskid: string = ActionURL.getParameter('taskid');
+    const formStartTime: Date = new Date(new Date().toISOString().slice(0, 16).replace('T', ' '));
 
-    const formType: string = LABKEY.ActionURL.getParameter('formType');
+    const formType: string = ActionURL.getParameter('formType');
     const reviewRequired = formType ? !formType.includes('Review') : true;
     const components: any[] = [
         {
@@ -75,6 +77,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                 components={components}
                 redirectSchema={"study"}
                 redirectQuery={"research_ultrasounds"}
+                formStartTime={formStartTime}
             />
         </div>
     );

@@ -1,0 +1,400 @@
+.content-wrapper {
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  border-color: #dddddd;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+}
+
+.content-wrapper-body {
+  padding: 15px;
+}
+
+.react-datepicker-wrapper {
+  margin-bottom: 5px;
+  height: 30px;
+  width: 100%;
+  max-width: 225px;
+}
+
+/* need this rule so the size is respected */
+/* todo maybe we can style the component via jsx instead?*/
+.react-datepicker__input-container {
+  display: block !important;
+}
+
+.custom-date-input {
+  width: 100%;
+  position: relative;
+  min-height: 1px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+#date-calendar-img {
+  display: inline-block;
+  position: absolute;
+  right: 5px;
+  top: 1px;
+  cursor: pointer;
+}
+
+.remove-record-button {
+  margin-left: 0px;
+  margin-right: -5px !important;
+  float: right;
+  background: none;
+}
+
+.remove-record-button {
+  margin-left: 0px;
+  float: right;
+  border: none;
+  font-size: 2rem;
+  fill: red;
+}
+
+.card-header:hover {
+  cursor: pointer;
+}
+
+.card-header {
+  background-color: #e0e0e0;
+}
+
+.card-body {
+  padding: 1rem;
+  border: 1px solid;
+  border-color: #e0e0e0;
+  margin-bottom: 2rem;
+}
+
+.card-body > div > .row > .col-xs-2 {
+  margin-right: 5px;
+}
+
+.card {
+  border-color: #e0e0e0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 2px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.row.card {
+  -webkit-transition: 0.5s !important;
+  -moz-transition: 0.5s !important;
+  -o-transition: 0.5s !important;
+  transition: 0.5s !important;
+}
+
+.loading {
+  background-image: url("../../../../../../platform/core/webapp/_images/ajax-loading.gif");
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1000ms;
+}
+
+.notloading {
+  opacity: 1;
+  transition: opacity 1000ms;
+}
+
+input.form-control,
+textarea.form-control,
+select.form-control {
+  max-width: 225px;
+  float: left;
+  width: 100%;
+}
+
+.submit-btn {
+  float: right;
+}
+
+.modal-backdrop {
+  opacity: 0.5;
+}
+
+#modal-body {
+  margin: auto;
+  width: 75%;
+  padding: 10px;
+}
+
+#modal-body-batch {
+  padding-left: 75px;
+}
+
+.modal-title {
+  float: left;
+}
+
+.modal-content > .modal-header {
+  padding: 15px;
+}
+
+.centered-wrapper {
+  margin: auto;
+  max-width: 500px;
+}
+
+.panel-portal-left {
+  margin-right: 15px;
+}
+
+.panel-portal-beneath {
+  clear: left;
+  max-width: 500px;
+}
+
+.form-wrapper {
+  padding: 15px;
+  position: relative;
+  display: flex;
+}
+
+.default-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.form-row-wrapper {
+  width: 95%;
+}
+
+.multi-col-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Adjust the number of columns as needed */
+  gap: 10px; /* Adjust the gap between columns */
+}
+
+.panel-input-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.panel-label {
+  text-align: left;
+  margin-right: 10px; /* add margin-right to separate from input */
+  width: auto;
+  margin-left: 10px;
+}
+
+.panel-input-row input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1; /* update to flex: 1 to take up remaining space */
+}
+
+.animal-info-pane {
+  position: sticky;
+  max-width: 500px;
+  height: 100%;
+  top: 45px;
+}
+
+.panel-portal-left {
+  max-width: 500px;
+}
+
+button {
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+  margin-right: 5px !important;
+}
+
+input[id^="animalid"],
+input[id^="weight"],
+select[id^="restraint"] {
+  margin-bottom: 5px;
+  text-transform: lowercase;
+}
+
+.wnprc-secondary-btn {
+  color: #5b5b5b !important;
+  border-color: #95989a !important;
+}
+
+#animal-info-empty {
+  padding: 15px;
+  padding-bottom: 40px;
+}
+
+#locations-select {
+  width: 160px;
+}
+
+.hide-record {
+  animation: slideout 0.5s linear 0.5s;
+  animation-iteration-count: 1;
+  animation-delay: 0s;
+  -webkit-animation-fill-mode: forwards;
+}
+
+.visible {
+  animation: slidein 3s linear 1s infinite alternate;
+}
+
+#invalid-tooltip {
+  float:right;
+  margin: 4px;
+  z-index: 0;
+  top: .85rem;
+  left: 1px;
+}
+
+@keyframes slideout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media screen and (max-width: 1023px) {
+  input.form-control,
+  textarea.form-control,
+  select.form-control {
+    width: 80%;
+    margin-left: 1em;
+  }
+
+  #date-calendar-img {
+    display: inline-block;
+    position: absolute;
+    right: -6px;
+    top: 1px;
+    cursor: pointer;
+  }
+}
+/**
+  React datepicker overrides
+ */
+
+.react-datepicker__input-container > input {
+  width: 100%;
+  min-height: 1px;
+  height: 26px;
+  border: none;
+  border-image: initial;
+  padding-left: 8px;
+  padding-right: 15px;
+  font-size: 14px;
+}
+
+.react-datepicker__aria-live {
+  position: absolute;
+  clip-path: circle(0);
+  border: 0;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  width: 1px;
+  white-space: nowrap;
+}
+
+/* Close button for react bootstrap submit modal */
+.btn-close {
+  position: absolute;
+  right: 32px;
+  top: 2px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+  border-width: 0px;
+  background: rgba(0,0,0,0.0);
+}
+.btn-close:hover {
+  opacity: 1;
+}
+
+.btn-close:after {
+  display: inline-block;
+  content: "\00d7";
+  font-size: 30px;
+}
+
+
+.my-datepicker-popper {
+  z-index: 9999; /* Ensure the popper is displayed above other elements */
+}
+
+.react-datepicker__time-container {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: calc(100% + 5px);
+}
+
+.react-error-text {
+  margin-left: 10px;
+}
+
+/* checkbox styling */
+.checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  margin-right: 6px;
+}
+
+.checkbox-custom.required {
+  border: 1px solid red;
+}
+.checkbox-container input[type="checkbox"]:checked + .checkbox-custom {
+  background-color: #007bff;
+}
+
+/* Additional styling for the checkmark */
+.checkbox-container input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 11px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-left: 6px;
+  margin-top: 2px;
+}
+
+.text-input {
+  display: flex;
+}
+
+.date-controller {
+  display: flex;
+}
+
+.date-controller-error .react-datepicker__input-container input {
+  border: 1px solid red;
+}
+
+.dropdown-controller {
+  display: flex;
+}

@@ -1,4 +1,3 @@
-import { TaskValuesType } from '../watermonitoring/typings/main';
 import { ActionURL, Filter, Query, Utils } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
@@ -177,40 +176,6 @@ export const lookupAnimalInfo = (id:string) => {
   });
 };
 
-export const insertTaskCommand = (taskid, title) => {
-  let taskObject = {
-
-    taskid:     taskid,
-    title:      title,
-    category:   "task",
-    qcstate:    1, //Complete
-    formType:   title
-    // assignedTo:
-  };
-  let taskCommand = {
-      schemaName: "ehr",
-      queryName: "tasks",
-      command: "insert",
-      rows: [taskObject]
-    };
-
-
-  return taskCommand;
-
-};
-
-export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: number, QCStateLabel: string): Array<TaskValuesType> => {
-  return [{
-    taskId: taskId,
-    duedate: dueDate,
-    assignedTo: assignedTo,
-    category: "task",
-    title: "Enter Water Daily Amount",
-    formType: "Enter Water Daily Amount",
-    QCStateLabel: QCStateLabel
-  }];
-};
-
 /*
 An expanded helper function for lookupAnimalInfo. This function updates the components animalInfo state.
 
@@ -220,15 +185,14 @@ TODO test caching if used for bulk animal upload
 @param setAnimalInfoState A state setter for animalInfoState
  */
 export const getAnimalInfo = (id, setAnimalInfo,setAnimalInfoState, setAnimalInfoCache) => {
-      lookupAnimalInfo(id).then((d) => {
-        setAnimalInfo(d);
-        setAnimalInfoState("loading-success");
-        setAnimalInfoCache(d);
-      }).catch((d)=> {
-        setAnimalInfoState("loading-unsuccess");
-      });
+  lookupAnimalInfo(id).then((d) => {
+    setAnimalInfo(d);
+    setAnimalInfoState("loading-success");
+    setAnimalInfoCache(d);
+  }).catch((d)=> {
+    setAnimalInfoState("loading-unsuccess");
+  });
 }
-
 /*
 Helper function to open the DatePicker component
 

@@ -1,6 +1,6 @@
 import { Filter } from '@labkey/api';
-import { lookupAnimalInfo, findAccount } from '../query/helpers';
-import { InfoProps } from './typings';
+import { lookupAnimalInfo, findAccount } from '../../query/helpers';
+import { InfoProps } from '../../query/typings';
 
 const validateId = (value: string) => {
     return lookupAnimalInfo(value).then((data: InfoProps) => {

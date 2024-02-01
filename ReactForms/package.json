@@ -1,0 +1,103 @@
+{
+  "name": "ReactForms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "build": "better-npm-run build",
+    "start": "cross-env NODE_ENV=development LK_MODULE=WNPRC_EHR webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
+    "build-prod": "better-npm-run build-prod",
+    "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@labkey/api": "1.21.0",
+    "@types/lodash": "^4.14.202",
+    "dayjs": "^1.11.10",
+    "lodash": "^4.17.21",
+    "react": "~18.2.0",
+    "react-bootstrap": "~1.6.8",
+    "react-bootstrap-typeahead": "6.3.2",
+    "react-data-grid": "7.0.0-beta.42",
+    "react-data-grid-addons": "7.0.0-alpha.24",
+    "react-datepicker": "~5.0.0",
+    "react-dom": "~18.2.0",
+    "react-hook-form": "7.49.3",
+    "react-select": "5.8.0",
+    "react-tabs": "~6.0.2",
+    "rsvp": "4.8.5",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "urijs": "^1.19.11"
+  },
+  "devDependencies": {
+    "@babel/core": "7.22.5",
+    "@labkey/build": "6.13.0",
+    "@types/react": "~18.2.48",
+    "@types/react-bootstrap": "~0.32.35",
+    "@types/react-data-grid": "4.0.12",
+    "@types/react-dom": "~18.2.18",
+    "better-npm-run": "0.1.1",
+    "css-loader": "^6.9.1",
+    "style-loader": "^3.3.4",
+    "webpack": "5.90.0",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "4.15.1"
+  },
+  "betterScripts": {
+    "start": {
+      "command": "webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "build": {
+      "command": "webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "build-prod": {
+      "command": "webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+      "env": {
+        "NODE_ENV": "production",
+        "PROD_SOURCE_MAP": "source-map"
+      }
+    }
+  },
+  "jest": {
+    "globals": {
+      "LABKEY": {}
+    },
+    "moduleFileExtensions": [
+      "tsx",
+      "ts",
+      "js"
+    ],
+    "preset": "ts-jest",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/jest.setup.ts"
+    ],
+    "testEnvironment": "jsdom",
+    "testMatch": null,
+    "testRegex": "(\\.(test|spec))\\.(ts|tsx)$",
+    "testResultsProcessor": "jest-teamcity-reporter",
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "isolatedModules": true,
+          "tsconfig": "node_modules/@labkey/build/webpack/tsconfig.json"
+        }
+      ]
+    }
+  }
+}

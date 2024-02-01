@@ -1,21 +1,21 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
+import {createRoot} from "react-dom/client";
+
 
 // Main react component
 import { ResearchUltrasounds } from './ResearchUltrasounds';
 
 // Import stylesheets
-import '../wnprc_ehr.scss';
+//import '../../wnprc_ehr.scss';
 
 
 const render = () => {
-    ReactDOM.render(
+    createRoot(document.getElementById("app")).render(
         <AppContainer>
             <ResearchUltrasounds />
-        </AppContainer>,
-        document.getElementById('app')
-    )
+        </AppContainer>
+    );
 };
 
 declare const module: any;

@@ -7,13 +7,15 @@ import {
     getTask,
     saveRowsDirect,
     wait,
-    getLsid
+    getLsid,
+    getQCRowID
 } from '../query/helpers';
 import AnimalInfoPane from "./AnimalInfoPane";
 import {TaskPane} from "./TaskPane";
 import ErrorModal from '../components/ErrorModal';
 import { ActionURL, Filter, Utils } from '@labkey/api';
 import { useForm, FormProvider } from 'react-hook-form';
+import { FormMetadataCollection } from './FormMetadataCollection';
 
 interface Component {
     type: React.FunctionComponent<any>;
@@ -33,6 +35,7 @@ interface formProps {
     command: string;
     components: Component[];
     reviewRequired: boolean;
+    formStartTime: Date;
 }
 
 /*
@@ -55,7 +58,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         command,
         redirectSchema,
         redirectQuery,
-        reviewRequired
+        reviewRequired,
+        formStartTime
     } = props;
 
     const methods = useForm({mode: "onChange"});
@@ -143,13 +147,21 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         const finalFormData = [];
         // generate taskId if required
         const newTaskId = prevTaskId ? prevTaskId : Utils.generateUUID().toUpperCase();
+
+        const formMetaData = FormMetadataCollection( {
+            schemaName:redirectSchema,
+            queryName: redirectQuery,
+            taskid: newTaskId,
+            startTime: formStartTime,
+        });
+        finalFormData.push(generateFormData("wnprc", "session_log","insert", formMetaData));
         //finalize (ehr_tasks) submission
         data.TaskPane = {
             ...data.TaskPane,
             taskid: newTaskId,
             category: 'task',
             formType: taskType,
-            qcstate: reviewRequired ? 4 : 1
+            qcstate: reviewRequired ? await getQCRowID("Review Required") : await getQCRowID("Completed")
         };
         // Create format to submit new task
         const taskData = generateFormData("ehr", "tasks", command, data.TaskPane);
@@ -160,7 +172,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             let jsonData = {commands: data}
             console.log('calling save rows on: ', jsonData);
             // save rows to database and redirect to desired schema/query
-            saveRowsDirect(jsonData)
+            /*saveRowsDirect(jsonData)
                 .then((data) => {
                     console.log('done!!');
                     console.log(JSON.stringify(data));
@@ -177,11 +189,12 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 .catch((e) => {
                     console.log(e);
                     setSubmitTextBody(e.exception);
-                });
+                });*/
             }).catch(e => {
                 console.error(e);
                 setSubmitTextBody(e.exception);
-            });
+            })
+
     }
 
     // Make sure if loading in from a taskId the render doesn't return before it fetches the previous task
@@ -237,7 +250,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                         setAnimalInfoCache={setAnimalInfoCache}
                     />
                 </FormProvider>
-
             </div>
     );
 

@@ -58,6 +58,7 @@
     <dataset name="restraints" id="1091" category="ColonyManagement"/>
     <dataset name="foodDeprives" id="1092" category="ColonyManagement"/>
     <dataset name="Behavior Abstract" id="1093" category="ColonyManagement"/>
+    <dataset name="pregnancyConceptionDate" id="6016" category="ColonyManagement"/>
     <dataset name="pregnancy_outcomes" id="6002" category="ColonyManagement"/>
     <dataset name="ultrasounds" id="6003" category="ColonyManagement"/>
     <dataset name="research_ultrasounds" id="6005" category="ColonyManagement"/>

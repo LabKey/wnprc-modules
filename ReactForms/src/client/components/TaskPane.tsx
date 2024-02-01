@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import TextInput from './TextInput';
 import InputLabel from './InputLabel';
 import '../theme/css/index.css';
-import { ConfigProps } from '../weight/typings/main';
+import { ConfigProps } from '../query/typings';
 import DropdownSearch from './DropdownSearch';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
 import ControlledDateInput from './ControlledDateInput';

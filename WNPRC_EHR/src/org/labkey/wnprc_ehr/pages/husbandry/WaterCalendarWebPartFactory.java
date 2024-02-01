@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.pages.husbandry;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.JspView;
@@ -8,7 +9,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.webutils.api.JspPage;
 
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 public class WaterCalendarWebPartFactory extends BaseWebPartFactory{

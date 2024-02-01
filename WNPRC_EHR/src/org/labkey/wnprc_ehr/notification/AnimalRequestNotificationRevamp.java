@@ -1,26 +1,12 @@
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.commons.math3.analysis.function.Abs;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
-import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
-import org.labkey.api.security.UserPrincipal;
-import org.labkey.api.ldk.notification.NotificationService;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.mail.Address;
-import javax.mail.Message;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-
-import static org.labkey.api.search.SearchService._log;
 
 public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
 {

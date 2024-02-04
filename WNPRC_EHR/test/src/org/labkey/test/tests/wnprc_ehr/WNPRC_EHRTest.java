@@ -192,21 +192,35 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return TestFileUtils.getSampleData("wnprc_ehr/wnprcEhrTestStudyPolicy.xml");
     }
 
+    private static void folderSetup()
+    {
+
+    }
+
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
         WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
-        initTest.initProject("EHR");
-        initTest.createTestSubjects();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR"));
+        initTest.createProjectAndFolders("EHR");
+        initTest.clickFolder(initTest.getProjectName());
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
 
         initTest.createFinanceManagementFolders();
+        initTest.createResearchServicesFolders();
+        initTest.clickFolder("EHR");
+        initTest.addFinanceRelatedWebParts("/WNPRC_TestProject/EHR");
+        initTest.loadEHRBillingTableDefinitions();
+
+        initTest.clickFolder(initTest.getProjectName());
+
         initTest.clickFolder("Private");
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
 
@@ -214,14 +228,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.updateEHRFormFrameworkTypes();
 
         initTest.loadBloodBilledByLookup();
-        initTest.addFinanceRelatedWebParts();
+        initTest.addFinanceRelatedWebParts(initTest.getBillingContainerPath());
         initTest.clickFolder("Private");
         initTest.loadEHRBillingTableDefinitions();
 
         initTest.clickFolder("Private");
         initTest.createStudyLinkedSchema();
         initTest.createCoreLinkedSchema();
-        initTest.createEHRLinkedSchema();
+        initTest.createEHRLinkedSchema(PROJECT_NAME + "/" + PRIVATE_TARGET_FOLDER_PATH);
+        initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
+        initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
+
 
         initTest.clickFolder("EHR");
         initTest.createEHRBillingPublicLinkedSchema();
@@ -231,6 +248,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
 
         initTest.createWNPRCBillingPublicLinkedSchema();
+
+        initTest.initCreatedProject();
+        initTest.createTestSubjects();
 
         initTest.clickFolder("PI Portal");
         initTest.addBillingPublicWebParts();
@@ -270,6 +290,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         goToProjectHome(PROJECT_NAME);
     }
 
+    // Validate queries at end of tests instead of during import
+    // TODO: Add linked schemas to tests
+    @Override
+    protected boolean shouldValidateQueries()
+    {
+        return true;
+    }
+
+    @Override
+    protected boolean skipStudyImportQueryValidation()
+    {
+        return true;
+    }
+
     private void createFinanceManagementFolders()
     {
         _containerHelper.createSubfolder(getProjectName(), "WNPRC_Units", "Collaboration");
@@ -277,6 +311,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services", "Financial_Management", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "Private", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "PI Portal", "Collaboration");
+    }
+
+    private void createResearchServicesFolders()
+    {
+        // This assumes WNPRC_Units is already created
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Research_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "Virology_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VL_DB", "Collaboration");
     }
 
     private void loadBloodBilledByLookup() throws IOException, CommandException
@@ -306,10 +348,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         insertCmd.execute(cn, EHR_FOLDER_PATH);
     }
 
-    private void addFinanceRelatedWebParts()
+    private void addFinanceRelatedWebParts(String container)
     {
         log("Add Finance Related Web Parts.");
-        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+        beginAt(buildURL("project", container, "begin"));
 
         //enable Page Admin Mode
         new SiteNavBar(getDriver()).enterPageAdminMode();
@@ -350,14 +392,25 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 null, null);
     }
 
-    private void createEHRLinkedSchema()
+    private void createEHRLinkedSchema(String target)
     {
         log("Creating ehrLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(target,
                 "ehrLinked", "/"+EHR_FOLDER_PATH, "ehrLinked", null,
                 null, null);
     }
+
+//    private void createPublicSOPsList()
+//    {
+//        ListDefinition listDef = new IntListDefinition("Labfee_NoChargeProjects", "key");
+//        listDef.addField(new FieldDefinition("project", FieldDefinition.ColumnType.Integer));
+//        listDef.addField(new FieldDefinition("startDate", FieldDefinition.ColumnType.DateAndTime));
+//        listDef.addField(new FieldDefinition("dateDisabled", FieldDefinition.ColumnType.DateAndTime));
+//        listDef.addField(new FieldDefinition("Createdb", FieldDefinition.ColumnType.Integer));
+//        listDef.addField(new FieldDefinition("Notes", FieldDefinition.ColumnType.String));
+//        listDef.getCreateCommand().execute(createDefaultConnection(), getProjectName());
+//    }
 
     private void createEHRBillingPublicLinkedSchema()
     {

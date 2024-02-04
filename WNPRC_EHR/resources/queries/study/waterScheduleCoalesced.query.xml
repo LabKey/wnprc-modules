@@ -67,13 +67,30 @@
                           <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="timeofday">
+                        <isHidden>true</isHidden>
+                        <columnTitle>Time Of Day</columnTitle>
+                    </column>
                     <column columnName="assignedTo">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>husbandry_assigned</fkTable>
                             <fkColumnName>value</fkColumnName>
                         </fk>
-
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Research Staff"/>
+                                </filters>
+                                <backgroundColor>32CD32</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Animal Care"/>
+                                </filters>
+                                <backgroundColor>BF5FFF</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
                     </column>
                     <column columnName="remark">
                         <displayWidth>250</displayWidth>
@@ -121,7 +138,6 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
                     </column>
                     <column columnName="provideFruit">
@@ -129,7 +145,6 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>husbandry_fruit</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
 
                     </column>

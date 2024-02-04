@@ -31,11 +31,13 @@
         dependencies.add("clientapi/ext4");
         dependencies.add("fullcalendar");
         dependencies.add("/webutils/lib/webutils_core/api.js");
-        dependencies.add("/wnprc_ehr/gen/waterMonitoringSystem.js");
+
 
         dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");
         dependencies.add("https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js");
         //dependencies.add("/mypath/mydependency.js");
+        //Adding typescript to water monitoring system for a future version.
+        // dependencies.add("/gen/waterMonitoringSystem.js");
     }
 %>
 
@@ -214,7 +216,9 @@
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {
-            if (key != 'animalLink'  && key != 'displayDate' && key != 'mlsPerKgCal') {
+            if (    key != 'animalLink'  && key != 'displayDate' &&
+                    key != 'mlsPerKgCal' && key != 'conditionAtTimeValue' &&
+                    key != 'taskLink'   && key != 'calculatedStatusValue') {
                 WebUtils.VM.taskDetails[key](null);
             }
         }
@@ -234,7 +238,7 @@
 
                     <dl class="dl-horizontal">
                         <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
-                        <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
+                        <dt>Task ID:            </dt> <dd><a href="{{taskLink}}">{{taskid}}</a></dd>
                         <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
                         <dt>Location:           </dt> <dd>{{location}}</dd>
                         <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
@@ -294,19 +298,29 @@
 
 
                     <dl class="dl-horizontal">
-                        <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
-                        <dt>Date:               </dt> <dd>{{displayDate}}</dd>
-                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
-                        <dt>Current Location:   </dt> <dd>{{location}}</dd>
-                        <dt>Total Volume:       </dt> <dd>{{volume}} ml</dd>
-                        <dt>ml Per Kg:          </dt> <dd>{{mlsPerKg}}</dd>
+                        <dt>DataSource:</dt>
+                            <dd>{{dataSource}}</dd>
+                        <dt>Date:</dt>
+                            <dd>{{displayDate}}</dd>
+                        <dt>Animal ID:</dt>
+                            <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                        <dt>
+                            <!-- ko if: calculatedStatusValue() == 'Alive' -->Current Location:  <!-- /ko-->
+                            <!-- ko if: calculatedStatusValue() == 'Dead' --> Last Location:  <!-- /ko-->
+                        </dt>
+                            <dd>{{location}}</dd>
+                        <dt>Total Volume:</dt>
+                            <dd>
+                                <!-- ko if: conditionAtTimeValue() == 'regulated' -->{{volume}} ml<!-- /ko-->
+                                <!-- ko if: conditionAtTimeValue() == 'lixit' -->On Lixit<!-- /ko-->
+                                <!-- ko if: conditionAtTimeValue() == 'dead' -->Dead<!-- /ko-->
+                            </dd>
+                        <dt>ml Per Kg:</dt>
+                            <dd>{{mlsPerKg}}</dd>
                     </dl>
                     <!-- ko if: mlsPerKgCal() -->
                         <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
-
                     <!-- /ko -->
-
-
                 </div>
             </div>
         </div>
@@ -474,7 +488,8 @@
                 </div>
                 <div id="waterTotalLegend" class="pull-left">
 
-                    <span style="color:red">&#x2589;</span><span>Total Water < 20 mL/Kg</span>
+                    <span style="color:red">&#x2589;</span><span>Total Water < 10 mL/Kg</span>
+                    <span style="color:orange">&#x2589;</span><span>Total Water < 20 mL/Kg or set point</span>
                     <span style="color:white">&#x2589;</span><span>Total Water >= 20 mL/Kg</span>
 
                 </div>
@@ -604,11 +619,12 @@
             eventSources:[
                     {
                         events: function (fetchInfo, successCallback, failureCallback) {
-                            console.log(" startStr" + fetchInfo.startStr);
+                            console.log(" startStr " + fetchInfo.startStr);
+                            console.log(" startStr " + fetchInfo.endStr);
 
                             console.log("inside eventSource " + allowProjects);
 
-                            if ($animalId == 'undefined' || $animalId == "null"){
+                            if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser,isAnimalCare);
 
@@ -702,39 +718,65 @@
                 },
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
+                        if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                         WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "TotalWater~isnonblank":true
+                            "date~lt":  new Date()
                         }).then(function (data) {
+                            debugger;
                             var events = data.rows;
 
                             successCallback(
                                     events.map(function (row) {
                                         let parsedTotalWater = 0;
-                                        if(row.TotalWater !== null){
-                                            parsedTotalWater = row.TotalWater;
+                                        let eventTitle = "";
+                                        if( row.conditionAtTime === 'regulated' ){
+                                            if ( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Alive'){
+                                                row.TotalWater = 'none';
+                                            }else if( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Dead'){
+                                                row.TotalWater = 'Dead'
+                                                eventTitle = row.id + row['Id/Demographics/calculated_status']
+                                            }
+                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
+                                                parsedTotalWater = row.TotalWater;
+                                                eventTitle = row.Id + " Total: " + parsedTotalWater;
+                                            }else{
+                                                eventTitle = row.Id + row['Id/Demographics/calculated_status']
+                                            }
+
+                                        }else{
+                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
+                                                row.TotalWater = 'Lixit'
+                                                eventTitle = row.Id + " on Lixit";
+                                            }else{
+                                                row.TotalWater = 'Dead'
+                                                eventTitle = row.Id + row['Id/Demographics/calculated_status']
+                                            }
                                         }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.Id + " Total: " + parsedTotalWater,
+                                            title: eventTitle,
                                             start: new Date(row.date),
                                             allDay: true,
+                                            groupId : row.Id,
                                             textColor: '#000000',
                                             rawRowData: row
                                         };
-
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
+                                        if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
                                             eventObj.color = '#FFFFFF';
-                                        }else{
+                                        }
+                                        else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                            eventObj.color = '#FF7F50';
+                                        }
+                                        else{
                                             eventObj.color = '#EE2020'
                                         }
                                         return eventObj;
                                     })
                             );
                             failureCallback((function (data){
-                                console.log("error from waterPrePivot general");
+                                console.log("error from waterTotalByDateWithWeight");
                             }))
 
                         })
@@ -744,31 +786,58 @@
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "TotalWater~isnonblank":true,
+                            "date~lt":  new Date(),
                             "Id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
-                                successCallback(events.map(function (row) {
-                                    let parsedTotalWater = 0;
-                                    if(row.TotalWater !== null){
-                                        parsedTotalWater = row.TotalWater;
-                                    }
-                                        var eventObj = {
-                                            id : LABKEY.Utils.generateUUID(),
-                                            title: row.Id + " Total: " + parsedTotalWater,
-                                            start: new Date(row.date),
-                                            textColor: '#000000',
-                                            allDay: true,
-                                            rawRowData: row
-                                        };
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#FFFFFF';
-                                        }else{
-                                            eventObj.color = '#EE2020'
-                                        }
+                                successCallback(
+                                        events.map(function (row) {
+                                            let parsedTotalWater = 0;
+                                            let eventTitle = "";
+                                            debugger;
+                                            if(row.conditionAtTime === 'regulated') {
+                                                if (row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    row.TotalWater = 'none';
+                                                }else if( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Dead'){
+                                                    row.TotalWater = 'Dead'
+                                                    eventTitle = row.Id + row['Id/Demographics/calculated_status']
+                                                }
+                                                else if (row['Id/Demographics/calculated_status'] === 'Alive'){
+                                                    parsedTotalWater = row.TotalWater;
+                                                    eventTitle = row.Id + " Total: " + parsedTotalWater;
+                                                }
+
+                                            }else{
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive'){
+                                                    row.TotalWater = 'Lixit'
+                                                    eventTitle = row.Id + " on Lixit";
+                                                }else{
+                                                    row.TotalWater = 'Dead'
+                                                    eventTitle = row.Id + row['Id/Demographics/calculated_status']
+                                                }
+
+                                            }
+                                            var eventObj = {
+                                                id : LABKEY.Utils.generateUUID(),
+                                                title: eventTitle,
+                                                start: new Date(row.date),
+                                                textColor: '#000000',
+                                                allDay: true,
+                                                groupId : row.Id,
+                                                rawRowData: row
+                                            };
+                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                                eventObj.color = '#FFFFFF';
+                                            }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                                eventObj.color = '#FF7F50';
+                                            }
+                                            else{
+                                                eventObj.color = '#EE2020'
+                                            }
                                             return eventObj;
-                                    }));
+                                        })
+                                );
                                 failureCallback((function (data){
                                     console.log("error from waterTotalByDateWithWeight");
                                 }))
@@ -814,7 +883,13 @@
                     $('#waterInformation').collapse('hide');
                     $('#waterTotalInformation').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
-                    WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData.location.toString());
+                    if (info.event.extendedProps.rawRowData["Id/curLocation/location"]){
+                        WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData["Id/curLocation/location"].toString());
+                    }else{
+                        WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData["Id/lastHousing/location"].toString());
+                    }
+
+
                 }else{
                     $('#waterInformation').collapse('show');
                     $('#waterTotalInformation').collapse('hide');
@@ -969,7 +1044,9 @@
                 frequencyMeaningCoalesced:  ko.observable(),
                 displaytimeofday:           ko.observable(),
                 rawDate:                    ko.observable(),
-                mlsPerKg:                   ko.observable()
+                mlsPerKg:                   ko.observable(),
+                conditionAtTime:            ko.observable(),
+                status:                     ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -1266,12 +1343,40 @@
             });
         });
 
+        WebUtils.VM.taskDetails.taskLink = ko.pureComputed(function() {
+            var taskidValue = WebUtils.VM.taskDetails.taskid();
+            var formtype = '';
+            if (WebUtils.VM.taskDetails.dataSource == 'waterAmount'){
+                formtype = 'Enter Water Amounts'
+
+            }else{
+                formtype = 'Enter Water Orders'
+            }
+
+            return LABKEY.ActionURL.buildURL('ehr', 'dataEntryFormDetails', null, {
+                formtype:   formtype,
+                taskid:     taskidValue
+
+            });
+        });
+
         WebUtils.VM.taskDetails.displayDate = ko.pureComputed(function(){
             return WebUtils.VM.taskDetails.date();
         });
 
         WebUtils.VM.taskDetails.mlsPerKgCal = ko.pureComputed(function(){
-            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20)
+            return !(WebUtils.VM.taskDetails.mlsPerKg() >= 20 || WebUtils.VM.taskDetails.conditionAtTime() === 'lixit')
+        });
+
+        WebUtils.VM.taskDetails.conditionAtTimeValue = ko.pureComputed(function(){
+            if ( WebUtils.VM.taskDetails.conditionAtTime() === 'regulated' && WebUtils.VM.taskDetails.calculatedStatusValue() === 'Alive' ){
+
+            }
+            return WebUtils.VM.taskDetails.conditionAtTime();
+        });
+
+        WebUtils.VM.taskDetails.calculatedStatusValue = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.status();
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel

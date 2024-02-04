@@ -7,5 +7,5 @@ login $LK_BACKGROUND_USER
 password $LK_BACKGROUND_USER_PASSWORD
 
 machine labkey.primate.wisc.edu
-login $LK_BAKCGROUD_USER
+login $LK_BACKGROUD_USER
 password $LK_BACKGROUND_USER_PASSWORD

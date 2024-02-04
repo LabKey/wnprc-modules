@@ -19,6 +19,7 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
     }
     else{
         panel.resolveSubjectsFromHousing(tab,renderCalendar,this);
+        calendarRender++;
 
     }
 

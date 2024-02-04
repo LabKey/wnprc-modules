@@ -102,6 +102,7 @@ import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
+import org.labkey.wnprc_ehr.notification.*;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
@@ -116,6 +117,8 @@ import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
+import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesSupervisorNotification;
 import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
 import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
@@ -124,6 +127,7 @@ import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
 import org.labkey.wnprc_ehr.security.roles.WNPRCAnimalRequestsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRUrgentTreatmentsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.wnprc_ehr.updates.ModuleUpdate;
@@ -178,7 +182,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 22.009;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 22.010;
     }
 
     @Override
@@ -221,6 +225,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalWaterCalendar.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/IncompleteTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/MorningTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/AfternoonTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/EveningTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/MasterTreatmentsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
@@ -351,6 +360,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         List<Notification> notifications = Arrays.asList(
                 new BehaviorNotification(this),
                 new DeathNotification(),
+                new DeathNotificationRevamp(this),
                 new ColonyAlertsNotification(this),
                 new TreatmentAlertsNotification(this),
                 new VvcNotification(this),
@@ -359,11 +369,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new FoodNotCompletedNotification(this),
                 new FoodCompletedProblemsNotification(this),
                 new AnimalRequestNotification(this),
+                new AnimalRequestNotificationRevamp(this),
                 new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
                 new WaterOrdersAlertNotification(this),
-                new WaterMonitoringAnimalWithOutEntriesNotification(this)
+                new WaterMonitoringAnimalWithOutEntriesNotification(this),
+                new WaterMonitoringNotification(this),
+                new ValidationSuiteNotification(this),
+                new WaterMonitoringAnimalWithOutEntriesSupervisorNotification(this)
         );
 
         for (Notification notification : notifications)
@@ -435,6 +449,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
         RoleManager.registerRole(new WNPRCAnimalRequestsRole());
+        RoleManager.registerRole(new WNPRCEHRUrgentTreatmentsRole());
     }
 
     public Set<Container> getWNPRCStudyContainers() {

@@ -14,12 +14,15 @@ SELECT wtbd.Id as Id,
        wtbd.volumeGivenInImage,
        wtbd.volumeGivenInProcedure,
        wtbd.currentWaterCondition,
+       wtbd.remarksConcat,
        waterScheduledAnimalsOuter.condition AS conditionAtTime,
+       waterScheduledAnimalsOuter.endDate as endDateCondition,
+
        CAST(waterScheduledAnimalsOuter.mlsperKg AS NUMERIC) AS InnerMlsPerKg,
        waterScheduledAnimalsOuter.project,
        wtbd.performedConcat,
        wtbd.qcstate,
-       wtbd.curRoom || '-' || wtbd.curCage AS location,
+       COALESCE(CAST(wtbd.TotalWater/weigthDates.weight AS NUMERIC), 0) AS zeroOrmlsPerKg,
        'waterTotal' AS dataSource
 FROM study.waterTotalByDate wtbd
 

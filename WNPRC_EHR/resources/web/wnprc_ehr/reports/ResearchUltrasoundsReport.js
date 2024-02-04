@@ -13,7 +13,7 @@ EHR.reports.ResearchUltrasoundsReport = function (panel, tab) {
 
     const wp = new LABKEY.WebPart({
         partConfig: {subjects: (tab.filters.subjects || []).join(';')},
-        partName: 'Research Ultrasounds',
+        partName: 'Research Ultrasounds Webpart',
         renderTo: target.renderTarget,
         style: 'margin-bottom: 20px;'
     });

@@ -4,7 +4,7 @@
     <Loader loaderClass="org.labkey.bootstrap.LabkeyServerBootstrapClassLoader" useSystemClassLoaderAsParent="false"/>
 
     <Parameter name="org.labkey.api.pipeline.config" value="/usr/local/labkey/config/config-server"/>
-    <Parameter name="MasterEncryptionKey" value="${labkey.masterEncryptionKey}"/>
+    <Parameter name="MasterEncryptionKey" value="@@encryptionKey@@"/>
 
     <Resource name="jdbc/labkeyDataSource" auth="Container"
               type="javax.sql.DataSource"
@@ -38,8 +38,6 @@
               mail.smtp.user=""
               mail.smtp.port="1025"
               mail.smtp.from="${server.email.address}"
-              mail.smtp.starttls.enable="true"
-              mail.smtp.socketFactory.class="javax.net.ssl.SSLSocketFactory"
               mail.smtp.auth="false"
     />
 

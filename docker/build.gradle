@@ -452,7 +452,7 @@ tasks.register("downloadPostfix") { Task t ->
     }
     group 'Docker'
     description  'Download Docker Images from Docker Hub'
-    dependsOn "checkDocker", "dockerLogin"
+    dependsOn "checkDocker", "dockerLogin", "processbranchName"
 }
 
 tasks.register("downloadPostfixPlug",DockerPullImage){

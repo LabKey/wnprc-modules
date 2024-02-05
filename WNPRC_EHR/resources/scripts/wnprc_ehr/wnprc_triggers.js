@@ -716,4 +716,9 @@ exports.init = function (EHR) {
             WNPRC.Utils.getJavaHelper().sendVvcNotification(requestid);
         }
     });*/
+    EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.INIT, function(event, helper, EHR){
+        helper.setScriptOptions({
+            datasetsToClose: ['Assignment', 'Cases', 'Housing', 'Treatment Orders', 'Notes', 'Problem List', 'Protocol Assignments', 'waterOrders', 'breeding_encounters'],
+        });
+    });
 };

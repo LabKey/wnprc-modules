@@ -1,16 +1,16 @@
 package org.labkey.wnprc_ehr.dataentry.generics.sections;
 
-import java.util.Arrays;
+import com.google.common.collect.Lists;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.google.common.collect.Lists;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
 import org.labkey.api.query.FieldKey;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +19,8 @@ import java.util.Map;
 /**
  * Created by jon on 3/2/16.
  */
-public class SimpleFormSection extends SimpleFormPanelSection {
+public class SimpleFormSection extends SimpleFormPanelSection
+{
     protected List<String> fieldNamesAtStartInOrder = new ArrayList<>();
     protected List<String> fieldNamesAtEndInOrder   = new ArrayList<>();
     protected Integer maxItemsPerColumn = null;
@@ -102,7 +103,8 @@ public class SimpleFormSection extends SimpleFormPanelSection {
     }
 
     @Override
-    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements) {
+    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements)
+    {
         JSONObject ret = super.toJSON(ctx, includeFormElements);
 
         if ( maxItemsPerColumn != null ) {

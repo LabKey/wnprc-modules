@@ -45,6 +45,7 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
@@ -487,13 +488,13 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public static Container getDefaultContainer() {
         if (ContainerManager.getForPath("/WNPRC") == null) {
-            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC");
+            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC", User.getAdminServiceUser());
         }
         Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
 
         Container ehrContainer = wnprcContainer.getChild("EHR");
         if (ehrContainer == null) {
-            ContainerManager.createContainer(wnprcContainer, "EHR");
+            ContainerManager.createContainer(wnprcContainer, "EHR", User.getAdminServiceUser());
             ehrContainer = wnprcContainer.getChild("EHR");
         }
 

@@ -3,18 +3,10 @@ package org.labkey.test.tests.wnprc_virology;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
-import org.labkey.remoteapi.PostCommand;
+import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
@@ -32,6 +24,7 @@ import org.labkey.test.pages.admin.SetFolderPermissionsPage;
 import org.labkey.test.tests.external.labModules.ViralLoadAssayTest;
 import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.RemoteConnectionHelper;
@@ -40,10 +33,16 @@ import org.labkey.test.util.di.DataIntegrationHelper;
 import org.labkey.test.util.ext4cmp.Ext4CmpRef;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
-import org.labkey.test.util.Ext4Helper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 
@@ -218,7 +217,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         importFolderFromPath(1);
         setupNotificationService();
 
-        PostCommand command = new PostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
+        SimplePostCommand command = new SimplePostCommand("wnprc_virology", "alterEHRBillingAliasesPKSequence");
         command.setTimeout(1200000);
         CommandResponse response = command.execute(connection, PROJECT_NAME_EHR);
         Assert.assertTrue(response.getStatusCode() < 400);
@@ -340,7 +339,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         _apiPermissionsHelper.setUserPermissions(TEST_USER, "WNPRC Viral Load Reader");
 
         Connection connection = createDefaultConnection();
-        PostCommand command = new PostCommand("wnprc_virology", "startRSEHRJob");
+        SimplePostCommand command = new SimplePostCommand("wnprc_virology", "startRSEHRJob");
         command.setTimeout(1200000);
         CommandResponse response = command.execute(connection, getProjectNameRSEHR());
         Assert.assertTrue(response.getStatusCode() < 400);
@@ -569,7 +568,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
         //run the job with the new permissions
         Connection connection = createDefaultConnection();
-        PostCommand command = new PostCommand("wnprc_virology", "startRSEHRJob");
+        SimplePostCommand command = new SimplePostCommand("wnprc_virology", "startRSEHRJob");
         command.setTimeout(1200000);
         CommandResponse response = command.execute(connection, getProjectNameRSEHR());
         Assert.assertTrue(response.getStatusCode() < 400);

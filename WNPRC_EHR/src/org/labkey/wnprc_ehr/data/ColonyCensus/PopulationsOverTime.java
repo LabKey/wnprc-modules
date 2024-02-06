@@ -4,7 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.webutils.api.json.ConvertibleToJSON;
 
 import java.util.ArrayList;
@@ -16,10 +16,10 @@ import java.util.TreeMap;
  * Created by jon on 1/17/16.
  */
 public class PopulationsOverTime implements ConvertibleToJSON {
-    private DateTime _start;
-    private DateTime _end;
-    private ColonyCensus _colonyCensus;
-    private PopulationChangeEvent.Species _species;
+    private final DateTime _start;
+    private final DateTime _end;
+    private final ColonyCensus _colonyCensus;
+    private final PopulationChangeEvent.Species _species;
     private List<PopulationChangeEvent> _eventList = null;
 
 
@@ -72,7 +72,7 @@ public class PopulationsOverTime implements ConvertibleToJSON {
             // If we've passed the start date, start the list off.
             else if (!dateTime.isBefore(_start) && (populationInstantsInRange.size() == 0)) {
                 if (!dateTime.isEqual(_start)) {
-                    populationInstantsInRange.add(new PopulationInstant(new LocalDate(_start), lastPopulationValue));
+                    populationInstantsInRange.add(new PopulationInstant(new LocalDate(_start).toString(), lastPopulationValue));
                 }
 
                 populationInstantsInRange.add(dateMap.get(date));
@@ -92,7 +92,7 @@ public class PopulationsOverTime implements ConvertibleToJSON {
         if (populationInstantsInRange.size() > 0) {
             PopulationInstant lastInstantInSet = populationInstantsInRange.get(populationInstantsInRange.size() - 1);
             if (!lastInstantInSet.getDate().equals(_end)) {
-                populationInstantsInRange.add(new PopulationInstant(new LocalDate(_end), lastPopulationValue));
+                populationInstantsInRange.add(new PopulationInstant(new LocalDate(_end).toString(), lastPopulationValue));
             }
         }
 
@@ -116,7 +116,7 @@ public class PopulationsOverTime implements ConvertibleToJSON {
             if (!index.equals(eventsLastIndex)) {
                 PopulationInstant nextPopulation = events.get(index + 1);
 
-                Duration durationOfPopulation = new Duration(populationInstant.getDate().toDateTimeAtStartOfDay(), nextPopulation.getDate().toDateTimeAtStartOfDay());
+                Duration durationOfPopulation = new Duration(new LocalDate(populationInstant.getDate()).toDateTimeAtStartOfDay(), new LocalDate(nextPopulation.getDate()).toDateTimeAtStartOfDay());
 
                 weightedSum = weightedSum + (durationOfPopulation.getMillis() * populationInstant.getPopulation());
             }
@@ -140,7 +140,7 @@ public class PopulationsOverTime implements ConvertibleToJSON {
             if (!index.equals(eventsLastIndex)) {
                 PopulationInstant nextPopulation = events.get(index + 1);
 
-                Duration durationOfPopulation = new Duration(populationInstant.getDate().toDateTimeAtStartOfDay(), nextPopulation.getDate().toDateTimeAtStartOfDay());
+                Duration durationOfPopulation = new Duration(new LocalDate(populationInstant.getDate()).toDateTimeAtStartOfDay(), new LocalDate(nextPopulation.getDate()).toDateTimeAtStartOfDay());
 
                 weightedSum = weightedSum + ((float) durationOfPopulation.getMillis() * (float) Math.pow(populationInstant.getPopulation() - (long) average, 2));
             }
@@ -155,7 +155,8 @@ public class PopulationsOverTime implements ConvertibleToJSON {
 
 
     @Override
-    public JSONObject toJSON() {
+    public JSONObject toJSON()
+    {
         JSONObject json = new JSONObject();
 
         List<PopulationChangeEvent> events = getEvents();

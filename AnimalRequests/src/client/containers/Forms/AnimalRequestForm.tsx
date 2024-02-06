@@ -136,7 +136,6 @@ interface State {
 export const AnimalRequestForm: FC<State> = (props) => {
 
     const [state, setState] = useState({...props});
-    console.log("State: ", state);
     useEffect(() => {
         getSeveralEHRData(state.dataArr);
     }, []);

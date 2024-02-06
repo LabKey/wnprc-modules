@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.calendar;
 
-import org.json.old.JSONArray;
+import org.json.JSONArray;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 

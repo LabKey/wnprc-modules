@@ -1,7 +1,7 @@
 package org.labkey.googledrive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
@@ -85,7 +85,6 @@ public class GoogleDriveController extends SpringActionController {
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
             JSONObject object = (form.getJsonObject() == null) ? new JSONObject() : form.getJsonObject();
-
 
             RegisterServiceAccountForm registerForm = mapper.readValue(object.toString(), RegisterServiceAccountForm.class);
 

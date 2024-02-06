@@ -1,6 +1,6 @@
 package org.labkey.webutils.api.json;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 
 import java.util.Comparator;
 
@@ -11,7 +11,7 @@ public class NumberKeyComparator implements Comparator<JSONObject> {
     // Always sort blank values last.
     public double defaultValue = Double.MAX_VALUE;
 
-    private String key;
+    private final String key;
 
     public NumberKeyComparator(String key) {
         this.key = key;

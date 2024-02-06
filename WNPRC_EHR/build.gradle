@@ -6,6 +6,7 @@ dependencies {
     implementation project(BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"))
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:laboratory", depProjectConfig: "apiJarFile")
     implementation project(path: "${project.parent.path}:DBUtils", configuration: "apiJarFile")
     implementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     implementation project(path: "${project.parent.path}:GoogleDrive", configuration: "apiJarFile")
@@ -65,7 +66,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.auth:google-auth-library-oauth2-http:1.10.0",
+            "com.google.auth:google-auth-library-oauth2-http:1.19.0",
             "Google Auth Library",
             "Google",
             "https://github.com/googleapis/google-auth-library-java",
@@ -104,7 +105,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.jsoup:jsoup:1.13.1",
+            "org.jsoup:jsoup:${jsoupVersion}",
             "jsoup: Java HTML Parser",
             "jsoup",
             "https://github.com/jhy/jsoup",

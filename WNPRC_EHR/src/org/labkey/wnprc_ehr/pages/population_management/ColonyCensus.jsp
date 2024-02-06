@@ -1,5 +1,5 @@
 <%@ page import="org.joda.time.LocalDate" %>
-<%@ page import="org.json.old.JSONObject" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus" %>
 <%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.PopulationInstant" %>
 <%@ page import="java.util.Map" %>
@@ -7,7 +7,7 @@
 
 <%
     ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
-    Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
+    Map<String, Map<String, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
 %>
 
 <style>
@@ -26,6 +26,8 @@
             <span>Marmoset <span class="badge">{{population.marmoset}}</span></span>
             <strong> | </strong>
             <span>Cynomolgus <span class="badge">{{population.cynomolgus}}</span></span>
+            <strong> | </strong>
+            <span>Pigtail <span class="badge">{{population.pigtail}}</span></span>
         </span>
     </div>
 </div>
@@ -44,6 +46,9 @@
             <li role="presentation">
                 <a href="#cynomolgus-tab"  role="tab" data-toggle="tab">Cynomolgus</a>
             </li>
+            <li role="presentation">
+                <a href="#pigtail-tab"  role="tab" data-toggle="tab">Pigtail</a>
+            </li>
         </ul>
 
         <div class="tab-content">
@@ -55,6 +60,9 @@
             </div>
             <div role="tabpanel" class="tab-pane" id="cynomolgus-tab">
                 <species-tab params="species: 'Cynomolgus'"></species-tab>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="pigtail-tab">
+                <species-tab params="species: 'Pigtail'"></species-tab>
             </div>
         </div>
     </div>
@@ -90,6 +98,9 @@
             <li role="presentation">
                 <a href="#cynomolgus-details-tab"  role="tab" data-toggle="tab">Cynomolgus</a>
             </li>
+            <li role="presentation">
+                <a href="#pigtail-details-tab"  role="tab" data-toggle="tab">Pigtail</a>
+            </li>
         </ul>
 
         <div class="col-xs-12" style="height: 20px"></div>
@@ -103,6 +114,9 @@
             </div>
             <div role="tabpanel" class="tab-pane" id="cynomolgus-details-tab">
                 <species-details-tab params="species: 'Cynomolgus'"></species-details-tab>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="pigtail-details-tab">
+                <species-details-tab params="species: 'Pigtail'"></species-details-tab>
             </div>
         </div>
     </div>
@@ -205,7 +219,7 @@
                 return new Date(d);
             });
             var pops  = dates.map(function(key) {
-                return data[key];
+                return data[key]["population"];
             });
 
             return {
@@ -509,7 +523,8 @@
         WebUtils.VM.population = {
             rhesus: getPopulationObject('Rhesus').pops.pop(),
             marmoset:   getPopulationObject('Marmoset').pops.pop(),
-            cynomolgus:  getPopulationObject('Cynomolgus').pops.pop()
+            cynomolgus:  getPopulationObject('Cynomolgus').pops.pop(),
+            pigtail:  getPopulationObject('Pigtail').pops.pop()
         }
     })();
 </script>

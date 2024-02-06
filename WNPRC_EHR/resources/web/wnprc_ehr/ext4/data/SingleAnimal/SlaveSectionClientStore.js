@@ -20,7 +20,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
         if (masterClientStore !== null) {
             var masterRecord = masterClientStore.getRange()[0];
 
-            if (masterRecord !== null) {
+            if (masterRecord) {
                 jQuery.each(records, function(i, record) {
                     record.beginEdit();
                     jQuery.each(self.getSlaveFields(), function(i, fieldName) {

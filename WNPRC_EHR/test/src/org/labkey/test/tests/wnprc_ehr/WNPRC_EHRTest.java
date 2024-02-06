@@ -16,6 +16,7 @@
 package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -39,7 +40,9 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
+import org.labkey.test.components.bootstrap.ModalDialog;
 import org.labkey.test.components.ext4.Window;
+import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
@@ -80,11 +83,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -136,7 +137,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
-    private SchemaHelper _schemaHelper = new SchemaHelper(this);
+    private final SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
 
@@ -145,7 +146,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
     public static final String GEN_CREDIT_ACCT_ID = "acct103";
 
-    private Map<String, Object> aliasesMap = new HashMap<>();
+    private final Map<String, Object> aliasesMap = new HashMap<>();
 
     protected static final Double FEEDING_AMT = 12.12;
     protected static final Double WEIGHT_VAL = 12.12;
@@ -263,7 +264,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.checkJavaNotificationsFunctionality();
+        initTest.deathNotificationSetup();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -599,6 +600,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void navigateToWeights()
     {
         beginAt(buildURL("wnprc_ehr", getContainerPath(), "weight"));
+        waitForElement(Locator.id("submit-all-btn"), defaultWaitForPage);
     }
 
     public void navigateToAnimalRequestForm()
@@ -625,25 +627,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void fillWeightForm(String weightVal, Integer index)
     {
-        fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
+        String animalId = ANIMAL_SUBSET_EHR_TEST[index];
+        fillAnInput("animalid_" + index, animalId );
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
 
         //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
 //        el2.sendKeys(Keys.TAB);
 //        el2.sendKeys(Keys.TAB);
 
-        fillAnInput("remark_"+ index.toString(), "Entered from automated test");
-        fillAnInput("restraint_" + index.toString(), "T");
+        fillAnInput("remark_"+ index, "Entered from automated test");
+        fillAnInput("restraint_" + index, "T");
+        waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 
-    public void waitUntilElementIsClickable(String id)
+    public WebElement waitUntilElementIsClickable(String id)
     {
-        shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
+        return shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
     }
 
-    public void clickNewButton(String id){
-        WebElement o = Locator.tagWithId("button",id).findElement(getDriver());
-        o.click();
+    public void clickNewButton(String id)
+    {
+        waitUntilElementIsClickable(id).click();
     }
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
@@ -1129,6 +1133,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickButton("Submit",0);
 
         log("Verify row insert in ehr_billing.dataAccess.");
+        waitForText("Stark, Sansa");
         List<String> actualRowData = dataAccessTable.getRowDataAsText(0, "investigatorid", "userId", "project", "alldata");
         List<String> expectedRowData = Arrays.asList("Stark, Sansa", "investigator", "640991", "No");
         assertEquals("Data access row not inserted as expected: " , expectedRowData, actualRowData);
@@ -1848,11 +1853,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.name("Id"), WAIT_FOR_JAVASCRIPT);
         waitForElement(Locator.name("title"), WAIT_FOR_JAVASCRIPT);
         _helper.setDataEntryField("title", MPR_TASK_TITLE);
+        waitAndClick(Locator.name("title"));
         _extHelper.selectComboBoxItem("Assigned To:", BASIC_SUBMITTER.getGroup() + "\u00A0"); // appended with a nbsp (Alt+0160)
         _extHelper.setExtFormElementByLabel("Id:", PROJECT_MEMBER_ID + "\t");
         click(Locator.xpath("//div[./label[normalize-space()='Id:']]//input"));
         waitForElement(Locator.linkWithText(PROJECT_MEMBER_ID), WAIT_FOR_JAVASCRIPT);
-
+        _helper.setDataEntryField("performedby", FULL_SUBMITTER.getEmail());
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);
@@ -2316,8 +2322,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _customizeViewsHelper.applyCustomView();
         DataRegionTable auditTable =  new DataRegionTable("query", this);
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
-        assertTrue("entry didn't contain \"paymentamountreceived:  » 1028.95\"\n" + auditLog, auditLog.contains("paymentamountreceived:  » 1028.95"));
-        assertTrue("entry didn't contain \"balancedue:  » 0.0\"\n" + auditLog, auditLog.contains("balancedue:  » 0.0"));
+        Assertions.assertThat(auditLog).as("Audit entry for ehr_billing.invoice")
+                .contains("paymentamountreceived:  \u00BB 1028.95")
+                .contains("balancedue:  \u00BB 0.0");
     }
 
     @Test
@@ -2329,12 +2336,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //navigate to weights form and fill it out
         beginAt(buildURL("project", getContainerPath(), "begin"));
         navigateToFeeding();
-        fillFeedingForm(FEEDING_AMT.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
+        fillFeedingForm(FEEDING_AMT.toString(), 0);
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success", 1, 50000);
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchFeedingData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("amount");
@@ -2343,20 +2348,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testWeights() throws IOException, CommandException
+    public void testWeights()
     {
       //dummy test
-
     }
+
     @Test
     public void testEnterWeights() throws IOException, CommandException
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
         clickNewButton("submit-all-btn");
-        clickAndWait(Locator.tagWithId("button","submit-final"));
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
         assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
@@ -2371,10 +2375,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(LOW_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
+
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
@@ -2399,35 +2403,23 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         cmd.setSorts(Arrays.asList(new Sort("duedate", Sort.Direction.DESCENDING), new Sort("created", Sort.Direction.DESCENDING)));
 
         return cmd.execute(cn, EHR_FOLDER_PATH);
-
     }
 
     @Test
     public void testWeightSubmitForReview() throws IOException, CommandException
     {
+        String reviewer = "EHR Full Submitters";
         navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
         waitUntilElementIsClickable("submit-review-btn");
         clickNewButton("submit-review-btn");
-        sleep(1000);
-        //waitForElement(Locator.id("reviewers"),10000);
-        waitForText("Submit for Review");
-
-        WebElement c = Locator.id("reviewers").findElement(getDriver());
-        TestLogger.log(FULL_SUBMITTER.getGroup());
-
-        Select select = new Select(c);
-        sleep(1000);
-        select.selectByIndex(2);
-        List<WebElement> l = select.getAllSelectedOptions();
-        WebElement option = l.get(0);
-        String defaultItem = option.getAttribute("value");
-        TestLogger.log(defaultItem);
-        //System.out.println(defaultItem );
-
-        sleep(1000);
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        Select assignedTo = SelectWrapper.Select(Locator.name("reviewers")).find(modalDialog);
+        waitForElement(Locator.tagWithText("option", reviewer), WAIT_FOR_PAGE);
+        assignedTo.selectByVisibleText(reviewer);
+        WebElement selectedOption = assignedTo.getFirstSelectedOption();
+        String reviewerValue = selectedOption.getAttribute("value");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2439,7 +2431,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse t = fetchTaskData(taskid);
         //assert that this task's assigned to is the same as info entered above
         Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("assignedto");
-        Assert.assertEquals(null, defaultItem, id.get("value").toString());
+        Assert.assertEquals(null, reviewerValue, id.get("value").toString());
 
         testWeightToRestraintObjectIdRelationship();
     }
@@ -2481,11 +2473,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(),0);
         clickNewButton("add-record");
         fillWeightForm(WEIGHT_VAL.toString(),1);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
-        waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
@@ -2516,8 +2507,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("remove-record-btn_1");
         sleep(2000);
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
         //verify that it was deleted by counting that task has only 1 record in it
         //do a a query to get weights filtered by taskid
         SelectRowsResponse r2 =  fetchWeightDataGivenTaskRowId(id.get("value").toString());
@@ -2607,10 +2598,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         el.sendKeys(WEIGHT_VAL.toString());
         WebElement el2 = fillAnInput("restraint-bulk", "T");
         clickNewButton("submit-bulk");
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
@@ -2661,10 +2651,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         /*WebElement el2 = fillAnInput("restraint_0", "T");*/
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2675,7 +2664,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> rt = (Map<String, Object>) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
         testWeightToRestraintObjectIdRelationship();
-
     }
 
     public void navigateToWeightsTable()
@@ -2693,10 +2681,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         navigateToWeightsTable();
         DataRegionTable table = new DataRegionTable("query", getDriver());
@@ -2711,10 +2698,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             sleep(500);
         }
         fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
@@ -2726,14 +2712,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
-        WebElement button = Locator.tagWithId("button","save-draft-btn").findElement(getDriver());
+        WebElement button = Locator.tagWithId("button", "save-draft-btn").findElement(getDriver());
         // Test that save button is disabled if no entries
-        Assert.assertFalse("Save button is enabled with no data",button.isEnabled());
+        Assert.assertFalse("Save button is enabled with no data", button.isEnabled());
         // Test that save button is disabled if single valid id is entered
         fillWeightForm(WEIGHT_VAL.toString(), 0);
-        Assert.assertTrue("Save button is disabled for correct id",button.isEnabled());
+        Assert.assertTrue("Save button is disabled for correct id", button.isEnabled());
         addBatchByLocation();
-        Assert.assertTrue("Save button is disabled for correct test ids",button.isEnabled());
+        Assert.assertTrue("Save button is disabled for correct test ids", button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");
@@ -2899,27 +2885,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //_extHelper.clickExtButton("Import");
         waitForText("Preview");
         click(Locator.extButton("Preview"));
-        //get the popup window
-        String parentWindowHandler = getDriver().getWindowHandle();
-        String subWindowHandler = null;
-
-        Set<String> handles = getDriver().getWindowHandles();
-        // preview should generate a popup window
-        Assert.assertTrue(handles.size() > 1);
-        Iterator<String> iterator = handles.iterator();
-        // we can assume the popup window is the only other window other than the parent
-        String next = null;
-        while (iterator.hasNext()){
-            next = iterator.next();
-            if (!next.equals(parentWindowHandler))
-            {
-                subWindowHandler = next;
-            }
-        }
-        // switch to popup window
-        getDriver().switchTo().window(subWindowHandler);
+        switchToWindow(1);
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("bad-date-preview-err").findElement(getDriver()).getText());
-        getDriver().switchTo().window(parentWindowHandler);
+        switchToMainWindow();
     }
 
     @Test
@@ -3085,41 +3053,44 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
-    @Test
-    public void testJavaDeathNotification() throws UnhandledAlertException {
-        //Navigates to the Necropsies table.
-        beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
-        waitForText("Necropsies");
-        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
-
-        //Views data from the most recent necropsy.
-        DataRegionTable dr = new DataRegionTable("query", getDriver());
-        dr.clickRowDetails(0);
-
-        //Saves data from most recent necropsy.
-        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
-        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
-        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
-        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
-        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
-        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
-        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
-
-        //Runs death notification in the browser.
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
-        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
-
-        //Validates necessary info.
-        assertTextPresent("Animal ID:", necropsyID);
-        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
-        assertTextPresent("Date of Necropsy:", necropsyDate);
-        assertTextPresent("Grant #:", necropsyAccount);
-    }
+//    @Test
+//    public void testJavaDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaDeathNotification.");
+//        //Navigates to the Necropsies table.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
+//        waitForText("Necropsies");
+//        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
+//
+//        //Views data from the most recent necropsy.
+//        DataRegionTable dr = new DataRegionTable("query", getDriver());
+//        dr.clickRowDetails(0);
+//
+//        //Saves data from most recent necropsy.
+//        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+//        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+//        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+//        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
+//        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+//        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
+//        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
+//
+//        //Runs death notification in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+//
+//        //Validates necessary info.
+//        assertTextPresent("Animal ID:", necropsyID);
+//        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
+//        assertTextPresent("Date of Necropsy:", necropsyDate);
+//        assertTextPresent("Grant #:", necropsyAccount);
+//        log("Completed testJavaDeathNotification.");
+//    }
 
     @Test
     public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+        log("Started testJavaPrenatalDeathNotification.");
         //Navigates to the "Enter Prenatal Death" page.
         beginAt(buildURL("project", getContainerPath(), "begin"));
         waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
@@ -3136,10 +3107,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Navigates to dumbster.
         goToModule("Dumbster");
         assertTextPresent("Prenatal Death Notification: pd9876");
+        log("Completed testJavaPrenatalDeathNotification.");
     }
 
-    private void checkJavaNotificationsFunctionality() throws UnhandledAlertException {
-        log("Starting checkJavaNotificationsFunctionality.");
+    private void deathNotificationSetup() throws UnhandledAlertException {
+        log("Starting deathNotificationSetup.");
         //Navigates to home to get a fresh start.
         beginAt(buildURL("project", getContainerPath(), "begin"));
 
@@ -3151,7 +3123,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
         //Enables all notification that we will be testing.
-        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
 //        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
@@ -3165,13 +3137,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));
 
-        log("Started testJavaDeathNotification.");
-        testJavaDeathNotification();
-        log("Completed testJavaDeathNotification.");
+        //Enable LDK Site Notification
+        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+        waitForText("Notification Site Admin");
+        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+        click(Locator.tagWithText("li", "Enabled"));
+        click(Locator.tagWithText("span", "Save"));
+        waitForText("Success");
+        clickButtonContainingText("OK");
+        waitForText("Notification Site Admin");
 
-        log("Started testJavaPrenatalDeathNotification.");
-        testJavaPrenatalDeathNotification();
-        log("Completed testJavaPrenatalDeathNotification.");
+        log("Completed deathNotificationSetup.");
     }
 
     @Test

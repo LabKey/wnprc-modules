@@ -2,8 +2,8 @@ package org.labkey.wnprc_virology;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.old.JSONObject;
-import org.json.old.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONArray;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
@@ -117,7 +117,7 @@ public class WNPRC_VirologyController extends SpringActionController
 
         for (int r = 0; r < ja.length(); r++)
         {
-            currentList.add((JSONObject) ja.get(r));
+            currentList.add(ja.getJSONObject(r));
         }
 
         if (newList.size() == 0)
@@ -339,7 +339,7 @@ public class WNPRC_VirologyController extends SpringActionController
                 SQLFragment sql;
                 if (scope.getSqlDialect().isPostgreSQL())
                 {
-                    sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96;\n");
+                    sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96");
                     new SqlExecutor(scope).execute(sql);
                 }
                 tx.commit();

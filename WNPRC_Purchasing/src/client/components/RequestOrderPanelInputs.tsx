@@ -2,7 +2,7 @@ import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'reac
 import { Button } from 'react-bootstrap';
 import { Filter } from '@labkey/api';
 
-import produce, { Draft } from 'immer';
+import { produce, Draft } from 'immer';
 
 import { getData } from '../actions';
 

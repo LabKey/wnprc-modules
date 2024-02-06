@@ -1,28 +1,16 @@
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
-<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="org.json.old.JSONObject" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.json.old.JSONArray" %>
-<%@ page import="java.util.UUID" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="java.text.ParseException" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-
-<%@ page import="org.labkey.api.query.QueryAction"%>
-<%@ page import="org.labkey.api.query.QueryDefinition"%>
-<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-
-<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
 <%@ page import="org.labkey.api.security.Group" %>
 <%@ page import="org.labkey.api.security.GroupManager" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
-<%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
+<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
+<%@ page import="java.util.List" %>
+
 <%@ page import="static java.lang.Integer.parseInt" %>
-<%@ page import="org.labkey.api.data.Container" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -66,7 +54,7 @@
     JSONObject userAccessWater = new JSONObject();
 
     for(JSONObject json : waterAccess){
-        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json.toMap());
 
         String allowUser = String.valueOf(map.get("alloweduser"));
         if (userAccessWater.isNull(allowUser)){
@@ -81,19 +69,17 @@
                 JSONArray projectList = userAccessWater.getJSONArray(allowUser);
                 projectList.put(map.get("project"));
             }
-
         }
-
-
     }
+
     String userid = String.valueOf(getUser().getUserId());
-    boolean isAdmin =  getUser().isInSiteAdminGroup();
+    boolean isAdmin =  getUser().hasSiteAdminPermission();
 
     JSONObject husbandryAssignmentLookup = new JSONObject();
     List<JSONObject> husbandryAssigned = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_assigned"));
 
     for (JSONObject json : husbandryAssigned) {
-        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json.toMap());
         JSONObject waterInfo = new JSONObject();
 
         if (map.get("category") != null) {
@@ -111,8 +97,8 @@
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group complianceGroup = GroupManager.getGroup(getContainer(), "compliance (LDAP)", GroupEnumType.SITE);
     Group animalCare = GroupManager.getGroup(getContainer(),"animalcare (LDAP)",GroupEnumType.SITE);
-    boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
-    boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
+    boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().hasSiteAdminPermission();
+    boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().hasSiteAdminPermission();
     boolean isAnimalCare = getUser().isInGroup(animalCare.getUserId());
     String container = getContainer().getEncodedPath();
 
@@ -428,8 +414,8 @@
                                             String rowid = "";
                                             String altmeaning = "";
                                             for(JSONObject frequency : husbandryFrequencyList) {
-                                                if ( frequency.getString("altmeaning") != null && !frequency.getString("altmeaning").trim().equals("")) {
-                                                     rowid= frequency.getString("rowid");
+                                                if ( !frequency.isNull("altmeaning") && !frequency.getString("altmeaning").trim().equals("")) {
+                                                     rowid= String.valueOf(frequency.getInt("rowid"));
                                                      altmeaning = frequency.getString("altmeaning");
                                         %>
                                            <option value="<%=h(rowid)%>"><%=h(altmeaning)%></option>

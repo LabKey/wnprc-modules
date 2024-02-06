@@ -1,7 +1,7 @@
 package org.labkey.webutils.api.json;
 
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +15,7 @@ public class JsonUtils {
     public static JSONArray sortJsonArray(JSONArray jsonArray, Comparator<JSONObject> comparator) {
         List<JSONObject> jsonList = getListFromJSONArray(jsonArray);
 
-        Collections.sort(jsonList, comparator);
+        jsonList.sort(comparator);
 
         return getJSONArrayFromList(jsonList);
     }
@@ -35,8 +35,9 @@ public class JsonUtils {
     public static JSONArray getJSONArrayFromList(List<JSONObject> jsonObjectList) {
         JSONArray jsonArray = new JSONArray();
 
-        for (int i = 0; i < jsonObjectList.size(); i++) {
-            jsonArray.put(jsonObjectList.get(i));
+        for (JSONObject jsonObject : jsonObjectList)
+        {
+            jsonArray.put(jsonObject);
         }
 
         return jsonArray;

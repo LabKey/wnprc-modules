@@ -42,6 +42,7 @@ import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.security.roles.SubmitterRole;
 import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.TestContext;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.security.xml.GroupEnumType;
@@ -297,7 +298,7 @@ public class SelfRegistrationController extends SpringActionController
         {
             // create container
             Container rootContainer = ContainerManager.getRoot();
-            Container container = ContainerManager.createContainer(rootContainer,"PrivateTest");
+            Container container = ContainerManager.createContainer(rootContainer,"PrivateTest", TestContext.get().getUser());
             Group group = GroupManager.getGroup(rootContainer, "Guests", GroupEnumType.SITE);
             if (null == group)
             {
@@ -308,7 +309,7 @@ public class SelfRegistrationController extends SpringActionController
             RoleManager.getAllRoles();
             //what is the roleName for submitter?
             policy.addRoleAssignment(group, SubmitterRole.class);
-            SecurityPolicyManager.savePolicy(policy);
+            SecurityPolicyManager.savePolicy(policy, TestContext.get().getUser());
 
             // ensure the issue module is enabled for this folder
             Module issueModule = ModuleLoader.getInstance().getModule("Issues");

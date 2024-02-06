@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.Module;
+import org.labkey.api.security.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ public class ContainerHelper {
             String nextPiece = pieces.remove(pieces.size() - 1);
 
             // Get the next container, creating it if it doesn't exist
-            Container nextContainer = ContainerManager.ensureContainer(lastContainer, nextPiece);
+            Container nextContainer = ContainerManager.ensureContainer(lastContainer, nextPiece, User.getAdminServiceUser());
 
             // Push the new container onto our stack
             containerStack.add(nextContainer);
@@ -54,19 +55,19 @@ public class ContainerHelper {
     }
 
     private static Container getDbUtilsContainer() {
-        return ContainerManager.ensureContainer(ContainerManager.getRoot(), DBUTILS_PROJECT);
+        return ContainerManager.ensureContainer(ContainerManager.getRoot(), DBUTILS_PROJECT, User.getAdminServiceUser());
     }
 
     public static Container getPrivateContainer() {
-        return ContainerManager.ensureContainer(getDbUtilsContainer(), PRIVATE_CONTAINER);
+        return ContainerManager.ensureContainer(getDbUtilsContainer(), PRIVATE_CONTAINER, User.getAdminServiceUser());
     }
 
     private static Container getPrivateModulesContainer() {
-        return ContainerManager.ensureContainer(getPrivateContainer(), MODULES_CONTAINER);
+        return ContainerManager.ensureContainer(getPrivateContainer(), MODULES_CONTAINER, User.getAdminServiceUser());
     }
 
     public static Container getPrivateContainerForModule(Module module) {
-        Container container = ContainerManager.ensureContainer(getPrivateModulesContainer(), module.getName().toLowerCase());
+        Container container = ContainerManager.ensureContainer(getPrivateModulesContainer(), module.getName().toLowerCase(), User.getAdminServiceUser());
 
         // Ensure
         Set<Module> activeModules = container.getActiveModules();

@@ -1,6 +1,6 @@
 package org.labkey.dbutils.api;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -23,11 +23,12 @@ import java.util.Map;
  * Similarly to how {@link SimpleQuery} makes it simple to access data in tables, {@link SimpleQueryUpdater} makes
  * it easy to edit tables.
  */
-public class SimpleQueryUpdater {
-    private TableInfo tableInfo;
-    private QueryUpdateService service;
-    private User user;
-    private Container container;
+public class SimpleQueryUpdater
+{
+    private final TableInfo tableInfo;
+    private final QueryUpdateService service;
+    private final User user;
+    private final Container container;
 
     public SimpleQueryUpdater (User user, Container container, String schemaName, String tableName) {
         this.tableInfo = QueryService.get().getUserSchema(user, container, schemaName).getTable(tableName);
@@ -51,8 +52,13 @@ public class SimpleQueryUpdater {
         return this.upsert(rows);
     }
 
-    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
-        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+    public List<CaseInsensitiveMapWrapper<Object>> upsert(JSONObject json) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(json.toMap());
+        return this.upsert(rows);
+    }
+
+    public List<CaseInsensitiveMapWrapper<Object>> delete(JSONObject json) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(json.toMap());
         return this.delete(rows);
     }
 
@@ -187,7 +193,12 @@ public class SimpleQueryUpdater {
     public List<Map<String, Object>> doUpdate(List<Map<String, Object>> rows) throws BatchValidationException , InvalidKeyException, SQLException, QueryUpdateServiceException {
         List<Map<String, Object>> updatedRows = new ArrayList<>();
         if (rows.size() > 0) {
-            updatedRows = service.updateRows(user, container, rows, rows, null, null);
+            BatchValidationException validationException = new BatchValidationException();
+            updatedRows = service.updateRows(user, container, rows, rows, validationException, null, null);
+
+            if (validationException.hasErrors()) {
+                throw validationException;
+            }
 
             if (updatedRows.size() != rows.size()) {
                 throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -241,7 +252,7 @@ public class SimpleQueryUpdater {
 
     /**
      * Casts a "list" of rows to appropriate case insensitive rows for {@link QueryUpdateService#insertRows(User, Container, List, BatchValidationException, Map, Map)}
-     * and {@link QueryUpdateService#updateRows(User, Container, List, List, Map, Map)}.
+     * and {@link QueryUpdateService#updateRows(User, Container, List, List, BatchValidationException, Map, Map)}.
      *
      * @param rows A series (possibly of just one) of {@link Map<String, Object>} objects (which includes
      *             {@link JSONObject} objects, since they extend {@link Map<String, Object>}.

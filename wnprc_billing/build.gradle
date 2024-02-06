@@ -19,19 +19,6 @@ dependencies {
     BuildUtils.addExternalDependency(
             project,
             new ExternalDependency(
-                    "org.apache.sanselan:sanselan:${sanselanVersion}",
-                    "Apache Commons Imaging",
-                    "Sanselan",
-                    "https://commons.apache.org/proper/commons-imaging/",
-                    ExternalDependency.APACHE_2_LICENSE_NAME,
-                    ExternalDependency.APACHE_2_LICENSE_URL,
-                    "Required by Java-FPDF"
-            )
-    )
-
-    BuildUtils.addExternalDependency(
-            project,
-            new ExternalDependency(
                     "commons-net:commons-net:${commonsNetVersion}",
                     "Commons Net",
                     "Apache",

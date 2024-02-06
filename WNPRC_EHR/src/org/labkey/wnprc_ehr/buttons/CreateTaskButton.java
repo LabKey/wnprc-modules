@@ -27,6 +27,7 @@ public class CreateTaskButton extends SimpleButtonConfigFactory
         super(owner, ("Schedule " + formType + " Task"), "WNPRC_EHR.DatasetButtons.createTaskButtonHandler(dataRegion, '" + formType + "');");
     }
 
+    @Override
     public boolean isAvailable(TableInfo ti)
     {
         if (!super.isAvailable(ti))

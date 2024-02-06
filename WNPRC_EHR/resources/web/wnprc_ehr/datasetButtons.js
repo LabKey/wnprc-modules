@@ -235,9 +235,12 @@ WNPRC_EHR.DatasetButtons = new function(){
                                         }, this)
                                     },
                                     failure: function(error){
-                                        console.log('failure');
-                                        console.log(error);
-                                        Ext4.Msg.hide();
+                                        Ext4.Msg.show({
+                                            title: "Error",
+                                            msg: error.message,
+                                            buttons: Ext4.MessageBox.OK,
+                                            icon: Ext4.MessageBox.ERROR
+                                        });
                                     }
                                 }
 
@@ -801,22 +804,43 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 toUpdate[rec['dataset/Label']].push(obj)
                             }, this);
 
-                            for(var i in toUpdate){
+                            let failure = false;
+                            let errors;
+                            for (const i in toUpdate){
                                 multi.add(LABKEY.Query.updateRows, {
                                     schemaName: 'study',
                                     queryName: i,
                                     rows: toUpdate[i],
                                     scope: this,
-                                    failure: EHR.Utils.onError
+                                    success: function() {
+                                    },
+                                    failure: function(error) {
+                                        failure = true;
+                                        errors = error.errors;
+                                    }
                                 });
                             }
 
                             multi.send(function(){
-                                Ext4.Msg.hide();
-                                dataRegion.selectNone();
+                                if (!failure) {
+                                    Ext4.Msg.hide();
+                                    dataRegion.selectNone();
 
-                                o.ownerCt.ownerCt.close();
-                                dataRegion.refresh();
+                                    o.ownerCt.ownerCt.close();
+                                    dataRegion.refresh();
+                                } else {
+                                    Ext4.Msg.hide();
+                                    let errorMsg = '';
+                                    for (let k = 0; k < errors.length; k++) {
+                                        errorMsg += errors[k].exception + ' for animal ' + errors[k].row.Id + '. '
+                                    }
+                                    Ext4.Msg.show({
+                                        title: "Error",
+                                        msg: errorMsg,
+                                        buttons: Ext4.MessageBox.OK,
+                                        icon: Ext4.MessageBox.WARNING
+                                    });
+                                }
                             }, this);
                         }
                     },{

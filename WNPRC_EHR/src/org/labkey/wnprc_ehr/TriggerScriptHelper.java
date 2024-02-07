@@ -13,10 +13,13 @@ import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
 import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
+import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.JdbcType;
@@ -27,6 +30,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.ehr.security.EHRDataAdminPermission;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -43,6 +47,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.SimpleQueryFactory;
@@ -67,6 +72,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,6 +81,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -88,6 +95,7 @@ public class TriggerScriptHelper {
     protected final User user;
     protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
+    private final Map<Integer, Pair<String, String>> _cachedProtocols = new HashMap<>();
 
     private TriggerScriptHelper(int userId, String containerId) {
         user = UserManager.getUser(userId);
@@ -993,6 +1001,7 @@ public class TriggerScriptHelper {
     }
 
     public String changeRowQCStatus(String tableName, String keyColumn, String columnCheck, List<Map<String, Object>> rowsToUpdate){
+
         String returnMessage = new String();
 
         TableInfo genericTable = getTableInfo("study",tableName);
@@ -2415,6 +2424,124 @@ public class TriggerScriptHelper {
 
         }
         return  returnCondition;
+    }
+
+    public Pair<String, String> getProtocolForProject(final Integer project)
+    {
+        if (project == null)
+            return null;
+
+        if (!_cachedProtocols.containsKey(project))
+        {
+            TableInfo ti = getTableInfo("ehr", "project");
+            final Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(ti, PageFlowUtil.set(FieldKey.fromString("protocol"), FieldKey.fromString("protocol/displayName")));
+            TableSelector ts = new TableSelector(ti, cols.values(), new SimpleFilter(FieldKey.fromString("project"), project), null);
+            ts.forEach(new Selector.ForEachBlock<ResultSet>()
+            {
+                @Override
+                public void exec(ResultSet object) throws SQLException
+                {
+                    Results rs = new ResultsImpl(object, cols);
+                    if (rs.getString(FieldKey.fromString("protocol")) != null)
+                        _cachedProtocols.put(project, Pair.of(rs.getString(FieldKey.fromString("protocol")), rs.getString(FieldKey.fromString("protocol/displayName"))));
+                }
+            });
+
+            if (!_cachedProtocols.containsKey(project))
+                _cachedProtocols.put(project, null);
+        }
+
+        return _cachedProtocols.get(project);
+    }
+    public String verifyProtocolCounts(final String id, Integer project, final List<Map<String, Object>> recordsInTransaction)
+    {
+        if (id == null)
+        {
+            return null;
+        }
+
+        AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+        if (ar.getSpecies() == null)
+        {
+            return "Unknown species: " + id;
+        }
+
+        final Pair<String, String> protocolPair = getProtocolForProject(project);
+        if (protocolPair == null)
+        {
+            return "Unable to find protocol associated with project: " + project;
+        }
+
+        //find the total animals previously used by this protocols/species
+        TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("protocolTotalAnimalsBySpecies");
+        SimpleFilter filter;
+        //If Rhesus or Cyno, check the Macaque value as well
+        if ("Rhesus".equals(ar.getSpecies()) || "Cynomolgus".equals(ar.getSpecies())) {
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(ar.getSpecies(), "All Species", "Macaque"), CompareType.IN);
+        } else {
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(ar.getSpecies(), "All Species"), CompareType.IN);
+        }
+        filter.addCondition(FieldKey.fromString("protocol"), protocolPair.first);
+        TableSelector ts = new TableSelector(ti, filter, null);
+        final List<String> errors = new ArrayList<>();
+        final String ALL_SPECIES = "All Species";
+        ts.forEach(new Selector.ForEachBlock<ResultSet>()
+        {
+            @Override
+            public void exec(ResultSet rs) throws SQLException
+            {
+                int totalAllowed = rs.getInt("allowed");
+                boolean totalAllowedNull = rs.wasNull();
+                String species = rs.getString("Species");
+                Set<String> animals = new CaseInsensitiveHashSet();
+                String animalString = rs.getString("Animals");
+                if (animalString != null)
+                {
+                    animals.addAll(Arrays.asList(StringUtils.split(animalString, ",")));
+                }
+
+                animals.add(id);
+
+                if (recordsInTransaction != null && recordsInTransaction.size() > 0)
+                {
+                    for (Map<String, Object> r : recordsInTransaction)
+                    {
+                        String id = (String)r.get("Id");
+                        Number project = (Number)r.get("project");
+                        if (id == null || project == null)
+                        {
+                            continue;
+                        }
+
+                        Pair<String, String> rowProtocol = getProtocolForProject(project.intValue());
+                        if (rowProtocol == null || rowProtocol.first == null || !rowProtocol.first.equals(protocolPair.first))
+                        {
+                            continue;
+                        }
+
+                        if (!ALL_SPECIES.equals(species))
+                        {
+                            //find species
+                            AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+                            if (ar.getSpecies() == null || !species.equals(ar.getSpecies()))
+                            {
+                                continue;
+                            }
+                        }
+
+                        animals.add(id);
+                    }
+                }
+
+                int remaining = totalAllowed - animals.size();
+                if (remaining < 0)
+                {
+                    errors.add("There are not enough spaces on protocol: " + protocolPair.second + ". Allowed: " + (totalAllowedNull ? "none": totalAllowed) + ", used: " + animals.size());
+                }
+            }
+        });
+
+        return StringUtils.join(errors, "<>");
     }
 
     public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}

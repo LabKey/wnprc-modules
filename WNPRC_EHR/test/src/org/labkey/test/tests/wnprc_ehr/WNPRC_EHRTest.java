@@ -16,13 +16,16 @@
 package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
@@ -54,6 +57,7 @@ import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.Maps;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
@@ -75,11 +79,13 @@ import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -89,6 +95,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.labkey.test.WebTestHelper.buildURL;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 
@@ -173,6 +180,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
+    protected static final SimpleDateFormat _df = new SimpleDateFormat("yyyy-MM-dd");
+    public static final String PROTOCOL_PROJECT_ID_2 = "795645"; // Project with exactly 3 members
+    public static final String PROTOCOL_ID_2 = "protocol102";
 
     @Nullable
     @Override
@@ -206,6 +216,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+
 
         initTest.createFinanceManagementFolders();
         initTest.clickFolder("Private");
@@ -244,7 +255,137 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.deathNotificationSetup();
+        //initTest.deathNotificationSetup();
+    }
+
+    protected String generateGUID()
+    {
+        return (String)executeScript("return LABKEY.Utils.generateUUID().toUpperCase()");
+    }
+
+    protected Date prepareDate(Date date, int daysOffset, int hoursOffset)
+    {
+        Calendar beforeInterval = Calendar.getInstance();
+        beforeInterval.setTime(date);
+        beforeInterval.add(Calendar.DATE, daysOffset);
+        beforeInterval.add(Calendar.HOUR_OF_DAY, hoursOffset);
+
+        return beforeInterval.getTime();
+    }
+    @Test
+    public void testAssignmentApi() throws Exception
+    {
+        final String investLastName = "Tester";
+
+        goToProjectHome();
+
+        //create project
+        String protocolTitle = generateGUID();
+        InsertRowsCommand protocolCommand = new InsertRowsCommand("ehr", "protocol");
+        protocolCommand.addRow(Maps.of("protocol", PROTOCOL_ID_2, "title", protocolTitle, "approve",  new Date(653295600000L) )); //; // Sept. 14, 1990
+        protocolCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand protocolSelect = new SelectRowsCommand("ehr", "protocol");
+        protocolSelect.addFilter(new Filter("title", protocolTitle));
+        final String protocolId = (String)protocolSelect.execute(getApiHelper().getConnection(), getContainerPath()).getRows().get(0).get("protocol");
+        Assert.assertNotNull(StringUtils.trimToNull(protocolId));
+
+        InsertRowsCommand investigatorsCommand = new InsertRowsCommand("ehr", "investigators");
+        investigatorsCommand.addRow(Maps.of("firstName", "Testie", "lastName", investLastName));
+        CommandResponse response = investigatorsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+        var id = ((HashMap<?, ?>) ((ArrayList<?>) response.getParsedData().get("rows")).get(0)).get("rowid");
+
+        InsertRowsCommand projectCommand = new InsertRowsCommand("ehr", "project");
+        String projectName = generateGUID();
+        projectCommand.addRow(Maps.of("project", PROTOCOL_PROJECT_ID_2, "name", projectName, "protocol", protocolId, "investigatorId", id));
+        projectCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand projectSelect = new SelectRowsCommand("ehr", "project");
+        projectSelect.setColumns(List.of("project", "investigatorId/lastName"));
+        projectSelect.addFilter(new Filter("protocol", protocolId));
+        SelectRowsResponse resp = projectSelect.execute(getApiHelper().getConnection(), getContainerPath());
+        final Integer projectId = (Integer)resp.getRows().get(0).get("project");
+
+        assertEquals("Project not correct in project table", PROTOCOL_PROJECT_ID_2, projectId.toString());
+
+        InsertRowsCommand protocolCountsCommand = new InsertRowsCommand("ehr", "protocol_counts");
+
+        Map<String, Object> protocolCountsRow = new HashMap<>();
+
+        protocolCountsRow.put("protocol", protocolId);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", protocolId);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", protocolId);
+        protocolCountsRow.put("species", "Cynomolgus");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", protocolId);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", protocolId);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+
+        //create assignment
+        InsertRowsCommand assignmentCommand = new InsertRowsCommand("study", "assignment");
+        assignmentCommand.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[0]);
+                put("date", prepareDate(new Date(), -10, 0));
+                put("objectid", generateGUID());
+                put("project", projectId);
+            }});
+        assignmentCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+
+
+        // try 2, should fail since there is one assignment of Rhesus (macaque), and only 1 spot for that
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {SUBJECTS[3], prepareDate(new Date(), 10, 0), null, projectId, "recordID"},
+                {SUBJECTS[4], prepareDate(new Date(), 10, 0), null, projectId, "recordID"}
+        }, Maps.of(
+                "project", Arrays.asList(
+                        "WARN: There are not enough spaces on protocol: " + protocolId + ". Allowed: 1, used: 2"
+                )
+        ));
+
+        // add assignmentsInTransaction, should fail
+        /*Map<String, Object> additionalExtraContext = new HashMap<>();
+        JSONArray assignmentsInTransaction = new JSONArray();
+        assignmentsInTransaction.put(Maps.of(
+                "Id", SUBJECTS[4],
+                "objectid", generateGUID(),
+                "date", _df.format(new Date()),
+                "enddate", null,
+                "project", projectId
+        ));
+        additionalExtraContext.put("assignmentsInTransaction", assignmentsInTransaction.toString());
+
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {SUBJECTS[3], prepareDate(new Date(), 10, 0), null, projectId, "recordID"}
+        }, Maps.of(
+                "project", Arrays.asList(
+                        "INFO: There are not enough spaces on protocol: " + protocolId + ". Allowed: 2, used: 3"
+                )
+        ), additionalExtraContext);*/
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -493,9 +634,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // upload virology results excel file
         goToEHRFolder();
         goToModule("FileContent");
-        _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE);
-        _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE);
-        _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE);
+        _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE, null, null, _fileBrowserHelper.fileIsPresent(CORRECT_SAMPLE_FILE.getName()));
+        _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE, null, null, _fileBrowserHelper.fileIsPresent(INCORRECT_FORMAT_SAMPLE_FILE.getName()));
+        _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE, null, null, _fileBrowserHelper.fileIsPresent(NO_MATCHING_RECORDS_SAMPLE_FILE.getName()));
 
         // set up the viral load hashmap to match CORRECT_SAMPLE_FILE
         VIROLOGY_RESULT_DATA.put("Id", "test1993532");

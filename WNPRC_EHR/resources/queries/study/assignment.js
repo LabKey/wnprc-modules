@@ -5,7 +5,7 @@
  */
 
 require("ehr/triggers").initScript(this);
-var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
+var WNPRCHelper  = require("wnprc_ehr/WNPRC").WNPRC.Utils.getJavaHelper();
 
 function onInit(event, helper){
     helper.setScriptOptions({
@@ -73,7 +73,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         var assignmentsInTransaction = helper.getProperty('assignmentsInTransaction');
         assignmentsInTransaction = assignmentsInTransaction || [];
 
-        var msgs = helper.getJavaHelper().verifyProtocolCounts(row.Id, row.project, assignmentsInTransaction);
+        var msgs = WNPRCHelper.verifyProtocolCounts(row.Id, row.project, assignmentsInTransaction);
         if (msgs){
             msgs = msgs.split("<>");
             for (var i=0;i<msgs.length;i++){
@@ -84,7 +84,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     //check that the animal request exists!
     if (row.animal_request_rowid) {
-        if (!WNPRC.Utils.getJavaHelper().checkAnimalRequestExists(row.animal_request_rowid)){
+        if (!WNPRCHelper.checkAnimalRequestExists(row.animal_request_rowid)){
             EHR.Server.Utils.addError(scriptErrors, 'animal_request_rowid', "Animal Request does not exist", 'ERROR');
         }
     }

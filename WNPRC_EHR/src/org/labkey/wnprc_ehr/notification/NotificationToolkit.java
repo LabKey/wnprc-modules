@@ -367,7 +367,7 @@ public class NotificationToolkit {
      *                              2. "No animal replacement fee to be paid (causeOfDeath death)".
      *                              3. "".
      */
-    public String getAnimalReplacementFee(Container currentContainer, User currentUser, String causeOfDeath) {
+    public String getAnimalReplacementFee(Container currentContainer, User currentUser, String causeOfDeath, String animalID) {
         //Sets up variables.
         StringBuilder returnFee = new StringBuilder();
         SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString("Value"), causeOfDeath, CompareType.EQUAL);
@@ -384,7 +384,32 @@ public class NotificationToolkit {
         //Returns fee.
         //TODO: Ask Daniel if this an empty fee (instead of 'fee' or 'no fee') should be 'no fee'.
         if (returnFee.toString().equals("Fee")) {
-            return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+
+
+            //TODO: Added this for hotfix, clean up later.
+            SimpleFilter feeFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
+            TableSelector feeTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "study").getTable("demographics"), feeFilter, null);
+            //Gets fee from table.
+            StringBuilder updatedFee = new StringBuilder();
+            if (feeTable != null) {
+                if (feeTable.getRowCount() > 0) {
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            updatedFee.append(rs.getString("prepaid"));
+                        }
+                    });
+                }
+            }
+            if (!updatedFee.isEmpty()) {
+                return updatedFee.toString();
+            }
+            else {
+                return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+            }
+            //TODO: End of hotfix changes.
+
+
         }
         else if (returnFee.toString().equals("No Fee")) {
             return ("No animal replacement fee to be paid (" + causeOfDeath + " death)");
@@ -554,7 +579,7 @@ public class NotificationToolkit {
                     //Gets animal replacement fee.
                     //TODO: What should I return when this is null?  Currently I just have it return a blank string.
                     if (necropsyTypeOfDeath != null) {
-                        this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath);
+                        this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath, animalID);
                     }
 
                     //Creates task id with hyperlink.

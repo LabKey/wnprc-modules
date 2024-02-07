@@ -118,7 +118,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.reflections:reflections:0.9.10",
+            "org.reflections:reflections:0.10.2",
             "Reflections",
             "Reflections",
             "https://github.com/ronmamo/reflections",

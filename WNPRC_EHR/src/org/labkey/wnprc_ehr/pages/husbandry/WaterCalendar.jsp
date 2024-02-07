@@ -284,25 +284,19 @@
 
 
                     <dl class="dl-horizontal">
-                        <dt>DataSource:</dt>
-                            <dd>{{dataSource}}</dd>
-                        <dt>Date:</dt>
-                            <dd>{{displayDate}}</dd>
-                        <dt>Animal ID:</dt>
-                            <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                        <dt>DataSource:     </dt>           <dd>{{dataSource}}</dd>
+                        <dt>Date:           </dt>           <dd>{{displayDate}}</dd>
+                        <dt>Animal ID:      </dt>           <dd><a href="{{animalLink}}">{{Id}}</a></dd>
                         <dt>
                             <!-- ko if: calculatedStatusValue() == 'Alive' -->Current Location:  <!-- /ko-->
                             <!-- ko if: calculatedStatusValue() == 'Dead' --> Last Location:  <!-- /ko-->
-                        </dt>
-                            <dd>{{location}}</dd>
-                        <dt>Total Volume:</dt>
-                            <dd>
+                                            </dt>           <dd>{{location}}</dd>
+                        <dt>Total Volume:   </dt>           <dd>
                                 <!-- ko if: conditionAtTimeValue() == 'regulated' -->{{volume}} ml<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'lixit' -->On Lixit<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'dead' -->Dead<!-- /ko-->
-                            </dd>
-                        <dt>ml Per Kg:</dt>
-                            <dd>{{mlsPerKg}}</dd>
+                                                                            </dd>
+                        <dt>ml Per Kg:      </dt>           <dd>{{mlsPerKg}}</dd>
                     </dl>
                     <!-- ko if: mlsPerKgCal() -->
                         <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
@@ -1355,10 +1349,15 @@
         });
 
         WebUtils.VM.taskDetails.conditionAtTimeValue = ko.pureComputed(function(){
-            if ( WebUtils.VM.taskDetails.conditionAtTime() === 'regulated' && WebUtils.VM.taskDetails.calculatedStatusValue() === 'Alive' ){
+            if (WebUtils.VM.taskDetails.calculatedStatusValue() === 'Alive' ){
+                debugger;
+                return WebUtils.VM.taskDetails.conditionAtTime();
+
+            }else{
+                return 'dead';
 
             }
-            return WebUtils.VM.taskDetails.conditionAtTime();
+            //return WebUtils.VM.taskDetails.conditionAtTime();
         });
 
         WebUtils.VM.taskDetails.calculatedStatusValue = ko.pureComputed(function(){

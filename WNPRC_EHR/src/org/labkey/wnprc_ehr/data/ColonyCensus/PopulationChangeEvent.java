@@ -51,7 +51,8 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
     public enum Species {
         Rhesus (0),
         Cynomolgus (1),
-        Marmoset (2)
+        Marmoset (2),
+        Pigtail (3)
         ;
 
         private int _speciesCode;
@@ -96,6 +97,7 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
                 case "cynomolgus": species = Species.Cynomolgus; break;
                 case "rhesus":     species = Species.Rhesus;     break;
                 case "marmoset":   species = Species.Marmoset;   break;
+                case "pigtail":    species = Species.Pigtail;    break;
                 default:
                     throw new IllegalArgumentException(speciesString + " is not a valid species.");
             }

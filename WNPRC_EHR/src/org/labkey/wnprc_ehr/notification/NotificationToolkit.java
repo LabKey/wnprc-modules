@@ -386,7 +386,7 @@ public class NotificationToolkit {
         if (returnFee.toString().equals("Fee")) {
 
 
-            //TODO: Added this for hotfix, clean up later.
+            //TODO: Added this for hotfix, clean up later
             SimpleFilter feeFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
             TableSelector feeTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "study").getTable("demographics"), feeFilter, null);
             //Gets fee from table.

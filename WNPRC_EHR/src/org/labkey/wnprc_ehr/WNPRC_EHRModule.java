@@ -119,6 +119,8 @@ import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
+import org.labkey.wnprc_ehr.notification.ColonyAlertsNotificationRevamp;
+import org.labkey.wnprc_ehr.notification.BloodAlertsNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesSupervisorNotification;
 import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
 import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
@@ -361,7 +363,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         List<Notification> notifications = Arrays.asList(
                 new BehaviorNotification(this),
                 new DeathNotification(),
-                new DeathNotificationRevamp(this),
                 new ColonyAlertsNotification(this),
                 new TreatmentAlertsNotification(this),
                 new VvcNotification(this),
@@ -370,7 +371,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new FoodNotCompletedNotification(this),
                 new FoodCompletedProblemsNotification(this),
                 new AnimalRequestNotification(this),
-                new AnimalRequestNotificationRevamp(this),
                 new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
@@ -378,8 +378,12 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new WaterMonitoringAnimalWithOutEntriesNotification(this),
                 new WaterMonitoringNotification(this),
                 new ValidationSuiteNotification(this),
-                new WaterMonitoringAnimalWithOutEntriesSupervisorNotification(this)
-        );
+                new WaterMonitoringAnimalWithOutEntriesSupervisorNotification(this),
+                new DeathNotificationRevamp(this),
+                new ColonyAlertsNotificationRevamp(this),
+                new AnimalRequestNotificationRevamp(this),
+                new BloodAlertsNotificationRevamp(this)
+                );
 
         for (Notification notification : notifications)
         {

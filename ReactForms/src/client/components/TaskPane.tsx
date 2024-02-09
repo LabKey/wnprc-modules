@@ -5,16 +5,30 @@ import InputLabel from './InputLabel';
 import '../theme/css/index.css';
 import { ConfigProps } from '../query/typings';
 import DropdownSearch from './DropdownSearch';
-import { labkeyActionSelectWithPromise } from '../query/helpers';
+import { getTask, labkeyActionSelectWithPromise } from '../query/helpers';
 import ControlledDateInput from './ControlledDateInput';
 import { Controller, FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
-export const TaskPane: FC<any> = (props) =>{
-    const { title, prevTask} = props;
+
+interface taskProps {
+    componentProps: {
+        title: string;
+        schemaName: string;
+        queryName: string;
+    }
+    prevTaskId?: string;
+}
+
+export const TaskPane: FC<taskProps> = (props) =>{
+    const {prevTaskId, componentProps} = props;
+    const { title} = componentProps;
 
     const { control } = useFormContext();
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [prevTask, setPrevTask] = useState(undefined);
+    const [isLoadingTask, setIsLoadingTask] = useState<boolean>(true);
+    const [isLoadingQC, setIsLoadingQC] = useState<boolean>(true);
+
     const [qcOptions, setQCOptions] = useState<any>({});
 
     const config: ConfigProps = {
@@ -28,6 +42,19 @@ export const TaskPane: FC<any> = (props) =>{
         queryName: "QCState",
         columns: ["RowId", "label"],
     };
+
+    // Loads previous task if one exists
+    useEffect(() => {
+        if(prevTaskId) {
+            getTask(prevTaskId).then((result) => {
+                setPrevTask(result);
+                setIsLoadingTask(false);
+            });
+        }else {
+            setIsLoadingTask(false);
+        }
+    },[]);
+
     // Gets QC labels and row ids
     useEffect(() => {
         labkeyActionSelectWithPromise(qcConfig).then((data) => {
@@ -36,9 +63,9 @@ export const TaskPane: FC<any> = (props) =>{
                 qcOpt[row.RowId] = row.Label;
             });
             setQCOptions(qcOpt);
-            setIsLoading(false);
+            setIsLoadingQC(false);
         }).catch(() => {
-            setIsLoading(false);
+            setIsLoadingQC(false);
         })
     }, []);
 
@@ -53,11 +80,11 @@ export const TaskPane: FC<any> = (props) =>{
         }
     }
 
-    if(isLoading){
+    if(isLoadingQC || isLoadingTask){
         return <div>Loading...</div>
     }
     return(
-        <div className={"col-md-8 panel panel-portal form-row-wrapper"}>
+        <>
             <div className="panel-heading">
                 <h3>Task</h3>
             </div>
@@ -130,7 +157,7 @@ export const TaskPane: FC<any> = (props) =>{
                     <Controller
                         name={"TaskPane.qcstate" as  FieldPathValue<FieldValues, any>}
                         control={control}
-                        defaultValue={prevTask?.qcstate || getQCRow("In Progress") as FieldPathValue<FieldValues, any>}
+                        defaultValue={prevTask?.qcstate as FieldPathValue<FieldValues, any> || getQCRow("In Progress") as FieldPathValue<FieldValues, any>}
                         render={({field: {onChange, value}}) => (
                             <div className={"text-input"}>
                                 <input
@@ -149,7 +176,7 @@ export const TaskPane: FC<any> = (props) =>{
                     />
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

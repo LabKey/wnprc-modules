@@ -11,7 +11,6 @@ import {
     getQCRowID
 } from '../query/helpers';
 import AnimalInfoPane from "./AnimalInfoPane";
-import {TaskPane} from "./TaskPane";
 import ErrorModal from '../components/ErrorModal';
 import { ActionURL, Filter, Utils } from '@labkey/api';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -29,7 +28,6 @@ interface Component {
 interface formProps {
     prevTaskId?: string;
     taskType: string;
-    taskTitle: string;
     redirectQuery: string;
     redirectSchema: string;
     command: string;
@@ -54,7 +52,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         prevTaskId,
         components,
         taskType,
-        taskTitle,
         command,
         redirectSchema,
         redirectQuery,
@@ -67,27 +64,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     // States required for animal info
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
 
-    // States required for tasks
-    const [prevTask, setPrevTask] = useState(undefined);
-    // State for making sure page doesn't load before previous task data fetching is complete
-    const [dataFetching, setDataFetching] = useState(true);
-
     // States for pop-ups/form checking
     const [errorText, setErrorText] = useState<string>("");
     const [showModal, setShowModal] = useState<string>();
     const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
-
-    // Load previous task data if required
-    useEffect(() => {
-        if(prevTaskId) {
-            getTask(prevTaskId).then((result) => {
-                setPrevTask(result);
-                setDataFetching(false);
-            });
-        }else {
-            setDataFetching(false);
-        }
-    },[]);
 
 
     /*
@@ -105,7 +85,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             const requiredFields = component.required;
             //Override command in-case form is under review and needs update and insert commands.
             const commandOverride = component.commandOverride;
-
             if(currentFormData[componentName] !== null && currentFormData[componentName] !== undefined){
                 // sync up task id
                 const tempNewData = currentFormData[componentName];
@@ -147,7 +126,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         const finalFormData = [];
         // generate taskId if required
         const newTaskId = prevTaskId ? prevTaskId : Utils.generateUUID().toUpperCase();
-
         const formMetaData = FormMetadataCollection( {
             schemaName:redirectSchema,
             queryName: redirectQuery,
@@ -155,17 +133,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             startTime: formStartTime,
         });
         finalFormData.push(generateFormData("wnprc", "session_log","insert", formMetaData));
-        //finalize (ehr_tasks) submission
-        data.TaskPane = {
-            ...data.TaskPane,
-            taskid: newTaskId,
-            category: 'task',
-            formType: taskType,
-            qcstate: reviewRequired ? await getQCRowID("Review Required") : await getQCRowID("Completed")
-        };
-        // Create format to submit new task
-        const taskData = generateFormData("ehr", "tasks", command, data.TaskPane);
-        finalFormData.push(taskData);
         processComponents(finalFormData, newTaskId, data ).then((data) => {
             // For each component compile the state data into a format ready for submission
 
@@ -197,10 +164,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
 
     }
 
-    // Make sure if loading in from a taskId the render doesn't return before it fetches the previous task
-    if(dataFetching){
-        return <div>loading...</div>;
-    }
     return (
             <div className={`form-wrapper ${false ? "saving" : ""}`}>
                 {showModal == "error" && (
@@ -212,10 +175,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 )}
                 <FormProvider {...methods}>
                     <form className={'default-form'} onSubmit={methods.handleSubmit(handleSubmit)}>
-                        <TaskPane
-                            prevTask={prevTask}
-                            title={taskTitle}
-                        />
                         {
                             components.map((component) => {
                                 // sub-component props

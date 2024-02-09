@@ -4,6 +4,7 @@ import { DefaultFormContainer } from '../../components/DefaultFormContainer';
 import { CustomInputPane } from '../../components/CustomInputPane';
 import {InstructionsPane} from '../../components/InstructionsPane';
 import {ActionURL} from '@labkey/api';
+import { TaskPane } from '../../components/TaskPane';
 
 export const Ultrasounds: FC<any> = (props) => {
 
@@ -14,6 +15,13 @@ export const Ultrasounds: FC<any> = (props) => {
     const reviewRequired = formType ? !formType.includes('Review') : true;
     const components: any[] = [
         {
+            type: TaskPane,
+            name: "TaskPane",
+            componentProps: {
+                prevTask: taskid,
+                title: "Ultrasounds"
+            }
+        },{
             type: InstructionsPane,
             name: "InstructionsPane",
             componentProps: {
@@ -31,12 +39,11 @@ export const Ultrasounds: FC<any> = (props) => {
             <DefaultFormContainer
                 prevTaskId={taskid}
                 reviewRequired={reviewRequired}
-                taskTitle={"Research Ultrasounds"}
-                taskType={"Research Ultrasounds"}
+                taskType={"Ultrasounds"}
                 command={taskid ? "update" : "insert"}
                 components={components}
                 redirectSchema={"study"}
-                redirectQuery={"research_ultrasounds"}
+                redirectQuery={"ultrasounds"}
                 formStartTime={formStartTime}
             />
         </div>

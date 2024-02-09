@@ -210,7 +210,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             if (formType.equalsIgnoreCase("Research Ultrasounds"))
                             {
                                 formType = "Research Ultrasounds Review";
-                                url = new ActionURL("wnprc_ehr", "researchUltrasoundsEntry.view", us.getContainer());
+                                url = new ActionURL("reactforms", "research_ultrasounds.view", us.getContainer());
                             }
                             url.addParameter("formType", formType);
                             url.addParameter("taskid", taskId);

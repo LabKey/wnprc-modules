@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { DefaultFormContainer } from '../../components/DefaultFormContainer';
 import { CustomInputPane } from '../../components/CustomInputPane';
 import {InstructionsPane} from '../../components/InstructionsPane';
+import {TaskPane} from '../../components/TaskPane';
 import {ActionURL} from '@labkey/api';
 
 import {
@@ -18,6 +19,14 @@ export const ResearchUltrasounds: FC<any> = (props) => {
     const reviewRequired = formType ? !formType.includes('Review') : true;
     const components: any[] = [
         {
+            type: TaskPane,
+            name: "TaskPane",
+            componentProps: {
+                title: "Research Ultrasounds",
+                schemaName: "ehr",
+                queryName: "tasks"
+            }
+        },{
             type: InstructionsPane,
             name: "InstructionsPane",
             componentProps: {
@@ -71,7 +80,6 @@ export const ResearchUltrasounds: FC<any> = (props) => {
             <DefaultFormContainer
                 prevTaskId={taskid}
                 reviewRequired={reviewRequired}
-                taskTitle={"Research Ultrasounds"}
                 taskType={"Research Ultrasounds"}
                 command={taskid ? "update" : "insert"}
                 components={components}

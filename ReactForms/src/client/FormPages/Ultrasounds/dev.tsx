@@ -1,21 +1,14 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
-
-// Main react component
 import { Ultrasounds } from './Ultrasounds';
-
-// Import stylesheets
-import '../../wnprc_ehr.scss';
-
+import { createRoot } from 'react-dom/client';
 
 const render = () => {
-    ReactDOM.render(
+    createRoot(document.getElementById("app")).render(
         <AppContainer>
             <Ultrasounds />
-        </AppContainer>,
-        document.getElementById('app')
-    )
+        </AppContainer>
+    );
 };
 
 declare const module: any;

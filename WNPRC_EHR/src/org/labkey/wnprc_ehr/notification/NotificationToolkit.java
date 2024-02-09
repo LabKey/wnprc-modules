@@ -336,7 +336,7 @@ public class NotificationToolkit {
      */
     public String getWeightFromAnimalID(Container currentContainer, User currentUser, String animalID) {
         //Gets the full animal weight.
-        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", new Sort("-weight"), "id", animalID, new String[]{"weight"});
+        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", new Sort("-date"), "id", animalID, new String[]{"weight"});
         if (!weightRow.isEmpty()) {
             String fullWeight = weightRow.get(0);
             if (fullWeight != null) {
@@ -368,61 +368,59 @@ public class NotificationToolkit {
      *                              3. "".
      */
     public String getAnimalReplacementFee(Container currentContainer, User currentUser, String causeOfDeath, String animalID) {
-        //Sets up variables.
-        StringBuilder returnFee = new StringBuilder();
-        SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString("Value"), causeOfDeath, CompareType.EQUAL);
-        TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "ehr_lookups").getTable("death_cause"), queryFilter, null);
+        if (causeOfDeath == null) {
+            return "";
+        }
+        else {
+            //Sets up variables.
+            StringBuilder returnFee = new StringBuilder();
+            SimpleFilter queryFilter = new SimpleFilter(FieldKey.fromString("Value"), causeOfDeath, CompareType.EQUAL);
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "ehr_lookups").getTable("death_cause"), queryFilter, null);
 
-        //Gets fee type from table.
-        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-            @Override
-            public void exec(ResultSet rs) throws SQLException {
-                returnFee.append(rs.getString("Category"));
-            }
-        });
-
-        //Returns fee.
-        //TODO: Ask Daniel if this an empty fee (instead of 'fee' or 'no fee') should be 'no fee'.
-        if (returnFee.toString().equals("Fee")) {
-
-
-            //TODO: Added this for hotfix, clean up later
-            SimpleFilter feeFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
-            TableSelector feeTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "study").getTable("demographics"), feeFilter, null);
-            //Gets fee from table.
-            StringBuilder updatedFee = new StringBuilder();
-            if (feeTable != null) {
-                if (feeTable.getRowCount() > 0) {
+            //Gets fee type from table.
+            if (myTable != null) {
+                if (myTable.getRowCount() > 0) {
                     myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
                         @Override
                         public void exec(ResultSet rs) throws SQLException {
-                            updatedFee.append(rs.getString("prepaid"));
+                            returnFee.append(rs.getString("Category"));
                         }
                     });
                 }
             }
-            if (!updatedFee.isEmpty()) {
-                return updatedFee.toString();
+
+            //Gets detailed (prepaid) fee (if available).
+            if (returnFee.toString().equals("Fee")) {
+                SimpleFilter feeFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
+                TableSelector feeTable = new TableSelector(QueryService.get().getUserSchema(currentUser, currentContainer, "study").getTable("demographics"), feeFilter, null);
+                //Gets fee from table.
+                StringBuilder updatedFee = new StringBuilder();
+                if (feeTable != null) {
+                    if (feeTable.getRowCount() > 0) {
+                        feeTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                            @Override
+                            public void exec(ResultSet rs) throws SQLException {
+                                updatedFee.append(rs.getString("prepaid"));
+                            }
+                        });
+                    }
+                }
+                if (!updatedFee.isEmpty()) {
+                    return updatedFee.toString();
+                }
+                else {
+                    return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+                }
             }
+            //Returns 'no fee'.
+            else if (returnFee.toString().equals("No Fee")) {
+                return ("No animal replacement fee to be paid (" + causeOfDeath + " death)");
+            }
+            //Returns an empty string if returnFee is blank.
             else {
-                return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+                return "";
             }
-            //TODO: End of hotfix changes.
-
-
         }
-        else if (returnFee.toString().equals("No Fee")) {
-            return ("No animal replacement fee to be paid (" + causeOfDeath + " death)");
-        }
-        else {
-            return "";
-        }
-//        if (returnFee.toString().equals("null")) {
-//            return "";
-//        }
-//        else {
-//            return returnFee.toString();
-//        }
     }
 
     /**
@@ -575,12 +573,7 @@ public class NotificationToolkit {
                     this.necropsyGrantNumber = necropsyTableRow.get(5);
                     this.necropsyMannerOfDeath = necropsyTableRow.get(6);
                     this.animalWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
-
-                    //Gets animal replacement fee.
-                    //TODO: What should I return when this is null?  Currently I just have it return a blank string.
-                    if (necropsyTypeOfDeath != null) {
-                        this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath, animalID);
-                    }
+                    this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath, animalID);
 
                     //Creates task id with hyperlink.
                     String necropsyTaskID = necropsyTableRow.get(1);

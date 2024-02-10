@@ -295,6 +295,7 @@
                                 <!-- ko if: conditionAtTimeValue() == 'regulated' -->{{volume}} ml<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'lixit' -->On Lixit<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'dead' -->Dead<!-- /ko-->
+                                <!-- ko if: conditionAtTimeValue() == '' --><!-- /ko-->
                                                                             </dd>
                         <dt>ml Per Kg:      </dt>           <dd>{{mlsPerKg}}</dd>
                     </dl>
@@ -702,7 +703,7 @@
                         WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "date~lt":  new Date()
+                            "date~lte":  new Date()
                         }).then(function (data) {
                             debugger;
                             var events = data.rows;
@@ -710,30 +711,38 @@
                             successCallback(
                                     events.map(function (row) {
                                         let parsedTotalWater = 0;
-                                        let eventTitle = "";
-                                        if( row.conditionAtTime === 'regulated' ){
-                                            if ( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                row.TotalWater = 'none';
-                                            }else if( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Dead'){
-                                                row.TotalWater = 'Dead'
-                                                eventTitle = row.id + row['Id/Demographics/calculated_status']
-                                            }
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                parsedTotalWater = row.TotalWater;
-                                                eventTitle = row.Id + " Total: " + parsedTotalWater;
-                                            }else{
-                                                eventTitle = row.Id + row['Id/Demographics/calculated_status']
-                                            }
+                                        let eventTitle = row.Id;
+                                        row.animalStatus=row['Id/Demographics/calculated_status'];
+                                        if( row.conditionAtTime === 'regulated' ) {
+                                            if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                if (row.TotalWater === null) {
+                                                    row.TotalWater = ' none';
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                                else if (row.TotalWater !== null) {
+                                                    parsedTotalWater = row.TotalWater;
+                                                    eventTitle += " Total: ";
+                                                }
 
-                                        }else{
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                row.TotalWater = 'Lixit'
-                                                eventTitle = row.Id + " on Lixit";
-                                            }else{
-                                                row.TotalWater = 'Dead'
-                                                eventTitle = row.Id + row['Id/Demographics/calculated_status']
+                                            }
+                                            else {
+                                                row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                parsedTotalWater = row.TotalWater;
                                             }
                                         }
+                                        else {
+                                            if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                row.TotalWater = 'on Lixit';
+                                                parsedTotalWater = row.TotalWater;
+                                            }
+                                            else {
+                                                row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                parsedTotalWater = row.TotalWater;
+
+                                            }
+                                        }
+                                        eventTitle += parsedTotalWater;
+
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
                                             title: eventTitle,
@@ -766,7 +775,7 @@
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "date~lt":  new Date(),
+                            "date~lte":  new Date(),
                             "Id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
@@ -774,30 +783,39 @@
                                 successCallback(
                                         events.map(function (row) {
                                             let parsedTotalWater = 0;
-                                            let eventTitle = "";
+                                            let eventTitle = row.Id;
+                                            row.animalStatus=row['Id/Demographics/calculated_status'];
                                             debugger;
-                                            if(row.conditionAtTime === 'regulated') {
-                                                if (row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                    row.TotalWater = 'none';
-                                                }else if( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Dead'){
-                                                    row.TotalWater = 'Dead'
-                                                    eventTitle = row.Id + row['Id/Demographics/calculated_status']
+                                            if( row.conditionAtTime === 'regulated' ) {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    if (row.TotalWater === null) {
+                                                        row.TotalWater = ' none';
+                                                        parsedTotalWater = row.TotalWater;
+                                                    }
+                                                    else if (row.TotalWater !== null) {
+                                                        parsedTotalWater = row.TotalWater;
+                                                        eventTitle += " Total: ";
+                                                    }
+
                                                 }
-                                                else if (row['Id/Demographics/calculated_status'] === 'Alive'){
+                                                else {
+                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
                                                     parsedTotalWater = row.TotalWater;
-                                                    eventTitle = row.Id + " Total: " + parsedTotalWater;
                                                 }
-
-                                            }else{
-                                                if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                    row.TotalWater = 'Lixit'
-                                                    eventTitle = row.Id + " on Lixit";
-                                                }else{
-                                                    row.TotalWater = 'Dead'
-                                                    eventTitle = row.Id + row['Id/Demographics/calculated_status']
-                                                }
-
                                             }
+                                            else {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    row.TotalWater = ' on Lixit';
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                                else {
+                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    parsedTotalWater = row.TotalWater;
+
+                                                }
+                                            }
+                                            eventTitle += parsedTotalWater;
+
                                             var eventObj = {
                                                 id : LABKEY.Utils.generateUUID(),
                                                 title: eventTitle,
@@ -841,7 +859,9 @@
                             color: '#fff'
                         }
                     });
-                    $('#waterInformation').collapse('show');
+                    $('#waterInformation').collapse('hide');
+                    $('#waterTotalInformation').collapse('hide');
+                    //$('#waterInformation').collapse('show');
 
                 }else{
                     $('#water-calendar').unblock();
@@ -1026,7 +1046,7 @@
                 rawDate:                    ko.observable(),
                 mlsPerKg:                   ko.observable(),
                 conditionAtTime:            ko.observable(),
-                status:                     ko.observable()
+                animalStatus:               ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -1353,15 +1373,18 @@
                 debugger;
                 return WebUtils.VM.taskDetails.conditionAtTime();
 
-            }else{
+            }
+            else if(WebUtils.VM.taskDetails.calculatedStatusValue() === 'Dead' ){
                 return 'dead';
+            }else{
+                return '';
 
             }
             //return WebUtils.VM.taskDetails.conditionAtTime();
         });
 
         WebUtils.VM.taskDetails.calculatedStatusValue = ko.pureComputed(function(){
-            return WebUtils.VM.taskDetails.status();
+            return WebUtils.VM.taskDetails.animalStatus();
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel

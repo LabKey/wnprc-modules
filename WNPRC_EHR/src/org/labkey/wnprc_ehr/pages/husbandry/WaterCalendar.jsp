@@ -217,92 +217,100 @@
     <div class="col-md-3">
 
         <div class="row" id="infoPanels">
-            <div class="collapse panel panel-primary" id="waterInformation">
-                <div class="panel-heading"><span>Water Details</span></div>
-                <div class="panel-body" id="waterInfoPanel" data-bind="with: taskDetails">
+            <div class="panel-group" id="waterInformation" role="tablist">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <span data-parent="#infoPanels">Water Details</span>
+                        </h4>
+                    </div>
+
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" id="waterInfoPanel" data-bind="with: taskDetails">
+                            <dl class="dl-horizontal">
+                                <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
+                                <dt>Task ID:            </dt> <dd><a href="{{taskLink}}">{{taskid}}</a></dd>
+                                <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                                <dt>Location:           </dt> <dd>{{location}}</dd>
+                                <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
+                                <dt>Volume:             </dt> <dd>{{volume}}</dd>
+                                <dt>Provide Fruit:      </dt> <dd>{{provideFruitTitle}}</dd>
+                                <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
+                                <dt>Date:               </dt> <dd>{{displayDate}}</dd>
+                                <dt>Frequency:          </dt> <dd>{{frequencyMeaningCoalesced}}</dd>
+                                <dt>Time of day:        </dt> <dd>{{displaytimeofday}}</dd>
+                            </dl>
+
+                            <button class="btn btn-default" data-bind="click: $root.requestTableClickAction" data-toggle="collapse" data-target="#waterExceptionPanel"
+                                    id="waterInfo" params="" disabled>Enter Single Day Water</button>
+
+                            <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
+                                    id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
 
 
-                    <dl class="dl-horizontal">
-                        <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
-                        <dt>Task ID:            </dt> <dd><a href="{{taskLink}}">{{taskid}}</a></dd>
-                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
-                        <dt>Location:           </dt> <dd>{{location}}</dd>
-                        <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
-                        <dt>Volume:             </dt> <dd>{{volume}}</dd>
-                        <dt>Provide Fruit:      </dt> <dd>{{provideFruitTitle}}</dd>
-                        <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
-                        <dt>Date:               </dt> <dd>{{displayDate}}</dd>
-                        <dt>Frequency:          </dt> <dd>{{frequencyMeaningCoalesced}}</dd>
-                        <dt>Time of day:        </dt> <dd>{{displaytimeofday}}</dd>
-                    </dl>
+                            <!--  Modal Definition -->
+                            <div class="modal fade" id="myModal" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" data-bind="click: $root.closeModalWindow">&times;</button>
+                                            <h4 class="modal-title">Modify Water Order</h4>
+                                        </div>
+                                        <div class="modal-body" id="modal-body">
+                                            <div>Select an option from this window:</div>
+                                            <div>End Date for Water Order: <b>{{date}}</b></div>
+                                            <div>
+                                                <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
+                                                <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                            </div>
+                                            <hr>
+                                            <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
+                                            <div class="server-return-message" id = "modelServerResponse"></div>
 
-                    <button class="btn btn-default" data-bind="click: $root.requestTableClickAction" data-toggle="collapse" data-target="#waterExceptionPanel"
-                                          id="waterInfo" params="" disabled>Enter Single Day Water</button>
-
-                    <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
-                            id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
-
-
-                    <!--  Modal Definition -->
-                    <div class="modal fade" id="myModal" role="dialog">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" data-bind="click: $root.closeModalWindow">&times;</button>
-                                    <h4 class="modal-title">Modify Water Order</h4>
-                                </div>
-                                <div class="modal-body" id="modal-body">
-                                    <div>Select an option from this window:</div>
-                                    <div>End Date for Water Order: <b>{{date}}</b></div>
-                                    <div>
-                                        <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
-                                        <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button id="proceedButton" type="button" class="btn btn-default hidden" data-bind="click: $root.proceed" >Proceed</button>
+                                            <button type="button" class="btn btn-default" data-bind="click: $root.endWaterOrder">End Water Order</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.enterNewWaterOrder">End and Start New Water Order</button>
+                                            <button type="button" class="btn btn-default" data-bind="click: $root.closeModalWindow" data-dismiss="modal">Close Window</button>
+                                        </div>
                                     </div>
-                                    <hr>
-                                    <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
-                                    <div class="server-return-message" id = "modelServerResponse"></div>
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button id="proceedButton" type="button" class="btn btn-default hidden" data-bind="click: $root.proceed" >Proceed</button>
-                                    <button type="button" class="btn btn-default" data-bind="click: $root.endWaterOrder">End Water Order</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.enterNewWaterOrder">End and Start New Water Order</button>
-                                    <button type="button" class="btn btn-default" data-bind="click: $root.closeModalWindow" data-dismiss="modal">Close Window</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
-            </div>
-
-            <div class="collapse panel panel-primary" id="waterTotalInformation">
-                <div class="panel-heading"><span>Water Total Details</span></div>
-                <div class="panel-body" id="waterTotalPanel" data-bind="with: taskDetails">
-
-
-                    <dl class="dl-horizontal">
-                        <dt>DataSource:     </dt>           <dd>{{dataSource}}</dd>
-                        <dt>Date:           </dt>           <dd>{{displayDate}}</dd>
-                        <dt>Animal ID:      </dt>           <dd><a href="{{animalLink}}">{{Id}}</a></dd>
-                        <dt>
-                            <!-- ko if: calculatedStatusValue() == 'Alive' -->Current Location:  <!-- /ko-->
-                            <!-- ko if: calculatedStatusValue() == 'Dead' --> Last Location:  <!-- /ko-->
-                                            </dt>           <dd>{{location}}</dd>
-                        <dt>Total Volume:   </dt>           <dd>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h5 class="panel-title">
+                            <span data-parent="#infoPanels">Water Total Details</span>
+                        </h5>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="panel-body" id="waterTotalPanel" data-bind="with: taskDetails">
+                            <dl class="dl-horizontal">
+                                <dt>DataSource:     </dt>           <dd>{{dataSource}}</dd>
+                                <dt>Date:           </dt>           <dd>{{displayDate}}</dd>
+                                <dt>Animal ID:      </dt>           <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                                <dt>
+                                    <!-- ko if: calculatedStatusValue() == 'Alive' -->Current Location:  <!-- /ko-->
+                                    <!-- ko if: calculatedStatusValue() == 'Dead' --> Last Location:  <!-- /ko-->
+                                </dt>           <dd>{{location}}</dd>
+                                <dt>Total Volume:   </dt>           <dd>
                                 <!-- ko if: conditionAtTimeValue() == 'regulated' -->{{volume}} ml<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'lixit' -->On Lixit<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'dead' -->Dead<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == '' --><!-- /ko-->
-                                                                            </dd>
-                        <dt>ml Per Kg:      </dt>           <dd>{{mlsPerKg}}</dd>
-                    </dl>
-                    <!-- ko if: mlsPerKgCal() -->
-                        <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
-                    <!-- /ko -->
+                            </dd>
+                                <dt>ml Per Kg:      </dt>           <dd>{{mlsPerKg}}</dd>
+                            </dl>
+                            <!-- ko if: mlsPerKgCal() -->
+                            <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
+                            <!-- /ko -->
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -880,8 +888,8 @@
                 //We also have to reset the dirty flag to track any change after the event is loaded into
                 //the form to be able to change.
                 if (info.event.source.id == "totalWater") {
-                    $('#waterInformation').collapse('hide');
-                    $('#waterTotalInformation').collapse('show');
+                    $('#collapseOne').collapse('hide');
+                    $('#collapseTwo').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
                     if (info.event.extendedProps.rawRowData["Id/curLocation/location"]){
                         WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData["Id/curLocation/location"].toString());
@@ -891,8 +899,8 @@
 
 
                 }else{
-                    $('#waterInformation').collapse('show');
-                    $('#waterTotalInformation').collapse('hide');
+                    $('#collapseOne').collapse('show');
+                    $('#collapseTwo').collapse('hide');
                     WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 }
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();

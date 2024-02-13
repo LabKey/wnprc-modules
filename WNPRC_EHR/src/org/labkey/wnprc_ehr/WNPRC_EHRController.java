@@ -964,7 +964,7 @@ public class WNPRC_EHRController extends SpringActionController
                         String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
                         description = description.replaceAll("(?i)<br */?>", "\n").trim();
                         description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
-                        if (onCallSchedule[i + 1][column].getString("html") == null) {
+                        if (onCallSchedule[i + 1][column].isEmpty() || onCallSchedule[i + 1][column].getString("html") == null) {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
                         } else {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");

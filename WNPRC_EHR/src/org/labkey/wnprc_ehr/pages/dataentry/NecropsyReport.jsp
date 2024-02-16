@@ -290,7 +290,7 @@
     }
 %>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         $('.dateWithTimeThatNeedsFormatting').each(function() {
             var $this = $(this);

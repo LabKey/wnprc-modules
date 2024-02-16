@@ -109,7 +109,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public static final String PRIVATE_FOLDER_PATH = "/WNPRC_TestProject/WNPRC_Units/Operation_Services/Financial_Management/Private";
     public static final String PRIVATE_TARGET_FOLDER_PATH = "WNPRC_Units/Operation_Services/Financial_Management/Private";
 
-    private final String ANIMAL_HISTORY_URL = "/ehr/" + PROJECT_NAME + "/EHR/animalHistory.view?";
+    private final String ANIMAL_HISTORY_URL = "/" + PROJECT_NAME + "/EHR/ehr-animalHistory.view";
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");

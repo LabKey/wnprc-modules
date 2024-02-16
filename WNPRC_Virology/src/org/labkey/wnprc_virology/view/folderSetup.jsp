@@ -12,7 +12,7 @@
     }
 %>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     LABKEY.Ajax.request({
         url: LABKEY.ActionURL.buildURL("wnprc_virology", "linkedSchemaSetup"),

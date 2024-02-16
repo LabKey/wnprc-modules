@@ -288,7 +288,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         File path = new File(TestFileUtils.getLabKeyRoot(), getModulePath() + "/resources/referenceStudy");
         setPipelineRoot(path.getPath());
 
-        beginAt(WebTestHelper.getBaseURL() + "/pipeline-status/" + getProjectNameRSEHR()  + "/begin.view");
+        beginAt(WebTestHelper.getBaseURL() + "/" + getProjectNameRSEHR()  + "/pipeline-status-begin.view");
         clickButton("Process and Import Data", defaultWaitForPage);
 
         _fileBrowserHelper.expandFileBrowserRootNode();

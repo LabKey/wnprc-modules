@@ -10,28 +10,28 @@ function createNavMenu()
         sections: [
             {header: 'Behavioral Management',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/Issue_Tracker/start.view?'},
-                {name: 'Behavioral Mgmt Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/Issue_Tracker/project-start.view'},
+                {name: 'Behavioral Mgmt Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/project-begin.view'}
             ]},
             {header: 'Colony Management',
             items: [
-                {name: 'Colony Mgmt Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/ColonyManagement-Public/begin.view'},
+                {name: 'Colony Mgmt Homepage', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/ColonyManagement-Public/project-begin.view'},
                 {name: 'Animal Relocation Request', url: 'https://go.wisc.edu/p9ap0o'},
-                {name: 'Colony Mgmt Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/begin.view?'},
+                {name: 'Colony Mgmt Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Colony_Management/project-begin.view'},
                 {name: 'Water Calendar',      url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'WaterCalendar',  'WNPRC/EHR')},
             ]},
             {header: 'Colony Records',
             items: [
-                {name: 'EHR Users and Initials', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Public/begin.view?'},
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Issue_Tracker/start.view?'},
-                {name: 'Colony Records Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/begin.view?'}
+                {name: 'EHR Users and Initials', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Public/project-begin.view'},
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Issue_Tracker/project-start.view'},
+                {name: 'Colony Records Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/project-begin.view'}
             ]},
             {header: 'Compliance, Safety and Training',
             items: [
-                {name: 'Compliance Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/begin.view?'},
-                {name: 'Trainers Only**', url: '<%=contextPath%>/EHR_ComplianceDB/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Trainers/training.view?'},
-                {name: 'Safety Data Sheets (SDS)', url: '<%=contextPath%>/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1229'},
-                {name: 'Injury/Exposure Documents', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=postExposure'},
+                {name: 'Compliance Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/project-begin.view'},
+                {name: 'Trainers Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Trainers/EHR_ComplianceDB-training.view'},
+                {name: 'Safety Data Sheets (SDS)', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/list-grid.view?listId=1229'},
+                {name: 'Injury/Exposure Documents', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/wiki-page.view?name=postExposure'},
                 {name: 'Read and Certify SOPs (PowerDMS)', url: 'https://go.wisc.edu/mkg850'},
                 {name: 'Request Training', url: 'https://go.wisc.edu/36i793'},
                 {name: 'CARE', url: 'https://uwprod.sharepoint.com/sites/CARE'},
@@ -39,22 +39,22 @@ function createNavMenu()
             ]},
             {header: 'Scientific Protocol Implementation',
             items: [
-                {name: 'SPI Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/SPI/begin.view'},
-                {name: 'SPI Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/begin.view'}
+                {name: 'SPI Homepage', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/SPI/project-begin.view'},
+                {name: 'SPI Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/project-begin.view'}
             ]},
             {header: 'Pathology Services',
             items: [
                 {name: 'Necropsy Schedule',      url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'NecropsySchedule',  'WNPRC/EHR')},
                 {name: 'Case List',              url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'PathologyCaseList', 'WNPRC/EHR')},
-                {name: 'Issue Tracker',          url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/Issue_Tracker/start.view?'},
-                {name: 'Pathology Guides', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/Public/begin.view?'},
-                {name: 'Pathology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/begin.view?'}
+                {name: 'Issue Tracker',          url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/Issue_Tracker/project-start.view'},
+                {name: 'Pathology Guides', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/Public/project-begin.view'},
+                {name: 'Pathology Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/project-begin.view'}
             ]},
             {header: 'Vet Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Vet_Services/Issue_Tracker/start.view?'},
-                {name: 'Vet Services Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Vet_Services_Public/begin.view'},
-                {name: 'Vet Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Vet_Services/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Vet_Services/Issue_Tracker/project-start.view'},
+                {name: 'Vet Services Homepage', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Vet_Services_Public/project-begin.view'},
+                {name: 'Vet Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Vet_Services/project-begin.view'}
             ]}
         ]
     });
@@ -64,52 +64,52 @@ function createNavMenu()
         sections: [
             {header: 'Facilities Management',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Facilities_Management/Issue_Tracker/start.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Facilities_Management/Issue_Tracker/project-start.view'}
             ]},
             {header: 'Financial Management',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Issue_Tracker/start.view?'},
-                {name: 'Internal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Private/begin.view?'},
-                {name: 'Finance Data Entry', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Finance_Data_Entry/begin.view?'},
-                {name: 'PI Portal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/PI Portal/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Issue_Tracker/project-start.view'},
+                {name: 'Internal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Private/begin.view'},
+                {name: 'Finance Data Entry', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Finance_Data_Entry/begin.view'},
+                {name: 'PI Portal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/PI Portal/begin.view'}
                 //{name: 'Enter Charges with Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'Charges'})},
                 //{name: 'Enter Charges without Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'NonAnimalCharges'})}
             ]},
             {header: 'Grants Management',
             items: [
-                {name: 'Grants Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Private/begin.view?' },
+                {name: 'Grants Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Private/project-begin.view' },
                 {name: 'Per Diems Report', url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'PerDiems', LABKEY.moduleContext.ehr["EHRStudyContainer"]) },
-                {name: 'Animal Billable Days Report', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=animalBillableDaysReport'},
-                {name: 'P51 Base Grant 2016 Renewal', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/P51_Base_Grant_2016_Renewal/begin.view?'},
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Issue_Tracker/start.view?'}
+                {name: 'Animal Billable Days Report', url: '<%=contextPath%>' + '/WNPRC/EHR/query-executeQuery.view?schemaName=study&query.queryName=animalBillableDaysReport'},
+                {name: 'P51 Base Grant 2016 Renewal', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/P51_Base_Grant_2016_Renewal/project-begin.view'},
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Issue_Tracker/project-start.view'}
             ]},
             {header: 'Human Resources',
             items: [
-                {name: 'HR Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/begin.view?'},
+                {name: 'HR Homepage', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/project-begin.view'},
                 {name: 'New User Request/Change Form', url: 'https://go.wisc.edu/hcvxa5'}
-                //{name: 'Travel Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/Issue_Tracker/start.view?'}
+                //{name: 'Travel Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/Issue_Tracker/project-start.view'}
             ]},
             {header: 'Informatics and Data Services',
                 items: [
-                    {name: 'IDS Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/begin.view?'},
-                    {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/start.view?'},
-                    {name: 'Version Testing', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/EHR_Version_Testing/begin.view?'}
+                    {name: 'IDS Homepage', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/EHR_Service/project-begin.view'},
+                    {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/project-start.view'},
+                    {name: 'Version Testing', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/EHR_Service/EHR_Version_Testing/project-begin.view'}
                 ]
             },
             {header: 'ITSS',
             items: [
-                {name: 'ITSS Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Issue_Tracker/start.view?'}
+                {name: 'ITSS Homepage', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/IT/Public/project-begin.view'},
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/IT/Issue_Tracker/project-start.view'}
             ]},
             {header: 'Building Access',
                 items: [
                     {name: 'Building/KeyCard Access Request', url: 'https://go.wisc.edu/948awe'},
-                    {name: 'Building Access Guide', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Operation_Services/BuildingAccess/page.view?name=BuildingAccessGuide'}
+                    {name: 'Building Access Guide', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/BuildingAccess/wiki-page.view?name=BuildingAccessGuide'}
             ]},
             {header: 'Purchasing Services',
             items: [
-                {name: 'WNPRC Purchasing Portal (New)', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/WNPRC%20Purchasing/begin.view'},
-                {name: 'Issue Tracker (Legacy)', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Purchasing/Issue_Tracker/start.view'}
+                {name: 'WNPRC Purchasing Portal (New)', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/WNPRC%20Purchasing/project-begin.view'},
+                {name: 'Issue Tracker (Legacy)', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Operation_Services/Purchasing/Issue_Tracker/project-start.view'}
             ]}
         ]
     });
@@ -119,23 +119,23 @@ function createNavMenu()
         sections: [
             {header: 'Assay Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Assay_Services/Issue_Tracker/start.view?'},
-                {name: 'Assay Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Assay_Services/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Assay_Services/Issue_Tracker/project-start.view'},
+                {name: 'Assay Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Assay_Services/project-begin.view'}
             ]},
             {header: 'Genetics Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Genetics_Services/Issue_Tracker/start.view?'},
-                {name: 'Genetics Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Genetics_Services/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Genetics_Services/Issue_Tracker/project-start.view'},
+                {name: 'Genetics Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Genetics_Services/project-begin.view'}
             ]},
             {header: 'Immunology Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Immunology_Services/Issue_Tracker/start.view?'},
-                {name: 'Immunology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Immunology_Services/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Immunology_Services/Issue_Tracker/project-start.view'},
+                {name: 'Immunology Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Immunology_Services/project-begin.view'}
             ]},
             {header: 'Virology Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Issue_Tracker/start.view?'},
-                {name: 'Virology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/begin.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Issue_Tracker/project-start.view'},
+                {name: 'Virology Staff Only**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/Virology_Services/project-begin.view'}
             ]}
         ]
     });
@@ -145,9 +145,9 @@ function createNavMenu()
         sections: [
             {header: 'Misc. Pages',
             items: [
-                {name: 'Executive Committee**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Director/Executive Committee/begin.view?'},
-                {name: 'Sr. Management**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Director/Sr Management/begin.view'},
-                {name: 'WNPRC Collaborations', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Director/WNPRC Collaborations/begin.view?'},
+                {name: 'Executive Committee**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Director/Executive Committee/project-begin.view'},
+                {name: 'Sr. Management**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Director/Sr Management/project-begin.view'},
+                {name: 'WNPRC Collaborations', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Director/WNPRC Collaborations/project-begin.view'},
             ]}
         ]
     });
@@ -159,11 +159,11 @@ function createNavMenu()
             {header: 'Misc. Pages',
             items: [
                 {name: 'Change WNPRC Password', url: 'https://www.mynetid.wisc.edu/recover/pwdreset'},
-                {name: 'Employee List', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=EmployeeList'},
-                {name: 'Guidelines for Protocols', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=ProtocolGuides'},
-                {name: 'View My Requirement Status', url: '<%=contextPath%>/EHR_ComplianceDB/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/My_Requirements.view?'},
-                {name: 'View/Download PDFs of Signs, Posters and Guides', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/executeQuery.view?schemaName=lists&query.queryName=Signs'},
-                {name: 'Download Paper Forms', url: '<%=contextPath%>' + '/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1399'},
+                {name: 'Employee List', url: '<%=contextPath%>' + '/WNPRC/EHR/query-executeQuery.view?schemaName=study&query.queryName=EmployeeList'},
+                {name: 'Guidelines for Protocols', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/wiki-page.view?name=ProtocolGuides'},
+                {name: 'View My Requirement Status', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/EHR_ComplianceDB-My_Requirements.view'},
+                {name: 'View/Download PDFs of Signs, Posters and Guides', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/query-executeQuery.view?schemaName=lists&query.queryName=Signs'},
+                {name: 'Download Paper Forms', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/list-grid.view?listId=1399'},
                 {name: 'PowerDMS', url: 'https://go.wisc.edu/mkg850'},
             ]}
         ]
@@ -188,14 +188,14 @@ function createNavMenu()
 <table style="display:inline">
 <tr>
     <td colspan="3">
-        Each WNPRC Unit can create pages for internal or external consumption.  At the moment most units only have an issue tracker.  If you are interested in creating a page for your group, please submit a request <a href="<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Issue_Tracker/start.view?" target="new">here</a>
+        Each WNPRC Unit can create pages for internal or external consumption.  At the moment most units only have an issue tracker.  If you are interested in creating a page for your group, please submit a request <a href="<%=contextPath%>/WNPRC/WNPRC_Units/IT/Issue_Tracker/project-start.view" target="new">here</a>
 
         <br><br>
     </td>
 </tr>
 <tr style="vertical-align:top">
     <td>
-        <a class="labkey-main-title" href="<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/begin.view">
+        <a class="labkey-main-title" href="<%=contextPath%>/WNPRC/WNPRC_Units/Animal_Services/project-begin.view">
             Animal Services:
         </a>
         <p/>

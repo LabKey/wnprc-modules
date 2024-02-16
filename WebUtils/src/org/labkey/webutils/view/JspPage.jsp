@@ -57,7 +57,7 @@
     }
 </style>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var WebUtils = WebUtils || {};
     WebUtils.VM = {};
     var $ = jQuery;
@@ -67,7 +67,7 @@
     <h2 style="color: red;">An error occurred while applying bindings. <span style="font-weight: normal; font-style: italic" class="errorText"></span></h2>
 </div>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         WebUtils.TestResults = {
             total:     ko.observable(),
@@ -159,7 +159,7 @@
     </div>
 </div>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var koSuccessfullyLoaded = true;
         //variables use for rendering the JSP a second time under a LabKey WebPart

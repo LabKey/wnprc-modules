@@ -198,7 +198,7 @@
         pointer-events: none;
     }
 </style>
-    <script type ="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {

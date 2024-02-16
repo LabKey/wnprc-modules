@@ -94,7 +94,7 @@
     </div>
 </template>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var parseMomentLookups = {
             d: "days",

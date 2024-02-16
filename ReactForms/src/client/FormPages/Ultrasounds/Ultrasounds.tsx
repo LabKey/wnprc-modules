@@ -2,9 +2,8 @@ import * as React from "react";
 import { FC } from 'react';
 import { DefaultFormContainer } from '../../components/DefaultFormContainer';
 import { CustomInputPane } from '../../components/CustomInputPane';
-import {InstructionsPane} from '../../components/InstructionsPane';
 import {ActionURL} from '@labkey/api';
-import { TaskPane } from '../../components/TaskPane';
+import { EditableGridPanel } from '../../components/EditableGridPanel';
 
 export const Ultrasounds: FC<any> = (props) => {
 
@@ -15,22 +14,12 @@ export const Ultrasounds: FC<any> = (props) => {
     const reviewRequired = formType ? !formType.includes('Review') : true;
     const components: any[] = [
         {
-            type: TaskPane,
-            name: "TaskPane",
+            type: EditableGridPanel,
+            name: "EditableGridPanel",
             componentProps: {
-                prevTask: taskid,
-                title: "Ultrasounds"
-            }
-        },{
-            type: InstructionsPane,
-            name: "InstructionsPane",
-            componentProps: {
-                instructions: "In the form below you can enter multiple comma separated values" +
-                    " for all measurement fields (all fields from BPM to Nuchal Fold).\n\s" +
-                    "\n\s" +
-                    "For example, if you took 3 crown rump measurements of 28.33mm, 29.12mm, and 28.75mm," +
-                    " you would enter them into the 'Crown Rump (mm)' field as:\n\s" +
-                    "**28.33,29.12,28.75**\s"
+                prevTaskId: taskid,
+                title: "Ultrasounds",
+                blacklist: ["crown_rump_gest_day", "gest_sac_gest_day","biparietal_diameter_gest_day", "femur_length_gest_day"]
             }
         }
     ];
@@ -45,6 +34,7 @@ export const Ultrasounds: FC<any> = (props) => {
                 redirectSchema={"study"}
                 redirectQuery={"ultrasounds"}
                 formStartTime={formStartTime}
+                animalInfoPane={false}
             />
         </div>
     );

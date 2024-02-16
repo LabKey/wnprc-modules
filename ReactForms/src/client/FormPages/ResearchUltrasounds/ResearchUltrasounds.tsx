@@ -86,6 +86,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                 redirectSchema={"study"}
                 redirectQuery={"research_ultrasounds"}
                 formStartTime={formStartTime}
+                animalInfoPane={true}
             />
         </div>
     );

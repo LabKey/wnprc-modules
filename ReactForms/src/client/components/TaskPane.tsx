@@ -43,6 +43,17 @@ export const TaskPane: FC<taskProps> = (props) =>{
         columns: ["RowId", "label"],
     };
 
+    const getQCLabel = (value) => {
+        return qcOptions[value];
+    }
+    const getQCRow = (label) => {
+        for(const key in qcOptions){
+            if(qcOptions.hasOwnProperty(key) && qcOptions[key] === label){
+                return key;
+            }
+        }
+    }
+
     // Loads previous task if one exists
     useEffect(() => {
         if(prevTaskId) {
@@ -69,16 +80,6 @@ export const TaskPane: FC<taskProps> = (props) =>{
         })
     }, []);
 
-    const getQCLabel = (value) => {
-        return qcOptions[value];
-    }
-    const getQCRow = (label) => {
-        for(const key in qcOptions){
-            if(qcOptions.hasOwnProperty(key) && qcOptions[key] === label){
-                return key;
-            }
-        }
-    }
 
     if(isLoadingQC || isLoadingTask){
         return <div>Loading...</div>

@@ -19,11 +19,20 @@ interface dateProps {
     id: string;
     validation?: any;
     required?: any;
+    className?: string;
 }
+
+/*
+customInput={
+    <DateInput
+        opendate={() => openDatepicker(ref)}
+        iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
+}
+ */
 
 
 const ControlledDateInput: FC<dateProps> = (props) => {
-    const {name, date, id, required, validation} = props;
+    const {name, date, id, required, validation, className} = props;
     const {control, formState: {errors}, trigger} = useFormContext();
 
     const [stateName, fieldName] = name.split('.');
@@ -48,15 +57,13 @@ const ControlledDateInput: FC<dateProps> = (props) => {
                         dateFormat="yyyy-MM-dd HH:mm"
                         todayButton="Today"
                         selected={value}
-                        className="form-control"
+                        className={"form-control " + className}
                         name={name}
+                        customInput={
+                            <DateInput />
+                        }
                         onChange={onChange}
                         onBlur={onBlur}
-                        customInput={
-                            <DateInput
-                                opendate={() => openDatepicker(ref)}
-                                iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
-                        }
                         popperClassName={"my-datepicker-popper"}
                     />
                 )}

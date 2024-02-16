@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES5",
     "jsx": "react",
-    "lib": ["dom","es2017"],
+    "lib": ["dom","es2017", "dom.iterable"],
     "sourceMap": false,
     "experimentalDecorators": true,
     "moduleResolution": "node",

@@ -1,0 +1,35 @@
+* { margin: 0; box-sizing: border-box; }
+html, body { height: 100dvh; font: 1.1rem/1.4 sans-serif; display: flex; flex-direction: column; }
+nav { padding: 1rem; }
+main { flex: 1; }
+
+/* Resizable grid */
+
+.panes {
+  touch-action: none;
+  display: grid;
+}
+
+.pane {
+  position: relative;
+  overflow: hidden;
+}
+
+.gutter {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 3;
+  background: #000;
+}
+
+.panes-h > .pane > .gutter {
+  cursor: col-resize;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+div[class*=col]{
+  border-color: green;
+}

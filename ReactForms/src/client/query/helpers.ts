@@ -2,6 +2,7 @@ import { ActionURL, Filter, Query, Utils } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
+import { GetQueryDetailsOptions } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -200,8 +201,14 @@ Helper function to open the DatePicker component
  */
 export const openDatepicker = (calendarEl) => {
   //@ts-ignore
+  console.log("calEL:", calendarEl);
   calendarEl.current.setOpen(true);
 };
+/*
+const MyInput = React.forwardRef(function openDatepicker(props, ref) {
+  if(!ref) return;
+  ref.current.setOpen(true);
+});*/
 
 /*
 Generic state handler for dates, this is only for states that are one object
@@ -422,4 +429,17 @@ export const getQCRowID = async (qcLabel: string) => {
     console.log("Error retrieving QC rowid");
     return null;
   })
+}
+
+
+export const getQueryDetails = async (schemaName, queryName) => {
+    let config: GetQueryDetailsOptions = {
+      schemaName: schemaName,
+      queryName: queryName,
+    };
+    return new Promise((resolve, reject) => {
+      config.success = (data) => {resolve(data)};
+      config.failure = (data) => {reject(data)};
+      Query.getQueryDetails(config)
+    });
 }

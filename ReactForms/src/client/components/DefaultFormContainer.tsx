@@ -34,6 +34,7 @@ interface formProps {
     components: Component[];
     reviewRequired: boolean;
     formStartTime: Date;
+    animalInfoPane: boolean;
 }
 
 /*
@@ -56,7 +57,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         redirectSchema,
         redirectQuery,
         reviewRequired,
-        formStartTime
+        formStartTime,
+        animalInfoPane
     } = props;
 
     const methods = useForm({mode: "onChange"});
@@ -68,7 +70,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [errorText, setErrorText] = useState<string>("");
     const [showModal, setShowModal] = useState<string>();
     const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
-
 
     /*
     Helper function to compile all the component states into form ready submission commands
@@ -123,6 +124,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     // Form submission handler
     const handleSubmit = async (data, e) => {
         e.preventDefault();
+        console.log(data);
         const finalFormData = [];
         // generate taskId if required
         const newTaskId = prevTaskId ? prevTaskId : Utils.generateUUID().toUpperCase();
@@ -189,6 +191,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                             prevTaskId={prevTaskId}
                                             name={name}
                                             componentProps={componentProps}
+                                            redirectSchema={"study"}
+                                            redirectQuery={"ultrasounds"}
                                         />
                                     </div>
                                 );
@@ -205,9 +209,11 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                             </button>
                         </div>
                     </form>
-                    <AnimalInfoPane
+                    {animalInfoPane && (
+                        <AnimalInfoPane
                         setAnimalInfoCache={setAnimalInfoCache}
-                    />
+                        />
+                    )}
                 </FormProvider>
             </div>
     );

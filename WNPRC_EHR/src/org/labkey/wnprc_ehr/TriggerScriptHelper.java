@@ -2499,9 +2499,6 @@ public class TriggerScriptHelper {
                 {
                     animals.addAll(Arrays.asList(StringUtils.split(animalString, ",")));
                 }
-
-                animals.add(id);
-
                 if (recordsInTransaction != null && recordsInTransaction.size() > 0)
                 {
                     for (Map<String, Object> r : recordsInTransaction)
@@ -2519,10 +2516,11 @@ public class TriggerScriptHelper {
                             continue;
                         }
 
-                        if (!ALL_SPECIES.equals(species))
+                        //we don't want to exit the animal count if ar.species() is cyno or rhesus and SPECIES is macaque.
+                        AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+                        if (!ALL_SPECIES.equals(species) && !("Rhesus".equals(ar.getSpecies()) || "Cynomolgus".equals(ar.getSpecies()) && "Macaque".equals(species)))
                         {
                             //find species
-                            AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
                             if (ar.getSpecies() == null || !species.equals(ar.getSpecies()))
                             {
                                 continue;
@@ -2533,10 +2531,12 @@ public class TriggerScriptHelper {
                     }
                 }
 
-                int remaining = totalAllowed - animals.size();
+                //add up the amount used in the DB plus the records in the grid
+                int used = animals.size();
+                int remaining = totalAllowed - used;
                 if (remaining < 0)
                 {
-                    errors.add("There are not enough spaces on protocol: " + protocolPair.second + ". Allowed: " + (totalAllowedNull ? "none": totalAllowed) + ", used: " + animals.size());
+                    errors.add("There are not enough spaces on protocol: " + protocolPair.second + ". Allowed: " + (totalAllowedNull ? "none": totalAllowed) + ", used: " + used);
                 }
             }
         });

@@ -181,8 +181,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
     protected static final SimpleDateFormat _df = new SimpleDateFormat("yyyy-MM-dd");
-    public static final String PROTOCOL_PROJECT_ID_2 = "795645"; // Project with exactly 3 members
+    public static final String PROTOCOL_PROJECT_ID_2 = "795645";
+    public static final String PROTOCOL_PROJECT_ID_3 = "795646";
     public static final String PROTOCOL_ID_2 = "protocol102";
+    public static final String PROTOCOL_ID_3 = "protocol103";
 
     @Nullable
     @Override
@@ -338,11 +340,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         protocolCountsRow = new HashMap<>();
         protocolCountsRow.put("protocol", protocolId);
         protocolCountsRow.put("species", "All Species");
-        protocolCountsRow.put("allowed", 1);
+        protocolCountsRow.put("allowed", 2);
         protocolCountsCommand.addRow(protocolCountsRow);
 
         protocolCountsCommand.execute(getApiHelper().getConnection(), getContainerPath());
-
 
         //create assignment
         InsertRowsCommand assignmentCommand = new InsertRowsCommand("study", "assignment");
@@ -355,37 +356,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             }});
         assignmentCommand.execute(getApiHelper().getConnection(), getContainerPath());
 
-
-
+        ArrayList<String> msgs = new ArrayList<>();
+        msgs.add("WARN: There are not enough spaces on protocol: " + protocolId + ". Allowed: 1, used: 3");
+        msgs.add("WARN: There are not enough spaces on protocol: " + protocolId + ". Allowed: 1, used: 2");
         // try 2, should fail since there is one assignment of Rhesus (macaque), and only 1 spot for that
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
                 {SUBJECTS[3], prepareDate(new Date(), 10, 0), null, projectId, "recordID"},
                 {SUBJECTS[4], prepareDate(new Date(), 10, 0), null, projectId, "recordID"}
         }, Maps.of(
-                "project", Arrays.asList(
-                        "WARN: There are not enough spaces on protocol: " + protocolId + ". Allowed: 1, used: 2"
-                )
+                "project", msgs
         ));
 
-        // add assignmentsInTransaction, should fail
-        /*Map<String, Object> additionalExtraContext = new HashMap<>();
-        JSONArray assignmentsInTransaction = new JSONArray();
-        assignmentsInTransaction.put(Maps.of(
-                "Id", SUBJECTS[4],
-                "objectid", generateGUID(),
-                "date", _df.format(new Date()),
-                "enddate", null,
-                "project", projectId
-        ));
-        additionalExtraContext.put("assignmentsInTransaction", assignmentsInTransaction.toString());
-
-        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
-                {SUBJECTS[3], prepareDate(new Date(), 10, 0), null, projectId, "recordID"}
-        }, Maps.of(
-                "project", Arrays.asList(
-                        "INFO: There are not enough spaces on protocol: " + protocolId + ". Allowed: 2, used: 3"
-                )
-        ), additionalExtraContext);*/
     }
 
     private void uploadBillingDataAndVerify() throws Exception

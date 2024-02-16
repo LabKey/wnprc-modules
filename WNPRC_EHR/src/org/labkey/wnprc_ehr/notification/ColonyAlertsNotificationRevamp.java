@@ -2,12 +2,15 @@ package org.labkey.wnprc_ehr.notification;
 
 import org.checkerframework.checker.units.qual.A;
 import org.labkey.api.action.Action;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Parameter;
 import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
@@ -24,7 +27,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.Results;
+
 
 /**
  * Created by Alex Schmidt on 12/27/23.
@@ -1321,6 +1329,54 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             }
         }
 
+        //This is a redo of the function getTableMultiRowMultiColumn() but using field keys.  Verify this works, then replace old function.
+        public static final ArrayList<HashMap<String,String>> NEWGetTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+            //Creates array to return.
+            ArrayList<HashMap<String, String>> returnArray = new ArrayList<HashMap<String, String>>();
+            try {
+                //Updates table info.
+                TableInfo myTableInfo = QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName);
+                //Updates columns to be retrieved.
+                Set<FieldKey> myKeys = new HashSet<>();
+                for (String myColumn : targetColumns) {
+                    myKeys.add(FieldKey.fromString(myColumn));
+                }
+                final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
+                //Runs query with updated info.
+                TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
+                //Verifies table exists.
+                if (myTable != null) {
+                    //Verifies data exists.
+                    if (myTable.getRowCount() > 0) {
+                        //Gets target column values for each row.
+                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                            @Override
+                            public void exec(ResultSet rs) throws SQLException {
+                                if (rs != null) {
+                                    Results myResults = new ResultsImpl(rs, myColumns);
+//                                    String[] currentRow = new String[targetColumns.length]; //TODO: Should I use a HashMap here?
+                                    HashMap<String, String> myRow = new HashMap<>();
+                                    //Goes through each column in current query row and updates currentRow.
+                                    for (int i = 0; i < targetColumns.length; i++) {
+                                        String currentColumnTitle = targetColumns[i];
+                                        String currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                        myRow.put(currentColumnTitle, currentColumnValue);
+//                                        currentRow[i] = myResults.getString(FieldKey.fromString(targetColumns[i]));
+                                    }
+                                    returnArray.add(myRow);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            finally
+            {
+                return returnArray;
+            }
+        }
+
+        //TODO: Combine this with getTableMultiRowSingleColumn?
         public static final ArrayList<String> getTableMultiRowSingleColumnWithParameters(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
             ArrayList<String> returnArray = new ArrayList<String>();
             try {
@@ -1346,6 +1402,37 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
                 return returnArray;
             }
         }
+
+//        public static final String getTableSingleRowSingleColumn(Container c, User u, String schemaName, String tableName, String targetRowColumn, String targetRowValue, String targetColumn) {
+//            StringBuilder returnString = new StringBuilder();
+//            try {
+//                //Creates filter to select a certain row from the table.
+//                SimpleFilter myFilter = new SimpleFilter(targetRowColumn, targetRowValue, CompareType.EQUAL);
+//
+//                //Creates table.
+//                TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, null);
+//                //Verifies table exists.
+//                if (myTable != null) {
+//                    if (myTable.getRowCount() > 0) {
+//                        //Verifies data exists.
+//                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+//                            //Gets data from target table row.
+//                            @Override
+//                            public void exec(ResultSet rs) throws SQLException {
+//                                if (rs != null) {
+//                                    returnString.append(rs.getString(targetColumn));
+//                                }
+//                            }
+//                        });
+//                    }
+//                }
+//            }
+//            finally
+//            {
+//                return returnString.toString();
+//            }
+//        }
+
     }
 }
 

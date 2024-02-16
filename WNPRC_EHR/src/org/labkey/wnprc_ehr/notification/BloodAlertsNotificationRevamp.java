@@ -4,6 +4,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
@@ -18,6 +19,7 @@ import org.labkey.api.util.Path;
 
 
 import java.lang.reflect.Array;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,6 +27,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.Results;
 
 public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     //Class Variables
@@ -124,8 +130,120 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             messageBody.append("<br>\n<hr>\n");
         }
 
-        //TODO: 5. Find any incomplete blood draws scheduled today, by area.
-//        if ()
+        //5. Find any incomplete blood draws scheduled today, by area.
+        if (myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByArea.isEmpty()) {
+            //Displays if there are no scheduled blood draws for today.
+            messageBody.append("<p>There are no blood draws scheduled for " + myBloodDrawAlertObject.getDateToday() + "</p>");
+        }
+        else {
+            //Displays the number of scheduled blood draws for today.
+            messageBody.append("<p>There are " + myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByArea.size() + " scheduled blood draws for " + myBloodDrawAlertObject.getDateToday() + ". " + myBloodDrawAlertObject.completeCount + " have been completed.</p>");
+            messageBody.append(notificationToolkit.createHyperlink("Click here for details.", myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByAreaURLView));
+
+            //Notifies user if all blood draws are completed.
+            if (myBloodDrawAlertObject.incompleteCount == 0) {
+                messageBody.append("<p>All scheduled blood draws have been marked complete as of " + myBloodDrawAlertObject.getDateToday() + "</p>");
+            }
+            else {
+                messageBody.append("<p>The following blood draws have not been marked complete as of " + myBloodDrawAlertObject.getDateToday() + "</p>");
+
+                //Displays totals by area.
+                messageBody.append("<b>Totals by Area:</b><br>\n");
+                //Goes through each area in billingHashMap.
+                //TODO: Sort myBloodDrawAlertObject.billingHashMap by area key.
+                for (String billingArea : myBloodDrawAlertObject.billingHashMap.keySet()) {
+                    HashMap<String,Integer> currentBillingArea = myBloodDrawAlertObject.billingHashMap.get(billingArea);
+                    messageBody.append(billingArea + ":<br>\n");
+                    //TODO: Sort currentBillingArea by billedByTitle key.
+                    for (String billedByTitle : currentBillingArea.keySet()) {
+                        messageBody.append(billedByTitle + ": " + currentBillingArea.get(billedByTitle) + "<br>\n");
+                    }
+                }
+
+                //Displays individual draws.
+                messageBody.append("<p>\n");
+                messageBody.append("<p><b>Individual Draws:</b></p>\n");
+                //TODO: Sort myBloodDrawAlertObject.summaryHashMap by area key.
+                for (String summaryArea : myBloodDrawAlertObject.summaryHashMap.keySet()) {
+                    HashMap<String,bloodDrawRoom> currentSummaryArea = myBloodDrawAlertObject.summaryHashMap.get(summaryArea);
+                    messageBody.append("<b>" + summaryArea + ":</b><br>\n");
+                    //TODO: Sort currentSummaryArea by room key.
+                    for (String summaryRoom : currentSummaryArea.keySet()) {
+                        bloodDrawRoom currentSummaryRoom = currentSummaryArea.get(summaryRoom);
+                        if (currentSummaryRoom.incomplete > 0) {
+                            //Display the incomplete count for the current room.
+                            messageBody.append(summaryRoom + ": " + currentSummaryRoom.incomplete);
+
+                            //TODO: Add table from bloodAlerts.pl line 321.
+
+                            for (HashMap<String, String> currentRecord : currentSummaryRoom.incompleteRecords) {
+                                //TODO: Update current date to the correct format.
+                                String currentDate = currentRecord.get("date");
+
+                                //TODO: Update color based on current date.
+                                String myColor = "";
+                                //If current date meets a certain criteria, change this to yellow.
+//                                if (criteriaIsMet) {
+//                                    myColor = "yellow";
+//                                }
+
+                                //TODO: Update table.
+                            }
+
+                            //TODO: End table.
+                        }
+                    }
+                }
+
+
+
+                HashMap<String, HashMap<String, bloodDrawRoom>> summaryHashMap = new HashMap<>();                                           //Summary in OG.    (area -> (room -> (bloodDrawRoom -> complete/incomplete/incompleteRecords)))
+                ArrayList<HashMap<String, String>> incompleteRecords = new ArrayList<HashMap<String, String>>();
+
+            }
+        }
+
+
+
+
+
+            //14.
+//                //TODO: Sort countsObject by area.
+//                //  OG version has counts with 'area' as the key for each.
+//                for (ArrayList area : countsObject) {
+//                    //Print 'area:<br>\n'
+//                    //Sort current area results.
+//                    for (Object type : area) {
+//                        //Print 'type:
+//                    }
+//                }
+
+
+            //14. Using 'counts object', print each area, followed by a list of that area's types.
+            // For each result (area) in counts object (sorted).
+            // Create a variable 'types' and assign it counts object > result (area).
+            // Print result: (area) with a break.
+            // For each result (type) in types object (sorted).
+            // Print result (type) with a break.
+
+            //15. Add a header to the email.
+            //Print 'individual draws'.
+
+            //16.
+            //Create a variable prevRoom.
+            //For each result (area) in summary object (sorted).
+            // Create a variable 'rooms' and set it to summary object > area.
+            // Print 'area:' with a break.
+            // For each result (room) in new 'rooms' variable (sorted).
+            // If rooms > result (room) > incomplete is true.
+            //Print 'room:' rooms > room > incomplete.
+            // Print a table with: (Time Requested, Id, Tube Volume, Tube Type, Num Tubes, Total Quantity, Additional Services, Assigned To.
+            // For each result (rec) in rooms > room > incompleteRecords.
+            // Result (rec) > date = date format.
+            // Create a variable called 'color'.
+            // Set color to yellow based on certain conditions.
+            // Color table as needed.
+
 
         return messageBody.toString();
     }
@@ -265,8 +383,10 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         //TODO: 5. Find any incomplete blood draws scheduled today, by area.
         int completeCount = 0;
         int incompleteCount = 0;
-        HashMap<String, HashMap<String, bloodDrawRoom>> summaryHashMap = new HashMap<>();
-        HashMap<String, HashMap<String, Integer>> billingHashMap = new HashMap<>();
+        HashMap<String, HashMap<String, bloodDrawRoom>> summaryHashMap = new HashMap<>();                                           //Summary in OG.    (area -> (room -> (bloodDrawRoom -> complete/incomplete/incompleteRecords)))
+        HashMap<String, HashMap<String, Integer>> billingHashMap = new HashMap<>();                                                 //Count in OG.      (area -> (billedByTitle -> count))
+        ArrayList<HashMap<String,String>> incompleteBloodDrawsScheduledTodayByArea = new ArrayList<HashMap<String, String>>();      //
+        String incompleteBloodDrawsScheduledTodayByAreaURLView;                                                                     //url string (view)
         private void getIncompleteBloodDrawsScheduledTodayByArea() {
             //Gets info.
             Date todayDate = this.getDateToday();
@@ -279,120 +399,65 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("date");
             //Creates columns to retrieve.
-            //TODO: Why issues with: 'project/protocol', 'billedby/title', 'Id/curLocation/area', 'Id/curLocation/room', 'Id/curLocation/cage', 'qcstate/Label'
-            String[] targetColumns = new String[]{"drawStatus", "project", "date", "taskid", "projectStatus", "tube_vol", "tube_type", "billedby", "num_tubes", "additionalServices", "remark", "Id", "quantity", "qcstate", "requestid"};
+            String[] targetColumns = new String[]{"drawStatus", "project", "date", "project/protocol", "taskid", "projectStatus", "tube_vol", "tube_type", "billedby", "billedby/title", "num_tubes", "Id/curLocation/area", "Id/curLocation/room", "Id/curLocation/cage", "additionalServices", "remark", "Id", "quantity", "qcstate", "qcstate/Label", "requestid"};
             //Runs query.
-            ArrayList<String[]> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowMultiColumn(c, u, "study", "BloodSchedule", testFilter, null, targetColumns);
-
-
+            ArrayList<HashMap<String,String>> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.NEWGetTableMultiRowMultiColumn(c, u, "study", "BloodSchedule", testFilter, null, targetColumns);
 
             //Sorts through each blood draw result.
-            for (String[] result : returnArray) {
-                BloodDrawResult currentBloodDraw = new BloodDrawResult(c, u, result);
+            for (HashMap<String, String> result : returnArray) {
+//                BloodDrawResult currentBloodDraw = new BloodDrawResult(c, u, result);         result.get("xxx")
 
                 //Increases the 'completed' count if blood draw is completed.
-                if (!currentBloodDraw.qcStateLabel.isEmpty() && currentBloodDraw.qcStateLabel.equals("Completed")) {
+                if (!result.get("qcstate/Label").isEmpty() && result.get("qcstate/Label").equals("Completed")) {
                     completeCount++;
                 }
                 else {
                     //If summary map does not contain the current area, add (summary > area) and (counts > area).
-                    if (!summaryHashMap.containsKey(currentBloodDraw.idCurLocationArea)) {
-                        summaryHashMap.put(currentBloodDraw.idCurLocationArea, new HashMap());
-                        billingHashMap.put(currentBloodDraw.idCurLocationArea, new HashMap<String, Integer>());
+                    if (!summaryHashMap.containsKey(result.get("Id/curLocation/area"))) {
+                        summaryHashMap.put(result.get("Id/curLocation/area"), new HashMap());
+                        billingHashMap.put(result.get("Id/curLocation/area"), new HashMap<String, Integer>());
                     }
                     //If summary map does not contain the current room for the current area, add (summary > area > room > bloodDrawObject).
-                    if (!summaryHashMap.get(currentBloodDraw.idCurLocationArea).containsKey(currentBloodDraw.idCurLocationRoom)) {
-                        summaryHashMap.get(currentBloodDraw.idCurLocationArea).put(currentBloodDraw.idCurLocationRoom, new bloodDrawRoom());
+                    if (!summaryHashMap.get(result.get("Id/curLocation/area")).containsKey(result.get("Id/curLocation/room"))) {
+                        summaryHashMap.get(result.get("Id/curLocation/area")).put(result.get("Id/curLocation/room"), new bloodDrawRoom());
                     }
 
                     //Updates info if billedByTitle exists.
-                    if (!currentBloodDraw.billedByTitle.isEmpty()) {
+                    if (!result.get("billedby/title").isEmpty()) {
                         //If counts map does not contain the current billedByTitle, add (counts > area > billedByTitle > 0).
-                        if (!billingHashMap.get(currentBloodDraw.idCurLocationArea).containsKey(currentBloodDraw.billedByTitle)) {
-                            billingHashMap.get(currentBloodDraw.idCurLocationArea).put(currentBloodDraw.billedByTitle, 0);
+                        if (!billingHashMap.get(result.get("Id/curLocation/area")).containsKey(result.get("billedby/title"))) {
+                            billingHashMap.get(result.get("Id/curLocation/area")).put(result.get("billedby/title"), 0);
                         }
                         //Increments the count for (counts > area > billedByTitle).
-                        int currentBillByCount = billingHashMap.get(currentBloodDraw.idCurLocationArea).get(currentBloodDraw.billedByTitle);
-                        billingHashMap.get(currentBloodDraw.idCurLocationArea).put(currentBloodDraw.billedByTitle, currentBillByCount + 1);
+                        int currentBillByCount = billingHashMap.get(result.get("Id/curLocation/area")).get(result.get("billedby/title"));
+                        billingHashMap.get(result.get("Id/curLocation/area")).put(result.get("billedby/title"), currentBillByCount + 1);
                     }
                     //Updates info if billedByTitle does not exist.
                     else {
                         //If counts map does not contain the 'Not Assigned' key, add (counts > area > 'Not Assigned' > 0).
-                        if (!billingHashMap.get(currentBloodDraw.idCurLocationArea).containsKey("Not Assigned")) {
-                            billingHashMap.get(currentBloodDraw.idCurLocationArea).put("Not Assigned", 0);
+                        if (!billingHashMap.get(result.get("Id/curLocation/area")).containsKey("Not Assigned")) {
+                            billingHashMap.get(result.get("Id/curLocation/area")).put("Not Assigned", 0);
                         }
                         //Increments the count for (counts > area > 'Not Assigned').
-                        int currentNotAssignedCount = billingHashMap.get(currentBloodDraw.idCurLocationArea).get("Not Assigned");
-                        billingHashMap.get(currentBloodDraw.idCurLocationArea).put("Not Assigned", currentNotAssignedCount + 1);
+                        int currentNotAssignedCount = billingHashMap.get(result.get("Id/curLocation/area")).get("Not Assigned");
+                        billingHashMap.get(result.get("Id/curLocation/area")).put("Not Assigned", currentNotAssignedCount + 1);
                     }
 
                     //Updates the summary map with the current record.
-                    summaryHashMap.get(currentBloodDraw.idCurLocationArea).get(currentBloodDraw.idCurLocationRoom).incomplete++;
-                    summaryHashMap.get(currentBloodDraw.idCurLocationArea).get(currentBloodDraw.idCurLocationRoom).incompleteRecords.add(currentBloodDraw);
+                    summaryHashMap.get(result.get("Id/curLocation/area")).get(result.get("Id/curLocation/room")).incomplete++;
+                    summaryHashMap.get(result.get("Id/curLocation/area")).get(result.get("Id/curLocation/room")).incompleteRecords.add(result);
 
                     //Increases the incomplete count.
                     incompleteCount++;
                 }
             }
 
-
-
-            //10. For printing email:
-
-            //11. Notify user if all blood draws are completed.
-            if (incompleteCount == 0) {
-                // Print 'All scheduled blood draws have been marked complete as of dateTimeStr'.
-            }
-
-            //12.
-            else {
-                //13.
-                //Print 'The following blood draws have not been marked complete as of dateTimeStr'.
-                //Print '<b>Totals by Area:</b><br>\n'.
-
-                //14.
-//                //TODO: Sort countsObject by area.
-//                //  OG version has counts with 'area' as the key for each.
-//                for (ArrayList area : countsObject) {
-//                    //Print 'area:<br>\n'
-//                    //Sort current area results.
-//                    for (Object type : area) {
-//                        //Print 'type:
-//                    }
-//                }
-
-
-                //14. Using 'counts object', print each area, followed by a list of that area's types.
-                // For each result (area) in counts object (sorted).
-                // Create a variable 'types' and assign it counts object > result (area).
-                // Print result: (area) with a break.
-                // For each result (type) in types object (sorted).
-                // Print result (type) with a break.
-
-                //15. Add a header to the email.
-                //Print 'individual draws'.
-
-                //16.
-                //Create a variable prevRoom.
-                //For each result (area) in summary object (sorted).
-                // Create a variable 'rooms' and set it to summary object > area.
-                // Print 'area:' with a break.
-                // For each result (room) in new 'rooms' variable (sorted).
-                // If rooms > result (room) > incomplete is true.
-                //Print 'room:' rooms > room > incomplete.
-                // Print a table with: (Time Requested, Id, Tube Volume, Tube Type, Num Tubes, Total Quantity, Additional Services, Assigned To.
-                // For each result (rec) in rooms > room > incompleteRecords.
-                // Result (rec) > date = date format.
-                // Create a variable called 'color'.
-                // Set color to yellow based on certain conditions.
-                // Color table as needed.
-
-            }
-
-
-
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.date~dateeq=" + todayDate + "&query.Id/DataSet/Demographics/calculated_status~eq=Alive");
+
+            //Returns data.
+            this.incompleteBloodDrawsScheduledTodayByArea = returnArray;
+            this.incompleteBloodDrawsScheduledTodayByAreaURLView = viewQueryURL.toString();
         }
     }
 
@@ -422,101 +487,62 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     public static class bloodDrawRoom {
         int complete = 0;
         int incomplete = 0;
-        ArrayList<BloodDrawResult> incompleteRecords = new ArrayList<>();
+        ArrayList<HashMap<String, String>> incompleteRecords = new ArrayList<HashMap<String, String>>();
     }
-    public static class BloodDrawResult {
-        Container c;
-        User u;
-        String drawStatus = "";
-        String project = "";
-        String date = "";
-        String projectProtocol = "";
-        String taskID = "";
-        String projectStatus = "";
-        String tubeVol = "";
-        String tubeType = "";
-        String billedBy = "";
-        String billedByTitle = "";
-        String numTubes = "";
-        String idCurLocationArea = "";
-        String idCurLocationRoom = "";
-        String idCurLocationCage = "";
-        String additionalServices = "";
-        String remark = "";
-        String id = "";
-        String quantity = "";
-        String qcState = "";
-        String qcStateLabel = "";
-        String requestID = "";
-
-        public BloodDrawResult(Container container, User user, String[] bloodDrawQueryResult) {
-
-//            'project/protocol', 'billedby/title', 'Id/curLocation/area', 'Id/curLocation/room', 'Id/curLocation/cage', 'qcstate/Label'
-
-            this.c = container;
-            this.u = user;
-
-            this.drawStatus = bloodDrawQueryResult[0];
-            this.project = bloodDrawQueryResult[1];
-            this.date = bloodDrawQueryResult[2];
-//            this.projectProtocol = bloodDrawQueryResult[3];
-            this.taskID = bloodDrawQueryResult[3];
-            this.projectStatus = bloodDrawQueryResult[4];
-            this.tubeVol = bloodDrawQueryResult[5];
-            this.tubeType = bloodDrawQueryResult[6];
-            this.billedBy = bloodDrawQueryResult[7];
-//            this.billedByTitle = bloodDrawQueryResult[9];
-            this.numTubes = bloodDrawQueryResult[8];
-//            this.idCurLocationArea = bloodDrawQueryResult[11];
-//            this.idCurLocationRoom = bloodDrawQueryResult[12];
-//            this.idCurLocationCage = bloodDrawQueryResult[13];
-            this.additionalServices = bloodDrawQueryResult[9];
-            this.remark = bloodDrawQueryResult[10];
-            this.id = bloodDrawQueryResult[11];
-            this.quantity = bloodDrawQueryResult[12];
-            this.qcState = bloodDrawQueryResult[13];
-//            this.qcStateLabel = bloodDrawQueryResult[19];
-            this.requestID = bloodDrawQueryResult[14];
-
-            String x = "test";
-            //TODO: Get project/protocol
-            //TODO: Get billedBy/Title
-            //TODO: Get id/CurLocation/Area
-            //TODO: Get id/CurLocation/Room
-            //TODO: Get id/CurLocation/Cage
-            //TODO: Get qcState/Label
-
-
-
-//            ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u, "ehr_lookups", "blood_billed_by", null, null, "value")
-//            rs.hasColumn(FieldKey.fromString("project/displayName"))
-
-
-
-            //OG VERSION
-//            this.drawStatus = bloodDrawQueryResult[0];
-//            this.project = bloodDrawQueryResult[1];
-//            this.date = bloodDrawQueryResult[2];
-//            this.projectProtocol = bloodDrawQueryResult[3];
-//            this.taskID = bloodDrawQueryResult[4];
-//            this.projectStatus = bloodDrawQueryResult[5];
-//            this.tubeVol = bloodDrawQueryResult[6];
-//            this.tubeType = bloodDrawQueryResult[7];
-//            this.billedBy = bloodDrawQueryResult[8];
-//            this.billedByTitle = bloodDrawQueryResult[9];
-//            this.numTubes = bloodDrawQueryResult[10];
-//            this.idCurLocationArea = bloodDrawQueryResult[11];
-//            this.idCurLocationRoom = bloodDrawQueryResult[12];
-//            this.idCurLocationCage = bloodDrawQueryResult[13];
-//            this.additionalServices = bloodDrawQueryResult[14];
-//            this.remark = bloodDrawQueryResult[15];
-//            this.id = bloodDrawQueryResult[16];
-//            this.quantity = bloodDrawQueryResult[17];
-//            this.qcState = bloodDrawQueryResult[18];
-//            this.qcStateLabel = bloodDrawQueryResult[19];
-//            this.requestID = bloodDrawQueryResult[20];
-        }
-    }
+//    public static class BloodDrawResult {
+//        Container c;
+//        User u;
+//        String drawStatus = "";
+//        String project = "";
+//        String date = "";
+//        String projectProtocol = "";
+//        String taskID = "";
+//        String projectStatus = "";
+//        String tubeVol = "";
+//        String tubeType = "";
+//        String billedBy = "";
+//        String billedByTitle = "";
+//        String numTubes = "";
+//        String idCurLocationArea = "";
+//        String idCurLocationRoom = "";
+//        String idCurLocationCage = "";
+//        String additionalServices = "";
+//        String remark = "";
+//        String id = "";
+//        String quantity = "";
+//        String qcState = "";
+//        String qcStateLabel = "";
+//        String requestID = "";
+//
+//        public BloodDrawResult(Container container, User user, HashMap<String,String> bloodDrawQueryResult) {
+//            //Updates user & container.
+//            this.c = container;
+//            this.u = user;
+//
+//            //Updates object data.
+//            this.drawStatus = bloodDrawQueryResult.get("drawStatus");
+//            this.project = bloodDrawQueryResult.get("project");
+//            this.date = bloodDrawQueryResult.get("date");
+//            this.projectProtocol = bloodDrawQueryResult.get("project/protocol");
+//            this.taskID = bloodDrawQueryResult.get("taskid");
+//            this.projectStatus = bloodDrawQueryResult.get("projectStatus");
+//            this.tubeVol = bloodDrawQueryResult.get("tube_vol");
+//            this.tubeType = bloodDrawQueryResult.get("tube_type");
+//            this.billedBy = bloodDrawQueryResult.get("billedby");
+//            this.billedByTitle = bloodDrawQueryResult.get("billedby/title");
+//            this.numTubes = bloodDrawQueryResult.get("num_tubes");
+//            this.idCurLocationArea = bloodDrawQueryResult.get("Id/curLocation/area");
+//            this.idCurLocationRoom = bloodDrawQueryResult.get("Id/curLocation/room");
+//            this.idCurLocationCage = bloodDrawQueryResult.get("Id/curLocation/cage");
+//            this.additionalServices = bloodDrawQueryResult.get("additionalServices");
+//            this.remark = bloodDrawQueryResult.get("remark");
+//            this.id = bloodDrawQueryResult.get("Id");
+//            this.quantity = bloodDrawQueryResult.get("quantity");
+//            this.qcState = bloodDrawQueryResult.get("qcstate");
+//            this.qcStateLabel = bloodDrawQueryResult.get("qcstate/Label");
+//            this.requestID = bloodDrawQueryResult.get("requestid");
+//        }
+//    }
 
 
 

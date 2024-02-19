@@ -202,7 +202,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         ko.extenders.validator = function(target, validatorFunction) {
             // Add sub-observables:

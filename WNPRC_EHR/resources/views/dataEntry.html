@@ -315,7 +315,7 @@
             }
         ]);
 
-        var baseURL = "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'];
+        var baseURL = "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-";
 
         var makeURL = function(view, params) {
             var paramArray = [];
@@ -323,7 +323,7 @@
                 paramArray.push( encodeURIComponent(key) + "=" + encodeURIComponent(value));
             });
 
-            return baseURL + "/" + view + ".view?" + paramArray.join("&")
+            return baseURL + view + ".view?" + paramArray.join("&")
         };
 
         var makeRequestDataEntryURL = function(formName, params) {
@@ -374,12 +374,12 @@
                             queries: ['Blood Draws']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Clinical%20Remarks&keyField=lsid",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?schemaName=study&queryName=Clinical%20Remarks&keyField=lsid",
                             title: 'Enter Clinical Remark',
                             queries: ['Clinical Remarks']
                         },
                         {
-                            url:     "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Feeding&keyField=lsid",
+                            url:     "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-updateQuery.view?schemaName=study&queryName=Feeding&keyField=lsid",
                             title:   'Enter/Manage Feeding Orders',
                             queries: ['Feeding']},
                         {
@@ -504,26 +504,26 @@
                             queries: ['Arrival']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Assignment&keyField=lsid",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-updateQuery.view?schemaName=study&queryName=Assignment&keyField=lsid",
                             title: 'Enter/Manage Assignments',
                             qcstate: 'Completed',
                             permission: 'admin',
                             queries: ['Assignment']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Birth",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?formtype=Birth",
                             title: 'Enter Births',
                             queries: ['Birth']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Demographics&keyField=lsid",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-updateQuery.view?schemaName=study&queryName=Demographics&keyField=lsid",
                             title: 'Enter/Manage Demographics',
                             qcstate: 'Completed',
                             permission: 'admin',
                             queries: ['Demographics']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Departure&keyField=lsid",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?schemaName=study&queryName=Departure&keyField=lsid",
                             title: 'Enter Departures',
                             qcstate: 'Completed',
                             permission: 'admin',
@@ -531,25 +531,25 @@
                         },
                         {
                             permission: 'admin',
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?formtype=Multi-Animal MPR",
                             title: 'Enter Multi-Animal MPR',
                             queries: ['Drug Administration']
                         },
                         {
                             permission: 'admin',
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR&useSnomedCodes=1",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?formtype=Multi-Animal MPR&useSnomedCodes=1",
                             title: 'Enter Multi-Animal MPR (using SNOMED codes)',
                             queries: ['Drug Administration']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Project&keyField=project",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-updateQuery.view?schemaName=ehr&queryName=Project&keyField=project",
                             title: 'Enter/Manage Projects',
                             qcstate: 'Completed',
                             permission: 'admin',
                             queries: ['Assignment']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Protocol&keyField=protocol",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-updateQuery.view?schemaName=ehr&queryName=Protocol&keyField=protocol",
                             title: 'Enter/Manage Protocols',
                             qcstate: 'Completed',
                             permission: 'admin',
@@ -568,12 +568,12 @@
 
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=SimpleRemark&title=Remark",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?formtype=SimpleRemark&title=Remark",
                             title: 'Enter Simple Remark',
                             queries: ['Clinical Remarks']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=supplemental_pedigree&keyField=rowid",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-updateQuery.view?schemaName=ehr&queryName=supplemental_pedigree&keyField=rowid",
                             title: 'Enter/Manage Supplemental Pedigree',
                             qcstate: 'Completed',
                             permission: 'admin',
@@ -604,17 +604,17 @@
                             queries: ['Behavior Abstract']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Behavior Abstract",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?formtype=Behavior Abstract",
                             title: 'Enter Behavior Abstract',
                             queries: ['Behavior Abstract']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Behavior Remarks&keyField=lsid",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?schemaName=study&queryName=Behavior Remarks&keyField=lsid",
                             title: 'Enter Behavior Remark',
                             queries: ['Behavior Remarks']
                         },
                         {
-                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Housing",
+                            url: "<%=contextPath%>" + ctx['EHRStudyContainer'] + "/ehr-manageTask.view?formtype=Housing",
                             title: 'Enter Housing Change',
                             qcstate: 'Completed',
                             permission: 'admin',

@@ -1,6 +1,6 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     QUnit.config.autostart = false;
 </script>
 

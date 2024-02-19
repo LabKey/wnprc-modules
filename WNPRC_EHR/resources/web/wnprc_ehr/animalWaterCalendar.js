@@ -5,7 +5,6 @@ let entireColony = false;
 EHR.reports.animalWaterCalendar = function (panel, tab){
 
     var animalIds = [];
-    debugger;
     if (tab.filters.subjects){
         // tab.filters.subjects.forEach (animalId => animalIds+=animalId+';');
         // animalIds = animalIds.substring(0, animalIds.length-1);

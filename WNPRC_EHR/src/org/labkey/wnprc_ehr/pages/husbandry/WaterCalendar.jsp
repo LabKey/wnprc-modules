@@ -503,6 +503,7 @@
     var calendar = {};
     var calendarEvents = {};
     var hideEditPanel = true;
+    var loadWaterTotalOnce = false;
     var allowProjects = "";
     var changeableItems = ko.observableArray();
 
@@ -593,6 +594,8 @@
             }
         });
         $(document).ready(function(){
+            const animalInToday = [];
+            const currentTime = new Date().setHours(0,0,0,0);
 
             calendar = new FullCalendar.Calendar(calendarEl, {
 
@@ -610,7 +613,6 @@
                         events: function (fetchInfo, successCallback, failureCallback) {
                             console.log(" startStr " + fetchInfo.startStr);
                             console.log(" startStr " + fetchInfo.endStr);
-
                             console.log("inside eventSource " + allowProjects);
 
                             if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
@@ -623,6 +625,9 @@
 
                                     successCallback(
                                         events.map(function (row) {
+                                        if (moment(row.date).isSame(currentTime) && !animalInToday.includes(row.Id)){
+                                            animalInToday.push(row.Id);
+                                        }
                                         var volume;
                                         if (row.volume != null) {
                                             volume = row.volume + 'mL';
@@ -650,13 +655,21 @@
                                             eventObj.color = '#F78181';
                                         }
 
-
+                                        console.log("event from waterSchedule");
                                         return eventObj;
                                         })
+
                                     );
                                     failureCallback((function(data){
                                         console.log ("Error retriving waterScheduleWithWeight");
                                     }));
+                                }).then(function(data){
+                                    console.log("promise returned schedule animals");
+                                    if (!loadWaterTotalOnce){
+                                        loadWaterTotal($animalId, animalInToday, calendar, currentTime);
+                                        loadWaterTotalOnce = true;
+                                    }
+
                                 })
 
                             }
@@ -665,17 +678,21 @@
                             else{
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser, isAnimalCare, $animalId);
-
+                                console.log("fetching single animal schedule");
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
 
                                     successCallback(events.map(function (row) {
+                                        if (moment(row.date).isSame(currentTime) && !animalInToday.includes(row.Id)){
+                                            console.log("adding animal to array "+ row.Id);
+                                            animalInToday.push(row.Id);
+                                        }
                                         var volume;
                                         if (row.volume != null) {
                                             volume = row.volume+ 'ml';
                                         }
                                         else {
-                                            volume = 'On Lixit';
+                                            volume = ' On Lixit';
                                         }
 
                                         var eventObj = {
@@ -697,7 +714,9 @@
                                         else {
                                             eventObj.color = '#F78181';
                                         }
+                                        console.log("event from waterSchedule");
                                         return eventObj;
+
                                     }))
                                 })
 
@@ -705,153 +724,6 @@
                         },
                         id : 'WaterScheduleCoalesced' //setting source id for full calendar
                 },
-                {
-                    events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
-                        WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
-                            "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "date~lte":  new Date()
-                        }).then(function (data) {
-                            debugger;
-                            var events = data.rows;
-
-                            successCallback(
-                                    events.map(function (row) {
-                                        let parsedTotalWater = 0;
-                                        let eventTitle = row.Id;
-                                        row.animalStatus=row['Id/Demographics/calculated_status'];
-                                        if( row.conditionAtTime === 'regulated' ) {
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                if (row.TotalWater === null) {
-                                                    row.TotalWater = ' none';
-                                                    parsedTotalWater = row.TotalWater;
-                                                }
-                                                else if (row.TotalWater !== null) {
-                                                    parsedTotalWater = row.TotalWater;
-                                                    eventTitle += " Total: ";
-                                                }
-
-                                            }
-                                            else {
-                                                row.TotalWater = row['Id/Demographics/calculated_status'];
-                                                parsedTotalWater = row.TotalWater;
-                                            }
-                                        }
-                                        else {
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                row.TotalWater = 'on Lixit';
-                                                parsedTotalWater = row.TotalWater;
-                                            }
-                                            else {
-                                                row.TotalWater = row['Id/Demographics/calculated_status'];
-                                                parsedTotalWater = row.TotalWater;
-
-                                            }
-                                        }
-                                        eventTitle += parsedTotalWater;
-
-                                        var eventObj = {
-                                            id : LABKEY.Utils.generateUUID(),
-                                            title: eventTitle,
-                                            start: new Date(row.date),
-                                            allDay: true,
-                                            groupId : row.Id,
-                                            textColor: '#000000',
-                                            rawRowData: row
-                                        };
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
-                                            eventObj.color = '#FFFFFF';
-                                        }
-                                        else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
-                                            eventObj.color = '#FF7F50';
-                                        }
-                                        else{
-                                            eventObj.color = '#EE2020'
-                                        }
-                                        return eventObj;
-                                    })
-                            );
-                            failureCallback((function (data){
-                                console.log("error from waterTotalByDateWithWeight");
-                            }))
-
-                        })
-
-                        }else{
-
-                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
-                            "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "date~lte":  new Date(),
-                            "Id~in": $animalId
-                            }).then(function (data) {
-                                var events = data.rows;
-
-                                successCallback(
-                                        events.map(function (row) {
-                                            let parsedTotalWater = 0;
-                                            let eventTitle = row.Id;
-                                            row.animalStatus=row['Id/Demographics/calculated_status'];
-                                            debugger;
-                                            if( row.conditionAtTime === 'regulated' ) {
-                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                    if (row.TotalWater === null) {
-                                                        row.TotalWater = ' none';
-                                                        parsedTotalWater = row.TotalWater;
-                                                    }
-                                                    else if (row.TotalWater !== null) {
-                                                        parsedTotalWater = row.TotalWater;
-                                                        eventTitle += " Total: ";
-                                                    }
-
-                                                }
-                                                else {
-                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
-                                                    parsedTotalWater = row.TotalWater;
-                                                }
-                                            }
-                                            else {
-                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                    row.TotalWater = ' on Lixit';
-                                                    parsedTotalWater = row.TotalWater;
-                                                }
-                                                else {
-                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
-                                                    parsedTotalWater = row.TotalWater;
-
-                                                }
-                                            }
-                                            eventTitle += parsedTotalWater;
-
-                                            var eventObj = {
-                                                id : LABKEY.Utils.generateUUID(),
-                                                title: eventTitle,
-                                                start: new Date(row.date),
-                                                textColor: '#000000',
-                                                allDay: true,
-                                                groupId : row.Id,
-                                                rawRowData: row
-                                            };
-                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
-                                                eventObj.color = '#FFFFFF';
-                                            }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
-                                                eventObj.color = '#FF7F50';
-                                            }
-                                            else{
-                                                eventObj.color = '#EE2020'
-                                            }
-                                            return eventObj;
-                                        })
-                                );
-                                failureCallback((function (data){
-                                    console.log("error from waterTotalByDateWithWeight");
-                                }))
-                                })
-                            }
-                        },
-                    id : 'totalWater' //setting source id for full calendar
-                }
             ],
             loading: function (isLoading){
                 if (isLoading){
@@ -1653,10 +1525,13 @@
 
     function queryConfigFunc (fetchInfo, isSuperUser, isAnimalCare, animalId){
         let date = new Date();
+        let numOfDate = moment(fetchInfo.end.format('Y-m-d')).diff(date,"days",false)
+        console.log("value of numofDate " + numOfDate)
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
             "date~lte": fetchInfo.end.format('Y-m-d'),
-            "parameters": {NumDays: 120, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            //"parameters": {NumDays: numOfDate, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "parameters": {NumDays: 43, StartDate: date.format(LABKEY.extDefaultDateFormat)},
             "qcstate/label~eq": "Scheduled"
         };
 
@@ -1748,6 +1623,172 @@
         }else{
             return row.objectIdCoalesced
         }
+    }
+    function loadWaterTotal(animalId, animalInToday, calendar, currentTime){
+        calendar.addEventSource(
+                {
+                    events:function (fetchInfo, successCallback, failureCallback) {
+                        if (animalId === 'undefined' || animalId === "null" || animalId === ''){
+                            var dateFuture = new Date()
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
+                                "date~gte": fetchInfo.start.format('Y-m-d'),
+                                "date~lte": fetchInfo.end.format('Y-m-d')
+
+                            }).then(function (data) {
+                                var events = data.rows;
+
+                                successCallback(
+                                        events.map(function (row) {
+                                            let parsedTotalWater = 0;
+                                            let eventTitle = row.Id;
+                                            row.animalStatus=row['Id/Demographics/calculated_status'];
+                                            if( row.conditionAtTime === 'regulated' ) {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    if (row.TotalWater === null) {
+                                                        row.TotalWater = ' none';
+                                                        parsedTotalWater = row.TotalWater;
+                                                    }
+                                                    else if (row.TotalWater !== null) {
+                                                        parsedTotalWater = row.TotalWater;
+                                                        eventTitle += " Total: ";
+                                                    }
+
+                                                }
+                                                else {
+                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                            }
+                                            else {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    row.TotalWater = ' on Lixit';
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                                else {
+                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    parsedTotalWater = row.TotalWater;
+
+                                                }
+                                            }
+                                            eventTitle += parsedTotalWater;
+
+                                            var eventObj = {
+                                                id : LABKEY.Utils.generateUUID(),
+                                                title: eventTitle,
+                                                start: new Date(row.date),
+                                                allDay: true,
+                                                groupId : row.Id,
+                                                textColor: '#000000',
+                                                rawRowData: row
+                                            };
+                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                                eventObj.color = '#FFFFFF';
+                                            }
+                                            else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                                eventObj.color = '#FF7F50';
+                                            }
+                                            else{
+                                                eventObj.color = '#EE2020'
+                                            }
+                                            if (animalInToday.includes(row.Id) && moment(row.date).isSameOrAfter(currentTime) ){
+                                                eventObj.display = 'none';
+                                            }else{
+                                                eventObj.display = 'auto';
+                                            }
+                                            debugger;
+                                            console.log("event from waterTotal");
+                                            return eventObj;
+                                        })
+                                );
+                                failureCallback((function (data){
+                                    console.log("error from waterTotalByDateWithWeight");
+                                }))
+
+                            })
+
+                        }else{
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
+                                "date~gte": fetchInfo.start.format('Y-m-d'),
+                                "date~lte": fetchInfo.end.format('Y-m-d'),
+                                "Id~in": animalId
+                            }).then(function (data) {
+                                var events = data.rows;
+
+                                successCallback(
+                                        events.map(function (row) {
+                                            if (!animalInToday.includes(row.Id)){
+                                                let parsedTotalWater = 0;
+                                                let eventTitle = row.Id;
+                                                row.animalStatus=row['Id/Demographics/calculated_status'];
+                                                if( row.conditionAtTime === 'regulated' ) {
+                                                    if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                        if (row.TotalWater === null) {
+                                                            row.TotalWater = ' none';
+                                                            parsedTotalWater = row.TotalWater;
+                                                        }
+                                                        else if (row.TotalWater !== null) {
+                                                            parsedTotalWater = row.TotalWater;
+                                                            eventTitle += " Total: ";
+                                                        }
+
+                                                    }
+                                                    else {
+                                                        row.TotalWater = row.TotalWater;
+                                                        parsedTotalWater += row.TotalWater;
+                                                        eventTitle += " Total: ";
+                                                    }
+                                                }
+                                                else {
+                                                    if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                        row.TotalWater = ' on Lixit';
+                                                        parsedTotalWater = row.TotalWater;
+                                                    }
+                                                    else {
+                                                        row.TotalWater = ' on Lixit';
+                                                        parsedTotalWater = row.TotalWater;
+
+                                                    }
+                                                }
+                                                eventTitle += parsedTotalWater;
+
+                                                var eventObj = {
+                                                    id : LABKEY.Utils.generateUUID(),
+                                                    title: eventTitle,
+                                                    start: new Date(row.date),
+                                                    textColor: '#000000',
+                                                    allDay: true,
+                                                    groupId : row.Id,
+                                                    rawRowData: row
+                                                };
+                                                if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                                    eventObj.color = '#FFFFFF';
+                                                }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                                    eventObj.color = '#FF7F50';
+                                                }
+                                                else{
+                                                    eventObj.color = '#EE2020'
+                                                }
+                                                if (animalInToday.includes(row.Id) && moment(row.date).isSameOrAfter(currentTime) ){
+                                                    eventObj.display = 'none';
+                                                }else{
+                                                    eventObj.display = 'auto';
+                                                }
+                                                console.log("event from waterTotal");
+                                                return eventObj;
+
+                                            }
+                                        })
+                                );
+                                failureCallback((function (data){
+                                    console.log("error from waterTotalByDateWithWeight");
+                                }))
+                            })
+                        }
+                    },
+                    id : 'totalWater', //setting source id for full calendar
+                }
+
+        );
     }
 
 </script>

@@ -603,7 +603,7 @@ exports.init = function (EHR) {
             var other = row.other.split(",");
             if ((other.length > 0) && (other.indexOf("T") >= 0)) {
                 if ((row.tlocation === null) || !(row.tlocation)) {
-                    EHR.Server.Utils.addError(scriptErrors, 'tlocation', "You must specify a location when indicating trauma to an animal.", 'ERROR');
+                    EHR.Server.Utils.addError(scriptErrors, 'tlocation', "You must specify a location when indicating trauma to an animal. " + row.Id, 'ERROR');
                 }
             }
         }

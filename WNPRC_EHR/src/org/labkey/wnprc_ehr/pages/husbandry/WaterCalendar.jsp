@@ -613,7 +613,6 @@
                         events: function (fetchInfo, successCallback, failureCallback) {
                             console.log(" startStr " + fetchInfo.startStr);
                             console.log(" startStr " + fetchInfo.endStr);
-                            console.log("inside eventSource " + allowProjects);
 
                             if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                                 let queryConfig ={};
@@ -1524,14 +1523,24 @@
 
 
     function queryConfigFunc (fetchInfo, isSuperUser, isAnimalCare, animalId){
-        let date = new Date();
-        let numOfDate = moment(fetchInfo.end.format('Y-m-d')).diff(date,"days",false)
+        let today = new Date();
+        let momentStarDate = fetchInfo.start.format('Y-m-d');
+        let momentEndDate = fetchInfo.end.format('Y-m-d');
+        let numOfDate;
+        let startCalendarDate;
+
+        if (moment(today).isBetween(momentStarDate, momentEndDate)){
+            numOfDate = moment(momentEndDate).diff(today, "days", false);
+            startCalendarDate = today.format(LABKEY.extDefaultDateFormat)
+        }else{
+            numOfDate = moment(momentEndDate).diff(momentStarDate,"days",false);
+            startCalendarDate = fetchInfo.start.format(LABKEY.extDefaultDateFormat);
+        }
         console.log("value of numofDate " + numOfDate)
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
             "date~lte": fetchInfo.end.format('Y-m-d'),
-            //"parameters": {NumDays: numOfDate, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-            "parameters": {NumDays: 43, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "parameters": {NumDays: numOfDate + 1, StartDate: startCalendarDate},
             "qcstate/label~eq": "Scheduled"
         };
 
@@ -1629,10 +1638,14 @@
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
                         if (animalId === 'undefined' || animalId === "null" || animalId === ''){
-                            var dateFuture = new Date()
+
+                            let momentStarDate = fetchInfo.start.format('Y-m-d');
+                            let momentEndDate = fetchInfo.end.format('Y-m-d');
+
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                                 "date~gte": fetchInfo.start.format('Y-m-d'),
-                                "date~lte": fetchInfo.end.format('Y-m-d')
+                                "date~lte": fetchInfo.end.format('Y-m-d'),
+                                "parameters": {STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate}
 
                             }).then(function (data) {
                                 var events = data.rows;

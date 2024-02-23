@@ -15,10 +15,14 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.reports.LabKeyScriptEngineManager;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
+import java.io.File;
 import java.sql.Array;
 import java.sql.ResultSet;
 
@@ -32,6 +36,9 @@ import java.util.Map;
 import java.util.Set;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.Results;
+import org.labkey.study.xml.Lab;
+
+import javax.script.ScriptEngine;
 
 
 /**
@@ -621,6 +628,20 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
             //Update snapshot.
             if (!returnArray.isEmpty()) {
+//
+//                ScriptEngine engine = null;
+//                String ext = FileUtil.getExtension("/usr/local/labkey/tools/uupdateSnapshot.pl");
+//                if (ext != null) {
+//                    engine = LabKeyScriptEngineManager.get().getEngineByExtension(c, ext, LabKeyScriptEngineManager.EngineContext.pipeline);
+//                }
+//                if (engine != null) {
+//                    File scriptDir = null;
+//                    Context myContext = null;  //TODO: Add context here.
+//                    try (SecurityManager.TransformSession session = SecurityManager.createTransformSession(myContext)) {
+//                        scriptDir = getScriptDirectory
+//                    }
+//                }
+
                 //TODO: Update snapshot (line 210 in colonyAlerts.pl).
                 // The following line is how it's done in the perl script.
 //                system("/usr/local/labkey/tools/updateSnapshot.pl");

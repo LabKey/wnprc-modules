@@ -39,6 +39,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.Row;
 import org.labkey.wnprc_ehr.WNPRC_EHREmail;
 //import org.labkey.remoteapi.query.Sort;
 
@@ -1042,7 +1043,76 @@ public class NotificationToolkit {
             );
             return returnStyle.toString();
         }
+
+        //TODO: Add documentation.
+        public String setHeaderRowBackgroundColor(String headerColor) {
+            StringBuilder returnStyle = new StringBuilder();
+            returnStyle.append(
+                    "th:nth-child(n) {background: " + headerColor + "}"
+            );
+            return returnStyle.toString();
+        }
+
+//        public String setRowBackgroundColor(Integer[] rowsToHighlight, String highlightColor) {
+//
+//        }
     }
 
+    static class NotificationRevampTable
+    {
+        //        Integer borderSize;                         //The size of the table border.
+        String[] tableColumns;                      //The names of the columns.
+        ArrayList<String[]> tableData;              //A 3D array of the table data. (ArrayList of rows, each containing a string array of column data.)
+        ArrayList<String> rowColors;         //An optional list of colors for each row.  Must be the same size as 'tableData'.
+
+        NotificationRevampTable(String[] TableColumns, ArrayList<String[]> TableData)
+        {
+            this.tableColumns = TableColumns;
+            this.tableData = TableData;
+            this.rowColors = null;
+        }
+
+        public String createBasicHTMLTable()
+        {
+            //Begin table.
+            StringBuilder tempTable = new StringBuilder();
+            tempTable.append("<table>");
+
+            //Adds column headers.
+            tempTable.append("<tr>");
+            for (String columnName : tableColumns)
+            {
+                tempTable.append("<th>" + columnName + "</th>");
+            }
+            tempTable.append("</tr>");
+
+            //Cycles through each row.
+            Integer rowTracker = 0;
+            for (String[] currentRow : tableData)
+            {
+                tempTable.append("<tr>");
+                //Cycles through each column in the current row.
+                for (String currentColumn : currentRow)
+                {
+                    //Updates row data.
+                    if (this.rowColors == null)
+                    {
+                        tempTable.append("<td>" + currentColumn + "</td>");
+                    }
+                    //Updates row data with color.
+                    else if (this.rowColors.size() == this.tableData.size())
+                    {
+                        tempTable.append("<td bgcolor=" + rowColors.get(rowTracker) + ">" + currentColumn + "</td>");
+                    }
+                }
+                tempTable.append("</tr>");
+                rowTracker++;
+            }
+
+            //Return table.
+            tempTable.append("</table>");
+            return tempTable.toString();
+        }
+    }
 }
 

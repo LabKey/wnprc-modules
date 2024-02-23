@@ -7,6 +7,7 @@
 SELECT
        Id,
        cal.targetdate AS date,
+       cal.reportEndDate AS reportEndDate,
        waterSummary.TotalWater,
        waterSummary.provideFruit,
        waterSummary.remarksConcat,
@@ -20,7 +21,7 @@ SELECT
        waterSummary.project,
        waterSummary.qcstate
 
-FROM ehr_lookups.calendar cal
+FROM study.waterTotalWithParameters cal
  LEFT OUTER JOIN (
     SELECT
         drwc.Id AS Id,
@@ -39,7 +40,8 @@ FROM ehr_lookups.calendar cal
         GROUP BY Id
  ) odrwc
  ON cal.targetdate >= CAST (odrwc.firstDate AS DATE)
- AND cal.targetdate <= curdate()
+ AND cal.targetdate <= cal.reportEndDate
+ --AND cal.targetdate <= timestampadd("SQL_TSI_DAY",120,CAST(curdate() AS TIMESTAMP))
  AND ( Id.death.date IS NULL OR cal.targetdate <= CAST(Id.death.date AS DATE) )
 
  LEFT OUTER JOIN (
@@ -68,5 +70,6 @@ ON
     CAST(cal.targetdate AS DATE) = waterSummary.date
     AND waterSummary.innerId = Id
 WHERE
-    cal.targetdate <= curdate()
+   cal.targetdate <= cal.reportEndDate
+   -- cal.targetdate <= timestampadd("SQL_TSI_DAY",120,CAST(curdate() AS TIMESTAMP))
     AND Id IS NOT NULL

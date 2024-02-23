@@ -614,6 +614,9 @@
                             console.log(" startStr " + fetchInfo.startStr);
                             console.log(" startStr " + fetchInfo.endStr);
 
+                            //TODO:Knockout not working when animalId is sent
+                            //have to troubleshot error "in"when sending $animalId
+
                             if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser,isAnimalCare);

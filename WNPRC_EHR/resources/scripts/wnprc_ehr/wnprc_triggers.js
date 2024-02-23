@@ -24,20 +24,8 @@ exports.init = function (EHR) {
         console.log("wnprc_triggers.js: general ehr INIT function")
 
         EHR.Server.TriggerManager.unregisterAllHandlersForQueryNameAndEvent('study', 'blood', EHR.Server.TriggerManager.Events.BEFORE_UPSERT);
-        EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'blood', function (helper, scriptErrors, row) {
-            console.log('wnprc_triggers.js: calling BEFORE_UPSERT from WNPRC EHR ')
-            var tube_types = {}
-            if (Object.keys(tube_types).length === 0){
-                LABKEY.Query.selectRows({
-                    schemaName: 'ehr_lookups',
-                    queryName: 'blood_tube_volumes',
-                    success: function(res) {
-                        for (var i = 0; i < res.rows.length; i++){
-                            tube_types[res.rows[i].volume] = res.rows[i].tube_types
-                        }
-                    }
-                })
-            }
+        EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'blood', function (helper, scriptErrors, row, oldRow) {
+            console.log('FROM WNPRC_EHR: calling BEFORE_UPSERT blood.js')
             if (!helper.isETL() && row.date && !row.daterequested){
                 if (!oldRow || !oldRow.daterequested){
                     row.daterequested = row.date;
@@ -56,22 +44,6 @@ exports.init = function (EHR) {
                     row.quantity = row.num_tubes * row.tube_vol;
                 }
 
-                if (!!tube_types && !!row.tube_type && !!row.tube_vol) {
-                    //if the instructions are blank and tube type does not match the volume, force user to add a special instruction
-                    var badTubeVol = false;
-                    if (!row.instructions) {
-                        if (tube_types[row.tube_vol] === undefined) {
-                            badTubeVol = true;
-                        } else {
-                            if (tube_types[row.tube_vol].indexOf(row.tube_type) === -1) {
-                                badTubeVol = true
-                            }
-                        }
-                        if (badTubeVol){
-                            EHR.Server.Utils.addError(scriptErrors, 'instructions', 'Tube volume "' + row.tube_vol + '" does not exist for tube type "' + row.tube_type + '". Please provide instructions for the custom volume and tube type combination.')
-                        }
-                    }
-                }
                 if (row.additionalServices) {
                     if (row.tube_type || row.tube_vol){
                         var tubeType = row.tube_type || null;
@@ -113,10 +85,39 @@ exports.init = function (EHR) {
                     if (weightMap && weightMap[row.Id]){
                         weights = weightMap[row.Id];
                     }
+                    var tube_types = {}
+                    if (Object.keys(tube_types).length === 0){
+                        LABKEY.Query.selectRows({
+                            schemaName: 'ehr_lookups',
+                            queryName: 'blood_tube_volumes',
+                            success: function(res) {
+                                for (var i = 0; i < res.rows.length; i++){
+                                    tube_types[res.rows[i].volume] = res.rows[i].tube_types
+                                }
+                            }
+                        })
+                    }
+                    if (!!tube_types && !!row.tube_type && !!row.tube_vol) {
+                        //if the instructions are blank and tube type does not match the volume, force user to add a special instruction
+                        var badTubeVol = false;
+                        if (!row.instructions) {
+                            if (tube_types[row.tube_vol] === undefined) {
+                                badTubeVol = true;
+                            } else {
+                                if (tube_types[row.tube_vol].indexOf(row.tube_type) === -1) {
+                                    badTubeVol = true
+                                }
+                            }
+                            if (badTubeVol){
+                                EHR.Server.Utils.addError(scriptErrors, 'instructions', 'Tube volume "' + row.tube_vol + '" does not exist for tube type "' + row.tube_type + '". Please provide instructions for the custom volume and tube type combination.')
+                            }
+                        }
+                    }
 
                     if (row.objectid) {
-                        console.log('verifying blood draw in EHR')
-                        var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
+                        console.log('verifying blood...')
+                        var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity, true);
+                        console.log(msg)
                         if (msg != null) {
                             if (msg.toLowerCase().indexOf('unknown weight') > -1) {
                                 volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
@@ -130,22 +131,6 @@ exports.init = function (EHR) {
                     else {
                         console.warn('objectid not provided for blood draw, cannot calculate allowable blood volume.  this probably indicates an error with the form submitting these data')
                     }
-                }
-            }
-            if (row.additionalServices) {
-                // We do not permit requests of 6mL in EDTA with CBC
-                if (row.tube_type === 'EDTA' && row.tube_vol === 6 && row.additionalServices.indexOf('CBC') >= 0) {
-                    EHR.Server.Utils.addError(scriptErrors, 'tube_type', 'May not request draw of 6mL in EDTA with CBC', 'ERROR');
-                }
-            }
-
-            // WNPRC#4350 - Require restraints for blood draws, but not for requests
-            if (row.QCStateLabel === 'Completed') {
-                if (!row.restraintDuration) {
-                    EHR.Server.Utils.addError(scriptErrors, 'restraintDuration', 'You must indicate the restraint time for blood draws.', 'ERROR');
-                }
-                if (!row.restraint) {
-                    EHR.Server.Utils.addError(scriptErrors, 'restraint', 'You must indicate the restraint used for blood draws.', 'ERROR');
                 }
             }
         });
@@ -747,64 +732,6 @@ exports.init = function (EHR) {
     });
 
     var tube_types = {}
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'blood', function (helper, scriptErrors, row) {
-      // Test init stuff.
-        console.log('calling blood INIT from WNPRC EHR')
-
-        // Grab all of the blood draws and weights being submitted in this transaction (packaged separately by the ExtJS
-        // client store so that we can use those values too for validation purposes, not just what's in the DB already
-        helper.decodeExtraContextProperty('bloodInTransaction');
-        helper.decodeExtraContextProperty('weightInTransaction');
-
-        helper.registerRowProcessor(function(helper, row){
-            if (!row)
-                return;
-
-            if (!row.Id || !row.quantity){
-                return;
-            }
-
-            var bloodInTransaction = helper.getProperty('bloodInTransaction');
-            bloodInTransaction = bloodInTransaction || {};
-            bloodInTransaction[row.Id] = bloodInTransaction[row.Id] || [];
-
-            var shouldAdd = true;
-            if (row.objectid){
-                LABKEY.ExtAdapter.each(bloodInTransaction[row.Id], function(r){
-                    if (r.objectid == row.objectid){
-                        if (r.quantity != row.quantity){
-                            r.quantity = row.quantity;
-                        }
-                        else {
-                            shouldAdd = false;
-                            return false;
-                        }
-                    }
-                }, this);
-            }
-
-            if (shouldAdd){
-                bloodInTransaction[row.Id].push({
-                    objectid: row.objectid,
-                    date: row.date,
-                    qcstate: row.QCState,
-                    quantity: row.quantity
-                });
-            }
-
-            helper.setProperty('bloodInTransaction', bloodInTransaction);
-        });
-
-        LABKEY.Query.selectRows({
-            schemaName: 'ehr_lookups',
-            queryName: 'blood_tube_volumes',
-            success: function(res) {
-                for (var i = 0; i < res.rows.length; i++){
-                    tube_types[res.rows[i].volume] = res.rows[i].tube_types
-                }
-            }
-        })
-    })
 
     function getHousingSQL(row) {
         var date = row.Date;

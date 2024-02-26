@@ -318,7 +318,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
 
     // Copied from parent class
     @Override
-    protected CustomView getCustomView() {
+    public CustomView getCustomView() {
         return QueryService.get().getCustomView(_user, _container, _user, getSchemaName(), getQueryName(), getViewName());
     }
 }

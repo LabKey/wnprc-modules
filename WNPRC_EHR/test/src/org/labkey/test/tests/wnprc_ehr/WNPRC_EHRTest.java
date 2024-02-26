@@ -134,6 +134,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
 
     private final File CHARGE_UNITS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeUnits.tsv");
+
+    private final File BLOOD_DATA_TSV = TestFileUtils.getSampleData("wnprc_ehr/study/datasetBlood.tsv");
     private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
@@ -208,7 +210,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder(initTest.getProjectName());
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
@@ -251,6 +253,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.createWNPRCBillingPublicLinkedSchema();
 
         initTest.initCreatedProject();
+
+        // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
+        // study import ensures that order.
+        initTest.importBlood();
+
         initTest.createTestSubjects();
 
         initTest.clickFolder("PI Portal");
@@ -265,6 +272,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.checkUpdateProgramIncomeAccount();
 
         initTest.deathNotificationSetup();
+    }
+
+    private void importBlood() throws IOException, CommandException
+    {
+        Connection connection = createDefaultConnection();
+        Map<String, Object> responseMap = new HashMap<>();
+
+        List<Map<String, Object>> tsv = loadTsv(BLOOD_DATA_TSV);
+        insertTsvData(connection, "study", "blood", tsv, EHR_FOLDER_PATH)
+                .forEach(row -> responseMap.put(row.get("Id").toString(),row.get("date")));
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -285,6 +302,32 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         updateChargeRates();
     }
 
+    @LogMethod
+    @Override
+    protected void populateProjectRecords() throws Exception
+    {
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "project");
+
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("project", PROTOCOL_PROJECT_ID);
+        rowMap.put("name", PROTOCOL_PROJECT_ID);
+        rowMap.put("protocol", PROTOCOL_ID);
+        rowMap.put("account", ACCOUNT_ID_1);
+        rowMap.put("investigatorId", "1");
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("project", PROJECT_ID);
+        rowMap.put("name", PROJECT_ID);
+        rowMap.put("protocol", DUMMY_PROTOCOL);
+        rowMap.put("account", ACCOUNT_ID_2);
+        rowMap.put("research", true);
+        rowMap.put("investigatorId", "2");
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(createDefaultConnection(), getContainerPath());
+    }
+
     @Override
     public void goToProjectHome()
     {
@@ -296,13 +339,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Override
     protected boolean shouldValidateQueries()
     {
-        return true;
+        return false;
     }
 
     @Override
     protected boolean skipStudyImportQueryValidation()
     {
-        return true;
+        return false;
     }
 
     private void createFinanceManagementFolders()
@@ -1530,27 +1573,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //upload Tier Rates
         List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
-        insertTsvData(connection, "wnprc_billing", "tierrates", tsv)
+        insertTsvData(connection, "wnprc_billing", "tierrates", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
 
         //upload Grant Accounts
         tsv = loadTsv(ALIASES_TSV);
-        insertTsvData(connection, "ehr_billing", "aliases", tsv)
+        insertTsvData(connection, "ehr_billing", "aliases", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
         tsv = loadTsv(CHARGE_UNITS_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv)
+        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
 
         //upload Chargeable Item Categories
         tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv)
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
 
         //upload Group-Category Associations
         tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
-        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv)
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
 
         //upload Chargeable Items and Charge Rates
@@ -1558,12 +1601,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv) throws IOException, CommandException
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String folderPath) throws IOException, CommandException
     {
         log("Loading tsv data: " + schemaName + "." + queryName);
         InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
         command.setRows(tsv);
-        SaveRowsResponse response = command.execute(connection, PRIVATE_FOLDER_PATH);
+        SaveRowsResponse response = command.execute(connection, folderPath);
         return response.getRows();
     }
 

@@ -118,10 +118,16 @@ EHR.model.DataModelManager.registerMetadata('NecropsyRequest', {
                 hidden: false
             },
             perfusion_soln1: {
-                hidden: false
+                hidden: false,
+               /* lookup:{
+                    filterArray: [LABKEY.Filter.create('category','two', LABKEY.Filter.Types.CONTAINS)]
+                }*/
             },
             perfusion_soln2:{
-                hidden: false
+                hidden: false,
+               /* lookup:{
+                    filterArray: [LABKEY.Filter.create('category','one', LABKEY.Filter.Types.CONTAINS)]
+                }*/
             }
         },
         'study.organ_weights': {

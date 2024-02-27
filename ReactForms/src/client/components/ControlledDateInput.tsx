@@ -34,7 +34,6 @@ customInput={
 const ControlledDateInput: FC<dateProps> = (props) => {
     const {name, date, id, required, validation, className} = props;
     const {control, formState: {errors}, trigger} = useFormContext();
-
     const [stateName, fieldName] = name.split('.');
 
     // Trigger validation on load-in once to show required inputs
@@ -46,7 +45,7 @@ const ControlledDateInput: FC<dateProps> = (props) => {
         <div className={errors?.[stateName]?.[fieldName] ? "date-controller date-controller-error" : "date-controller"}>
             <Controller
                 control={control}
-                defaultValue={date as FieldPathValue<FieldValues, any> || new Date() as FieldPathValue<FieldValues, any>}
+                defaultValue={(date || new Date()) as FieldPathValue<FieldValues, any>}
                 name={name as FieldPathValue<FieldValues, any>}
                 rules={{validate: validation, required: required ? "This field is required" : false} as FieldPathValue<FieldValues, any>}
                 render={({field: {onChange, onBlur,value,ref}}) => (

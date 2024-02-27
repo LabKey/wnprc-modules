@@ -7,12 +7,12 @@ import ControlledDateInput from './ControlledDateInput';
 import DropdownSearch from './DropdownSearch';
 
 interface EditableGridCellProps {
-    value: any;
+    value?: any;
     className: string;
     inputField: any;
     prevForm: any;
     name: string;
-    id: string;
+    id?: string;
 }
 /*
 <input
@@ -24,13 +24,13 @@ interface EditableGridCellProps {
 
 export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
     const {value, className, inputField, prevForm, name, id} = props;
-
+    if(!inputField) return;
     if(inputField.type === "date"){
         return(<ControlledDateInput
             name={name}
             className={className}
             id={id}
-            date={prevForm?.[name]?.value ? new Date(prevForm[name]?.value) : new Date()}
+            date={prevForm?.[name]?.value}
             required={inputField.required}
             validation={inputField.validation}
         />);

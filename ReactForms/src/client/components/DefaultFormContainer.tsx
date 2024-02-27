@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useMemo } from 'react';
 import "../theme/css/react-datepicker.css";
 import "../theme/css/index.css";
 import {
@@ -8,17 +8,20 @@ import {
     saveRowsDirect,
     wait,
     getLsid,
-    getQCRowID
+    getQCRowID, getQueryDetails
 } from '../query/helpers';
 import AnimalInfoPane from "./AnimalInfoPane";
 import ErrorModal from '../components/ErrorModal';
 import { ActionURL, Filter, Utils } from '@labkey/api';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, FieldPathValue } from 'react-hook-form';
 import { FormMetadataCollection } from './FormMetadataCollection';
 
 interface Component {
     type: React.FunctionComponent<any>;
     name: string;
+    schemaName?: string;
+    queryName?: string;
+    viewName?: string;
     required?: any;
     commandOverride?: string;
     componentProps?: {
@@ -61,7 +64,14 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         animalInfoPane
     } = props;
 
-    const methods = useForm({mode: "onChange"});
+    const [defaultValues, setDefaultValues] = useState<any>();
+    const methods = useForm({
+        mode: "onChange",
+        defaultValues: useMemo(() => defaultValues, [defaultValues])
+    });
+
+    const [columnDetails, setColumnDetails] = useState(undefined);
+
 
     // States required for animal info
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
@@ -80,6 +90,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     */
     const processComponents = async (finalFormData: Array<any>, newTaskId: string, currentFormData: any) => {
         const promises = components.map(async (component) => {
+            console.log("comp: ", component);
+            console.log("currData: ", currentFormData);
             const componentName = component.name;
             const schemaName = component.componentProps.schemaName;
             const queryName = component.componentProps.queryName;
@@ -166,6 +178,46 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
 
     }
 
+    useEffect(() => {
+        components.forEach((component) => {
+            console.log(component)
+            getQueryDetails(component.schemaName, component.queryName).then((data: any) => {
+                let tempData;
+                let tempDefaultValues = [{}];
+                if (component.viewName) {//TODO use this view instead of default
+                    tempData = data.views.filter(item => !component.componentProps.blacklist?.includes(item.name));
+                } else {
+                    tempData = data.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
+
+                }
+                console.log("TD: ", tempData);
+                tempData.forEach(column => {
+                    if(column.type === "Date and Time"){
+                        tempDefaultValues[0][column.name] = new Date() as FieldPathValue<any, string>;
+
+                    }else{
+                        tempDefaultValues[0][column.name] = column.defaultValue;
+                    }
+                })
+                setDefaultValues(prevState => ({
+                    ...prevState,
+                    defaultValues: {
+                        ...prevState?.defaultValues,
+                        [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
+                    }
+                }));
+                methods.setValue(`${component.schemaName}-${component.queryName}`, tempDefaultValues);
+            }).catch((data) => {
+                console.log("Error");
+            });
+        });
+    }, []);
+
+    useEffect(() => {
+        console.log("FORM DETS: ", defaultValues)
+        //methods.reset(defaultValues);
+    }, [defaultValues])
+
     return (
             <div className={`form-wrapper ${false ? "saving" : ""}`}>
                 {showModal == "error" && (
@@ -183,16 +235,19 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                 const {
                                     type: ComponentType,
                                     componentProps,
-                                    name
+                                    name,
+                                    schemaName,
+                                    queryName
                                 } = component;
                                 return (
-                                    <div key={name} className="col-md-8 panel panel-portal form-row-wrapper">
+                                    <div key={`${name}-${schemaName}-${queryName}`} className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
                                             prevTaskId={prevTaskId}
                                             name={name}
                                             componentProps={componentProps}
-                                            redirectSchema={"study"}
-                                            redirectQuery={"ultrasounds"}
+                                            redirectSchema={schemaName}
+                                            redirectQuery={queryName}
+                                            formControl={methods.control}
                                         />
                                     </div>
                                 );

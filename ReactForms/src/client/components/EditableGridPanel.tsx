@@ -9,6 +9,7 @@ import { resizableGrid } from './EditableGridPanelResize';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Container'
 import Col from 'react-bootstrap/Container'
+import { useFieldArray } from 'react-hook-form';
 
 
 interface EditableGridPanelProps {
@@ -20,6 +21,7 @@ interface EditableGridPanelProps {
         title: string;
         blacklist: string[];
     }
+    formControl: any;
 }
 
 export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
@@ -28,7 +30,9 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
         redirectSchema,
         redirectQuery,
         redirectView,
+        formControl
     } = props;
+    const {fields} = useFieldArray({control: formControl, name: `${redirectSchema}-${redirectQuery}`});
 
     const {blacklist} = componentProps;
     const [gridData, setGridData] = useState<string[][]>(undefined);
@@ -77,7 +81,7 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
     // pre load data set effect
     useEffect(() => {
         if(!columnDetails) return;
-        console.log(columnDetails);
+        console.log("col: ", columnDetails);
         columnDetails.forEach((column) => {
             gridConfig.current.push({
                 name: column.fieldKey,
@@ -86,7 +90,6 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
                 required: column.required
             })
         })
-        console.log(gridConfig);
 
         setGridData(Array(1).fill(Array(columnDetails.length).fill('')));
         setColumnWidth(new Array(columnDetails.length).fill(1/columnDetails.length))
@@ -100,40 +103,45 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
         });
     }, [columnWidth]);
 
+    useEffect(() => {
+        console.log("fields: ", fields);
+    },[fields]);
+
+    useEffect(() => {
+        console.log(gridConfig);
+    },[gridConfig]);
+
+
     if(gridConfig.current.length === 0) {
         return(<div>Loading...</div>)
     }else {
         return (
             <>
                 <EditableGridMenu onAddRow={handleAddRow}/>
-                <Container key={`editableGrid-0`}>
-                    <Row key={`header-0`} >
-                        <div className={"grid-row header-row panes panes-h"}>
-                            {columnDetails?.map((col, colIndex) => (
-                                <div key={`header-${colIndex}`} className={`pane grid-cell grid-col-${colIndex} header-cell`}>
-                                    {col.caption}
-                                </div>
-                            ))}
-                        </div>
-                    </Row>
-                    {gridData?.map((row, rowIndex) => (
-                        <Row key={`row-${rowIndex}`}>
-                            <div className={`grid-row-${rowIndex} panes panes-h`}>
-                                {row.map((cell, colIndex) => (
+                <div key={`editableGrid-0`}>
+                    <div className={"grid-row header-row panes panes-h"}>
+                        {columnDetails?.map((col, colIndex) => (
+                            <div key={`header-${colIndex}`} className={`pane grid-cell grid-col-${colIndex} header-cell`}>
+                                {col.caption}
+                            </div>
+                        ))}
+                    </div>
+                    <ul>
+                        {fields?.map((row, rowIndex) => (
+                            <li key={`${redirectSchema}-${redirectQuery}-${rowIndex}`} className={`grid-row-${rowIndex} panes panes-h`}>
+                                {Object.keys(row).map((col, colIndex) => (
                                     <EditableGridCell
-                                        key={`cell-${rowIndex}-${colIndex}`}
-                                        name={`EditableGridCell-${redirectSchema}-${redirectQuery}-${gridConfig.current[colIndex].name}-${rowIndex}-${colIndex}`}
-                                        id={`EditableGridCell-${redirectSchema}-${redirectQuery}-${rowIndex}-${colIndex}`}
+                                        key={`${redirectSchema}-${redirectQuery}-${rowIndex}-${colIndex}`}
+                                        name={`${redirectSchema}-${redirectQuery}.${rowIndex}.${col}`}
                                         className={`pane`}
-                                        value={cell}
-                                        inputField={gridConfig.current[colIndex]}
+                                        inputField={gridConfig?.current[colIndex]}
                                         prevForm={null}
                                     />
                                 ))}
-                            </div>
-                        </Row>
-                    ))}
-                </Container>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </>
         );
     }

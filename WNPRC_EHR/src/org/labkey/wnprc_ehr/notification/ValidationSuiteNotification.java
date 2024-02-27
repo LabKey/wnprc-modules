@@ -95,7 +95,7 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     @Override
     public String getCronString()
     {
-        return(notificationToolkit.createCronString(new String[]{"15"}));
+        return notificationToolkit.createCronString("0", "15", "*");
     }
     @Override
     public String getCategory()

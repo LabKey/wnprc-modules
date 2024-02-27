@@ -79,7 +79,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getCronString() {
-        return notificationToolkit.createCronString(new String[]{"6"});
+        return notificationToolkit.createCronString("0", "6", "*");
     }
     @Override
     public String getCategory() {

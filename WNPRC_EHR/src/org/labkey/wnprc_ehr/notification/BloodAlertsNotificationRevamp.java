@@ -75,8 +75,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getCronString() {
-        createCronString2("15", "5,8,9,12,14", "*");
-        return notificationToolkit.createCronString(new String[]{"0"});
+        return notificationToolkit.createCronString("15", "5,8,9,12,14", "*");
     }
     @Override
     public String getCategory() {
@@ -88,6 +87,14 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     //Message Creation
     @Override
     public String getMessageBodyHTML(Container c, User u) {
+        //TODO: Testing date functions to check format before moving to notification toolkit.
+//        NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
+//        Date test1 = dateToolkit.getDateToday();
+//        Date test2 = dateToolkit.getDateTomorrow();
+//        Date test3 = dateToolkit.getDateFiveDaysAgo();
+//        String test4 = dateToolkit.getCalendarDateToday();
+
+
         //Creates variables & gets data.
         final StringBuilder messageBody = new StringBuilder();
         BloodAlertObject myBloodDrawAlertObject = new BloodAlertObject(c, u);
@@ -296,7 +303,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         }
 
         //2. Finds any blood draws over the allowable limit.
-        //TODO: Need to test.
+        //TODO: Should this display ID's only once?  Also, should we be adding approved draws minus the allowable limit?
         ArrayList<String> bloodDrawsOverAllowableLimit;                                 //id
         String bloodDrawsOverAllowableLimitURLView;                                     //url string (view)
         private void getBloodDrawsOverAllowableLimit() {
@@ -310,10 +317,11 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
 //            myFilter.addCondition("BloodRemaining/AvailBlood", 0, CompareType.LT);
 
             //Runs query.
-            ArrayList<String> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u, "study", "DailyOverDraws", null, null, "Id");
+            ArrayList<String> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u,  "study", "DailyOverDrawsWithThreshold", null, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDraws&query.viewName=Blood Summary&query.date~dategte=" + todayDate + "&query.Id/Dataset/Demographics/calculated_status~eq=Alive");
+            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDrawsWithThreshold");
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDraws&query.viewName=Blood Summary&query.date~dategte=" + todayDate + "&query.Id/Dataset/Demographics/calculated_status~eq=Alive");
 
             //Returns data.
             this.bloodDrawsOverAllowableLimit = returnArray;
@@ -459,22 +467,23 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
 
 
     //TODO: This is the new version of the createCronString() function in NotificationToolkit.  Replace it after 23.11 upgrade.
-    /**
-     * This formats the notification's "hours sent" into a usable cron string.
-     * @param minute    (0-59, *, or comma separated values with no spaces)
-     * @param hour      (0-23, *, or comma separated values with no spaces)
-     * @param dayOfWeek (1-7, *, or comma separated values with no spaces)
-     * @return
-     */
-    public final String createCronString2(String minute, String hour, String dayOfWeek) {
-        //Creates variables.
-        StringBuilder returnString = new StringBuilder("0 " + minute + " " + hour + " ? * " + dayOfWeek + " *");
-
-        //Returns properly formatted cron string.
-        return returnString.toString();
-    }
+//    /**
+//     * This formats the notification's "hours sent" into a usable cron string.
+//     * @param minute    (0-59, *, or comma separated values with no spaces)
+//     * @param hour      (0-23, *, or comma separated values with no spaces)
+//     * @param dayOfWeek (1-7, *, or comma separated values with no spaces)
+//     * @return
+//     */
+//    public final String createCronString2(String minute, String hour, String dayOfWeek) {
+//        //Creates variables.
+//        StringBuilder returnString = new StringBuilder("0 " + minute + " " + hour + " ? * " + dayOfWeek + " *");
+//
+//        //Returns properly formatted cron string.
+//        return returnString.toString();
+//    }
 
     //This function sorts a set that may or may not contain a null.  This is needed because all sort functions don't work with nulls.
+    //Move to Notification Toolkit if used in more than one notification.
     public ArrayList<String> sortSetWithNulls(Set<String> setToSort) {
         //Converts set to ArrayList.
         ArrayList<String> sortedList = new ArrayList<>();

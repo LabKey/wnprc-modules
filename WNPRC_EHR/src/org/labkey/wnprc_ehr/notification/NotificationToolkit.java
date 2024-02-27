@@ -212,23 +212,37 @@ public class NotificationToolkit {
 
 
 
+//    /**
+//     * This formats the notification's "hours sent" into a usable cron string.
+//     * @param hours A string array of hours in military time (ex. {8, 12, 23}).
+//     * @return      A cron string representing the passed-in hours.
+//     */
+//    public final String createCronString(String[] hours) {
+//
+//        //Creates variables.
+//        StringBuilder returnString = new StringBuilder("0 0");
+//
+//        //Adds desired hours.
+//        for (int i = 0; i < hours.length; i++) {
+//            returnString.append(" " + hours[i]);
+//        }
+//
+//        //Adds necessary format text to the end.
+//        returnString.append(" * * ?");
+//
+//        //Returns properly formatted cron string.
+//        return returnString.toString();
+//    }
     /**
      * This formats the notification's "hours sent" into a usable cron string.
-     * @param hours A string array of hours in military time (ex. {8, 12, 23}).
-     * @return      A cron string representing the passed-in hours.
+     * @param minute    (0-59, * (all), or comma separated values with no spaces)
+     * @param hour      (0-23, * (all), or comma separated values with no spaces)
+     * @param dayOfWeek (1-7, * (all), or comma separated values with no spaces)
+     * @return
      */
-    public final String createCronString(String[] hours) {
-
+    public final String createCronString(String minute, String hour, String dayOfWeek) {
         //Creates variables.
-        StringBuilder returnString = new StringBuilder("0 0");
-
-        //Adds desired hours.
-        for (int i = 0; i < hours.length; i++) {
-            returnString.append(" " + hours[i]);
-        }
-
-        //Adds necessary format text to the end.
-        returnString.append(" * * ?");
+        StringBuilder returnString = new StringBuilder("0 " + minute + " " + hour + " ? * " + dayOfWeek + " *");
 
         //Returns properly formatted cron string.
         return returnString.toString();
@@ -1106,6 +1120,46 @@ public class NotificationToolkit {
             tempTable.append("</table>");
             return tempTable.toString();
         }
+    }
+
+    static class DateToolkit {
+
+        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        public Date getDateToday() {
+            Calendar todayCalendar = Calendar.getInstance();
+            Date todayDate = todayCalendar.getTime();
+            return todayDate;
+        }
+
+        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        public Date getDateTomorrow() {
+            Calendar todayCalendar = Calendar.getInstance();
+            todayCalendar.add(Calendar.DATE, 1);
+            Date tomorrowDate = todayCalendar.getTime();
+            return tomorrowDate;
+        }
+
+        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        public Date getDateFiveDaysAgo() {
+            Calendar todayCalendar = Calendar.getInstance();
+            todayCalendar.add(Calendar.DATE, -5);
+            Date fiveDaysAgoDate = todayCalendar.getTime();
+            return fiveDaysAgoDate;
+        }
+
+        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        public String getCalendarDateToday() {
+            //Create "month/day/year" string.  No need for 'left-padding-zeroes' as '_dateFormat.format()' already adds these.
+            String currentDate = AbstractEHRNotification._dateFormat.format(new Date());
+            String[] splitDate = currentDate.split("-");
+            String myDay = splitDate[2];
+            String myMonth = splitDate[1];
+            String myYear = splitDate[0];
+            String currentDateFormatted = myMonth + "/" + myDay + "/" + myYear;
+            return currentDateFormatted;
+        }
+
+
     }
 }
 

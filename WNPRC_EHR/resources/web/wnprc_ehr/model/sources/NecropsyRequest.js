@@ -119,9 +119,9 @@ EHR.model.DataModelManager.registerMetadata('NecropsyRequest', {
             },
             perfusion_soln1: {
                 hidden: false,
-               /* lookup:{
-                    filterArray: [LABKEY.Filter.create('category','two', LABKEY.Filter.Types.CONTAINS)]
-                }*/
+                lookup:{
+                    filterArray: [LABKEY.Filter.create('category','two', LABKEY.Filter.Types.EQUALS)]
+                }
             },
             perfusion_soln2:{
                 hidden: false,

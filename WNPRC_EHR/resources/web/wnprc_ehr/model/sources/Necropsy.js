@@ -78,6 +78,18 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
             perfusion_area: {
                 allowBlank: true
             },
+            perfusion_soln1: {
+                hidden: false,
+                lookup:{
+                    filterArray: [LABKEY.Filter.create('category','two', LABKEY.Filter.Types.EQUALS)]
+                }
+            },
+            perfusion_soln2:{
+                hidden: false,
+                /* lookup:{
+                     filterArray: [LABKEY.Filter.create('category','one', LABKEY.Filter.Types.CONTAINS)]
+                 }*/
+            },
             tissue_distribution: {
                 xtype: 'checkcombo',
                 hasOwnTpl: true,

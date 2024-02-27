@@ -21,7 +21,8 @@ interface EditableGridPanelProps {
         title: string;
         blacklist: string[];
     }
-    formControl: any;
+    formControl?: any;
+    defaultValues?: any;
 }
 
 export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
@@ -30,12 +31,16 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
         redirectSchema,
         redirectQuery,
         redirectView,
-        formControl
+        formControl,
+        defaultValues
     } = props;
-    const {fields} = useFieldArray({control: formControl, name: `${redirectSchema}-${redirectQuery}`});
+    const {fields, append} = useFieldArray({
+        control: formControl,
+        name: `${redirectSchema}-${redirectQuery}`}
+    );
 
     const {blacklist} = componentProps;
-    const [gridData, setGridData] = useState<string[][]>(undefined);
+
     const [columnDetails, setColumnDetails] = useState(undefined);
     const [columnWidth, setColumnWidth] = useState(undefined);
     const [isResizing, setIsResizing] = useState(false);
@@ -45,23 +50,13 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
     const els = (sel, par = document) => document.querySelectorAll(sel);
     const elNew = (tag, prop = {}) => Object.assign(document.createElement(tag), prop);
 
-    const handleCellChange = (rowIndex: number, colIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.currentTarget.value;
-        const newData = gridData.map((row, i) => {
-            if (i === rowIndex) {
-                return row.map((cell, j) => (j === colIndex ? value : cell));
-            }
-            return row;
-        });
-        setGridData(newData);
-    };
-
     const handleAddRow = () => {
-        setGridData([...gridData, Array(columnDetails?.length).fill('')]);
+        append(
+            defaultValues[`${redirectSchema}-${redirectQuery}`][0],
+            {focusName: `${redirectSchema}-${redirectQuery}.0.Id`}
+        );
     };
 
-    useEffect(() => {
-    },[gridData]);
 
     // pre load data fetch effect
     useEffect(() => {
@@ -81,7 +76,6 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
     // pre load data set effect
     useEffect(() => {
         if(!columnDetails) return;
-        console.log("col: ", columnDetails);
         columnDetails.forEach((column) => {
             gridConfig.current.push({
                 name: column.fieldKey,
@@ -91,7 +85,6 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
             })
         })
 
-        setGridData(Array(1).fill(Array(columnDetails.length).fill('')));
         setColumnWidth(new Array(columnDetails.length).fill(1/columnDetails.length))
     }, [columnDetails]);
 
@@ -103,12 +96,9 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
         });
     }, [columnWidth]);
 
-    useEffect(() => {
-        console.log("fields: ", fields);
-    },[fields]);
 
     useEffect(() => {
-        console.log(gridConfig);
+        //console.log("GC: ", gridConfig);
     },[gridConfig]);
 
 
@@ -128,7 +118,7 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
                     </div>
                     <ul>
                         {fields?.map((row, rowIndex) => (
-                            <li key={`${redirectSchema}-${redirectQuery}-${rowIndex}`} className={`grid-row-${rowIndex} panes panes-h`}>
+                            <li key={row.id} className={`grid-row-${rowIndex} panes panes-h`}>
                                 {Object.keys(row).map((col, colIndex) => (
                                     <EditableGridCell
                                         key={`${redirectSchema}-${redirectQuery}-${rowIndex}-${colIndex}`}

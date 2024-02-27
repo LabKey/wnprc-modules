@@ -180,7 +180,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
 
     useEffect(() => {
         components.forEach((component) => {
-            console.log(component)
             getQueryDetails(component.schemaName, component.queryName).then((data: any) => {
                 let tempData;
                 let tempDefaultValues = [{}];
@@ -190,7 +189,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     tempData = data.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
 
                 }
-                console.log("TD: ", tempData);
                 tempData.forEach(column => {
                     if(column.type === "Date and Time"){
                         tempDefaultValues[0][column.name] = new Date() as FieldPathValue<any, string>;
@@ -201,10 +199,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 })
                 setDefaultValues(prevState => ({
                     ...prevState,
-                    defaultValues: {
-                        ...prevState?.defaultValues,
-                        [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
-                    }
+                    [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
                 }));
                 methods.setValue(`${component.schemaName}-${component.queryName}`, tempDefaultValues);
             }).catch((data) => {
@@ -212,11 +207,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             });
         });
     }, []);
-
-    useEffect(() => {
-        console.log("FORM DETS: ", defaultValues)
-        //methods.reset(defaultValues);
-    }, [defaultValues])
 
     return (
             <div className={`form-wrapper ${false ? "saving" : ""}`}>
@@ -248,6 +238,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                             redirectSchema={schemaName}
                                             redirectQuery={queryName}
                                             formControl={methods.control}
+                                            defaultValues={defaultValues}
                                         />
                                     </div>
                                 );

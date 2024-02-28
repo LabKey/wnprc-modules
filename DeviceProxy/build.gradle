@@ -11,18 +11,14 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbVersion}",
+            "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbApiVersion}",
             "Jakarta XML Binding API",
             "Eclipse",
             "https://eclipse-ee4j.github.io/jaxb-ri/",
             "Eclipse Distribution License v1.0",
             "http://www.eclipse.org/org/documents/edl-v10.php",
             "Parsing XML"
-        ),
-        {
-            // Exclude activation jars from webapp to avoid classloader conflicts with <tomcat>/lib/javax.activation.jar
-            exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
-        }
+        )
     )
 
     BuildUtils.addExternalDependency(

@@ -28,7 +28,6 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>death_manner</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="necropsy">

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC, useEffect } from 'react';
 import { openDatepicker } from '../query/helpers';
-import DateInput from './DateInput';
+import {DateInput} from './DateInput';
 import { ActionURL } from '@labkey/api';
 import DatePicker from 'react-datepicker';
 import "../theme/css/index.css";
@@ -50,6 +50,7 @@ const ControlledDateInput: FC<dateProps> = (props) => {
                 rules={{validate: validation, required: required ? "This field is required" : false} as FieldPathValue<FieldValues, any>}
                 render={({field: {onChange, onBlur,value,ref}}) => (
                     <DatePicker
+                        portalId={"ReactDatePicker"}
                         ref={ref}
                         id={id}
                         showTimeSelect
@@ -58,11 +59,9 @@ const ControlledDateInput: FC<dateProps> = (props) => {
                         selected={value}
                         className={"form-control " + className}
                         name={name}
-                        customInput={
-                            <DateInput />
-                        }
                         onChange={onChange}
                         onBlur={onBlur}
+                        popperPlacement={"bottom"}
                         popperClassName={"my-datepicker-popper"}
                     />
                 )}

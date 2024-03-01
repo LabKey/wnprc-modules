@@ -5,6 +5,7 @@ import { CustomInputPane } from '../../components/CustomInputPane';
 import {ActionURL} from '@labkey/api';
 import { EditableGridPanel } from '../../components/EditableGridPanel';
 import { TaskPane } from '../../components/TaskPane';
+import {MUIEditableGridPanel} from '../../components/ResizeableTable';
 
 export const Ultrasounds: FC<any> = (props) => {
 
@@ -43,6 +44,22 @@ export const Ultrasounds: FC<any> = (props) => {
                 prevTaskId: taskid,
                 title: "Blood",
                 blacklist: []
+            }
+        },{
+            type: MUIEditableGridPanel,
+            name: "MUIEditableGridPanel",
+            schemaName: "study",
+            queryName: "blood",
+            componentProps: {
+                prevTaskId: taskid,
+                title: "Blood",
+                data: [{
+                    firstName: 'Dylan',
+                    lastName: 'Murray',
+                    email: 'dmurray@yopmail.com',
+                    city: 'East Daphne',
+                    country: 'USA',
+                }]
             }
         }
     ];

@@ -15,6 +15,8 @@ import ErrorModal from '../components/ErrorModal';
 import { ActionURL, Filter, Utils } from '@labkey/api';
 import { useForm, FormProvider, FieldPathValue } from 'react-hook-form';
 import { FormMetadataCollection } from './FormMetadataCollection';
+import { QueryDetailsResponse, QueryView } from '@labkey/api/dist/labkey/query/GetQueryDetails';
+import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 
 interface Component {
     type: React.FunctionComponent<any>;
@@ -65,6 +67,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     } = props;
 
     const [defaultValues, setDefaultValues] = useState<any>();
+    const [metaData, setMetaData] = useState<QueryColumn[]>(undefined);
     const methods = useForm({
         mode: "onChange",
         defaultValues: useMemo(() => defaultValues, [defaultValues])
@@ -180,15 +183,16 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
 
     useEffect(() => {
         components.forEach((component) => {
-            getQueryDetails(component.schemaName, component.queryName).then((data: any) => {
-                let tempData;
+            getQueryDetails(component.schemaName, component.queryName).then((data: QueryDetailsResponse) => {
+                let tempData: QueryColumn[];
                 let tempDefaultValues = [{}];
                 if (component.viewName) {//TODO use this view instead of default
-                    tempData = data.views.filter(item => !component.componentProps.blacklist?.includes(item.name));
+                    tempData = data.views[component.viewName].filter(item => !component.componentProps.blacklist?.includes(item.name));
                 } else {
                     tempData = data.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
 
                 }
+                setMetaData(tempData);
                 tempData.forEach(column => {
                     if(column.type === "Date and Time"){
                         tempDefaultValues[0][column.name] = new Date() as FieldPathValue<any, string>;
@@ -239,6 +243,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                             redirectQuery={queryName}
                                             formControl={methods.control}
                                             defaultValues={defaultValues}
+                                            metaData={metaData}
                                         />
                                     </div>
                                 );

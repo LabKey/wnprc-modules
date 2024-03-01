@@ -1,5 +1,5 @@
 import * as React from "react";
-import { openDatepicker } from '../query/helpers';
+//import { openDatepicker } from '../query/helpers';
 import { forwardRef } from 'react';
 import { ActionURL } from '@labkey/api';
 
@@ -15,7 +15,12 @@ interface DateInputProps {
  */
 export const DateInput = forwardRef(function DateInput(props, ref) {
     const { ...inputprops} = props;
-    const iconpath= `${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`
+    const iconpath= `${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`;
+    console.log("REF: ", ref);
+    const openDatepicker = (calendarEl) => {
+        console.log("calEL:", calendarEl);
+        calendarEl.setOpen(true);
+    };
     return (
       <>
         <input className="custom-date-input" {...inputprops} />
@@ -23,5 +28,3 @@ export const DateInput = forwardRef(function DateInput(props, ref) {
       </>
     );
 });
-
-export default DateInput;

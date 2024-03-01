@@ -335,7 +335,6 @@ select[id^="restraint"] {
 
 .react-datepicker__time-container {
   position: absolute;
-  top: calc(100% + 10px);
   left: calc(100% + 5px);
 }
 

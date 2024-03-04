@@ -87,6 +87,9 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
                 autoFocus={autoFocus}
                 className={className}
                 style={{borderColor: borderColor}}
+                onWheel={(event) => {
+                    event.currentTarget.blur();
+                }}
             />
             <div className={"react-error-text"}>
                 {errors?.[stateName]?.[fieldName]?.message}

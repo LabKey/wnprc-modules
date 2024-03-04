@@ -9,10 +9,14 @@ import DropdownSearch from './DropdownSearch';
 interface EditableGridCellProps {
     value?: any;
     className: string;
-    inputField: any;
     prevForm: any;
+    type: any;
     name: string;
     id?: string;
+    required: boolean;
+    validation?: any;
+    dropdownConfig?: any;
+    autoFill?: any;
 }
 /*
 <input
@@ -23,47 +27,60 @@ interface EditableGridCellProps {
 />*/
 
 export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
-    const {value, className, inputField, prevForm, name, id} = props;
-    if(!inputField) return;
-    if(inputField.type === "date"){
+    const {
+        value,
+        className,
+        type,
+        prevForm,
+        name,
+        id,
+        required,
+        validation,
+        dropdownConfig,
+        autoFill
+    } = props;
+
+    if(!type) return;
+    //console.log(type);
+    if(type === "Date and Time"){
         return(<ControlledDateInput
             name={name}
             className={className}
             id={id}
             date={prevForm?.[name]?.value}
-            required={inputField.required}
-            validation={inputField.validation}
+            required={required}
+            validation={validation}
         />);
-    }else if(inputField.type === "textarea"){
+    }else if(type === "textarea"){
         return(<TextAreaInput
             name={name}
             id={id}
             className={"form-control " + className}
             value={prevForm?.[name] ?? ""}
-            required={inputField.required}
-            validation={inputField.validation}
+            required={required}
+            validation={validation}
         />);
-    }else if(inputField.type === "checkbox"){
+    }else if(type === "checkbox"){
         return(<Checkbox
             name={name}
             id={id}
-            validation={inputField.validation}
+            validation={validation}
             className={"form-control " + className}
             value={prevForm?.[name] ?? ""}
-            required={inputField.required}
+            required={required}
         />);
-    }else if(inputField.type === "dropdown"){
+    }else if(type === "dropdown"){
         return(<DropdownSearch
-            optConf={inputField.optConf}
-            defaultOpts={inputField.defaultOpts}
-            optDep={inputField.watchState}
+            optConf={dropdownConfig.optConf}
+            defaultOpts={dropdownConfig.defaultOpts}
+            optDep={dropdownConfig.watchState}
             initialValue={prevForm?.[name] ?? null}
             name={name}
             id={id}
             classname={"navbar__search-form " + className}
-            required={inputField.required}
+            required={required}
             isClearable={true}
-            validation={inputField.validation}
+            validation={validation}
         />);
     }
     else{
@@ -73,11 +90,11 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
                 id={id}
                 className={"form-control " + className}
                 value={prevForm?.[name] ?? ""}
-                required={inputField.required}
-                validation={inputField.validation}
-                autoFill={inputField.autoFill}
+                required={required}
+                validation={validation}
+                autoFill={autoFill}
+                type={type.includes("Integer") || type.includes("Number") ? "number" : "text"}
             />
         );
     }
-    return(<div>ugh</div>);
 };

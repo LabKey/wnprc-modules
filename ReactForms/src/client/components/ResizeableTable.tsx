@@ -36,22 +36,42 @@ import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import {DateInput} from './DateInput';
 import DatePicker from 'react-datepicker';
 import ControlledDateInput from './ControlledDateInput';
+import { EditableGridCell } from './EditableGridCell';
 
 interface ResizeableTableProps {
     data: any;
     metaData: QueryColumn[];
+    columnHelper: any;
+    schema: string;
+    query: string;
 }
 
 const ResizeableTable = (props: ResizeableTableProps) => {
-    const {data, metaData} = props;
+    const {data, metaData, columnHelper, schema, query} = props;
     const columnNames = Object.keys(data[0]).reduce((result, key) => {
         result[key] = key.charAt(0).toUpperCase() + key.slice(1); // convert the key to titlecase
         return result;
     }, {} as const);
     const [validationErrors, setValidationErrors] = useState<
-        Record<string, string | undefined>
+        any
     >({});
     console.log("D: ", columnNames);
+    console.log("CH: ", columnHelper);
+    console.log("MEta: ", metaData);
+
+    const columns = useMemo(() => metaData.map((col, colIdx) => (
+        columnHelper.accessor(`${schema}-${query}.${col.name}`, {
+            header: `${col.name}`,
+            id: `${col.name}`,
+            meta: {...metaData[colIdx]},
+            Cell: ({cell}) => (
+                <EditableGridCell className={""} type={(cell.column.columnDef.meta as QueryColumn).type} prevForm={null}
+                                  name={`${schema}-${query}.${cell.row.id}.${col.name}`} required={metaData[colIdx].required}/>
+            )
+        }))
+    ), [metaData]);
+
+    /*
     const columns = useMemo<MRT_ColumnDef<User>[]>(
         () =>
             data.length
@@ -68,7 +88,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 }))
                 : [],
         [data],
-    );
+    );*/
     console.log("COLUMNS: ", columns);
     /*
     const columns = useMemo<MRT_ColumnDef<User>[]>(
@@ -163,8 +183,9 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                                                                                      values,
                                                                                      table,
                                                                                  }) => {
-        const newValidationErrors = validateUser(values);
-        if (Object.values(newValidationErrors).some((error) => error)) {
+        console.log("VALS: ", values);
+        const newValidationErrors = validateUser(values, metaData);
+        if (newValidationErrors.filter(bool => !bool).length !== 0) {
             setValidationErrors(newValidationErrors);
             return;
         }
@@ -178,8 +199,8 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                                                                                   values,
                                                                                   table,
                                                                               }) => {
-        const newValidationErrors = validateUser(values);
-        if (Object.values(newValidationErrors).some((error) => error)) {
+        const newValidationErrors = validateUser(values, metaData);
+        if (newValidationErrors.filter(bool => !bool).length !== 0) {
             setValidationErrors(newValidationErrors);
             return;
         }
@@ -276,6 +297,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
             <Button
                 variant="contained"
                 onClick={() => {
+                    console.log(table);
                     table.setCreatingRow(true); //simplest way to open the create row modal with no default values
                     //or you can pass in a row object to set default values with the `createRow` helper function
                     // table.setCreatingRow(
@@ -392,7 +414,6 @@ function useDeleteUser() {
     });
 }
 
-const validateRequired = (value: string) => !!value.length;
 const validateEmail = (email: string) =>
     !!email.length &&
     email
@@ -401,12 +422,14 @@ const validateEmail = (email: string) =>
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         );
 
-function validateUser(user: User) {
-    return {
-        firstName: !validateRequired(user.Id)
-            ? 'Id is Required'
-            : '',
-    };
+function validateUser(values: User, metaData: any) {
+    console.log("USER: ", values);
+
+    return(Object.keys(values).map(key => {
+
+
+        return true;
+    }))
 }
 
 
@@ -414,12 +437,14 @@ const queryClient = new QueryClient();
 
 export const MUIEditableGridPanel = (props) => {
     console.log(props);
-    const {defaultValues, redirectSchema, redirectQuery, metaData} = props;
+    const {defaultValues, redirectSchema, redirectQuery, metaData, componentProps} = props;
+    const {columnHelper} = componentProps;
     if(!metaData) return;
     if (!(redirectSchema && redirectQuery && defaultValues && `${redirectSchema}-${redirectQuery}` in defaultValues)) return;
     const data = defaultValues[`${redirectSchema}-${redirectQuery}`];
     console.log("Meta: ", metaData);
     data[0].date = data[0].date.toString();
+
     //Put this with your other react-query providers near root of your app
     return(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -427,6 +452,9 @@ export const MUIEditableGridPanel = (props) => {
                 <ResizeableTable
                     data={data}
                     metaData={metaData}
+                    columnHelper={columnHelper}
+                    schema={redirectSchema}
+                    query={redirectQuery}
                 />
             </QueryClientProvider>
         </LocalizationProvider>

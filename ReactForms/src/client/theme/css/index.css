@@ -398,4 +398,10 @@ select[id^="restraint"] {
   display: flex;
 }
 
-
+.form-wrapper {
+  width: 100vw; /* Full viewport width */
+  height: fit-content; /* Full viewport height */
+  display: flex;
+  justify-content: center; /* Center the content horizontally */
+  align-items: center; /* Center the content vertically */
+}

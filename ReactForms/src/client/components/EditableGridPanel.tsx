@@ -120,13 +120,7 @@ export const EditableGridPanel: FC<EditableGridPanelProps> = (props) => {
                         {fields?.map((row, rowIndex) => (
                             <li key={row.id} className={`grid-row-${rowIndex} panes panes-h`}>
                                 {Object.keys(row).map((col, colIndex) => (
-                                    <EditableGridCell
-                                        key={`${redirectSchema}-${redirectQuery}-${rowIndex}-${colIndex}`}
-                                        name={`${redirectSchema}-${redirectQuery}.${rowIndex}.${col}`}
-                                        className={`pane`}
-                                        inputField={gridConfig?.current[colIndex]}
-                                        prevForm={null}
-                                    />
+                                    <div></div>
                                 ))}
                             </li>
                         ))}

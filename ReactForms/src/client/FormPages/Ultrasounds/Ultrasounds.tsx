@@ -3,10 +3,10 @@ import { FC } from 'react';
 import { DefaultFormContainer } from '../../components/DefaultFormContainer';
 import { CustomInputPane } from '../../components/CustomInputPane';
 import {ActionURL} from '@labkey/api';
-import { EditableGridPanel } from '../../components/EditableGridPanel';
 import { TaskPane } from '../../components/TaskPane';
 import {MUIEditableGridPanel} from '../../components/ResizeableTable';
-
+import {User} from '../../components/testData';
+import { createMRTColumnHelper } from 'material-react-table';
 export const Ultrasounds: FC<any> = (props) => {
 
     const taskid: string = ActionURL.getParameter('taskid');
@@ -26,26 +26,6 @@ export const Ultrasounds: FC<any> = (props) => {
                 queryName: "tasks"
             }
         },{
-            type: EditableGridPanel,
-            name: "EditableGridPanel",
-            schemaName: "study",
-            queryName: "ultrasounds",
-            componentProps: {
-                prevTaskId: taskid,
-                title: "Ultrasounds",
-                blacklist: ["crown_rump_gest_day", "gest_sac_gest_day","biparietal_diameter_gest_day", "femur_length_gest_day"]
-            }
-        },{
-            type: EditableGridPanel,
-            name: "EditableGridPanel",
-            schemaName: "study",
-            queryName: "blood",
-            componentProps: {
-                prevTaskId: taskid,
-                title: "Blood",
-                blacklist: []
-            }
-        },{
             type: MUIEditableGridPanel,
             name: "MUIEditableGridPanel",
             schemaName: "study",
@@ -53,13 +33,8 @@ export const Ultrasounds: FC<any> = (props) => {
             componentProps: {
                 prevTaskId: taskid,
                 title: "Blood",
-                data: [{
-                    firstName: 'Dylan',
-                    lastName: 'Murray',
-                    email: 'dmurray@yopmail.com',
-                    city: 'East Daphne',
-                    country: 'USA',
-                }]
+                blacklist: ['taskid'],
+                columnHelper: createMRTColumnHelper<User>()
             }
         }
     ];

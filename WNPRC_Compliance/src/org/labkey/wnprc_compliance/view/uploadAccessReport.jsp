@@ -26,15 +26,15 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     // QUnit defines a module function, so hide it before dropzone.
     var _safe = {};
     _safe.module = module;
     module = undefined;
 </script>
-<script type="application/javascript" src="<%= getContextPath()%>/compliance/dropzone.js"></script>
+<script type="text/javascript" src="<%= getContextPath()%>/compliance/dropzone.js"></script>
 <link rel="stylesheet" href="https://rawgit.com/enyo/dropzone/master/dist/dropzone.css">
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     module = _safe.module;
 
     // Don't autodetect

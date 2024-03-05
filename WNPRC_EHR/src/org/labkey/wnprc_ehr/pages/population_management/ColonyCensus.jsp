@@ -209,7 +209,7 @@
     {{/ifnot}} <!-- loading -->
 </template>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function(){
         var populations = <%=new JSONObject(populations)%>;
 

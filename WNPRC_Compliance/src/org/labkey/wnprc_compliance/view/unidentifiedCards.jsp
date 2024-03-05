@@ -129,7 +129,7 @@
 
 </div>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var $exemptDialog = $('#exemptDialog').modal({
             show: false

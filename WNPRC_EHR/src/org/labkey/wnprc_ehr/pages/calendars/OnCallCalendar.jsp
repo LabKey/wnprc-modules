@@ -158,7 +158,7 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     let startDateOfSchedule;
     let endDateOfSchedule;
 

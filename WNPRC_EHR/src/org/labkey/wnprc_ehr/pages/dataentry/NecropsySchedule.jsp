@@ -298,7 +298,7 @@
     }
 %>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var necropsySuiteLookup = <%=necropsySuiteLookup%>;
         WebUtils.VM.necropsySuiteLookup = necropsySuiteLookup;

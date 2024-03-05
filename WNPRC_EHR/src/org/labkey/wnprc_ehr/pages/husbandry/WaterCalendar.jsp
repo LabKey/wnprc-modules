@@ -493,7 +493,7 @@
 
 
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     //TODO: change var to let for all the following variables for better scoop management
     var selectedEvent = {};

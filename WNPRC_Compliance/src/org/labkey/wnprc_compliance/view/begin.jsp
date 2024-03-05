@@ -59,7 +59,7 @@
 </div>
 
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         WebUtils.VM = {
             archivedPersonsURL: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {

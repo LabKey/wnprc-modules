@@ -289,7 +289,7 @@
 <% } %>
 
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         $(".todaysDate").text(moment().format("dddd, MMMM Do YYYY [at] h:mm:ss a"));
     })();

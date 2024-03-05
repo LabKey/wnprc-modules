@@ -311,7 +311,7 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         ko.bindingHandlers.bsChecked = {
             init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {

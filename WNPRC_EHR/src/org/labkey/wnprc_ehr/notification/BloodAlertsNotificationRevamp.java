@@ -44,6 +44,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     //Class Variables
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
+    NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
 
 
@@ -67,7 +68,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getEmailSubject(Container c) {
-        return "Daily Blood Draw Alerts: " + notificationToolkit.getCurrentTime();
+        return "Daily Blood Draw Alerts: " + dateToolkit.getCurrentTime();
     }
     @Override
     public String getScheduleDescription() {
@@ -87,13 +88,6 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     //Message Creation
     @Override
     public String getMessageBodyHTML(Container c, User u) {
-        //TODO: Testing date functions to check format before moving to notification toolkit.
-//        NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
-//        Date test1 = dateToolkit.getDateToday();
-//        Date test2 = dateToolkit.getDateTomorrow();
-//        Date test3 = dateToolkit.getDateFiveDaysAgo();
-//        String test4 = dateToolkit.getCalendarDateToday();
-
 
         //Creates variables & gets data.
         final StringBuilder messageBody = new StringBuilder();
@@ -106,7 +100,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         messageBody.append(styleToolkit.endStyle());
 
         //Begins message info.
-        messageBody.append("<p>This email contains any scheduled blood draws not marked as completed.  It was run on: " + notificationToolkit.getCurrentTime() + "</p>");
+        messageBody.append("<p>This email contains any scheduled blood draws not marked as completed.  It was run on: " + dateToolkit.getCurrentTime() + "</p>");
 
         //1. Finds any current or future blood draws where the animal is not alive.
         if (!myBloodDrawAlertObject.bloodDrawsWhereAnimalIsNotAlive.isEmpty()) {
@@ -156,20 +150,20 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         //5. Find any incomplete blood draws scheduled today, by area.
         if (myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByArea.isEmpty()) {
             //Displays if there are no scheduled blood draws for today.
-            messageBody.append("<p>There are no blood draws scheduled for " + myBloodDrawAlertObject.getDateToday() + "</p>");
+            messageBody.append("<p>There are no blood draws scheduled for " + dateToolkit.getDateToday() + "</p>");
         }
         else {
             //Displays the number of scheduled blood draws for today.
-            messageBody.append("<p>There are " + myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByArea.size() + " scheduled blood draws for " + myBloodDrawAlertObject.getDateToday() + ". " + myBloodDrawAlertObject.completeCount + " have been completed.</p>");
+            messageBody.append("<p>There are " + myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByArea.size() + " scheduled blood draws for " + dateToolkit.getDateToday() + ". " + myBloodDrawAlertObject.completeCount + " have been completed.</p>");
             messageBody.append(notificationToolkit.createHyperlink("Click here for details.", myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByAreaURLView));
 
             //Notifies user if all blood draws are completed.
             if (myBloodDrawAlertObject.incompleteCount == 0) {
-                messageBody.append("<p>All scheduled blood draws have been marked complete as of " + myBloodDrawAlertObject.getDateToday() + "</p>");
+                messageBody.append("<p>All scheduled blood draws have been marked complete as of " + dateToolkit.getDateToday() + "</p>");
             }
             //Shows all incomplete blood draws.
             else {
-                messageBody.append("<p>The following blood draws have not been marked complete as of " + myBloodDrawAlertObject.getDateToday() + "</p>");
+                messageBody.append("<p>The following blood draws have not been marked complete as of " + dateToolkit.getDateToday() + "</p>");
 
                 //Displays totals by area.
                 messageBody.append("<b>Totals by Area:</b><br>\n");
@@ -249,13 +243,8 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
     public static class BloodAlertObject {
         Container c;
         User u;
-
-        //TODO: Move to notification toolkit, also exists in ColonyAlertsNotificationRevamp.java.
-        public Date getDateToday() {
-            Calendar todayCalendar = Calendar.getInstance();
-            Date todayDate = todayCalendar.getTime();
-            return todayDate;
-        }
+        NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
+        NotificationToolkit notificationToolkit = new NotificationToolkit();
 
         public BloodAlertObject(Container currentContainer, User currentUser) {
             //Sets object parameters.
@@ -275,7 +264,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         String bloodDrawsWhereAnimalIsNotAliveURLView;                                  //url string (view)
         private void getBloodDrawsWhereAnimalIsNotAlive() {
             //Gets info.
-            Date todayDate = this.getDateToday();
+            Date todayDate = dateToolkit.getDateToday();
 
             Calendar testCal1 = new GregorianCalendar(2023, Calendar.DECEMBER, 28);
             testCal1.set(Calendar.HOUR_OF_DAY, 0);
@@ -292,7 +281,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("qcstate/label", "Request: Denied", CompareType.NEQ);
             myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
             //Runs query.
-            ArrayList<String> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u, "study", "Blood Draws", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Blood Draws", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.date~dategte=" + todayDate + "&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive&query.qcstate/label~neq=Request: Denied");
@@ -308,7 +297,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         String bloodDrawsOverAllowableLimitURLView;                                     //url string (view)
         private void getBloodDrawsOverAllowableLimit() {
             //Gets info.
-            Date todayDate = this.getDateToday();
+            Date todayDate = dateToolkit.getDateToday();
 
 //            //Creates filter.
 //            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
@@ -317,7 +306,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
 //            myFilter.addCondition("BloodRemaining/AvailBlood", 0, CompareType.LT);
 
             //Runs query.
-            ArrayList<String> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u,  "study", "DailyOverDrawsWithThreshold", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u,  "study", "DailyOverDrawsWithThreshold", null, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDrawsWithThreshold");
@@ -333,7 +322,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         String bloodDrawsWhereAnimalNotAssignedToProjectURLView;                        //url string (view)
         private void getBloodDrawsWhereAnimalNotAssignedToProject() {
             //Gets info.
-            Date todayDate = this.getDateToday();
+            Date todayDate = dateToolkit.getDateToday();
 
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
@@ -341,7 +330,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("projectStatus", "", CompareType.NONBLANK);
             myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
             //Runs query.
-            ArrayList<String> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dategte=" + todayDate);
@@ -356,7 +345,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         String bloodDrawsTodayWhereAnimalNotAssignedToProjectURLView;                   //url string (view)
         private void getBloodDrawsTodayWhereAnimalNotAssignedToProject() {
             //Gets info.
-            Date todayDate = this.getDateToday();
+            Date todayDate = dateToolkit.getDateToday();
 
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
@@ -365,7 +354,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL);
 
             //Runs query.
-            ArrayList<String> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
 
             //Creates URL.
             //TODO: Why doesn't URL use qcstate/label.
@@ -385,7 +374,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         String incompleteBloodDrawsScheduledTodayByAreaURLView;                                                                     //url string (view)
         private void getIncompleteBloodDrawsScheduledTodayByArea() {
             //Gets info.
-            Date todayDate = this.getDateToday();
+            Date todayDate = dateToolkit.getDateToday();
 
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
@@ -401,7 +390,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates columns to retrieve.
             String[] targetColumns = new String[]{"drawStatus", "project", "date", "project/protocol", "taskid", "projectStatus", "tube_vol", "tube_type", "billedby", "billedby/title", "num_tubes", "Id/curLocation/area", "Id/curLocation/room", "Id/curLocation/cage", "additionalServices", "remark", "Id", "quantity", "qcstate", "qcstate/Label", "requestid"};
             //Runs query.
-            ArrayList<HashMap<String,String>> returnArray = ColonyAlertsNotificationRevamp.ColonyAlertObject.NEWGetTableMultiRowMultiColumn(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
+            ArrayList<HashMap<String,String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
 
             //Sorts through each blood draw result.
             for (HashMap<String, String> result : returnArray) {
@@ -462,25 +451,6 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
 
 
 
-
-
-
-
-    //TODO: This is the new version of the createCronString() function in NotificationToolkit.  Replace it after 23.11 upgrade.
-//    /**
-//     * This formats the notification's "hours sent" into a usable cron string.
-//     * @param minute    (0-59, *, or comma separated values with no spaces)
-//     * @param hour      (0-23, *, or comma separated values with no spaces)
-//     * @param dayOfWeek (1-7, *, or comma separated values with no spaces)
-//     * @return
-//     */
-//    public final String createCronString2(String minute, String hour, String dayOfWeek) {
-//        //Creates variables.
-//        StringBuilder returnString = new StringBuilder("0 " + minute + " " + hour + " ? * " + dayOfWeek + " *");
-//
-//        //Returns properly formatted cron string.
-//        return returnString.toString();
-//    }
 
     //This function sorts a set that may or may not contain a null.  This is needed because all sort functions don't work with nulls.
     //Move to Notification Toolkit if used in more than one notification.

@@ -60,6 +60,7 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     //Class variables.
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
+    NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
 
 
@@ -85,7 +86,7 @@ public class ValidationSuiteNotification extends AbstractEHRNotification
     @Override
     public String getEmailSubject(Container c)
     {
-        return "Validation Suite Check: " + notificationToolkit.getCurrentTime();
+        return "Validation Suite Check: " + dateToolkit.getCurrentTime();
     }
     @Override
     public String getScheduleDescription()

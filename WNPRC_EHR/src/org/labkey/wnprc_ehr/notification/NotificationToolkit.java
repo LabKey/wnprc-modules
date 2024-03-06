@@ -210,29 +210,6 @@ public class NotificationToolkit {
         return(ts.getRowCount());
     }
 
-
-
-//    /**
-//     * This formats the notification's "hours sent" into a usable cron string.
-//     * @param hours A string array of hours in military time (ex. {8, 12, 23}).
-//     * @return      A cron string representing the passed-in hours.
-//     */
-//    public final String createCronString(String[] hours) {
-//
-//        //Creates variables.
-//        StringBuilder returnString = new StringBuilder("0 0");
-//
-//        //Adds desired hours.
-//        for (int i = 0; i < hours.length; i++) {
-//            returnString.append(" " + hours[i]);
-//        }
-//
-//        //Adds necessary format text to the end.
-//        returnString.append(" * * ?");
-//
-//        //Returns properly formatted cron string.
-//        return returnString.toString();
-//    }
     /**
      * This formats the notification's "hours sent" into a usable cron string.
      * @param minute    (0-59, * (all), or comma separated values with no spaces)
@@ -266,15 +243,6 @@ public class NotificationToolkit {
 
         //Returns string.
         return largeString.toString();
-    }
-
-
-    /**
-     * Gets a timestamp with the current date & time.
-     * @return  A string representing the current date & time.
-     */
-    public final String getCurrentTime() {
-        return AbstractEHRNotification._dateTimeFormat.format(new Date());
     }
 
     /**
@@ -544,6 +512,146 @@ public class NotificationToolkit {
         return returnRow;
     }
 
+    //TODO: Finish documentation.
+    //Try/Catch prevents error if:
+    // Table does not exist.
+    // Study does not exist.
+    // Target column does not exist.
+    // Sort value does not exist.
+    // Filter column does not exist.
+    public static final ArrayList<String> getTableMultiRowSingleColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn) {
+        ArrayList<String> returnArray = new ArrayList<String>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets ID from each table row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                returnArray.add(rs.getString(targetColumn));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Finish documentation.
+    public static final ArrayList<String[]> getTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+        ArrayList<String[]> returnArray = new ArrayList<String[]>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets target column values for each row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                String[] columnArray = new String[targetColumns.length];
+                                for (int i = 0; i < targetColumns.length; i++) {
+                                    columnArray[i] = rs.getString(targetColumns[i]);
+                                }
+                                returnArray.add(columnArray);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Finish documentation.
+    //This is a redo of the function getTableMultiRowMultiColumn() but using field keys.  Verify this works, then replace old function.
+    public static final ArrayList<HashMap<String,String>> getTableMultiRowMultiColumnWithFieldKeys(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+        //Creates array to return.
+        ArrayList<HashMap<String, String>> returnArray = new ArrayList<HashMap<String, String>>();
+        try {
+            //Updates table info.
+            TableInfo myTableInfo = QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName);
+            //Updates columns to be retrieved.
+            Set<FieldKey> myKeys = new HashSet<>();
+            for (String myColumn : targetColumns) {
+                myKeys.add(FieldKey.fromString(myColumn));
+            }
+            final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
+            //Runs query with updated info.
+            TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets target column values for each row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                Results myResults = new ResultsImpl(rs, myColumns);
+                                HashMap<String, String> myRow = new HashMap<>();
+                                //Goes through each column in current query row and updates currentRow.
+                                for (int i = 0; i < targetColumns.length; i++) {
+                                    String currentColumnTitle = targetColumns[i];
+                                    String currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    myRow.put(currentColumnTitle, currentColumnValue);
+//                                        currentRow[i] = myResults.getString(FieldKey.fromString(targetColumns[i]));
+                                }
+                                returnArray.add(myRow);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Finish documentation.
+    //TODO: Combine this with getTableMultiRowSingleColumn?
+    public static final ArrayList<String> getTableMultiRowSingleColumnWithParameters(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
+        ArrayList<String> returnArray = new ArrayList<String>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort).setNamedParameters(myParameters);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets ID from each table row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                returnArray.add(rs.getString(targetColumn));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Move this to DeathNotificationRevamp.java
     /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's necropsy.
      * It contains the following data (returning blank strings for non-existent data):
@@ -664,6 +772,7 @@ public class NotificationToolkit {
         }
     }
 
+    //TODO: Move this to DeathNotificationRevamp.java
     /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's demographics.
      * It contains the following data (returning blank strings for non-existent data):
@@ -1124,14 +1233,14 @@ public class NotificationToolkit {
 
     static class DateToolkit {
 
-        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        //Returns today's date as Date (ex: "Wed Mar 06 13:11:02 CST 2024").
         public Date getDateToday() {
             Calendar todayCalendar = Calendar.getInstance();
             Date todayDate = todayCalendar.getTime();
             return todayDate;
         }
 
-        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
         public Date getDateTomorrow() {
             Calendar todayCalendar = Calendar.getInstance();
             todayCalendar.add(Calendar.DATE, 1);
@@ -1139,7 +1248,7 @@ public class NotificationToolkit {
             return tomorrowDate;
         }
 
-        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
         public Date getDateFiveDaysAgo() {
             Calendar todayCalendar = Calendar.getInstance();
             todayCalendar.add(Calendar.DATE, -5);
@@ -1147,7 +1256,7 @@ public class NotificationToolkit {
             return fiveDaysAgoDate;
         }
 
-        //TODO: Delete in ColonyAlertsNotificationRevamp.java when finished.
+        //Returns today's date as String (ex: "03/06/2024").
         public String getCalendarDateToday() {
             //Create "month/day/year" string.  No need for 'left-padding-zeroes' as '_dateFormat.format()' already adds these.
             String currentDate = AbstractEHRNotification._dateFormat.format(new Date());
@@ -1159,6 +1268,13 @@ public class NotificationToolkit {
             return currentDateFormatted;
         }
 
+        /**
+         * Gets a timestamp with the current date & time.
+         * @return  A string representing the current date & time (ex: "2024-03-06 13:11")
+         */
+        public final String getCurrentTime() {
+            return AbstractEHRNotification._dateTimeFormat.format(new Date());
+        }
 
     }
 }

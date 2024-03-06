@@ -48,6 +48,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
     //Class Variables
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
+    NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
 
 
@@ -71,7 +72,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getEmailSubject(Container c) {
-        return "Daily Colony Alerts: " + notificationToolkit.getCurrentTime();
+        return "Daily Colony Alerts: " + dateToolkit.getCurrentTime();
     }
     @Override
     public String getScheduleDescription() {
@@ -96,7 +97,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         ColonyAlertObject myColonyAlertObject = new ColonyAlertObject(c, u);
 
         //Begins message info.
-        messageBody.append("<p> This email contains a series of automatic alerts about the colony.  It was run on: " + notificationToolkit.getCurrentTime() + ".</p>");
+        messageBody.append("<p> This email contains a series of automatic alerts about the colony.  It was run on: " + dateToolkit.getCurrentTime() + ".</p>");
 
         //Creates message.
         //1. Find all living animals without a weight.
@@ -240,7 +241,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 //        }
         //19. Find non-continguous housing records.
         if (!myColonyAlertObject.nonContiguousHousingRecords.isEmpty()) {
-            messageBody.append("<b>WARNING: There are " + myColonyAlertObject.nonContiguousHousingRecords.size() + " housing records since " + myColonyAlertObject.getCalendarDateToday() + " that do not have a contiguous previous or next record.</b><br>");
+            messageBody.append("<b>WARNING: There are " + myColonyAlertObject.nonContiguousHousingRecords.size() + " housing records since " + dateToolkit.getCalendarDateToday() + " that do not have a contiguous previous or next record.</b><br>");
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view and update them<br>\n", myColonyAlertObject.nonContiguousHousingRecordsURLView));
             messageBody.append("<hr>\n");
         }
@@ -342,30 +343,28 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //34. Summarize events in the last 5 days.
         if (!myColonyAlertObject.birthsInLastFiveDays.isEmpty()) {
-            messageBody.append("Births since " + myColonyAlertObject.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Births since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
             for (String result : myColonyAlertObject.birthsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.birthsInLastFiveDaysURLView));
-            //TODO: Why does this function mute the <hr> tag in colonyAlerts.pl?
         }
         //35. Deaths in the last 5 days.
         if (!myColonyAlertObject.deathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Deaths since " + myColonyAlertObject.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Deaths since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
             for (String result : myColonyAlertObject.deathsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.deathsInLastFiveDaysURLView));
-            //TODO: Why does this function mute the <hr> tag in colonyAlerts.pl?
         }
         //36. Prenatal deaths in the last 5 days.
         if (!myColonyAlertObject.prenatalDeathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Prenatal Deaths since " + myColonyAlertObject.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
             for (String result : myColonyAlertObject.prenatalDeathsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.prenatalDeathsInLastFiveDaysURLView));
-            messageBody.append("<hr>");   //TODO: Why does this function NOT mute the <hr> tag in colonyAlerts.pl like the past 3 do?
+            messageBody.append("<hr>");
         }
         //37. Find the total finalized records with future dates.
         if (!myColonyAlertObject.totalFinalizedRecordsWithFutureDates.isEmpty()) {
@@ -386,41 +385,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         Container c;
         User u;
         Integer expiringSoonNumDays = 14;
-
-        //TODO: Move to notification toolkit.
-        public Date getDateToday() {
-            Calendar todayCalendar = Calendar.getInstance();
-            Date todayDate = todayCalendar.getTime();
-            return todayDate;
-        }
-
-        //TODO: Move to notification toolkit.
-        public Date getDateTomorrow() {
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, 1);
-            Date tomorrowDate = todayCalendar.getTime();
-            return tomorrowDate;
-        }
-
-        //TODO: Move to notification toolkit.
-        public Date getDateFiveDaysAgo() {
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, -5);
-            Date fiveDaysAgoDate = todayCalendar.getTime();
-            return fiveDaysAgoDate;
-        }
-
-        //TODO: Move to notification toolkit.
-        public String getCalendarDateToday() {
-            //Create "month/day/year" string.  No need for 'left-padding-zeroes' as '_dateFormat.format()' already adds these.
-            String currentDate = AbstractEHRNotification._dateFormat.format(new Date());
-            String[] splitDate = currentDate.split("-");
-            String myDay = splitDate[2];
-            String myMonth = splitDate[1];
-            String myYear = splitDate[0];
-            String currentDateFormatted = myMonth + "/" + myDay + "/" + myYear;
-            return currentDateFormatted;
-        }
+        NotificationToolkit notificationToolkit = new NotificationToolkit();
+        NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
         public ColonyAlertObject(Container currentContainer, User currentUser) {
             this.c = currentContainer;
@@ -512,7 +478,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank");
@@ -528,7 +494,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String occupiedCagesWithoutDimensionsURLEdit;                                   //url string (edit)
         private void getOccupiedCagesWithoutDimensions() {
             //Runs query.
-            ArrayList<String[]> returnArray = getTableMultiRowMultiColumn(c, u, "ehr", "missingCages", null, null, new String[]{"room", "cage"});
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "ehr", "missingCages", null, null, new String[]{"room", "cage"});
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=missingCages");
@@ -551,7 +517,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String[]> resultArray = getTableMultiRowMultiColumn(c, u, "study", "Housing", myFilter, mySort, new String[]{"Id", "cage", "room"});
+            ArrayList<String[]> resultArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Housing", myFilter, mySort, new String[]{"Id", "cage", "room"});
 
             //Loops through each result in the table.
             ArrayList<String[]> returnArray = new ArrayList<String[]>();
@@ -602,7 +568,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingProblems");
@@ -624,7 +590,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String livingAnimalsWhereHousingSnapshotDoesNotMatchHousingTableURLView;        //url string (view)
         private void getLivingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable() {
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "ValidateHousingSnapshot", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "ValidateHousingSnapshot", null, null, "Id");
 
             //Update snapshot.
             if (!returnArray.isEmpty()) {
@@ -665,7 +631,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("room, cage");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems");
@@ -691,7 +657,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Housing", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Housing", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Housing&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
@@ -711,7 +677,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room~isblank&query.calculated_status~eq=Alive");
@@ -726,7 +692,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String recordsWithCalculatedStatusFieldProblemsURLView;                         //url string (view)
         private void getAllRecordsWithCalculatedStatusFieldProblems() {
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Validate_status");
@@ -746,7 +712,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns");
@@ -764,7 +730,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
@@ -784,7 +750,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             myFilter.addCondition("project/protocol", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive&query.project/protocol~isblank");
@@ -799,7 +765,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String duplicateActiveAssignmentsURLView;                                       //url string (view)
         private void getDuplicateActiveAssignments() {
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "duplicateAssignments", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "duplicateAssignments", null, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=duplicateAssignments");
@@ -818,7 +784,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("medical", "siv", CompareType.CONTAINS);
             myFilter.addCondition("Id/assignmentSummary/ActiveVetAssignments", "20060202", CompareType.DOES_NOT_CONTAIN);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=siv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202");
@@ -837,7 +803,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("medical", "shiv", CompareType.CONTAINS);
             myFilter.addCondition("Id/assignmentSummary/ActiveVetAssignments", "20060202", CompareType.DOES_NOT_CONTAIN);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "demographics", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "demographics", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=shiv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202");
@@ -855,7 +821,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Treatment Orders", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Treatment Orders", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Treatment Orders&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
@@ -873,7 +839,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Problem List", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Problem List", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Problem List&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
@@ -892,7 +858,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 //            SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
 //            myFilter.addCondition("enddate", "", CompareType.ISBLANK);
 //            //Runs query.
-//            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 //
 //            //Creates URL.
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
@@ -907,11 +873,11 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String nonContiguousHousingRecordsURLView;                                      //url string (view)
         private void getNonContiguousHousingRecords() {
             //Creates parameter.
-            String todayCalendarDate = this.getCalendarDateToday();
+            String todayCalendarDate = dateToolkit.getCalendarDateToday();
             Map<String, Object> myParams = new HashMap<>();
             myParams.put("MINDATE", todayCalendarDate);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumnWithParameters(c, u, "study", "HousingCheck", null, null, "Id", myParams);
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumnWithParameters(c, u, "study", "HousingCheck", null, null, "Id", myParams);
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=HousingCheck&query.param.MINDATE=" + todayCalendarDate);
@@ -929,7 +895,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("gender", "", CompareType.ISBLANK);
             myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
             //Runs query.
-            ArrayList<String[]> returnArray = getTableMultiRowMultiColumn(c, u, "study", "Birth", myFilter, null, new String[]{"Id", "date"});
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Birth", myFilter, null, new String[]{"Id", "date"});
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.gender~isblank=&query.date~dategte=-90d");
@@ -949,7 +915,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String[]> returnArray = getTableMultiRowMultiColumn(c, u, "study", "Demographics", myFilter, mySort, new String[]{"Id", "birth"});
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Demographics", myFilter, mySort, new String[]{"Id", "birth"});
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.gender~isblank=&query.created~dategte=-90d");
@@ -969,7 +935,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String[]> returnArray = getTableMultiRowMultiColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, new String[]{"Id", "date"});
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, new String[]{"Id", "date"});
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.gender~isblank=&query.date~dategte=-90d");
@@ -989,7 +955,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String[]> returnArray = getTableMultiRowMultiColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, new String[]{"Id", "date"});
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, new String[]{"Id", "date"});
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.species~isblank=&query.date~dategte=-90d");
@@ -1008,7 +974,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=validateFinalWeights&query.death~dategte=-90d");
@@ -1027,7 +993,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
             myFilter.addCondition("date", "-10d", CompareType.DATE_LTE);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "TB Tests", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "TB Tests", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=TB Tests&query.date~datelte=-10d&query.date~dategte=-90d&query.missingresults~eq=true");
@@ -1046,7 +1012,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 //            SimpleFilter myFilter = new SimpleFilter("TotalRemaining", 5, CompareType.LT);
 //            myFilter.addCondition("allowed", 0, CompareType.NEQ);
 //            //Runs query.
-//            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, "protocol");
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, "protocol");
 //
 //            //Creates URL.
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocolTotalAnimalsBySpecies&query.TotalRemaining~lt=5&query.allowed~neqornull=0");
@@ -1064,7 +1030,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 //            //Creates filter.
 //            SimpleFilter myFilter = new SimpleFilter("PercentUsed", 95, CompareType.GTE);
 //            //Runs query.
-//            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, "protocol");
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, "protocol");
 //
 //            //Creates URL.
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocolTotalAnimalsBySpecies&query.PercentUsed~gte=95");
@@ -1085,7 +1051,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Approve", expirationFilterValue, CompareType.DATE_LTE);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "ehr", "protocol", myFilter, null, "protocol");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocol", myFilter, null, "protocol");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocol&query.Approve~datelte=-" + expirationValue + "d");
@@ -1104,7 +1070,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.Id/Dataset/Demographics/Id~isblank");
@@ -1124,7 +1090,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Deaths&query.Id/Dataset/Demographics/Id~isblank&query.notAtCenter~neqornull=true");
@@ -1144,7 +1110,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/assignmentSummary/NumPendingAssignments~eq=0");
@@ -1159,14 +1125,14 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String assignmentsWithProjectedReleasesTodayURLView;                            //url string (view)
         private void getAssignmentsWithProjectedReleasesToday() {
             //Gets info.
-            Date currentDate = this.getDateToday();
+            Date currentDate = dateToolkit.getDateToday();
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("projectedRelease", currentDate, CompareType.DATE_EQUAL);
             myFilter.addCondition("enddate", "", CompareType.NONBLANK);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.projectedRelease~dateeq="+ currentDate + "&query.enddate~isnonblank=");
@@ -1181,11 +1147,11 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String assignmentsWithProjectedReleasesTomorrowURLView;                         //url string (view)
         private void getAssignmentsWithProjectedReleasesTomorrow() {
             //Gets info.
-            Date tomorrowDate = this.getDateTomorrow();
+            Date tomorrowDate = dateToolkit.getDateTomorrow();
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("projectedRelease", tomorrowDate, CompareType.DATE_EQUAL);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.projectedRelease~dateeq=" + tomorrowDate);
@@ -1200,13 +1166,13 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String birthsInLastFiveDaysURLView;                                             //url string (view)
         private void getBirthsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = this.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.date~dategte=" + fiveDaysAgoDate);
@@ -1221,13 +1187,13 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String deathsInLastFiveDaysURLView;                                             //url string (view)
         private void getDeathsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = this.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Deaths&query.date~dategte=" + fiveDaysAgoDate);
@@ -1242,13 +1208,13 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String prenatalDeathsInLastFiveDaysURLView;                                     //url string (view)
         private void getPrenatalDeathsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = this.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.date~dategte=" + fiveDaysAgoDate);
@@ -1263,14 +1229,14 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String totalFinalizedRecordsWithFutureDatesURLView;                             //url string (view)
         private void getTotalFinalizedRecordsWithFutureDates() {
             //Gets info.
-            Date todayDate = this.getDateToday();
+            Date todayDate = dateToolkit.getDateToday();
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/QCState/PublicData", true, CompareType.EQUAL);
             myFilter.addCondition("date", todayDate, CompareType.DATE_GT);
             myFilter.addCondition("dataset/label", "Treatment Orders", CompareType.NEQ);
             myFilter.addCondition("dataset/label", "Assignment", CompareType.NEQ);
             //Runs query.
-            ArrayList<String> returnArray = getTableMultiRowSingleColumn(c, u, "study", "StudyData", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "StudyData", myFilter, null, "Id");
 
             //Creates URL.
             Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=StudyData&query.date~dategt=" + todayDate + "&query.Id/Dataset/Demographics/QCState/PublicData~eq=1&query.dataset/label~neq=Treatment Orders&query.dataset/label~neq=Assignment");
@@ -1279,181 +1245,6 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.totalFinalizedRecordsWithFutureDates = returnArray;
             this.totalFinalizedRecordsWithFutureDatesURLView = viewQueryURL.toString();
         }
-
-
-
-
-
-
-
-
-        //TODO: MOVE THESE FUNCTIONS TO THE NOTIFICATION TOOLKIT.
-        //Try/Catch prevents error if:
-        // Table does not exist.
-        // Study does not exist.
-        // Target column does not exist.
-        // Sort value does not exist.
-        // Filter column does not exist.
-        public static final ArrayList<String> getTableMultiRowSingleColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn) {
-            ArrayList<String> returnArray = new ArrayList<String>();
-            try {
-                TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
-                //Verifies table exists.
-                if (myTable != null) {
-                    //Verifies data exists.
-                    if (myTable.getRowCount() > 0) {
-                        //Gets ID from each table row.
-                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-                            @Override
-                            public void exec(ResultSet rs) throws SQLException {
-                                if (rs != null) {
-                                    returnArray.add(rs.getString(targetColumn));
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            finally
-            {
-                return returnArray;
-            }
-        }
-
-        public static final ArrayList<String[]> getTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
-            ArrayList<String[]> returnArray = new ArrayList<String[]>();
-            try {
-                TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
-                //Verifies table exists.
-                if (myTable != null) {
-                    //Verifies data exists.
-                    if (myTable.getRowCount() > 0) {
-                        //Gets target column values for each row.
-                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-                            @Override
-                            public void exec(ResultSet rs) throws SQLException {
-                                if (rs != null) {
-                                    String[] columnArray = new String[targetColumns.length];
-                                    for (int i = 0; i < targetColumns.length; i++) {
-                                        columnArray[i] = rs.getString(targetColumns[i]);
-                                    }
-                                    returnArray.add(columnArray);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            finally
-            {
-                return returnArray;
-            }
-        }
-
-        //This is a redo of the function getTableMultiRowMultiColumn() but using field keys.  Verify this works, then replace old function.
-        public static final ArrayList<HashMap<String,String>> NEWGetTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
-            //Creates array to return.
-            ArrayList<HashMap<String, String>> returnArray = new ArrayList<HashMap<String, String>>();
-            try {
-                //Updates table info.
-                TableInfo myTableInfo = QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName);
-                //Updates columns to be retrieved.
-                Set<FieldKey> myKeys = new HashSet<>();
-                for (String myColumn : targetColumns) {
-                    myKeys.add(FieldKey.fromString(myColumn));
-                }
-                final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
-                //Runs query with updated info.
-                TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
-                //Verifies table exists.
-                if (myTable != null) {
-                    //Verifies data exists.
-                    if (myTable.getRowCount() > 0) {
-                        //Gets target column values for each row.
-                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-                            @Override
-                            public void exec(ResultSet rs) throws SQLException {
-                                if (rs != null) {
-                                    Results myResults = new ResultsImpl(rs, myColumns);
-//                                    String[] currentRow = new String[targetColumns.length]; //TODO: Should I use a HashMap here?
-                                    HashMap<String, String> myRow = new HashMap<>();
-                                    //Goes through each column in current query row and updates currentRow.
-                                    for (int i = 0; i < targetColumns.length; i++) {
-                                        String currentColumnTitle = targetColumns[i];
-                                        String currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
-                                        myRow.put(currentColumnTitle, currentColumnValue);
-//                                        currentRow[i] = myResults.getString(FieldKey.fromString(targetColumns[i]));
-                                    }
-                                    returnArray.add(myRow);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            finally
-            {
-                return returnArray;
-            }
-        }
-
-        //TODO: Combine this with getTableMultiRowSingleColumn?
-        public static final ArrayList<String> getTableMultiRowSingleColumnWithParameters(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
-            ArrayList<String> returnArray = new ArrayList<String>();
-            try {
-                TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort).setNamedParameters(myParameters);
-                //Verifies table exists.
-                if (myTable != null) {
-                    //Verifies data exists.
-                    if (myTable.getRowCount() > 0) {
-                        //Gets ID from each table row.
-                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-                            @Override
-                            public void exec(ResultSet rs) throws SQLException {
-                                if (rs != null) {
-                                    returnArray.add(rs.getString(targetColumn));
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            finally
-            {
-                return returnArray;
-            }
-        }
-
-//        public static final String getTableSingleRowSingleColumn(Container c, User u, String schemaName, String tableName, String targetRowColumn, String targetRowValue, String targetColumn) {
-//            StringBuilder returnString = new StringBuilder();
-//            try {
-//                //Creates filter to select a certain row from the table.
-//                SimpleFilter myFilter = new SimpleFilter(targetRowColumn, targetRowValue, CompareType.EQUAL);
-//
-//                //Creates table.
-//                TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, null);
-//                //Verifies table exists.
-//                if (myTable != null) {
-//                    if (myTable.getRowCount() > 0) {
-//                        //Verifies data exists.
-//                        myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-//                            //Gets data from target table row.
-//                            @Override
-//                            public void exec(ResultSet rs) throws SQLException {
-//                                if (rs != null) {
-//                                    returnString.append(rs.getString(targetColumn));
-//                                }
-//                            }
-//                        });
-//                    }
-//                }
-//            }
-//            finally
-//            {
-//                return returnString.toString();
-//            }
-//        }
-
     }
 }
 

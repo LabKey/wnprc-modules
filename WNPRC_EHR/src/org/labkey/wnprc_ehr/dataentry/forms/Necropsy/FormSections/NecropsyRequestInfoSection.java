@@ -14,7 +14,7 @@ public class NecropsyRequestInfoSection extends SimpleFormSection {
         super("study", "Necropsies", "Necropsies");
         setTemplateMode(AbstractFormSection.TEMPLATE_MODE.NONE);
 
-        this.maxItemsPerColumn = 4;
+        this.maxItemsPerColumn = 9;
 
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.NecropsyClientStore");
     }
@@ -22,16 +22,27 @@ public class NecropsyRequestInfoSection extends SimpleFormSection {
     @Override
     protected List<String> getFieldNames() {
         return Arrays.asList(
+                //animal information
                 "Id",
                 "is_prenatal_necropsy",
                 "dam",
-                "date",
-                "location",
+
+                //necropsy information
+                "perfusion_area",
+                "perfusion_soln1",
+                "perfusion_soln2",
+
+                //Billing information
                 "project",
                 "account",
-                "perfusion_area",
+
+                //logistic information
+                "date",
+                "location",
                 "shipping",
                 "shipping_comment",
+
+                //additional information
                 "comments"
         );
     }

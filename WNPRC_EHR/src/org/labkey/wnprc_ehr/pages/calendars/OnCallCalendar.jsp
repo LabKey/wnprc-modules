@@ -86,7 +86,8 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-2">
-                        <button onclick="loadRequestedWeek()" type="button" class="btn btn-primary">Fetch Schedule</button>
+                        <% addHandler("loadRequestedWeek", "click", "loadRequestedWeek()"); %>
+                        <button id="loadRequestedWeek" type="button" class="btn btn-primary">Fetch Schedule</button>
                     </div>
                 </div>
             </div>
@@ -96,9 +97,12 @@
             <div class="col-sm-12">
                 <div id="navigateByWeek">
                     <br><br>
-                    <a class="schedule-nav-link" href="javascript:changeWeek(-1)">&laquo; Previous</a>
-                    <a class="schedule-nav-link" href="javascript:loadCurrentWeek()">Current Week</a>
-                    <a class="schedule-nav-link" href="javascript:changeWeek(1)">Next &raquo;</a>
+                    <% addHandler("previousWeek", "click", "changeWeek(-1)"); %>
+                    <a class="schedule-nav-link" id="previousWeek">&laquo; Previous</a>
+                    <% addHandler("currentWeek", "click", "loadCurrentWeek()"); %>
+                    <a class="schedule-nav-link" id="currentWeek">Current Week</a>
+                    <% addHandler("nextWeek", "click", "changeWeek(1)"); %>
+                    <a class="schedule-nav-link" id="nextWeek">Next &raquo;</a>
                     <br><br>
                 </div>
             </div>

@@ -85,16 +85,22 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
     }
     else{
         return(
-            <TextInput
-                name={name}
-                id={id}
-                className={"form-control " + className}
-                value={prevForm?.[name] ?? ""}
-                required={required}
-                validation={validation}
-                autoFill={autoFill}
-                type={type.includes("Integer") || type.includes("Number") ? "number" : "text"}
-            />
+            <div className={"standard-input"}>
+                <TextInput
+                    name={name}
+                    id={id}
+                    className={"" + className}
+                    value={prevForm?.[name] ?? ""}
+                    required={required}
+                    validation={validation}
+                    autoFill={autoFill}
+                    type={type.includes("Integer") || type.includes("Number") ? "number" : "text"}
+                />
+                <label>
+                    {id}
+                </label>
+                <span className={"underline"}></span>
+            </div>
         );
     }
 };

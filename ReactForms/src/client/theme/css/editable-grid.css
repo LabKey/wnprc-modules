@@ -1,0 +1,138 @@
+/*
+CSS Styles here found
+https://github.com/LeonGeldsch/css_material_input/tree/main
+ */
+:root {
+  --main-blue: #90caf9;
+  --main-white: #fff;
+  --main-grey: rgba(255, 255, 255, 0.23);
+  --main-transparent: transparent;
+  --main-ease: cubic-bezier(.65,.05,.36,1);
+}
+
+
+.page-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+
+/* OUTLINED INPUT STYLES */
+
+.outlined-input {
+  position: relative;
+}
+
+.outlined-input input {
+  color: var(--main-grey);
+  height: 4rem;
+  outline: 1px solid var(--main-grey);
+  border-radius: 5px;
+  border: none;
+  background-color: var(--main-transparent);
+  padding-left: 20px;
+  font-size: 20px;
+  transition: .1s var(--main-ease);
+}
+
+.outlined-input label {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  background-color: var(--main-transparent);
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  transition: .2s var(--main-ease);
+  font-size: 1.5rem;
+  pointer-events: none;
+  padding: 0 5px;
+}
+
+.outlined-input input:not(:placeholder-shown) ~ label,
+.outlined-input input:focus ~ label {
+  top: 0px;
+  left: 10px;
+  font-size: 1rem;
+}
+
+.outlined-input input:focus {
+  outline: 1px solid var(--main-blue) !important;
+}
+.outlined-input input:hover {
+  outline: 1px solid var(--main-grey);
+}
+.outlined-input input:focus ~ label {
+  color: var(--main-blue) !important;
+}
+
+/* END OUTLINED INPUT STYLES */
+
+
+
+/* STANDARD INPUT STYLES */
+
+.standard-input {
+  position: relative;
+}
+
+.standard-input input {
+  color: black;
+  height: 4rem;
+  border: none;
+  border-bottom: 1px solid var(--main-grey);
+  background-color: var(--main-transparent);
+  padding-left: 20px;
+  font-size: 20px;
+  transition: .1s var(--main-ease);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.standard-input label {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  background-color: var(--main-transparent);
+  color: gray;
+  text-align: center;
+  transition: .2s var(--main-ease);
+  font-size: 1.5rem;
+  pointer-events: none;
+  padding: 0 5px;
+}
+
+.standard-input input:not(:placeholder-shown) ~ label,
+.standard-input input:focus ~ label {
+  top: 0px;
+  left: 10px;
+  font-size: 1rem;
+}
+
+.standard-input .underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: scaleX(0);
+  transition: transform 0.2s var(--main-ease);
+  border-bottom: 2px solid var(--main-blue);
+}
+
+.standard-input input:focus ~ .underline {
+  transform: scaleX(1);
+}
+.standard-input input:hover {
+  border-bottom: 2px solid var(--main-grey);
+}
+.standard-input input:focus ~ label {
+  color: var(--main-blue) !important;
+}
+
+/* END OF STANDARD INPUT STYLES */

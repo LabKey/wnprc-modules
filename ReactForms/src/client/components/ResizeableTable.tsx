@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import {
     MRT_EditActionButtons,
     MaterialReactTable,
@@ -7,7 +7,7 @@ import {
     type MRT_ColumnDef,
     type MRT_Row,
     type MRT_TableOptions,
-    useMaterialReactTable, MRT_ActionMenuItem,
+    useMaterialReactTable, MRT_ActionMenuItem, createRow, openEditingCell, MRT_Cell,
 } from 'material-react-table';
 import {
     Box,
@@ -17,6 +17,7 @@ import {
     DialogTitle,
     IconButton,
     Tooltip,
+    Stack
 } from '@mui/material';
 import {
     QueryClient,
@@ -26,6 +27,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 import { type User } from './testData';
+
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -37,6 +39,8 @@ import {DateInput} from './DateInput';
 import DatePicker from 'react-datepicker';
 import ControlledDateInput from './ControlledDateInput';
 import { EditableGridCell } from './EditableGridCell';
+import {showEditableGridCreateModal, EditableGridCreateModal} from './EditableGridCreateModal';
+import { useFieldArray, useFormContext, useFormState } from 'react-hook-form';
 
 interface ResizeableTableProps {
     data: any;
@@ -44,20 +48,47 @@ interface ResizeableTableProps {
     columnHelper: any;
     schema: string;
     query: string;
+    formControl: any;
+}
+type TableRow<T> = {
+    key: string
+    Id: string,
+    date: Date,
+    project: string,
+    protocol: string,
+    quantity: string,
+    performedby: string,
+    assayCode: string,
+    billedby: string,
+    tube_type: string,
+    additionalServices: string,
+    instructions: string,
+    remark: string,
+    QCState: string,
+    taskid: string,
+    requestid: string
 }
 
 const ResizeableTable = (props: ResizeableTableProps) => {
-    const {data, metaData, columnHelper, schema, query} = props;
+    const {data, metaData, columnHelper, schema, query, formControl} = props;
     const columnNames = Object.keys(data[0]).reduce((result, key) => {
         result[key] = key.charAt(0).toUpperCase() + key.slice(1); // convert the key to titlecase
         return result;
     }, {} as const);
-    const [validationErrors, setValidationErrors] = useState<
-        any
-    >({});
+    const [validationErrors, setValidationErrors] = useState<any>({});
+    const [editingCell, setEditingCell] = useState<MRT_Cell<any>>();
+    const [editingRow, setEditingRow] = useState<MRT_Row<any>>();
+    const [creatingRow, setCreatingRow] = useState<MRT_Row<any>>();
+    const {getValues,setValue} = useFormContext();
+    const queryClient = useQueryClient();
+    console.log("QC: ", queryClient.getQueryData(['rows']));
+    //const {fields} = useFieldArray({control: formControl, name: "ResizeTable"})
     console.log("D: ", columnNames);
     console.log("CH: ", columnHelper);
-    console.log("MEta: ", metaData);
+    console.log("Meta: ", metaData);
+    console.log("DATA: ", data);
+    console.log("Fields: ", getValues());
+    console.log("Control: ", formControl);
 
     const columns = useMemo(() => metaData.map((col, colIdx) => (
         columnHelper.accessor(`${schema}-${query}.${col.name}`, {
@@ -67,7 +98,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
             Cell: ({cell}) => (
                 <EditableGridCell className={""} type={(cell.column.columnDef.meta as QueryColumn).type} prevForm={null}
                                   name={`${schema}-${query}.${cell.row.id}.${col.name}`} required={metaData[colIdx].required}/>
-            )
+            ),
         }))
     ), [metaData]);
 
@@ -90,76 +121,6 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         [data],
     );*/
     console.log("COLUMNS: ", columns);
-    /*
-    const columns = useMemo<MRT_ColumnDef<User>[]>(
-        () => [
-            {
-                accessorKey: 'id',
-                header: 'Id',
-                enableEditing: false,
-                size: 80,
-            },
-            {
-                accessorKey: 'firstName',
-                header: 'First Name',
-                muiEditTextFieldProps: {
-                    required: true,
-                    error: !!validationErrors?.firstName,
-                    helperText: validationErrors?.firstName,
-                    //remove any previous validation errors when user focuses on the input
-                    onFocus: () =>
-                        setValidationErrors({
-                            ...validationErrors,
-                            firstName: undefined,
-                        }),
-                    //optionally add validation checking for onBlur or onChange
-                },
-            },
-            {
-                accessorKey: 'lastName',
-                header: 'Last Name',
-                muiEditTextFieldProps: {
-                    required: true,
-                    error: !!validationErrors?.lastName,
-                    helperText: validationErrors?.lastName,
-                    //remove any previous validation errors when user focuses on the input
-                    onFocus: () =>
-                        setValidationErrors({
-                            ...validationErrors,
-                            lastName: undefined,
-                        }),
-                },
-            },
-            {
-                accessorKey: 'email',
-                header: 'Email',
-                muiEditTextFieldProps: {
-                    type: 'email',
-                    required: true,
-                    error: !!validationErrors?.email,
-                    helperText: validationErrors?.email,
-                    //remove any previous validation errors when user focuses on the input
-                    onFocus: () =>
-                        setValidationErrors({
-                            ...validationErrors,
-                            email: undefined,
-                        }),
-                },
-            },
-            {
-                accessorKey: 'state',
-                header: 'State',
-                editVariant: 'select',
-                editSelectOptions: usStates,
-                muiEditTextFieldProps: {
-                    select: true,
-                    error: !!validationErrors?.state,
-                    helperText: validationErrors?.state,
-                },
-            },
-        ],
-        [validationErrors],
-    );*/
 
     //call CREATE hook
     const { mutateAsync: createUser, isPending: isCreatingUser } =
@@ -170,7 +131,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         isError: isLoadingUsersError,
         isFetching: isFetchingUsers,
         isLoading: isLoadingUsers,
-    } = useGetUsers(data);
+    } = useGetUsers(data, formControl);
     //call UPDATE hook
     const { mutateAsync: updateUser, isPending: isUpdatingUser } =
         useUpdateUser();
@@ -179,7 +140,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         useDeleteUser();
 
     //CREATE action
-    const handleCreateUser: MRT_TableOptions<User>['onCreatingRowSave'] = async ({
+    const handleCreateUser: MRT_TableOptions<TableRow<any>>['onCreatingRowSave'] = async ({
                                                                                      values,
                                                                                      table,
                                                                                  }) => {
@@ -195,22 +156,31 @@ const ResizeableTable = (props: ResizeableTableProps) => {
     };
 
     //UPDATE action
-    const handleSaveUser: MRT_TableOptions<User>['onEditingRowSave'] = async ({
-                                                                                  values,
-                                                                                  table,
-                                                                              }) => {
+    const handleSaveUser: MRT_TableOptions<TableRow<any>>['onEditingRowSave'] = async ({
+        values,
+        table,
+        row
+    }) => {
+        console.log("SAVING QC: ", queryClient.getQueryData(['rows']))
+        console.log("Saving...");
+        console.log("Row: ", row);
+        console.log("Editing row: ", editingRow);
         const newValidationErrors = validateUser(values, metaData);
         if (newValidationErrors.filter(bool => !bool).length !== 0) {
             setValidationErrors(newValidationErrors);
             return;
         }
         setValidationErrors({});
-        await updateUser(values);
+        console.log(values);
+        Object.keys(values).map((key) => {
+            setValue(`${schema}-${query}.${table.getRow(row.id).id}.${key}`, values[key]);
+        })
+        //await updateUser(values);
         table.setEditingRow(null); //exit editing mode
     };
 
     //DELETE action
-    const openDeleteConfirmModal = (row: MRT_Row<User>) => {
+    const openDeleteConfirmModal = (row: MRT_Row<TableRow<any>>) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             deleteUser(row.original.key);
         }
@@ -247,6 +217,12 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 minHeight: '500px',
             },
         },
+        muiTablePaperProps: {
+            sx: {
+                marginTop: '10px',
+                marginBottom: '10px',
+            },
+        },
         onCreatingRowCancel: () => setValidationErrors({}),
         onCreatingRowSave: handleCreateUser,
         onEditingRowCancel: () => setValidationErrors({}),
@@ -258,7 +234,12 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 <DialogContent
                     sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
                 >
-                    {internalEditComponents} {/* or render custom edit components here */}
+                    {<EditableGridCreateModal
+                        table={table}
+                        row={row}
+                        schema={schema}
+                        query={query}
+                    />} {/* or render custom edit components here */}
                 </DialogContent>
                 <DialogActions>
                     <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -293,7 +274,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 </Tooltip>
             </Box>
         ),
-        renderTopToolbarCustomActions: ({ table }) => (
+        renderTopToolbarCustomActions: ({table }) => (
             <Button
                 variant="contained"
                 onClick={() => {
@@ -327,7 +308,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
             isLoading: isLoadingUsers,
             isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
             showAlertBanner: isLoadingUsersError,
-            showProgressBars: isFetchingUsers,
+            showProgressBars: isFetchingUsers
         },
     });
 
@@ -336,25 +317,28 @@ const ResizeableTable = (props: ResizeableTableProps) => {
 
 //CREATE hook (post new user to api)
 function useCreateUser() {
+    console.log("Creating Row");
     const queryClient = useQueryClient();
+    console.log(queryClient);
     return useMutation({
-        mutationFn: async (user: User) => {
+        mutationFn: async (user: TableRow<any>) => {
             //send api update request here
+            console.log("MUTATE");
             await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
             return Promise.resolve();
         },
         //client side optimistic update
-        onMutate: (newUserInfo: User) => {
+        onMutate: (newUserInfo: TableRow<any>) => {
             queryClient.setQueryData(
-                ['users'],
-                (prevUsers: any) =>
+                ['rows'],
+                (prevUsers: any) => (
                     [
                         ...prevUsers,
                         {
                             ...newUserInfo,
                             id: (Math.random() + 1).toString(36).substring(7),
                         },
-                    ] as User[],
+                    ] as TableRow<any>[]),
             );
         },
         // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
@@ -362,11 +346,12 @@ function useCreateUser() {
 }
 
 //READ hook (get users from api)
-function useGetUsers(data: any) {
-    return useQuery<User[]>({
-        queryKey: ['users'],
+function useGetUsers(data: any, formControl) {
+    return useQuery<TableRow<any>[]>({
+        queryKey: ['rows'],
         queryFn: async () => {
             //send api request here
+            console.log("D", formControl);
             await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
             return Promise.resolve(data);
         },
@@ -377,19 +362,25 @@ function useGetUsers(data: any) {
 //UPDATE hook (put user in api)
 function useUpdateUser() {
     const queryClient = useQueryClient();
+    console.log("Start update: ", queryClient);
     return useMutation({
-        mutationFn: async (user: User) => {
+        mutationFn: async (user: TableRow<any>) => {
             //send api update request here
+            console.log("Saving(3)...", user);
+
             await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
             return Promise.resolve();
         },
         //client side optimistic update
-        onMutate: (newUserInfo: User) => {
-            queryClient.setQueryData(['users'], (prevUsers: any) =>
-                prevUsers?.map((prevUser: User) =>
+        onMutate: (newUserInfo: TableRow<any>) => {
+            console.log("Saving(2)...");
+            console.log("Saving newUser: ", newUserInfo);
+            queryClient.setQueryData(['rows'], (prevUsers: any) =>
+                prevUsers?.map((prevUser: TableRow<any>) =>
                     prevUser.key === newUserInfo.key ? newUserInfo : prevUser,
                 ),
             );
+            console.log("Saving ", queryClient.getQueryData(['rows']));
         },
         // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
     });
@@ -406,8 +397,8 @@ function useDeleteUser() {
         },
         //client side optimistic update
         onMutate: (userId: string) => {
-            queryClient.setQueryData(['users'], (prevUsers: any) =>
-                prevUsers?.filter((user: User) => user.key !== userId),
+            queryClient.setQueryData(['rows'], (prevUsers: any) =>
+                prevUsers?.filter((user: TableRow<any>) => user.key !== userId),
             );
         },
         // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
@@ -422,7 +413,7 @@ const validateEmail = (email: string) =>
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         );
 
-function validateUser(values: User, metaData: any) {
+function validateUser(values: TableRow<any>, metaData: any) {
     console.log("USER: ", values);
 
     return(Object.keys(values).map(key => {
@@ -437,7 +428,7 @@ const queryClient = new QueryClient();
 
 export const MUIEditableGridPanel = (props) => {
     console.log(props);
-    const {defaultValues, redirectSchema, redirectQuery, metaData, componentProps} = props;
+    const {defaultValues, redirectSchema, redirectQuery, metaData, componentProps, formControl} = props;
     const {columnHelper} = componentProps;
     if(!metaData) return;
     if (!(redirectSchema && redirectQuery && defaultValues && `${redirectSchema}-${redirectQuery}` in defaultValues)) return;
@@ -455,6 +446,7 @@ export const MUIEditableGridPanel = (props) => {
                     columnHelper={columnHelper}
                     schema={redirectSchema}
                     query={redirectQuery}
+                    formControl={formControl}
                 />
             </QueryClientProvider>
         </LocalizationProvider>

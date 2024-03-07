@@ -72,7 +72,7 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
     }, [watchVar]);
 
     return (
-        <div className={"text-input"}>
+        <>
             <input {...register(name, {
                 required: required ? "This field is required" : false,
                 onBlur: onBlur,
@@ -90,11 +90,12 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
                 onWheel={(event) => {
                     event.currentTarget.blur();
                 }}
+                placeholder={" "}
             />
             <div className={"react-error-text"}>
                 {errors?.[stateName]?.[fieldName]?.message}
             </div>
-        </div>
+        </>
     );
 };
 

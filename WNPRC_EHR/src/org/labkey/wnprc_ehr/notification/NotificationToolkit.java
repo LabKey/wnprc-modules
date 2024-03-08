@@ -606,9 +606,11 @@ public class NotificationToolkit {
                                 //Goes through each column in current query row and updates currentRow.
                                 for (int i = 0; i < targetColumns.length; i++) {
                                     String currentColumnTitle = targetColumns[i];
-                                    String currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    String currentColumnValue = "";
+                                    if (myResults.getString(FieldKey.fromString(currentColumnTitle)) != null) {
+                                        currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    }
                                     myRow.put(currentColumnTitle, currentColumnValue);
-//                                        currentRow[i] = myResults.getString(FieldKey.fromString(targetColumns[i]));
                                 }
                                 returnArray.add(myRow);
                             }

@@ -148,6 +148,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
         }
 
         //5. Find any incomplete blood draws scheduled today, by area.
+        //Possible separate.
         if (myBloodDrawAlertObject.incompleteBloodDrawsScheduledTodayByArea.isEmpty()) {
             //Displays if there are no scheduled blood draws for today.
             messageBody.append("<p>There are no blood draws scheduled for " + dateToolkit.getDateToday() + "</p>");
@@ -183,7 +184,13 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
                 messageBody.append("<p><b>Individual Draws:</b></p>\n");
                 //Iterates through each area.
                 for (String summaryArea : sortSetWithNulls(myBloodDrawAlertObject.summaryHashMap.keySet())) {
-                    messageBody.append("<b>" + summaryArea + ":</b><br>\n");
+                    //Lists current area.
+                    if (!summaryArea.isEmpty()) {
+                        messageBody.append("<b>" + summaryArea + ":</b><br>\n");
+                    }
+                    else {
+                        messageBody.append("<b>" + "Unknown Area" + ":</b><br>\n");
+                    }
                     //Sorts currentSummaryArea by room key.
                     HashMap<String,bloodDrawRoom> currentSummaryArea = myBloodDrawAlertObject.summaryHashMap.get(summaryArea);
                     //Iterates through each room.
@@ -210,7 +217,9 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
                                 String currentRowColor = "white";
                                 LocalDateTime currentTime = LocalDateTime.now();
                                 LocalDateTime timeLimit = currentTime.plusMinutes(15);
-                                LocalDateTime recordTime = LocalDateTime.parse(currentRecord.get("date"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                                //Parses the record time because many of the records have optional milliseconds.
+                                String recordTimeFormatted = currentRecord.get("date").split("\\.")[0];
+                                LocalDateTime recordTime = LocalDateTime.parse(recordTimeFormatted, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                                 if (timeLimit.isAfter(recordTime)) {
                                     if (currentTime.isBefore(recordTime)) {
                                         currentRowColor = "yellow";
@@ -228,7 +237,12 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
                             myTable.rowColors = myTableRowColors;
 
                             //Displays the incomplete count for the current room and shows the table.
-                            messageBody.append(summaryRoom + ": " + currentSummaryRoom.incomplete);
+                            if (!summaryRoom.isEmpty()) {
+                                messageBody.append(summaryRoom + ": " + currentSummaryRoom.incomplete);
+                            }
+                            else {
+                                messageBody.append("Unknown Room" + ": " + currentSummaryRoom.incomplete);
+                            }
                             messageBody.append(myTable.createBasicHTMLTable());
                         }
                     }
@@ -379,10 +393,6 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
             myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL);
-            //TODO: Ask about both updates below.
-            //Update: Changed this from 'qcstate' to 'qcstate/Label' because 'qcstate' only returned number codes.
-            //Update: Removed this condition because qcstate is checked later.
-//            myFilter.addCondition("qcstate/Label", "Completed", CompareType.NEQ);
             //TODO: Add the following filter if separating this email between groups.
 //            myFilter.addCondition("billedby/title", currentNotificationGroup, CompareType.EQUAL);
             //Creates sort.

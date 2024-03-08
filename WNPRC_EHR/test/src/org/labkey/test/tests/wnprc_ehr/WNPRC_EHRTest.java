@@ -41,13 +41,20 @@ import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.bootstrap.ModalDialog;
+import org.labkey.test.components.domain.DomainFieldRow;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.pages.assay.ChooseAssayTypePage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
 import org.labkey.test.pages.ehr.EHRAdminPage;
 import org.labkey.test.pages.ehr.NotificationAdminPage;
+import org.labkey.test.params.FieldDefinition;
+import org.labkey.test.params.list.IntListDefinition;
+import org.labkey.test.params.list.ListDefinition;
 import org.labkey.test.tests.ehr.AbstractGenericEHRTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
@@ -90,6 +97,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
+import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 
 /**
@@ -100,13 +108,13 @@ import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 @Category({CustomModules.class, EHR.class, WNPRC_EHR.class})
 public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnlyTest
 {
-    public static final String PROJECT_NAME = "WNPRC_TestProject";
-    public static final String EHR_FOLDER_PATH = "WNPRC_TestProject/EHR";
+    public static final String PROJECT_NAME = "WNPRC";
+    public static final String EHR_FOLDER_PATH = PROJECT_NAME + "/EHR";
     private static final String PRIVATE_FOLDER = "Private";
     private static final String EHR_FOLDER = "EHR";
     private static final String PI_PORTAL = "PI Portal";
     public static final String PI_FOLDER_FOLDER_PATH = "/WNPRC_Units/Operation_Services/Financial_Management/PI Portal";
-    public static final String PRIVATE_FOLDER_PATH = "/WNPRC_TestProject/WNPRC_Units/Operation_Services/Financial_Management/Private";
+    public static final String PRIVATE_FOLDER_PATH = PROJECT_NAME + "/WNPRC_Units/Operation_Services/Financial_Management/Private";
     public static final String PRIVATE_TARGET_FOLDER_PATH = "WNPRC_Units/Operation_Services/Financial_Management/Private";
 
     private final String ANIMAL_HISTORY_URL = "/ehr/" + PROJECT_NAME + "/EHR/animalHistory.view?";
@@ -134,7 +142,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
 
     private final File CHARGE_UNITS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeUnits.tsv");
-
     private final File BLOOD_DATA_TSV = TestFileUtils.getSampleData("wnprc_ehr/study/datasetBlood.tsv");
     private static int BILLING_RUN_COUNT = 0;
 
@@ -175,6 +182,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
+    private static final String MHC_SSP_LIST = "MHC SSP List";
+    private static final String QPCR_QC_list = "QPCR_QC_list";
 
     @Nullable
     @Override
@@ -218,8 +227,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.createFinanceManagementFolders();
         initTest.createResearchServicesFolders();
+        initTest.createAnimalServicesFolders();
+        initTest._containerHelper.enableModule("EHR_ComplianceDB");
+        initTest.createRequiredLists();
+        initTest.createRequiredAssays();
         initTest.clickFolder("EHR");
-        initTest.addFinanceRelatedWebParts("/WNPRC_TestProject/EHR");
+        initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
         initTest.loadEHRBillingTableDefinitions();
 
         initTest.clickFolder(initTest.getProjectName());
@@ -232,7 +245,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.loadBloodBilledByLookup();
         initTest.addFinanceRelatedWebParts(initTest.getBillingContainerPath());
-        initTest.clickFolder("Private");
+        initTest.beginAt(buildURL("project", initTest.getBillingContainerPath(), "begin"));
         initTest.loadEHRBillingTableDefinitions();
 
         initTest.clickFolder("Private");
@@ -241,7 +254,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.createEHRLinkedSchema(PROJECT_NAME + "/" + PRIVATE_TARGET_FOLDER_PATH);
         initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
         initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
-
 
         initTest.clickFolder("EHR");
         initTest.createEHRBillingPublicLinkedSchema();
@@ -363,6 +375,68 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Research_Services", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "Virology_Services", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VL_DB", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VS_group_wiki", "Collaboration");
+
+        //MHC folders
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "MHC_SSP", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private", "MHC_DB", "Collaboration");
+    }
+
+    private void createAnimalServicesFolders()
+    {
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Animal_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services", "Compliance_Training", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services/Compliance_Training", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services/Compliance_Training/Private", "EmployeeDB", "Collaboration");
+
+    }
+
+    private void createRequiredLists() throws IOException, CommandException
+    {
+        Connection cn = getRemoteApiConnection();
+        List<FieldDefinition> listColumns = List.of(
+                new FieldDefinition("ref_nt_name", FieldDefinition.ColumnType.String),
+                new FieldDefinition("shortName", FieldDefinition.ColumnType.String));
+        ListDefinition listDef = new IntListDefinition(MHC_SSP_LIST, "Key");
+        listDef.setFields(listColumns);
+        listDef.create(cn, getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB");
+
+        listColumns = List.of(
+                new FieldDefinition("Expt_nr", FieldDefinition.ColumnType.Decimal),
+                new FieldDefinition("QC_Pass", FieldDefinition.ColumnType.String));
+        listDef = new IntListDefinition(QPCR_QC_list, "Key");
+        listDef.setFields(listColumns);
+        listDef.create(cn, getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VS_group_wiki");
+    }
+
+    private void createRequiredAssays()
+    {
+        beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB", "begin"));
+        goToManageAssays();
+        clickButton("New Assay Design");
+        ChooseAssayTypePage chooseAssayTypePage = new ChooseAssayTypePage(getDriver());
+        chooseAssayTypePage.selectAssayLocation("Current Folder (MHC_DB)");
+        ReactAssayDesignerPage assayDesignerPage = chooseAssayTypePage.selectAssayType("General");
+        assayDesignerPage.setName("MHC_SSP");
+        DomainFormPanel domainFormPanel = assayDesignerPage.goToResultsFields();
+        domainFormPanel.addField("SubjectId").setType(FieldDefinition.ColumnType.String);
+        domainFormPanel.addField("Institution").setType(FieldDefinition.ColumnType.String);
+        domainFormPanel.addField("Result").setType(FieldDefinition.ColumnType.String);
+        DomainFieldRow domainFieldRow = domainFormPanel.addField("PrimerPair");
+        domainFieldRow.setLookup(new FieldDefinition.IntLookup("lists", MHC_SSP_LIST));
+        assayDesignerPage.clickFinish();
+
+        beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VL_DB", "begin"));
+        goToManageAssays();
+        clickButton("New Assay Design");
+        chooseAssayTypePage = new ChooseAssayTypePage(getDriver());
+        chooseAssayTypePage.selectAssayLocation("Current Folder (VL_DB)");
+        assayDesignerPage = chooseAssayTypePage.selectAssayType("Viral Loads");
+        assayDesignerPage.setName("Viral_Load");
+        domainFormPanel = assayDesignerPage.goToRunFields();
+        domainFormPanel.addField("exptNumber").setType(FieldDefinition.ColumnType.String);
+        assayDesignerPage.clickFinish();
     }
 
     private void loadBloodBilledByLookup() throws IOException, CommandException

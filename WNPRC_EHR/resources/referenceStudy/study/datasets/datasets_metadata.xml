@@ -10321,6 +10321,10 @@
         <isHidden>true</isHidden>
         <formatString>DateTime</formatString>
       </column>
+      <column columnName="runId">
+        <datatype>varchar</datatype>
+        <columnTitle>Run Id</columnTitle>
+      </column>
       <column columnName="quantityOORIndicator">
         <datatype>varchar</datatype>
         <columnTitle>Quantity OOR Indicator</columnTitle>

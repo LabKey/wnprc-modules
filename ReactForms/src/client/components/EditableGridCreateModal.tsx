@@ -1,11 +1,14 @@
 import * as React from 'react'
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { Input, TextField } from '@mui/material';
 import { MRT_Cell, MRT_Row, MRT_TableInstance } from 'material-react-table';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import { EditableGridCell } from './EditableGridCell';
 import "../theme/css/editable-grid.css";
 import TextInput from './TextInput';
+import { useFormContext } from 'react-hook-form';
+import ReactDatePicker from 'react-datepicker';
+import { DateInput } from './DateInput';
 
 
 interface CreateModalProps {
@@ -22,34 +25,50 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
         query,
         cell
     } = props;
+    const {watch, getValues} = useFormContext();
+
     console.log("Table: ", table.getAllColumns());
     console.log("Table row: ", row);
     console.log("CELL##: ", cell);
+    const initVals = row.id === "mrt-row-create" ? row.original : getValues(`${schema}-${query}.${row.id}`);
+    console.log(initVals);
 
     return(
         <div className={"page-wrapper"}>
-        {table.getAllColumns().map((column) => {
-            if (column.id === "mrt-row-actions") return;
-            return (
-                <div className={'standard-input'} key={column.id}>
-                    <input
-                        className={""}
-                        key={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
-                        defaultValue={row.original[column.id]}
-                        name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
-                        type={(column.columnDef.meta as QueryColumn).type}
-                        required={(column.columnDef.meta as QueryColumn).required}
-                    />
-                    <label>
-                        {column.id}
-                    </label>
-                    <span className={'underline'}></span>
-                </div>
-
-        )
-            ;
-        })
-        }.
+            {table.getAllColumns().map((column) => {
+                if (column.id === "mrt-row-actions") return;
+                if((column.columnDef.meta as QueryColumn).type === "Date and Time") {
+                    return(
+                        <div className={'standard-input'} key={column.id}>
+                            <DateInput
+                                id={column.id}
+                                defaultValue={row.id === "mrt-row-create" ? new Date() : initVals[column.id]}
+                                name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}/>
+                            <label>
+                                {column.id}
+                            </label>
+                            <span className={'underline'}></span>
+                        </div>
+                    )
+                }
+                return (
+                    <div className={'standard-input'} key={column.id}>
+                        <input
+                            className={""}
+                            key={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
+                            defaultValue={initVals[column.id]}
+                            name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
+                            type={(column.columnDef.meta as QueryColumn).type}
+                            required={(column.columnDef.meta as QueryColumn).required}
+                        />
+                        <label>
+                            {column.id}
+                        </label>
+                        <span className={'underline'}></span>
+                    </div>
+                );
+            })
+            }
         </div>
     );
 

@@ -139,6 +139,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     // Form submission handler
     const handleSubmit = async (data, e) => {
         e.preventDefault();
+        console.log("MAIN SUBMIT: ", e);
         console.log(data);
         const finalFormData = [];
         // generate taskId if required
@@ -222,7 +223,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     />
                 )}
                 <FormProvider {...methods}>
-                    <form className={'default-form'} onSubmit={methods.handleSubmit(handleSubmit)}>
+                    <form id={"default-form"} className={'default-form'} onSubmit={methods.handleSubmit(handleSubmit)}>
                         {
                             components.map((component) => {
                                 // sub-component props
@@ -255,6 +256,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                 type="submit"
                                 className={`btn btn-primary submit-btn ${false ? "saving" : ""}`}
                                 id={"submit-btn"}
+                                form={"default-form"}
                             >
                                 Submit For Review
                             </button>

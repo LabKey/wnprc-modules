@@ -112,6 +112,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                             menu: (base) => ({
                                 ...base,
                                 width: 'max-content',
+                                zIndex: 2
                             })
                         }}
                     />

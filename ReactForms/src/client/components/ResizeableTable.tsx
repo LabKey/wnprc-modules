@@ -176,7 +176,6 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         Object.keys(values).forEach((key, idx) => {
             setValue(key, values[key]);
         });
-        //TODO FIX THIS MONDAY EDIT - on edit changes all rows
         queryClient.setQueryData(['rows'], (prevRows: any) =>
             prevRows?.map((prevRow, prevRowIdx) => {
                 if(prevRowIdx !== updatedRowIdx) {

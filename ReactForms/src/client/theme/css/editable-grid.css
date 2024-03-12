@@ -136,3 +136,14 @@ https://github.com/LeonGeldsch/css_material_input/tree/main
 }
 
 /* END OF STANDARD INPUT STYLES */
+
+
+.edit-row-modal {
+  max-height: fit-content;
+  font-size: smaller;
+}
+
+.date-modal-label {
+  top: 1px !important;
+  margin-bottom: 5px;
+}

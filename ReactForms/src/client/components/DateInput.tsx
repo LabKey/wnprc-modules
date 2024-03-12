@@ -1,6 +1,6 @@
 import * as React from "react";
 //import { openDatepicker } from '../query/helpers';
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { ActionURL } from '@labkey/api';
 import DatePicker from 'react-datepicker';
 
@@ -32,6 +32,7 @@ export const DateInput: FC<DateInputProps> = (props) => {
         calendarEl.setOpen(true);
     };
 
+
     return (
       <>
           <DatePicker
@@ -43,7 +44,7 @@ export const DateInput: FC<DateInputProps> = (props) => {
           selected={dateState}
           className={"form-control " + className}
           name={name}
-          onChange={() => setDateState(dateState)}
+          onChange={(date) => setDateState(date)}
           onBlur={onBlur}
           popperPlacement={"bottom"}
           popperClassName={"my-datepicker-popper"}

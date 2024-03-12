@@ -43,8 +43,9 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
                             <DateInput
                                 id={column.id}
                                 defaultValue={row.id === "mrt-row-create" ? new Date() : initVals[column.id]}
-                                name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}/>
-                            <label>
+                                name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
+                            />
+                            <label className={"date-modal-label"}>
                                 {column.id}
                             </label>
                             <span className={'underline'}></span>

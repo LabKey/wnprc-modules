@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FC, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
     MRT_EditActionButtons,
     MaterialReactTable,
@@ -7,7 +7,7 @@ import {
     type MRT_ColumnDef,
     type MRT_Row,
     type MRT_TableOptions,
-    useMaterialReactTable, MRT_ActionMenuItem, createRow, openEditingCell, MRT_Cell,
+    useMaterialReactTable, MRT_ActionMenuItem, createRow, openEditingCell, MRT_Cell, MRT_FilterOption,
 } from 'material-react-table';
 import {
     Box,
@@ -17,7 +17,7 @@ import {
     DialogTitle,
     IconButton,
     Tooltip,
-    Stack
+    Stack, MenuItem
 } from '@mui/material';
 import {
     QueryClient,
@@ -26,6 +26,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
+import {compareItems, rankItem, RankingInfo} from "@tanstack/match-sorter-utils";
 import { type User } from './testData';
 
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,6 +42,7 @@ import ControlledDateInput from './ControlledDateInput';
 import { EditableGridCell } from './EditableGridCell';
 import {showEditableGridCreateModal, EditableGridCreateModal} from './EditableGridCreateModal';
 import { get, useFieldArray, useFormContext, useFormState } from 'react-hook-form';
+import {FilterFn} from '@tanstack/react-table';
 
 interface ResizeableTableProps {
     data: any;
@@ -81,6 +83,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
     const [editingRow, setEditingRow] = useState<MRT_Row<any>>();
     const [creatingRow, setCreatingRow] = useState<MRT_Row<any>>();
     const {getValues,setValue, resetField} = useFormContext();
+    const [globalFilter, setGlobalFilter] = useState('');
     const {remove} = useFieldArray(({control: formControl, name: `${schema}-${query}`}));
     const queryClient = useQueryClient();
     console.log("QC: ", queryClient.getQueryData(['rows']));
@@ -88,6 +91,34 @@ const ResizeableTable = (props: ResizeableTableProps) => {
     console.log("Meta: ", metaData);
     console.log("DATA: ", data);
     console.log("Fields: ", getValues());
+    const isWithinRange = (row, columnId, value) => {
+        const date = row.original[columnId];
+        const [startDate, endDate] = value;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        //If one filter defined and date is null filter it
+        if((start || end) && !date) return false;
+        if(start && !end){
+            return date.getTime() >= start.getTime()
+        }else if(!start && end){
+            return date.getTime() <= end.getTime()
+        }else if (start && end) {
+            return date.getTime() >= start.getTime() && date.getTime() <= end.getTime()
+        } else return true;
+    };
+    const textFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+        // Rank the item
+        const itemRank = rankItem(row.original[columnId], value);
+        console.log("fuzzy1: ", row, columnId, value);
+        console.log("Fuzzy rank1: ", itemRank);
+        // Store the itemRank info
+        addMeta({
+            itemRank,
+        })
+
+        // Return if the item should be filtered in/out
+        return itemRank.passed
+    }
 
     const columns = useMemo(() => metaData.map((col, colIdx) => (
         columnHelper.accessor(`${schema}-${query}.${col.name}`, {
@@ -98,8 +129,12 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 <EditableGridCell className={""} type={(cell.column.columnDef.meta as QueryColumn).type} prevForm={null}
                                   name={`${schema}-${query}.${cell.row.id}.${col.name}`} required={metaData[colIdx].required}/>
             ),
+            filterVariant: (col.type === "Date and Time") ? 'datetime-range' : 'text',
+            filterFn: (col.type === "Date and Time") ? isWithinRange : textFilter
         }))
     ), [metaData]);
+
+
 
     //call CREATE hook
     const { mutateAsync: createUser, isPending: isCreatingUser } =
@@ -204,13 +239,48 @@ const ResizeableTable = (props: ResizeableTableProps) => {
             console.log(getValues());
         }
     };
+
+    //Global Search
+    const handleGlobalFilterChange = (value: string) => {
+        console.log("FOUND ME: ", value);
+        const filteredData = (queryClient.getQueryData(['rows']) as any[]).map(((prevRow) => {
+            if(prevRow) {
+                return(prevRow);
+            }
+            return;
+        }));
+        console.log("Filtered Data: ", filteredData);
+
+    }
+    useEffect(() => {
+        console.log("GLOBAL: ", globalFilter);
+
+    },[globalFilter]);
+    const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+        // Rank the item
+        const itemRank = rankItem<Date>(row.original[columnId], value.$d);
+        console.log("fuzzy: ", row, columnId, value);
+        console.log("Fuzzy rank: ", itemRank);
+        // Store the itemRank info
+        addMeta({
+            itemRank,
+        })
+
+        // Return if the item should be filtered in/out
+        return itemRank.passed
+    }
+
     const table = useMaterialReactTable({
         columns,
         data: fetchedUsers,
+        filterFns: {
+            myCustomGlobalFn: fuzzyFilter
+        },
         createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
         editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
         enableEditing: true,
         layoutMode: "semantic",
+        enableColumnFilterModes: true,
         enableColumnResizing: true,
         enableCellActions: false,
         getRowId: (row) => row.key,
@@ -280,6 +350,20 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 },
             }
         },
+        muiSearchTextFieldProps: {
+            onKeyDown: (e) => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                else{
+                    return true;
+                }
+            }
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: "myCustomGlobalFn",
         onCreatingRowSave: handleCreateUser,
         onEditingRowSave: handleUpdateUser,
         //optionally customize modal content
@@ -386,6 +470,20 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 }}
                 table={table}
             />
+        ],
+        renderColumnFilterModeMenuItems: ({ column, onSelectFilterMode }) => [
+            <MenuItem
+                key="startsWith"
+                onClick={() => onSelectFilterMode('startsWith')}
+            >
+                Start With
+            </MenuItem>,
+            <MenuItem
+                key="endsWith"
+                onClick={() => onSelectFilterMode('myCustomGlobalFn')}
+            >
+                Your Custom Filter Fn
+            </MenuItem>,
         ],
         state: {
             isLoading: isLoadingUsers,

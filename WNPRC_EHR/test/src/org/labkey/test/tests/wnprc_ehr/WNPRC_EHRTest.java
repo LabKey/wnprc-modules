@@ -80,6 +80,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -3120,6 +3121,123 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertTrue("Grid Panel webpart failed to render in animal history",reactComp.isDisplayed());
 
         log("Completed testReactGridPanel.");
+    }
+
+    protected Date prepareDate(Date date, int daysOffset, int hoursOffset)
+    {
+        Calendar beforeInterval = Calendar.getInstance();
+        beforeInterval.setTime(date);
+        beforeInterval.add(Calendar.DATE, daysOffset);
+        beforeInterval.add(Calendar.HOUR_OF_DAY, hoursOffset);
+
+        return beforeInterval.getTime();
+    }
+    @Test
+    public void testBloodDrawAPI() throws Exception
+    {
+        goToProjectHome();
+
+        Integer projectId = 20240228;
+
+        Date bloodDate = prepareDate(new Date(), -12, 0);
+
+        Integer tubeVol = 10;
+        Integer numTubes = 1;
+        String tubeType = "EDTA";
+        Map<String, List<String>> expected = new HashMap<>();
+        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVol + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
+                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
+                expected
+        );
+
+        /* TODO this is intended to test an overdraw - for some reason this error is not being reported from the testValidationMethod
+           it seems that EHR.Server.Utils.shouldIncludeError is false for this case... look at this later when we can also add to species.tsv in EHR
+        Integer newNumTubes = 200;
+        double quantity = newNumTubes*tubeVol;
+        Integer interval = 30;
+        Double weight = 12.0;
+        double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
+        expected = new HashMap<>();
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", "isRequest"}, new Object[][]{
+                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, newNumTubes, quantity, null, "y", "Chemical", "< 30 min", "instructions", null, "autotest", true}},
+                expected
+        );*/
+
+
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), -11, 0);
+        bloodCmd.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[0]);
+                put("date", dt);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVol);
+                put("num_tubes", numTubes);
+                put("quantity", numTubes*tubeVol);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+        SelectRowsCommand sr = new SelectRowsCommand("study","blood");
+        sr.addFilter("Id", SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date", dt, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1, resp2.getRowCount());
+
+
+        /*TODO This should be moved to EHR API test, would need to add clinpath runs table to the study schema in EHR test,
+          and update the labwork_services.tsv to include alertOnComplete field populated, since there the EHR trigger
+          script uses it
+
+        //create blood draw with additional services to create a clinpath request
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), -11, 0);
+        String serviceRequested = "CBC";
+        bloodCmd.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[0]);
+                put("date", dt);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type","Tube Type Test");
+                put("tube_vol", 1);
+                put("num_tubes", 1);
+                put("quantity", 1);
+                put("additionalServices", serviceRequested);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+        //assert clinpath request was created
+        SelectRowsCommand sr = new SelectRowsCommand("study","Clinpath Runs");
+        sr.addFilter("Id",SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date",dt, Filter.Operator.EQUAL);
+        sr.addFilter("servicerequested", serviceRequested, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1,resp2.getRowCount());*/
+
     }
 
 }

@@ -74,7 +74,6 @@
                     </fk>
                   </column>
                   <column columnName="perfusion_soln1">
-                    <isHidden>true</isHidden>
                     <columnTitle>Perfusion Solution 1</columnTitle>
                     <fk>
                       <fkDbSchema>ehr_lookups</fkDbSchema>
@@ -83,11 +82,10 @@
                     </fk>
                   </column>
                   <column columnName="perfusion_soln2">
-                      <isHidden>true</isHidden>
                     <columnTitle>Perfusion Solution 2</columnTitle>
                     <fk>
                       <fkDbSchema>ehr_lookups</fkDbSchema>
-                      <fkTable>necropsy_perfusion</fkTable>
+                      <fkTable>necropsy_perfusion_2</fkTable>
                       <fkColumnName>value</fkColumnName>
                     </fk>
                   </column>

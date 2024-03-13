@@ -21,7 +21,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@labkey/api": "1.27.0",
-    "@labkey/components": "2.390.6",
+    "@labkey/components": "2.390.4",
     "font-awesome": "~4.7.0",
     "immer": "~10.0.3",
     "immutable": "~4.3.4",

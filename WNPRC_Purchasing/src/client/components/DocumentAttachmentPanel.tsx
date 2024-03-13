@@ -43,8 +43,8 @@ export const DocumentAttachmentPanel: FC<Props> = memo(props => {
                 expanded={true}
                 onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
             >
-                <div>
-                    <Panel.Heading className={'bg-primary'}>
+                <div className="bg-primary">
+                    <Panel.Heading>
                         <div className="panel-title">Attachments</div>
                     </Panel.Heading>
                 </div>

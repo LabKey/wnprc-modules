@@ -8375,6 +8375,10 @@
         <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
       </column>
+      <column columnName="runId">
+        <datatype>varchar</datatype>
+        <columnTitle>Run Id</columnTitle>
+      </column>
     </columns>
     <tableTitle>Chemistry Results</tableTitle>
     <indices>
@@ -9584,6 +9588,10 @@
         </fk>
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
         <scale>4000</scale>
+      </column>
+      <column columnName="runId">
+        <datatype>varchar</datatype>
+        <columnTitle>Run Id</columnTitle>
       </column>
     </columns>
     <tableTitle>Hematology Results</tableTitle>

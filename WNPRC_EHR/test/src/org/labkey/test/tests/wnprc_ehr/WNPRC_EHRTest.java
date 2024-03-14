@@ -265,15 +265,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return (String)executeScript("return LABKEY.Utils.generateUUID().toUpperCase()");
     }
 
-    protected Date prepareDate(Date date, int daysOffset, int hoursOffset)
-    {
-        Calendar beforeInterval = Calendar.getInstance();
-        beforeInterval.setTime(date);
-        beforeInterval.add(Calendar.DATE, daysOffset);
-        beforeInterval.add(Calendar.HOUR_OF_DAY, hoursOffset);
-
-        return beforeInterval.getTime();
-    }
     @Test
     public void testAssignmentApi() throws Exception
     {

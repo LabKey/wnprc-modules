@@ -23,6 +23,8 @@ exports.init = function (EHR) {
     EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.INIT, function (event, helper, EHR) {
         EHR.Server.TriggerManager.unregisterAllHandlersForQueryNameAndEvent('study', 'blood', EHR.Server.TriggerManager.Events.BEFORE_UPSERT);
         setStudyBloodBeforeUpsertTrigger();
+        EHR.Server.TriggerManager.unregisterAllHandlersForQueryNameAndEvent('study', 'assignment', EHR.Server.TriggerManager.Events.BEFORE_UPSERT);
+        setStudyAssignmentBeforeUpsertTrigger();
     });
 
 
@@ -816,5 +818,48 @@ exports.init = function (EHR) {
             }
         });
 
+    }
+
+    function  setStudyAssignmentBeforeUpsertTrigger() {
+
+        EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'assignment', function(helper, scriptErrors, row, oldRow) {
+            console.log('calling wnprc assignment trigger!!')
+            if (!helper.isETL()){
+                //note: the the date field is handled above by removeTimeFromDate
+                EHR.Server.Utils.removeTimeFromDate(row, scriptErrors, 'enddate');
+                EHR.Server.Utils.removeTimeFromDate(row, scriptErrors, 'projectedRelease');
+            }
+
+            //remove the projected release date if a true enddate is added
+            if (row.enddate && row.projectedRelease){
+                row.projectedRelease = null;
+            }
+
+            //check number of allowed animals at assign/approve time
+            if (!helper.isETL() && !helper.isQuickValidation() && helper.doStandardProtocolCountValidation() &&
+                    //this is designed to always perform the check on imports, but also updates where the Id was changed
+                    !(oldRow && oldRow.Id && oldRow.Id==row.Id) &&
+                    row.Id && row.project && row.date
+            ){
+                var assignmentsInTransaction = helper.getProperty('assignmentsInTransaction');
+                assignmentsInTransaction = assignmentsInTransaction || [];
+                console.log('calling helper')
+                var msgs = WNPRC.Utils.getJavaHelper().verifyProtocolCounts(row.Id, row.project, assignmentsInTransaction);
+                console.log('done calling helper')
+                if (msgs){
+                    msgs = msgs.split("<>");
+                    for (var i=0;i<msgs.length;i++){
+                        EHR.Server.Utils.addError(scriptErrors, 'project', msgs[i], 'WARN');
+                    }
+                }
+            }
+
+            //check that the animal request exists!
+            if (row.animal_request_rowid) {
+                if (!WNPRC.Utils.getJavaHelper().checkAnimalRequestExists(row.animal_request_rowid)){
+                    EHR.Server.Utils.addError(scriptErrors, 'animal_request_rowid', "Animal Request does not exist", 'ERROR');
+                }
+            }
+        })
     }
 };

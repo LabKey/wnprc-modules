@@ -2651,13 +2651,6 @@
         </fk>
         <scale>4000</scale>
       </column>
-      <column columnName="depriveStartTime">
-        <datatype>timestamp</datatype>
-        <columnTitle>Deprive Start Time</columnTitle>
-        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
-        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
-        <formatString>yyyy-MM-dd HH:mm</formatString>
-      </column>
       <column columnName="separated">
         <datatype>boolean</datatype>
         <columnTitle>Separated</columnTitle>
@@ -2666,7 +2659,6 @@
       <column columnName="restoredTime">
         <datatype>timestamp</datatype>
         <columnTitle>Restored Time</columnTitle>
-        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
         <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
         <formatString>yyyy-MM-dd HH:mm</formatString>
       </column>
@@ -2717,6 +2709,12 @@
         <shownInDetailsView>false</shownInDetailsView>
         <scale>4000</scale>
         <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="depriveStartTime">
+        <datatype>timestamp</datatype>
+        <columnTitle>Deprive Start Time</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+        <formatString>yyyy-MM-dd HH:mm</formatString>
       </column>
       <column columnName="depriveStartedBy">
         <datatype>varchar</datatype>

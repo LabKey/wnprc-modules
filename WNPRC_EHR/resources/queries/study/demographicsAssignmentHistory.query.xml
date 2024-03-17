@@ -51,33 +51,6 @@
                             <!--query.project/avail~eq=t-->
                         <!--</url>-->
                     </column>
-                    <column columnName="HistoricSPF_StockAssignment">
-                        <columnTitle>Assigned to SPF Stock?</columnTitle>
-                        <displayWidth>110</displayWidth>
-                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
-                            <!--query.queryName=Assignment&amp;-->
-                            <!--query.Id~eq=${Id}&amp;-->
-                            <!--query.project~eq=20020201-->
-                        <!--</url>-->
-                    </column>
-                    <column columnName="HistoricConventionalStockAssignment">
-                        <columnTitle>Assigned to Conventional Stock?</columnTitle>
-                        <displayWidth>110</displayWidth>
-                        <url>/query/executeQuery.view?schemaName=study&amp;
-                            query.queryName=Assignment&amp;
-                            query.Id~eq=${Id}&amp;
-                            query.project~eq=20070202
-                        </url>
-                    </column>
-                    <column columnName="HistoricMarmStockAssignment">
-                        <columnTitle>Assigned to Marm Stock?</columnTitle>
-                        <displayWidth>110</displayWidth>
-                        <url>/query/executeQuery.view?schemaName=study&amp;
-                            query.queryName=Assignment&amp;
-                            query.Id~eq=${Id}&amp;
-                            query.project~eq=20070801
-                        </url>
-                    </column>
                     <column columnName="HistoricStockAssignments">
                         <columnTitle>Historic Stock Assignments (any)?</columnTitle>
                         <displayWidth>110</displayWidth>

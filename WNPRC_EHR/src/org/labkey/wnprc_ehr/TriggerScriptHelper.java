@@ -2534,7 +2534,7 @@ public class TriggerScriptHelper {
                 //add up the amount used in the DB plus the records in the grid
                 int used = animals.size();
                 int remaining = totalAllowed - used;
-                if (remaining < 0)
+                if (remaining <= 0)
                 {
                     errors.add("There are not enough spaces on protocol: " + protocolPair.second + ". Allowed: " + (totalAllowedNull ? "none": totalAllowed) + ", used: " + used);
                 }

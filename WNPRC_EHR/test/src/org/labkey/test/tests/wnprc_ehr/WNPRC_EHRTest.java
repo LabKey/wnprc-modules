@@ -358,6 +358,26 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "project", msgs
         ));
 
+        InsertRowsCommand assignmentCommand2 = new InsertRowsCommand("study", "assignment");
+        assignmentCommand2.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[2]); //test marm
+                put("date", prepareDate(new Date(), -10, 0));
+                put("objectid", generateGUID());
+                put("project", projectId);
+            }});
+        assignmentCommand2.execute(getApiHelper().getConnection(), getContainerPath());
+
+
+        msgs = new ArrayList<>();
+        //the verifyProtocolCounts assumes unique animal ids in the count for the # of slots used on the protocol
+        msgs.add("WARN: There are not enough spaces on protocol: " + protocolId + ". Allowed: 1, used: 2");
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {MORE_ANIMAL_IDS[2], prepareDate(new Date(), 10, 0), null, projectId, "recordID"},
+        }, Maps.of(
+                "project", msgs
+        ));
+
     }
 
     private void uploadBillingDataAndVerify() throws Exception

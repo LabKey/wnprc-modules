@@ -5,7 +5,7 @@ import { CustomInputPane } from '../../components/CustomInputPane';
 import {ActionURL} from '@labkey/api';
 import { TaskPane } from '../../components/TaskPane';
 import {MUIEditableGridPanel} from '../../components/ResizeableTable';
-import {User} from '../../components/testData';
+import {BloodRow, UltrasoundsRow} from '../../components/testData';
 import { createMRTColumnHelper } from 'material-react-table';
 export const Ultrasounds: FC<any> = (props) => {
 
@@ -34,7 +34,18 @@ export const Ultrasounds: FC<any> = (props) => {
                 prevTaskId: taskid,
                 title: "Blood",
                 blacklist: ['taskid'],
-                columnHelper: createMRTColumnHelper<User>()
+                columnHelper: createMRTColumnHelper<BloodRow>()
+            }
+        },{
+            type: MUIEditableGridPanel,
+            name: "MUIEditableGridPanel",
+            schemaName: "study",
+            queryName: "ultrasounds",
+            componentProps: {
+                prevTaskId: taskid,
+                title: "Ultrasounds",
+                blacklist: ['taskid'],
+                columnHelper: createMRTColumnHelper<UltrasoundsRow>()
             }
         }
     ];

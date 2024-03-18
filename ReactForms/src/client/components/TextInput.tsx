@@ -37,14 +37,30 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
       autoFill,
   } = props;
     const {register, formState: {errors}, trigger, watch, resetField, setValue} = useFormContext();
-    const [stateName, fieldName] = name.split('.');
-    const borderColor = errors?.[stateName]?.[fieldName] ? 'red' : null;
+    const nameParsed = name.split(".");
+    let stateName;
+    let fieldName;
+    let rowNum;
+    if(nameParsed.length === 2) {
+        [stateName,fieldName] = nameParsed;
+    }else{ // it is 3
+        [stateName,rowNum,fieldName] = nameParsed;
+    }
+
+    const borderColor = rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null);
     const watchVar = autoFill ? watch(autoFill.watch as FieldPathValue<FieldValues, any>)  : undefined;
 
     // Trigger validation on load-in once to show required inputs
     useEffect(() => {
         trigger(name);
     }, []);
+
+    useEffect(() => {
+        console.log("Errors: ", borderColor);
+        console.log("Errors Field: ", stateName, fieldName, rowNum)
+        console.log("Errors Name: ", name);
+
+    }, [borderColor]);
 
     /* Watch effect,
     / This will update the text input automatically if given autoFill options, watch variable and search function.
@@ -93,7 +109,7 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
                 placeholder={" "}
             />
             <div className={"react-error-text"}>
-                {errors?.[stateName]?.[fieldName]?.message}
+                {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
             </div>
         </>
     );

@@ -53,6 +53,7 @@ export const GridPanelConfig: FC<configProps> = ({
             filterArray.push(Filter.create("date", filterDate, Filter.Types.DATE_EQUAL));
         }
     }
+    console.log(filterArray);
     if(cellStyles) {
         cellStyles.forEach((cell) => {
             if (cell.flagData.type === "dataset") {

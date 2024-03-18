@@ -39,7 +39,6 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
         dropdownConfig,
         autoFill
     } = props;
-
     if(!type) return;
     //console.log(type);
     if(type === "Date and Time"){

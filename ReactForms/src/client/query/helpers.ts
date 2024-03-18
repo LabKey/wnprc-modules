@@ -443,3 +443,23 @@ export const getQueryDetails = async (schemaName, queryName) => {
       Query.getQueryDetails(config)
     });
 }
+
+export const createTypeFromJson = (json: any): string => {
+  let typeDefinition = 'type MyType = {\n';
+
+  for (const key in json) {
+    const value = json[key];
+    const valueType = typeof value;
+
+    if (valueType === 'object' && value !== null && !Array.isArray(value)) {
+      // Recursively generate type for nested objects
+      typeDefinition += `${key}: MyType;\n`;
+    } else {
+      typeDefinition += `${key}: ${valueType};\n`;
+    }
+  }
+
+  typeDefinition += '};';
+
+  return typeDefinition;
+}

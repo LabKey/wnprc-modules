@@ -30,8 +30,16 @@ const TextAreaInput: React.FunctionComponent<TextAreaInputProps> = (props) => {
         rows
     } = props;
     const {register, trigger, formState: {errors}} = useFormContext();
-    const [stateName, fieldName] = name.split('.');
-    const borderColor = errors?.[stateName]?.[fieldName] ? 'red' : null;
+    const nameParsed = name.split(".");
+    let stateName;
+    let fieldName;
+    let rowNum;
+    if(nameParsed.length === 2) {
+        [stateName,fieldName] = nameParsed;
+    }else{ // it is 3
+        [stateName,rowNum,fieldName] = nameParsed;
+    }
+    const borderColor = rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null);
 
     // Trigger validation on load-in once to show required inputs
     useEffect(() => {
@@ -56,7 +64,7 @@ const TextAreaInput: React.FunctionComponent<TextAreaInputProps> = (props) => {
                 style={{borderColor: borderColor}}
              />
             <div className={"react-error-text"}>
-                {errors?.[stateName]?.[fieldName]?.message}
+                {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
             </div>
         </div>
     );

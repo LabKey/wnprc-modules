@@ -42,6 +42,9 @@ interface formProps {
     animalInfoPane: boolean;
 }
 
+interface FormMetaData {
+    [key: string]: QueryColumn[];
+}
 /*
 Default form container that handles tasks and animal info, add other components as needed.
 
@@ -67,7 +70,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     } = props;
 
     const [defaultValues, setDefaultValues] = useState<any>();
-    const [metaData, setMetaData] = useState<QueryColumn[]>(undefined);
+    const [metaData, setMetaData] = useState<FormMetaData>({});
     const methods = useForm({
         mode: "onChange",
         defaultValues: useMemo(() => defaultValues, [defaultValues])
@@ -193,7 +196,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     tempData = data.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
 
                 }
-                setMetaData(tempData);
+                setMetaData((prevMetaData) => ({
+                    ...prevMetaData,
+                    [`${component.schemaName}-${component.queryName}`]: tempData
+                }));
                 tempData.forEach(column => {
                     if(column.type === "Date and Time"){
                         tempDefaultValues[0][column.name] = new Date() as FieldPathValue<any, string>;
@@ -234,6 +240,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                     schemaName,
                                     queryName
                                 } = component;
+
                                 return (
                                     <div key={`${name}-${schemaName}-${queryName}`} className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
@@ -244,7 +251,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                             redirectQuery={queryName}
                                             formControl={methods.control}
                                             defaultValues={defaultValues}
-                                            metaData={metaData}
+                                            metaData={metaData[`${schemaName}-${queryName}`]}
                                         />
                                     </div>
                                 );

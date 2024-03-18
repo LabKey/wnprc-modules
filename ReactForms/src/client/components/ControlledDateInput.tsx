@@ -9,8 +9,9 @@ import {
     useFormContext,
     Controller,
     FieldValues,
-    FieldPathValue,
+    FieldPathValue, Control, FormState,
 } from 'react-hook-form';
+import { UseFormTrigger } from 'react-hook-form/dist/types/form';
 
 
 interface dateProps {
@@ -32,9 +33,25 @@ customInput={
 
 
 const ControlledDateInput: FC<dateProps> = (props) => {
-    const {name, date, id, required, validation, className} = props;
+    const {
+        name,
+        date,
+        id,
+        required,
+        validation,
+        className,
+    } = props;
+
     const {control, formState: {errors}, trigger} = useFormContext();
-    const [stateName, fieldName] = name.split('.');
+    const nameParsed = name.split(".");
+    let stateName;
+    let fieldName;
+    let rowNum;
+    if(nameParsed.length === 2) {
+        [stateName,fieldName] = nameParsed;
+    }else{ // it is 3
+        [stateName,rowNum,fieldName] = nameParsed;
+    }
 
     // Trigger validation on load-in once to show required inputs
     useEffect(() => {
@@ -67,7 +84,7 @@ const ControlledDateInput: FC<dateProps> = (props) => {
                 )}
             />
             <div className={"react-error-text"}>
-                {errors?.[stateName]?.[fieldName]?.message}
+                {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
             </div>
         </div>
     );

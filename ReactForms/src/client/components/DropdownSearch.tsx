@@ -37,7 +37,17 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     const {control, formState: {errors}} = useFormContext();
     const [optState, setOptState] = useState([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [stateName, fieldName] = name.split('.');
+    const nameParsed = name.split(".");
+    let stateName;
+    let fieldName;
+    let rowNum;
+    if(nameParsed.length === 2) {
+        [stateName,fieldName] = nameParsed;
+    }else{ // it is 3
+        [stateName,rowNum,fieldName] = nameParsed;
+    }
+
+
     const [defaultValue, setDefaultValue] = useState(null);
 
     useEffect(() => {
@@ -103,7 +113,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                         styles={{
                             control: (base) => ({
                                 ...base,
-                                borderColor: errors?.[stateName]?.[fieldName] ? 'red' : null,
+                                borderColor: rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null),
                             }),
                             container: (base) => ({
                                 ...base,
@@ -119,7 +129,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                 )}
             />
             <div className={"react-error-text"}>
-                {errors?.[stateName]?.[fieldName]?.message}
+                {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
             </div>
         </div>
     );

@@ -219,7 +219,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder(initTest.getProjectName());
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
@@ -258,6 +258,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder("EHR");
         initTest.createEHRBillingPublicLinkedSchema();
         initTest.createWNPRCBillingLinkedSchema();
+        initTest.createStudyLinkedSchemaForQueryValidation();
         initTest.goToProjectHome();
         initTest.clickFolder(PI_PORTAL);
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
@@ -497,6 +498,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Creating studyLinked Schema");
         _schemaHelper.setQueryLoadTimeout(60000);
         _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
+                "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
+                null, null);
+    }
+
+    private void createStudyLinkedSchemaForQueryValidation()
+    {
+        log("Creating studyLinked Schema");
+        _schemaHelper.setQueryLoadTimeout(60000);
+        _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
                 "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
                 null, null);
     }

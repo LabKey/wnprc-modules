@@ -257,7 +257,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        //initTest.deathNotificationSetup();
+        initTest.deathNotificationSetup();
     }
 
     protected String generateGUID()

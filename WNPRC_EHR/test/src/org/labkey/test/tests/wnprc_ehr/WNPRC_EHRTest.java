@@ -259,6 +259,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.createEHRBillingPublicLinkedSchema();
         initTest.createWNPRCBillingLinkedSchema();
         initTest.createStudyLinkedSchemaForQueryValidation();
+        initTest.createEHRLookupsLinkedSchemaQueryValidation();
         initTest.goToProjectHome();
         initTest.clickFolder(PI_PORTAL);
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
@@ -504,11 +505,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void createStudyLinkedSchemaForQueryValidation()
     {
+        final String BLOOD_SCHED_METADATA =
+                "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\"> \n" +
+                        "  <table tableName=\"BloodSchedule\" tableDbType=\"TABLE\">\n" +
+                        "    <columns>\n" +
+                        "      <column columnName=\"qcstate\">\n" +
+                        "        <fk>\n" +
+                        "          <fkDbSchema>core</fkDbSchema>\n" +
+                        "          <fkTable>QCState</fkTable>\n" +
+                        "          <fkColumnName>RowId</fkColumnName>\n" +
+                        "          <fkDisplayColumnName>Label</fkDisplayColumnName>\n" +
+                        "        </fk>\n" +
+                        "      </column>\n" +
+                        "  </columns>\n" +
+                        "  </table>\n" +
+                        "</tables>";
+
         log("Creating studyLinked Schema");
         _schemaHelper.setQueryLoadTimeout(60000);
         _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
                 "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
-                null, null);
+                null, BLOOD_SCHED_METADATA);
     }
 
     private void createCoreLinkedSchema()
@@ -526,6 +543,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _schemaHelper.setQueryLoadTimeout(30000);
         _schemaHelper.createLinkedSchema(target,
                 "ehrLinked", "/"+EHR_FOLDER_PATH, "ehrLinked", null,
+                null, null);
+    }
+
+    private void createEHRLookupsLinkedSchemaQueryValidation()
+    {
+        log("Creating ehr_LookupsLinked Schema");
+        _schemaHelper.setQueryLoadTimeout(30000);
+        _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
+                "ehr_lookupsLinked", "/"+EHR_FOLDER_PATH, null, "ehr_lookups",
                 null, null);
     }
 

@@ -251,6 +251,7 @@ if [[ -z $prod ]]; then
         update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
         delete from googledrive.service_accounts where id = '8c4a933c-2f8e-4094-9f43-46e80f14e163';
         delete from ehr.notificationrecipients;
+        INSERT INTO core.members (userid, groupid) SELECT userid, -1 FROM core.principals WHERE name LIKE '%@labkey.com%' ON CONFLICT (userid,groupid) DO NOTHING;
 XXX
 fi
 

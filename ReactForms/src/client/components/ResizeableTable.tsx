@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     MaterialReactTable,
     type MRT_Row,
@@ -34,16 +34,19 @@ import { Email } from '@mui/icons-material';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import { EditableGridCell } from './EditableGridCell';
 import { EditableGridCreateModal} from './EditableGridCreateModal';
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
+import { useFieldArray, useForm, useFormContext, useFormState } from 'react-hook-form';
 import {FilterFn} from '@tanstack/react-table';
 
-interface ResizeableTableProps {
+interface ResizeableTableProps<T extends object> {
     data: any;
     metaData: QueryColumn[];
     columnHelper: any;
     schema: string;
     query: string;
     formControl: any;
+    validationFns?: {
+        [key: string]: (arg: T) => boolean
+    };
 }
 type TableRow<T> = {
     key: string
@@ -64,8 +67,8 @@ type TableRow<T> = {
     requestid: string
 }
 
-const ResizeableTable = (props: ResizeableTableProps) => {
-    const {data, metaData, columnHelper, schema, query, formControl} = props;
+const ResizeableTable = (props: ResizeableTableProps<any>) => {
+    const {data, metaData, columnHelper, schema, query, formControl, validationFns} = props;
     const columnNames = Object.keys(data[0]).reduce((result, key) => {
         result[key] = key.charAt(0).toUpperCase() + key.slice(1); // convert the key to titlecase
         return result;
@@ -73,12 +76,21 @@ const ResizeableTable = (props: ResizeableTableProps) => {
     const [open, setOpen] = useState(true);
     const [isCreatingUser, setIsCreatingUser] = useState(false);
     const [isUpdatingUser, setIsUpdatingUser] = useState(false);
+
     const [validationErrors, setValidationErrors] = useState<any>({});
     const {getValues,setValue,setError, trigger, formState} = useFormContext();
     const {remove} = useFieldArray(({control: formControl, name: `${schema}-${query}`}));
     const queryClient = useQueryClient();
-    const updateForm = useForm();
-    const createForm = useForm();
+    const updateForm = useForm(
+        {
+            mode: "onChange",
+            reValidateMode: "onChange"
+        });
+    const createForm = useForm(
+        {
+            mode: "onChange",
+            reValidateMode: "onChange"
+        });
 
     console.log("QC: ", queryClient.getQueryData(['rows']));
     //const {fields} = useFieldArray({control: formControl, name: "ResizeTable"})
@@ -126,6 +138,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                     prevForm={null}
                     name={`${schema}-${query}.${cell.row.id}.${col.name}`}
                     required={metaData[colIdx].required}
+                    validation={validationFns?.[col.name] ?? undefined}
                 />
             ),
             filterVariant: (col.type === "Date and Time") ? 'datetime-range' : 'text',
@@ -153,11 +166,22 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         values,
         table,
     }) => {
-
+        
+        createForm.reset();
         Object.keys(values).forEach((key) => {
-            createForm.setValue(key, values[key]);
+            const columnId = key.slice(key.lastIndexOf(".") + 1);
+            // check if columnId has validation fns Key here is ${schema}-${query}.${rowIdx}.${columnId}
+            if(validationFns?.hasOwnProperty(columnId)){
+                createForm.register(key,{
+                    validate: value => validationFns[columnId](value),
+                });
+                createForm.setValue(key, values[key]);
+            }else{
+                createForm.register(key);
+                createForm.setValue(key, values[key]);
+            }
         })
-        createForm.trigger();
+        await createForm.trigger();
         const oldValidationErrors = createForm.formState.errors;
 
         if (Object.keys(oldValidationErrors).length !== 0 ) {
@@ -202,10 +226,21 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         table
     }) => {
         const updatedRowIdx: number = parseInt(Object.keys(values).map(key => key.match(/\.(\d+)\./)?.[1])[0]);
+        updateForm.reset();
         Object.keys(values).forEach((key) => {
-            updateForm.setValue(key, values[key]);
+            const columnId = key.slice(key.lastIndexOf(".") + 1);
+            // check if columnId has validation fns Key here is ${schema}-${query}.${rowIdx}.${columnId}
+            if(validationFns?.hasOwnProperty(columnId)){
+                updateForm.register(key,{
+                    validate: value => validationFns[columnId](value),
+                });
+                updateForm.setValue(key, values[key]);
+            }else{
+                updateForm.register(key);
+                updateForm.setValue(key, values[key]);
+            }
         })
-        updateForm.trigger();
+        await updateForm.trigger();
         const oldValidationErrors = updateForm.formState.errors;
 
         if (Object.keys(oldValidationErrors).length !== 0 ) {
@@ -233,7 +268,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                 );
             }),
         )
-        trigger();
+        await trigger();
         setIsUpdatingUser(false);
         table.setEditingRow(null); //exit editing mode
     };
@@ -300,6 +335,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         },
         muiCreateRowModalProps: {
             open: open,
+            key: "createRowModal",
             PaperProps: {
                 component: "form",
                 id: "createRowForm",
@@ -320,9 +356,10 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         },
         muiEditRowDialogProps: {
             open: open,
+            key: "updateRowModal",
             PaperProps: {
                 component: "form",
-                id: "editRowForm",
+                id: "updateRowForm",
                 onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -354,7 +391,7 @@ const ResizeableTable = (props: ResizeableTableProps) => {
         onCreatingRowSave: handleCreateUser,
         onEditingRowSave: handleUpdateUser,
         //optionally customize modal content
-        renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
+        renderCreateRowDialogContent: ({ table, row }) => (
             <>
                 <DialogTitle variant="h3">Create New Blood Draw</DialogTitle>
                 <DialogContent
@@ -366,28 +403,31 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                         schema={schema}
                         query={query}
                         action={"create"}
+                        modalForm={createForm}
                     />} {/* or render custom edit components here */}
                 </DialogContent>
                 <DialogActions>
-                    <button
+                    <Button
                         type={'submit'}
                         form={"createRowForm"}
                     >
                         submit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        id={"createCancelButton"}
                         type={'button'}
                         onClick={() => {
                             setOpen(false);
+                            table.setCreatingRow(undefined);
                         }}
                     >
                         cancel
-                    </button>
+                    </Button>
                 </DialogActions>
             </>
         ),
         //optionally customize modal content
-        renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
+        renderEditRowDialogContent: ({ table, row }) => (
             <>
                 <DialogTitle variant="h3">Edit User</DialogTitle>
                 <DialogContent
@@ -399,15 +439,17 @@ const ResizeableTable = (props: ResizeableTableProps) => {
                         schema={schema}
                         query={query}
                         action={"edit"}
-
-                    />} {/* or render custom edit components here */}
+                        modalForm={updateForm}
+                    />}
                 </DialogContent>
                 <DialogActions>
-                    <button type={'submit'} form={"editRowForm"}> submit</button>
+                    <button type={'submit'} form={"updateRowForm"}> submit</button>
                     <button
+                        id={"updateCancelButton"}
                         type={'button'}
                         onClick={() => {
                             setOpen(false);
+                            table.setEditingRow(undefined);
                         }}
                     > cancel</button>
                 </DialogActions>
@@ -518,7 +560,7 @@ const queryClient = new QueryClient();
 export const MUIEditableGridPanel = (props) => {
     console.log(props);
     const {defaultValues, redirectSchema, redirectQuery, metaData, componentProps, formControl} = props;
-    const {columnHelper} = componentProps;
+    const {columnHelper, validationFns} = componentProps;
     if(!metaData) return;
     if (!(redirectSchema && redirectQuery && defaultValues && `${redirectSchema}-${redirectQuery}` in defaultValues)) return;
     const data = defaultValues[`${redirectSchema}-${redirectQuery}`];
@@ -535,6 +577,7 @@ export const MUIEditableGridPanel = (props) => {
                     schema={redirectSchema}
                     query={redirectQuery}
                     formControl={formControl}
+                    validationFns={validationFns}
                 />
             </QueryClientProvider>
         </LocalizationProvider>

@@ -7,6 +7,22 @@ import { TaskPane } from '../../components/TaskPane';
 import {MUIEditableGridPanel} from '../../components/ResizeableTable';
 import {BloodRow, UltrasoundsRow} from '../../components/testData';
 import { createMRTColumnHelper } from 'material-react-table';
+import { lookupAnimalInfo } from '../../query/helpers';
+import { InfoProps } from '../../query/typings';
+
+const validateId = (id: string) => {
+    console.log("validate Id");
+    return lookupAnimalInfo(id).then((data: InfoProps) => {
+        if(data.calculated_status === "Alive"){
+            return true;
+        }
+        return "Animal is not valid";
+    }).catch(() => {
+        return "Animal is not valid";
+    });
+}
+
+
 export const Ultrasounds: FC<any> = (props) => {
 
     const taskid: string = ActionURL.getParameter('taskid');
@@ -34,7 +50,10 @@ export const Ultrasounds: FC<any> = (props) => {
                 prevTaskId: taskid,
                 title: "Blood",
                 blacklist: ['taskid'],
-                columnHelper: createMRTColumnHelper<BloodRow>()
+                columnHelper: createMRTColumnHelper<BloodRow>(),
+                validationFns: { // input should be expected new cell value only
+                    Id: validateId
+                }
             }
         },{
             type: MUIEditableGridPanel,

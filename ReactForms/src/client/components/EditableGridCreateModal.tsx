@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FC,  } from 'react';
+import { FC, useEffect, } from 'react';
 import { MRT_Cell, MRT_Row, MRT_TableInstance } from 'material-react-table';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import "../theme/css/editable-grid.css";
@@ -13,33 +13,41 @@ interface CreateModalProps {
     schema: string;
     query: string;
     action: string;
+    modalForm: any;
 }
 export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
     const {table,
         row,
         schema,
         query,
-        action
+        action,
+        modalForm
     } = props;
     const {getValues} = useFormContext();
+    console.log("ACT: ", action);
     const initVals = action === "create" ? row.original : getValues(`${schema}-${query}.${row.id}`);
-
+    useEffect(() => {
+        console.log("Modal Errors: ", modalForm.errors);
+    }, [modalForm.errors]);
     return(
         <div className={"page-wrapper"}>
             {table.getAllColumns().map((column) => {
                 if (column.id === "mrt-row-actions") return;
                 if((column.columnDef.meta as QueryColumn).type === "Date and Time") {
                     return(
-                        <div className={'standard-input'} key={column.id}>
+                        <div className={'standard-input'} key={`${action}-${column.id}`}>
                             <DateInput
                                 id={column.id}
-                                defaultValue={row.id === "mrt-row-create" ? new Date() : initVals[column.id]}
+                                defaultValue={row.id === 'mrt-row-create' ? new Date() : initVals[column.id]}
                                 name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
                             />
-                            <label className={"date-modal-label"}>
+                            <label className={'date-modal-label'}>
                                 {column.id}
                             </label>
                             <span className={'underline'}></span>
+                            <div className={'react-error-text'}>
+                                {(modalForm.formState?.errors?.[`${schema}-${query}`]?.[row.id]?.[column.id]?.message)}
+                            </div>
                         </div>
                     )
                 }
@@ -52,11 +60,15 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
                             name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
                             type={(column.columnDef.meta as QueryColumn).type}
                             required={(column.columnDef.meta as QueryColumn).required}
+                            style={(modalForm.formState?.errors?.[`${schema}-${query}`]?.[row.id]?.[column.id]) ? {borderColor: "red"} : undefined}
                         />
                         <label>
                             {column.id}
                         </label>
                         <span className={'underline'}></span>
+                        <div className={"react-error-text"}>
+                            {(modalForm.formState?.errors?.[`${schema}-${query}`]?.[row.id]?.[column.id]?.message)}
+                        </div>
                     </div>
                 );
             })

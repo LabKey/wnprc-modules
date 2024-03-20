@@ -4,7 +4,7 @@ import { DefaultFormContainer } from '../../components/DefaultFormContainer';
 import { CustomInputPane } from '../../components/CustomInputPane';
 import {ActionURL} from '@labkey/api';
 import { TaskPane } from '../../components/TaskPane';
-import {MUIEditableGridPanel} from '../../components/ResizeableTable';
+import {MUIEditableGridPanel} from '../../components/EditableGridPanel';
 import {BloodRow, UltrasoundsRow} from '../../components/testData';
 import { createMRTColumnHelper } from 'material-react-table';
 import { lookupAnimalInfo } from '../../query/helpers';

@@ -55,13 +55,6 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
         trigger(name);
     }, []);
 
-    useEffect(() => {
-        console.log("Errors: ", borderColor);
-        console.log("Errors Field: ", stateName, fieldName, rowNum)
-        console.log("Errors Name: ", name);
-
-    }, [borderColor]);
-
     /* Watch effect,
     / This will update the text input automatically if given autoFill options, watch variable and search function.
     / Currently this only works if the watch variable is a dropdown input field.

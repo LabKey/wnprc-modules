@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { FC, useEffect, } from 'react';
-import { MRT_Cell, MRT_Row, MRT_TableInstance } from 'material-react-table';
+import { FC } from 'react';
+import { MRT_Row, MRT_TableInstance } from 'material-react-table';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import "../theme/css/editable-grid.css";
 import { useFormContext } from 'react-hook-form';
@@ -9,7 +9,6 @@ import { DateInput } from './DateInput';
 interface CreateModalProps {
     table: MRT_TableInstance<any>;
     row: MRT_Row<any>;
-    cell?: MRT_Cell<any>;
     schema: string;
     query: string;
     action: string;
@@ -24,11 +23,8 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
         modalForm
     } = props;
     const {getValues} = useFormContext();
-    console.log("ACT: ", action);
+    // decides to create new row or load previous row
     const initVals = action === "create" ? row.original : getValues(`${schema}-${query}.${row.id}`);
-    useEffect(() => {
-        console.log("Modal Errors: ", modalForm.errors);
-    }, [modalForm.errors]);
     return(
         <div className={"page-wrapper"}>
             {table.getAllColumns().map((column) => {

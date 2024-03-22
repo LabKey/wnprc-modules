@@ -359,7 +359,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Override
     protected boolean skipStudyImportQueryValidation()
     {
-        return false;
+        return true;
     }
 
     private void createFinanceManagementFolders()

@@ -31,5 +31,12 @@
                 <permission>ADMIN</permission>
             </editPermissions>
         </propertyDescriptor>
+        <propertyDescriptor name="BloodDrawThreshold">
+            <description>Threshold in mL of blood draws getting close to empty</description>
+            <defaultValue>4</defaultValue>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
     </properties>
 </module>

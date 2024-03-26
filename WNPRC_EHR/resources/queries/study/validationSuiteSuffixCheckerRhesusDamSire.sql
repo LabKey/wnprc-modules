@@ -52,18 +52,18 @@ UNION ALL
 SELECT last_four, NULL AS sire, Dam, frequency, Species
 FROM (
          --Gets: (dams) (rhesus/unknown) (beginning with 'rh').
-         SELECT Dam, SUBSTR(Dam,(length(dam)-3),length(dam)) AS last_four, COUNT(*) AS frequency, Species
+         SELECT Dam, SUBSTR(Dam,(length(Dam)-3),length(Dam)) AS last_four, COUNT(*) AS frequency, Species
          FROM Pedigree
          WHERE (SUBSTR(Dam,1,2) = 'rh') AND ((Species='Rhesus') OR (Species='Unknown'))
-         GROUP BY Dam, SUBSTR(Dam,(length(dam)-3),length(dam)), Species
+         GROUP BY Dam, SUBSTR(Dam,(length(Dam)-3),length(Dam)), Species
 
          UNION
 
          --Gets: (dams) (rhesus/unknown) (NOT beginning with 'rh') (with a length of 4).
-         SELECT Dam, SUBSTR(Dam,(length(dam)-3),length(dam)) AS last_four, COUNT(*) AS frequency, Species
+         SELECT Dam, SUBSTR(Dam,(length(Dam)-3),length(Dam)) AS last_four, COUNT(*) AS frequency, Species
          FROM Pedigree
-         WHERE (SUBSTR(Dam,1,2) != 'rh') AND (length(dam) = 4) AND ((Species='Rhesus') OR (Species='Unknown'))
-         GROUP BY Dam, SUBSTR(Dam,(length(dam)-3),length(dam)), Species
+         WHERE (SUBSTR(Dam,1,2) != 'rh') AND (length(Dam) = 4) AND ((Species='Rhesus') OR (Species='Unknown'))
+         GROUP BY Dam, SUBSTR(Dam,(length(Dam)-3),length(Dam)), Species
      )
 --Checks that each row above has a (last_four) that shows up BOTH with & without the 'rh' prefix.
 WHERE last_four IN (
@@ -71,16 +71,16 @@ WHERE last_four IN (
     SELECT last_four
     FROM (
              --Gets: (dams) (rhesus/unknown) (beginning with 'rh').
-             SELECT Dam, SUBSTR(Dam,(length(dam)-3),length(dam)) AS last_four, Species
+             SELECT Dam, SUBSTR(Dam,(length(Dam)-3),length(Dam)) AS last_four, Species
              FROM Pedigree
              WHERE (SUBSTR(Dam,1,2) = 'rh') AND ((Species='Rhesus') OR (Species='Unknown'))
 
              UNION
 
              --Gets: (dams) (rhesus/unknown) (NOT beginning with 'rh') (with a length of 4).
-             SELECT Dam, SUBSTR(Dam,(length(dam)-3),length(dam)) AS last_four, Species
+             SELECT Dam, SUBSTR(Dam,(length(Dam)-3),length(Dam)) AS last_four, Species
              FROM Pedigree
-             WHERE (SUBSTR(Dam,1,2) != 'rh') AND (length(dam) = 4) AND ((Species='Rhesus') OR (Species='Unknown'))
+             WHERE (SUBSTR(Dam,1,2) != 'rh') AND (length(Dam) = 4) AND ((Species='Rhesus') OR (Species='Unknown'))
          )
     GROUP BY last_four
     HAVING COUNT(*) >= 2

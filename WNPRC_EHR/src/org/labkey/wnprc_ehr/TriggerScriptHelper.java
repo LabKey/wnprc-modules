@@ -2130,6 +2130,11 @@ public class TriggerScriptHelper {
         return  returnCondition;
     }
 
+
+    public static List<Object> filterBloodDraws(List<Object> bloodRecords, Integer limit)
+    {
+        return null;
+    }
     //This function will always have lixit as the waterSource
     public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, Map<String, Object> extraContext) throws Exception
     {

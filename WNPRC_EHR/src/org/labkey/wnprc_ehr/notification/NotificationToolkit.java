@@ -39,6 +39,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.Row;
 import org.labkey.wnprc_ehr.WNPRC_EHREmail;
 //import org.labkey.remoteapi.query.Sort;
 
@@ -209,25 +210,16 @@ public class NotificationToolkit {
         return(ts.getRowCount());
     }
 
-
-
     /**
      * This formats the notification's "hours sent" into a usable cron string.
-     * @param hours A string array of hours in military time (ex. {8, 12, 23}).
-     * @return      A cron string representing the passed-in hours.
+     * @param minute    (0-59, * (all), or comma separated values with no spaces)
+     * @param hour      (0-23, * (all), or comma separated values with no spaces)
+     * @param dayOfWeek (1-7, * (all), or comma separated values with no spaces)
+     * @return
      */
-    public final String createCronString(String[] hours) {
-
+    public final String createCronString(String minute, String hour, String dayOfWeek) {
         //Creates variables.
-        StringBuilder returnString = new StringBuilder("0 0");
-
-        //Adds desired hours.
-        for (int i = 0; i < hours.length; i++) {
-            returnString.append(" " + hours[i]);
-        }
-
-        //Adds necessary format text to the end.
-        returnString.append(" * * ?");
+        StringBuilder returnString = new StringBuilder("0 " + minute + " " + hour + " ? * " + dayOfWeek + " *");
 
         //Returns properly formatted cron string.
         return returnString.toString();
@@ -251,15 +243,6 @@ public class NotificationToolkit {
 
         //Returns string.
         return largeString.toString();
-    }
-
-
-    /**
-     * Gets a timestamp with the current date & time.
-     * @return  A string representing the current date & time.
-     */
-    public final String getCurrentTime() {
-        return AbstractEHRNotification._dateTimeFormat.format(new Date());
     }
 
     /**
@@ -529,6 +512,148 @@ public class NotificationToolkit {
         return returnRow;
     }
 
+    //TODO: Finish documentation.
+    //Try/Catch prevents error if:
+    // Table does not exist.
+    // Study does not exist.
+    // Target column does not exist.
+    // Sort value does not exist.
+    // Filter column does not exist.
+    public static final ArrayList<String> getTableMultiRowSingleColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn) {
+        ArrayList<String> returnArray = new ArrayList<String>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets ID from each table row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                returnArray.add(rs.getString(targetColumn));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Finish documentation.
+    public static final ArrayList<String[]> getTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+        ArrayList<String[]> returnArray = new ArrayList<String[]>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets target column values for each row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                String[] columnArray = new String[targetColumns.length];
+                                for (int i = 0; i < targetColumns.length; i++) {
+                                    columnArray[i] = rs.getString(targetColumns[i]);
+                                }
+                                returnArray.add(columnArray);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Finish documentation.
+    //This is a redo of the function getTableMultiRowMultiColumn() but using field keys.  Verify this works, then replace old function.
+    public static final ArrayList<HashMap<String,String>> getTableMultiRowMultiColumnWithFieldKeys(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+        //Creates array to return.
+        ArrayList<HashMap<String, String>> returnArray = new ArrayList<HashMap<String, String>>();
+        try {
+            //Updates table info.
+            TableInfo myTableInfo = QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName);
+            //Updates columns to be retrieved.
+            Set<FieldKey> myKeys = new HashSet<>();
+            for (String myColumn : targetColumns) {
+                myKeys.add(FieldKey.fromString(myColumn));
+            }
+            final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
+            //Runs query with updated info.
+            TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets target column values for each row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                Results myResults = new ResultsImpl(rs, myColumns);
+                                HashMap<String, String> myRow = new HashMap<>();
+                                //Goes through each column in current query row and updates currentRow.
+                                for (int i = 0; i < targetColumns.length; i++) {
+                                    String currentColumnTitle = targetColumns[i];
+                                    String currentColumnValue = "";
+                                    if (myResults.getString(FieldKey.fromString(currentColumnTitle)) != null) {
+                                        currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    }
+                                    myRow.put(currentColumnTitle, currentColumnValue);
+                                }
+                                returnArray.add(myRow);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Finish documentation.
+    //TODO: Combine this with getTableMultiRowSingleColumn?
+    public static final ArrayList<String> getTableMultiRowSingleColumnWithParameters(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
+        ArrayList<String> returnArray = new ArrayList<String>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort).setNamedParameters(myParameters);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets ID from each table row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                returnArray.add(rs.getString(targetColumn));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        finally
+        {
+            return returnArray;
+        }
+    }
+
+    //TODO: Move this to DeathNotificationRevamp.java
     /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's necropsy.
      * It contains the following data (returning blank strings for non-existent data):
@@ -649,6 +774,7 @@ public class NotificationToolkit {
         }
     }
 
+    //TODO: Move this to DeathNotificationRevamp.java
     /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's demographics.
      * It contains the following data (returning blank strings for non-existent data):
@@ -1035,7 +1161,123 @@ public class NotificationToolkit {
             );
             return returnStyle.toString();
         }
+
+        //TODO: Add documentation.
+        public String setHeaderRowBackgroundColor(String headerColor) {
+            StringBuilder returnStyle = new StringBuilder();
+            returnStyle.append(
+                    "th:nth-child(n) {background: " + headerColor + "}"
+            );
+            return returnStyle.toString();
+        }
+
+//        public String setRowBackgroundColor(Integer[] rowsToHighlight, String highlightColor) {
+//
+//        }
     }
 
+    static class NotificationRevampTable
+    {
+        //        Integer borderSize;                         //The size of the table border.
+        String[] tableColumns;                      //The names of the columns.
+        ArrayList<String[]> tableData;              //A 3D array of the table data. (ArrayList of rows, each containing a string array of column data.)
+        ArrayList<String> rowColors;         //An optional list of colors for each row.  Must be the same size as 'tableData'.
+
+        NotificationRevampTable(String[] TableColumns, ArrayList<String[]> TableData)
+        {
+            this.tableColumns = TableColumns;
+            this.tableData = TableData;
+            this.rowColors = null;
+        }
+
+        public String createBasicHTMLTable()
+        {
+            //Begin table.
+            StringBuilder tempTable = new StringBuilder();
+            tempTable.append("<table>");
+
+            //Adds column headers.
+            tempTable.append("<tr>");
+            for (String columnName : tableColumns)
+            {
+                tempTable.append("<th>" + columnName + "</th>");
+            }
+            tempTable.append("</tr>");
+
+            //Cycles through each row.
+            Integer rowTracker = 0;
+            for (String[] currentRow : tableData)
+            {
+                tempTable.append("<tr>");
+                //Cycles through each column in the current row.
+                for (String currentColumn : currentRow)
+                {
+                    //Updates row data.
+                    if (this.rowColors == null)
+                    {
+                        tempTable.append("<td>" + currentColumn + "</td>");
+                    }
+                    //Updates row data with color.
+                    else if (this.rowColors.size() == this.tableData.size())
+                    {
+                        tempTable.append("<td bgcolor=" + rowColors.get(rowTracker) + ">" + currentColumn + "</td>");
+                    }
+                }
+                tempTable.append("</tr>");
+                rowTracker++;
+            }
+
+            //Return table.
+            tempTable.append("</table>");
+            return tempTable.toString();
+        }
+    }
+
+    static class DateToolkit {
+
+        //Returns today's date as Date (ex: "Wed Mar 06 13:11:02 CST 2024").
+        public Date getDateToday() {
+            Calendar todayCalendar = Calendar.getInstance();
+            Date todayDate = todayCalendar.getTime();
+            return todayDate;
+        }
+
+        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
+        public Date getDateTomorrow() {
+            Calendar todayCalendar = Calendar.getInstance();
+            todayCalendar.add(Calendar.DATE, 1);
+            Date tomorrowDate = todayCalendar.getTime();
+            return tomorrowDate;
+        }
+
+        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
+        public Date getDateFiveDaysAgo() {
+            Calendar todayCalendar = Calendar.getInstance();
+            todayCalendar.add(Calendar.DATE, -5);
+            Date fiveDaysAgoDate = todayCalendar.getTime();
+            return fiveDaysAgoDate;
+        }
+
+        //Returns today's date as String (ex: "03/06/2024").
+        public String getCalendarDateToday() {
+            //Create "month/day/year" string.  No need for 'left-padding-zeroes' as '_dateFormat.format()' already adds these.
+            String currentDate = AbstractEHRNotification._dateFormat.format(new Date());
+            String[] splitDate = currentDate.split("-");
+            String myDay = splitDate[2];
+            String myMonth = splitDate[1];
+            String myYear = splitDate[0];
+            String currentDateFormatted = myMonth + "/" + myDay + "/" + myYear;
+            return currentDateFormatted;
+        }
+
+        /**
+         * Gets a timestamp with the current date & time.
+         * @return  A string representing the current date & time (ex: "2024-03-06 13:11")
+         */
+        public final String getCurrentTime() {
+            return AbstractEHRNotification._dateTimeFormat.format(new Date());
+        }
+
+    }
 }
 

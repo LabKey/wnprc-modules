@@ -77,7 +77,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
 
     const columns = useMemo(() => metaData.map((col, colIdx)=> {
         return(columnHelper.accessor(`${schema}-${query}.${col.name}`, {
-            header: `${col.name}`,
+            header: `${col.caption}`,
             id: `${col.name}`,
             meta: {...metaData[colIdx]},
             Cell: ({cell}) => (
@@ -238,6 +238,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
         createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
         editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
         enableEditing: true,
+        enableHiding: false,
         layoutMode: "semantic",
         enableGlobalFilter: false,
         enableColumnFilterModes: true,
@@ -376,7 +377,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
         //optionally customize modal content
         renderEditRowDialogContent: ({ table, row }) => (
             <>
-                <DialogTitle variant="h3">Edit User</DialogTitle>
+                <DialogTitle variant="h3">Edit Row</DialogTitle>
                 <DialogContent
                     sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
                 >
@@ -511,12 +512,12 @@ const queryClient = new QueryClient();
 
 export const MUIEditableGridPanel = (props) => {
     console.log(props);
-    const {defaultValues, redirectSchema, redirectQuery, metaData, componentProps, formControl} = props;
+    const {defaultValues, schemaName, queryName, metaData, componentProps, formControl} = props;
     const {columnHelper, validationFns} = componentProps;
     if(!metaData) return;
-    if (!(redirectSchema && redirectQuery && defaultValues && `${redirectSchema}-${redirectQuery}` in defaultValues)) return;
-    const data = defaultValues[`${redirectSchema}-${redirectQuery}`];
-    data[0].date = data[0].date.toString();
+    if (!(schemaName && queryName && defaultValues && `${schemaName}-${queryName}` in defaultValues)) return;
+    const data = defaultValues[`${schemaName}-${queryName}`];
+    //data[0].date = data[0] ? data[0].date.toString();
 
     //Put this with your other react-query providers near root of your app
     return(
@@ -526,8 +527,8 @@ export const MUIEditableGridPanel = (props) => {
                     data={data}
                     metaData={metaData}
                     columnHelper={columnHelper}
-                    schema={redirectSchema}
-                    query={redirectQuery}
+                    schema={schemaName}
+                    query={queryName}
                     formControl={formControl}
                     validationFns={validationFns}
                 />

@@ -8,7 +8,7 @@ interface TextInputProps {
   name: string;
   id: string;
   className: string;
-  value: any; //function?
+  value?: any; //function?
   onChange?: any; //function?
   onBlur?: any;
   onFocus?: any;

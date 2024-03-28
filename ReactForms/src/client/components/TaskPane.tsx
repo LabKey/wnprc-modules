@@ -13,24 +13,26 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 interface taskProps {
     componentProps: {
-        title: string;
-        schemaName: string;
-        queryName: string;
-    }
+        defaultValues: {
+            updateTitle: string;
+        }
+    };
+    schemaName: string;
+    queryName: string;
     prevTaskId?: string;
 }
 
 export const TaskPane: FC<taskProps> = (props) =>{
-    const {prevTaskId, componentProps} = props;
-    const { title} = componentProps;
-
-    const { control } = useFormContext();
+    const {prevTaskId, schemaName, queryName, componentProps} = props;
+    const {defaultValues} = componentProps;
+    const {updateTitle} = defaultValues;
+    const { control, getValues } = useFormContext();
     const [prevTask, setPrevTask] = useState(undefined);
     const [isLoadingTask, setIsLoadingTask] = useState<boolean>(true);
     const [isLoadingQC, setIsLoadingQC] = useState<boolean>(true);
 
     const [qcOptions, setQCOptions] = useState<any>({});
-
+    console.log("taxxxkPane");
     const config: ConfigProps = {
         schemaName: "core",
         queryName: "PrincipalsWithoutAdmin",
@@ -54,17 +56,20 @@ export const TaskPane: FC<taskProps> = (props) =>{
         }
     }
 
+    /*
     // Loads previous task if one exists
     useEffect(() => {
         if(prevTaskId) {
             getTask(prevTaskId).then((result) => {
                 setPrevTask(result);
                 setIsLoadingTask(false);
+            }).catch(() => {
+                console.log("No prev task for ID found");
             });
         }else {
             setIsLoadingTask(false);
         }
-    },[]);
+    },[]);*/
 
     // Gets QC labels and row ids
     useEffect(() => {
@@ -81,7 +86,7 @@ export const TaskPane: FC<taskProps> = (props) =>{
     }, []);
 
 
-    if(isLoadingQC || isLoadingTask){
+    if(isLoadingQC){
         return <div>Loading...</div>
     }
     return(
@@ -97,13 +102,12 @@ export const TaskPane: FC<taskProps> = (props) =>{
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={`TaskPane.rowid`}
+                        name={`${schemaName}-${queryName}.rowid`}
                         id={'taskRowId'}
                         className="form-control"
-                        value={prevTask?.rowid || undefined}
                         required={false}
                         readOnly={true}
-                        type={prevTask ? "text": "hidden"}
+                        type={"text"}
                     />
                 </div>
                 <div className={"panel-input-row"}>
@@ -113,10 +117,9 @@ export const TaskPane: FC<taskProps> = (props) =>{
                         className = {'panel-label'}
                     />
                     <TextInput
-                        name={"TaskPane.title"}
+                        name={`${schemaName}-${queryName}.updateTitle`}
                         id={"taskTitle"}
                         className="form-control"
-                        value={prevTask?.title || title}
                         required={true}
                     />
                 </div>
@@ -128,9 +131,8 @@ export const TaskPane: FC<taskProps> = (props) =>{
                         className = {'panel-label'}
                     />
                     <DropdownSearch
-                        initialValue={prevTask?.assignedto || undefined}
                         optConf={config}
-                        name={"TaskPane.assignedto"}
+                        name={`${schemaName}-${queryName}.assignedto`}
                         id={"taskAssignedTo"}
                         classname="navbar__search-form"
                         required={true}
@@ -144,9 +146,8 @@ export const TaskPane: FC<taskProps> = (props) =>{
                         className = {'panel-label'}
                     />
                     <ControlledDateInput
-                        name={"TaskPane.duedate"}
+                        name={`${schemaName}-${queryName}.duedate`}
                         id={"taskDueDate"}
-                        date={prevTask?.duedate ? new Date(prevTask.duedate) : new Date()}
                     />
                 </div>
                 <div className={"panel-input-row"}>
@@ -156,9 +157,8 @@ export const TaskPane: FC<taskProps> = (props) =>{
                         className={'panel-label'}
                     />
                     <Controller
-                        name={"TaskPane.qcstate" as  FieldPathValue<FieldValues, any>}
+                        name={`${schemaName}-${queryName}.qcstate` as  FieldPathValue<FieldValues, any>}
                         control={control}
-                        defaultValue={prevTask?.qcstate as FieldPathValue<FieldValues, any> || getQCRow("In Progress") as FieldPathValue<FieldValues, any>}
                         render={({field: {onChange, value}}) => (
                             <div className={"text-input"}>
                                 <input

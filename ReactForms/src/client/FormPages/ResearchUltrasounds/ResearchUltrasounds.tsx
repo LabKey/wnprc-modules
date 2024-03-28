@@ -6,11 +6,7 @@ import {InstructionsPane} from '../../components/InstructionsPane';
 import {TaskPane} from '../../components/TaskPane';
 import {ActionURL} from '@labkey/api';
 
-import {
-    inputs,
-    reviewInputs,
-    restraintInputs,
-} from './customInputs';
+import { findAccount } from '../../query/helpers';
 export const ResearchUltrasounds: FC<any> = (props) => {
     const taskid: string = ActionURL.getParameter('taskid');
     const formStartTime: Date = new Date(new Date().toISOString().slice(0, 16).replace('T', ' '));
@@ -21,10 +17,13 @@ export const ResearchUltrasounds: FC<any> = (props) => {
         {
             type: TaskPane,
             name: "TaskPane",
+            schemaName: "ehr",
+            queryName: "tasks",
             componentProps: {
-                title: "Research Ultrasounds",
-                schemaName: "ehr",
-                queryName: "tasks"
+                defaultValues: {
+                    updateTitle: "Research Ultrasounds",
+                    qcstate: 2,
+                }
             }
         },{
             type: InstructionsPane,
@@ -40,22 +39,42 @@ export const ResearchUltrasounds: FC<any> = (props) => {
         },{
             type: CustomInputPane,
             name: "ResearchPane",
-            required: ["TaskPane.qcstate"],
+            required: ["ehr-tasks.qcstate"],
+            schemaName: "study",
+            queryName: "research_ultrasounds",
             componentProps: {
                 title: "Research Ultrasounds",
-                schemaName: "study",
-                queryName: "research_ultrasounds",
-                inputs: inputs,
+                blacklist: ["taskid", "QCState", "history", "Container"],
+                wnprcMetaData: {
+                    Id: {
+                        type: "text"
+                    },
+                    project: {
+                        type: "dropdown",
+                        watchVar: "study-research_ultrasounds.Id",
+                        lookup: {
+                            schemaName: "study",
+                            queryName: "Assignment",
+                            displayColumn: "project",
+                            keyColumn: "project",
+                        },
+                        defaultOpts: [{value:300901, label:"300901"},{value:400901, label:"400901"}]
+                    },
+                    account: {
+                        type: "text",
+                        autoFill: {watch: "study-research_ultrasounds.project", search: findAccount}
+                    }
+                }
             }
         },{
             type: CustomInputPane,
             name: "RestraintPane",
-            required: ["ResearchPane.Id","ResearchPane.date", "TaskPane.qcstate"],
+            schemaName: "study",
+            queryName: "restraints",
+            required: ["study-research_ultrasounds.Id","study-research_ultrasounds.date", "ehr-tasks.qcstate"],
             componentProps: {
-                schemaName: "study",
-                queryName: "restraints",
+                blacklist: ["Id", "taskid", "project","folder", "QCState", "history", "Container", "description", "date"],
                 title: "Restraint",
-                inputs: restraintInputs,
             }
         }
     ];
@@ -65,14 +84,18 @@ export const ResearchUltrasounds: FC<any> = (props) => {
             name: "ReviewPane",
             required: ["TaskPane.qcstate"],
             commandOverride: 'insert',
+            schemaName: "study",
+            queryName: "ultrasound_review",
             componentProps: {
                 title: "Ultrasound Review",
-                schemaName: "study",
-                queryName: "ultrasound_review",
-                inputs: reviewInputs,
+                blacklist: ['taskid', 'Container', 'history', 'QCState', 'ultrasound_id'],
+                wnprcMetaData: {
+                    Id: {
+                        type: "text"
+                    }
+                }
             }
         }
-
         components.push(review);
     }
     return (

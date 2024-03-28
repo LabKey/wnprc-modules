@@ -2,7 +2,7 @@ import { ActionURL, Filter, Query, Utils } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { GetQueryDetailsOptions } from '@labkey/api/dist/labkey/query/GetQueryDetails';
+import { GetQueryDetailsOptions, QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -362,7 +362,7 @@ export const getFormData = (taskId: string, schemaName: string, queryName: strin
     labkeyActionSelectWithPromise(config)
         .then((data) => {
           if (data["rows"][0]) {
-            resolve(data["rows"][0]);
+            resolve(data["rows"]);
           } else {
             reject(data);
           }
@@ -432,7 +432,7 @@ export const getQCRowID = async (qcLabel: string) => {
 }
 
 
-export const getQueryDetails = async (schemaName, queryName) => {
+export const getQueryDetails = async (schemaName, queryName): Promise<Awaited<any>> => {
     let config: GetQueryDetailsOptions = {
       schemaName: schemaName,
       queryName: queryName,
@@ -462,4 +462,28 @@ export const createTypeFromJson = (json: any): string => {
   typeDefinition += '};';
 
   return typeDefinition;
+}
+
+export const findDropdownOptions = (lookupMetaData, watchState?) => {
+  console.log("DDX: ", lookupMetaData, watchState);
+  if(watchState){
+    return ({
+      schemaName: lookupMetaData.schemaName,
+      queryName: lookupMetaData.queryName,
+      columns: [lookupMetaData.keyColumn, lookupMetaData.displayColumn],
+      filterArray: [
+        Filter.create(
+            watchState.name,
+            watchState.field,
+            Filter.Types.EQUALS
+        )
+      ]
+    });
+  }else{
+    return ({
+      schemaName: lookupMetaData.schemaName,
+      queryName: lookupMetaData.queryName,
+      columns: [lookupMetaData.keyColumn, lookupMetaData.displayColumn],
+    });
+  }
 }

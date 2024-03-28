@@ -156,6 +156,9 @@ select.form-control {
   padding: 15px;
   position: relative;
   display: flex;
+  max-width: 100vw;
+  height: fit-content; /* Full viewport height */
+  justify-content: center; /* Center the content horizontally */
 }
 
 .default-form {
@@ -396,12 +399,4 @@ select[id^="restraint"] {
 
 .dropdown-controller {
   display: flex;
-}
-
-.form-wrapper {
-  width: 100vw; /* Full viewport width */
-  height: fit-content; /* Full viewport height */
-  display: flex;
-  justify-content: center; /* Center the content horizontally */
-  align-items: center; /* Center the content vertically */
 }

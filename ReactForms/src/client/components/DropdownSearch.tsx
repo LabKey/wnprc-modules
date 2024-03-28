@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as React from "react";
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
 import { useFormContext, Controller, FieldPathValue, FieldValues } from 'react-hook-form';
 
@@ -54,7 +54,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         labkeyActionSelectWithPromise(optConf).then(data => {
             const options = [];
             const value = optConf.columns[0];
-            const display = optConf.columns[1] || optConf.columns[0];
+            const display = optConf.columns[1];
             data["rows"].forEach(item => {
                 options.push({value: item[value], label: item[display]});
                 if(item[value] === initialValue){
@@ -79,6 +79,8 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                 }
                 return accumulator;
             }, []);
+            console.log("DDX 2: ", optConf);
+            console.log("DDX 3: ", duplicatesRemovedArray);
             setOptState(duplicatesRemovedArray);
             setIsLoading(false);
         });
@@ -93,7 +95,6 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
             <Controller
                 control={control}
                 name={name}
-                defaultValue={defaultValue?.value as FieldPathValue<FieldValues, any>}
                 rules={{
                     validate: validation,
                     required: required ? "This field is required" : false
@@ -110,6 +111,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                         onChange={(selectedOption) => {onChange(selectedOption?.value ? selectedOption.value : null);}}
                         options={optState}
                         isClearable={isClearable}
+                        filterOption={createFilter({ ignoreAccents: false })}
                         styles={{
                             control: (base) => ({
                                 ...base,

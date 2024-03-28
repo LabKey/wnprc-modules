@@ -8,12 +8,12 @@ import DropdownSearch from './DropdownSearch';
 import ControlledDateInput from './ControlledDateInput';
 import TextAreaInput from './TextAreaInput';
 import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
+import { findDropdownOptions } from '../query/helpers';
 
 interface BulkFormProps {
     inputField: any[];
     compName: string;
-    prevForm: any;
-    dropdownOptions?: any;
+    wnprcMetaData?: any;
 }
 /*
 Form creation helper
@@ -24,7 +24,7 @@ Form creation helper
 
  */
 const BulkFormInput: FC<BulkFormProps> = (props) => {
-    const {inputField, prevForm, dropdownOptions, compName} = props;
+    const {inputField, compName, wnprcMetaData} = props;
     const {watch} = useFormContext();
 
     const inputs = [];
@@ -34,13 +34,15 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
     for (let i = 0; i < inputField.length; i++) {
         const id = `${compName}_${i}`;
         const name = inputField[i].name;
-        const label = inputField[i].label;
+        const label = inputField[i].caption;
         const isRequired = inputField[i].required;
-        const fieldType = inputField[i].type;
-        const validation = inputField[i].validation;
-        const watchVar = inputField[i].watch;
-        const autoFill = inputField[i].autoFill;
-        const defaultOpts = inputField[i].defaultOpts;
+        const fieldType = wnprcMetaData?.hasOwnProperty(name) ? wnprcMetaData[name].type
+            : inputField[i].type.includes("Date") ? "date"
+            : inputField[i].lookup ? "dropdown"
+            : inputField[i].inputType;
+        //const validation = inputField[i].validation;
+        const watchVar = wnprcMetaData?.[name]?.watchVar;
+        const autoFill = wnprcMetaData?.[name]?.autoFill;
         // Text field
         // Tells the form to expose the animal Id input with name "Id" to a global state
         if(fieldType === "text"){
@@ -54,11 +56,9 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                     <TextInput
                         name={`${compName}.${name}`}
                         id={id}
-                        className={"form-control"}
-                        value={prevForm?.[name] ?? ""}
-                        required={isRequired}
-                        validation={validation}
                         autoFill={autoFill}
+                        className={"form-control"}
+                        required={isRequired}
                     />
                 </div>
             );
@@ -75,9 +75,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         name={`${compName}.${name}`}
                         id={id}
                         className={"form-control"}
-                        value={prevForm?.[name] ?? ""}
                         required={isRequired}
-                        validation={validation}
                     />
                 </div>
             );
@@ -93,19 +91,22 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                     <Checkbox
                         name={`${compName}.${name}`}
                         id={id}
-                        validation={validation}
                         className={"form-control"}
-                        value={prevForm?.[name] ?? ""}
                         required={isRequired}
                     />
             </div>
             );
         }
         else if(fieldType === "dropdown"){ // Dropdown field
-            const watchState = watch(watchVar as FieldPathValue<FieldValues, any>);
-            const optConf = typeof inputField[i].options === 'function'
-                ? inputField[i].options(watchState)
-                : inputField[i].options;
+
+            const watchState = watchVar && {
+                name: watchVar.substring(watchVar.lastIndexOf('.') + 1),
+                field: watch(watchVar as FieldPathValue<FieldValues, any>)
+            };
+
+            const optConf = wnprcMetaData?.[name]?.lookup ? findDropdownOptions(wnprcMetaData[name].lookup,watchState)
+                : inputField[i].lookup ? findDropdownOptions(inputField[i].lookup,watchState)
+                : wnprcMetaData[name].options;
             inputs.push(
                 <div key={id} className={"panel-input-row"}>
                     <InputLabel
@@ -115,15 +116,13 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                     />
                     <DropdownSearch
                         optConf={optConf}
-                        defaultOpts={defaultOpts}
                         optDep={watchState}
-                        initialValue={prevForm?.[name] ?? null}
                         name={`${compName}.${name}`}
+                        defaultOpts={wnprcMetaData?.[name]?.defaultOpts}
                         id={id}
                         classname={"navbar__search-form"}
                         required={isRequired}
                         isClearable={true}
-                        validation={validation}
                     />
                 </div>
             );
@@ -139,9 +138,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                     <ControlledDateInput
                         name={`${compName}.${name}`}
                         id={id}
-                        date={prevForm?.[name]?.value ? new Date(prevForm[name]?.value) : new Date()}
                         required={isRequired}
-                        validation={validation}
                     />
                 </div>
             );

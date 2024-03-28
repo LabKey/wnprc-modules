@@ -1,21 +1,14 @@
-import * as React from "react";
-import { FC, useEffect, useState, useMemo } from 'react';
-import "../theme/css/react-datepicker.css";
-import "../theme/css/index.css";
-import {
-    generateFormData,
-    getTask,
-    saveRowsDirect,
-    wait,
-    getLsid,
-    getQCRowID, getQueryDetails
-} from '../query/helpers';
-import AnimalInfoPane from "./AnimalInfoPane";
+import * as React from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import '../theme/css/react-datepicker.css';
+import '../theme/css/index.css';
+import { generateFormData, getFormData, getLsid, getQueryDetails } from '../query/helpers';
+import AnimalInfoPane from './AnimalInfoPane';
 import ErrorModal from '../components/ErrorModal';
-import { ActionURL, Filter, Utils } from '@labkey/api';
-import { useForm, FormProvider, FieldPathValue } from 'react-hook-form';
+import { Utils } from '@labkey/api';
+import { FormProvider, useForm } from 'react-hook-form';
 import { FormMetadataCollection } from './FormMetadataCollection';
-import { QueryDetailsResponse, QueryView } from '@labkey/api/dist/labkey/query/GetQueryDetails';
+import { QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 
 interface Component {
@@ -73,9 +66,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const [metaData, setMetaData] = useState<FormMetaData>({});
     const methods = useForm({
         mode: "onChange",
+        reValidateMode: "onSubmit",
         defaultValues: useMemo(() => defaultValues, [defaultValues])
     });
-
+    const [isLoadingPrevTask, setIsLoadingPrevTask] = useState(true);
     const [columnDetails, setColumnDetails] = useState(undefined);
 
 
@@ -98,15 +92,15 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         const promises = components.map(async (component) => {
             console.log("comp: ", component);
             console.log("currData: ", currentFormData);
-            const componentName = component.name;
-            const schemaName = component.componentProps.schemaName;
-            const queryName = component.componentProps.queryName;
+            const formName = `${component.schemaName}-${component.queryName}`;
+            const schemaName = component.schemaName;
+            const queryName = component.queryName;
             const requiredFields = component.required;
             //Override command in-case form is under review and needs update and insert commands.
             const commandOverride = component.commandOverride;
-            if(currentFormData[componentName] !== null && currentFormData[componentName] !== undefined){
+            if(currentFormData[formName] !== null && currentFormData[formName] !== undefined){
                 // sync up task id
-                const tempNewData = currentFormData[componentName];
+                const tempNewData = currentFormData[formName];
                 tempNewData.taskid = newTaskId;
                 if(prevTaskId && !commandOverride && command === 'update'){
                     await getLsid(schemaName, queryName, newTaskId).then((prevLsid) =>{
@@ -142,8 +136,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     // Form submission handler
     const handleSubmit = async (data, e) => {
         e.preventDefault();
-        console.log("MAIN SUBMIT: ", e);
-        console.log(data);
         const finalFormData = [];
         // generate taskId if required
         const newTaskId = prevTaskId ? prevTaskId : Utils.generateUUID().toUpperCase();
@@ -154,10 +146,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             startTime: formStartTime,
         });
         finalFormData.push(generateFormData("wnprc", "session_log","insert", formMetaData));
-        processComponents(finalFormData, newTaskId, data ).then((data) => {
+        processComponents(finalFormData, newTaskId, data ).then((processedData) => {
             // For each component compile the state data into a format ready for submission
 
-            let jsonData = {commands: data}
+            let jsonData = {commands: processedData}
             console.log('calling save rows on: ', jsonData);
             // save rows to database and redirect to desired schema/query
             /*saveRowsDirect(jsonData)
@@ -184,42 +176,97 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             })
 
     }
-
+    // use effect to store default values into react hook form state management framework
     useEffect(() => {
-        components.forEach((component) => {
-            getQueryDetails(component.schemaName, component.queryName).then((data: QueryDetailsResponse) => {
-                let tempData: QueryColumn[];
-                let tempDefaultValues = [{}];
-                if (component.viewName) {//TODO use this view instead of default
-                    tempData = data.views[component.viewName].filter(item => !component.componentProps.blacklist?.includes(item.name));
-                } else {
-                    tempData = data.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
-
-                }
-                setMetaData((prevMetaData) => ({
+        Promise.all(components.map(async (component) => {
+            if(component.type.name === "InstructionsPane") return;
+            try {
+                const metaData: QueryDetailsResponse = await getQueryDetails(component.schemaName, component.queryName);
+                let tempMetaData = component.viewName ? metaData.views[component.viewName].filter(item => !component.componentProps.blacklist?.includes(item.name))
+                    : metaData.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
+                const columnNameTypeMap = tempMetaData.reduce((map, obj) => {
+                    map[obj.name] = obj.type || "String"; // Default to "String" type if not provided
+                    return map;
+                }, {});
+                setMetaData(prevMetaData => ({
                     ...prevMetaData,
-                    [`${component.schemaName}-${component.queryName}`]: tempData
+                    [`${component.schemaName}-${component.queryName}`]: tempMetaData
                 }));
-                tempData.forEach(column => {
-                    if(column.type === "Date and Time"){
-                        tempDefaultValues[0][column.name] = new Date() as FieldPathValue<any, string>;
 
+                if (prevTaskId) {
+                    const result = await getFormData(prevTaskId, component.schemaName, component.queryName);
+                    let tempDefaultValues: Array<any> | object = component.type.name === "MUIEditableGridPanel" ? [] : {};
+
+                    if(component.type.name === "MUIEditableGridPanel"){
+                        tempDefaultValues = result.map(obj => {
+                            const newObj = {};
+                            // Iterate through each property of the object
+                            Object.keys(obj).forEach(key => {
+                                // Check if the property key exists in the names array
+                                if (columnNameTypeMap[key] === "Date and Time") {
+                                    newObj[key] = new Date(obj[key]);
+                                } else {
+                                    newObj[key] = obj[key];
+                                }
+                            });
+                            return newObj;
+                        });
                     }else{
-                        tempDefaultValues[0][column.name] = column.defaultValue;
+                        tempMetaData.forEach(column => {
+                            tempDefaultValues[column.name] = result[0].hasOwnProperty(column.name)
+                                ? (column.type === "Date and Time"
+                                    ? new Date(result[0][column.name])
+                                    : result[0][column.name])
+                                : (column.type === "Date and Time"
+                                    ? new Date()
+                                    : column.defaultValue);
+                            console.log("xxx: ", tempDefaultValues, column.name, result[0].hasOwnProperty(column.name), result);
+                        });
                     }
-                })
-                setDefaultValues(prevState => ({
-                    ...prevState,
-                    [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
-                }));
-                methods.setValue(`${component.schemaName}-${component.queryName}`, tempDefaultValues);
-            }).catch((data) => {
-                console.log("Error");
+                    console.log("xxxd: ", tempDefaultValues);
+                    setDefaultValues(prevState => ({
+                        ...prevState,
+                        [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
+                    }));
+                    methods.setValue(`${component.schemaName}-${component.queryName}`, tempDefaultValues);
+                    await methods.trigger();
+                } else {
+                    let tempDefaultValues = component.type.name === "MUIEditableGridPanel" ? [{}] : {};
+                    tempMetaData.forEach(column => {
+                        if (component.type.name === "MUIEditableGridPanel"){
+                            tempDefaultValues[0][column.name] = component.componentProps?.defaultValues?.hasOwnProperty(column.name) ? component.componentProps.defaultValues[column.name] : (column.type === "Date and Time" ? new Date() : column.defaultValue);
+                        }else{
+                            tempDefaultValues[column.name] = component.componentProps?.defaultValues?.hasOwnProperty(column.name) ? component.componentProps.defaultValues[column.name] : (column.type === "Date and Time" ? new Date() : column.defaultValue);
+                        }
+
+                    });
+                    setDefaultValues(prevState => ({
+                        ...prevState,
+                        [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
+                    }));
+                    methods.setValue(`${component.schemaName}-${component.queryName}`, tempDefaultValues);
+                    await methods.trigger();
+                }
+            } catch (error) {
+                console.error("Error occurred:", error);
+            }
+        }))
+            .then(() => setIsLoadingPrevTask(false))
+            .catch(error => {
+                console.error('Error occurred loading previous tasks:', error);
+                setIsLoadingPrevTask(false);
             });
-        });
     }, []);
 
-    return (
+    useEffect(() => {
+        console.log("DV: ", defaultValues, metaData);
+    }, [defaultValues]);
+
+
+    if(isLoadingPrevTask){
+        return(<div>Loading...</div>);
+    }else {
+        return (
             <div className={`form-wrapper ${false ? "saving" : ""}`}>
                 {showModal == "error" && (
                     <ErrorModal
@@ -242,14 +289,14 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                 } = component;
 
                                 return (
-                                    <div key={`${name}-${schemaName}-${queryName}`} className="col-md-8 panel panel-portal form-row-wrapper">
+                                    <div key={`${name}-${schemaName}-${queryName}`}
+                                         className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
                                             prevTaskId={prevTaskId}
                                             name={name}
                                             componentProps={componentProps}
-                                            redirectSchema={schemaName}
-                                            redirectQuery={queryName}
-                                            formControl={methods.control}
+                                            schemaName={schemaName}
+                                            queryName={queryName}
                                             defaultValues={defaultValues}
                                             metaData={metaData[`${schemaName}-${queryName}`]}
                                         />
@@ -271,11 +318,11 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     </form>
                     {animalInfoPane && (
                         <AnimalInfoPane
-                        setAnimalInfoCache={setAnimalInfoCache}
+                            setAnimalInfoCache={setAnimalInfoCache}
                         />
                     )}
                 </FormProvider>
             </div>
-    );
-
+        );
+    }
 }

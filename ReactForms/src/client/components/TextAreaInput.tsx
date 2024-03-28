@@ -7,7 +7,7 @@ interface TextAreaInputProps {
     name: string;
     id: string;
     className: string;
-    value: any;
+    value?: any;
     onChange?: any; //function
     onBlur?: any;
     onFocus?: any;

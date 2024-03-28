@@ -37,13 +37,14 @@ export const Ultrasounds: FC<any> = (props) => {
             schemaName: "ehr",
             queryName: "tasks",
             componentProps: {
-                title: "Research Ultrasounds",
-                schemaName: "ehr",
-                queryName: "tasks"
+                defaultValues: {
+                    updateTitle: "Research Ultrasound",
+                    qcstate: 2,
+                }
             }
         },{
             type: MUIEditableGridPanel,
-            name: "MUIEditableGridPanel",
+            name: "BloodEditableGridPanel",
             schemaName: "study",
             queryName: "blood",
             componentProps: {
@@ -54,17 +55,6 @@ export const Ultrasounds: FC<any> = (props) => {
                 validationFns: { // input should be expected new cell value only
                     Id: validateId
                 }
-            }
-        },{
-            type: MUIEditableGridPanel,
-            name: "MUIEditableGridPanel",
-            schemaName: "study",
-            queryName: "ultrasounds",
-            componentProps: {
-                prevTaskId: taskid,
-                title: "Ultrasounds",
-                blacklist: ['taskid'],
-                columnHelper: createMRTColumnHelper<UltrasoundsRow>()
             }
         }
     ];

@@ -5,7 +5,7 @@ import "../theme/css/index.css";
 interface CheckboxProps {
     name: string;
     id: string;
-    value: boolean;
+    value?: boolean;
     onChange?: any;
     required?: boolean;
     className?: string;

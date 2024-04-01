@@ -382,7 +382,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new DeathNotificationRevamp(this),
                 new ColonyAlertsNotificationRevamp(this),
                 new AnimalRequestNotificationRevamp(this),
-                new BloodAlertsNotificationRevamp(this)
+                new BloodAlertsNotificationRevamp(this),
+                new BloodAlertsNotificationRevampAnimalCare(this),
+                new BloodAlertsNotificationRevampResearchStaff(this),
+                new BloodAlertsNotificationRevampSPI(this),
+                new BloodAlertsNotificationRevampVetStaff(this)
                 );
 
         for (Notification notification : notifications)

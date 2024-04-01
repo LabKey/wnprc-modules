@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -653,6 +654,35 @@ public class NotificationToolkit {
         }
     }
 
+    //This function sorts a set that may or may not contain a null.  This is needed because all sort functions don't work with nulls.
+    public ArrayList<String> sortSetWithNulls(Set<String> setToSort) {
+        //Converts set to ArrayList.
+        ArrayList<String> sortedList = new ArrayList<>();
+        sortedList.addAll(setToSort);
+
+        //Removes null value if it exists.
+        Boolean nullExists = false;
+        if (sortedList.contains(null)) {
+            sortedList.remove(null);
+            nullExists = true;
+        }
+
+        //Sorts list.
+        Collections.sort(sortedList);
+
+        //Adds null back to list if needed.
+        if (nullExists == true) {
+            sortedList.add(null);
+        }
+
+        //Returns sorted list.
+        return sortedList;
+    }
+
+
+
+
+
     //TODO: Move this to DeathNotificationRevamp.java
     /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's necropsy.
@@ -845,8 +875,6 @@ public class NotificationToolkit {
             }
         }
     }
-
-
 
     /**
      * This is an object representation of a custom QView file.

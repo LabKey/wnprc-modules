@@ -49,7 +49,7 @@ UNION ALL
 
 --Gets all (dams) grouped by their (last_four).
 --Uses a (frequency) variable to show how many (dams) are listed for each (last_four).
-SELECT last_four, NULL AS sire, dam, frequency, Species
+SELECT last_four, NULL AS sire, Dam, frequency, Species
 FROM (
          --Gets: (dams) (rhesus/unknown) (beginning with 'rh').
          SELECT Dam, SUBSTR(Dam,(length(dam)-3),length(dam)) AS last_four, COUNT(*) AS frequency, Species

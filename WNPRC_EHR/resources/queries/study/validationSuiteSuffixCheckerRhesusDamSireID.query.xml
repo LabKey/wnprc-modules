@@ -7,14 +7,15 @@
                     This query checks Rhesus parents against Rhesus ID's for similarities (ex. ID's: rhxxyy and xxyy).
                 </description>
                 <columns>
-                    <column columnName="sire">
+                    <column columnName="Id">
                         <url>
                             /query/executeQuery.view?schemaName=study&amp;
                             query.queryName=Pedigree&amp;
                             query.sort=-Id%2C-source&amp;
                             query.Id~in=${last_four}%3Brh${last_four}
                         </url>
-                    </column>                    <column columnName="sire">
+                    </column>
+                    <column columnName="sire">
                         <url>
                             /query/executeQuery.view?schemaName=study&amp;
                             query.queryName=Pedigree&amp;

@@ -226,7 +226,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
 
-        initTest.createFinanceManagementFolders();
+        initTest.goToEHRFolder();
+        initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");
+
         initTest.createResearchServicesFolders();
         initTest.createAnimalServicesFolders();
         initTest._containerHelper.enableModule("EHR_ComplianceDB");
@@ -236,49 +238,23 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
         initTest.loadEHRBillingTableDefinitions();
 
-        initTest.clickFolder(initTest.getProjectName());
-
-        initTest.clickFolder("Private");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
-
-        initTest.populateInitialData();
         initTest.updateEHRFormFrameworkTypes();
 
-        initTest.loadBloodBilledByLookup();
-        initTest.addFinanceRelatedWebParts(initTest.getBillingContainerPath());
-        initTest.beginAt(buildURL("project", initTest.getBillingContainerPath(), "begin"));
-        initTest.loadEHRBillingTableDefinitions();
-
-        initTest.clickFolder("Private");
-        initTest.createStudyLinkedSchema();
-        initTest.createCoreLinkedSchema();
-        initTest.createEHRLinkedSchema(PROJECT_NAME + "/" + PRIVATE_TARGET_FOLDER_PATH);
         initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
         initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
 
-        initTest.clickFolder("EHR");
-        initTest.createEHRBillingPublicLinkedSchema();
-        initTest.createWNPRCBillingLinkedSchema();
+        initTest.goToEHRFolder();
         initTest.createStudyLinkedSchemaForQueryValidation();
         initTest.createEHRLookupsLinkedSchemaQueryValidation();
-        initTest.goToProjectHome();
-        initTest.clickFolder(PI_PORTAL);
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
-
-        initTest.createWNPRCBillingPublicLinkedSchema();
 
         initTest.initCreatedProject();
+        initTest.billingSetup();
 
         // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
         // study import ensures that order.
         initTest.importBlood();
 
         initTest.createTestSubjects();
-
-        initTest.clickFolder("PI Portal");
-        initTest.addBillingPublicWebParts();
-
-        initTest.uploadBillingDataAndVerify();
 
         initTest.setupClinpathVirologySection();
 
@@ -287,6 +263,36 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.checkUpdateProgramIncomeAccount();
 
         initTest.deathNotificationSetup();
+    }
+
+    private void billingSetup() throws Exception
+    {
+        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
+        initTest.createFinanceManagementFolders();
+        goToBillingFolder();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest.addFinanceRelatedWebParts(initTest.getBillingContainerPath());
+
+        goToBillingFolder();
+        initTest.loadEHRBillingTableDefinitions();
+
+        initTest.createStudyLinkedSchema();
+        initTest.createCoreLinkedSchema();
+        initTest.createEHRLinkedSchema(PROJECT_NAME + "/" + PRIVATE_TARGET_FOLDER_PATH);
+
+        goToEHRFolder();
+        initTest.createEHRBillingPublicLinkedSchema();
+        initTest.createWNPRCBillingLinkedSchema();
+
+        goToPIPortal();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
+
+        initTest.createWNPRCBillingPublicLinkedSchema();
+
+        goToPIPortal();
+        initTest.addBillingPublicWebParts();
+
+        initTest.uploadBillingDataAndVerify();
     }
 
     private void importBlood() throws IOException, CommandException
@@ -301,6 +307,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadBillingDataAndVerify() throws Exception
     {
+        log("Load billedBy lookup used in 'Blood Draws' dataset.");
+        loadBloodBilledByLookup();
+
         log("Check Extensible table columns.");
         checkExtensibleTablesCols();
 
@@ -315,6 +324,37 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Update new charge rates.");
         updateChargeRates();
+
+        log("Add procedure queries.");
+        addProcedureQueries();
+    }
+
+    private void addProcedureQueries() throws IOException, CommandException
+    {
+        log("Add procedure queries into ehr_billing.procedureQueryChargeIdAssoc table.");
+
+        goToBillingFolder();
+
+        Connection cn = WebTestHelper.getRemoteApiConnection();
+
+        log("Inserting procedure query names info into ehr_billing.procedureQueryChargeIdAssoc table.");
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_billing", "procedureQueryChargeIdAssoc");
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsOneTubeAnimalServices");
+        rowMap.put("description", "Blood Draws One Tube - Animal Services");
+        rowMap.put("chargeId", getChargeId("Blood draws"));
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsAdditionalTubesAnimalServices");
+        rowMap.put("description", "Blood Draws Additional Tubes - Animal Services");
+        rowMap.put("chargeId", getChargeId("Blood draws - Additional Tubes"));
+        insertCmd.addRow(rowMap);
+
+        int numRows = insertCmd.execute(cn, PRIVATE_FOLDER_PATH).getRows().size();
+        log("Inserted " + numRows + " into ehr_billing.procedureQueryChargeIdAssoc table.");
     }
 
     @LogMethod
@@ -343,11 +383,32 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         insertCmd.execute(createDefaultConnection(), getContainerPath());
     }
 
+    private int getChargeId(String chargeName) throws IOException, CommandException
+    {
+        Connection cn = getRemoteApiConnection();
+        SelectRowsCommand selectCmd = new SelectRowsCommand("ehr_billing", "chargeableItems");
+        selectCmd.setColumns(Arrays.asList("rowId, name"));
+        selectCmd.addFilter(new Filter("name", chargeName));
+        SelectRowsResponse response = selectCmd.execute(cn, getBillingContainerPath());
+        return (Integer) response.getRows().get(0).get("rowId");
+    }
+
     @Override
     public void goToProjectHome()
     {
         goToProjectHome(PROJECT_NAME);
     }
+
+    protected final void goToBillingFolder()
+    {
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+    }
+
+    protected final void goToPIPortal()
+    {
+        beginAt(buildURL("project", getPIPortalContainerPath(), "begin"));
+    }
+
 
     // Validate queries at end of tests instead of during import
     // TODO: Add linked schemas to tests
@@ -365,7 +426,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void createFinanceManagementFolders()
     {
-        _containerHelper.createSubfolder(getProjectName(), "WNPRC_Units", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Operation_Services", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services", "Financial_Management", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "Private", "Collaboration");
@@ -1272,7 +1332,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void provideBillingDataAccess() throws IOException, CommandException
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Access To Billing Data"));
         DataRegionTable dataAccessTable = new DataRegionTable("query", getDriver());
         dataAccessTable.clickInsertNewRow();
@@ -1386,7 +1446,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public String getBillingContainerPath()
     {
-        return getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management/Private/";
+        return getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH;
+    }
+
+    public String getPIPortalContainerPath()
+    {
+        return getProjectName() + PI_FOLDER_FOLDER_PATH;
     }
 
     private void enterCharges()
@@ -1427,7 +1492,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId2.put("quantity", "10");
         mapWithAnimalId2.put("comment", "charge 2 with animal id");
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         log("Enter Misc. Charges with animal Id.");
         waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
@@ -1592,7 +1657,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void checkColumns(String linkText, List<String> expectedColumns)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText(linkText));
         DataRegionTable results = new DataRegionTable("query", getDriver());
         assertEquals("Wrong columns for " + linkText, expectedColumns, results.getColumnNames());
@@ -1600,7 +1665,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void updateChargeRates()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
 
@@ -1623,7 +1688,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_UPDATE_TSV, CHARGE_RATES_NUM_UPDATE_ROWS, CHARGEABLE_ITEMS_NUM_UPDATE_ROWS);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
         assertTextPresent("Blood draws", 2);
@@ -1631,7 +1696,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent("Medicine A per dose", 2);
         assertTextPresent("vaccine supplies", 4);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Chargeable Items");
         clickAndWait(Locator.bodyLinkContainingText("Chargeable Items"));
         assertTextPresent("Blood draws", 2);
@@ -1643,7 +1708,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadChargeRates(File file, int rateRows, int itemRows)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
 
@@ -1657,7 +1722,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         drt = new DataRegionTable("query", getDriver());
         assertEquals(rateRows, drt.getDataRowCount());
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Chargeable Items"));
         drt = new DataRegionTable("query", getDriver());
         assertEquals(itemRows, drt.getDataRowCount());
@@ -1730,7 +1795,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void performBillingRun(String startDate, String endDate, int billingRunCount)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitAndClickAndWait(Locator.linkContainingText("Perform Billing Run"));
         Ext4FieldRef.waitForField(this, "Start Date");
         Ext4FieldRef.getForLabel(this, "Start Date").setValue(startDate);
@@ -1755,7 +1820,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testReports(String linkText, int numRows, String... texts)
     {
-        clickFolder(PRIVATE_FOLDER);
+        goToBillingFolder();
         click(Locator.bodyLinkContainingText(linkText));
         DataRegionTable results = new DataRegionTable("query", getDriver());
         assertEquals("Wrong row count", numRows, results.getDataRowCount());
@@ -1764,10 +1829,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void testDownloadMultipleInvoices()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         performBillingRun("11/01/2010", "11/10/2010", ++BILLING_RUN_COUNT);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         performBillingRun("11/11/2010", "11/20/2010", ++BILLING_RUN_COUNT);
 
         goToSchemaBrowser();
@@ -1791,7 +1856,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("quantity", "10");
         mapWithAnimalId.put("chargetype", "Adjustment");
         mapWithAnimalId.put("comment", "charge 1 with animal id");
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         log("Enter Misc. Charges with animal Id.");
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         enterChargesInGrid(1, mapWithAnimalId);
@@ -1799,7 +1864,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sleep(5000);
         submitForm();
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         performBillingRun("11/21/2010", "11/30/2010", ++BILLING_RUN_COUNT);
 
         goToFinanceFolderTable("Invoiced Items");
@@ -1825,7 +1890,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         invoicedItems = new DataRegionTable("query", getDriver());
         assertEquals("Invoiced Items were not deleted", invoicedItems.getDataRowCount(), invoicedItemsBeforeDelete-2);
 
-        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        goToEHRFolder();
         goToSchemaBrowser();
         DataRegionTable miscCharges = viewQueryData("ehr_billing", "miscCharges");
         miscCharges.setFilter("date", "Equals", "2010-11-22");
@@ -1835,7 +1900,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void goToFinanceFolderTable(String tableName)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText(tableName);
         clickAndWait(Locator.bodyLinkContainingText(tableName));
     }

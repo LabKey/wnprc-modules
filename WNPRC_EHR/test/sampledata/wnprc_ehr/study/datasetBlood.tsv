@@ -215,7 +215,7 @@ daterequested	instructions	ts	remark	taskid	parentId	date	QCStateLabel	requestor
 		2010-05-24 14:29:44.0				2010-03-16 07:42:00.0	Completed	dw/nws	test4564246		vel non luctus a venenatis gravida et varius tristique auctor id vitae	tlb		Other			5	1	a	908815	None					1	
 		2010-05-24 14:29:44.0				2010-05-04 08:30:00.0	Completed	nsd	test4564246		class dictum et eu vestibulum quam porttitor lorem leo gravida eu	dl		Other			6	1	a	1205294	None					1	
 		2010-06-29 12:26:20.0				2010-06-29 07:54:00.0	Completed	nsd	test4564246		nulla aliquam viverra orci lacinia enim natoque commodo sed orci odio	ia		Other			100	1	a	1205294	None					1	
-		2010-10-12 13:21:10.0				2010-10-12 07:30:00.0	Completed	nsd	test4564246		curabitur sed leo dolor euismod et vel augue turpis lobortis ligula	jg		Other			3.5	1	a	1205294	None					1	
+		2010-10-12 13:21:10.0				2010-10-12 07:30:00.0	Completed	nsd	test4564246		curabitur sed leo dolor euismod et vel augue turpis lobortis ligula	jg		Other			3.5		a	1205294	None					1
 		2011-01-12 08:41:50.0				2011-01-11 09:58:00.0	Completed	sc	test4564246		cursus per accumsan praesent justo ut purus bibendum vitae neque arcu	wn		Other			3.5	1	n	803932	None					1	
 		2011-07-12 16:24:03.0				2011-07-12 10:27:00.0	Completed	sc	test4564246		adipiscing dignissim ut donec in imperdiet natoque vel pellentesque	sm		Other			5.5	1	a	803932	None					1	
 		2010-05-24 14:29:44.0				2007-07-05 10:20:00.0	Completed	sc	test6390238		purus nisi in sagittis phasellus dolor pellentesque nec fringilla lectus	sm		Other			3.5	1	y	803932	None					1	

@@ -23,7 +23,11 @@ SELECT
     project.account.tier_rate.tierRate AS otherRate,
     objectid AS sourceRecord,
     null AS comment,
-    (num_tubes - 1) AS quantity,
+    CAST((num_tubes - 1) AS DOUBLE) AS quantity,
     taskId,
     performedby
-FROM studyLinked.BloodSchedule bloodSch WHERE num_tubes > 1 AND billedBy.value = 'a'
+FROM studyLinked.BloodSchedule bloodSch
+WHERE
+    num_tubes > 1 AND
+    billedBy.value = 'a' AND
+    qcstate.publicdata = true

@@ -23,10 +23,14 @@ SELECT
     project.account.tier_rate.tierRate AS otherRate,
     objectid AS sourceRecord,
     ('Blood Draws ' || Id) AS comment,
-    num_tubes AS quantity,
+    CAST(num_tubes AS DOUBLE) AS quantity,
     taskId,
     performedby
-FROM studyLinked.BloodSchedule bloodSch WHERE num_tubes = 1 AND billedBy.value = 'a'
+FROM studyLinked.BloodSchedule bloodSch
+WHERE
+    num_tubes = 1 AND
+    billedBy.value = 'a' AND
+    qcstate.publicdata = true
 
 UNION
 
@@ -39,7 +43,11 @@ SELECT
     project.account.tier_rate.tierRate AS otherRate,
     objectid AS sourceRecord,
     ('Blood Draws ' || Id) AS comment,
-    1 AS quantity,
+    1.0 AS quantity,
     taskId,
     performedby
-FROM studyLinked.BloodSchedule bloodSch WHERE num_tubes > 1 AND billedBy.value = 'a'
+FROM studyLinked.BloodSchedule bloodSch
+WHERE
+    num_tubes > 1 AND
+    billedBy.value = 'a' AND
+    qcstate.publicdata = true

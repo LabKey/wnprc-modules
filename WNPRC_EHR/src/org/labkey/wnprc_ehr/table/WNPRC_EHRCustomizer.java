@@ -162,9 +162,18 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 @Override
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
+                    String taskId;
+                    String formType = "Necropsy";
                     Integer rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
-                    String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
-                    String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+                    if (ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid")).getClass().equals(String.class)){
+                        taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
+                    }else{
+                        taskId =  ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid")).toString();
+                    }
+                    if (ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype")) != null){
+                        formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+                    }
+
 
                     if (isExt4Form("form", formType))
                     {

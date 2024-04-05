@@ -205,11 +205,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return TestFileUtils.getSampleData("wnprc_ehr/wnprcEhrTestStudyPolicy.xml");
     }
 
-    private static void folderSetup()
-    {
-
-    }
-
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
@@ -2504,7 +2499,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testWeights()
     {
-      //dummy test
+        //dummy test
     }
 
     @Test
@@ -3356,7 +3351,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "study",
                 "blood",
                 new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
-                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
+                        {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
                 expected
         );
 
@@ -3443,6 +3438,24 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sr.addFilter("servicerequested", serviceRequested, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
         Assert.assertEquals(1,resp2.getRowCount());*/
+
+    }
+
+    @Test
+    public void testCalendarView()
+    {
+        goToEHRFolder();
+        saveLocation();
+        impersonate(FULL_SUBMITTER.getEmail());
+        recallLocation();
+        waitAndClickAndWait(Locator.linkWithText("Enter Data"));
+
+        log("Rendering Full Calendar Necropsy Schedule");
+        waitAndClickAndWait(Locator.linkWithText("Schedule Necropsy"));
+
+
+
+
 
     }
 

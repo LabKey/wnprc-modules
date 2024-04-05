@@ -1,6 +1,6 @@
 /* This query feeds the Necropsy Schedule JSP page/calendar. */
 SELECT lsid
-      ,necropsy.taskid
+      ,coalesce(necropsy.taskid)
       ,animalid
       ,animalid.Demographics.gender                         AS sex
       ,animalid.age.ageFriendly                             AS age
@@ -43,7 +43,7 @@ SELECT lsid
              ,performedby
              ,taskid.qcstate   AS state
         FROM study.necropsy
-       WHERE taskid IS NOT NULL) necropsy
+       WHERE taskid IS NOT NULL AND date >'2023-01-01') necropsy
 /* Look up the display friendly name for the delivery option. */
  LEFT JOIN wnprc.necropsy_delivery_options delivery_option
    ON necropsy.shipping = delivery_option.key

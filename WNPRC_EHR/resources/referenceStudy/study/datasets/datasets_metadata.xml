@@ -8926,6 +8926,14 @@
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
         <scale>4000</scale>
       </column>
+      <column columnName="ship_to">
+        <datatype>varchar</datatype>
+        <columnTitle>Ship To</columnTitle>
+      </column>
+      <column columnName="shipping">
+        <datatype>varchar</datatype>
+        <columnTitle>Shipping</columnTitle>
+      </column>
     </columns>
     <tableTitle>Cytology Manual Evaluation</tableTitle>
     <indices>

@@ -213,56 +213,56 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
-//        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
-//
-//        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR"));
-//        initTest.createProjectAndFolders("EHR");
-//        initTest.clickFolder(initTest.getProjectName());
-//        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
-//        initTest.clickFolder("EHR");
-//        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
-//        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-//                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-//        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-//                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-//
-//        initTest.goToEHRFolder();
-//        initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");
-//
-//        initTest.createResearchServicesFolders();
-//        initTest.createAnimalServicesFolders();
-//        initTest._containerHelper.enableModule("EHR_ComplianceDB");
-//        initTest.createRequiredLists();
-//        initTest.createRequiredAssays();
-//        initTest.clickFolder("EHR");
-//        initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
-//        initTest.loadEHRBillingTableDefinitions();
-//
-//        initTest.updateEHRFormFrameworkTypes();
-//
-//        initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
-//        initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
-//
-//        initTest.goToEHRFolder();
-//        initTest.createStudyLinkedSchemaForQueryValidation();
-//        initTest.createEHRLookupsLinkedSchemaQueryValidation();
-//
-//        initTest.initCreatedProject();
-//        initTest.billingSetup();
-//
-//        // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
-//        // study import ensures that order.
-//        initTest.importBlood();
-//
-//        initTest.createTestSubjects();
-//
-//        initTest.setupClinpathVirologySection();
-//
-//        initTest.setupAnimalRequests();
-//
-//        initTest.checkUpdateProgramIncomeAccount();
+        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
-//        initTest.deathNotificationSetup();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR"));
+        initTest.createProjectAndFolders("EHR");
+        initTest.clickFolder(initTest.getProjectName());
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest.clickFolder("EHR");
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
+        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
+                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
+                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+
+        initTest.goToEHRFolder();
+        initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");
+
+        initTest.createResearchServicesFolders();
+        initTest.createAnimalServicesFolders();
+        initTest._containerHelper.enableModule("EHR_ComplianceDB");
+        initTest.createRequiredLists();
+        initTest.createRequiredAssays();
+        initTest.clickFolder("EHR");
+        initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
+        initTest.loadEHRBillingTableDefinitions();
+
+        initTest.updateEHRFormFrameworkTypes();
+
+        initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
+        initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
+
+        initTest.goToEHRFolder();
+        initTest.createStudyLinkedSchemaForQueryValidation();
+        initTest.createEHRLookupsLinkedSchemaQueryValidation();
+
+        initTest.initCreatedProject();
+        initTest.billingSetup();
+
+        // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
+        // study import ensures that order.
+        initTest.importBlood();
+
+        initTest.createTestSubjects();
+
+        initTest.setupClinpathVirologySection();
+
+        initTest.setupAnimalRequests();
+
+        initTest.checkUpdateProgramIncomeAccount();
+
+        initTest.deathNotificationSetup();
     }
 
     private void billingSetup() throws Exception
@@ -1190,7 +1190,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Running report in the browser");
         notificationAdminPage.clickRunReportInBrowser("Billing Notification");
-//        verifyChargeSummary("Blood Draws", 2); //commenting this out for now since Blood Draws notification is now notification for all Procedures, which is not currently implemented.
+
+        // Note: commenting out verifyChargeSummary() for Blood Draws for now since this notification is no longer just a 'Blood Draws'
+        // notification but encompassing all Procedures that are listed in ehr_billing.procedureQueryChargeIdAssoc table.
+        // This new notification is not implemented in the current version of the module.
+        // verifyChargeSummary("Blood Draws", 2);
+
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
 

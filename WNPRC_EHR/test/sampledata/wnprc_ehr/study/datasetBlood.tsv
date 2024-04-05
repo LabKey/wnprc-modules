@@ -194,7 +194,7 @@ daterequested	instructions	ts	remark	taskid	parentId	date	QCStateLabel	requestor
 		2010-06-24 11:45:27.0				2010-06-24 09:45:00.0	Completed	nsd	test4551032		sagittis luctus imperdiet vestibulum non risus donec condimentum praesent	tlb		Other			3.5	1	a	1205294	None					1	
 		2010-06-24 11:48:12.0				2010-06-24 09:45:00.0	Completed	sc	test4551032		amet euismod faucibus ultrices dignissim porta vitae mus est nec eget	tlb		Other			3	1	a	803932	None					1	
 		2010-09-14 10:48:42.0				2010-09-14 08:15:00.0	Completed	nsd	test4551032		commodo ligula tincidunt nisl tortor imperdiet erat in lorem ac quisque	tlb		Other			5	1	a	1205294	None					1	
-		2010-11-23 10:55:39.0				2010-11-23 09:50:00.0	Completed	sc	test4551032		ut vitae augue sit diam mauris sem elit velit id placerat condimentum	sm		Other			5.5	1	a	7853454	None					1	
+		2010-11-23 10:55:39.0				2010-11-23 09:50:00.0	Completed	sc	test4551032		ut vitae augue sit diam mauris sem elit velit id placerat condimentum	sm		Other			5.5		a	7853454	None					1
 		2010-05-24 14:29:44.0				2006-02-08 10:00:00.0	Completed	sc	test5904521		tellus vehicula facilisis elit suspendisse fringilla viverra elementum	es		Other			5.5	1	y	803932	None					1	
 		2010-05-24 14:29:44.0				2009-12-17 08:30:00.0	Completed	do	test5904521		mattis cursus quam egestas placerat hendrerit tincidunt non urna et	af		Other			26	1	a	658612	None					1	
 		2010-05-24 14:29:44.0				2010-01-11 10:23:00.0	Completed	sc	test5904521		nec ultrices magna vestibulum montes iaculis purus accumsan  natoque	dwk		Other			5.5	1	a	803932	None					1	
@@ -815,7 +815,7 @@ daterequested	instructions	ts	remark	taskid	parentId	date	QCStateLabel	requestor
 		2010-05-24 14:29:44.0				2008-07-03 08:05:00.0	Completed	dw	test2312318		sem congue a pretium adipiscing himenaeos libero leo egestas aptent	jg		Other			12	1	y	640991	None					1	
 		2010-05-24 14:29:44.0				2008-07-23 08:00:00.0	Completed	dw	test2312318		vestibulum ultrices quisque amet per libero hendrerit vulputate tincidunt	la		Other			18	1	y	640991	None					1	
 		2010-05-24 14:29:44.0				2008-07-25 07:45:00.0	Completed	dw	test2312318		sapien tempor posuere molestie nulla id vitae ultrices et natoque nec	mak		Other			36	1	a	640991	None					1	
-		2010-05-24 14:29:44.0				2008-07-31 00:00:00.0	Completed	dw	test2312318		a odio duis primis adipiscing ac elit et posuere vel et vitae viverra	mak		Other			18	1	a	640991	None					1	
+		2010-05-24 14:29:44.0				2008-07-31 00:00:00.0	Completed	dw	test2312318		a odio duis primis adipiscing ac elit et posuere vel et vitae viverra	mak		Other			18	1	a	640991	None					1
 		2010-05-24 14:29:44.0				2008-08-05 08:40:00.0	Completed	dw	test2312318		metus integer ultricies mi facilisis sem gravida orci eleifend commodo	jg		Other			18	1	a	640991	None					1	
 		2010-05-24 14:29:44.0				2008-08-11 08:00:00.0	Completed	dw	test2312318		facilisi urna semper pellentesque libero bibendum nec sit felis mattis	jg		Other			18	1	y	640991	None					1	
 		2010-05-24 14:29:44.0				2008-08-28 08:05:00.0	Completed	dw	test2312318		magna cras orci nam volutpat posuere sed enim libero aliquam sed ipsum	jg		Other			12	1	a	640991	None					1	

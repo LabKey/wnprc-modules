@@ -7,6 +7,8 @@ package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -51,6 +53,7 @@ import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -1290,6 +1293,7 @@ public class NotificationToolkit {
     }
 
     static class DateToolkit {
+        String DATE_FORMAT_STRING = "MM/dd/yyyy";
 
         //Returns today's date as Date (ex: "Wed Mar 06 13:11:02 CST 2024").
         public Date getDateToday() {
@@ -1316,14 +1320,7 @@ public class NotificationToolkit {
 
         //Returns today's date as String (ex: "03/06/2024").
         public String getCalendarDateToday() {
-            //Create "month/day/year" string.  No need for 'left-padding-zeroes' as '_dateFormat.format()' already adds these.
-            String currentDate = AbstractEHRNotification._dateFormat.format(new Date());
-            String[] splitDate = currentDate.split("-");
-            String myDay = splitDate[2];
-            String myMonth = splitDate[1];
-            String myYear = splitDate[0];
-            String currentDateFormatted = myMonth + "/" + myDay + "/" + myYear;
-            return currentDateFormatted;
+            return  new SimpleDateFormat(DATE_FORMAT_STRING).format(new Date());
         }
 
         /**
@@ -1335,5 +1332,32 @@ public class NotificationToolkit {
         }
 
     }
+
+    // The unit test has to end in "UnitTest" to get registered and show up at http://localhost:8080/labkey/junit-begin.view?
+    public static class DateToolkitUnitTest extends Assert
+    {
+
+
+        @Test
+        public void testGetCalendarDateToday() {
+            //test your dates here
+
+            // Arrange
+            DateToolkit dateToolkit = new DateToolkit();
+
+            // Act
+            String formattedDate = dateToolkit.getCalendarDateToday();
+
+            // Assert
+            // Since the actual date can change, validate the format (MM/DD/YYYY)
+            SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+            try {
+                format.parse(formattedDate);
+            } catch (Exception e) {
+                fail("getCalendarDateToday should return a date formatted as MM/DD/YYYY");
+            }
+        }
+    }
+
 }
 

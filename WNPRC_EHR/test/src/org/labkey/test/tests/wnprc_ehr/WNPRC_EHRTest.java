@@ -225,6 +225,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("PrimateId", "/" +
+                initTest.getProjectName(), "PrimateIdPrefix", "Prefix (2 chars max)", "XX")));
 
         initTest.goToEHRFolder();
         initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");

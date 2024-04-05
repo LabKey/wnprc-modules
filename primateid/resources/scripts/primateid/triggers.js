@@ -68,11 +68,18 @@ exports.init = function (EHR) {
             filterArray: [LABKEY.Filter.create('participantid', row['participantid'], LABKEY.Filter.Types.EQUAL)],
             requiredVersion: 17.1,
             success: function (data) {
+
+                // Getting the participantId field is the normal case, but in auto-tests we need to grab the Id field
+                var participantid = row['participantid'];
+                if (!participantid) {
+                    participantid = row['Id'];
+                }
+
                 // noinspection JSUnresolvedFunction
                 if (data.getRowCount() === 0)
-                    createAndInsertPrimateId(row['participantid']);
+                    createAndInsertPrimateId(participantid);
                 else
-                    _log("PrimateID present for subject: " + row['participantid'])
+                    _log("PrimateID present for subject: " + participantid)
             },
             failure: EHR.Server.Utils.onFailure
         });

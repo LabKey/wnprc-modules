@@ -891,23 +891,23 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testBilling() throws IOException, CommandException
     {
-//        log("Enter misc charges via data entry form.");
-//        enterCharges();
-//
-//        log("Perform Billing Run for period 10/01/2010-10/31/2010");
-//        performBillingRun("10/01/2010", "10/31/2010", ++BILLING_RUN_COUNT);
-//
-//        log("Test Invoiced Items");
-//        testInvoicedItems();
-//
-//        log("Test Summary Reports");
-//        testSummaryReports();
-//
-//        log("View and download JET");
-//        viewJET();
-//
-//        log("View and download invoice PDF.");
-//        viewPDF("downloadPDF");
+        log("Enter misc charges via data entry form.");
+        enterCharges();
+
+        log("Perform Billing Run for period 10/01/2010-10/31/2010");
+        performBillingRun("10/01/2010", "10/31/2010", ++BILLING_RUN_COUNT);
+
+        log("Test Invoiced Items");
+        testInvoicedItems();
+
+        log("Test Summary Reports");
+        testSummaryReports();
+
+        log("View and download JET");
+        viewJET();
+
+        log("View and download invoice PDF.");
+        viewPDF("downloadPDF");
 
         log("View Billing Queries");
         viewBillingQueries();

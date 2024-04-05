@@ -679,6 +679,34 @@ public class NotificationToolkit {
         return sortedList;
     }
 
+    public String createQueryURL(Container c, String schemaName, String queryName, HashMap<String, String> queryParameters) {
+        //Creates the query string.
+        ActionURL queryString = new ActionURL("query", "executeQuery.view", c);
+        queryString.addParameter("schemaName", schemaName);
+        queryString.addParameter("query.queryName", queryName);
+
+        //Adds parameters based on
+        if (queryParameters != null) {
+            //Updates query string parameters.
+            for (String parameterKey : queryParameters.keySet()) {
+                //Gets parameter name and value.
+                String parameterName = "query." + parameterKey;
+                String parameterValue = queryParameters.get(parameterKey);
+                //Updates string with parameter.
+                queryString.addParameter(parameterName, parameterValue);
+            }
+        }
+
+        //Creates URL to return.
+        String urlPart1 = new ActionURL().getBaseServerURI();
+        String urlPart2 = queryString.toString();
+        Path returnPath = new Path(urlPart1, urlPart2);
+
+        //Returns URL.
+        return returnPath.toString();
+
+    }
+
 
 
 

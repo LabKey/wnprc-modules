@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.notification;
 
+import org.labkey.api.action.Action;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -122,11 +123,16 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Blood Draws", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.date~dategte=" + todayDate + "&query.Id/DataSet/Demographics/calculated_status~neqornull=Alive&query.qcstate/label~neq=Request: Denied");
+            HashMap<String, String> myParameters = new HashMap<>(){{
+                put("date~dategte", todayDate.toString());
+                put("Id/DataSet/Demographics/calculated_status~neqornull", "Alive");
+                put("qcstate/label~neq", "Request: Denied");
+            }};
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "Blood Draws", myParameters);
 
             //Returns data.
             this.bloodDrawsWhereAnimalIsNotAlive = returnArray;
-            this.bloodDrawsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
+            this.bloodDrawsWhereAnimalIsNotAliveURLView = viewQueryURL;
         }
 
         //2. Finds any blood draws over the allowable limit.
@@ -146,7 +152,6 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDraws&query.viewName=Blood Summary&query.date~dategte=" + todayDate + "&query.Id/Dataset/Demographics/calculated_status~eq=Alive");
 
             //Runs query.
-            //TODO: Should we be combining duplicate draws minus the allowable limit?
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u,  "study", "DailyOverDrawsWithThreshold", null, null, "Id");
             //Removes duplicate ID's from this list.
             Set<String> idsWithoutDuplicates = new HashSet<>(returnArray);
@@ -154,11 +159,11 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             returnArray.addAll(idsWithoutDuplicates);
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDrawsWithThreshold");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "DailyOverDrawsWithThreshold", null);
 
             //Returns data.
             this.bloodDrawsOverAllowableLimit = returnArray;
-            this.bloodDrawsOverAllowableLimitURLView = viewQueryURL.toString();
+            this.bloodDrawsOverAllowableLimitURLView = viewQueryURL;
         }
 
         //3. Finds any blood draws where the animal is not assigned to that project.
@@ -177,11 +182,16 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dategte=" + todayDate);
+            HashMap<String, String> myParameters = new HashMap<>(){{
+                put("projectStatus~isnonblank", "");
+                put("Id/DataSet/Demographics/calculated_status~eq", "Alive");
+                put("date~dategte", todayDate.toString());
+            }};
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "BloodSchedule", myParameters);
 
             //Returns data.
             this.bloodDrawsWhereAnimalNotAssignedToProject = returnArray;
-            this.bloodDrawsWhereAnimalNotAssignedToProjectURLView = viewQueryURL.toString();
+            this.bloodDrawsWhereAnimalNotAssignedToProjectURLView = viewQueryURL;
         }
 
         //4. Find any blood draws today where the animal is not assigned to that project.
@@ -201,7 +211,12 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dateeq=" + todayDate + "&query.qcstate/label~neq=Request: Denied");
+            HashMap<String, String> myParameters = new HashMap<>(){{
+                put("projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq", "Alive");
+                put("date~dateeq", todayDate.toString());
+                put("qcstate/label~neq", "Request: Denied");
+            }};
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "BloodSchedule", myParameters);
 
             //Returns data.
             this.bloodDrawsTodayWhereAnimalNotAssignedToProject = returnArray;
@@ -280,7 +295,11 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             }
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.date~dateeq=" + todayDate + "&query.Id/DataSet/Demographics/calculated_status~eq=Alive");
+            HashMap<String, String> myParameters = new HashMap<>(){{
+                put("date~dateeq", todayDate.toString());
+                put("Id/DataSet/Demographics/calculated_status~eq", "Alive");
+            }};
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "BloodSchedule", myParameters);
 
             //Returns data.
             this.incompleteBloodDrawsScheduledTodayByArea = returnArray;

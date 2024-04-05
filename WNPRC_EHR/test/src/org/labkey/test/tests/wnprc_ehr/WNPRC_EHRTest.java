@@ -1174,11 +1174,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvestigatorFacingLinks()
     {
-        navigateToFolder(PROJECT_NAME, PI_PORTAL);
+        goToPIPortal();
         log("Give EHR Lab Read access to PI Portal folder.");
         _permissionsHelper.setPermissions("EHR Lab", "ReaderRole");
 
-        navigateToFolder(PROJECT_NAME, PI_PORTAL);
+        goToPIPortal();
         log("Impersonate as investigator@ehrstudy.test");
         impersonate(INVESTIGATOR.getEmail());
         waitForElement(Locator.linkWithText("00640991"));
@@ -1780,7 +1780,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testReports(String linkText, int numRows, String... texts)
     {
-        clickFolder(PRIVATE_FOLDER);
+        goToBillingFolder();
         click(Locator.bodyLinkContainingText(linkText));
         DataRegionTable results = new DataRegionTable("query", getDriver());
         assertEquals("Wrong row count", numRows, results.getDataRowCount());

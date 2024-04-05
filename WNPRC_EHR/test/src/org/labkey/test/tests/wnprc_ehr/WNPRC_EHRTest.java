@@ -1335,7 +1335,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         goToBillingFolder();
         log("Verify per diems");
-        beginAt(String.format("query%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=perDiemFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=perDiemFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
         DataRegionTable perDiemFeeRates = new DataRegionTable("query", this);
         expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.0", "0.3", "$780.00");
         actualRowData = perDiemFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
@@ -1344,7 +1344,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         goToBillingFolder();
         log("Verify blood draws");
-        beginAt(String.format("query%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=procedureFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=procedureFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
         DataRegionTable procedureFeeRates = new DataRegionTable("query", this);
         expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "00640991", "acct101", "$13.00", "1", "0.3", "$13.00", " ");
         actualRowData = procedureFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost", "performedby");

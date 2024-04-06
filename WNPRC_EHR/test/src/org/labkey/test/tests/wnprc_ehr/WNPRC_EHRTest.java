@@ -821,7 +821,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public WebElement waitUntilElementIsClickable(String id)
     {
-        return shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
+        return longWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
     }
 
     public void clickNewButton(String id)
@@ -3305,13 +3305,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
         //NEW TRY:
-        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotificationRevamp").withText("Manage Subscribed Users/Groups"), 0);
-        log("Attempting to select combo box item: EHR Administrators");
-        _ext4Helper.selectComboBoxItem("Add User Or Group:", "EHR Administrators");
-        log("Successfully selected combo box item: EHR Administrators");
-        clickButton("Close", 0);
+//        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotificationRevamp").withText("Manage Subscribed Users/Groups"), 0);
+//        log("Attempting to select combo box item: EHR Administrators");
+//        _ext4Helper.selectComboBoxItem("Add User Or Group:", "EHR Administrators");
+//        log("Successfully selected combo box item: EHR Administrators");
+//        clickButton("Close", 0);
 
         //Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));

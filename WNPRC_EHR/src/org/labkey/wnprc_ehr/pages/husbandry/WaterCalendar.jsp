@@ -1208,9 +1208,20 @@
                                     let volume = Ext4.util.Format.htmlEncode(errorObject.volume);
                                     let date = Ext4.util.Format.htmlEncode(errorObject.date);
                                     returnMessage += "<div id='waterException" + i +"'>There is another waterAmount on "+date+" for the volume of "+volume+" " +
-                                            " <button onclick=\"updateWaterAmount('"+clientObjectId+"')\">Update</button> " +
-                                            "<button onclick=\"deleteWaterAmount(null, null,'"+clientObjectId+"','waterException" + i +"')\">Delete</button><br></div>";
+                                            " <button id='water-updt-btn'>Update</button> " +
+                                            "<button id='water-dlt-btn'>Delete</button><br></div>";
 
+                                    setTimeout(function() {
+                                        // Attach the onclick handler, this will be executed after 100 milliseconds, similar to Ext4.defer.
+                                        LABKEY.Utils.attachEventHandler("water-updt-btn", "click", function () {
+                                            return updateWaterAmount(clientObjectId);
+                                        });
+
+                                        LABKEY.Utils.attachEventHandler("water-dlt-btn", "click", function () {
+                                            return deleteWaterAmount(null, null, clientObjectId, "waterException" + i);
+                                        });
+
+                                    }, 100);
                                 }
 
                             }

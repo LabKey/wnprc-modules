@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
@@ -94,6 +95,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -165,6 +167,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final Double HIGH_VAL = 0.12;
     protected static final String ROOM_ID_LOCAL = "ab160";
     protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
+
+    protected static String[] TEST_SUBJECTS = {"r12345", "cy23456", "cj3456", "cy45678", "cy56789"};
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
@@ -340,6 +344,83 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Update new charge rates.");
         updateChargeRates();
+    }
+
+    @LogMethod
+    @Override
+    protected void createTestSubjects() throws Exception
+    {
+        String[] fields;
+        Object[][] data;
+        SimplePostCommand insertCommand;
+
+        //insert into demographics
+        log("Creating test subjects");
+        fields = new String[]{"Id", "Species", "Birth", "Gender", "date", "calculated_status", "objectid"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[1], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[2], "Marmoset", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[3], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[4], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //for simplicity, also create the animals from MORE_ANIMAL_IDS right now
+        data = new Object[][]{
+                {MORE_ANIMAL_IDS[0], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[1], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[2], "Rhesus", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[3], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[4], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(MORE_ANIMAL_IDS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //used as initial dates
+        Date pastDate1 = TIME_FORMAT.parse("2012-01-03 09:30");
+        Date pastDate2 = TIME_FORMAT.parse("2012-05-03 19:20");
+
+        //set housing
+        log("Creating initial housing records");
+        fields = new String[]{"Id", "date", "enddate", "room", "cage"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], pastDate1, pastDate2, getRooms()[0], CAGES[0]},
+                {TEST_SUBJECTS[0], pastDate2, null, getRooms()[0], CAGES[0]},
+                {TEST_SUBJECTS[1], pastDate1, pastDate2, getRooms()[0], CAGES[0]},
+                {TEST_SUBJECTS[1], pastDate2, null, getRooms()[2], CAGES[2]}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Housing", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "Housing", new Filter("Id", StringUtils.join(SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //set a base weight
+        log("Setting initial weights");
+        fields = new String[]{"Id", "date", "weight", "QCStateLabel"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], pastDate2, 10.5, EHRQCState.COMPLETED.label},
+                {TEST_SUBJECTS[0], new Date(), 12, EHRQCState.COMPLETED.label},
+                {TEST_SUBJECTS[1], new Date(), 12, EHRQCState.COMPLETED.label},
+                {TEST_SUBJECTS[2], new Date(), 12, EHRQCState.COMPLETED.label}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Weight", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "Weight", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //set assignment
+        log("Setting initial assignments");
+        fields = new String[]{"Id", "date", "enddate", "project"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], pastDate1, pastDate2, PROJECTS[0]},
+                {TEST_SUBJECTS[1], pastDate1, pastDate2, PROJECTS[0]},
+                {TEST_SUBJECTS[1], pastDate2, null, PROJECTS[2]}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Assignment", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "Assignment", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
     }
 
     @LogMethod
@@ -851,6 +932,49 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return cmd.execute(cn, EHR_FOLDER_PATH);
     }
 
+    @Test
+    public void testWeightValidation()
+    {
+        //initialize weight of subject 3
+        String[] fields;
+        Object[][] data;
+        SimplePostCommand insertCommand;
+        fields = new String[]{"Id", "date", "weight", "QCStateLabel"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), 12, EHRQCState.COMPLETED.label},
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Weight", "lsid", fields, data);
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //expect weight out of range
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), null, null, 120, EHRQCState.IN_PROGRESS.label, null, null, "recordID"}
+        };
+        Map<String, List<String>> expected = new HashMap<>();
+        expected.put("weight", Arrays.asList(
+                "WARN: Weight above the allowable value of 20.0 kg for Cynomolgus",
+                "INFO: Weight gain of >10%. Last weight 12 kg")
+        );
+        getApiHelper().testValidationMessage(DATA_ADMIN.getEmail(), "study", "weight", weightFields, data, expected);
+
+        //expect INFO for +10% diff
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), null, null, 20, EHRQCState.IN_PROGRESS.label, null, null, "recordID"}
+        };
+        expected = new HashMap<>();
+        expected.put("weight", Collections.singletonList("INFO: Weight gain of >10%. Last weight 12 kg"));
+        getApiHelper().testValidationMessage(DATA_ADMIN.getEmail(), "study", "weight", weightFields, data, expected);
+
+        //expect INFO for -10% diff
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), null, null, 5, EHRQCState.IN_PROGRESS.label, null, null, "recordID"}
+        };
+        expected = new HashMap<>();
+        expected.put("weight", Collections.singletonList("INFO: Weight drop of >10%. Last weight 12 kg"));
+        getApiHelper().testValidationMessage(DATA_ADMIN.getEmail(), "study", "weight", weightFields, data, expected);
+
+        //TODO: test error threshold
+    }
 
     @Test
     public void testBilling() throws IOException, CommandException
@@ -3380,7 +3504,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "study",
                 "blood",
                 new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
-                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
                 expected
         );
 
@@ -3407,7 +3531,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Date dt = prepareDate(new Date(), -11, 0);
         bloodCmd.addRow(new HashMap<String, Object>(){
             {
-                put("Id", SUBJECTS[0]);
+                put("Id", TEST_SUBJECTS[0]);
                 put("date", dt);
                 put("project", projectId);
                 put("account", 123456);
@@ -3426,7 +3550,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             }});
         bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
         SelectRowsCommand sr = new SelectRowsCommand("study","blood");
-        sr.addFilter("Id", SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("Id", TEST_SUBJECTS[0], Filter.Operator.EQUAL);
         sr.addFilter("date", dt, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
         Assert.assertEquals(1, resp2.getRowCount());

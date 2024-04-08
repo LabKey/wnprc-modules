@@ -143,10 +143,11 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
     }
 
     @Override
-    public void setAdditionalTotalsByCategory(User u, Container c, Date startDate, Date endDate,
+    public void getAdditionalChargeCategoryInfo(User u, Container c, Date startDate, Date endDate,
                                               final Map<String, Map<String, Double>> totalsByCategory,
                                               Map<String, String> additionalCategoryUrls)
     {
+        //get Procedure queries listed in ehr_billing.procedureQueryChargeIdAssoc
         UserSchema us = QueryService.get().getUserSchema(u, c, "ehr_billing");
         TableInfo ti = us.getTable("procedureQueryChargeIdAssoc", null);
         TableSelector ts = new TableSelector(ti);
@@ -170,6 +171,7 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
                 continue;
             }
 
+            //filter by startDate and endDate
             SimpleFilter filter = new SimpleFilter();
             filter.addCondition(FieldKey.fromString("date"), startDate, CompareType.DATE_GTE);
             filter.addCondition(FieldKey.fromString("date"), endDate, CompareType.DATE_LTE);
@@ -178,7 +180,7 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
 
             Double totalCostPerCategory = 0.00;
 
-            //iterate through procedure query results
+            //iterate through procedure query results and get total cost
             for (Map<String, Object> procedureRow : procedureRows)
             {
                 // for each row, associate chargeId

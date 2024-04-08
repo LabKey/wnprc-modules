@@ -1193,10 +1193,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Running report in the browser");
         notificationAdminPage.clickRunReportInBrowser("Billing Notification");
 
-        // Note: commenting out verifyChargeSummary() for Blood Draws for now since this notification is no longer just a 'Blood Draws'
-        // notification but encompassing all Procedures that are listed in ehr_billing.procedureQueryChargeIdAssoc table.
-        // This new notification is not implemented in the current version of the module.
-        // verifyChargeSummary("Blood Draws", 2);
+        verifyChargeSummary("Blood Draws Additional Tubes - Animal Services", 1);
+        verifyChargeSummary("Blood Draws One Tube - Animal Services", 49);
 
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
@@ -1206,7 +1204,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void verifyChargeSummary(String category, int rowCount)
     {
-        log("Verifying the " + category);
+        log("Verifying '" + category + "' charge summary in the notification");
         pushLocation();
         clickAndWait(Locator.linkWithText(category));
         DataRegionTable table = new DataRegionTable("query", getDriver());

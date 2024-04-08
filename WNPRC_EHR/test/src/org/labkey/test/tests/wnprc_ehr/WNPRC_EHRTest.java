@@ -215,8 +215,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
-        initTest.goToProjectHome();
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR"));
         initTest.createProjectAndFolders("EHR");
         initTest.clickFolder(initTest.getProjectName());
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));

@@ -198,7 +198,7 @@
         pointer-events: none;
     }
 </style>
-    <script type ="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         function clearSelectedEvent() {
         selectedEvent = {};
         for (let key in WebUtils.VM.taskDetails) {
@@ -493,7 +493,7 @@
 
 
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     //TODO: change var to let for all the following variables for better scoop management
     var selectedEvent = {};
@@ -1208,19 +1208,12 @@
                                     let volume = Ext4.util.Format.htmlEncode(errorObject.volume);
                                     let date = Ext4.util.Format.htmlEncode(errorObject.date);
                                     returnMessage += "<div id='waterException" + i +"'>There is another waterAmount on "+date+" for the volume of "+volume+" " +
-                                            " <button id='water-updt-btn'>Update</button> " +
-                                            "<button id='water-dlt-btn'>Delete</button><br></div>";
-                                    setTimeout(function() {
-                                        // Attach the onclick handler, this will be executed after 100 milliseconds, similar to Ext4.defer.
-                                        LABKEY.Utils.attachEventHandler("water-updt-btn", "click", function () {
-                                            return updateWaterAmount(clientObjectId);
-                                        });
-                                        LABKEY.Utils.attachEventHandler("water-dlt-btn", "click", function () {
-                                            return deleteWaterAmount(null, null, clientObjectId, "waterException" + i);
-                                        });
-                                    }, 100);
-
+                                            " <button class='water-updt-btn' data-clientObjectId='" + clientObjectId + "'>Update</button> " +
+                                            "<button class='water-dlt-btn' data-clientObjectId='" + clientObjectId + "' data-index='" + i +"'>Delete</button><br></div>";
                                 }
+
+                                LABKEY.Utils.attachEventHandlerForQuerySelector('BUTTON.water-updt-btn','click',function(){return updateWaterAmount(this.attributes.getNamedItem('data-clientObjectId').value);});
+                                LABKEY.Utils.attachEventHandlerForQuerySelector('BUTTON.water-dlt-btn','click',function(){return deleteWaterAmount(null, null, this.attributes.getNamedItem('data-clientObjectId').value, "waterException" + this.attributes.getNamedItem('data-index').value)});
 
                             }
                             document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";

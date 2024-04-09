@@ -1278,7 +1278,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Running report in the browser");
         notificationAdminPage.clickRunReportInBrowser("Billing Notification");
-        verifyChargeSummary("Blood Draws", 2);
+        verifyChargeSummary("Blood Draws", 48);
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
 

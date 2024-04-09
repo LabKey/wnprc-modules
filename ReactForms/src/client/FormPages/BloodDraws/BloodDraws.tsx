@@ -4,10 +4,10 @@ import { DefaultFormContainer } from '../../components/DefaultFormContainer';
 import {ActionURL} from '@labkey/api';
 import { TaskPane } from '../../components/TaskPane';
 import {MUIEditableGridPanel} from '../../components/EditableGridPanel';
-import {BloodRow} from '../../components/testData';
 import { createMRTColumnHelper } from 'material-react-table';
 import { lookupAnimalInfo } from '../../query/helpers';
 import { InfoProps } from '../../query/typings';
+import { submitRequest } from '../../components/actions';
 
 const validateId = (id: string) => {
     return lookupAnimalInfo(id).then((data: InfoProps) => {
@@ -20,6 +20,37 @@ const validateId = (id: string) => {
     });
 }
 
+type BloodRow = {
+    key: string
+    Id: string,
+    date: Date,
+    project: number,
+    "project/protocol": string,
+    quantity: string,
+    performedby: string,
+    assayCode: string,
+    billedby: string,
+    tube_type: string,
+    additionalServices: string,
+    instructions: string,
+    remark: string,
+    QCState: string,
+    taskid: string,
+    requestid: string
+};
+type BloodForm = {
+    TaskModel: {
+        rowid: number;
+        created: Date;
+        createdby: string;
+        formtype: string;
+        updateTitle: string;
+        assignedto: string;
+        duedate: Date;
+        qcstate: string;
+    };
+    BloodModel: BloodRow[];
+}
 
 export const BloodDraws: FC<any> = (props) => {
 
@@ -94,6 +125,14 @@ export const BloodDraws: FC<any> = (props) => {
                 redirectQuery={"blood"}
                 formStartTime={formStartTime}
                 animalInfoPane={false}
+                submit={(jsonData) => submitRequest<BloodForm>(
+                    {
+                        TaskModel: jsonData['ehr-tasks'],
+                        BloodModel: jsonData['study-blood']
+                    },
+                    1,
+                    'submitBloodDraw.api')
+                }
             />
         </div>
     );

@@ -10,6 +10,7 @@ import { FieldPathValue, FormProvider, useForm, useWatch } from 'react-hook-form
 import { FormMetadataCollection } from './FormMetadataCollection';
 import { QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
+import { submitRequest } from './actions';
 
 interface Component {
     type: React.FunctionComponent<any>;
@@ -23,7 +24,7 @@ interface Component {
         [key: string]: any;
     };
 }
-interface formProps {
+interface formProps<T> {
     prevTaskId?: string;
     taskType: string;
     redirectQuery: string;
@@ -33,6 +34,7 @@ interface formProps {
     reviewRequired: boolean;
     formStartTime: Date;
     animalInfoPane: boolean;
+    submit?: (jsonData: T) => Promise<any>;
 }
 
 interface FormMetaData {
@@ -49,7 +51,7 @@ Default form container that handles tasks and animal info, add other components 
 @param {string} redirectSchema The name of the schema to redirect the page to after successful submission
 @param {string} redirectQuery The name of the query to redirect the page to after successful submission
  */
-export const DefaultFormContainer: FC<formProps> = (props) => {
+export const DefaultFormContainer: FC<formProps<any>> = (props) => {
     const {
         prevTaskId,
         components,
@@ -59,7 +61,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         redirectQuery,
         reviewRequired,
         formStartTime,
-        animalInfoPane
+        animalInfoPane,
+        submit
     } = props;
 
     const [defaultValues, setDefaultValues] = useState<any>();
@@ -142,6 +145,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     const handleSubmit = async (data, e) => {
         e.preventDefault();
         const finalFormData = [];
+        console.log("raw Data: ", data);
         // generate taskId if required
         const newTaskId = prevTaskId ? prevTaskId : Utils.generateUUID().toUpperCase();
         const formMetaData = FormMetadataCollection( {
@@ -151,13 +155,27 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             startTime: formStartTime,
         });
         finalFormData.push(generateFormData("wnprc", "session_log","insert", formMetaData));
+        if(submit) {
+            submit(data).then((res) => {
+                console.log(res);
+            }).catch(rej => {
+                console.log(rej);
+            })
+        }
         processComponents(finalFormData, newTaskId, data ).then((processedData) => {
             // For each component compile the state data into a format ready for submission
 
             let jsonData = {commands: processedData}
             console.log('calling save rows on: ', jsonData);
+            /*if(submit) {
+                submit(jsonData).then((res) => {
+                    console.log(res);
+                }).catch(rej => {
+                    console.log(rej);
+                })
+            }*/
             // save rows to database and redirect to desired schema/query
-            /*saveRowsDirect(jsonData)
+            /*submitRequest(jsonData, )
                 .then((data) => {
                     console.log('done!!');
                     console.log(JSON.stringify(data));

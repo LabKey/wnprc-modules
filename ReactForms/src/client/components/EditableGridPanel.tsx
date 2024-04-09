@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, FC } from 'react';
 import {
     MaterialReactTable,
     type MRT_Row,
@@ -33,7 +33,7 @@ import { Email } from '@mui/icons-material';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import { EditableGridCell } from './EditableGridCell';
 import { EditableGridCreateModal} from './EditableGridCreateModal';
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
+import { FieldPathValue, useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import {textFilter, isWithinRange} from '../query/columnFilters';
 
 interface EditableGridPanelProps<T extends object> {
@@ -42,13 +42,21 @@ interface EditableGridPanelProps<T extends object> {
     columnHelper: any;
     schema: string;
     query: string;
-    formControl: any;
     validationFns?: {
         [key: string]: (arg: T) => boolean
     };
+    wnprcMetaData?: any;
 }
-const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
-    const {data, metaData, columnHelper, schema, query, formControl, validationFns} = props;
+const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridPanelProps<any>) => {
+    const {
+        data,
+        metaData,
+        columnHelper,
+        schema,
+        query,
+        validationFns,
+        wnprcMetaData
+    } = props;
 
     const [open, setOpen] = useState(true);
     const [isCreatingUser, setIsCreatingUser] = useState(false);
@@ -56,8 +64,10 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
     const [isDeletingUser, setIsDeletingUser] = useState(false);
 
     const [validationErrors, setValidationErrors] = useState<any>({});
-    const {getValues,setValue,setError, trigger, formState} = useFormContext();
-    const {remove} = useFieldArray(({control: formControl, name: `${schema}-${query}`}));
+    const {setValue, getValues,watch, trigger, formState, control} = useFormContext();
+    const {remove, update} = useFieldArray(({control: control, name: `${schema}-${query}`}));
+    const watchTable = watch(`${schema}-${query}` as FieldPathValue<String, any>);
+
     const queryClient = useQueryClient();
     const updateForm = useForm(
         {
@@ -70,11 +80,6 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
             reValidateMode: "onChange"
         });
 
-    console.log("QC: ", queryClient.getQueryData(['rows']));
-    console.log("DATA: ", data);
-    console.log("MetaData: ", metaData);
-    console.log("Fields: ", getValues());
-
     const columns = useMemo(() => metaData.map((col, colIdx)=> {
         return(columnHelper.accessor(`${schema}-${query}.${col.name}`, {
             header: `${col.caption}`,
@@ -83,11 +88,19 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
             Cell: ({cell}) => (
                 <EditableGridCell
                     className={""}
-                    type={(cell.column.columnDef.meta as QueryColumn).type}
-                    prevForm={null}
+                    id={`id_${schema}-${query}.${cell.row.id}.${col.name}`}
+                    metaData={wnprcMetaData?.hasOwnProperty(col.name) ? {wnprcMetaData: {...wnprcMetaData}, ...metaData[colIdx]} : metaData[colIdx]}
+                    type={
+                        wnprcMetaData?.[col.name]?.type ? wnprcMetaData[col.name].type
+                            : (cell.column.columnDef.meta as QueryColumn).type.includes("Date") ? "date"
+                                : (cell.column.columnDef.meta as QueryColumn).lookup ? "dropdown"
+                                    : (cell.column.columnDef.meta as QueryColumn).inputType
+                    }
                     name={`${schema}-${query}.${cell.row.id}.${col.name}`}
                     required={metaData[colIdx].required}
                     validation={validationFns?.[col.name] ?? undefined}
+                    autoFill={wnprcMetaData?.[col.name]?.autoFill}
+                    value={watchTable?.[cell.row.id]?.[col.name]}
                 />
             ),
             filterVariant: (col.type === "Date and Time") ? 'datetime-range' : 'text',
@@ -118,13 +131,12 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                 createForm.register(key,{
                     validate: value => validationFns[columnId](value),
                 });
-                createForm.setValue(key, values[key]);
+                createForm.setValue(key, values[key], {shouldValidate: true});
             }else{
                 createForm.register(key);
                 createForm.setValue(key, values[key]);
             }
         })
-        await createForm.trigger();
         const oldValidationErrors = createForm.formState.errors;
 
         if (Object.keys(oldValidationErrors).length !== 0 ) {
@@ -155,7 +167,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
         for (let key in values) {
             if (Object.prototype.hasOwnProperty.call(values, key)) {
                 const newKey = key.replace("mrt-row-create", `${(queryClient.getQueryState([`${schema}-${query}`]).data as Array<any>).length - 1}`);
-                setValue(newKey, values[key]);
+                setValue(newKey, values[key], {shouldValidate: true});
             }
         }
 
@@ -177,13 +189,12 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                 updateForm.register(key,{
                     validate: value => validationFns[columnId](value),
                 });
-                updateForm.setValue(key, values[key]);
+                updateForm.setValue(key, values[key], {shouldValidate: true});
             }else{
                 updateForm.register(key);
                 updateForm.setValue(key, values[key]);
             }
         })
-        await updateForm.trigger();
         const oldValidationErrors = updateForm.formState.errors;
 
         if (Object.keys(oldValidationErrors).length !== 0 ) {
@@ -192,9 +203,8 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
         }
         setValidationErrors({});
         // Update form state
-        Object.keys(values).forEach((key, idx) => {
-            setValue(key, values[key]);
-        });
+        //update(updatedRowIdx, updateForm.getValues()[`${schema}-${query}`][updatedRowIdx]);
+        setValue(`${schema}-${query}.${updatedRowIdx}`,updateForm.getValues()[`${schema}-${query}`][updatedRowIdx])
         // Update table state
         queryClient.setQueryData([`${schema}-${query}`], (prevRows: any) =>
             prevRows?.map((prevRow, prevRowIdx) => {
@@ -211,7 +221,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                 );
             }),
         )
-        await trigger();
+        await trigger(`${schema}-${query}`);
         setIsUpdatingUser(false);
         table.setEditingRow(null); //exit editing mode
     };
@@ -254,12 +264,13 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
         muiTableBodyCellProps: {
             sx: {
                 overflow: 'visible',
-                zIndex: 'tooltip'
+                zIndex: null,
             }
         },
         muiTableBodyRowProps: {
             sx: {
                 overflow: 'inherit',
+                zIndex: null,
             }
         },
         muiTableContainerProps: {
@@ -319,7 +330,6 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                         acc[key] = getTypeByName(metaData, key.match(/[^.]*$/)[0]) === "Date and Time" ? new Date(value) : value;
                         return acc;
                     }, {});
-                    console.log("Valid values: ", formJson);
                     handleUpdateUser({values: formJson, table: table} as any);
                 },
             }
@@ -352,6 +362,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                         query={query}
                         action={"create"}
                         modalForm={createForm}
+                        wnprcMetaData={wnprcMetaData}
                     />} {/* or render custom edit components here */}
                 </DialogContent>
                 <DialogActions>
@@ -388,6 +399,7 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                         query={query}
                         action={"edit"}
                         modalForm={updateForm}
+                        wnprcMetaData={wnprcMetaData}
                     />}
                 </DialogContent>
                 <DialogActions>
@@ -437,19 +449,6 @@ const EditableGridPanel = (props: EditableGridPanelProps<any>) => {
                 Create New Blood Draw
             </Button>
         ),
-        renderCellActionMenuItems: ({ closeMenu, cell, row, table }) => [
-            <MRT_ActionMenuItem
-                icon={<Email />}
-                key={1}
-                label="Item 1"
-                onClick={() => {
-                    //your logic here
-                    console.log("cell: ", cell);
-                    closeMenu(); //close the menu after the action is performed
-                }}
-                table={table}
-            />
-        ],
         renderColumnFilterModeMenuItems: ({ column, onSelectFilterMode }) => [
             <MenuItem
                 key="contains"
@@ -489,36 +488,14 @@ function useGetUsers(data: any, schema, query) {
     });
 }
 
-//DELETE hook (delete user in api)
-function useDeleteUser(schema, query) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async (rowId: number) => {
-            //send api update request here
-            await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-            return Promise.resolve();
-        },
-        //client side optimistic update
-        onMutate: (rowId: number) => {
-            queryClient.setQueryData([`${schema}-${query}`], (prevUsers: any) =>
-                prevUsers?.filter((_, rowIdx) => rowIdx !== rowId),
-            );
-        },
-        // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-    });
-}
-
 const queryClient = new QueryClient();
 
 export const MUIEditableGridPanel = (props) => {
-    console.log(props);
-    const {defaultValues, schemaName, queryName, metaData, componentProps, formControl} = props;
-    const {columnHelper, validationFns} = componentProps;
+    const {defaultValues, schemaName, queryName, metaData, componentProps} = props;
+    const {columnHelper, validationFns, wnprcMetaData} = componentProps;
     if(!metaData) return;
     if (!(schemaName && queryName && defaultValues && `${schemaName}-${queryName}` in defaultValues)) return;
     const data = defaultValues[`${schemaName}-${queryName}`];
-    //data[0].date = data[0] ? data[0].date.toString();
-
     //Put this with your other react-query providers near root of your app
     return(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -529,8 +506,8 @@ export const MUIEditableGridPanel = (props) => {
                     columnHelper={columnHelper}
                     schema={schemaName}
                     query={queryName}
-                    formControl={formControl}
                     validationFns={validationFns}
+                    wnprcMetaData={wnprcMetaData}
                 />
             </QueryClientProvider>
         </LocalizationProvider>

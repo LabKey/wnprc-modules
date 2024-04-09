@@ -79,6 +79,7 @@ https://github.com/LeonGeldsch/css_material_input/tree/main
 
 .standard-input {
   position: relative;
+  min-width: 100%;
 }
 
 .standard-input input {
@@ -97,7 +98,7 @@ https://github.com/LeonGeldsch/css_material_input/tree/main
 .standard-input label {
   position: absolute;
   top: 50%;
-  left: 5%;
+  left: 0;
   transform: translateY(-50%);
   background-color: var(--main-transparent);
   color: gray;
@@ -110,8 +111,8 @@ https://github.com/LeonGeldsch/css_material_input/tree/main
 
 .standard-input input:not(:placeholder-shown) ~ label,
 .standard-input input:focus ~ label {
-  top: 0px;
-  left: 10px;
+  top: 0;
+  left: 0;
   font-size: 1rem;
 }
 
@@ -146,4 +147,22 @@ https://github.com/LeonGeldsch/css_material_input/tree/main
 .date-modal-label {
   top: 1px !important;
   margin-bottom: 5px;
+  font-size: inherit !important;
+}
+
+.dropdown-modal-label {
+  font-size: inherit !important;
+  position: initial;
+  transform: translateY(-50%);
+  background-color: var(--main-transparent);
+  color: gray;
+  text-align: center;
+  transition: .2s var(--main-ease);
+  pointer-events: none;
+  padding: 0 5px;
+}
+
+.dropdown-modal-container {
+  position: relative;
+  min-width: 100%;
 }

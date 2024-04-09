@@ -2,6 +2,7 @@ import * as React from "react";
 import "../theme/css/index.css";
 import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
+import { findAutoFill } from '../query/helpers';
 
 
 interface TextInputProps {
@@ -41,14 +42,19 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
     let stateName;
     let fieldName;
     let rowNum;
+    let gridAutoFill;
     if(nameParsed.length === 2) {
         [stateName,fieldName] = nameParsed;
     }else{ // it is 3
         [stateName,rowNum,fieldName] = nameParsed;
+        if(autoFill){// add row if editable grid
+            const tempAuto = autoFill.watch.split(".");
+            gridAutoFill = `${tempAuto[0]}.${rowNum}.${tempAuto[1]}`;
+        }
     }
 
     const borderColor = rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null);
-    const watchVar = autoFill ? watch(autoFill.watch as FieldPathValue<FieldValues, any>)  : undefined;
+    const watchVar = gridAutoFill ? watch(gridAutoFill) : autoFill ? watch(autoFill.watch as FieldPathValue<FieldValues, any>)  : undefined;
 
     // Trigger validation on load-in once to show required inputs
     useEffect(() => {
@@ -68,8 +74,12 @@ const TextInput: React.FunctionComponent<TextInputProps> = (props) => {
             resetField(name);
         }
         else if(autoFill){ // autofill input based on dropdown
-            if(autoFill.search) {
-                autoFill.search(watchVar).then((data) => {
+            if(autoFill.lookup) {
+                const watchState = watchVar && {
+                    name: autoFill.watch.substring(autoFill.watch.lastIndexOf('.') + 1),
+                    field: watchVar
+                };
+                findAutoFill(autoFill.lookup, watchState).then((data) => {
                     setValue(name, data);
                 });
             }

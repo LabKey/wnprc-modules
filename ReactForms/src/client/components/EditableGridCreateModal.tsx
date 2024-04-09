@@ -3,8 +3,11 @@ import { FC } from 'react';
 import { MRT_Row, MRT_TableInstance } from 'material-react-table';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
 import "../theme/css/editable-grid.css";
-import { useFormContext } from 'react-hook-form';
+import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 import { DateInput } from './DateInput';
+import DropdownSearch from './DropdownSearch';
+import InputLabel from './InputLabel';
+import { getConfig } from '../query/helpers';
 
 interface CreateModalProps {
     table: MRT_TableInstance<any>;
@@ -13,6 +16,7 @@ interface CreateModalProps {
     query: string;
     action: string;
     modalForm: any;
+    wnprcMetaData: any;
 }
 export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
     const {table,
@@ -20,22 +24,29 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
         schema,
         query,
         action,
-        modalForm
+        modalForm,
+        wnprcMetaData
     } = props;
-    const {getValues} = useFormContext();
+    const {getValues, watch} = useFormContext();
     // decides to create new row or load previous row
     const initVals = action === "create" ? row.original : getValues(`${schema}-${query}.${row.id}`);
     return(
         <div className={"page-wrapper"}>
             {table.getAllColumns().map((column) => {
                 if (column.id === "mrt-row-actions") return;
-                if((column.columnDef.meta as QueryColumn).type === "Date and Time") {
+                const colMetaData = column.columnDef.meta as QueryColumn;
+                const wnprcColMetaData = wnprcMetaData?.[colMetaData.name];
+                const type = wnprcColMetaData?.type ? wnprcColMetaData.type
+                    : colMetaData.type.includes("Date") ? "date"
+                        : colMetaData.lookup ? "dropdown"
+                            : colMetaData.inputType;
+                if(type === "date") {
                     return(
                         <div className={'standard-input'} key={`${action}-${column.id}`}>
                             <DateInput
                                 id={column.id}
                                 defaultValue={row.id === 'mrt-row-create' ? new Date() : initVals[column.id]}
-                                name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
+                                name={`${schema}-${query}.${(row.id)}.${colMetaData.name}`}
                             />
                             <label className={'date-modal-label'}>
                                 {column.id}
@@ -46,11 +57,40 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
                             </div>
                         </div>
                     )
+                }else if (type === "dropdown") {
+                    const watchVar = wnprcColMetaData?.watchVar;
+                    const watchState = watchVar && {
+                        name: watchVar.substring(watchVar.lastIndexOf('.') + 1),
+                        field: watch(watchVar as FieldPathValue<FieldValues, any>)
+                    };
+
+                    const optConf = wnprcColMetaData?.lookup ? getConfig(wnprcColMetaData.lookup,watchState)
+                        : colMetaData.lookup ? getConfig(colMetaData.lookup,watchState)
+                            : wnprcColMetaData.options;
+                    return(
+                        <div className={'dropdown-modal-container'} key={`${action}-${column.id}`}>
+                            <label className={'dropdown-modal-label'}>
+                                {column.id}
+                            </label>
+                            <DropdownSearch
+                                optConf={optConf}
+                                optDep={watchState}
+                                name={`${schema}-${query}.${row.id}.${colMetaData.name}`}
+                                defaultOpts={wnprcColMetaData?.defaultOpts}
+                                id={column.id}
+                                controlled={false}
+                                classname={''}
+                                initialValue={initVals[column.id]}
+                                required={colMetaData.required}
+                                isClearable={true}
+                            />
+                        </div>
+                    );
                 }
                 return (
                     <div className={'standard-input'} key={column.id}>
                         <input
-                            className={""}
+                            className={''}
                             key={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}
                             defaultValue={initVals[column.id]}
                             name={`${schema}-${query}.${(row.id)}.${(column.columnDef.meta as QueryColumn).name}`}

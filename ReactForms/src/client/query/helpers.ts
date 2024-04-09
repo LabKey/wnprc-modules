@@ -201,7 +201,6 @@ Helper function to open the DatePicker component
  */
 export const openDatepicker = (calendarEl) => {
   //@ts-ignore
-  console.log("calEL:", calendarEl);
   calendarEl.current.setOpen(true);
 };
 /*
@@ -276,10 +275,7 @@ Compiles a state object into a submission ready object for labkey saverows API c
 @returns {Object} New object ready for saverows
  */
 export const generateFormData = (schemaName: string, queryName: string, command: string, state: object): object => {
-  const rows = [{}];
-  Object.keys(state).forEach(key => {
-    rows[0][key] = state[key];
-  });
+  const rows = state instanceof Array ? state : [state];
   return {
     schemaName,
     queryName,
@@ -464,8 +460,7 @@ export const createTypeFromJson = (json: any): string => {
   return typeDefinition;
 }
 
-export const findDropdownOptions = (lookupMetaData, watchState?) => {
-  console.log("DDX: ", lookupMetaData, watchState);
+export const getConfig = (lookupMetaData, watchState?) => {
   if(watchState){
     return ({
       schemaName: lookupMetaData.schemaName,
@@ -486,4 +481,50 @@ export const findDropdownOptions = (lookupMetaData, watchState?) => {
       columns: [lookupMetaData.keyColumn, lookupMetaData.displayColumn],
     });
   }
+}
+
+export const getDistinctConfig = (lookupMetaData, watchState?) => {
+  console.log()
+  if(watchState){
+    return ({
+      schemaName: lookupMetaData.schemaName,
+      queryName: lookupMetaData.queryName,
+      column: lookupMetaData.column,
+      filterArray: [
+        Filter.create(
+            watchState.name,
+            watchState.field,
+            Filter.Types.EQUALS
+        )
+      ]
+    });
+  }else{
+    return ({
+      schemaName: lookupMetaData.schemaName,
+      queryName: lookupMetaData.queryName,
+      column: lookupMetaData.column,
+    });
+  }
+}
+
+export const findAutoFill = async (lookup, watchState) => {
+  let config: SelectDistinctOptions = getDistinctConfig(lookup, watchState) as SelectDistinctOptions;
+  const data = await labkeyActionDistinctSelectWithPromise(config);
+
+  return data["values"][0];
+};
+
+
+export const parseGridName = (str) => {
+  const regex = /^([^.-]+)-([^.-]+)\.(\d+)\.([^.-]+)$/;
+  const match = str.match(regex);
+
+  if (!match) {
+    // Handle invalid input format
+    console.error('Invalid input format');
+    return null;
+  }
+
+  const [, schema, query, row, col] = match;
+  return { schema, query, row, col};
 }

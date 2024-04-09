@@ -5,7 +5,7 @@ import InputLabel from './InputLabel';
 import '../theme/css/index.css';
 import { ConfigProps } from '../query/typings';
 import DropdownSearch from './DropdownSearch';
-import { getTask, labkeyActionSelectWithPromise } from '../query/helpers';
+import { labkeyActionSelectWithPromise } from '../query/helpers';
 import ControlledDateInput from './ControlledDateInput';
 import { Controller, FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
@@ -23,22 +23,16 @@ interface taskProps {
 }
 
 export const TaskPane: FC<taskProps> = (props) =>{
-    const {prevTaskId, schemaName, queryName, componentProps} = props;
-    const {defaultValues} = componentProps;
-    const {updateTitle} = defaultValues;
-    const { control, getValues } = useFormContext();
-    const [prevTask, setPrevTask] = useState(undefined);
-    const [isLoadingTask, setIsLoadingTask] = useState<boolean>(true);
+    const { schemaName, queryName} = props;
+    const { control} = useFormContext();
     const [isLoadingQC, setIsLoadingQC] = useState<boolean>(true);
 
     const [qcOptions, setQCOptions] = useState<any>({});
-    console.log("taxxxkPane");
     const config: ConfigProps = {
         schemaName: "core",
         queryName: "PrincipalsWithoutAdmin",
         columns: ["UserId", "DisplayName"]
     };
-
     const qcConfig: SelectRowsOptions = {
         schemaName: "core",
         queryName: "QCState",
@@ -55,21 +49,6 @@ export const TaskPane: FC<taskProps> = (props) =>{
             }
         }
     }
-
-    /*
-    // Loads previous task if one exists
-    useEffect(() => {
-        if(prevTaskId) {
-            getTask(prevTaskId).then((result) => {
-                setPrevTask(result);
-                setIsLoadingTask(false);
-            }).catch(() => {
-                console.log("No prev task for ID found");
-            });
-        }else {
-            setIsLoadingTask(false);
-        }
-    },[]);*/
 
     // Gets QC labels and row ids
     useEffect(() => {
@@ -135,7 +114,8 @@ export const TaskPane: FC<taskProps> = (props) =>{
                         name={`${schemaName}-${queryName}.assignedto`}
                         id={"taskAssignedTo"}
                         classname="navbar__search-form"
-                        required={true}
+                        required={false}
+                        controlled={true}
                         isClearable={true}
                     />
                 </div>

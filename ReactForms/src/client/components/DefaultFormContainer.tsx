@@ -6,7 +6,7 @@ import { generateFormData, getFormData, getLsid, getQueryDetails } from '../quer
 import AnimalInfoPane from './AnimalInfoPane';
 import ErrorModal from '../components/ErrorModal';
 import { Utils } from '@labkey/api';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FieldPathValue, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { FormMetadataCollection } from './FormMetadataCollection';
 import { QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
@@ -70,8 +70,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
         defaultValues: useMemo(() => defaultValues, [defaultValues])
     });
     const [isLoadingPrevTask, setIsLoadingPrevTask] = useState(true);
-    const [columnDetails, setColumnDetails] = useState(undefined);
-
 
     // States required for animal info
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
@@ -90,8 +88,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
     */
     const processComponents = async (finalFormData: Array<any>, newTaskId: string, currentFormData: any) => {
         const promises = components.map(async (component) => {
-            console.log("comp: ", component);
-            console.log("currData: ", currentFormData);
             const formName = `${component.schemaName}-${component.queryName}`;
             const schemaName = component.schemaName;
             const queryName = component.queryName;
@@ -101,7 +97,14 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
             if(currentFormData[formName] !== null && currentFormData[formName] !== undefined){
                 // sync up task id
                 const tempNewData = currentFormData[formName];
-                tempNewData.taskid = newTaskId;
+                if(tempNewData instanceof Array){
+                    tempNewData.forEach((row) => {
+                        row.taskid = newTaskId;
+                    });
+                }else {
+                    tempNewData.taskid = newTaskId;
+                }
+
                 if(prevTaskId && !commandOverride && command === 'update'){
                     await getLsid(schemaName, queryName, newTaskId).then((prevLsid) =>{
                         tempNewData.lsid = prevLsid;
@@ -112,8 +115,10 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 if(requiredFields){
                     requiredFields.forEach((field) => {
                         const [stateName, fieldName] = field.split(".");
-                        if(stateName === "Key"){ // generate unique key
-                            tempNewData[fieldName] = Utils.generateUUID().toUpperCase();
+                        if(tempNewData instanceof Array){
+                            tempNewData.forEach((row) => {
+                                row[fieldName] = currentFormData[stateName][fieldName];
+                            })
                         }else{
                             tempNewData[fieldName] = currentFormData[stateName][fieldName];
                         }
@@ -220,10 +225,8 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                 : (column.type === "Date and Time"
                                     ? new Date()
                                     : column.defaultValue);
-                            console.log("xxx: ", tempDefaultValues, column.name, result[0].hasOwnProperty(column.name), result);
                         });
                     }
-                    console.log("xxxd: ", tempDefaultValues);
                     setDefaultValues(prevState => ({
                         ...prevState,
                         [`${component.schemaName}-${component.queryName}`]: tempDefaultValues
@@ -248,6 +251,7 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                     await methods.trigger();
                 }
             } catch (error) {
+
                 console.error("Error occurred:", error);
             }
         }))
@@ -257,11 +261,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                 setIsLoadingPrevTask(false);
             });
     }, []);
-
-    useEffect(() => {
-        console.log("DV: ", defaultValues, metaData);
-    }, [defaultValues]);
-
 
     if(isLoadingPrevTask){
         return(<div>Loading...</div>);
@@ -292,7 +291,6 @@ export const DefaultFormContainer: FC<formProps> = (props) => {
                                     <div key={`${name}-${schemaName}-${queryName}`}
                                          className="col-md-8 panel panel-portal form-row-wrapper">
                                         <ComponentType
-                                            prevTaskId={prevTaskId}
                                             name={name}
                                             componentProps={componentProps}
                                             schemaName={schemaName}

@@ -62,7 +62,13 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                     },
                     account: {
                         type: "text",
-                        autoFill: {watch: "study-research_ultrasounds.project", search: findAccount}
+                        autoFill: {
+                            watch: "study-research_ultrasounds.project",
+                            lookup: {
+                                schemaName: "ehr",
+                                queryName: "project",
+                                column: "account"
+                            }}
                     }
                 }
             }

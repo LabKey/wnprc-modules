@@ -1,11 +1,10 @@
 import * as React from "react";
 import { FC } from 'react';
 import { DefaultFormContainer } from '../../components/DefaultFormContainer';
-import { CustomInputPane } from '../../components/CustomInputPane';
 import {ActionURL} from '@labkey/api';
 import { TaskPane } from '../../components/TaskPane';
 import {MUIEditableGridPanel} from '../../components/EditableGridPanel';
-import {BloodRow, UltrasoundsRow} from '../../components/testData';
+import {BloodRow} from '../../components/testData';
 import { createMRTColumnHelper } from 'material-react-table';
 import { lookupAnimalInfo } from '../../query/helpers';
 import { InfoProps } from '../../query/typings';
@@ -22,7 +21,7 @@ const validateId = (id: string) => {
 }
 
 
-export const Ultrasounds: FC<any> = (props) => {
+export const BloodDraws: FC<any> = (props) => {
 
     const taskid: string = ActionURL.getParameter('taskid');
     const formStartTime: Date = new Date(new Date().toISOString().slice(0, 16).replace('T', ' '));
@@ -37,7 +36,7 @@ export const Ultrasounds: FC<any> = (props) => {
             queryName: "tasks",
             componentProps: {
                 defaultValues: {
-                    updateTitle: "Blood Draw",
+                    updateTitle: "Blood Draws",
                     qcstate: 2,
                 }
             }
@@ -88,11 +87,11 @@ export const Ultrasounds: FC<any> = (props) => {
             <DefaultFormContainer
                 prevTaskId={taskid}
                 reviewRequired={reviewRequired}
-                taskType={"Ultrasounds"}
+                taskType={"Blood Draws"}
                 command={taskid ? "update" : "insert"}
                 components={components}
                 redirectSchema={"study"}
-                redirectQuery={"ultrasounds"}
+                redirectQuery={"blood"}
                 formStartTime={formStartTime}
                 animalInfoPane={false}
             />

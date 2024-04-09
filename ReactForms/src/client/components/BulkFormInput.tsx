@@ -8,7 +8,7 @@ import DropdownSearch from './DropdownSearch';
 import ControlledDateInput from './ControlledDateInput';
 import TextAreaInput from './TextAreaInput';
 import { FieldPathValue, FieldValues, useFormContext } from 'react-hook-form';
-import { findDropdownOptions } from '../query/helpers';
+import { getConfig } from '../query/helpers';
 
 interface BulkFormProps {
     inputField: any[];
@@ -104,8 +104,8 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                 field: watch(watchVar as FieldPathValue<FieldValues, any>)
             };
 
-            const optConf = wnprcMetaData?.[name]?.lookup ? findDropdownOptions(wnprcMetaData[name].lookup,watchState)
-                : inputField[i].lookup ? findDropdownOptions(inputField[i].lookup,watchState)
+            const optConf = wnprcMetaData?.[name]?.lookup ? getConfig(wnprcMetaData[name].lookup,watchState)
+                : inputField[i].lookup ? getConfig(inputField[i].lookup,watchState)
                 : wnprcMetaData[name].options;
             inputs.push(
                 <div key={id} className={"panel-input-row"}>
@@ -120,6 +120,7 @@ const BulkFormInput: FC<BulkFormProps> = (props) => {
                         name={`${compName}.${name}`}
                         defaultOpts={wnprcMetaData?.[name]?.defaultOpts}
                         id={id}
+                        controlled={true}
                         classname={"navbar__search-form"}
                         required={isRequired}
                         isClearable={true}

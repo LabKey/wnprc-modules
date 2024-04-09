@@ -7,7 +7,6 @@ import DatePicker from 'react-datepicker';
 interface DateInputProps {
     opendate?: () => void;
     iconpath?: string;
-    inputprops?: any;
     id: string;
     name: string
     className?: string;
@@ -17,21 +16,13 @@ interface DateInputProps {
 
 export const DateInput: FC<DateInputProps> = (props) => {
     const {
-        inputprops,
         id,
         name,
         className,
         onBlur,
         defaultValue
     } = props;
-    const iconpath= `${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`;
-    const calanderEl = useRef(false);
     const [dateState, setDateState] = useState<Date>(defaultValue ?? new Date());
-    const openDatepicker = (calendarEl) => {
-        console.log("calEL:", calendarEl);
-        calendarEl.setOpen(true);
-    };
-
 
     return (
       <>
@@ -42,14 +33,13 @@ export const DateInput: FC<DateInputProps> = (props) => {
           dateFormat="yyyy-MM-dd HH:mm"
           todayButton="Today"
           selected={dateState}
-          className={"form-control " + className}
+          className={className}
           name={name}
           onChange={(date) => setDateState(date)}
           onBlur={onBlur}
           popperPlacement={"bottom"}
           popperClassName={"my-datepicker-popper"}
         />
-        <img id="date-calendar-img" onClick={() => openDatepicker(calanderEl)} src={iconpath}/>
       </>
     );
 };

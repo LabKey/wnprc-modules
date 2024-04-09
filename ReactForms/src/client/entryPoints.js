@@ -9,6 +9,10 @@ module.exports = {
         title: "Ultrasounds",
         permission: "login",
         path: './src/client/FormPages/Ultrasounds'
-    }
-    ]
+    },{
+        name: "blood_draws",
+        title: "Blood Draws",
+        permission: "login",
+        path: './src/client/FormPages/BloodDraws'
+    }]
 };

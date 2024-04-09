@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { FC, useEffect } from 'react';
 import { openDatepicker } from '../query/helpers';
-import {DateInput} from './DateInput';
 import { ActionURL } from '@labkey/api';
 import DatePicker from 'react-datepicker';
 import "../theme/css/index.css";
@@ -16,7 +15,7 @@ import { UseFormTrigger } from 'react-hook-form/dist/types/form';
 
 interface dateProps {
     name: string;
-    date?: Date;
+    value?: Date;
     id: string;
     validation?: any;
     required?: any;
@@ -35,7 +34,7 @@ customInput={
 const ControlledDateInput: FC<dateProps> = (props) => {
     const {
         name,
-        date,
+        value,
         id,
         required,
         validation,
@@ -62,7 +61,7 @@ const ControlledDateInput: FC<dateProps> = (props) => {
         <div className={errors?.[stateName]?.[fieldName] ? "date-controller date-controller-error" : "date-controller"}>
             <Controller
                 control={control}
-                defaultValue={(date || new Date()) as FieldPathValue<FieldValues, any>}
+                defaultValue={(value || new Date()) as FieldPathValue<FieldValues, any>}
                 name={name as FieldPathValue<FieldValues, any>}
                 rules={{validate: validation, required: required ? "This field is required" : false} as FieldPathValue<FieldValues, any>}
                 render={({field: {onChange, onBlur,value,ref}}) => (

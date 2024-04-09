@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 import * as React from "react";
 import Select, { createFilter } from 'react-select';
 import { labkeyActionSelectWithPromise } from '../query/helpers';
@@ -10,11 +10,12 @@ interface PropTypes {
     name: any;
     id: string;
     classname: string;
-    initialValue?: any;
+    initialValue?: string;
     required: boolean;
     isClearable?: boolean;
     validation?: any;
     defaultOpts?: any;
+    controlled?: boolean;
 }
 
 /**
@@ -32,11 +33,13 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         required,
         isClearable,
         validation,
-        defaultOpts
+        defaultOpts,
+        controlled
     } = props;
     const {control, formState: {errors}} = useFormContext();
     const [optState, setOptState] = useState([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [uncontrolledState, setUncontrolledState] = useState(initialValue);
     const nameParsed = name.split(".");
     let stateName;
     let fieldName;
@@ -46,10 +49,9 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     }else{ // it is 3
         [stateName,rowNum,fieldName] = nameParsed;
     }
-
-
-    const [defaultValue, setDefaultValue] = useState(null);
-
+    const changeUncontrolled = (selectedOption) => {
+        setUncontrolledState(selectedOption || null);
+    }
     useEffect(() => {
         labkeyActionSelectWithPromise(optConf).then(data => {
             const options = [];
@@ -57,9 +59,6 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
             const display = optConf.columns[1];
             data["rows"].forEach(item => {
                 options.push({value: item[value], label: item[display]});
-                if(item[value] === initialValue){
-                    setDefaultValue({value: item[value], label: item[display]});
-                }
             });
 
             if(defaultOpts) {
@@ -79,8 +78,6 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                 }
                 return accumulator;
             }, []);
-            console.log("DDX 2: ", optConf);
-            console.log("DDX 3: ", duplicatesRemovedArray);
             setOptState(duplicatesRemovedArray);
             setIsLoading(false);
         });
@@ -89,7 +86,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
 
     if(isLoading) {
         return (<div>Loading...</div>);
-    }
+    }else if(controlled){
     return (
         <div className={'dropdown-controller'}>
             <Controller
@@ -103,38 +100,85 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                     <Select
                         ref={ref}
                         inputId={id}
-                        value={optState.find((c) => c.value === value)}
+                        value={optState.find((c) => (
+                            c.value.toString() === value?.toString()
+                        ))}
                         className={classname}
                         classNamePrefix={'react-hook-select'}
                         getOptionLabel={x => x.label}
                         getOptionValue={x => x.value}
-                        onChange={(selectedOption) => {onChange(selectedOption?.value ? selectedOption.value : null);}}
+                        onChange={(selectedOption) => {
+                            onChange(selectedOption?.value ? selectedOption.value : null);
+                        }}
                         options={optState}
                         isClearable={isClearable}
-                        filterOption={createFilter({ ignoreAccents: false })}
+                        filterOption={createFilter({ignoreAccents: false})}
                         styles={{
                             control: (base) => ({
                                 ...base,
                                 borderColor: rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null),
+                                height: '20px'
                             }),
                             container: (base) => ({
                                 ...base,
-                                width: 'max-content',
+                                width: 'auto',
                             }),
                             menu: (base) => ({
                                 ...base,
                                 width: 'max-content',
                                 zIndex: 2
-                            })
+                            }),
                         }}
                     />
                 )}
-            />
-            <div className={"react-error-text"}>
-                {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
+                />
+                <div className={"react-error-text"}>
+                    {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
+                </div>
             </div>
-        </div>
-    );
+        );
+    }else{
+        return (
+            <div className={'dropdown-controller'}>
+                <Select
+                    defaultValue={initialValue}
+                    inputId={id}
+                    required={required}
+                    name={name}
+                    value={optState.find((c) => (
+                        c.value.toString() === uncontrolledState?.toString()
+                    ))}
+                    className={classname}
+                    classNamePrefix={'react-hook-select'}
+                    getOptionLabel={x => x.label}
+                    getOptionValue={x => x.value}
+                    onChange={(selectedOption) => (changeUncontrolled(selectedOption))}
+                    options={optState}
+                    isClearable={isClearable}
+                    filterOption={createFilter({ignoreAccents: false})}
+                    styles={{
+                        control: (base) => ({
+                            ...base,
+                            borderColor: rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null),
+                            height: '20px'
+                        }),
+                        container: (base) => ({
+                            ...base,
+                            width: 'auto',
+                        }),
+                        menu: (base) => ({
+                            ...base,
+                            width: 'max-content',
+                            zIndex: 2
+                        }),
+                    }}
+                />
+                <div className={'react-error-text'}>
+                    {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
+                </div>
+            </div>
+        );
+    }
 };
 
 export default DropdownSearch;

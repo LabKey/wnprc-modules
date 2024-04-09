@@ -5,11 +5,11 @@ import TextAreaInput from './TextAreaInput';
 import Checkbox from './Checkbox';
 import ControlledDateInput from './ControlledDateInput';
 import DropdownSearch from './DropdownSearch';
+import { getConfig, parseGridName } from '../query/helpers';
+import { FieldPathValue, FieldValues, useFormContext, useWatch } from 'react-hook-form';
 
 interface EditableGridCellProps {
-    value?: any;
     className: string;
-    prevForm: any;
     type: any;
     name: string;
     id?: string;
@@ -17,6 +17,8 @@ interface EditableGridCellProps {
     validation?: any;
     dropdownConfig?: any;
     autoFill?: any;
+    metaData: any;
+    value?: any;
 }
 /*
 <input
@@ -28,36 +30,46 @@ interface EditableGridCellProps {
 
 export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
     const {
-        value,
         className,
         type,
-        prevForm,
         name,
         id,
         required,
         validation,
         dropdownConfig,
-        autoFill
+        autoFill,
+        metaData,
+        value
     } = props;
     if(!type) return;
-    //console.log(type);
-    if(type === "Date and Time"){
+
+    const useFormValues = () => {
+        const { getValues } = useFormContext()
+
+        return {
+            ...useWatch(), // subscribe to form value updates
+
+            ...getValues(), // always merge with latest form values
+        }
+    }
+
+    if(type === "date"){
         return(<ControlledDateInput
             name={name}
             className={className}
             id={id}
-            date={prevForm?.[name]?.value}
             required={required}
             validation={validation}
+            value={value}
         />);
     }else if(type === "textarea"){
         return(<TextAreaInput
             name={name}
             id={id}
             className={"form-control " + className}
-            value={prevForm?.[name] ?? ""}
             required={required}
             validation={validation}
+            value={value}
         />);
     }else if(type === "checkbox"){
         return(<Checkbox
@@ -65,15 +77,27 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
             id={id}
             validation={validation}
             className={"form-control " + className}
-            value={prevForm?.[name] ?? ""}
             required={required}
+            value={value}
         />);
     }else if(type === "dropdown"){
+        const [fieldName, rowNum,colName] = name.split(".");
+        const watchVar = metaData.wnprcMetaData?.[colName]?.watchVar;
+        const watchName = watchVar?.split?.(".")?.[1];
+        const watchState = metaData.wnprcMetaData?.[colName]?.watchVar && {
+            name: watchName,
+            field: useFormValues()?.[fieldName]?.[rowNum]?.[watchName]
+        };
+        const optConf = metaData.wnprcMetaData?.[colName]?.lookup ? getConfig(metaData.wnprcMetaData?.[colName]?.lookup,watchState)
+            : metaData.lookup ? getConfig(metaData.lookup,watchState)
+                : metaData.options;
+
         return(<DropdownSearch
-            optConf={dropdownConfig.optConf}
-            defaultOpts={dropdownConfig.defaultOpts}
-            optDep={dropdownConfig.watchState}
-            initialValue={prevForm?.[name] ?? null}
+            optConf={optConf}
+            initialValue={value}
+            defaultOpts={metaData.wnprcMetaData?.[colName]?.defaultOpts}
+            optDep={watchState}
+            controlled={true}
             name={name}
             id={id}
             classname={"navbar__search-form " + className}
@@ -87,17 +111,14 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
             <div className={"standard-input"}>
                 <TextInput
                     name={name}
+                    value={value}
                     id={id}
                     className={"" + className}
-                    value={prevForm?.[name] ?? ""}
                     required={required}
                     validation={validation}
                     autoFill={autoFill}
                     type={type.includes("Integer") || type.includes("Number") ? "number" : "text"}
                 />
-                <label>
-                    {id}
-                </label>
                 <span className={"underline"}></span>
             </div>
         );

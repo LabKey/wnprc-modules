@@ -398,5 +398,5 @@ select[id^="restraint"] {
 }
 
 .dropdown-controller {
-  display: flex;
+  display: block;
 }

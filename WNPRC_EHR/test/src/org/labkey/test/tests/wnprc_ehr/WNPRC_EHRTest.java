@@ -2778,11 +2778,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        sleep(3000);
         clickNewButton("add-record");
-        sleep(3000);
         fillWeightForm(WEIGHT_VAL.toString(),1);
-        sleep(3000);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
         doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));

@@ -898,7 +898,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInput("remark_"+ index, "Entered from automated test");
         sleep(3000);
         fillAnInput("restraint_" + index, "T");
-        sleep(3000);
         waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 

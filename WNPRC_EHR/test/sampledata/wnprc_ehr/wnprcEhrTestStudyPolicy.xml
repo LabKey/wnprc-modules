@@ -425,7 +425,6 @@
     <ns:datasetPermission datasetName="chairing" groupName="EHR Full Updaters" role="org.labkey.ehr.security.EHRFullUpdaterRole"/>
     <ns:datasetPermission datasetName="chairing" groupName="EHR Request Admins" role="org.labkey.ehr.security.EHRRequestAdminRole"/>
     <ns:datasetPermission datasetName="chairing" groupName="EHR Requestors" role="org.labkey.ehr.security.EHRRequestorRole"/>
-
     <ns:datasetPermission datasetName="BehaviorAbstract" groupName="EHR Administrators" role="org.labkey.ehr.security.EHRDataAdminRole"/>
     <ns:datasetPermission datasetName="BehaviorAbstract" groupName="EHR Basic Submitters" role="org.labkey.ehr.security.EHRBasicSubmitterRole"/>
     <ns:datasetPermission datasetName="BehaviorAbstract" groupName="EHR Full Submitters" role="org.labkey.ehr.security.EHRFullSubmitterRole"/>

@@ -888,6 +888,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         String animalId = ANIMAL_SUBSET_EHR_TEST[index];
         fillAnInput("animalid_" + index, animalId );
+        sleep(3000);
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
 
         //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
@@ -895,7 +896,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 //        el2.sendKeys(Keys.TAB);
 
         fillAnInput("remark_"+ index, "Entered from automated test");
+        sleep(3000);
         fillAnInput("restraint_" + index, "T");
+        sleep(3000);
         waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 
@@ -2775,11 +2778,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        sleep(1000);
+        sleep(3000);
         clickNewButton("add-record");
-        sleep(1000);
+        sleep(3000);
         fillWeightForm(WEIGHT_VAL.toString(),1);
-        sleep(1000);
+        sleep(3000);
         clickNewButton("submit-all-btn");
         ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
         doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));

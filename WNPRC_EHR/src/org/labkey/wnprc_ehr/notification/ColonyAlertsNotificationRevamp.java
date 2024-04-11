@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +77,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getScheduleDescription() {
-        return "every day at 6AM";
+        return "Daily at 6AM";
     }
     @Override
     public String getCronString() {
@@ -481,7 +482,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.calculated_status~eq=Alive&query.Id/MostRecentWeight/MostRecentWeightDate~isblank");
 
             //Returns data.
             this.livingAnimalsWithoutWeight = returnArray;
@@ -497,8 +499,10 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "ehr", "missingCages", null, null, new String[]{"room", "cage"});
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=missingCages");
-            Path editQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr_lookups&query.queryName=cage");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "ehr", "missingCages", null);
+            String editQueryURL = notificationToolkit.createQueryURL(c, "update", "ehr", "missingCages", null);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=missingCages");
+//            Path editQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr_lookups&query.queryName=cage");
 
             //Returns data.
             this.occupiedCagesWithoutDimensions = returnArray;
@@ -553,7 +557,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             }
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Housing&query.cond~eq=pc&query.enddate~isblank=");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Housing", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Housing&query.cond~eq=pc&query.enddate~isblank=");
 
             //Returns data.
             this.livingAnimalsInProtectedContact = returnArray;
@@ -571,12 +576,16 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingProblems");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingProblems", null);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingProblems");
             StringBuilder idsToCheck = new StringBuilder();
             for (String id : returnArray) {
                 idsToCheck.append(id + ";");
             }
-            Path editQueryURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=" + idsToCheck + "&query.enddate~isblank");
+            SimpleFilter myFilter = new SimpleFilter("Id", idsToCheck.toString(), CompareType.IN);
+            myFilter.addCondition("enddate", "", CompareType.ISBLANK);
+            String editQueryURL = notificationToolkit.createQueryURL(c, "update", "study", "Housing", myFilter);
+//            Path editQueryURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=" + idsToCheck + "&query.enddate~isblank");
 
             //Returns data.
             this.livingAnimalsWithMultipleActiveHousingRecords = returnArray;
@@ -592,8 +601,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "ValidateHousingSnapshot", null, null, "Id");
 
-            //Update snapshot.
-            if (!returnArray.isEmpty()) {
+//            //Update snapshot.
+//            if (!returnArray.isEmpty()) {
 //
 //                ScriptEngine engine = null;
 //                String ext = FileUtil.getExtension("/usr/local/labkey/tools/uupdateSnapshot.pl");
@@ -607,14 +616,15 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 //                        scriptDir = getScriptDirectory
 //                    }
 //                }
-
-                //TODO: Update snapshot (line 210 in colonyAlerts.pl).
-                // The following line is how it's done in the perl script.
-//                system("/usr/local/labkey/tools/updateSnapshot.pl");
-            }
+//
+//                //TODO: Update snapshot (line 210 in colonyAlerts.pl).
+//                // The following line is how it's done in the perl script.
+////                system("/usr/local/labkey/tools/updateSnapshot.pl");
+//            }
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "ValidateHousingSnapshot", null);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot");
 
             //Returns data.
             this.livingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable = returnArray;
@@ -634,12 +644,16 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingConditionProblems", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems");
             StringBuilder idsToCheck = new StringBuilder();
             for (String id : returnArray) {
                 idsToCheck.append(id + ";");
             }
-            Path editQueryURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=" + idsToCheck + "&query.enddate~isblank");
+            myFilter.addCondition("Id", idsToCheck.toString(), CompareType.IN);
+            myFilter.addCondition("enddate", "", CompareType.ISBLANK);
+            String editQueryURL = notificationToolkit.createQueryURL(c, "update", "study", "Housing", myFilter);
+//            Path editQueryURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=" + idsToCheck + "&query.enddate~isblank");
 
             //Returns data.
             this.recordsWithPotentialHousingConditionProblems = returnArray;
@@ -660,7 +674,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Housing", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Housing&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Housing", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Housing&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
 
             //Returns data.
             this.openHousingRecordsWhereAnimalIsNotAlive = returnArray;
@@ -680,7 +695,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room~isblank&query.calculated_status~eq=Alive");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room~isblank&query.calculated_status~eq=Alive");
 
             //Returns data.
             this.livingAnimalsWithoutActiveHousingRecord = returnArray;
@@ -695,7 +711,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Validate_status");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Validate_status", null);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Validate_status");
 
             //Returns data.
             this.recordsWithCalculatedStatusFieldProblems = returnArray;
@@ -715,7 +732,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns");
 
             //Returns data.
             this.animalsLackingAssignments = returnArray;
@@ -733,7 +751,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
 
             //Returns data.
             this.activeAssignmentsWhereAnimalIsNotAlive = returnArray;
@@ -753,7 +772,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive&query.project/protocol~isblank");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive&query.project/protocol~isblank");
 
             //Returns data.
             this.activeAssignmentsWhereProjectLacksValidProtocol = returnArray;
@@ -768,7 +788,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "duplicateAssignments", null, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=duplicateAssignments");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "duplicateAssignments", null);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=duplicateAssignments");
 
             //Returns data.
             this.duplicateActiveAssignments = returnArray;
@@ -787,7 +808,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=siv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=siv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202");
 
             //Returns data.
             this.livingSivPosAnimalsNotExemptFromPairHousing = returnArray;
@@ -806,7 +828,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "demographics", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=shiv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=shiv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202");
 
             //Returns data.
             this.livingShivPosAnimalsNotExemptFromPairHousing = returnArray;
@@ -824,7 +847,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Treatment Orders", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Treatment Orders&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Treatment Orders", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Treatment Orders&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
 
             //Returns data.
             this.openEndedTreatmentsWhereAnimalIsNotAlive = returnArray;
@@ -842,31 +866,15 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Problem List", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Problem List&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Problem List", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Problem List&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
 
             //Returns data.
             this.openEndedProblemsWhereAnimalIsNotAlive = returnArray;
             this.openEndedProblemsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
         }
 
-//        //18. Find open assignments where the animal is not alive.
-//        //REVAMP EDIT: Removed this (duplicate of #11).
-//        ArrayList<String> openAssignmentsWhereAnimalIsNotAlive;                         //id
-//        String openAssignmentsWhereAnimalIsNotAliveURLView;                             //url string (view)
-//        private void getOpenAssignmentsWhereAnimalIsNotAlive() {
-//            //Creates filter.
-//            SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
-//            myFilter.addCondition("enddate", "", CompareType.ISBLANK);
-//            //Runs query.
-//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
-//
-//            //Creates URL.
-//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive");
-//
-//            //Returns data.
-//            this.openAssignmentsWhereAnimalIsNotAlive = returnArray;
-//            this.openAssignmentsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
-//        }
+        //REMOVED QUERY 18 (it was a duplicate of 11).
 
         //19. Find non-continguous housing records.
         ArrayList<String> nonContiguousHousingRecords;                                  //id
@@ -880,7 +888,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumnWithParameters(c, u, "study", "HousingCheck", null, null, "Id", myParams);
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=HousingCheck&query.param.MINDATE=" + todayCalendarDate);
+            ActionURL queryURL = new ActionURL("query", "executeQuery.view", c);
+            queryURL.addParameter("schemaName", "study");
+            queryURL.addParameter("query.queryName", "HousingCheck");
+            queryURL.addParameter("query.param.MINDATE", todayCalendarDate);
+            String viewQueryURL = (new Path(new ActionURL().getBaseServerURI(), queryURL.toString())).toString();
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=HousingCheck&query.param.MINDATE=" + todayCalendarDate);
 
             //Returns data.
             this.nonContiguousHousingRecords = returnArray;
@@ -898,7 +911,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Birth", myFilter, null, new String[]{"Id", "date"});
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.gender~isblank=&query.date~dategte=-90d");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.gender~isblank=&query.date~dategte=-90d");
 
             //Returns data.
             this.birthRecordsMissingGender = returnArray;
@@ -918,7 +932,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Demographics", myFilter, mySort, new String[]{"Id", "birth"});
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.gender~isblank=&query.created~dategte=-90d");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.gender~isblank=&query.created~dategte=-90d");
 
             //Returns data.
             this.demographicsMissingGender = returnArray;
@@ -938,7 +953,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, new String[]{"Id", "date"});
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.gender~isblank=&query.date~dategte=-90d");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Prenatal Deaths", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.gender~isblank=&query.date~dategte=-90d");
 
             //Returns data.
             this.prenatalRecordsMissingGender = returnArray;
@@ -958,7 +974,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, new String[]{"Id", "date"});
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.species~isblank=&query.date~dategte=-90d");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Prenatal Deaths", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.species~isblank=&query.date~dategte=-90d");
 
             //Returns data.
             this.prenatalRecordsMissingSpecies = returnArray;
@@ -977,7 +994,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=validateFinalWeights&query.death~dategte=-90d");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "validateFinalWeights", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=validateFinalWeights&query.death~dategte=-90d");
 
             //Returns data.
             this.animalsThatDiedWithoutWeight = returnArray;
@@ -996,49 +1014,15 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "TB Tests", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=TB Tests&query.date~datelte=-10d&query.date~dategte=-90d&query.missingresults~eq=true");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "TB Tests", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=TB Tests&query.date~datelte=-10d&query.date~dategte=-90d&query.missingresults~eq=true");
 
             //Returns data.
             this.tbRecordsLackingResult = returnArray;
             this.tbRecordsLackingResultURLView = viewQueryURL.toString();
         }
 
-//        //26. Find protocols nearing the animal limit count.
-//        //REVAMP EDIT: Removed this, Sandra says nobody uses this.
-//        ArrayList<String> protocolsNearingAnimalLimitCount;                             //protocol
-//        String protocolsNearingAnimalLimitCountURLView;                                 //url string (view)
-//        private void getProtocolsNearingAnimalLimitCount() {
-//            //Creates filter.
-//            SimpleFilter myFilter = new SimpleFilter("TotalRemaining", 5, CompareType.LT);
-//            myFilter.addCondition("allowed", 0, CompareType.NEQ);
-//            //Runs query.
-//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, "protocol");
-//
-//            //Creates URL.
-//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocolTotalAnimalsBySpecies&query.TotalRemaining~lt=5&query.allowed~neqornull=0");
-//
-//            //Returns data.
-//            this.protocolsNearingAnimalLimitCount = returnArray;
-//            this.protocolsNearingAnimalLimitCountURLView = viewQueryURL.toString();
-//        }
-
-//        //27. Find protocols nearing the animal limit percentage.
-//        //REVAMP EDIT: Removed this, Sandra says nobody uses this.
-//        ArrayList<String> protocolsNearingAnimalLimitPercentage;                        //protocol
-//        String protocolsNearingAnimalLimitPercentageURLView;                            //url string (view)
-//        private void getProtocolsNearingAnimalLimitPercentage() {
-//            //Creates filter.
-//            SimpleFilter myFilter = new SimpleFilter("PercentUsed", 95, CompareType.GTE);
-//            //Runs query.
-//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, "protocol");
-//
-//            //Creates URL.
-//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocolTotalAnimalsBySpecies&query.PercentUsed~gte=95");
-//
-//            //Returns data.
-//            this.protocolsNearingAnimalLimitPercentage = returnArray;
-//            this.protocolsNearingAnimalLimitPercentageURLView = viewQueryURL.toString();
-//        }
+        //REMOVED QUERIES 26 & 27 (per user request).
 
         //28. Find protocols expiring soon.
         ArrayList<String> protocolsExpiringSoon;                                        //protocol
@@ -1054,7 +1038,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocol", myFilter, null, "protocol");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocol&query.Approve~datelte=-" + expirationValue + "d");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "ehr", "protocol", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=ehr&query.queryName=protocol&query.Approve~datelte=-" + expirationValue + "d");
 
             //Returns data.
             this.protocolsExpiringSoon = returnArray;
@@ -1073,7 +1058,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.Id/Dataset/Demographics/Id~isblank");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.Id/Dataset/Demographics/Id~isblank");
 
             //Returns data.
             this.birthRecordsWithoutDemographicsRecord = returnArray;
@@ -1093,7 +1079,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Deaths&query.Id/Dataset/Demographics/Id~isblank&query.notAtCenter~neqornull=true");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Deaths&query.Id/Dataset/Demographics/Id~isblank&query.notAtCenter~neqornull=true");
 
             //Returns data.
             this.deathRecordsWithoutDemographicsRecord = returnArray;
@@ -1113,7 +1100,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/assignmentSummary/NumPendingAssignments~eq=0");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/assignmentSummary/NumPendingAssignments~eq=0");
 
             //Returns data.
             this.animalsWithHoldCodesNotPending = returnArray;
@@ -1135,7 +1123,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.projectedRelease~dateeq="+ currentDate + "&query.enddate~isnonblank=");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.projectedRelease~dateeq="+ currentDate + "&query.enddate~isnonblank=");
 
             //Returns data.
             this.assignmentsWithProjectedReleasesToday = returnArray;
@@ -1154,7 +1143,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.projectedRelease~dateeq=" + tomorrowDate);
+            String viewQueryURL = notificationToolkit.createQueryURL(c,"execute", "study", "Assignment", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Assignment&query.projectedRelease~dateeq=" + tomorrowDate);
 
             //Returns data.
             this.assignmentsWithProjectedReleasesTomorrow = returnArray;
@@ -1175,7 +1165,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.date~dategte=" + fiveDaysAgoDate);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Birth&query.date~dategte=" + fiveDaysAgoDate);
 
             //Returns data.
             this.birthsInLastFiveDays = returnArray;
@@ -1196,7 +1187,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Deaths&query.date~dategte=" + fiveDaysAgoDate);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Deaths&query.date~dategte=" + fiveDaysAgoDate);
 
             //Returns data.
             this.deathsInLastFiveDays = returnArray;
@@ -1217,7 +1209,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.date~dategte=" + fiveDaysAgoDate);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Prenatal Deaths", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Prenatal Deaths&query.date~dategte=" + fiveDaysAgoDate);
 
             //Returns data.
             this.prenatalDeathsInLastFiveDays = returnArray;
@@ -1239,7 +1232,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "StudyData", myFilter, null, "Id");
 
             //Creates URL.
-            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=StudyData&query.date~dategt=" + todayDate + "&query.Id/Dataset/Demographics/QCState/PublicData~eq=1&query.dataset/label~neq=Treatment Orders&query.dataset/label~neq=Assignment");
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "StudyData", myFilter);
+//            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=StudyData&query.date~dategt=" + todayDate + "&query.Id/Dataset/Demographics/QCState/PublicData~eq=1&query.dataset/label~neq=Treatment Orders&query.dataset/label~neq=Assignment");
 
             //Returns data.
             this.totalFinalizedRecordsWithFutureDates = returnArray;

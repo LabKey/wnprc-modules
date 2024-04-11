@@ -105,16 +105,6 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             //Gets info.
             Date todayDate = dateToolkit.getDateToday();
 
-            Calendar testCal1 = new GregorianCalendar(2023, Calendar.DECEMBER, 28);
-            testCal1.set(Calendar.HOUR_OF_DAY, 0);
-            Date testDate1 = testCal1.getTime();
-            Calendar testCal2 = new GregorianCalendar(2023, Calendar.DECEMBER, 28);
-            testCal2.set(Calendar.HOUR_OF_DAY, 9);
-            Date testDate2 = testCal2.getTime();
-            Calendar testCal3 = new GregorianCalendar(2023, Calendar.DECEMBER, 28);
-            testCal3.set(Calendar.HOUR_OF_DAY, 23);
-            Date testDate3 = testCal3.getTime();
-
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("qcstate/label", "Request: Denied", CompareType.NEQ);
@@ -123,12 +113,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Blood Draws", myFilter, null, "Id");
 
             //Creates URL.
-            HashMap<String, String> myParameters = new HashMap<>(){{
-                put("date~dategte", todayDate.toString());
-                put("Id/DataSet/Demographics/calculated_status~neqornull", "Alive");
-                put("qcstate/label~neq", "Request: Denied");
-            }};
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "Blood Draws", myParameters);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Blood Draws", myFilter);
 
             //Returns data.
             this.bloodDrawsWhereAnimalIsNotAlive = returnArray;
@@ -159,7 +144,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             returnArray.addAll(idsWithoutDuplicates);
 
             //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "DailyOverDrawsWithThreshold", null);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "DailyOverDrawsWithThreshold", null);
 
             //Returns data.
             this.bloodDrawsOverAllowableLimit = returnArray;
@@ -182,12 +167,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
 
             //Creates URL.
-            HashMap<String, String> myParameters = new HashMap<>(){{
-                put("projectStatus~isnonblank", "");
-                put("Id/DataSet/Demographics/calculated_status~eq", "Alive");
-                put("date~dategte", todayDate.toString());
-            }};
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "BloodSchedule", myParameters);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
 
             //Returns data.
             this.bloodDrawsWhereAnimalNotAssignedToProject = returnArray;
@@ -211,12 +191,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
 
             //Creates URL.
-            HashMap<String, String> myParameters = new HashMap<>(){{
-                put("projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq", "Alive");
-                put("date~dateeq", todayDate.toString());
-                put("qcstate/label~neq", "Request: Denied");
-            }};
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "BloodSchedule", myParameters);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
 
             //Returns data.
             this.bloodDrawsTodayWhereAnimalNotAssignedToProject = returnArray;
@@ -295,11 +270,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             }
 
             //Creates URL.
-            HashMap<String, String> myParameters = new HashMap<>(){{
-                put("date~dateeq", todayDate.toString());
-                put("Id/DataSet/Demographics/calculated_status~eq", "Alive");
-            }};
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "study", "BloodSchedule", myParameters);
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
 
             //Returns data.
             this.incompleteBloodDrawsScheduledTodayByArea = returnArray;

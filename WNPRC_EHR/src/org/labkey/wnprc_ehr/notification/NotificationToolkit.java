@@ -38,6 +38,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 import org.labkey.remoteapi.query.Filter;
@@ -542,10 +543,11 @@ public class NotificationToolkit {
                     });
                 }
             }
-        }
-        finally
-        {
             return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowSingleColumn().", e);
+            return new ArrayList<String>();
         }
     }
 
@@ -573,10 +575,11 @@ public class NotificationToolkit {
                     });
                 }
             }
-        }
-        finally
-        {
             return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowMultiColumn()", e);
+            return new ArrayList<String[]>();
         }
     }
 
@@ -622,10 +625,11 @@ public class NotificationToolkit {
                     });
                 }
             }
-        }
-        finally
-        {
             return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowMultiColumnWithFieldKeys().", e);
+            return new ArrayList<HashMap<String, String>>();
         }
     }
 
@@ -650,10 +654,11 @@ public class NotificationToolkit {
                     });
                 }
             }
-        }
-        finally
-        {
             return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowSingleColumnWithParameters().", e);
+            return new ArrayList<String>();
         }
     }
 
@@ -682,33 +687,64 @@ public class NotificationToolkit {
         return sortedList;
     }
 
-    public String createQueryURL(Container c, String schemaName, String queryName, HashMap<String, String> queryParameters) {
-        //Creates the query string.
-        ActionURL queryString = new ActionURL("query", "executeQuery.view", c);
-        queryString.addParameter("schemaName", schemaName);
-        queryString.addParameter("query.queryName", queryName);
 
-        //Adds parameters based on
-        if (queryParameters != null) {
-            //Updates query string parameters.
-            for (String parameterKey : queryParameters.keySet()) {
-                //Gets parameter name and value.
-                String parameterName = "query." + parameterKey;
-                String parameterValue = queryParameters.get(parameterKey);
-                //Updates string with parameter.
-                queryString.addParameter(parameterName, parameterValue);
+
+    public String createQueryURL(Container c, String executeOrUpdate, String schemaName, String queryName, SimpleFilter queryFilter) {
+        ActionURL queryURL = new ActionURL();
+        // Creates the query string.
+        if (executeOrUpdate.equals("execute")) {
+            queryURL = new ActionURL("query", "executeQuery.view", c);
+        }
+        else if (executeOrUpdate.equals("update")) {
+            queryURL = new ActionURL("ehr", "updateQuery.view", c);
+        }
+        else {
+            return "";
+        }
+        queryURL.addParameter("schemaName", schemaName);
+        queryURL.addParameter("query.queryName", queryName);
+
+        // Creates the query filter.
+        if (queryFilter != null) {
+            // Adds parameters from queryFilter.
+            for (SimpleFilter.FilterClause currentClause : queryFilter.getClauses()) {
+                // Gets clause key.
+                FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with one field key.
+
+                // Gets clause value.
+                StringBuilder clauseValue = new StringBuilder();
+                if (currentClause.getParamVals() != null) {
+                    for (Object paramValue : currentClause.getParamVals()) {
+                        clauseValue.append(paramValue.toString());
+                        clauseValue.append(";");
+                    }
+                }
+
+                // Gets clause compare.
+                CompareType clauseCompare = null;
+                if (currentClause instanceof CompareType.CompareClause) {
+                    clauseCompare = ((CompareType.CompareClause)currentClause).getCompareType();
+                }
+                else if (currentClause instanceof SimpleFilter.InClause) {
+                    clauseCompare = ((SimpleFilter.InClause) currentClause).getCompareType();
+                }
+                else {
+                    return "";
+                }
+
+                // Adds filter.
+                queryURL.addFilter("query", clauseKey, clauseCompare, clauseValue);
             }
         }
 
         //Creates URL to return.
-        String urlPart1 = new ActionURL().getBaseServerURI();
-        String urlPart2 = queryString.toString();
-        Path returnPath = new Path(urlPart1, urlPart2);
+        Path returnURL = new Path(new ActionURL().getBaseServerURI(), queryURL.toString());
 
         //Returns URL.
-        return returnPath.toString();
-
+        return returnURL.toString();
     }
+
+
 
 
 
@@ -984,7 +1020,7 @@ public class NotificationToolkit {
                 }
             }
             catch(Exception e) {
-                return;
+                _log.error("Error executing NotificationToolkit->QviewObject(Container c, User u, String queryName, String qviewName).", e);
             }
         }
 
@@ -1103,7 +1139,7 @@ public class NotificationToolkit {
                         try {
                             parsedFilterValue = Integer.parseInt(filterValue);
                         }
-                        catch(Exception e) {
+                        catch(Exception e2) {
                             parsedFilterValue = filterValue;
                         }
                         //Creates the filter condition and adds it to the queryFilter.
@@ -1128,7 +1164,8 @@ public class NotificationToolkit {
             }
             catch (Exception e)
             {
-                throw new RuntimeException(e);
+                _log.error("Error executing NotificationToolkit->QviewObject(String queryName, String qviewName).", e);
+//                throw new RuntimeException(e);
             }
         }
     }

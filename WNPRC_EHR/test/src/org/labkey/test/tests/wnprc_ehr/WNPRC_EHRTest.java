@@ -888,7 +888,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         String animalId = ANIMAL_SUBSET_EHR_TEST[index];
         fillAnInput("animalid_" + index, animalId );
-        sleep(3000);
+        sleep(1000);
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
 
         //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
@@ -896,7 +896,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 //        el2.sendKeys(Keys.TAB);
 
         fillAnInput("remark_"+ index, "Entered from automated test");
-        sleep(3000);
+        sleep(1000);
         fillAnInput("restraint_" + index, "T");
         waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }

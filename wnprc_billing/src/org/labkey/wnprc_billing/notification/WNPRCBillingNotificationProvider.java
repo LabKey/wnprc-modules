@@ -143,10 +143,10 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
     }
 
     @Override
-    public void getAdditionalChargeCategoryInfo(User u, Container c, Date startDate, Date endDate,
-                                              final Map<String, Map<String, Double>> totalsByCategory,
-                                              Map<String, String> additionalCategoryUrls)
+    public Map<String, Map<String, Object>> getAdditionalChargeCategoryInfo(User u, Container c, Date startDate, Date endDate)
     {
+        Map<String, Map<String, Object>> additionalChargeCategoryInfo = new HashMap<>();
+
         //get Procedure queries listed in ehr_billing.procedureQueryChargeIdAssoc
         UserSchema us = QueryService.get().getUserSchema(u, c, "ehr_billing");
         TableInfo ti = us.getTable("procedureQueryChargeIdAssoc", null);
@@ -197,17 +197,24 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
 
                 totalCostPerCategory += totalCost;
             }
-            Map<String, Double> totalsMap = new HashMap<>();
-            totalsMap.put("total", (procedureRows.size()*1.00));
-            totalsMap.put("totalCost", totalCostPerCategory);
-            totalsByCategory.put(description, totalsMap);
-            ActionURL url = QueryService.get().urlFor(u, c, QueryAction.executeQuery, procedureSchema, procedureQuery);
+            Map<String, Object> categoryInfo = new HashMap<>();
 
+            // set total no. of rows per each charge category/procedure query
+            categoryInfo.put("total", (procedureRows.size() * 1.00));
+
+            // set total cost per each charge category/procedure query
+            categoryInfo.put("totalCost", totalCostPerCategory);
+
+            // set url for each category with startDate and endDate as parameters
+            ActionURL url = QueryService.get().urlFor(u, c, QueryAction.executeQuery, procedureSchema, procedureQuery);
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             url.addParameter("query.date~dategte", format.format(startDate));
             url.addParameter("query.date~datelte", format.format(endDate));
-            additionalCategoryUrls.put(description, url.toString());
+            categoryInfo.put("url", url.toString());
+
+            additionalChargeCategoryInfo.put(description, categoryInfo);
         }
+        return additionalChargeCategoryInfo;
     }
 
     private ChargeInfo getChargeInfo(int chargeId, ArrayList<ChargeInfo> chargeInfoArrayList, Object date)
@@ -215,22 +222,11 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
         Date chargeDate = (Date) date;
         List<ChargeInfo> chargeInfoList = chargeInfoArrayList.stream().filter(ci -> ci.getChargeId() == chargeId).toList();
 
-        if (chargeInfoList.size() == 1)
+        for (ChargeInfo ci : chargeInfoList)
         {
-            ChargeInfo ci = chargeInfoList.get(0);
-            if (chargeDate.after(ci.getChargeRateStartDate()) && chargeDate.before(ci.getChargeRateEndDate()))
+            if (chargeDate.after(ci.getChargeRateEndDate()) && chargeDate.before(ci.getChargeRateEndDate()))
             {
                 return ci;
-            }
-        }
-        else if (chargeInfoList.size() > 1)
-        {
-            for (ChargeInfo ci : chargeInfoList)
-            {
-                if (chargeDate.after(ci.getChargeRateStartDate()) && chargeDate.before(ci.getChargeRateEndDate()))
-                {
-                    return ci;
-                }
             }
         }
 

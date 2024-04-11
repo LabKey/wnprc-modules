@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 LabKey Corporation
+ * Copyright (c) 2012-2024 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.Maps;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
@@ -1194,7 +1195,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.clickRunReportInBrowser("Billing Notification");
 
         verifyChargeSummary("Blood Draws Additional Tubes - Animal Services", 1);
-        verifyChargeSummary("Blood Draws One Tube - Animal Services", 49);
+        verifyChargeSummary("Blood Draws One Tube - Animal Services", 50);
 
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
@@ -1366,7 +1367,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         goToEHRFolder();
         log("Verify misc charges");
-        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=miscChargesFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", getContainerPath(), startDate, endDate));
+        beginAt(buildURL("query", getContainerPath(), "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "miscChargesFeeRates", "query.param.StartDate", startDate, "query.param.EndDate", endDate)));
         DataRegionTable miscChargesFeeRates = new DataRegionTable("query", this);
         List<String> expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-15", "640991", "acct101", "$19.50", "10.0", "$195.00", getDisplayName());
         List<String> actualRowData = miscChargesFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "totalCost", "createdby");
@@ -1375,7 +1376,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         goToBillingFolder();
         log("Verify per diems");
-        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=perDiemFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
+        beginAt(buildURL("query", PRIVATE_FOLDER_PATH, "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "perDiemFeeRates", "query.param.StartDate", startDate, "query.param.EndDate", endDate)));
         DataRegionTable perDiemFeeRates = new DataRegionTable("query", this);
         expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.0", "0.3", "$780.00");
         actualRowData = perDiemFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
@@ -1384,9 +1385,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         goToBillingFolder();
         log("Verify num. rows for 'blood draws with one tube'");
-        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=bloodDrawsOneTubeAnimalServices&query.date~dategte=2011-09-01&query.date~datelte=2011-09-30", PRIVATE_FOLDER_PATH));
+        beginAt(buildURL("query", PRIVATE_FOLDER_PATH, "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "bloodDrawsOneTubeAnimalServices", "query.date~dategte", startDate, "query.date~datelte", endDate)));
         DataRegionTable bloodDrawProcedureOneTube = new DataRegionTable("query", this);
-        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "00640991", "acct101", "0.3", "1.0", " ");
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "640991", "acct101", "0.3", "1.0", " ");
         actualRowData = bloodDrawProcedureOneTube.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
         assertEquals("Wrong row data for Blood Draws with one tube: ", expectedRowData, actualRowData);
         assertEquals("Four rows should be displayed", bloodDrawProcedureOneTube.getDataRowCount(), 4);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
--- Get rows where num_tubes = 1
+-- Get rows where num_tubes = 1 and the 1st tube where num_tubes > 1
 SELECT
     Id,
     date,
@@ -23,31 +23,11 @@ SELECT
     project.account.tier_rate.tierRate AS otherRate,
     objectid AS sourceRecord,
     ('Blood Draws ' || Id) AS comment,
-    CAST(num_tubes AS DOUBLE) AS quantity,
+    CAST (1 AS DOUBLE) AS quantity,
     taskId,
     performedby
 FROM studyLinked.BloodSchedule bloodSch
 WHERE
-    num_tubes = 1 AND
-    billedBy.value = 'a' AND
-    qcstate.publicdata = true
-
-UNION
-
--- Get the 1st tube where num_tubes > 1
-SELECT
-    Id,
-    date,
-    project,
-    project.account.alias AS debitedAccount,
-    project.account.tier_rate.tierRate AS otherRate,
-    objectid AS sourceRecord,
-    ('Blood Draws ' || Id) AS comment,
-    1.0 AS quantity,
-    taskId,
-    performedby
-FROM studyLinked.BloodSchedule bloodSch
-WHERE
-    num_tubes > 1 AND
+    num_tubes >= 1 AND
     billedBy.value = 'a' AND
     qcstate.publicdata = true

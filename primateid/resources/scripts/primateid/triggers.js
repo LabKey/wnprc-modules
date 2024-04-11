@@ -70,10 +70,7 @@ exports.init = function (EHR) {
             success: function (data) {
 
                 // Getting the participantId field is the normal case, but in auto-tests we need to grab the Id field
-                var participantid = row['participantid'];
-                if (!participantid) {
-                    participantid = row['Id'];
-                }
+                var participantid = row['participantid'] || row['Id'];
 
                 // noinspection JSUnresolvedFunction
                 if (data.getRowCount() === 0)

@@ -193,9 +193,11 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
 
                 // get cost
                 Double unitCost = ci.getUnitCost();
+                Double tierRate = (null != procedureRow.get("otherRate")) ? (Double) procedureRow.get("otherRate") : 0.0;
+                Double unitCostWithTierRate = unitCost + (unitCost * tierRate);
 
                 // total cost
-                Double totalCost = unitCost * (Double) procedureRow.get("quantity");
+                Double totalCost = unitCostWithTierRate * (Double) procedureRow.get("quantity");
 
                 totalQuantityPerCategory += (Double) procedureRow.get("quantity");
                 totalCostPerCategory += totalCost;

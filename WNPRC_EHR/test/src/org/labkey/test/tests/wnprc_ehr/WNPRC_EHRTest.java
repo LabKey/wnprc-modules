@@ -945,7 +945,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String msg = "You are about to set values for 2 fields on 5 records. Do you want to do this?";
 
         log ("Animals with Charge Ids - Bulk Edit via Add Batch");
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
         miscChargesGrid.clickTbarButton("Add Batch");
@@ -977,7 +977,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Verify Debit Account drop down with list of account(s) active on the date of charge");
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
 
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
@@ -994,7 +994,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testJETWithNonGenCreditAccount()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
 
         String startDate = LocalDateTime.now().minusDays(45).format(_dateTimeFormatter);
@@ -1029,7 +1029,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         performBillingRun(startDate, endDate, ++BILLING_RUN_COUNT);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         DataRegionTable invoiceRunsDataRegionTable = getInvoiceRunsDataRegionTable();
         invoiceRunsDataRegionTable.link(0, "viewJETInvoice").click();
@@ -1153,7 +1153,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String comment = "Charges without Animal Ids added via bulk edit.";
 
         log ("Animals without Charge Ids - Bulk Edit via More Options --> Bulk Edit");
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
         _helper.addRecordToGrid(miscChargesGrid);
@@ -1280,7 +1280,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Add investigators to ehr.investigators table.");
 
-        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        goToEHRFolder();
 
         Connection cn = WebTestHelper.getRemoteApiConnection();
 
@@ -2062,7 +2062,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         stopImpersonating();
         sleep(1000); // Weird
 
-        navigateToFolder(PROJECT_NAME, FOLDER_NAME);
+        goToEHRFolder();
         waitAndClickAndWait(Locator.linkWithText("Browse All Datasets"));
         waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Weight:", "Browse All"));
 
@@ -3148,7 +3148,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = currentDate.format(formatter);
-        navigateToFolder(PROJECT_NAME,FOLDER_NAME);
+        goToEHRFolder();
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
         waitForText("Comments:");

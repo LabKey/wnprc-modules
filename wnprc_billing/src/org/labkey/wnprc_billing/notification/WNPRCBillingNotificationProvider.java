@@ -8,6 +8,7 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr_billing.EHR_BillingService;
 import org.labkey.api.ehr_billing.notification.BillingNotificationProvider;
+import org.labkey.api.ehr_billing.notification.ChargeCategoryInfo;
 import org.labkey.api.ehr_billing.notification.FieldDescriptor;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -143,9 +144,9 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
     }
 
     @Override
-    public Map<String, Map<String, Object>> getAdditionalChargeCategoryInfo(User u, Container c, Date startDate, Date endDate)
+    public List<ChargeCategoryInfo> getAdditionalChargeCategoryInfo(User u, Container c, Date startDate, Date endDate)
     {
-        Map<String, Map<String, Object>> additionalChargeCategoryInfo = new HashMap<>();
+        List<ChargeCategoryInfo> additionalChargeCategoryInfo = new ArrayList<>();
 
         //get Procedure queries listed in ehr_billing.procedureQueryChargeIdAssoc
         UserSchema us = QueryService.get().getUserSchema(u, c, "ehr_billing");
@@ -179,6 +180,7 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
             Collection<Map<String, Object>> procedureRows = procedureQueryTs.getMapCollection();
 
             Double totalCostPerCategory = 0.00;
+            Double totalQuantityPerCategory = 0.00;
 
             //iterate through procedure query results and get total cost
             for (Map<String, Object> procedureRow : procedureRows)
@@ -195,24 +197,17 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
                 // total cost
                 Double totalCost = unitCost * (Double) procedureRow.get("quantity");
 
+                totalQuantityPerCategory += (Double) procedureRow.get("quantity");
                 totalCostPerCategory += totalCost;
             }
-            Map<String, Object> categoryInfo = new HashMap<>();
-
-            // set total no. of rows per each charge category/procedure query
-            categoryInfo.put("total", (procedureRows.size() * 1.00));
-
-            // set total cost per each charge category/procedure query
-            categoryInfo.put("totalCost", totalCostPerCategory);
 
             // set url for each category with startDate and endDate as parameters
             ActionURL url = QueryService.get().urlFor(u, c, QueryAction.executeQuery, procedureSchema, procedureQuery);
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             url.addParameter("query.date~dategte", format.format(startDate));
             url.addParameter("query.date~datelte", format.format(endDate));
-            categoryInfo.put("url", url.toString());
 
-            additionalChargeCategoryInfo.put(description, categoryInfo);
+            additionalChargeCategoryInfo.add(new ChargeCategoryInfo(description, url.toString(), totalQuantityPerCategory, totalCostPerCategory));
         }
         return additionalChargeCategoryInfo;
     }
@@ -224,7 +219,7 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
 
         for (ChargeInfo ci : chargeInfoList)
         {
-            if (chargeDate.after(ci.getChargeRateEndDate()) && chargeDate.before(ci.getChargeRateEndDate()))
+            if (chargeDate.after(ci.getChargeRateStartDate()) && chargeDate.before(ci.getChargeRateEndDate()))
             {
                 return ci;
             }

@@ -1549,7 +1549,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         ColumnInfo sourceCol = ti.getColumn(sourceColName);
         if (sourceCol == null)
         {
-            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            // Normally this should not happen, but importing during tests will load studyData first before specific columns
+            _log.warn("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
             return;
         }
 

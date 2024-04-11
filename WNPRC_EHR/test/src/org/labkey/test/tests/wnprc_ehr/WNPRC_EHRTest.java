@@ -3433,12 +3433,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Adds notification recipients.
         notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
-        //NEW TRY:
-//        clickAndWait(Locator.tagWithAttributeContaining("a", "id", "org.labkey.wnprc_ehr.notification.DeathNotificationRevamp").withText("Manage Subscribed Users/Groups"), 0);
-//        log("Attempting to select combo box item: EHR Administrators");
-//        _ext4Helper.selectComboBoxItem("Add User Or Group:", "EHR Administrators");
-//        log("Successfully selected combo box item: EHR Administrators");
-//        clickButton("Close", 0);
 
         //Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));

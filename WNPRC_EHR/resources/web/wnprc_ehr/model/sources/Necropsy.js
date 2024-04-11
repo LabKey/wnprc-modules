@@ -199,7 +199,8 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
                     queryName:     'necropsy_delivery_options',
                     keyColumn:     'key',
                     displayColumn: 'title'
-                }
+                },
+                defaultValue: 'ANIMAL_CARE'
             },
             QCState: {
                 hidden: true

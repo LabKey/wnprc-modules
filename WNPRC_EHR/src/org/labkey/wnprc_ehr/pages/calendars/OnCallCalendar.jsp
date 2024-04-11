@@ -74,11 +74,15 @@
                 <div class="row">
                     <div class="col-sm-2">
                         <label for="startDate">Start Date</label>
-                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="startDate" placeholder="">
+                        <input type="text" class="form-control" id="startDate" placeholder="">
+                        <% addHandler("startDate", "focus", "setDateOnFocus(this)");%>
+                        <% addHandler("startDate", "blur", "setPlaceholderOnBlur(this)");%>
                     </div>
                     <div class="col-sm-2">
                         <label for="endDate">End Date</label>
-                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="endDate" placeholder="">
+                        <input type="text" class="form-control" id="endDate" placeholder="">
+                        <% addHandler("endDate", "focus", "setDateOnFocus(this)");%>
+                        <% addHandler("endDate", "blur", "setPlaceholderOnBlur(this)");%>
                     </div>
                 </div>
             </div>

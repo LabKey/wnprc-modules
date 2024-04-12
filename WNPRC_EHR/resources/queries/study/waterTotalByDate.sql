@@ -1,8 +1,12 @@
-/*Creates a date entry for every day for each animal in the water monitoring system.
-  It uses LabKeys ehr_lookup.calendar to create and ongoing date row from the
-  first date the animal gets added to the system. It adds all the water the animal receives
-  for every single day in the system. If no water is given to the animal is creates an
-  empty row.*/
+/*
+* Creates a date entry for every day for each animal in the water monitoring system.
+* It uses waterTotalWithParameters which is a version of LabKey's ehr_lookup.calendar
+* that adds parameters to improve performance when rendering the calendar. This query
+* creates an ongoing date row from the first date the animal gets added to the system.
+* In addition, it adds all the water recorded in the water given dataset
+* for every single day the animal is in the system. If no water is given to the animal
+* is creates an empty row.
+*/
 
 SELECT
        Id,

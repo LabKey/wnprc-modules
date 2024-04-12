@@ -479,7 +479,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
@@ -573,7 +573,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingProblems", null);
@@ -599,7 +599,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String livingAnimalsWhereHousingSnapshotDoesNotMatchHousingTableURLView;        //url string (view)
         private void getLivingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable() {
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "ValidateHousingSnapshot", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "ValidateHousingSnapshot", null, null, "Id", null);
 
 //            //Update snapshot.
 //            if (!returnArray.isEmpty()) {
@@ -641,7 +641,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("room, cage");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingConditionProblems", myFilter);
@@ -671,7 +671,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Housing", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Housing", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Housing", myFilter);
@@ -692,7 +692,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
@@ -708,7 +708,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String recordsWithCalculatedStatusFieldProblemsURLView;                         //url string (view)
         private void getAllRecordsWithCalculatedStatusFieldProblems() {
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Validate_status", null);
@@ -729,7 +729,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
@@ -748,7 +748,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
@@ -769,7 +769,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             myFilter.addCondition("project/protocol", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
@@ -785,7 +785,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String duplicateActiveAssignmentsURLView;                                       //url string (view)
         private void getDuplicateActiveAssignments() {
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "duplicateAssignments", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "duplicateAssignments", null, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "duplicateAssignments", null);
@@ -805,7 +805,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("medical", "siv", CompareType.CONTAINS);
             myFilter.addCondition("Id/assignmentSummary/ActiveVetAssignments", "20060202", CompareType.DOES_NOT_CONTAIN);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
@@ -825,7 +825,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("medical", "shiv", CompareType.CONTAINS);
             myFilter.addCondition("Id/assignmentSummary/ActiveVetAssignments", "20060202", CompareType.DOES_NOT_CONTAIN);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "demographics", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "demographics", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
@@ -844,7 +844,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Treatment Orders", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Treatment Orders", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Treatment Orders", myFilter);
@@ -863,7 +863,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.NEQ_OR_NULL);
             myFilter.addCondition("enddate", "", CompareType.ISBLANK);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Problem List", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Problem List", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Problem List", myFilter);
@@ -885,7 +885,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             Map<String, Object> myParams = new HashMap<>();
             myParams.put("MINDATE", todayCalendarDate);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumnWithParameters(c, u, "study", "HousingCheck", null, null, "Id", myParams);
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "HousingCheck", null, null, "Id", myParams);
 
             //Creates URL.
             ActionURL queryURL = new ActionURL("query", "executeQuery.view", c);
@@ -991,7 +991,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "validateFinalWeights", myFilter);
@@ -1011,7 +1011,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
             myFilter.addCondition("date", "-10d", CompareType.DATE_LTE);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "TB Tests", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "TB Tests", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "TB Tests", myFilter);
@@ -1035,7 +1035,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Approve", expirationFilterValue, CompareType.DATE_LTE);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocol", myFilter, null, "protocol");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "ehr", "protocol", myFilter, null, "protocol", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "ehr", "protocol", myFilter);
@@ -1055,7 +1055,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
@@ -1076,7 +1076,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
@@ -1097,7 +1097,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
@@ -1120,7 +1120,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
@@ -1140,7 +1140,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("projectedRelease", tomorrowDate, CompareType.DATE_EQUAL);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c,"execute", "study", "Assignment", myFilter);
@@ -1162,7 +1162,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
@@ -1184,7 +1184,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
@@ -1206,7 +1206,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Prenatal Deaths", myFilter);
@@ -1229,7 +1229,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("dataset/label", "Treatment Orders", CompareType.NEQ);
             myFilter.addCondition("dataset/label", "Assignment", CompareType.NEQ);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "StudyData", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "StudyData", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "StudyData", myFilter);

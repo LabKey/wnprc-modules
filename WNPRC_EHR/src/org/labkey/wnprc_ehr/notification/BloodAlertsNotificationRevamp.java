@@ -110,7 +110,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("qcstate/label", "Request: Denied", CompareType.NEQ);
             myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Blood Draws", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Blood Draws", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Blood Draws", myFilter);
@@ -137,7 +137,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=DailyOverDraws&query.viewName=Blood Summary&query.date~dategte=" + todayDate + "&query.Id/Dataset/Demographics/calculated_status~eq=Alive");
 
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u,  "study", "DailyOverDrawsWithThreshold", null, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u,  "study", "DailyOverDrawsWithThreshold", null, null, "Id", null);
             //Removes duplicate ID's from this list.
             Set<String> idsWithoutDuplicates = new HashSet<>(returnArray);
             returnArray.clear();
@@ -164,7 +164,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("projectStatus", "", CompareType.NONBLANK);
             myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
@@ -188,7 +188,7 @@ public class BloodAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL);
 
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "BloodSchedule", myFilter, null, "Id", null);
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);

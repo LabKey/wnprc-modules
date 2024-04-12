@@ -220,7 +220,7 @@ public class NotificationToolkit {
      * @param minute    (0-59, * (all), or comma separated values with no spaces)
      * @param hour      (0-23, * (all), or comma separated values with no spaces)
      * @param dayOfWeek (1-7, * (all), or comma separated values with no spaces)
-     * @return
+     * @return          A cron string defining the time(s) a notification should be sent.
      */
     public final String createCronString(String minute, String hour, String dayOfWeek) {
         //Creates variables.
@@ -517,17 +517,34 @@ public class NotificationToolkit {
         return returnRow;
     }
 
-    //TODO: Finish documentation.
-    //Try/Catch prevents error if:
-    // Table does not exist.
-    // Study does not exist.
-    // Target column does not exist.
-    // Sort value does not exist.
-    // Filter column does not exist.
-    public static final ArrayList<String> getTableMultiRowSingleColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn) {
+    /**
+     * Retrieves the specified single column value for multiple rows in a dataset using a filter and sort.
+     * This is the same as getTableMultiRowMultiColumn(), except each row returns a single column value instead of multiple column values.
+     * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
+     *      EXAMPLE GOAL:       Get all animal ID's in the Blood Draws dataset where animal is not alive sorted by date.
+     *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareTType.NEQ_OR_NULL);
+     *                          Sort mySort = new Sort("date");
+     *                          getTableRowAsList(c, u, "study", "Blood Draws", myFilter, mySort, "Id");
+     *      EXAMPLE RETURNS:    [rh1234, rh1235, rh1236]
+     * @param c             The current container.
+     * @param u             The current user.
+     * @param schemaName    The current system schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName     The specific table's name (dataset name).
+     * @param myFilter      A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @param mySort        (Optional) The type of Sort applied to the table.
+     * @param targetColumn  The name of the column the user wants data for.
+     * @return              A list of Strings holding the column value for each row matching the filter parameters.
+     */
+    public static final ArrayList<String> getTableMultiRowSingleColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
         ArrayList<String> returnArray = new ArrayList<String>();
         try {
-            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            TableSelector myTable = null;
+            if (myParameters != null) {
+                myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort).setNamedParameters(myParameters);
+            }
+            else {
+                myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            }
             //Verifies table exists.
             if (myTable != null) {
                 //Verifies data exists.
@@ -551,7 +568,26 @@ public class NotificationToolkit {
         }
     }
 
-    //TODO: Finish documentation.
+    /**
+     * Retrieves multiple specified column values for multiple rows in a dataset using a filter and sort.
+     * This is the same as getTableMultiRowSingleColumn(), except each row returns multiple column values instead of just a single column value.
+     * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
+     * WARNING: This cannot be used with targetColumns referencing other datasets (ex. "Id/Dataset/Demographics/calculated_status").  For those, use getTableMultiRowMultiColumnWithFieldKeys().
+     *      EXAMPLE GOAL:       Get ID, cage #, and room # for all animals in the 'Housing' dataset with their condition listed as Protected Contact, sorted by ID.
+     *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("cond", "pc", CompareType.EQUAL);
+     *                          Sort mySort = new Sort("id");
+     *                          getTableMultiRowMultiColumn(c, u, "study", "Housing", myFilter, mySort, new String[]{"Id", "cage", "room"});
+     *      EXAMPLE RETURNS:    [[rh1234, cage1, room1], [rh1235, cage2, room2], [rh1236, cage3, room3]]
+     *
+     * @param c             The current container.
+     * @param u             The current user.
+     * @param schemaName    The current system schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName     The specific table's name (dataset name).
+     * @param myFilter      A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @param mySort        (Optional) The type of Sort applied to the table.
+     * @param targetColumns The names of the columns the user wants data for.  THESE CANNOT REFERENCE OTHER DATASETS.  See warning above.
+     * @return              A list of Strings holding the column values for each row matching the filter parameters.
+     */
     public static final ArrayList<String[]> getTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
         ArrayList<String[]> returnArray = new ArrayList<String[]>();
         try {
@@ -583,8 +619,26 @@ public class NotificationToolkit {
         }
     }
 
-    //TODO: Finish documentation.
-    //This is a redo of the function getTableMultiRowMultiColumn() but using field keys.  Verify this works, then replace old function.
+    /**
+     * TODO: This is an update to getTableMultiRowMultiColumn() that allow targetColumns to reference other datasets.
+     *  Refactor all usages of getTableMultiRowMultiColumn() to use this new format, then delete the getTableMultiRowSingleColumn() function.
+     * Retrieves multiple specified column values for multiple rows in a dataset using a filter and sort.
+     * This is the same as getTableMultiRowMultiColumn(), except this can be used with target columns that reference other datasets (ex. "Id/Dataset/Demographics/calculated_status").  This also returns a differently formatted value.
+     * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
+     *      EXAMPLE GOAL:       Get ID, drawStatus, and billing group for all animals in the 'BloodSchedule' dataset with their date set for today, sorted by ID.
+     *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getDateToday(), CompareType.DATE_EQUAL);
+     *                          Sort mySort = new Sort("Id");
+     *                          getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, new String[]{"Id", "drawStatus", "billedby/title"});
+     *      EXAMPLE RETURNS:    [[Id -> rh1234, drawStatus -> Completed, billedby/title -> Research Staff], [Id -> rh1235, drawStatus -> Completed, billedby/title -> Colony Records]]
+     * @param c             The current container.
+     * @param u             The current user.
+     * @param schemaName    The current system schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName     The specific table's name (dataset name).
+     * @param myFilter      A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @param mySort        (Optional) The type of Sort applied to the table.
+     * @param targetColumns The names of the columns the user wants data for.
+     * @return              A list of Hash Maps holding the column values for each row matching the filter parameters.
+     */
     public static final ArrayList<HashMap<String,String>> getTableMultiRowMultiColumnWithFieldKeys(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
         //Creates array to return.
         ArrayList<HashMap<String, String>> returnArray = new ArrayList<HashMap<String, String>>();
@@ -633,36 +687,11 @@ public class NotificationToolkit {
         }
     }
 
-    //TODO: Finish documentation.
-    //TODO: Combine this with getTableMultiRowSingleColumn?
-    public static final ArrayList<String> getTableMultiRowSingleColumnWithParameters(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
-        ArrayList<String> returnArray = new ArrayList<String>();
-        try {
-            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort).setNamedParameters(myParameters);
-            //Verifies table exists.
-            if (myTable != null) {
-                //Verifies data exists.
-                if (myTable.getRowCount() > 0) {
-                    //Gets ID from each table row.
-                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
-                        @Override
-                        public void exec(ResultSet rs) throws SQLException {
-                            if (rs != null) {
-                                returnArray.add(rs.getString(targetColumn));
-                            }
-                        }
-                    });
-                }
-            }
-            return returnArray;
-        }
-        catch(Exception e) {
-            _log.error("Error executing NotificationToolkit->getTableMultiRowSingleColumnWithParameters().", e);
-            return new ArrayList<String>();
-        }
-    }
-
-    //This function sorts a set that may or may not contain a null.  This is needed because all sort functions don't work with nulls.
+    /**
+     * This function sorts a set that may or may not contain a null.  This is needed because all sort functions don't work with nulls.
+     * @param setToSort A set containing data to be sorted.
+     * @return          A sorted set of the input data.
+     */
     public ArrayList<String> sortSetWithNulls(Set<String> setToSort) {
         //Converts set to ArrayList.
         ArrayList<String> sortedList = new ArrayList<>();
@@ -687,8 +716,17 @@ public class NotificationToolkit {
         return sortedList;
     }
 
-
-
+    /**
+     * Creates a URL for a query matching user arguments.
+     * WARNING: This should only be used with a SimpleFilter that has clauses containing only one field key.  You can use multiple clauses and multiple values for each, but each clause should only have one key.
+     * NOTE: ColonyAlertsNotificationRevamp -> getNonContiguousHousingRecords() uses this same function, but rewrites it to include a PARAMETER argument.  If this gets used frequently, update this function to include the paramter.
+     * @param c                 The current container.
+     * @param executeOrUpdate   A string that is either "execute" or "update".  The decides whether the presented query is editable.
+     * @param schemaName        The current schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param queryName         The specific table's name (dataset name).
+     * @param queryFilter       (Optional) A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @return                  A URL that directs a user to the LabKey query browser's result.
+     */
     public String createQueryURL(Container c, String executeOrUpdate, String schemaName, String queryName, SimpleFilter queryFilter) {
         ActionURL queryURL = new ActionURL();
         // Creates the query string.

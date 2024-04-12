@@ -89,7 +89,7 @@ export const ResearchUltrasounds: FC<any> = (props) => {
             type: CustomInputPane,
             name: "ReviewPane",
             required: ["TaskPane.qcstate"],
-            commandOverride: 'insert',
+            commandOverride: true,
             schemaName: "study",
             queryName: "ultrasound_review",
             componentProps: {
@@ -110,7 +110,6 @@ export const ResearchUltrasounds: FC<any> = (props) => {
                 prevTaskId={taskid}
                 reviewRequired={reviewRequired}
                 taskType={"Research Ultrasounds"}
-                command={taskid ? "update" : "insert"}
                 components={components}
                 redirectSchema={"study"}
                 redirectQuery={"research_ultrasounds"}

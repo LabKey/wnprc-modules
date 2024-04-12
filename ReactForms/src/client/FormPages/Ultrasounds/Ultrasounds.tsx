@@ -89,7 +89,6 @@ export const Ultrasounds: FC<any> = (props) => {
                 prevTaskId={taskid}
                 reviewRequired={reviewRequired}
                 taskType={"Ultrasounds"}
-                command={taskid ? "update" : "insert"}
                 components={components}
                 redirectSchema={"study"}
                 redirectQuery={"ultrasounds"}

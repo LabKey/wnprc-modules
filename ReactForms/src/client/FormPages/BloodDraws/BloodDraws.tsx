@@ -69,6 +69,7 @@ export const BloodDraws: FC<any> = (props) => {
                 defaultValues: {
                     updateTitle: "Blood Draws",
                     qcstate: 2,
+                    title: "Blood Draws"
                 }
             }
         },{
@@ -119,20 +120,12 @@ export const BloodDraws: FC<any> = (props) => {
                 prevTaskId={taskid}
                 reviewRequired={reviewRequired}
                 taskType={"Blood Draws"}
-                command={taskid ? "update" : "insert"}
                 components={components}
                 redirectSchema={"study"}
                 redirectQuery={"blood"}
                 formStartTime={formStartTime}
                 animalInfoPane={false}
-                submit={(jsonData) => submitRequest<BloodForm>(
-                    {
-                        TaskModel: jsonData['ehr-tasks'],
-                        BloodModel: jsonData['study-blood']
-                    },
-                    1,
-                    'submitBloodDraw.api')
-                }
+                submit={(jsonData) => submitRequest(jsonData)}
             />
         </div>
     );

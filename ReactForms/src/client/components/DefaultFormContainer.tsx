@@ -10,7 +10,7 @@ import { FieldPathValue, FormProvider, useForm, useWatch } from 'react-hook-form
 import { FormMetadataCollection } from './FormMetadataCollection';
 import { QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
-import { submitRequest } from './actions';
+import { parseErrors, submitRequest } from './actions';
 
 interface Component {
     type: React.FunctionComponent<any>;
@@ -19,7 +19,7 @@ interface Component {
     queryName?: string;
     viewName?: string;
     required?: any;
-    commandOverride?: string;
+    commandOverride?: boolean;
     componentProps?: {
         [key: string]: any;
     };
@@ -29,7 +29,6 @@ interface formProps<T> {
     taskType: string;
     redirectQuery: string;
     redirectSchema: string;
-    command: string;
     components: Component[];
     reviewRequired: boolean;
     formStartTime: Date;
@@ -56,7 +55,6 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
         prevTaskId,
         components,
         taskType,
-        command,
         redirectSchema,
         redirectQuery,
         reviewRequired,
@@ -108,7 +106,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                     tempNewData.taskid = newTaskId;
                 }
 
-                if(prevTaskId && !commandOverride && command === 'update'){
+                if(prevTaskId && !commandOverride){
                     await getLsid(schemaName, queryName, newTaskId).then((prevLsid) =>{
                         tempNewData.lsid = prevLsid;
                     }).catch(() => {
@@ -131,7 +129,8 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                 const newData = generateFormData(
                     schemaName,
                     queryName,
-                    commandOverride ? commandOverride : command,
+                    commandOverride ? "insertWithKeys" :
+                        prevTaskId ? "updateChangingKeys" : "insertWithKeys",
                     tempNewData
                 );
                 finalFormData.push(newData);
@@ -145,7 +144,6 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
     const handleSubmit = async (data, e) => {
         e.preventDefault();
         const finalFormData = [];
-        console.log("raw Data: ", data);
         // generate taskId if required
         const newTaskId = prevTaskId ? prevTaskId : Utils.generateUUID().toUpperCase();
         const formMetaData = FormMetadataCollection( {
@@ -154,28 +152,27 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
             taskid: newTaskId,
             startTime: formStartTime,
         });
-        finalFormData.push(generateFormData("wnprc", "session_log","insert", formMetaData));
-        if(submit) {
-            submit(data).then((res) => {
-                console.log(res);
-            }).catch(rej => {
-                console.log(rej);
-            })
-        }
+        finalFormData.push(generateFormData("wnprc", "session_log","insertWithKeys", formMetaData));
         processComponents(finalFormData, newTaskId, data ).then((processedData) => {
             // For each component compile the state data into a format ready for submission
 
-            let jsonData = {commands: processedData}
-            console.log('calling save rows on: ', jsonData);
-            /*if(submit) {
-                submit(jsonData).then((res) => {
+            //const commands = processedData
+            console.log('calling save rows on: ', processedData);
+            if(submit) {
+                submitRequest(processedData).then((res) => {
                     console.log(res);
+                    console.log("Error Ct: ", res.errorCount);
+                    if(res.errorCount > 0) {
+                        const errors = parseErrors(res.result);
+                        console.log(errors);
+                    }
+
                 }).catch(rej => {
                     console.log(rej);
                 })
-            }*/
+            }
             // save rows to database and redirect to desired schema/query
-            /*submitRequest(jsonData, )
+            /*saveRows(jsonData)
                 .then((data) => {
                     console.log('done!!');
                     console.log(JSON.stringify(data));

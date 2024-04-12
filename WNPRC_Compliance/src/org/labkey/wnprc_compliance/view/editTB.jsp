@@ -106,7 +106,7 @@
 </div>
 </div>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var disableButton = function(el,val){
             $(el).prop('disabled',val);

@@ -6,7 +6,7 @@
     rowClickCallback: rowClickCallback, rowBackgroundColorClicked: rowBackgroundColorClicked, cursor: cursor, caseInsensitiveFilter: true"></lk-table>
 </template>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function(){
         ko.components.register('lk-querytable', {
             viewModel: {

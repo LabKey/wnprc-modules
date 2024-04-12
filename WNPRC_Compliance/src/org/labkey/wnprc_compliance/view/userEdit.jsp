@@ -106,7 +106,7 @@
 </div>
 
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         WebUtils.VM.namePanel = {
             firstName:  ko.observable(''),

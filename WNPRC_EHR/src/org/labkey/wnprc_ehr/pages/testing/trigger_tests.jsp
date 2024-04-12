@@ -17,7 +17,7 @@
             These tests use animal ids that start with "x", however, since these tests do insert and delete data
             to the database, you need to press the button below to actually kick them off:
         </p>
-
-        <button class="btn btn-primary" onclick="QUnit.start()">Perform Tests</button>
+        <% addHandler("performTests", "click", "QUnit.start()"); %>
+        <button class="btn btn-primary" id="performTests">Perform Tests</button>
     </div>
 </div>

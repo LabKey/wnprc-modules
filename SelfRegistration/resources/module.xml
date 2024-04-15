@@ -14,6 +14,7 @@
         <editPermissions>
             <permission>ADMIN</permission>
         </editPermissions>
+            <defaultValue>test@test.com</defaultValue>
         </propertyDescriptor>
     </properties>
 </module>

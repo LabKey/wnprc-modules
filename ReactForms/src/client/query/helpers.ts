@@ -461,7 +461,8 @@ export const createTypeFromJson = (json: any): string => {
 }
 
 export const getConfig = (lookupMetaData, watchState?) => {
-  if(watchState){
+  console.log(lookupMetaData, watchState);
+  if(watchState && watchState.field !== ''){
     return ({
       schemaName: lookupMetaData.schemaName,
       queryName: lookupMetaData.queryName,
@@ -470,7 +471,7 @@ export const getConfig = (lookupMetaData, watchState?) => {
         Filter.create(
             watchState.name,
             watchState.field,
-            Filter.Types.EQUALS
+            Filter.Types.CONTAINS
         )
       ]
     });
@@ -484,7 +485,6 @@ export const getConfig = (lookupMetaData, watchState?) => {
 }
 
 export const getDistinctConfig = (lookupMetaData, watchState?) => {
-  console.log()
   if(watchState){
     return ({
       schemaName: lookupMetaData.schemaName,
@@ -528,3 +528,5 @@ export const parseGridName = (str) => {
   const [, schema, query, row, col] = match;
   return { schema, query, row, col};
 }
+
+

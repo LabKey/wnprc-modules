@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import * as React from "react";
 import Select, { createFilter } from 'react-select';
-import { labkeyActionSelectWithPromise } from '../query/helpers';
+import { getConfig, labkeyActionSelectWithPromise } from '../query/helpers';
 import { useFormContext, Controller, FieldPathValue, FieldValues } from 'react-hook-form';
+import AsyncSelect from 'react-select/async';
 
 interface PropTypes {
     optConf: any; // Options query config
@@ -52,6 +53,51 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     const changeUncontrolled = (selectedOption) => {
         setUncontrolledState(selectedOption || null);
     }
+
+    const testFunc = (inputValue: string) => {
+        const tempTestConf = {
+            schemaName: optConf.schemaName,
+            queryName: optConf.queryName,
+            displayColumn: optConf.columns[0],
+            keyColumn: optConf.columns[1],
+        }
+        const tempWatchState = {
+            name: optConf.columns[1],
+            field: inputValue
+        }
+        const testConf = getConfig(tempTestConf, tempWatchState);
+        console.log("OPTL: ", testConf);
+        labkeyActionSelectWithPromise(testConf).then(data => {
+            const options = [];
+            const value = optConf.columns[0];
+            const display = optConf.columns[1];
+            data["rows"].forEach(item => {
+                options.push({value: item[value], label: item[display]});
+            });
+
+            if(defaultOpts) {
+                defaultOpts.forEach((option) => {
+                    options.push(option);
+                });
+            }
+
+            // remove possible duplicates
+            const duplicatesRemovedArray = options.reduce((accumulator, currentObject) => {
+                const isDuplicate = accumulator.some(
+                    (obj) => obj.value === currentObject.value && obj.label === currentObject.label
+                );
+
+                if (!isDuplicate) {
+                    accumulator.push(currentObject);
+                }
+                return accumulator;
+            }, []);
+            console.log(data);
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
     useEffect(() => {
         labkeyActionSelectWithPromise(optConf).then(data => {
             const options = [];
@@ -140,6 +186,12 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     }else{
         return (
             <div className={'dropdown-controller'}>
+                <AsyncSelect
+                    defaultOptions
+                    cacheOptions
+                    loadOptions={testFunc}
+
+                />
                 <Select
                     defaultValue={initialValue}
                     inputId={id}

@@ -71,7 +71,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
         defaultValues: useMemo(() => defaultValues, [defaultValues])
     });
     const [isLoadingPrevTask, setIsLoadingPrevTask] = useState(true);
-
+    const [apiData, setApiData] = useState([])
     // States required for animal info
     const [animalInfoCache, setAnimalInfoCache] = useState<any>();
 
@@ -205,9 +205,26 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                 let tempMetaData = component.viewName ? metaData.views[component.viewName].filter(item => !component.componentProps.blacklist?.includes(item.name))
                     : metaData.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
                 const columnNameTypeMap = tempMetaData.reduce((map, obj) => {
-                    map[obj.name] = obj.type || "String"; // Default to "String" type if not provided
+                    if(component.componentProps?.wnprcMetaData?.hasOwnProperty(obj.name)) {
+                        map[obj.name] = component.componentProps.wnprcMetaData[obj.name].type;
+                    }else if(obj.type.includes("Date")){
+                        map[obj.name] = "date";
+                    }else if(obj?.lookup){
+                        map[obj.name] = "dropdown"
+                    }else{
+                        map[obj.name] = obj.inputType;
+                    }
                     return map;
                 }, {});
+                console.log("MD: ", metaData, tempMetaData, columnNameTypeMap);
+
+                console.log("XXX: ", component.componentProps?.wnprcMetaData);
+                tempMetaData.forEach((col) => {
+                    if(columnNameTypeMap?.[col.name] === "dropdown"){
+                        const tempOptState = []
+                        console.log(col);
+                    }
+                })
                 setMetaData(prevMetaData => ({
                     ...prevMetaData,
                     [`${component.schemaName}-${component.queryName}`]: tempMetaData
@@ -223,7 +240,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                             // Iterate through each property of the object
                             Object.keys(obj).forEach(key => {
                                 // Check if the property key exists in the names array
-                                if (columnNameTypeMap[key] === "Date and Time") {
+                                if (columnNameTypeMap[key] === "date") {
                                     newObj[key] = new Date(obj[key]);
                                 } else {
                                     newObj[key] = obj[key];

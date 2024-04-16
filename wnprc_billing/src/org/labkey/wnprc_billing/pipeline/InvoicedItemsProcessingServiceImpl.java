@@ -43,8 +43,9 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         perDiemProcess.setRequiredFields(Arrays.asList("date", "unitCost", "totalcost"));
         processes.add(perDiemProcess);
 
-        BillingPipelineJobProcess proceduresProcess = new BillingPipelineJobProcess("Procedure Fees", WNPRC_BillingSchema.NAME, "procedureFeeRates", getProceduresColMap());
-        proceduresProcess.setRequiredFields(Arrays.asList("date", "unitCost", "totalcost"));
+        BillingPipelineJobProcess proceduresProcess = new BillingPipelineJobProcess(true);
+        proceduresProcess.setQueryToInvoiceItemColMap(getProceduresColMap());
+        proceduresProcess.setRequiredFields(Arrays.asList("Id", "date", "project", "debitedAccount", "sourceRecord", "quantity", "taskId", "performedBy"));
         processes.add(proceduresProcess);
 
         BillingPipelineJobProcess miscChargesProcess = new BillingPipelineJobProcess("Misc Charges", WNPRC_BillingSchema.NAME, "miscChargesFeeRates", getMisChargesColMap());
@@ -72,7 +73,6 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         colMap.put("chargeId", "chargeId");
         colMap.put("item", "item");
         colMap.put("category", "category");
-        colMap.put("groupName", "groupName");
         return colMap;
     }
 
@@ -93,7 +93,6 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         colMap.put("chargeId", "chargeId");
         colMap.put("item", "item");
         colMap.put("category", "category");
-        colMap.put("groupName", "groupName");
         return colMap;
     }
 
@@ -114,7 +113,6 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         colMap.put("chargeId", "chargeId");
         colMap.put("item", "item");
         colMap.put("category", "category");
-        colMap.put("groupName", "groupName");
         colMap.put("creditedAccount", "creditedAccount");
         return colMap;
     }
@@ -143,4 +141,27 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
 
     }
 
+    @Override
+    public String getUnitCostColName()
+    {
+        return "unitCostDirect";
+    }
+
+    @Override
+    public String getTotalCostColName()
+    {
+        return "totalCostDirect";
+    }
+
+    @Override
+    public String getAdditionalUnitCostColName()
+    {
+        return "unitCost";
+    }
+
+    @Override
+    public String getAdditionalTotalCostColName()
+    {
+        return "totalcost";
+    }
 }

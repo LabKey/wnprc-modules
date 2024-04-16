@@ -226,5 +226,8 @@
     <dataset name="tissue_samples" id="1071" category="Pathology" type="Standard">
       <tags/>
     </dataset>
+    <dataset name="BehaviorAbstract" id="5015" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
   </datasets>
 </datasets>

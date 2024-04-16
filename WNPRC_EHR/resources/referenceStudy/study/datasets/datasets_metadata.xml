@@ -6,22 +6,10 @@
       <column columnName="Id">
         <datatype>varchar</datatype>
         <columnTitle>Female</columnTitle>
-        <description>Subject identifier</description>
-        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
-        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
-        <nullable>false</nullable>
-        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
         <importAliases>
           <importAlias>ptid</importAlias>
           <importAlias>participantid</importAlias>
         </importAliases>
-        <fk>
-          <fkDbSchema>study</fkDbSchema>
-          <fkTable>Animal</fkTable>
-          <fkColumnName>Id</fkColumnName>
-        </fk>
-        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
-        <scale>32</scale>
       </column>
       <column columnName="date">
         <datatype>timestamp</datatype>
@@ -16205,6 +16193,94 @@
       </index>
       <index type="non-unique">
         <column>parentid</column>
+      </index>
+    </indices>
+  </table>
+  <table tableName="BehaviorAbstract" tableDbType="TABLE">
+    <description>Behavior Abstract</description>
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+        <nullable>false</nullable>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>32</scale>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+        <nullable>false</nullable>
+        <formatString>yyyy-MM-dd HH:mm</formatString>
+      </column>
+      <column columnName="Behavior">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Behavior</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <scale>0</scale>
+      </column>
+      <column columnName="performedby">
+        <datatype>varchar</datatype>
+        <columnTitle>Performed By</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>0</scale>
+      </column>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <scale>0</scale>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="taskid">
+        <datatype>varchar</datatype>
+        <columnTitle>Task Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/taskDetails.view?formtype=${taskid/formtype}&taskid=${taskid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>tasks</fkTable>
+          <fkColumnName>taskid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>0</scale>
+      </column>
+      <column columnName="enddate">
+        <datatype>timestamp</datatype>
+        <columnTitle>End Date</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+        <formatString>DateTime</formatString>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+    </columns>
+    <tableTitle>Behavior Abstract</tableTitle>
+    <indices>
+      <index type="non-unique">
+        <column>participantsequencenum</column>
       </index>
     </indices>
   </table>

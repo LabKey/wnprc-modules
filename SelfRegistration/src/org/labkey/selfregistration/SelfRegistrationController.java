@@ -1,12 +1,14 @@
 package org.labkey.selfregistration;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.junit.*;
+import org.apache.logging.log4j.Logger;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
@@ -17,7 +19,6 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.gwt.client.model.PropertyValidatorType;
 import org.labkey.api.issues.IssuesListDefService;
 import org.labkey.api.module.AllowedDuringUpgrade;
 import org.labkey.api.module.Module;
@@ -25,6 +26,7 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.Group;
 import org.labkey.api.security.GroupManager;
 import org.labkey.api.security.IgnoresTermsOfUse;
@@ -37,18 +39,12 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.security.roles.SubmitterRole;
 import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.TestContext;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
 import org.labkey.security.xml.GroupEnumType;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
-import org.labkey.api.query.UserSchema;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -267,11 +263,9 @@ public class SelfRegistrationController extends SpringActionController
                 _log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
-
-
         }
-
     }
+
     public static class TestCase extends Assert
     {
         private static final String adminUser = "admin_user_test@primate.wisc.edu";
@@ -306,18 +300,16 @@ public class SelfRegistrationController extends SpringActionController
             }
             // give guest submit perms
             MutableSecurityPolicy policy = new MutableSecurityPolicy(container);
-            RoleManager.getAllRoles();
             //what is the roleName for submitter?
             policy.addRoleAssignment(group, SubmitterRole.class);
-            SecurityPolicyManager.savePolicy(policy, TestContext.get().getUser());
+            SecurityPolicyManager.savePolicyForTests(policy, TestContext.get().getUser());
 
             // ensure the issue module is enabled for this folder
             Module issueModule = ModuleLoader.getInstance().getModule("Issues");
             Set<Module> activeModules = container.getActiveModules();
             if (!activeModules.contains(issueModule))
             {
-                Set<Module> newActiveModules = new HashSet<>();
-                newActiveModules.addAll(activeModules);
+                Set<Module> newActiveModules = new HashSet<>(activeModules);
                 newActiveModules.add(issueModule);
 
                 container.setActiveModules(newActiveModules);
@@ -352,9 +344,7 @@ public class SelfRegistrationController extends SpringActionController
             User guestUser = UserManager.getGuestUser();
             // create issue in issue tracker
             UpdateSelfRegistrationListAction.saveIssue(guestUser, container, f);
-
         }
-
 
         @Test
         public void testIssueWasCreated() throws Exception
@@ -379,7 +369,6 @@ public class SelfRegistrationController extends SpringActionController
             Assert.assertEquals("testreason",issue.get("reason"));
             Assert.assertEquals(0,issue.get("assignedto"));
             Assert.assertEquals("testtitle",issue.get("title"));
-
         }
 
         @AfterClass
@@ -394,5 +383,4 @@ public class SelfRegistrationController extends SpringActionController
             UserManager.deleteUser(adminuser.getUserId());
         }
     }
-
 }

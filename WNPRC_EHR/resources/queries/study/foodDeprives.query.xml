@@ -68,7 +68,7 @@
                             <className>org.labkey.api.data.JavaScriptDisplayColumnFactory</className>
                             &lt;!&ndash;<properties>
                                 <property name="dependency">ehr/window/ManageRecordWindow.js</property>
-                                <property name="javaScriptEvents">onclick="EHR.window.ManageRecordWindow.buttonHandler(${Id:jsString}, ${objectid:jsString}, ${queryName:jsString}, '${dataRegionName}');"</property>
+                                <property name="onclick">EHR.window.ManageRecordWindow.buttonHandler(${Id:jsString}, ${objectid:jsString}, ${queryName:jsString}, '${dataRegionName}');</property>
                             </properties>&ndash;&gt;
                         </displayColumnFactory>-->
                         <nullable>true</nullable>

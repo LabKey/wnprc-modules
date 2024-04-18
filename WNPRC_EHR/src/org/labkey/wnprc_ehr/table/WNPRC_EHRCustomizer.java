@@ -389,6 +389,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col20.setLabel("PrimateId");
             col20.setDescription("Unique PrimateID column to be shared across all datasets");
             ds.addColumn(col20);
+
+            BaseColumnInfo col21 = getWrappedIdCol(us, ds, "mostRecentWaterCondition", "demographicsMostRecentWaterCondition" );
+            col21.setLabel("Most Recent Water Condition");
+            col21.setDescription("Most Recent Water condition for animals in Water restricted protocols");
+            ds.addColumn(col21);
         }
 
         if (ds.getColumn("totalOffspring") == null)
@@ -1545,7 +1550,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         ColumnInfo sourceCol = ti.getColumn(sourceColName);
         if (sourceCol == null)
         {
-            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            // Normally this should not happen, but importing during tests will load studyData first before specific columns
+            _log.warn("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
             return;
         }
 

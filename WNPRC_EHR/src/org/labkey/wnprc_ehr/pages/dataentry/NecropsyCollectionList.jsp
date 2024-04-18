@@ -146,12 +146,18 @@
                 List<JSONObject> preDeathTissueSamples = JsonUtils.getSortedListFromJSONArray(queryFactory.selectRows("study", "tissue_samples", preDeathFilter), "collection_order");
 
                 for (JSONObject tissueSample : preDeathTissueSamples) {
-
-                    String deliveryMethod = tissueSample.getString("ship_to");
-                    if (deliveryMethod != null) {
+                    String deliveryMethod;
+                    try{
+                        deliveryMethod = tissueSample.getString("ship_to");
+                    }catch(Exception JSONException){
+                        deliveryMethod = null;
+                    }
+                    if (deliveryMethod != null)
+                    {
                         NecropsySampleDeliveryDestination.SampleDeliveryDestination deliveryDestination = NecropsySampleDeliveryDestination.SampleDeliveryDestination.valueOf(deliveryMethod);
 
-                        if (deliveryDestination != null) {
+                        if (deliveryDestination != null)
+                        {
                             deliveryMethod = deliveryDestination.getTitle();
                         }
                     }
@@ -210,8 +216,12 @@
                 List<JSONObject> postmortemTissueSamples = JsonUtils.getSortedListFromJSONArray(queryFactory.selectRows("study", "tissue_samples", preDeathFilter), new NumberKeyComparator("collection_order"));
 
                 for (JSONObject tissueSample : postmortemTissueSamples) {
-
-                    String deliveryMethod = tissueSample.getString("ship_to");
+                    String deliveryMethod;
+                    try{
+                        deliveryMethod = tissueSample.getString("ship_to");
+                    }catch(Exception JSONException){
+                        deliveryMethod = null;
+                    }
                     if (deliveryMethod != null) {
                         NecropsySampleDeliveryDestination.SampleDeliveryDestination deliveryDestination = NecropsySampleDeliveryDestination.SampleDeliveryDestination.valueOf(deliveryMethod);
 
@@ -279,7 +289,7 @@
 <% } %>
 
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         $(".todaysDate").text(moment().format("dddd, MMMM Do YYYY [at] h:mm:ss a"));
     })();

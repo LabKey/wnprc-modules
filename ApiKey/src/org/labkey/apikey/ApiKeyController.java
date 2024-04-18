@@ -1,5 +1,6 @@
 package org.labkey.apikey;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -18,8 +19,6 @@ import org.labkey.apikey.api.JsonServiceManager;
 import org.labkey.apikey.api.exception.InvalidApiKey;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 public class ApiKeyController extends SpringActionController
 {

@@ -5,7 +5,6 @@ package org.labkey.apikey.model.jooq;
 
 
 import jakarta.annotation.Generated;
-
 import org.labkey.apikey.model.jooq.tables.AllowedServices;
 import org.labkey.apikey.model.jooq.tables.Apikeys;
 import org.labkey.apikey.model.jooq.tables.KeyRevocations;

@@ -55,13 +55,18 @@ public class ViralLoadRSEHRRunner implements Job {
     public Map<String,Object> getEmailListAndFolderInfo(Container container)
     {
         List<User> adminUsers = SecurityManager.getUsersWithPermissions(container, Collections.singleton(AdminPermission.class));
-        List<User> containerVLReaders = SecurityManager.getUsersWithPermissions(container, Collections.singleton(WNPRCViralLoadReadPermission.class));
+        List<User> immutableContainerVLReaders = SecurityManager.getUsersWithPermissions(container, Collections.singleton(WNPRCViralLoadReadPermission.class));
+        ArrayList<User> mutableContainerVLReaders = new ArrayList<>();
+
+        for (User vlReader: immutableContainerVLReaders) {
+            mutableContainerVLReaders.add(vlReader);
+        }
         for (User adminUser: adminUsers){
-            containerVLReaders.remove(adminUser);
+            mutableContainerVLReaders.remove(adminUser);
         }
         Map<String, Object> mpVL = new HashMap<>();
         List<String> emailsVLReaders = new ArrayList<>();
-        for (User u : containerVLReaders){
+        for (User u : mutableContainerVLReaders){
             emailsVLReaders.add(u.getEmail());
         }
         mpVL.put("emails", StringUtils.join(emailsVLReaders,";"));
@@ -80,7 +85,15 @@ public class ViralLoadRSEHRRunner implements Job {
         {
             //update the settings map in case settings have changed since startup.
             virologyModule = ModuleLoader.getInstance().getModule(WNPRC_VirologyModule.NAME);
-            populateFolderPermissionsTable();
+            boolean populatedSuccessfully = populateFolderPermissionsTable();
+            if (populatedSuccessfully)
+            {
+                _log.info("Viral Load RSEHR Job Complete");
+            }
+            else
+            {
+                _log.warn("Viral Load RSEHR Job did not complete successfully");
+            }
         }
         catch (QueryUpdateServiceException e)
         {
@@ -103,11 +116,10 @@ public class ViralLoadRSEHRRunner implements Job {
             e.printStackTrace();
         }
 
-        _log.info("Viral Load RSEHR Job Complete");
 
     }
 
-    public void populateFolderPermissionsTable() throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException, InvalidKeyException
+    public boolean populateFolderPermissionsTable() throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException, InvalidKeyException
     {
         List<Map<String, Object>> rowsToInsert = new ArrayList<>();
         String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
@@ -116,22 +128,22 @@ public class ViralLoadRSEHRRunner implements Job {
         if (containerPath == null)
         {
             _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module settings.");
-            return;
+            return false;
         }
         Container viralLoadContainer = ContainerManager.getForPath(containerPath);
         if (viralLoadContainer == null)
         {
             _log.info("No container found for RSEHR Viral Load Parent Folder. Set up the container to run this job.");
-            return;
+            return false;
         }
 
-        for (Container child : viralLoadContainer.getChildren())
-        {
-            Map<String, Object> mp = getEmailListAndFolderInfo(child);
-            rowsToInsert.add(mp);
-        }
         try
         {
+            for (Container child : viralLoadContainer.getChildren())
+            {
+                Map<String, Object> mp = getEmailListAndFolderInfo(child);
+                rowsToInsert.add(mp);
+            }
             User user = EHRService.get().getEHRUser(viralLoadContainer);
             SimpleQueryUpdater qu = new SimpleQueryUpdater(user, viralLoadContainer, "wnprc_virology", "folder_paths_with_readers");
             SimpleQueryFactory sf = new SimpleQueryFactory(user,viralLoadContainer);
@@ -144,8 +156,11 @@ public class ViralLoadRSEHRRunner implements Job {
         }
         catch (Exception e)
         {
-            _log.warn(e.getMessage());
+            _log.error("Viral Load RSEHR Job ERROR");
+            e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public static JobKey getJobKey() {
@@ -211,8 +226,7 @@ public class ViralLoadRSEHRRunner implements Job {
         try {
             sched = StdSchedulerFactory.getDefaultScheduler();
 
-            sched.deleteJob(getJobKey());
-            //sched.unscheduleJob(getTriggerKey());
+            sched.unscheduleJob(getTriggerKey());
         }
         catch (SchedulerException e) {
             throw new RuntimeException(e);

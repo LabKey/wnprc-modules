@@ -70,7 +70,8 @@
             <!-- ko foreach2: {data: $parent.table.rows } -->
             <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err}, visible: !isHidden(), style: {background-color: isSelected() ? $component.rowBackgroundColorClicked : '', 'cursor' : $component.cursor} ">
                 <!-- ko if: $component.rowsAreSelectable -->
-                <td onclick="event.stopPropagation();"> <%-- prevent click from propagating to the row. --%>
+                <td id="chk-btn"> <%-- prevent click from propagating to the row. --%>
+                    <% addHandler("chk-btn", "click", "event.stopPropagation()"); %>
                     <input type="checkbox" data-bind="checked: isSelected" >
                 </td>
                 <!-- /ko -->
@@ -94,7 +95,7 @@
     </div>
 </template>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var parseMomentLookups = {
             d: "days",

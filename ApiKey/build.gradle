@@ -6,13 +6,12 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
 
     apiExternal "org.apache.commons:commons-collections4:${commonsCollections4Version}"
-    implementation "javax.servlet:jsp-api:2.0"
     implementation files(apiJar)
 
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbVersion}",
+            "jakarta.xml.bind:jakarta.xml.bind-api:${jaxbApiVersion}",
             "Jakarta XML Binding API",
             "Eclipse",
             "https://eclipse-ee4j.github.io/jaxb-ri/",
@@ -21,8 +20,8 @@ dependencies {
             "Parsing XML"
         ),
         {
-            // Exclude activation jars from webapp to avoid classloader conflicts with <tomcat>/lib/javax.activation.jar
-            exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+            // Exclude in favor of angus activation from API
+            exclude group: "jakarta.activation", module: "jakarta.activation-api"
         }
     )
 

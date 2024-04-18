@@ -1,6 +1,6 @@
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
 
-    function importFile(config) {
+    function importFile(config, module) {
         var o = {
             schemaName: config.schemaName,
             queryName: config.queryName
@@ -8,7 +8,7 @@
 
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("query", "import", config.containerPath, {
-                module: 'ehr',
+                module: module || 'ehr',
                 moduleResource: config.moduleResource
             }),
             method: 'POST',
@@ -255,6 +255,20 @@
             schemaName: 'ehr_lookups',
             queryName: 'weight_ranges',
             pk: 'rowid'
+        },{
+            label: 'Husbandry Fruit',
+            populateFn: 'populateFromFile',
+            schemaName: 'ehr_lookups',
+            queryName: 'husbandry_fruit',
+            module: 'wnprc_ehr',
+            pk: 'rowid'
+        },{
+            label: 'Husbandry Assigned',
+            populateFn: 'populateFromFile',
+            schemaName: 'ehr_lookups',
+            queryName: 'husbandry_assigned',
+            module: 'wnprc_ehr',
+            pk: 'rowid'
         }];
 
         tables.sort(function(a, b) {
@@ -314,7 +328,7 @@
             }
         }
 
-        function populateFromFile (schemaName, queryName) {
+        function populateFromFile (schemaName, queryName, module) {
             console.log("Populating " + schemaName + "." + queryName + "...");
             pendingInserts++;
             //records for task forms:
@@ -327,7 +341,7 @@
                 scope: this
             };
 
-            importFile(config);
+            importFile(config, module);
         }
 
         function onPopulateFromFileSuccess(result, xhr, config){
@@ -8054,7 +8068,7 @@
                 if (!table.doSkip) {
 //                    document.getElementById('msgbox').innerHTML += '<div>Populating ' + table.queryName + '...</div>';
                     if (table.populateFn == 'populateFromFile') {
-                        populateFromFile(table.schemaName, table.queryName);
+                        populateFromFile(table.schemaName, table.queryName, table.module);
                     } else {
                         this[table.populateFn]();
                     }
@@ -8180,7 +8194,7 @@
 
                         LABKEY.Ajax.request({
                             url: LABKEY.ActionURL.buildURL("query", "import", config.containerPath, {
-                                module: 'ehr',
+                                module: 'wnprc_ehr',
                                 moduleResource: config.moduleResource
                             }),
                             method: 'POST',
@@ -8287,7 +8301,7 @@
                         handler: function(){
 //                            document.getElementById('msgbox').innerHTML = '<div>Populating ' + table.queryName + '...</div>';
                             if (table.populateFn == 'populateFromFile') {
-                                populateFromFile(table.schemaName, table.queryName);
+                                populateFromFile(table.schemaName, table.queryName, table.module);
                             } else {
                                 this[table.populateFn].call(this);
                             }

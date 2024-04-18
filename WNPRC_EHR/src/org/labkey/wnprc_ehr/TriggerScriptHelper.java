@@ -50,8 +50,10 @@ import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
+import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
@@ -181,16 +183,37 @@ public class TriggerScriptHelper {
         return map;
     }
 
-    public void sendDeathNotification(final List<String> ids) {
+    public void sendDeathNotification(final List<String> ids, String hostName) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends original Death Notification.
+            //Remove this if-else when new notification is approved.
+            if (NotificationService.get().isActive(new DeathNotification(), container)) {
+                for (String id : ids) {
+                    DeathNotification idNotification = new DeathNotification();
+                    idNotification.setParam(DeathNotification.idParamName, id);
+                    idNotification.sendManually(container, user);
+                }
+            }
+            else {
+                _log.info("Death Notification is not enabled, will not send death notification");
+            }
 
-        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
-            _log.info("Notification service is not enabled, will not send death notification");
-            return;
+            //Sends revamped Death Notification.
+            if (NotificationService.get().isActive(new DeathNotificationRevamp(ehr), container)) {
+                for (String id : ids) {
+                    _log.info("Using java helper to send email for animal death record: "+ id);
+                    DeathNotificationRevamp notification = new DeathNotificationRevamp(ehr, id, user, hostName);
+                    notification.sendManually(container, user);
+                }
+            }
+            else {
+                _log.info("Death Notification Revamp is not enabled, will not send death notification");
+            }
         }
-        for (String id : ids) {
-            DeathNotification idNotification = new DeathNotification();
-            idNotification.setParam(DeathNotification.idParamName, id);
-            idNotification.sendManually(container, user);
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send death notification");
         }
     }
 
@@ -790,10 +813,34 @@ public class TriggerScriptHelper {
     }
 
     public void sendAnimalRequestNotification(Integer rowid, String hostName){
-        _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
-        notification.sendManually(container, user);
+
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends original Animal Request Notification.
+            //Remove this if-else when new notification is approved.
+            if (NotificationService.get().isActive(new AnimalRequestNotification(ehr), container)) {
+                _log.info("Using java helper to send email for animal request record: "+rowid);
+                AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Animal Request Notification is not enabled, will not send animal request notification");
+            }
+
+            //Sends revamped Animal Request Notification.
+            if (NotificationService.get().isActive(new AnimalRequestNotificationRevamp(ehr), container)) {
+                _log.info("Using java helper to send animal request notification revamp for animal request record: "+rowid);
+                AnimalRequestNotificationRevamp notification = new AnimalRequestNotificationRevamp(ehr, rowid, user, hostName);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Animal Request Notification Revamp is not enabled, will not send animal request notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send animal request notification");
+        }
     }
     public void sendAnimalRequestNotificationUpdate(Integer rowid, Map<String,Object> row, Map<String,Object> oldRow, String hostName){
         _log.info("Using java helper to send email for animal request record: "+rowid);
@@ -2125,7 +2172,10 @@ public class TriggerScriptHelper {
 
                 Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
                 updateWaterOrder.put("lsid", lsid);
-                updateWaterOrder.put("enddate", startDate);
+                //closing water order the day before, new lixit orders have to be completed the first time.
+                java.time.LocalDateTime newEndDate = java.time.LocalDateTime.ofInstant(startDate.toInstant(),ZoneId.systemDefault());
+                newEndDate.minusDays(1);
+                updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
                 updateWaterOrder.put("skipWaterRegulationCheck", true);
                 toUpdate.add(updateWaterOrder);
 

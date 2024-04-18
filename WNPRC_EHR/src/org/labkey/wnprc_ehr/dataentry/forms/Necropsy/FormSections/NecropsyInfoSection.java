@@ -28,7 +28,9 @@ public class NecropsyInfoSection extends SimpleFormSection {
                 "timeofdeath",
                 "causeofdeath",
                 "mannerofdeath",
-                "perfusion_area"
+                "perfusion_area",
+                "perfusion_soln1",
+                "perfusion_soln2"
         );
 
         fieldNamesAtEndInOrder = Arrays.asList(
@@ -39,7 +41,7 @@ public class NecropsyInfoSection extends SimpleFormSection {
                 "comments"
         );
 
-        maxItemsPerColumn = 16;
+        maxItemsPerColumn = 18;
 
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.NecropsyClientStore");
     }

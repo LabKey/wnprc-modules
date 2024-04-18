@@ -1,5 +1,7 @@
 package org.labkey.wnprc_ehr.notification;
 
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -10,8 +12,6 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
-import jakarta.mail.Address;
-import jakarta.mail.Message;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;

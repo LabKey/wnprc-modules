@@ -5,7 +5,6 @@ package org.labkey.apikey.model.jooq.tables.records;
 
 
 import jakarta.annotation.Generated;
-
 import org.jooq.Field;
 import org.jooq.Record3;
 import org.jooq.Row3;

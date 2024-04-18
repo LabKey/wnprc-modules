@@ -4,14 +4,13 @@
 package org.labkey.apikey.model.jooq;
 
 
+import jakarta.annotation.Generated;
+import org.jooq.Schema;
+import org.jooq.impl.CatalogImpl;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import jakarta.annotation.Generated;
-
-import org.jooq.Schema;
-import org.jooq.impl.CatalogImpl;
 
 
 /**

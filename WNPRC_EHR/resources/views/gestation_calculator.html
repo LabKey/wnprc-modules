@@ -33,7 +33,7 @@
             padding: 10px;
         }
     </style>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=scriptNonce%>">
         window.onload = function() {
             populateSpeciesList();
         }
@@ -146,12 +146,16 @@
                 failure: EHR.Utils.onFailure
             });
         }
+
+        LABKEY.Utils.onReady(function(){
+            document.getElementById('calculate')['onclick'] = calculateGestationDays;
+        });
     </script>
 </head>
 <body>
 
 <div class="container">
-    <form name="gestation_calculator" action="javascript:calculateGestationDays()">
+    <form name="gestation_calculator">
         <div class="row">
             <div class="col">
                 <label for="species_input">Species</label>
@@ -214,7 +218,7 @@
 
         <div class="row">
             <div class="col">
-                <button type="submit" style="float:right">Calculate</button>
+                <button id="calculate" type="submit" style="float:right">Calculate</button>
             </div>
             <div class="col">
                 <button type="reset">Clear</button>

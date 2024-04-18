@@ -117,8 +117,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
 
         String id = UUID.randomUUID().toString();
 
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode row = mapper.valueToTree(form);
+        ObjectNode row = JsonUtil.DEFAULT_MAPPER.valueToTree(form);
 
         row.put("id", id);
         row.put("display_name", displayName);

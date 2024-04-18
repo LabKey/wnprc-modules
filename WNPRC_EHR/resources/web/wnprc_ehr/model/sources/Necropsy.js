@@ -78,6 +78,12 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
             perfusion_area: {
                 allowBlank: true
             },
+            perfusion_soln1: {
+                hidden: false
+            },
+            perfusion_soln2:{
+                hidden: false
+            },
             tissue_distribution: {
                 xtype: 'checkcombo',
                 hasOwnTpl: true,
@@ -193,7 +199,8 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
                     queryName:     'necropsy_delivery_options',
                     keyColumn:     'key',
                     displayColumn: 'title'
-                }
+                },
+                defaultValue: 'ANIMAL_CARE'
             },
             QCState: {
                 hidden: true

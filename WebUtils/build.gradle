@@ -1,5 +1,0 @@
-dependencies {
-    apiImplementation "org.apache.tomcat:tomcat-jsp-api:${apacheTomcatVersion}"
-    implementation "javax.servlet:jsp-api:2.0"
-    apiImplementation "javax.servlet:jsp-api:2.0"
-}

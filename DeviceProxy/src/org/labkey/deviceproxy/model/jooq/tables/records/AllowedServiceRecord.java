@@ -4,15 +4,14 @@
 package org.labkey.deviceproxy.model.jooq.tables.records;
 
 
-import java.sql.Timestamp;
-
 import jakarta.annotation.Generated;
-
 import org.jooq.Field;
 import org.jooq.Record4;
 import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.labkey.deviceproxy.model.jooq.tables.AllowedService;
+
+import java.sql.Timestamp;
 
 
 /**

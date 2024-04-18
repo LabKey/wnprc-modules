@@ -4,11 +4,7 @@
 package org.labkey.apikey.model.jooq.tables;
 
 
-import java.util.Arrays;
-import java.util.List;
-
 import jakarta.annotation.Generated;
-
 import org.jooq.Field;
 import org.jooq.Schema;
 import org.jooq.Table;
@@ -18,6 +14,9 @@ import org.jooq.impl.TableImpl;
 import org.labkey.apikey.model.jooq.Apikey;
 import org.labkey.apikey.model.jooq.Keys;
 import org.labkey.apikey.model.jooq.tables.records.AllowedServicesRecord;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**

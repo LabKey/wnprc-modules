@@ -63,7 +63,7 @@
     ></lk-querytable>
 </div>
 
-<script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var $resultDialog = $('#resultDialog').modal({
             show: false

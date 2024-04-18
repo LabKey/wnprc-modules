@@ -1,0 +1,67 @@
+networks:
+  networkExt:
+    name: sharedservices
+    external: true
+
+services:
+  labkey:
+    image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}
+    volumes:
+      - "${LK_FILES_DIR}:/backups/new_files_dir"
+      - "${LK_LOG_DIR}:/usr/local/tomcat/logs"
+      - "${LK_MODULE_DEPLOY_DIR}:/usr/local/modules"
+      - "${LK_SESSION_DIR}:/usr/local/labkey/sessions"
+    expose:
+      - "8080"
+    networks:
+      - networkExt
+    environment:
+      CATALINA_OPTS:
+      JAVA_OPTS: "${LK_JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
+                  -Dmsql.user=${LK_MSQL_USER} -Dmsql.pass=${LK_MSQL_PASS} -Dmsql.url=\"${LK_MSQL_URL}\" \
+                  -Dlog4j2.formatMsgNoLookups=true"
+      LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
+      LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
+      LK_MS_VALUE: ${LK_MS_VALUE}
+      LK_MX_VALUE: ${LK_MX_VALUE}
+      LK_MASTER_ENCRYPTION_FILE: /run/secrets/master_encryption_pwd
+      LK_BASE_URL: ${LK_BASE_URL}
+      PG_NAME:
+      PG_PASS:
+      PG_USER:
+      LK_MSQL_USER:
+      LK_MSQL_PASS:
+      LK_MSQL_URL:
+      TZ: America/Chicago
+    secrets:
+      - master_encryption_pwd
+
+  nginx:
+    image: nginx:1.25
+    volumes:
+      - "${NGINX_TEMPLATES}:/etc/nginx/templates"
+      - "${NGINX_WELL_KNOWN_DIR}:/usr/share/nginx/html"
+    ports:
+      - "${LK_DANGER_PORT}:80"
+      - "${LK_SECURE_PORT}:443"
+    networks:
+      - networkExt
+    environment:
+      LK_SERVICE_NAME: ${LK_SERVICE_NAME}
+      NGINX_SERVER_CER: /run/secrets/server-certificate
+      NGINX_SERVER_KEY: /run/secrets/server-key
+      NGINX_SERVER_PASS: /run/secrets/server-pass
+      TZ: America/Chicago
+    secrets:
+      - server-certificate
+      - server-key
+      - server-pass
+secrets:
+  master_encryption_pwd:
+    file: ${LK_MASTER_ENCRYPTION}
+  server-certificate:
+    file: ${NGINX_SERVER_CER_FILE}
+  server-key:
+    file: ${NGINX_SERVER_KEY_FILE}
+  server-pass:
+    file: ${NGINX_SERVER_PASS_FILE}

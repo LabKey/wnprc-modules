@@ -16,6 +16,8 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,8 +115,6 @@ import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
 
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -582,7 +582,7 @@ public class WNPRC_EHRController extends SpringActionController
         public ApiResponse execute(Object form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
-            Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
+            Map<String, Map<String, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
 
             Map<String, Object> props = new HashMap<>();
             props.put("populations", populations);
@@ -964,7 +964,7 @@ public class WNPRC_EHRController extends SpringActionController
                         String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
                         description = description.replaceAll("(?i)<br */?>", "\n").trim();
                         description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
-                        if (onCallSchedule[i + 1][column].getString("html") == null) {
+                        if (onCallSchedule[i + 1][column].isEmpty() || onCallSchedule[i + 1][column].getString("html") == null) {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
                         } else {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");

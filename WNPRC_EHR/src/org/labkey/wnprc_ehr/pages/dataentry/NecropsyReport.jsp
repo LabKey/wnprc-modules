@@ -40,8 +40,13 @@
     JSONArray weights = queryFactory.selectRows("study", "weight", taskFilter);
     List<String> weightList = new ArrayList();
     for (JSONObject weightRecord : JsonUtil.toJSONObjectList(weights)) {
-        String weight = weightRecord.getString("weight");
+        String weight;
+        try{
+            weight = weightRecord.getString("weight");
 
+        }catch(Exception JSONException){
+            weight = null;
+        }
         if (weight == null) {
             weight = "[not specified]";
         }
@@ -285,7 +290,7 @@
     }
 %>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         $('.dateWithTimeThatNeedsFormatting').each(function() {
             var $this = $(this);

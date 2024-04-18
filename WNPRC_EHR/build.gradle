@@ -14,7 +14,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.apache.commons:commons-text:1.11.0",
+            "org.apache.commons:commons-text:${commonsTextVersion}",
             "Commons Text",
             "Apache",
             "https://commons.apache.org/proper/commons-text/",
@@ -118,7 +118,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.reflections:reflections:0.10.2",
+            "org.reflections:reflections:${reflectionsVersion}",
             "Reflections",
             "Reflections",
             "https://github.com/ronmamo/reflections",

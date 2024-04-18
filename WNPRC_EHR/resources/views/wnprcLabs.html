@@ -1,7 +1,7 @@
 <html>
 <head>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
 
 Ext4.onReady(createNavMenu);
 
@@ -13,20 +13,20 @@ function createNavMenu()
         sections: [
             {header: 'Information to Laboratories',
             items: [
-                {name: 'Pricing for WNPRC Services', url: '<%=contextPath%>/WNPRC_EHR/WNPRC/EHR/unitPricing.view?'}
+                {name: 'Pricing for WNPRC Services', url: '<%=contextPath%>' + '/WNPRC/EHR/WNPRC_EHR-unitPricing.view'}
             ]},        
             {header: 'WNPRC Lab Sites',
             items: [
-                {name: 'Tom Friedrich Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/friedrich/begin.view'},
-                {name: 'David O\'Connor Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/oconnor/begin.view'},
-                {name: 'Ted Golos Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/golos/begin.view'},
-                {name: 'Shelby O\'Connor Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/soconnor/begin.view'},
-                {name: 'Slukvin Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/Slukvin/begin.view'},
-                {name: 'Colman Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/Colman/begin.view'}
+                {name: 'Tom Friedrich Lab**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Laboratories/friedrich/project-begin.view'},
+                {name: 'David O\'Connor Lab**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Laboratories/oconnor/project-begin.view'},
+                {name: 'Ted Golos Lab**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Laboratories/golos/project-begin.view'},
+                {name: 'Shelby O\'Connor Lab**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Laboratories/soconnor/project-begin.view'},
+                {name: 'Slukvin Lab**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Laboratories/Slukvin/project-begin.view'},
+                {name: 'Colman Lab**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Laboratories/Colman/project-begin.view'}
             ]},
             {header: 'Affiliated Groups',
             items: [
-                {name: 'MHC SSP Core**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/MHC_SSP/begin.view?'}
+                {name: 'MHC SSP Core**', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Research_Services/MHC_SSP/project-begin.view'}
             ]},
 
         ]
@@ -42,7 +42,7 @@ function createNavMenu()
 <div style="max-width:900px">
     Laboratories associated with WNPRC can create pages for internal or external consumption.  These could include areas to store data, post information or securately share information with collaborators.
 <p/>
-    If you are interested in creating a page for your group, please submit a request <a href="<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Issue_Tracker/start.view?" target="new">here</a>
+    If you are interested in creating a page for your group, please submit a request <a href="<%=contextPath%>/WNPRC/WNPRC_Units/IT/Issue_Tracker/project-start.view" target="new">here</a>
 </div>
 <p />
 

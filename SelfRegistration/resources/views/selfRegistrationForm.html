@@ -28,7 +28,7 @@
 
     <div id="form-info">Please fill out the form to create an account on this server. All fields are required.</div>
     <div id="registration-content" class="auth-form-body">
-        <form class="register-form" name="register" action="javascript:void(0)">
+        <form class="register-form" name="register">
 
             <label for="firstname">First name</label>
             <input id="firstname" name="firstname" type="text" class="input-block i-am-an-input-field" autofocus required>
@@ -52,10 +52,10 @@
             </select>
 
             <label for="reason">Reason (max 200 characters)</label>
-            <textarea id="reason" name="reason" type="textarea" class="input-block i-am-an-input-field"  autofocus required style="width:350px; height:100px" maxlength="200"></textarea>
+            <textarea id="reason" name="reason" type="textarea" class="input-block i-am-an-input-field" autofocus required style="width:350px; height:100px" maxlength="200"></textarea>
 
             <div>To help protect against abuse by bots, please enter the six characters shown below (case-insensitive).<br>
-                <a href="javascript: window.location.reload()">Reload the page to get a new image.</a></div>
+                <a id="reload" href="#">Reload the page to get a new image.</a></div>
             <img id="kaptcha-img" src="/kaptcha.jpg" alt="Verification text" title="Verification text" height="50" />
             <input id="kaptchaText" name="kaptchaText" type="text" class="input-block i-am-an-input-field" autofocus required>
 
@@ -65,7 +65,7 @@
         </form>
     </div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=scriptNonce%>">
 
         LIST_VALUES = {}
 
@@ -85,6 +85,8 @@
                     $('.register-btn').trigger('click');
                 }
             })
+
+            document.getElementById("reload")['onclick'] = function() { window.location.reload(); };
         }
 
         function getProjectList(){

@@ -21,6 +21,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 
 my $studyContainer = 'WNPRC/EHR/';
 my $notificationtypes = 'Clinpath Admin Alerts';
@@ -81,7 +82,7 @@ $results = LabKey::Query::selectRows(
 $email_html .= "<b>Clinpath requests created since the last time this email was sent ($lastRun):</b><br>\n";
 if(@{$results->{rows}}){
 	$email_html .= "There are ".@{$results->{rows}}." requests.<br>";
-	$email_html .= "<p><a href='".$baseUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:ClinpathRequests"."'>Click here to view them</a><br>\n";	
+	$email_html .= "<p><a href='".$printableUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:ClinpathRequests"."'>Click here to view them</a><br>\n";	
 }
 else {
 	$email_html .= "No requests have been entered.<br>";
@@ -108,7 +109,7 @@ $results = LabKey::Query::selectRows(
 $email_html .= "<b>Clinpath requests that have not been approved or denied yet:</b><br>\n";
 if(@{$results->{rows}}){
 	$email_html .= "WARNING: There are ".@{$results->{rows}}." requests that have not been approved or denied yet.<br>";
-	$email_html .= "<p><a href='".$baseUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:ClinpathRequests"."'>Click here to view them</a><br>\n";			
+	$email_html .= "<p><a href='".$printableUrl."ehr/".$studyContainer."dataEntry.view#topTab:Requests&activeReport:ClinpathRequests"."'>Click here to view them</a><br>\n";			
 }
 else {
 	$email_html .= "There are no requests that have not been approved or denied yet.<br>";	
@@ -132,7 +133,7 @@ $results = LabKey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." requests that were requested for today or earlier, but have not been marked complete.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Clinpath Runs&query.qcstate/label~neq=Completed&query.date~datelte=$datestr"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Clinpath Runs&query.qcstate/label~neq=Completed&query.date~datelte=$datestr"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";
 }
 

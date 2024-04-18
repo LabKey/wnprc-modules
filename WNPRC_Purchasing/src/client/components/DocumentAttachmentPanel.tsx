@@ -3,7 +3,7 @@ import { Panel } from 'react-bootstrap';
 import { FileAttachmentForm } from '@labkey/components';
 
 import { Map } from 'immutable';
-import produce, { Draft } from 'immer';
+import { produce, Draft } from 'immer';
 
 import { DocumentAttachmentModel } from '../model';
 
@@ -16,10 +16,10 @@ interface Props {
 export const DocumentAttachmentPanel: FC<Props> = memo(props => {
     const { model, onInputChange, isReorder } = props;
 
-    const onFileChange = useCallback(
+    const onFileChange = useCallback<any>(
         (files: Map<string, File>) => {
             const updatedModel = produce(model, (draft: Draft<DocumentAttachmentModel>) => {
-                draft['filesToUpload'] = files;
+                draft['filesToUpload'] = files as any;
             });
             onInputChange(updatedModel);
         },
@@ -39,7 +39,7 @@ export const DocumentAttachmentPanel: FC<Props> = memo(props => {
     return (
         <>
             <Panel
-                className="panel panel-default"
+                className={'panel panel-default domain-form-panel'}
                 expanded={true}
                 onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
             >

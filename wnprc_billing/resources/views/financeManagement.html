@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
 
     Ext4.onReady(function(){
 
@@ -84,7 +84,8 @@
                     header: 'Other',
                     items: [
                         {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})},
-                        {name: 'Update Program Income Account', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'updateProgramIncomeAccount', null)}
+                        {name: 'Update Program Income Account', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'updateProgramIncomeAccount', null)},
+                        {name: 'Add procedure queries', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'procedureQueryChargeIdAssoc'})}
                     ]
                 }]
             }]

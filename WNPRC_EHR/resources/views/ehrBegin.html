@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
 
     LABKEY.requiresScript("/ehr/utils.js");
 
@@ -13,7 +13,7 @@ function createNavMenu()
 
     Ext.get(webpart.wrapperDivId).update(
         '<div style="max-width:920px">' +
-        '    Below are the sections of the Electronic Health Record.  If there are additional reports you would like, please submit a request <a href="<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/start.view?" target="_blank">here</a>.' +
+        '    Below are the sections of the Electronic Health Record.  If there are additional reports you would like, please submit a request <a href="<%=contextPath%>/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/project-start.view" target="_blank">here</a>.' +
         '   <br><br>' +
         '</div>' +
         '<table>' +
@@ -37,34 +37,34 @@ function createNavMenu()
         sections: [
             {header: 'By Animal',
             items: [
-                {name: 'Animal History', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view?'},
-                {name: 'Animal Search', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalSearch.view?'}
+                {name: 'Animal History', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view'},
+                {name: 'Animal Search', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalSearch.view'}
                 ]},
             {header: 'By Dataset',
             items: [
-                {name: 'Browse All Datasets', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/datasets.view?'},
-                {name: 'Clinical Remarks', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=Clinical%20Remarks'},
-                {name: 'Housing Queries', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/housingQueries.view?'},
-                {name: 'Protocol and Project Queries', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/projectQueries.view?'}
+                {name: 'Browse All Datasets', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-datasets.view'},
+                {name: 'Clinical Remarks', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=Clinical%20Remarks'},
+                {name: 'Housing Queries', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-housingQueries.view'},
+                {name: 'Protocol and Project Queries', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-projectQueries.view'}
             ]},
             {header: 'By Location',
             items: [
-                {name: 'Search By Room, Floor or Cage', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage'},
-                {name: 'Irregular Obs By Location', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:obs'},
-                {name: 'Clinical Remarks By Location', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:clinremarks'}
+                {name: 'Search By Room, Floor or Cage', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage'},
+                {name: 'Irregular Obs By Location', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:obs'},
+                {name: 'Clinical Remarks By Location', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:clinremarks'}
             ]},
             {header: 'Today At WNPRC',
             items: [
-                {name: 'Blood Draw Schedule', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:none&showReport:1&activeReport:todaysBlood'},
-                {name: 'Irregular Observations', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:obs'},
-                {name: 'Treatment Schedule - AM', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:treatmentScheduleAM'},
-                {name: 'Treatment Schedule - PM', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:treatmentSchedulePM'},
-                {name: 'Treatment Schedule - Night', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:treatmentScheduleNight'},
-                {name: 'Treatment Schedule - All', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:treatmentSchedule'},
-                {name: 'Incomplete Treatment - All', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:none&showReport:0&activeReport:IncompleteTreatmentsReport'},
-                {name: 'Food Deprives Schedule', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:none&showReport:1&activeReport:ScheduledFoodDeprives'},
-                {name: 'Forms Completed Today', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr&query.queryName=TasksByLocation&query.viewName=Completion Times&query.taskid/Created~dateeq='+(new Date()).format('Y-m-d')},
-                {name: 'On Call Schedule', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/OnCallCalendar.view?'}
+                {name: 'Blood Draw Schedule', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:none&showReport:1&activeReport:todaysBlood'},
+                {name: 'Irregular Observations', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:obs'},
+                {name: 'Treatment Schedule - AM', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:treatmentScheduleAM'},
+                {name: 'Treatment Schedule - PM', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:treatmentSchedulePM'},
+                {name: 'Treatment Schedule - Night', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:treatmentScheduleNight'},
+                {name: 'Treatment Schedule - All', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:roomCage&activeReport:treatmentSchedule'},
+                {name: 'Incomplete Treatment - All', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:none&showReport:0&activeReport:IncompleteTreatmentsReport'},
+                {name: 'Food Deprives Schedule', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-animalHistory.view#inputType:none&showReport:1&activeReport:ScheduledFoodDeprives'},
+                {name: 'Forms Completed Today', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr&query.queryName=TasksByLocation&query.viewName=Completion Times&query.taskid/Created~dateeq='+(new Date()).format('Y-m-d')},
+                {name: 'On Call Schedule', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-OnCallCalendar.view'}
             ]}
         ]
     });
@@ -76,37 +76,37 @@ function createNavMenu()
         sections: [
             {header: 'Entire Colony',
             items: [
-                {name: 'Animal Utilization By Category', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=colonyAssignmentSummary'},
-                {name: 'Blood Draw Summary', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=ScheduledBlood'},
-                {name: 'Colony Population By Age', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=colonyPopulationByAge'},
-                {name: 'MHC Genotype Summary', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=alleleFrequencies'},
-                {name: 'Population Summary', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/populationOverview.view?'},
-                {name: 'Colony Census', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/colonyCensus.view?'},
-                {name: 'Pregnancies', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/breeding.view?'},
-                {name: 'Research Ultrasounds', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/research_ultrasounds.view?'},
-                {name: 'Water Calendar', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/watercalendar.view?'},
-                {name: 'Room Utilization', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=roomUtilization'},
-                {name: 'Feeding', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=feeding'},
-                {name: 'Time Chart', url: '<%=contextPath%>/visualization' + ctx['EHRStudyContainer'] + '/timeChartWizard.view?edit=true'},
-                {name: 'Viral Challenges', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=ViralChallenges'},
-                {name: 'Weight: 10% Drop In Last 30 Days', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 30 Days'},
-                {name: 'Weight: 10% Drop In Last 90 Days', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 90 Days'},
-                {name: 'Weight: 10% Drop In Last 6 Months', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 6 Months'},
-                {name: 'More Reports', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/moreReports.view?'}
+                {name: 'Animal Utilization By Category', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=colonyAssignmentSummary'},
+                {name: 'Blood Draw Summary', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=ScheduledBlood'},
+                {name: 'Colony Population By Age', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-.view?schemaName=study&query.queryName=colonyPopulationByAge'},
+                {name: 'MHC Genotype Summary', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=alleleFrequencies'},
+                {name: 'Population Summary', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-populationOverview.view'},
+                {name: 'Colony Census', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-colonyCensus.view'},
+                {name: 'Pregnancies', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-breeding.view'},
+                {name: 'Research Ultrasounds', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-research_ultrasounds.view'},
+                {name: 'Water Calendar', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-watercalendar.view'},
+                {name: 'Room Utilization', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr_lookups&query.queryName=roomUtilization'},
+                {name: 'Feeding', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=feeding'},
+                {name: 'Time Chart', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/visualization-timeChartWizard.view?edit=true'},
+                {name: 'Viral Challenges', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=ViralChallenges'},
+                {name: 'Weight: 10% Drop In Last 30 Days', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 30 Days'},
+                {name: 'Weight: 10% Drop In Last 90 Days', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 90 Days'},
+                {name: 'Weight: 10% Drop In Last 6 Months', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 6 Months'},
+                {name: 'More Reports', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-moreReports.view'}
             ]},
             {header: 'Validation and Alerts',
              items: [
-                 {name: 'Animals Without Assignments', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'},
-                 {name: 'Cage Review', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=CageReview&query.viewName=Problem%20Cages'},
-                 {name: 'Cages Lacking Dimensions', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr&query.queryName=missingCages'},
+                 {name: 'Animals Without Assignments', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'},
+                 {name: 'Cage Review', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=CageReview&query.viewName=Problem%20Cages'},
+                 {name: 'Cages Lacking Dimensions', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr&query.queryName=missingCages'},
 
-                 {name: 'Housing: Condition Problems', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems'},
-                 {name: 'Housing: Double Entries', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=housingProblems'},
-                 {name: 'Loners', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=demographicsDaysAlone&query.viewName=Alone 30 Days Without Exemptions'},
+                 {name: 'Housing: Condition Problems', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems'},
+                 {name: 'Housing: Double Entries', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=housingProblems'},
+                 {name: 'Loners', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=demographicsDaysAlone&query.viewName=Alone 30 Days Without Exemptions'},
 
-                 {name: 'Rooms Without Obs Today', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr&query.queryName=RoomsWithoutObsToday'},
-                 {name: 'TB: Untested In >4 Months', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=TB Older Than 4 Months'},
-                 {name: 'Unweighed In Past 45 Days', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Unweighed%20Over%2045%20Days'}
+                 {name: 'Rooms Without Obs Today', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr&query.queryName=RoomsWithoutObsToday'},
+                 {name: 'TB: Untested In >4 Months', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=TB Older Than 4 Months'},
+                 {name: 'Unweighed In Past 45 Days', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Unweighed%20Over%2045%20Days'}
              ]}
 
         ]
@@ -118,25 +118,25 @@ function createNavMenu()
         sections: [
             {header: 'Misc',
             items: [
-                {name: 'About the EHR Project', url: '<%=contextPath%>/project' + ctx['EHRStudyContainer'] + '/About The EHR/begin.view?'},
-                {name: 'Compare Lists of Animals', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/utilities.view?'},
-                {name: 'Run SQL Directly', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/executeSql.view?'},
-                {name: 'Search WNPRC SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=snomed'},
-                {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'},
-                {name: 'Gestational Day Calculator', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/gestation_calculator.view?'}
+                {name: 'About the EHR Project', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/About The EHR/project-begin.view'},
+                {name: 'Compare Lists of Animals', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-utilities.view'},
+                {name: 'Run SQL Directly', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-executeSql.view'},
+                {name: 'Search WNPRC SNOMED Codes', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr_lookups&query.queryName=snomed'},
+                {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'},
+                {name: 'Gestational Day Calculator', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-gestation_calculator.view'}
             ]},
             {header: 'Data Entry',
             items: [
-                {name: 'Enter Data', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/dataEntry.view'},
+                {name: 'Enter Data', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-dataEntry.view'},
                 {name: 'Download Paper Forms', url: '<%=contextPath%>' + '/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1399'}
             ]},
             {header: 'Request Services',
             items: [
-                {name: 'Views Requests', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/requestServices.view'},
-                {name: 'Request Blood Draws', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Blood%20Draw%20Request'},
-                {name: 'Request Clinpath Services', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Clinpath%20Request'},
-                {name: 'Request Project', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/IT/Public/insertQueryRow.view?schemaName=lists&query.queryName=WNPRC%20Colony%20Records%20Project%20Number%20Request%20Form'},
-                {name: 'Request Animals', url: '<%=contextPath%>/animalrequests' + ctx['EHRStudyContainer'] + '/app.view'}
+                {name: 'Views Requests', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-requestServices.view'},
+                {name: 'Request Blood Draws', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-manageRequest.view?formtype=Blood%20Draw%20Request'},
+                {name: 'Request Clinpath Services', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-manageRequest.view?formtype=Clinpath%20Request'},
+                {name: 'Request Project', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/IT/Public/query-insertQueryRow.view?schemaName=lists&query.queryName=WNPRC%20Colony%20Records%20Project%20Number%20Request%20Form'},
+                {name: 'Request Animals', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/animalrequests-app.view'}
             ]}
         ]
     };
@@ -145,9 +145,9 @@ function createNavMenu()
         menuCfg.sections.push({
             header: 'Admin',
             items: [
-                {name: 'EHR Admin Page', url: '<%=contextPath%>/WNPRC_EHR' + ctx['EHRStudyContainer'] + '/ehrAdmin.view'},
-                {name: 'Manage EHR Study', url: '<%=contextPath%>/study' + ctx['EHRStudyContainer'] + '/manageStudy.view?'},
-                {name: 'Manage Lookup Tables', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/dataAdmin.view'}
+                {name: 'EHR Admin Page', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/WNPRC_EHR-ehrAdmin.view'},
+                {name: 'Manage EHR Study', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/study-manageStudy.view'},
+                {name: 'Manage Lookup Tables', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-dataAdmin.view'}
             ]
         })
 

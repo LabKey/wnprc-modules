@@ -1,5 +1,10 @@
 <!--suppress JSUnresolvedFunction -->
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
+    LABKEY.Utils.onReady(function () {
+        const el = document.getElementById('generate');
+        el['onclick'] = function () { onGenerateClick(el); };
+    });
+
     function onGenerateClick(btn) {
         jQuery(btn).attr('disabled', true);
         PrimateIDModule.generate(function(msg) {
@@ -15,6 +20,6 @@
     }
 </script>
 <div>
-    <button onclick="onGenerateClick(this)">Generate PrimateIDs</button>
+    <button id="generate">Generate PrimateIDs</button>
     <span id="output"></span>
 </div>

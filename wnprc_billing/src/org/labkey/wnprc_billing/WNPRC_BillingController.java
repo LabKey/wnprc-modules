@@ -17,28 +17,23 @@
 package org.labkey.wnprc_billing;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.ModuleProperty;
-import org.labkey.api.pipeline.AbstractSpecimenTransformTask;
-import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresNoPermission;
@@ -46,45 +41,35 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
-import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.writer.PrintWriters;
-import org.labkey.api.writer.VirtualFile;
-import org.labkey.api.writer.ZipUtil;
-import org.labkey.wnprc_billing.domain.*;
+import org.labkey.wnprc_billing.domain.Alias;
+import org.labkey.wnprc_billing.domain.Invoice;
+import org.labkey.wnprc_billing.domain.InvoiceRun;
+import org.labkey.wnprc_billing.domain.InvoicedItem;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
 import org.labkey.wnprc_billing.invoice.SummaryPDF;
-import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 import org.labkey.wnprc_billing.security.permissions.EHRFinanceAdminPermission;
 import org.springframework.validation.BindException;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class WNPRC_BillingController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_BillingController.class);
     public static final String NAME = "wnprc_billing";
-    private NumberFormat decimalFormat = new DecimalFormat("###0.00"); //note no comma in the format, otherwise it will get separated in the csv.
+    private final NumberFormat decimalFormat = new DecimalFormat("###0.00"); //note no comma in the format, otherwise it will get separated in the csv.
 
     public WNPRC_BillingController()
     {

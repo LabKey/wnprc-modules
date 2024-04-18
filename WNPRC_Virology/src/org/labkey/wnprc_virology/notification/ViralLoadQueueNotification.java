@@ -1,5 +1,7 @@
 package org.labkey.wnprc_virology.notification;
 
+import jakarta.mail.Address;
+import jakarta.mail.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
@@ -21,8 +23,6 @@ import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
-import jakarta.mail.Address;
-import jakarta.mail.Message;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

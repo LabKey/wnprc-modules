@@ -46,6 +46,7 @@ interface EditableGridPanelProps<T extends object> {
         [key: string]: (arg: T) => boolean
     };
     wnprcMetaData?: any;
+    apiData?: any;
 }
 const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridPanelProps<any>) => {
     const {
@@ -55,7 +56,8 @@ const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridP
         schema,
         query,
         validationFns,
-        wnprcMetaData
+        wnprcMetaData,
+        apiData
     } = props;
 
     const [open, setOpen] = useState(true);
@@ -79,7 +81,6 @@ const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridP
             mode: "onChange",
             reValidateMode: "onChange"
         });
-
     const columns = useMemo(() => metaData.map((col, colIdx)=> {
         return(columnHelper.accessor(`${schema}-${query}.${col.name}`, {
             header: `${col.caption}`,
@@ -101,12 +102,13 @@ const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridP
                     validation={validationFns?.[col.name] ?? undefined}
                     autoFill={wnprcMetaData?.[col.name]?.autoFill}
                     value={watchTable?.[cell.row.id]?.[col.name]}
+                    apiData={apiData?.[col.name]}
                 />
             ),
             filterVariant: (col.type === "Date and Time") ? 'datetime-range' : 'text',
             filterFn: (col.type === "Date and Time") ? isWithinRange : textFilter
         }))}
-    ), [metaData]);
+    ), [metaData, apiData]);
 
     //call READ hook
     const {
@@ -363,6 +365,7 @@ const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridP
                         action={"create"}
                         modalForm={createForm}
                         wnprcMetaData={wnprcMetaData}
+                        apiData={apiData}
                     />} {/* or render custom edit components here */}
                 </DialogContent>
                 <DialogActions>
@@ -400,6 +403,7 @@ const EditableGridPanel: FC<EditableGridPanelProps<any>> = (props: EditableGridP
                         action={"edit"}
                         modalForm={updateForm}
                         wnprcMetaData={wnprcMetaData}
+                        apiData={apiData}
                     />}
                 </DialogContent>
                 <DialogActions>
@@ -491,7 +495,7 @@ function useGetUsers(data: any, schema, query) {
 const queryClient = new QueryClient();
 
 export const MUIEditableGridPanel = (props) => {
-    const {defaultValues, schemaName, queryName, metaData, componentProps} = props;
+    const {defaultValues, schemaName, queryName, metaData, componentProps, apiData} = props;
     const {columnHelper, validationFns, wnprcMetaData} = componentProps;
     if(!metaData) return;
     if (!(schemaName && queryName && defaultValues && `${schemaName}-${queryName}` in defaultValues)) return;
@@ -508,6 +512,7 @@ export const MUIEditableGridPanel = (props) => {
                     query={queryName}
                     validationFns={validationFns}
                     wnprcMetaData={wnprcMetaData}
+                    apiData={apiData}
                 />
             </QueryClientProvider>
         </LocalizationProvider>

@@ -2,7 +2,13 @@ import * as React from 'react';
 import { FC, useEffect, useMemo, useState } from 'react';
 import '../theme/css/react-datepicker.css';
 import '../theme/css/index.css';
-import { generateFormData, getFormData, getLsid, getQueryDetails } from '../query/helpers';
+import {
+    generateFormData,
+    getFormData,
+    getLsid,
+    getQueryDetails,
+    labkeyActionSelectWithPromise
+} from '../query/helpers';
 import AnimalInfoPane from './AnimalInfoPane';
 import ErrorModal from '../components/ErrorModal';
 import { Utils } from '@labkey/api';
@@ -222,7 +228,43 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                 tempMetaData.forEach((col) => {
                     if(columnNameTypeMap?.[col.name] === "dropdown"){
                         const tempOptState = []
-                        console.log(col);
+                        const tempConfig = {
+                            schemaName: col.lookup.schemaName,
+                            queryName: col.lookup.queryName,
+                            columns: [col.lookup.keyColumn, col.lookup.displayColumn],
+                        }
+                        labkeyActionSelectWithPromise(tempConfig).then(data => {
+                            console.log("col: ", data.rows)
+                            const options = [];
+                            data.rows.forEach(item => {
+                                options.push({value: item[col.lookup.keyColumn], label: item[col.lookup.displayColumn]});
+                            });
+
+                            if(component.componentProps?.wnprcMetaData?.[col.name]?.defaultOpts) {
+                                component.componentProps.wnprcMetaData[col.name].defaultOpts.forEach((option) => {
+                                    options.push(option);
+                                });
+                            }
+
+                            // remove possible duplicates
+                            const duplicatesRemovedArray = options.reduce((accumulator, currentObject) => {
+                                const isDuplicate = accumulator.some(
+                                    (obj) => obj.value === currentObject.value && obj.label === currentObject.label
+                                );
+
+                                if (!isDuplicate) {
+                                    accumulator.push(currentObject);
+                                }
+                                return accumulator;
+                            }, []);
+                            setApiData((prevData) => ({
+                                ...prevData,
+                                [`${component.schemaName}-${component.queryName}`]: {
+                                    ...prevData[`${component.schemaName}-${component.queryName}`],
+                                    [`${col.name}`]: duplicatesRemovedArray
+                                }
+                            }))
+                        })
                     }
                 })
                 setMetaData(prevMetaData => ({
@@ -294,6 +336,9 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
             });
     }, []);
 
+    useEffect(() => {
+        console.log("API: ", apiData)
+    }, [apiData]);
     if(isLoadingPrevTask){
         return(<div>Loading...</div>);
     }else {
@@ -329,6 +374,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                                             queryName={queryName}
                                             defaultValues={defaultValues}
                                             metaData={metaData[`${schemaName}-${queryName}`]}
+                                            apiData={apiData?.[`${schemaName}-${queryName}`]}
                                         />
                                     </div>
                                 );

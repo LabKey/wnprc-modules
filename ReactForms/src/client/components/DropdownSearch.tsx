@@ -17,6 +17,7 @@ interface PropTypes {
     validation?: any;
     defaultOpts?: any;
     controlled?: boolean;
+    newDefaults?: any;
 }
 
 /**
@@ -35,7 +36,8 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         isClearable,
         validation,
         defaultOpts,
-        controlled
+        controlled,
+        newDefaults
     } = props;
     const {control, formState: {errors}} = useFormContext();
     const [optState, setOptState] = useState([]);
@@ -53,8 +55,11 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     const changeUncontrolled = (selectedOption) => {
         setUncontrolledState(selectedOption || null);
     }
-
-    const testFunc = (inputValue: string) => {
+    const promiseOptions = (inputValue: string) =>
+        new Promise<any[]>((resolve) => {
+            resolve(testFunc(inputValue));
+        });
+    const testFunc = async (inputValue: string): Promise<any> => {
         const tempTestConf = {
             schemaName: optConf.schemaName,
             queryName: optConf.queryName,
@@ -67,7 +72,9 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         }
         const testConf = getConfig(tempTestConf, tempWatchState);
         console.log("OPTL: ", testConf);
-        labkeyActionSelectWithPromise(testConf).then(data => {
+
+        try {
+            const data = await labkeyActionSelectWithPromise(testConf);
             const options = [];
             const value = optConf.columns[0];
             const display = optConf.columns[1];
@@ -92,10 +99,12 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                 }
                 return accumulator;
             }, []);
-            console.log(data);
-        }).catch(error => {
+
+            return duplicatesRemovedArray;
+        } catch (error) {
             console.log(error);
-        });
+            return [];
+        }
     }
 
     useEffect(() => {
@@ -187,7 +196,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         return (
             <div className={'dropdown-controller'}>
                 <AsyncSelect
-                    defaultOptions
+                    defaultOptions={newDefaults}
                     cacheOptions
                     loadOptions={testFunc}
 

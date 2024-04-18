@@ -19,6 +19,7 @@ interface EditableGridCellProps {
     autoFill?: any;
     metaData: any;
     value?: any;
+    apiData?: any;
 }
 /*
 <input
@@ -39,7 +40,8 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
         dropdownConfig,
         autoFill,
         metaData,
-        value
+        value,
+        apiData
     } = props;
     if(!type) return;
 
@@ -52,6 +54,7 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
             ...getValues(), // always merge with latest form values
         }
     }
+    console.log("API 2: ", apiData);
 
     if(type === "date"){
         return(<ControlledDateInput
@@ -104,6 +107,7 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
             required={required}
             isClearable={true}
             validation={validation}
+            newDefaults={apiData}
         />);
     }
     else{

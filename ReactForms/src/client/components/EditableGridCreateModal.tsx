@@ -17,6 +17,7 @@ interface CreateModalProps {
     action: string;
     modalForm: any;
     wnprcMetaData: any;
+    apiData: any
 }
 export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
     const {table,
@@ -25,7 +26,8 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
         query,
         action,
         modalForm,
-        wnprcMetaData
+        wnprcMetaData,
+        apiData
     } = props;
     const {getValues, watch} = useFormContext();
     // decides to create new row or load previous row
@@ -83,6 +85,7 @@ export const EditableGridCreateModal: FC<CreateModalProps> = (props) => {
                                 initialValue={initVals[column.id]}
                                 required={colMetaData.required}
                                 isClearable={true}
+                                newDefaults={apiData[colMetaData.name]}
                             />
                         </div>
                     );

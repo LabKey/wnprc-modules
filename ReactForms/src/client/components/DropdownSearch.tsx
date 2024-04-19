@@ -75,6 +75,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
 
         try {
             const data = await labkeyActionSelectWithPromise(testConf);
+            console.log("data: ", data);
             const options = [];
             const value = optConf.columns[0];
             const display = optConf.columns[1];
@@ -198,7 +199,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
                 <AsyncSelect
                     defaultOptions={newDefaults}
                     cacheOptions
-                    loadOptions={testFunc}
+                    loadOptions={promiseOptions}
 
                 />
                 <Select

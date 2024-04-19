@@ -3569,7 +3569,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, List<String>> expected = new HashMap<>();
 
         String[] newBloodFields = {"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", FIELD_QCSTATELABEL, FIELD_OBJECTID, FIELD_LSID, "_recordid"};
-        Object bloodData[][] = {{SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolOver.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
         expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
@@ -3589,7 +3589,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         );
         Double tubeVolLimit = 142.5;
         Double quantityLimit = numTubes*tubeVolLimit;
-        Object bloodDataNearLimit[][] = {{SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
         expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolLimit.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
@@ -3610,7 +3610,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Date dt = prepareDate(new Date(), -11, 0);
         bloodCmd.addRow(new HashMap<String, Object>(){
             {
-                put("Id", SUBJECTS[0]);
+                put("Id", TEST_SUBJECTS[0]);
                 put("date", dt);
                 put("project", projectId);
                 put("account", 123456);
@@ -3629,7 +3629,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             }});
         bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
         SelectRowsCommand sr = new SelectRowsCommand("study","blood");
-        sr.addFilter("Id", SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("Id", TEST_SUBJECTS[0], Filter.Operator.EQUAL);
         sr.addFilter("date", dt, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
         Assert.assertEquals(1, resp2.getRowCount());

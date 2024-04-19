@@ -798,10 +798,16 @@ exports.init = function (EHR) {
                     }
 
                     if (row.objectid) {
+                        helper.getJavaHelper().setThresholdCheck(true);
                         var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
                         if (msg != null) {
                             if (msg.toLowerCase().indexOf('unknown weight') > -1) {
                                 volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
+                            }
+
+                            //Set the severity level to INFO for limit notices strictly
+                            if (msg.indexOf('Limit') === 0 && msg.indexOf('exceeds') === -1 ) {
+                                volumeErrorSeverity = 'INFO'
                             }
 
                             //TODO: change all future bloods draws to review required, if submitted for medical purpose.

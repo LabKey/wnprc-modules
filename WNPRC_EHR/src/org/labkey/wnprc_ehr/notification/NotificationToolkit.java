@@ -4,6 +4,9 @@ package org.labkey.wnprc_ehr.notification;
 import jakarta.mail.Address;
 import jakarta.mail.Message;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.FilterInfo;
@@ -35,7 +38,10 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -175,25 +181,16 @@ public class NotificationToolkit {
         return(ts.getRowCount());
     }
 
-
-
     /**
      * This formats the notification's "hours sent" into a usable cron string.
-     * @param hours A string array of hours in military time (ex. {8, 12, 23}).
-     * @return      A cron string representing the passed-in hours.
+     * @param minute    (0-59, * (all), or comma separated values with no spaces)
+     * @param hour      (0-23, * (all), or comma separated values with no spaces)
+     * @param dayOfWeek (1-7, * (all), or comma separated values with no spaces)
+     * @return          A cron string defining the time(s) a notification should be sent.
      */
-    public final String createCronString(String[] hours) {
-
+    public final String createCronString(String minute, String hour, String dayOfWeek) {
         //Creates variables.
-        StringBuilder returnString = new StringBuilder("0 0");
-
-        //Adds desired hours.
-        for (int i = 0; i < hours.length; i++) {
-            returnString.append(" " + hours[i]);
-        }
-
-        //Adds necessary format text to the end.
-        returnString.append(" * * ?");
+        StringBuilder returnString = new StringBuilder("0 " + minute + " " + hour + " ? * " + dayOfWeek + " *");
 
         //Returns properly formatted cron string.
         return returnString.toString();
@@ -217,15 +214,6 @@ public class NotificationToolkit {
 
         //Returns string.
         return largeString.toString();
-    }
-
-
-    /**
-     * Gets a timestamp with the current date & time.
-     * @return  A string representing the current date & time.
-     */
-    public final String getCurrentTime() {
-        return AbstractEHRNotification._dateTimeFormat.format(new Date());
     }
 
     /**
@@ -496,6 +484,278 @@ public class NotificationToolkit {
     }
 
     /**
+     * Retrieves the specified single column value for multiple rows in a dataset using a filter and sort.
+     * This is the same as getTableMultiRowMultiColumn(), except each row returns a single column value instead of multiple column values.
+     * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
+     *      EXAMPLE GOAL:       Get all animal ID's in the Blood Draws dataset where animal is not alive sorted by date.
+     *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareTType.NEQ_OR_NULL);
+     *                          Sort mySort = new Sort("date");
+     *                          getTableRowAsList(c, u, "study", "Blood Draws", myFilter, mySort, "Id");
+     *      EXAMPLE RETURNS:    [rh1234, rh1235, rh1236]
+     * @param c             The current container.
+     * @param u             The current user.
+     * @param schemaName    The current system schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName     The specific table's name (dataset name).
+     * @param myFilter      A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @param mySort        (Optional) The type of Sort applied to the table.
+     * @param targetColumn  The name of the column the user wants data for.
+     * @return              A list of Strings holding the column value for each row matching the filter parameters.
+     */
+    public static final ArrayList<String> getTableMultiRowSingleColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String targetColumn, Map<String, Object> myParameters) {
+        ArrayList<String> returnArray = new ArrayList<String>();
+        try {
+            TableSelector myTable = null;
+            if (myParameters != null) {
+                myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort).setNamedParameters(myParameters);
+            }
+            else {
+                myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            }
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets ID from each table row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                returnArray.add(rs.getString(targetColumn));
+                            }
+                        }
+                    });
+                }
+            }
+            return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowSingleColumn().", e);
+            return new ArrayList<String>();
+        }
+    }
+
+    /**
+     * Retrieves multiple specified column values for multiple rows in a dataset using a filter and sort.
+     * This is the same as getTableMultiRowSingleColumn(), except each row returns multiple column values instead of just a single column value.
+     * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
+     * WARNING: This cannot be used with targetColumns referencing other datasets (ex. "Id/Dataset/Demographics/calculated_status").  For those, use getTableMultiRowMultiColumnWithFieldKeys().
+     *      EXAMPLE GOAL:       Get ID, cage #, and room # for all animals in the 'Housing' dataset with their condition listed as Protected Contact, sorted by ID.
+     *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("cond", "pc", CompareType.EQUAL);
+     *                          Sort mySort = new Sort("id");
+     *                          getTableMultiRowMultiColumn(c, u, "study", "Housing", myFilter, mySort, new String[]{"Id", "cage", "room"});
+     *      EXAMPLE RETURNS:    [[rh1234, cage1, room1], [rh1235, cage2, room2], [rh1236, cage3, room3]]
+     *
+     * @param c             The current container.
+     * @param u             The current user.
+     * @param schemaName    The current system schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName     The specific table's name (dataset name).
+     * @param myFilter      A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @param mySort        (Optional) The type of Sort applied to the table.
+     * @param targetColumns The names of the columns the user wants data for.  THESE CANNOT REFERENCE OTHER DATASETS.  See warning above.
+     * @return              A list of Strings holding the column values for each row matching the filter parameters.
+     */
+    public static final ArrayList<String[]> getTableMultiRowMultiColumn(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+        ArrayList<String[]> returnArray = new ArrayList<String[]>();
+        try {
+            TableSelector myTable = new TableSelector(QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets target column values for each row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                String[] columnArray = new String[targetColumns.length];
+                                for (int i = 0; i < targetColumns.length; i++) {
+                                    columnArray[i] = rs.getString(targetColumns[i]);
+                                }
+                                returnArray.add(columnArray);
+                            }
+                        }
+                    });
+                }
+            }
+            return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowMultiColumn()", e);
+            return new ArrayList<String[]>();
+        }
+    }
+
+    /**
+     * TODO: This is an update to getTableMultiRowMultiColumn() that allow targetColumns to reference other datasets.
+     *  Refactor all usages of getTableMultiRowMultiColumn() to use this new format, then delete the getTableMultiRowSingleColumn() function.
+     * Retrieves multiple specified column values for multiple rows in a dataset using a filter and sort.
+     * This is the same as getTableMultiRowMultiColumn(), except this can be used with target columns that reference other datasets (ex. "Id/Dataset/Demographics/calculated_status").  This also returns a differently formatted value.
+     * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
+     *      EXAMPLE GOAL:       Get ID, drawStatus, and billing group for all animals in the 'BloodSchedule' dataset with their date set for today, sorted by ID.
+     *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getDateToday(), CompareType.DATE_EQUAL);
+     *                          Sort mySort = new Sort("Id");
+     *                          getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, new String[]{"Id", "drawStatus", "billedby/title"});
+     *      EXAMPLE RETURNS:    [[Id -> rh1234, drawStatus -> Completed, billedby/title -> Research Staff], [Id -> rh1235, drawStatus -> Completed, billedby/title -> Colony Records]]
+     * @param c             The current container.
+     * @param u             The current user.
+     * @param schemaName    The current system schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param tableName     The specific table's name (dataset name).
+     * @param myFilter      A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @param mySort        (Optional) The type of Sort applied to the table.
+     * @param targetColumns The names of the columns the user wants data for.
+     * @return              A list of Hash Maps holding the column values for each row matching the filter parameters.
+     */
+    public static final ArrayList<HashMap<String,String>> getTableMultiRowMultiColumnWithFieldKeys(Container c, User u, String schemaName, String tableName, SimpleFilter myFilter, Sort mySort, String[] targetColumns) {
+        //Creates array to return.
+        ArrayList<HashMap<String, String>> returnArray = new ArrayList<HashMap<String, String>>();
+        try {
+            //Updates table info.
+            TableInfo myTableInfo = QueryService.get().getUserSchema(u, c, schemaName).getTable(tableName);
+            //Updates columns to be retrieved.
+            Set<FieldKey> myKeys = new HashSet<>();
+            for (String myColumn : targetColumns) {
+                myKeys.add(FieldKey.fromString(myColumn));
+            }
+            final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
+            //Runs query with updated info.
+            TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
+            //Verifies table exists.
+            if (myTable != null) {
+                //Verifies data exists.
+                if (myTable.getRowCount() > 0) {
+                    //Gets target column values for each row.
+                    myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException {
+                            if (rs != null) {
+                                Results myResults = new ResultsImpl(rs, myColumns);
+                                HashMap<String, String> myRow = new HashMap<>();
+                                //Goes through each column in current query row and updates currentRow.
+                                for (int i = 0; i < targetColumns.length; i++) {
+                                    String currentColumnTitle = targetColumns[i];
+                                    String currentColumnValue = "";
+                                    if (myResults.getString(FieldKey.fromString(currentColumnTitle)) != null) {
+                                        currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    }
+                                    myRow.put(currentColumnTitle, currentColumnValue);
+                                }
+                                returnArray.add(myRow);
+                            }
+                        }
+                    });
+                }
+            }
+            return returnArray;
+        }
+        catch(Exception e) {
+            _log.error("Error executing NotificationToolkit->getTableMultiRowMultiColumnWithFieldKeys().", e);
+            return new ArrayList<HashMap<String, String>>();
+        }
+    }
+
+    /**
+     * This function sorts a set that may or may not contain a null.  This is needed because all sort functions don't work with nulls.
+     * @param setToSort A set containing data to be sorted.
+     * @return          A sorted set of the input data.
+     */
+    public ArrayList<String> sortSetWithNulls(Set<String> setToSort) {
+        //Converts set to ArrayList.
+        ArrayList<String> sortedList = new ArrayList<>();
+        sortedList.addAll(setToSort);
+
+        //Removes null value if it exists.
+        Boolean nullExists = false;
+        if (sortedList.contains(null)) {
+            sortedList.remove(null);
+            nullExists = true;
+        }
+
+        //Sorts list.
+        Collections.sort(sortedList);
+
+        //Adds null back to list if needed.
+        if (nullExists == true) {
+            sortedList.add(null);
+        }
+
+        //Returns sorted list.
+        return sortedList;
+    }
+
+    /**
+     * Creates a URL for a query matching user arguments.
+     * WARNING: This should only be used with a SimpleFilter that has clauses containing only one field key.  You can use multiple clauses and multiple values for each, but each clause should only have one key.
+     * NOTE: ColonyAlertsNotificationRevamp -> getNonContiguousHousingRecords() uses this same function, but rewrites it to include a PARAMETER argument.  If this gets used frequently, update this function to include the paramter.
+     * @param c                 The current container.
+     * @param executeOrUpdate   A string that is either "execute" or "update".  The decides whether the presented query is editable.
+     * @param schemaName        The current schema (ex. "ehr", "study", "ehr_lookups", etc.).
+     * @param queryName         The specific table's name (dataset name).
+     * @param queryFilter       (Optional) A SimpleFilter object defining the column to filter under, the value to filter by, and the type of comparison to be used.
+     * @return                  A URL that directs a user to the LabKey query browser's result.
+     */
+    public String createQueryURL(Container c, String executeOrUpdate, String schemaName, String queryName, SimpleFilter queryFilter) {
+        ActionURL queryURL = new ActionURL();
+        // Creates the query string.
+        if (executeOrUpdate.equals("execute")) {
+            queryURL = new ActionURL("query", "executeQuery.view", c);
+        }
+        else if (executeOrUpdate.equals("update")) {
+            queryURL = new ActionURL("ehr", "updateQuery.view", c);
+        }
+        else {
+            return "";
+        }
+        queryURL.addParameter("schemaName", schemaName);
+        queryURL.addParameter("query.queryName", queryName);
+
+        // Creates the query filter.
+        if (queryFilter != null) {
+            // Adds parameters from queryFilter.
+            for (SimpleFilter.FilterClause currentClause : queryFilter.getClauses()) {
+                // Gets clause key.
+                FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with one field key.
+
+                // Gets clause value.
+                StringBuilder clauseValue = new StringBuilder();
+                if (currentClause.getParamVals() != null) {
+                    for (Object paramValue : currentClause.getParamVals()) {
+                        clauseValue.append(paramValue.toString());
+                        clauseValue.append(";");
+                    }
+                }
+
+                // Gets clause compare.
+                CompareType clauseCompare = null;
+                if (currentClause instanceof CompareType.CompareClause) {
+                    clauseCompare = ((CompareType.CompareClause)currentClause).getCompareType();
+                }
+                else if (currentClause instanceof SimpleFilter.InClause) {
+                    clauseCompare = ((SimpleFilter.InClause) currentClause).getCompareType();
+                }
+                else {
+                    return "";
+                }
+
+                // Adds filter.
+                queryURL.addFilter("query", clauseKey, clauseCompare, clauseValue);
+            }
+        }
+
+        //Creates URL to return.
+        Path returnURL = new Path(new ActionURL().getBaseServerURI(), queryURL.toString());
+
+        //Returns URL.
+        return returnURL.toString();
+    }
+
+
+
+
+
+
+
+    //TODO: Move this to DeathNotificationRevamp.java
+    /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's necropsy.
      * It contains the following data (returning blank strings for non-existent data):
      *  If necropsy exists (true/false).
@@ -615,6 +875,7 @@ public class NotificationToolkit {
         }
     }
 
+    //TODO: Move this to DeathNotificationRevamp.java
     /**
      * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's demographics.
      * It contains the following data (returning blank strings for non-existent data):
@@ -685,8 +946,6 @@ public class NotificationToolkit {
             }
         }
     }
-
-
 
     /**
      * This is an object representation of a custom QView file.
@@ -765,7 +1024,7 @@ public class NotificationToolkit {
                 }
             }
             catch(Exception e) {
-                return;
+                _log.error("Error executing NotificationToolkit->QviewObject(Container c, User u, String queryName, String qviewName).", e);
             }
         }
 
@@ -884,7 +1143,7 @@ public class NotificationToolkit {
                         try {
                             parsedFilterValue = Integer.parseInt(filterValue);
                         }
-                        catch(Exception e) {
+                        catch(Exception e2) {
                             parsedFilterValue = filterValue;
                         }
                         //Creates the filter condition and adds it to the queryFilter.
@@ -909,7 +1168,8 @@ public class NotificationToolkit {
             }
             catch (Exception e)
             {
-                throw new RuntimeException(e);
+                _log.error("Error executing NotificationToolkit->QviewObject(String queryName, String qviewName).", e);
+//                throw new RuntimeException(e);
             }
         }
     }
@@ -1000,6 +1260,143 @@ public class NotificationToolkit {
                     "th:nth-child(" + columnToColor + "), td:nth-child(" + columnToColor + ") {color: " + textColor + "}"
             );
             return returnStyle.toString();
+        }
+
+        //TODO: Add documentation.
+        public String setHeaderRowBackgroundColor(String headerColor) {
+            StringBuilder returnStyle = new StringBuilder();
+            returnStyle.append(
+                    "th:nth-child(n) {background: " + headerColor + "}"
+            );
+            return returnStyle.toString();
+        }
+
+//        public String setRowBackgroundColor(Integer[] rowsToHighlight, String highlightColor) {
+//
+//        }
+    }
+
+    static class NotificationRevampTable
+    {
+        //        Integer borderSize;                         //The size of the table border.
+        String[] tableColumns;                      //The names of the columns.
+        ArrayList<String[]> tableData;              //A 3D array of the table data. (ArrayList of rows, each containing a string array of column data.)
+        ArrayList<String> rowColors;         //An optional list of colors for each row.  Must be the same size as 'tableData'.
+
+        NotificationRevampTable(String[] TableColumns, ArrayList<String[]> TableData)
+        {
+            this.tableColumns = TableColumns;
+            this.tableData = TableData;
+            this.rowColors = null;
+        }
+
+        public String createBasicHTMLTable()
+        {
+            //Begin table.
+            StringBuilder tempTable = new StringBuilder();
+            tempTable.append("<table>");
+
+            //Adds column headers.
+            tempTable.append("<tr>");
+            for (String columnName : tableColumns)
+            {
+                tempTable.append("<th>" + columnName + "</th>");
+            }
+            tempTable.append("</tr>");
+
+            //Cycles through each row.
+            Integer rowTracker = 0;
+            for (String[] currentRow : tableData)
+            {
+                tempTable.append("<tr>");
+                //Cycles through each column in the current row.
+                for (String currentColumn : currentRow)
+                {
+                    //Updates row data.
+                    if (this.rowColors == null)
+                    {
+                        tempTable.append("<td>" + currentColumn + "</td>");
+                    }
+                    //Updates row data with color.
+                    else if (this.rowColors.size() == this.tableData.size())
+                    {
+                        tempTable.append("<td bgcolor=" + rowColors.get(rowTracker) + ">" + currentColumn + "</td>");
+                    }
+                }
+                tempTable.append("</tr>");
+                rowTracker++;
+            }
+
+            //Return table.
+            tempTable.append("</table>");
+            return tempTable.toString();
+        }
+    }
+
+    static class DateToolkit {
+        String DATE_FORMAT_STRING = "MM/dd/yyyy";
+
+        //Returns today's date as Date (ex: "Wed Mar 06 13:11:02 CST 2024").
+        public Date getDateToday() {
+            Calendar todayCalendar = Calendar.getInstance();
+            Date todayDate = todayCalendar.getTime();
+            return todayDate;
+        }
+
+        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
+        public Date getDateTomorrow() {
+            Calendar todayCalendar = Calendar.getInstance();
+            todayCalendar.add(Calendar.DATE, 1);
+            Date tomorrowDate = todayCalendar.getTime();
+            return tomorrowDate;
+        }
+
+        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
+        public Date getDateFiveDaysAgo() {
+            Calendar todayCalendar = Calendar.getInstance();
+            todayCalendar.add(Calendar.DATE, -5);
+            Date fiveDaysAgoDate = todayCalendar.getTime();
+            return fiveDaysAgoDate;
+        }
+
+        //Returns today's date as String (ex: "03/06/2024").
+        public String getCalendarDateToday() {
+            return  new SimpleDateFormat(DATE_FORMAT_STRING).format(new Date());
+        }
+
+        /**
+         * Gets a timestamp with the current date & time.
+         * @return  A string representing the current date & time (ex: "2024-03-06 13:11")
+         */
+        public final String getCurrentTime() {
+            return AbstractEHRNotification._dateTimeFormat.format(new Date());
+        }
+
+    }
+
+    // The unit test has to end in "UnitTest" to get registered and show up at http://localhost:8080/labkey/junit-begin.view?
+    public static class DateToolkitUnitTest extends Assert
+    {
+
+
+        @Test
+        public void testGetCalendarDateToday() {
+            //test your dates here
+
+            // Arrange
+            DateToolkit dateToolkit = new DateToolkit();
+
+            // Act
+            String formattedDate = dateToolkit.getCalendarDateToday();
+
+            // Assert
+            // Since the actual date can change, validate the format (MM/DD/YYYY)
+            SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+            try {
+                format.parse(formattedDate);
+            } catch (Exception e) {
+                fail("getCalendarDateToday should return a date formatted as MM/DD/YYYY");
+            }
         }
     }
 

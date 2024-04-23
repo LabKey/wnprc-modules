@@ -13,6 +13,7 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
     //Class Variables
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
+    NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
     public Integer rowId;
     public User currentUser;
     public String hostName;
@@ -56,7 +57,7 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
     @Override
     public String getEmailSubject(Container c)
     {
-        return "[EHR Services] New Animal Request Submitted on " + notificationToolkit.getCurrentTime();
+        return "[EHR Services] New Animal Request Submitted on " + dateToolkit.getCurrentTime();
     }
     public String getScheduleDescription()
     {

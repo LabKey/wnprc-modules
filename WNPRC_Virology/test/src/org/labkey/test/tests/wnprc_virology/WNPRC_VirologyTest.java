@@ -76,8 +76,6 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     private static final File ALIASES_EHR_TSV = TestFileUtils.getSampleData("aliases_ehr.tsv");
     private static final File LLOD_EHR_TSV = TestFileUtils.getSampleData("llod_ehr.tsv");
 
-    private static WNPRC_VirologyTest _test;
-
     private static final String ACCOUNT_LOOKUP = "1";
     private static final String ACCOUNT_STR = "acct105";
     private static final String ACCOUNT_STR_2 = "acct106";
@@ -128,8 +126,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
 
     public void doVirologySetup() throws Exception
     {
-        _test = (WNPRC_VirologyTest) getCurrentTest();
-        _test.initProject("Collaboration");
+        ((WNPRC_VirologyTest) getCurrentTest()).initProject("Collaboration");
     }
 
     public void testTheStuff() throws Exception
@@ -173,7 +170,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
             _containerHelper.deleteProject(PROJECT_NAME_EHR);
         }
         _containerHelper.createProject(PROJECT_NAME_EHR, type);
-        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
+        _containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
         _userHelper.createUser(ADMIN_USER);
         _apiPermissionsHelper.setUserPermissions(ADMIN_USER, "Folder Administrator");
         // Set up the module properties
@@ -188,7 +185,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadAssayDataPath", getProjectName()));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "EHRViralLoadQCList", PROJECT_NAME_EHR));
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", PROJECT_NAME_EHR));
-        _test.setModuleProperties(properties);
+        setModuleProperties(properties);
 
         Connection connection = createDefaultConnection(true);
         //import example grant accnt data
@@ -197,19 +194,19 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         //import llod data into viral load assay project
         List<Map<String, Object>> tsv3 = loadTsv(LLOD_EHR_TSV);
         navigateToFolder(getProjectName(), getProjectName());
-        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME));
+        _containerHelper.enableModules(Arrays.asList(MODULE_NAME));
         insertTsvData(connection, "wnprc_virology", "assays_llod", tsv3, getProjectName());
 
         navigateToFolder(PROJECT_NAME_EHR, PROJECT_NAME_EHR);
-        _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE);
-        _test._listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE_QC);
+        _listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE);
+        _listHelper.importListArchive(PROJECT_NAME_EHR, LIST_ARCHIVE_QC);
         //create RSEHR folder with study data
         if (_containerHelper.doesContainerExist(getProjectNameRSEHR()))
         {
             _containerHelper.deleteProject(getProjectNameRSEHR());
         }
         _containerHelper.createProject(getProjectNameRSEHR(),"Collaboration");
-        _test._containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study", "EHR", "DataIntegration"));
+        _containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster","Study", "EHR", "DataIntegration"));
         //create study folder
         //just import study to root and tie down perms later
         //_containerHelper.createSubfolder(getProjectNameRSEHR(), RSEHR_PRIVATE_FOLDER_NAME, "Collaboration");
@@ -250,7 +247,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
         List<ModulePropertyValue> props = new ArrayList<>();
         props.add(new ModulePropertyValue("EHR", PROJECT_NAME_RSEHR, "EHRAdminUser", getCurrentUser()));
-        _test.setModuleProperties(props);
+        setModuleProperties(props);
 
         //create the public folder and wiki
         _userHelper.createUser(TEST_USER);
@@ -322,19 +319,19 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
     protected void setupSharedDataFolder(String name) throws IOException, CommandException
     {
         navigateToFolder(PROJECT_NAME_RSEHR, PROJECT_NAME_RSEHR);
-        CreateSubFolderPage createSubFolderPage = _test.projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
+        CreateSubFolderPage createSubFolderPage = projectMenu().navigateToCreateSubFolderPage().setFolderName(name);
         createSubFolderPage.selectFolderType(MODULE_NAME);
         SetFolderPermissionsPage setFolderPermissionsPage = createSubFolderPage.clickNext();
         setFolderPermissionsPage.setMyUserOnly();
-        _test.clickButton("Next");
-        _test.waitForText("Select...");
+        clickButton("Next");
+        waitForText("Select...");
         WebElement el = Locator.id("app").findElement(getDriver());
         WebElement inp = el.findElement(By.tagName("input"));
         inp.sendKeys(ACCOUNT_STR);
         inp.sendKeys(Keys.ENTER);
-        _test.clickButton("Save and Configure Permissions");
-        _test.waitForText("Save and Finish");
-        _test.clickButton("Save and Finish");
+        clickButton("Save and Configure Permissions");
+        waitForText("Save and Finish");
+        clickButton("Save and Finish");
 
         _apiPermissionsHelper.setUserPermissions(TEST_USER, "WNPRC Viral Load Reader");
 
@@ -433,7 +430,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         inp.sendKeys(ACCOUNT_STR_3);
         inp.sendKeys(Keys.ENTER);
         //note that this clickbutton expects a page reload
-        _test.clickButton("Update Accounts");
+        clickButton("Update Accounts");
         waitForText("Accounts successfully updated!");
         navigateToFolder(PROJECT_NAME_RSEHR, A_SECOND_LINKED_SCHEMA_FOLDER_NAME);
         waitForText(ANIMAL_ID_3);
@@ -496,7 +493,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         WebElement inp = el.findElement(By.tagName("input"));
         inp.sendKeys(ACCOUNT_STR_3);
         inp.sendKeys(Keys.ENTER);
-        _test.clickButton("Update Accounts");
+        clickButton("Update Accounts");
 
         //also add TEST_USER_2 to this, maybe remove TEST_USER from the list so we can assert an email is not sent to them
 
@@ -560,7 +557,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         WebElement inp = el.findElement(By.tagName("input"));
         inp.sendKeys(ACCOUNT_STR_4);
         inp.sendKeys(Keys.ENTER);
-        _test.clickButton("Update Accounts");
+        clickButton("Update Accounts");
 
         //also add TEST_USER_2 to this, maybe remove TEST_USER from the list so we can assert an email is not sent to them
         _apiPermissionsHelper.removeUserRoleAssignment(TEST_USER, "WNPRC Viral Load Reader", getProjectNameRSEHR() + "/" + A_FOURTH_LINKED_SCHEMA_FOLDER_NAME);

@@ -12,21 +12,16 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 
 interface taskProps {
-    componentProps: {
-        defaultValues: {
-            updateTitle: string;
-        }
-    };
     schemaName: string;
     queryName: string;
     prevTaskId?: string;
+    apiData: any;
 }
 
 export const TaskPane: FC<taskProps> = (props) =>{
-    const { schemaName, queryName} = props;
+    const { schemaName, queryName, apiData} = props;
     const { control} = useFormContext();
     const [isLoadingQC, setIsLoadingQC] = useState<boolean>(true);
-
     const [qcOptions, setQCOptions] = useState<any>({});
     const config: ConfigProps = {
         schemaName: "core",
@@ -111,6 +106,7 @@ export const TaskPane: FC<taskProps> = (props) =>{
                     />
                     <DropdownSearch
                         optConf={config}
+                        newDefaults={apiData["assignedto"]}
                         name={`${schemaName}-${queryName}.assignedto`}
                         id={"taskAssignedTo"}
                         classname="navbar__search-form"

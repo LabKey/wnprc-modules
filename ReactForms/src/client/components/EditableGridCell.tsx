@@ -15,19 +15,11 @@ interface EditableGridCellProps {
     id?: string;
     required: boolean;
     validation?: any;
-    dropdownConfig?: any;
     autoFill?: any;
     metaData: any;
     value?: any;
     apiData?: any;
 }
-/*
-<input
-    type="text"
-    value={value}
-    onChange={onChange}
-    className={"grid-cell " + className}
-/>*/
 
 export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
     const {
@@ -37,7 +29,6 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
         id,
         required,
         validation,
-        dropdownConfig,
         autoFill,
         metaData,
         value,
@@ -54,7 +45,6 @@ export const EditableGridCell: FC<EditableGridCellProps> = (props) => {
             ...getValues(), // always merge with latest form values
         }
     }
-    console.log("API 2: ", apiData);
 
     if(type === "date"){
         return(<ControlledDateInput

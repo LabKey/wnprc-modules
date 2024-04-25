@@ -65,21 +65,26 @@ export const BloodDraws: FC<any> = (props) => {
             name: "TaskPane",
             schemaName: "ehr",
             queryName: "tasks",
+            primaryKey: "rowid",
             componentProps: {
                 defaultValues: {
-                    updateTitle: "Blood Draws",
                     qcstate: 2,
-                    title: "Blood Draws"
-                }
+                    title: "Blood Draws",
+                    updateTitle: "Blood Draws",
+                    category: "tasks"
+                },
+                whitelist: ["title", "category"]
             }
         },{
             type: MUIEditableGridPanel,
             name: "BloodEditableGridPanel",
             schemaName: "study",
             queryName: "blood",
+            primaryKey: "lsid",
             componentProps: {
                 title: "Blood",
                 blacklist: ['taskid', 'requestid'],
+                whitelist: ["project/protocol"],
                 columnHelper: createMRTColumnHelper<BloodRow>(),
                 validationFns: { // input should be expected new cell value only
                     Id: validateId
@@ -94,7 +99,7 @@ export const BloodDraws: FC<any> = (props) => {
                         lookup: {
                             schemaName: "study",
                             queryName: "Assignment",
-                            displayColumn: "project",
+                            displayColumn: "project/displayName",
                             keyColumn: "project",
                         },
                         defaultOpts: [{value:300901, label:"300901"},{value:400901, label:"400901"}]
@@ -125,7 +130,6 @@ export const BloodDraws: FC<any> = (props) => {
                 redirectQuery={"blood"}
                 formStartTime={formStartTime}
                 animalInfoPane={false}
-                submit={(jsonData) => submitRequest(jsonData)}
             />
         </div>
     );

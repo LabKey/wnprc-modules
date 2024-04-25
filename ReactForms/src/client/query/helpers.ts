@@ -3,6 +3,8 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { GetQueryDetailsOptions, QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
+import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
+import { cleanDropdownOpts } from '../components/actions';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -266,25 +268,6 @@ export const findAccount = async (projectId: string) => {
 }
 
 /*
-Compiles a state object into a submission ready object for labkey saverows API call
-
-@param schemaName Name of schema for data to submit to
-@param queryName Name of query for data to submit to
-@param command Command of what to trigger for labkey saverows, insert or update
-@param state Data object to package for submission
-@returns {Object} New object ready for saverows
- */
-export const generateFormData = (schemaName: string, queryName: string, command: string, state: object): object => {
-  const rows = state instanceof Array ? state : [state];
-  return {
-    schemaName,
-    queryName,
-    command,
-    rows,
-  };
-};
-
-/*
 Helper function that finds task data from a task ID
 
 @param taskId Task ID to find task information for
@@ -377,7 +360,7 @@ Helper function to find the lsid for a given schema/query and task id
 @param taskId string of the task id to search for corresponding lsid
 @returns Promise string of lsid value
  */
-export const getLsid = (schemaName: string, queryName: string, taskId: string): Promise<string> => {
+export const getLsid = (schemaName: string, queryName: string, taskId: string): Promise<[string]> => {
   const config: SelectDistinctOptions = {
     schemaName: schemaName,
     queryName: queryName,
@@ -393,8 +376,9 @@ export const getLsid = (schemaName: string, queryName: string, taskId: string): 
   return new Promise ((resolve, reject) => {
     labkeyActionDistinctSelectWithPromise(config)
         .then((data) => {
+          console.log("LSID: ",data);
           if (data.values[0]) {
-            resolve(data.values[0]);
+            resolve(data.values);
           } else {
             reject(data);
           }
@@ -461,7 +445,6 @@ export const createTypeFromJson = (json: any): string => {
 }
 
 export const getConfig = (lookupMetaData, watchState?) => {
-  console.log(lookupMetaData, watchState);
   if(watchState && watchState.field !== ''){
     return ({
       schemaName: lookupMetaData.schemaName,
@@ -530,3 +513,17 @@ export const parseGridName = (str) => {
 }
 
 
+export const findDropdownOptions = async (component, col) => {
+      const tempConfig = {
+        schemaName: col.lookup.schemaName,
+        queryName: col.lookup.queryName,
+        columns: [col.lookup.keyColumn, col.lookup.displayColumn],
+      }
+      const data = await labkeyActionSelectWithPromise(tempConfig);
+      return cleanDropdownOpts(
+          data,
+          col.lookup.keyColumn,
+          col.lookup.displayColumn,
+          component.componentProps?.wnprcMetaData?.[col.name]?.defaultOpts
+      );
+}

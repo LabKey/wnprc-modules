@@ -3,7 +3,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import '../theme/css/react-datepicker.css';
 import '../theme/css/index.css';
 import {
-    generateFormData,
+    findDropdownOptions,
     getFormData,
     getLsid,
     getQueryDetails,
@@ -16,14 +16,15 @@ import { FieldPathValue, FormProvider, useForm, useWatch } from 'react-hook-form
 import { FormMetadataCollection } from './FormMetadataCollection';
 import { QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
 import { QueryColumn } from '@labkey/api/dist/labkey/query/types';
-import { parseErrors, submitRequest } from './actions';
+import { parseErrors, submitRequest, generateFormData} from './actions';
 
 interface Component {
     type: React.FunctionComponent<any>;
     name: string;
-    schemaName?: string;
-    queryName?: string;
+    schemaName: string;
+    queryName: string;
     viewName?: string;
+    primaryKey: string;
     required?: any;
     commandOverride?: boolean;
     componentProps?: {
@@ -39,7 +40,6 @@ interface formProps<T> {
     reviewRequired: boolean;
     formStartTime: Date;
     animalInfoPane: boolean;
-    submit?: (jsonData: T) => Promise<any>;
 }
 
 interface FormMetaData {
@@ -65,8 +65,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
         redirectQuery,
         reviewRequired,
         formStartTime,
-        animalInfoPane,
-        submit
+        animalInfoPane
     } = props;
 
     const [defaultValues, setDefaultValues] = useState<any>();
@@ -112,9 +111,16 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                     tempNewData.taskid = newTaskId;
                 }
 
-                if(prevTaskId && !commandOverride){
+                if(prevTaskId && !commandOverride && schemaName === "study"){
                     await getLsid(schemaName, queryName, newTaskId).then((prevLsid) =>{
-                        tempNewData.lsid = prevLsid;
+                        tempNewData.forEach((row, rowIdx) => {
+                            prevLsid.forEach((lsid) => {
+                                if(lsid.includes(row.Id)){
+                                    tempNewData[rowIdx].lsid = lsid
+                                    return;
+                                }
+                            })
+                        })
                     }).catch(() => {
                         console.log("Error finding previous task lsid");
                     });
@@ -131,6 +137,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                         }
                     })
                 }
+
                 // generate submission command for component
                 const newData = generateFormData(
                     schemaName,
@@ -164,19 +171,18 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
 
             //const commands = processedData
             console.log('calling save rows on: ', processedData);
-            if(submit) {
-                submitRequest(processedData).then((res) => {
-                    console.log(res);
-                    console.log("Error Ct: ", res.errorCount);
-                    if(res.errorCount > 0) {
-                        const errors = parseErrors(res.result);
-                        console.log(errors);
-                    }
-
-                }).catch(rej => {
-                    console.log(rej);
-                })
-            }
+            submitRequest(processedData).then((res) => {
+                console.log(res);
+                console.log("Error Ct: ", res.errorCount);
+                const errors = parseErrors(res.result);
+                if(errors.length === 0){
+                    console.log("Successful validation: ", processedData);
+                }else{
+                    console.log("Unsuccessful validation: ", errors);
+                }
+            }).catch(rej => {
+                console.log(rej);
+            })
             // save rows to database and redirect to desired schema/query
             /*saveRows(jsonData)
                 .then((data) => {
@@ -208,8 +214,24 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
             if(component.type.name === "InstructionsPane") return;
             try {
                 const metaData: QueryDetailsResponse = await getQueryDetails(component.schemaName, component.queryName);
-                let tempMetaData = component.viewName ? metaData.views[component.viewName].filter(item => !component.componentProps.blacklist?.includes(item.name))
-                    : metaData.defaultView.columns.filter(item => !component.componentProps.blacklist?.includes(item.name));
+
+                // grab meta data for all columns, filter out blacklist and whitelist, then add rest in default / given view
+                let tempMetaData = metaData.columns.map((col, index) => {
+                    if(component.componentProps.blacklist?.includes(col.name)){
+                        return;
+                    }else if (component.componentProps.whitelist?.includes(col.name)){
+                        return col;
+                    }else{
+                        const tempCol = metaData.defaultView.columns.find(obj => obj.name === col.name);
+                        if(tempCol){
+                            return tempCol;
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                }).filter(value => value !== undefined)
+                // create a name to type map of needed columns for later
                 const columnNameTypeMap = tempMetaData.reduce((map, obj) => {
                     if(component.componentProps?.wnprcMetaData?.hasOwnProperty(obj.name)) {
                         map[obj.name] = component.componentProps.wnprcMetaData[obj.name].type;
@@ -222,60 +244,27 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                     }
                     return map;
                 }, {});
-                console.log("MD: ", metaData, tempMetaData, columnNameTypeMap);
-
-                console.log("XXX: ", component.componentProps?.wnprcMetaData);
-                tempMetaData.forEach((col) => {
-                    if(columnNameTypeMap?.[col.name] === "dropdown"){
-                        const tempOptState = []
-                        const tempConfig = {
-                            schemaName: col.lookup.schemaName,
-                            queryName: col.lookup.queryName,
-                            columns: [col.lookup.keyColumn, col.lookup.displayColumn],
+                //Set metadata for dropdown options
+                for (const col of tempMetaData) {
+                    if(columnNameTypeMap?.[col.name] !== "dropdown") continue;
+                    const tempOpt = await findDropdownOptions(component, col);
+                    setApiData((prevData) => ({
+                        ...prevData,
+                        [`${component.schemaName}-${component.queryName}`]: {
+                            ...prevData[`${component.schemaName}-${component.queryName}`],
+                            [`${col.name}`]: tempOpt
                         }
-                        labkeyActionSelectWithPromise(tempConfig).then(data => {
-                            console.log("col: ", data.rows)
-                            const options = [];
-                            data.rows.forEach(item => {
-                                options.push({value: item[col.lookup.keyColumn], label: item[col.lookup.displayColumn]});
-                            });
-
-                            if(component.componentProps?.wnprcMetaData?.[col.name]?.defaultOpts) {
-                                component.componentProps.wnprcMetaData[col.name].defaultOpts.forEach((option) => {
-                                    options.push(option);
-                                });
-                            }
-
-                            // remove possible duplicates
-                            const duplicatesRemovedArray = options.reduce((accumulator, currentObject) => {
-                                const isDuplicate = accumulator.some(
-                                    (obj) => obj.value === currentObject.value && obj.label === currentObject.label
-                                );
-
-                                if (!isDuplicate) {
-                                    accumulator.push(currentObject);
-                                }
-                                return accumulator;
-                            }, []);
-                            setApiData((prevData) => ({
-                                ...prevData,
-                                [`${component.schemaName}-${component.queryName}`]: {
-                                    ...prevData[`${component.schemaName}-${component.queryName}`],
-                                    [`${col.name}`]: duplicatesRemovedArray
-                                }
-                            }))
-                        })
-                    }
-                })
+                    }))
+                }
                 setMetaData(prevMetaData => ({
                     ...prevMetaData,
                     [`${component.schemaName}-${component.queryName}`]: tempMetaData
                 }));
 
+                // Load prev task data
                 if (prevTaskId) {
                     const result = await getFormData(prevTaskId, component.schemaName, component.queryName);
                     let tempDefaultValues: Array<any> | object = component.type.name === "MUIEditableGridPanel" ? [] : {};
-
                     if(component.type.name === "MUIEditableGridPanel"){
                         tempDefaultValues = result.map(obj => {
                             const newObj = {};
@@ -292,13 +281,23 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                         });
                     }else{
                         tempMetaData.forEach(column => {
-                            tempDefaultValues[column.name] = result[0].hasOwnProperty(column.name)
-                                ? (column.type === "Date and Time"
-                                    ? new Date(result[0][column.name])
-                                    : result[0][column.name])
-                                : (column.type === "Date and Time"
-                                    ? new Date()
-                                    : column.defaultValue);
+                            if(result[0].hasOwnProperty(column.name)){
+                                if(column.type === "Date and Time") {
+                                    tempDefaultValues[column.name] = new Date(result[0][column.name])
+                                }else{
+                                    tempDefaultValues[column.name] = result[0][column.name]
+                                }
+                            }else{
+                                if(component.componentProps?.defaultValues.hasOwnProperty(column.name)){
+                                    tempDefaultValues[column.name] = component.componentProps?.defaultValues?.[column.name]
+                                }else{
+                                    if(column.type === "Date and Time") {
+                                        tempDefaultValues[column.name] = new Date()
+                                    }else{
+                                        tempDefaultValues[column.name] = column.defaultValue
+                                    }
+                                }
+                            }
                         });
                     }
                     setDefaultValues(prevState => ({
@@ -307,7 +306,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                     }));
                     methods.setValue(`${component.schemaName}-${component.queryName}`, tempDefaultValues);
                     await methods.trigger();
-                } else {
+                } else { // Initiate new form
                     let tempDefaultValues = component.type.name === "MUIEditableGridPanel" ? [{}] : {};
                     tempMetaData.forEach(column => {
                         if (component.type.name === "MUIEditableGridPanel"){
@@ -315,7 +314,6 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                         }else{
                             tempDefaultValues[column.name] = component.componentProps?.defaultValues?.hasOwnProperty(column.name) ? component.componentProps.defaultValues[column.name] : (column.type === "Date and Time" ? new Date() : column.defaultValue);
                         }
-
                     });
                     setDefaultValues(prevState => ({
                         ...prevState,
@@ -336,9 +334,7 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
             });
     }, []);
 
-    useEffect(() => {
-        console.log("API: ", apiData)
-    }, [apiData]);
+    
     if(isLoadingPrevTask){
         return(<div>Loading...</div>);
     }else {

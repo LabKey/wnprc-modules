@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as React from "react";
 import Select, { createFilter } from 'react-select';
 import { getConfig, labkeyActionSelectWithPromise } from '../query/helpers';
 import { useFormContext, Controller, FieldPathValue, FieldValues } from 'react-hook-form';
 import AsyncSelect from 'react-select/async';
-
+import lodash from 'lodash';
+import { cleanDropdownOpts } from './actions';
 interface PropTypes {
     optConf: any; // Options query config
     optDep?: any; // Option dependencies/watch
@@ -18,6 +19,11 @@ interface PropTypes {
     defaultOpts?: any;
     controlled?: boolean;
     newDefaults?: any;
+}
+
+type dropdownOption = {
+    value: string | number;
+    label: string;
 }
 
 /**
@@ -40,7 +46,7 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         newDefaults
     } = props;
     const {control, formState: {errors}} = useFormContext();
-    const [optState, setOptState] = useState([]);
+    const [optState, setOptState] = useState<[dropdownOption]>(newDefaults);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [uncontrolledState, setUncontrolledState] = useState(initialValue);
     const nameParsed = name.split(".");
@@ -58,7 +64,13 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
     const promiseOptions = (inputValue: string) =>
         new Promise<any[]>((resolve) => {
             resolve(testFunc(inputValue));
-        });
+    });
+    let debouncedOptions = useCallback(
+        lodash.debounce((inputValue, callback) => {
+            testFunc(inputValue).then(options => callback(options))
+        }, 500),
+        []
+    );
     const testFunc = async (inputValue: string): Promise<any> => {
         const tempTestConf = {
             schemaName: optConf.schemaName,
@@ -76,117 +88,59 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         try {
             const data = await labkeyActionSelectWithPromise(testConf);
             console.log("data: ", data);
-            const options = [];
-            const value = optConf.columns[0];
-            const display = optConf.columns[1];
-            data["rows"].forEach(item => {
-                options.push({value: item[value], label: item[display]});
-            });
-
-            if(defaultOpts) {
-                defaultOpts.forEach((option) => {
-                    options.push(option);
-                });
-            }
-
-            // remove possible duplicates
-            const duplicatesRemovedArray = options.reduce((accumulator, currentObject) => {
-                const isDuplicate = accumulator.some(
-                    (obj) => obj.value === currentObject.value && obj.label === currentObject.label
-                );
-
-                if (!isDuplicate) {
-                    accumulator.push(currentObject);
-                }
-                return accumulator;
-            }, []);
-
-            return duplicatesRemovedArray;
+            return cleanDropdownOpts(data, optConf.columns[0], optConf.columns[1], defaultOpts);
         } catch (error) {
             console.log(error);
             return [];
         }
     }
-
-    useEffect(() => {
-        labkeyActionSelectWithPromise(optConf).then(data => {
-            const options = [];
-            const value = optConf.columns[0];
-            const display = optConf.columns[1];
-            data["rows"].forEach(item => {
-                options.push({value: item[value], label: item[display]});
-            });
-
-            if(defaultOpts) {
-                defaultOpts.forEach((option) => {
-                    options.push(option);
-                });
-            }
-
-            // remove possible duplicates
-            const duplicatesRemovedArray = options.reduce((accumulator, currentObject) => {
-                const isDuplicate = accumulator.some(
-                    (obj) => obj.value === currentObject.value && obj.label === currentObject.label
-                );
-
-                if (!isDuplicate) {
-                    accumulator.push(currentObject);
-                }
-                return accumulator;
-            }, []);
-            setOptState(duplicatesRemovedArray);
-            setIsLoading(false);
-        });
-    }, [optDep] || []);
-
-
-    if(isLoading) {
-        return (<div>Loading...</div>);
-    }else if(controlled){
-    return (
-        <div className={'dropdown-controller'}>
-            <Controller
-                control={control}
-                name={name}
-                rules={{
-                    validate: validation,
-                    required: required ? "This field is required" : false
-                } as FieldPathValue<FieldValues, any>}
-                render={({field: { onChange, value, name, ref }}) => (
-                    <Select
-                        ref={ref}
-                        inputId={id}
-                        value={optState.find((c) => (
-                            c.value.toString() === value?.toString()
-                        ))}
-                        className={classname}
-                        classNamePrefix={'react-hook-select'}
-                        getOptionLabel={x => x.label}
-                        getOptionValue={x => x.value}
-                        onChange={(selectedOption) => {
-                            onChange(selectedOption?.value ? selectedOption.value : null);
-                        }}
-                        options={optState}
-                        isClearable={isClearable}
-                        filterOption={createFilter({ignoreAccents: false})}
-                        styles={{
-                            control: (base) => ({
-                                ...base,
-                                borderColor: rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null),
-                                height: '20px'
-                            }),
-                            container: (base) => ({
-                                ...base,
-                                width: 'auto',
-                            }),
-                            menu: (base) => ({
-                                ...base,
-                                width: 'max-content',
-                                zIndex: 2
-                            }),
-                        }}
-                    />
-                )}
+    if(controlled){
+        return (
+            <div className={'dropdown-controller'}>
+                <Controller
+                    control={control}
+                    name={name}
+                    rules={{
+                        validate: validation,
+                        required: required ? "This field is required" : false
+                    } as FieldPathValue<FieldValues, any>}
+                    render={({field: { onChange, value, name, ref }}) => (
+                        <AsyncSelect
+                            defaultOptions={optState}
+                            cacheOptions
+                            loadOptions={debouncedOptions}
+                            ref={ref}
+                            inputId={id}
+                            value={optState.find((c) => (
+                                c.value.toString() === value?.toString()
+                            ))}
+                            className={classname}
+                            classNamePrefix={'react-hook-select'}
+                            getOptionLabel={x => x.label}
+                            getOptionValue={x => x.value as string}
+                            onChange={(selectedOption) => {
+                                onChange(selectedOption?.value ? selectedOption.value : null);
+                            }}
+                            isClearable={isClearable}
+                            filterOption={createFilter({ignoreAccents: false})}
+                            styles={{
+                                control: (base) => ({
+                                    ...base,
+                                    borderColor: rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName] ? 'red' : null) : (errors?.[stateName]?.[fieldName] ? 'red' : null),
+                                    height: '20px'
+                                }),
+                                container: (base) => ({
+                                    ...base,
+                                    width: 'auto',
+                                }),
+                                menu: (base) => ({
+                                    ...base,
+                                    width: 'max-content',
+                                    zIndex: 2
+                                }),
+                            }}
+                        />
+                    )}
                 />
                 <div className={"react-error-text"}>
                     {rowNum ? (errors?.[stateName]?.[rowNum]?.[fieldName]?.message) : (errors?.[stateName]?.[fieldName]?.message)}
@@ -197,25 +151,19 @@ const DropdownSearch: React.FunctionComponent<PropTypes> = (props) => {
         return (
             <div className={'dropdown-controller'}>
                 <AsyncSelect
-                    defaultOptions={newDefaults}
+                    defaultOptions={optState}
                     cacheOptions
                     loadOptions={promiseOptions}
-
-                />
-                <Select
-                    defaultValue={initialValue}
+                    className={classname}
                     inputId={id}
                     required={required}
                     name={name}
                     value={optState.find((c) => (
                         c.value.toString() === uncontrolledState?.toString()
                     ))}
-                    className={classname}
-                    classNamePrefix={'react-hook-select'}
                     getOptionLabel={x => x.label}
-                    getOptionValue={x => x.value}
+                    getOptionValue={x => x.value as string}
                     onChange={(selectedOption) => (changeUncontrolled(selectedOption))}
-                    options={optState}
                     isClearable={isClearable}
                     filterOption={createFilter({ignoreAccents: false})}
                     styles={{

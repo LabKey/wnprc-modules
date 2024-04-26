@@ -7,11 +7,11 @@ import {
     getFormData,
     getLsid,
     getQueryDetails,
-    labkeyActionSelectWithPromise
+    labkeyActionSelectWithPromise, wait
 } from '../query/helpers';
 import AnimalInfoPane from './AnimalInfoPane';
 import ErrorModal from '../components/ErrorModal';
-import { Utils } from '@labkey/api';
+import { ActionURL, Utils } from '@labkey/api';
 import { FieldPathValue, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { FormMetadataCollection } from './FormMetadataCollection';
 import { QueryDetailsResponse } from '@labkey/api/dist/labkey/query/GetQueryDetails';
@@ -171,41 +171,31 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
 
             //const commands = processedData
             console.log('calling save rows on: ', processedData);
+            // save rows to database and redirect to desired schema/query
             submitRequest(processedData).then((res) => {
                 console.log(res);
                 console.log("Error Ct: ", res.errorCount);
                 const errors = parseErrors(res.result);
                 if(errors.length === 0){
                     console.log("Successful validation: ", processedData);
-                }else{
-                    console.log("Unsuccessful validation: ", errors);
-                }
-            }).catch(rej => {
-                console.log(rej);
-            })
-            // save rows to database and redirect to desired schema/query
-            /*saveRows(jsonData)
-                .then((data) => {
-                    console.log('done!!');
-                    console.log(JSON.stringify(data));
-                    setSubmitTextBody("Success!");
-
+                    /*setSubmitTextBody("Success!");
                     wait(3, setSubmitTextBody).then(() => {
                         window.location.href = ActionURL.buildURL(
                             "ehr",
                             `executeQuery.view?schemaName=${redirectSchema}&query.queryName=${redirectQuery}`,
                             ActionURL.getContainer()
                         );
-                    });
-                })
-                .catch((e) => {
-                    console.log(e);
-                    setSubmitTextBody(e.exception);
-                });*/
-            }).catch(e => {
-                console.error(e);
-                setSubmitTextBody(e.exception);
+                    });*/
+                }else{
+                    console.log("Unsuccessful validation: ", errors);
+                }
+            }).catch(rej => {
+                console.log(rej);
             })
+        }).catch(e => {
+            console.error(e);
+            setSubmitTextBody(e.exception);
+        })
 
     }
     // use effect to store default values into react hook form state management framework
@@ -216,21 +206,17 @@ export const DefaultFormContainer: FC<formProps<any>> = (props) => {
                 const metaData: QueryDetailsResponse = await getQueryDetails(component.schemaName, component.queryName);
 
                 // grab meta data for all columns, filter out blacklist and whitelist, then add rest in default / given view
-                let tempMetaData = metaData.columns.map((col, index) => {
+                let tempMetaData = metaData.defaultView.columns.map((col,idx) => {
                     if(component.componentProps.blacklist?.includes(col.name)){
                         return;
-                    }else if (component.componentProps.whitelist?.includes(col.name)){
-                        return col;
-                    }else{
-                        const tempCol = metaData.defaultView.columns.find(obj => obj.name === col.name);
-                        if(tempCol){
-                            return tempCol;
-                        }
-                        else {
-                            return;
-                        }
                     }
+                    return col;
                 }).filter(value => value !== undefined)
+                if (component.componentProps.whitelist) {
+                    component.componentProps.whitelist.forEach((colName) => {
+                         tempMetaData.push(metaData.columns.find(obj => obj.name === colName));
+                    })
+                }
                 // create a name to type map of needed columns for later
                 const columnNameTypeMap = tempMetaData.reduce((map, obj) => {
                     if(component.componentProps?.wnprcMetaData?.hasOwnProperty(obj.name)) {

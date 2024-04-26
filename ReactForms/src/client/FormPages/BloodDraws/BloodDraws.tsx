@@ -84,7 +84,6 @@ export const BloodDraws: FC<any> = (props) => {
             componentProps: {
                 title: "Blood",
                 blacklist: ['taskid', 'requestid'],
-                whitelist: ["project/protocol"],
                 columnHelper: createMRTColumnHelper<BloodRow>(),
                 validationFns: { // input should be expected new cell value only
                     Id: validateId

@@ -708,7 +708,7 @@ exports.init = function (EHR) {
     });*/
 
     function setStudyBloodInitTrigger() {
-        EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'blood', function (helper, scriptErrors, row, oldRow) {
+        EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'blood', function (helper, scriptErrors, row, oldRow) {
             helper.setCenterCustomProps({
                 doWarnForBloodNearOverages: true,
                 bloodNearOverageThreshold: 4.0

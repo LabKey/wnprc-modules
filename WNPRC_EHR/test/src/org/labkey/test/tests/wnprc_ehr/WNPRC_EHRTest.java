@@ -3575,10 +3575,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
         expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
-        Map<String,Object> additionalExtraContext = new HashMap<>();
-        additionalExtraContext.put("errorThreshold", "INFO");
-        additionalExtraContext.put("validateOnly", true); //a flag to force failure
-        additionalExtraContext.put("targetQC", "Request: Pending");
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
                 "study",
                 "blood",
@@ -3601,6 +3597,30 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 expected
                 //additionalExtraContext
         );
+
+        /*
+        // move to EHR
+        Double tubeVolNear = 143.5;
+        Double quantityNear = numTubes*tubeVolNear;
+        //test two records in the grid
+        Double totalRequested = tubeVolNear*2;
+
+        Object bloodDataNear[][] = {
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolNear, numTubes, quantityNear, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"},
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolNear, numTubes, quantityNear, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}
+        };
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + totalRequested + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + totalRequested + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                newBloodFields,
+                bloodDataNear,
+                expected
+                //additionalExtraContext
+        );*/
 
 
         //test an actual valid entry

@@ -21,6 +21,7 @@ exports.init = function (EHR) {
     ];
 
     EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.INIT, function (event, helper, EHR) {
+        setStudyBloodInitTrigger();
         EHR.Server.TriggerManager.unregisterAllHandlersForQueryNameAndEvent('study', 'blood', EHR.Server.TriggerManager.Events.BEFORE_UPSERT);
         setStudyBloodBeforeUpsertTrigger();
     });
@@ -706,6 +707,15 @@ exports.init = function (EHR) {
         }
     });*/
 
+    function setStudyBloodInitTrigger() {
+        EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'blood', function (helper, scriptErrors, row, oldRow) {
+            helper.setCenterCustomProps({
+                doWarnForBloodNearOverages: true,
+                bloodNearOverageThreshold: 4.0
+            })
+        });
+    }
+
     //TODO put this in INIT once we can override it
     var tube_types = {}
     function setStudyBloodBeforeUpsertTrigger() {
@@ -798,7 +808,6 @@ exports.init = function (EHR) {
                     }
 
                     if (row.objectid) {
-                        helper.getJavaHelper().setThresholdCheck(true);
                         var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
                         if (msg != null) {
                             if (msg.toLowerCase().indexOf('unknown weight') > -1) {

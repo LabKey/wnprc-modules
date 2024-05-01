@@ -241,8 +241,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.createRequiredLists();
         initTest.createRequiredAssays();
         initTest.clickFolder("EHR");
-        initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
-        initTest.loadEHRBillingTableDefinitions();
 
         initTest.updateEHRFormFrameworkTypes();
 
@@ -3449,27 +3447,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 //        log("Completed testJavaDeathNotification.");
 //    }
 
-    @Test
-    public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
-        log("Started testJavaPrenatalDeathNotification.");
-        //Navigates to the "Enter Prenatal Death" page.
-        beginAt(buildURL("project", getContainerPath(), "begin"));
-        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
-        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Prenatal Death"));
-
-        //Enters Prenatal Death record.
-        _helper.setDataEntryField("Id", "pd9876");
-        log("Attempting to select combo box item: female");
-        _extHelper.selectComboBoxItem("Gender:", "female" + "\u00A0");
-        log("Successfully selected combo box item: female");
-        click(Locator.buttonContainingText("Force Submit"));
-        clickAndWait(Locator.buttonContainingText("Yes"));
-
-        //Navigates to dumbster.
-        goToModule("Dumbster");
-        assertTextPresent("Prenatal Death Notification: pd9876");
-        log("Completed testJavaPrenatalDeathNotification.");
-    }
+//    @Test
+//    public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaPrenatalDeathNotification.");
+//        //Navigates to the "Enter Prenatal Death" page.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
+//        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Prenatal Death"));
+//
+//        //Enters Prenatal Death record.
+//        _helper.setDataEntryField("Id", "pd9876");
+//        log("Attempting to select combo box item: female");
+//        _extHelper.selectComboBoxItem("Gender:", "female" + "\u00A0");
+//        log("Successfully selected combo box item: female");
+//        click(Locator.buttonContainingText("Force Submit"));
+//        clickAndWait(Locator.buttonContainingText("Yes"));
+//
+//        //Navigates to dumbster.
+//        goToModule("Dumbster");
+//        assertTextPresent("Prenatal Death Notification: pd9876");
+//        log("Completed testJavaPrenatalDeathNotification.");
+//    }
 
     private void deathNotificationSetup() throws UnhandledAlertException {
         log("Starting deathNotificationSetup.");

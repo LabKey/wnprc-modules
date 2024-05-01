@@ -805,20 +805,26 @@ exports.init = function (EHR) {
                     }
 
                     if (row.objectid) {
-                        var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
-                        if (msg != null) {
-                            if (msg.toLowerCase().indexOf('unknown weight') > -1) {
-                                volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
-                            }
+                        try {
+                            var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
+                            if (msg != null) {
+                                if (msg.toLowerCase().indexOf('unknown weight') > -1) {
+                                    volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
+                                }
 
-                            //Set the severity level to INFO for limit notices strictly
-                            if (msg.indexOf('Limit') === 0 && msg.indexOf('exceeds') === -1 ) {
-                                volumeErrorSeverity = 'INFO'
-                            }
+                                //Set the severity level to INFO for limit notices strictly
+                                if (msg.indexOf('Limit') === 0 && msg.indexOf('exceeds') === -1 ) {
+                                    volumeErrorSeverity = 'INFO'
+                                }
 
-                            //TODO: change all future bloods draws to review required, if submitted for medical purpose.
-                            EHR.Server.Utils.addError(scriptErrors, 'num_tubes', msg, volumeErrorSeverity);
-                            EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, volumeErrorSeverity);
+                                //TODO: change all future bloods draws to review required, if submitted for medical purpose.
+                                EHR.Server.Utils.addError(scriptErrors, 'num_tubes', msg, volumeErrorSeverity);
+                                EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, volumeErrorSeverity);
+                            }
+                        }
+                        catch (error) {
+                            EHR.Server.Utils.addError(scriptErrors, 'num_tubes', error.message, 'ERROR');
+                            console.error(error);
                         }
                     }
                     else {

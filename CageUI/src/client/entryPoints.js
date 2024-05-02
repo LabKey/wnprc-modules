@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
-        name: "cage_interface",
-        title: "Cages Interface",
+        name: "home",
+        title: "Cage Display",
         permission: "login",
         path: './src/client/cageUI'
     }]

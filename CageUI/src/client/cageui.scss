@@ -1,0 +1,81 @@
+
+.room-header {
+  background-color: lightgreen;
+}
+
+.room-legend {
+  flex: 1;
+  background-color: lightcoral;
+}
+
+.room-display {
+  display: flex;
+  flex: 4;
+  background-color: lightblue;
+}
+
+.room-container {
+  display: flex;
+  flex-direction: column; /* Arrange children in a column */
+  height: 75vh;
+}
+
+.room-sub-container {
+  display: flex;
+  flex: 1; /* Take up remaining space */
+}
+
+.room-header, .room-display, .room-legend {
+  padding: 10px;
+}
+
+/* Media query for landscape orientation */
+@media screen and (orientation: portrait) {
+  .room-container {
+    flex-direction: column;
+  }
+
+  .room-sub-container {
+    flex-direction: column;
+  }
+
+  .room-legend, .room-display {
+    margin-right: 0;
+    margin-bottom: 5px;
+  }
+}
+
+.room-header-name {
+  display: inline-block;
+  margin-left: 20px;
+}
+.room-header-text {
+  display: inline-block;
+}
+
+.room-layout {
+  background-color: lightpink;
+  margin:0 auto
+  //background-image: url("./rooms/AB140-167.svg");
+  //display: flex;
+  //max-width: 50%;
+  //flex-wrap: wrap;
+  //flex-direction: row;
+  //flex-flow: row;
+}
+
+
+.rack-container {
+  min-height: 100%;
+  max-width: 20%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.cage-container {
+  display: flex;
+  flex: 1 0;
+  max-width: fit-content;
+  box-sizing: border-box;
+}

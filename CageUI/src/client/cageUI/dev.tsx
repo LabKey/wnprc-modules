@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { AppContainer } from 'react-hot-loader';
 import { createRoot } from 'react-dom/client';
-import { CageHome } from './CageHome';
+import { RoomHome } from './RoomHome';
+import { testRoom } from './testData';
 
 const render = () => {
     createRoot(document.getElementById("app")).render(
         <AppContainer>
-            <CageHome />
+            <RoomHome room={testRoom}/>
         </AppContainer>
     );
 };

@@ -1,4 +1,3 @@
-var console = require('console');
 require("ehr/triggers").initScript(this);
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
@@ -24,12 +23,11 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         //validate that the sire(s) are male, alive, and not duplicated
         //also strip any non alphanumeric characters and separate sire ids by a comma
         if (row.sireid) {
-            row.sireid = row.sireid.replace(/[^A-Za-z0-9]+/g, ',');
-            let ids = row.sireid.split(',');
+            row.sireid = row.sireid.replace(/\s+/g, '');
             let duplicateCount = [];
 
             for (let i = 0; i < ids.length; i++) {
-                let id = ids[i];
+                let id = ids[i].trim();
                 EHR.Server.Utils.findDemographics({
                     participant: id,
                     helper: helper,

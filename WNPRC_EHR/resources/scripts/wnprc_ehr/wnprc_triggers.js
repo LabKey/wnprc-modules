@@ -633,6 +633,12 @@ exports.init = function (EHR) {
         }
     });
 
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.AFTER_UPSERT, 'study', 'Blood', function (helper, scriptErrors, row) {
+        if (row.QCStateLabel === 'Request: Approved') {
+            WNPRC.Utils.getJavaHelper().sendBloodDrawReviewNotification(row.Id, row.project, row.date, row.requestor);
+        }
+    })
+
     function getHousingSQL(row) {
         var date = row.Date;
         date = EHR.Server.Utils.normalizeDate(date);

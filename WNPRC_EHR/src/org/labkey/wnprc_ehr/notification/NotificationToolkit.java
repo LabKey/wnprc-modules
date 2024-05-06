@@ -55,6 +55,8 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -256,7 +258,7 @@ public class NotificationToolkit {
      * @param currentUser           The current user.
      * @param currentContainer      The current container.
      */
-    public void sendNotification(Notification currentNotification, User currentUser, Container currentContainer) {
+    public void sendNotification(Notification currentNotification, User currentUser, Container currentContainer, ArrayList<String> extraRecipients) {
 
         //Retrieves email details.
         Collection<UserPrincipal> recipients = NotificationService.get().getRecipients(currentNotification, currentContainer);
@@ -283,6 +285,15 @@ public class NotificationToolkit {
                         if (a.toString() != null) {
                             emailRecipients.add(a.toString());
                         }
+                    }
+                }
+            }
+
+            //Adds extra recipients if necessary.
+            if (extraRecipients != null) {
+                if (!extraRecipients.isEmpty()) {
+                    for (String extraRecipient : extraRecipients) {
+                        emailRecipients.add(extraRecipient);
                     }
                 }
             }
@@ -476,6 +487,7 @@ public class NotificationToolkit {
         return animalSexMeaning;
     }
 
+    //TODO: Fix this so it only gets the FIRST row (check the myTable.forEach part).  Maybe add a counter and only update returnRow on first one.  (See: getTableRowAsListWithFieldKeys() -> "if (returnRow.isEmpty())")
     /**
      * Retrieves a specific row from a specific table with only necessary columns.
      * The schema, tableName, and column names can be found through the Query Schema Browser.
@@ -508,6 +520,52 @@ public class NotificationToolkit {
                         if (rs != null) {
                             for (int i = 0; i < columnsToGet.length; i++) {
                                 returnRow.add(rs.getString(columnsToGet[i]));
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        return returnRow;
+    }
+
+    // TODO: WRITE DOCUMENTATION!!!  Also might be able to merge this with original getTableRowAsList().  Also need to add try/catch w/ exception maybe?
+    //  NOTE: mySort can be null.
+    //  NOTE: This gets the first non-empty result.
+    public ArrayList<String> getTableRowAsListWithFieldKeys(Container currentContainer, User currentUser, String schema, String tableName, String targetColumnName, String targetColumnValue, String[] columnsToGet, Sort mySort) {
+        ArrayList<String> returnRow = new ArrayList<String>();
+        //Verifies table contains data before attempting to retrieve row.
+        if (getTableRowCount(currentContainer, currentUser, schema, tableName, "") > 0) {
+            //Updates table info.
+            TableInfo myTableInfo = QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName);
+            //Updates columns to be retrieved.
+            Set<FieldKey> myKeys = new HashSet<>();
+            for (String myColumn : columnsToGet) {
+                myKeys.add(FieldKey.fromString(myColumn));
+            }
+            final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
+            //Sets up variables.
+            SimpleFilter myFilter = new SimpleFilter(FieldKey.fromString(targetColumnName), targetColumnValue, CompareType.EQUAL);
+            //Runs query with updated info.
+            TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
+
+            //Gets row from table.
+            if (myTable != null) {
+                myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                    @Override
+                    public void exec(ResultSet rs) throws SQLException {
+                        if (returnRow.isEmpty()) {
+                            if (rs != null) {
+                                Results myResults = new ResultsImpl(rs, myColumns);
+                                //Goes through each column in current query row and updates currentRow.
+                                for (int i = 0; i < columnsToGet.length; i++) {
+                                    String currentColumnTitle = columnsToGet[i];
+                                    String currentColumnValue = "";
+                                    if (myResults.getString(FieldKey.fromString(currentColumnTitle)) != null) {
+                                        currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    }
+                                    returnRow.add(currentColumnValue);
+                                }
                             }
                         }
                     }
@@ -624,6 +682,7 @@ public class NotificationToolkit {
      *  Refactor all usages of getTableMultiRowMultiColumn() to use this new format, then delete the getTableMultiRowSingleColumn() function.
      * Retrieves multiple specified column values for multiple rows in a dataset using a filter and sort.
      * This is the same as getTableMultiRowMultiColumn(), except this can be used with target columns that reference other datasets (ex. "Id/Dataset/Demographics/calculated_status").  This also returns a differently formatted value.
+     * This does not return null values.  Any null values will be returned as an empty string.
      * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
      *      EXAMPLE GOAL:       Get ID, drawStatus, and billing group for all animals in the 'BloodSchedule' dataset with their date set for today, sorted by ID.
      *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getDateToday(), CompareType.DATE_EQUAL);
@@ -782,7 +841,77 @@ public class NotificationToolkit {
         return returnURL.toString();
     }
 
+    // TODO: COMMENT!!!
+    public Boolean checkIfAnimalIsAlive(Container c, User u, String idToCheck) {
+        try {
+            //Runs query.
+            ArrayList<String> animalDemographicRow = getTableRowAsList(c, u, "study", "Demographics", null, "id", idToCheck, new String[]{"calculated_status"});
 
+            //Checks alive status.
+            if (animalDemographicRow.get(0).equals("Alive")) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (IndexOutOfBoundsException e) {
+            // TODO: Log exception.
+            return false;
+        }
+    }
+
+    // TODO: COMMENT!!!
+    //  This checks if an animal is assigned to a certain project on a given date.
+    //      --> dateToCheck must be formatted as "yyyy-MM-dd.....".  Any trailing characters after 'dd' are ignored.
+    //      --> returns 'true' if assigned to a project, 'false' if not.
+    public Boolean checkProjectAssignmentStatusOnDate(Container c, User u, String idToCheck, Integer projectToCheck, String dateToCheck) {
+        Boolean animalAssigned = false;
+        // Checks if animal is assigned to a project.
+        if (projectToCheck.equals("300901") || projectToCheck.equals("400901")) {
+            animalAssigned = true;
+        }
+        // Gets everything in the 'assignment' dataset with the same 'id' and 'project' as the request, and an assignment 'start date' on or after the 'request date'.
+        else {
+            // Sets up query.
+            SimpleFilter myFilter = new SimpleFilter("id", idToCheck, CompareType.EQUAL);
+            myFilter.addCondition("project", projectToCheck, CompareType.EQUAL);   // TODO: Verify that currentProject will always be a numerical value.
+            myFilter.addCondition("date", dateToCheck, CompareType.DATE_LTE);
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"Id", "enddate"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "assignment", myFilter, null, targetColumns);
+
+            // Looks through each assignment for the current animal.
+            for (HashMap<String, String> assignmentRow : returnArray)
+            {
+                // Marks animal 'assigned' if there's no project end date.
+                if (assignmentRow.get("enddate").isEmpty())
+                {
+                    animalAssigned = true;
+                }
+                // Marks animal 'assigned' if the project's 'end date' is on or after the 'request date'.
+                else
+                {
+                    // Some times show up as 'yyyy-MM-dd 00:00:00.0'.  Time is inconsistent & irrelevant, so we'll just take the date.
+                    String endDateWithoutTime = assignmentRow.get("enddate").substring(0, 10);
+                    String drawDateWithoutTime = dateToCheck.substring(0, 10);
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDate formattedEndDate = LocalDate.parse(endDateWithoutTime, dateFormatter);
+                    LocalDate formattedDrawDate = LocalDate.parse(drawDateWithoutTime, dateFormatter);
+                    if (formattedEndDate.compareTo(formattedDrawDate) >= 0)
+                    {
+                        animalAssigned = true;
+                    }
+                }
+            }
+        }
+        return animalAssigned;
+    }
+
+//    public String getEmailFromUsername(Container c, User u, String username) {
+        // TODO
+//    }
 
 
 

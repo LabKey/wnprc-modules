@@ -62,7 +62,7 @@
         </column>
         <column name="Id/availBlood/AvailBlood">
             <properties>
-                <property name="columnTitle" value="Available Blood"/>
+                <property name="columnTitle" value="Available Blood Today"/>
             </properties>
         </column>
     </columns>

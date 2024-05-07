@@ -810,12 +810,12 @@ exports.init = function (EHR) {
                             if (msg != null) {
                                 if (msg.toLowerCase().indexOf('unknown weight') > -1) {
                                     volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
+                                } else if (msg.indexOf('Limit') === 0 && msg.indexOf('exceeds') === -1 ) {
+                                    volumeErrorSeverity = 'INFO';
                                 }
 
                                 //Set the severity level to INFO for limit notices strictly
-                                if (msg.indexOf('Limit') === 0 && msg.indexOf('exceeds') === -1 ) {
-                                    volumeErrorSeverity = 'INFO'
-                                }
+
 
                                 //TODO: change all future bloods draws to review required, if submitted for medical purpose.
                                 EHR.Server.Utils.addError(scriptErrors, 'num_tubes', msg, volumeErrorSeverity);

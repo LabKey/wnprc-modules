@@ -69,7 +69,6 @@
                     <column columnName="modified">
                         <isHidden>true</isHidden>
                     </column>
-                    <column columnName="debitedaccount"/>
                 </columns>
             </table>
         </tables>

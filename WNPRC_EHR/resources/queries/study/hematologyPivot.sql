@@ -18,7 +18,7 @@ END as result
 
 FROM study."Hematology Results" b
 
-WHERE testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW', 'PLT', 'MPV','PCV','NE','LY','MN','EO','BS','BANDS','METAMYELO','MYELO','TP','RETICULO', 'PRO MYELO', 'ATYL', 'OTHER')
+WHERE testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW', 'PLT', 'MPV','PCV','NE','LY','MN','EO','BS','BANDS','METAMYELO','MYELO','TP','RETICULO', 'PRO MYELO', 'ATYP', 'OTHER')
 and b.qcstate.publicdata = true
 
 UNION ALL
@@ -35,5 +35,5 @@ FROM study.hematologyAbsCount b
 ) b
 
 GROUP BY b.id, b.date, b.runId, b.testId
-PIVOT results BY testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW', 'PLT', 'MPV','PCV','NE','NE-ABS','LY','LY-ABS','MN','MN-ABS','EO','EO-ABS','BS','BS-ABS','BANDS','BANDS-ABS','METAMYELO','MYELO','TP','RETICULO', 'PRO MYELO', 'ATYL', 'OTHER')
+PIVOT results BY testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW', 'PLT', 'MPV','PCV','NE','NE-ABS','LY','LY-ABS','MN','MN-ABS','EO','EO-ABS','BS','BS-ABS','BANDS','BANDS-ABS','METAMYELO','MYELO','TP','RETICULO', 'PRO MYELO', 'ATYP', 'OTHER')
 

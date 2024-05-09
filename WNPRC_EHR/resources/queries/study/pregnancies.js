@@ -23,6 +23,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         //validate that the sire(s) are male, alive, and not duplicated
         if (row.sireid) {
             row.sireid = row.sireid.replace(/\s+/g, '');
+            let ids = row.sireid.split(',');
             let duplicateCount = [];
 
             for (let i = 0; i < ids.length; i++) {

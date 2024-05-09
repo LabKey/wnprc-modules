@@ -199,6 +199,7 @@ public class NotificationToolkit {
      * @return          The number of rows in the given table.  If none, returns 0.
      */
     public final long getTableRowCount(Container c, User u, String schema, String tableName, String qViewName) {
+        // TODO: Change this to handle null (i.e. if null is passed in as qViewName, set qViewName = "").
 
         //Creates variables.
         StringBuilder returnString = new StringBuilder();
@@ -1387,7 +1388,14 @@ public class NotificationToolkit {
                     //Adds a hover effect to rows.
                     "tr:hover {background-color: #d9d9d9;}" +
                     //Adds padding to each cell.
-                    "th, td {padding: 5px; text-align: center}"
+                    "th, td {padding: 5px; text-align: center}" +
+                    //Adds vertical column lines (on right side of row's cells, but not on the row's final cell).
+                    "th, td {border-right: 1px solid #000000}" +
+                    "th:last-child, td:last-child {border-right: none}" +
+                    //Adds horizontal row lines (on bottom side of row's cells, but not on the final row's cells).
+                    "th, td {border-bottom: 1px solid #000000}" +
+                    "tr:last-child td {border-bottom: none}"
+
                     //TODO: Figure out how to make the bottom 2 formats work.
                     //Sets the header text format.
 //                    "th {font-weight: bold}" +
@@ -1506,18 +1514,26 @@ public class NotificationToolkit {
             return todayDate;
         }
 
-        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
-        public Date getDateTomorrow() {
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, 1);
-            Date tomorrowDate = todayCalendar.getTime();
-            return tomorrowDate;
-        }
+//        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
+//        public Date getDateTomorrow() {
+//            Calendar todayCalendar = Calendar.getInstance();
+//            todayCalendar.add(Calendar.DATE, 1);
+//            Date tomorrowDate = todayCalendar.getTime();
+//            return tomorrowDate;
+//        }
 
-        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
-        public Date getDateFiveDaysAgo() {
+//        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
+//        public Date getDateFiveDaysAgo() {
+//            Calendar todayCalendar = Calendar.getInstance();
+//            todayCalendar.add(Calendar.DATE, -5);
+//            Date fiveDaysAgoDate = todayCalendar.getTime();
+//            return fiveDaysAgoDate;
+//        }
+
+        //Returns today's date +/- a specific number of days as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
+        public Date getDateXDaysFromNow(Integer numDaysFromNow) {
             Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, -5);
+            todayCalendar.add(Calendar.DATE, numDaysFromNow);
             Date fiveDaysAgoDate = todayCalendar.getTime();
             return fiveDaysAgoDate;
         }

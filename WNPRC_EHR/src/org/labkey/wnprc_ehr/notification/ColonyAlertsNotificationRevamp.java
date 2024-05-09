@@ -344,7 +344,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //34. Summarize events in the last 5 days.
         if (!myColonyAlertObject.birthsInLastFiveDays.isEmpty()) {
-            messageBody.append("Births since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Births since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
             for (String result : myColonyAlertObject.birthsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
@@ -352,7 +352,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //35. Deaths in the last 5 days.
         if (!myColonyAlertObject.deathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Deaths since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
             for (String result : myColonyAlertObject.deathsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
@@ -360,7 +360,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //36. Prenatal deaths in the last 5 days.
         if (!myColonyAlertObject.prenatalDeathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
             for (String result : myColonyAlertObject.prenatalDeathsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
@@ -1136,7 +1136,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String assignmentsWithProjectedReleasesTomorrowURLView;                         //url string (view)
         private void getAssignmentsWithProjectedReleasesTomorrow() {
             //Gets info.
-            Date tomorrowDate = dateToolkit.getDateTomorrow();
+            Date tomorrowDate = dateToolkit.getDateXDaysFromNow(1);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("projectedRelease", tomorrowDate, CompareType.DATE_EQUAL);
             //Runs query.
@@ -1156,7 +1156,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String birthsInLastFiveDaysURLView;                                             //url string (view)
         private void getBirthsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
@@ -1178,7 +1178,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String deathsInLastFiveDaysURLView;                                             //url string (view)
         private void getDeathsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
@@ -1200,7 +1200,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         String prenatalDeathsInLastFiveDaysURLView;                                     //url string (view)
         private void getPrenatalDeathsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.

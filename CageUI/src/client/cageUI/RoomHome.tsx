@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {FC} from 'react';
-import { RoomHeader } from './components/RoomHeader';
-import { RoomLegend } from './components/RoomLegend';
-import { RoomDisplay } from './components/RoomDisplay';
+import { RoomHeader } from '../components/RoomHeader';
+import { RoomLegend } from '../components/RoomLegend';
+import { RoomDisplay } from '../components/RoomDisplay';
 import '../cageui.scss';
 import {Cage} from '../components/typings';
 
@@ -10,7 +10,6 @@ interface RoomProps {
     room: {
         name: string;
         cages: Cage[];
-        type: string;
     }
 }
 
@@ -23,7 +22,7 @@ export const RoomHome: FC<RoomProps> = (props) => {
             />
             <div className={"room-sub-container"}>
                 <RoomLegend />
-                <RoomDisplay type={room.type}/>
+                <RoomDisplay name={room.name}/>
             </div>
         </div>
     );

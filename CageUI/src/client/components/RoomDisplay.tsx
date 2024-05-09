@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { FC, useState } from 'react';
-import { Cage, Rack } from '../../components/typings';
-import {loadRoom} from '../../components/helpers';
+import { Cage, Rack } from './typings';
+import {loadRoom} from './helpers';
 import { RoomLayout } from './RoomLayout';
 
 interface DisplayProps {
-    type: string; // room type
+    name: string; // room type
 }
 export const RoomDisplay: FC<DisplayProps> = (props) => {
-    const {type} = props;
-    const [currRoom, setCurrRoom] = useState<Rack[]>(loadRoom(type));
+    const {name} = props;
+    const [currRoom, setCurrRoom] = useState<Rack[]>(loadRoom(name));
     // insert logic to find ro
     return (
         <div className={"room-display"}>

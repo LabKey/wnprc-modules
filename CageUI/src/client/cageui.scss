@@ -131,7 +131,7 @@
 .details-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
 
   height: auto;
   margin-inline: 10px
@@ -158,4 +158,63 @@
   background-color: darkgrey; /* Adjust color as needed */
   margin: 10px; /* Adjust margin as needed */
   border-radius: 5px; /* Adjust border radius for rounded corners */
+}
+
+.details-modifications {
+  padding-left: 10px;
+}
+
+.details-mod-header {
+  display: flex;
+  align-content: center;
+  align-items: baseline;
+}
+
+
+.details-add-mod {
+  float: right;
+  font-size: x-large;
+  padding: 5px;
+  border: none;
+  background: none;
+  margin-left: 20px;
+}
+
+.details-add-mod:hover,
+.details-add-mod:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.details-mod {
+
+}
+
+.details-modifications ul {
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.details-modifications li {
+  font-size: large;
+}
+
+.details-table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 20%;
+}
+
+.details-table thead{
+  font-size: large;
+}
+
+.details-table td, th {
+  text-align: left;
+  padding: 8px;
+}
+
+.details-table tr:nth-child(even) {
+  background-color: #dddddd;
 }

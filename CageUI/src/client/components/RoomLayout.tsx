@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { Cage, Rack } from './typings';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
-import { parseCage, parseRack } from './helpers';
+import { changeStyleProperty, parseCage, parseRack, parseSeparator } from './helpers';
 import { CageDetails } from './CageDetails';
 
 interface LayoutProps {
@@ -14,7 +14,9 @@ export const RoomLayout: FC<LayoutProps> = (props) => {
     const {room} = props;
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [clickedCage, setClickedCage] = useState<Cage>();
-    console.log(room);
+    const [clickedRack, setClickedRack] = useState<Rack>();
+
+    console.log("Room: ", room);
 
     const openDetails = () => {
         setIsOpen(true);
@@ -31,8 +33,10 @@ export const RoomLayout: FC<LayoutProps> = (props) => {
         const clickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = clickedRack.cages.find(cage => cage.id === cageId);
 
-        console.log(clickedRack, clickedCage);
+        console.log("Rack: ", clickedRack);
+        console.log("Cage: ", clickedCage);
         setClickedCage(clickedCage);
+        setClickedRack(clickedRack);
         openDetails();
 
     };
@@ -48,14 +52,30 @@ export const RoomLayout: FC<LayoutProps> = (props) => {
                     cages.forEach((cage) => {
                         cage.onclick = (event) => handleClick(event);
                     })
-                    console.log(cages);
+                }}
+                afterInjection={(svg) => {
+                    // Parses seperators styling them correctly
+                    for (let i = 0; i < room.length; i++) {
+                        const currSeparators = room[i].separators;
+                        const separators = svg.querySelector(`#seperators-${i + 1}`);
+                        const children = [...separators.children];
+                        children.forEach((childNode) => {
+                            const styles = currSeparators[parseSeparator(childNode.id)].styles;
+                            styles.forEach((style) => {
+                                changeStyleProperty(childNode, style.property, style.value);
+                            })
+                        })
+                    }
+
                 }}
             />
-            <CageDetails
-                isOpen={isOpen}
-                onClose={closeDetails}
-                cage={clickedCage}
-            />
+            {isOpen &&
+                <CageDetails
+                        isOpen={isOpen}
+                        onClose={closeDetails}
+                        cage={clickedCage}
+                />
+            }
         </div>
     );
 }

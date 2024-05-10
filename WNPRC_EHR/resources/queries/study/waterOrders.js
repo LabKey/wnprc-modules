@@ -108,7 +108,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.waterSource, row.objectid, row.project, this.extraContext);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {
-                var errorObject = JSON.parse(JSON.stringify(jsonArray[i]));
+                var errorObject = jsonArray[i];
                 EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
             }
         }

@@ -1787,12 +1787,12 @@ public class TriggerScriptHelper {
                     validation = false;
                     break;
                 }
-            case "Daily":
+            case "Daily - PM":
             //case "ˆDaily":
-                if(serverRecord.compareTo("Monday") == 0 || serverRecord.compareTo("Tuesday") == 0 ||
-                        serverRecord.compareTo("Wednesday") == 0 || serverRecord.compareTo("Thursday") == 0 ||
-                        serverRecord.compareTo("Friday") == 0 || serverRecord.compareTo("Saturday") == 0 ||
-                        serverRecord.compareTo("Sunday") == 0)  {
+                if(serverRecord.compareTo("Monday - PM") == 0 || serverRecord.compareTo("Tuesday - PM") == 0 ||
+                        serverRecord.compareTo("Wednesday - PM") == 0 || serverRecord.compareTo("Thursday - PM") == 0 ||
+                        serverRecord.compareTo("Friday - PM") == 0 || serverRecord.compareTo("Saturday - PM") == 0 ||
+                        serverRecord.compareTo("Sunday - PM") == 0)  {
                     validation = false;
                     break;
                 }

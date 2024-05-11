@@ -488,6 +488,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsCommand selectCmd = new SelectRowsCommand("ehr_billing", "chargeableItems");
         selectCmd.setColumns(Arrays.asList("rowId, name"));
         selectCmd.addFilter(new Filter("name", chargeName));
+        
         SelectRowsResponse response = selectCmd.execute(cn, getBillingContainerPath());
         return (Integer) response.getRows().get(0).get("rowId");
     }

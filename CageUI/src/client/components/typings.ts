@@ -59,7 +59,8 @@ interface SchematicRoomProps {
 
 
 export interface CageState {
-    divider: Modification | undefined;
+    leftDivider: Modification | undefined;
+    rightDivider: Modification | undefined;
     floor: Modification | undefined;
     extraMods: Modification[] | undefined;
 }
@@ -128,7 +129,11 @@ export const Modifications = {
     },
     noDivider: {
         name: "No Divider",
-        mod: ModTypes.NoDivider
+        mod: ModTypes.NoDivider,
+        styles: [{
+            property: "stroke",
+            value: "black"
+        }]
     },
     cTunnel: {
         name: "C-Tunnel",
@@ -136,7 +141,8 @@ export const Modifications = {
     },
     popTop: {
         name: "Pop Top",
-        mod: ModTypes.PopTop
+        mod: ModTypes.PopTop,
+        styles: []
     },
     bumpOut: {
         name: "Bump Out",
@@ -157,14 +163,37 @@ export const RoomSchematics = {
     ab165: Schematics["AB140-167.svg"],
     ab167: Schematics["AB140-167.svg"],
 }
-export const RackCombinors = {
+export const RackSeparators = {
     rackTwoOfTwo: {
-        topDivider: Modifications.solidDivider,
-        bottomDivider: Modifications.solidDivider,
+        topDivider: Modifications.noDivider,
+        bottomDivider: Modifications.noDivider,
         leftFloor: Modifications.standardFloor,
         rightFloor: Modifications.standardFloor
     },
     rackOneOfOne: {
         floor: Modifications.standardFloor
+    }
+}
+
+export const DefaultCageState = {
+    rackTwoOfTwo: {
+        posA: {
+            rightDivider: Modifications.noDivider,
+            floor: Modifications.standardFloor,
+            extraMods: [Modifications.popTop]
+        },
+        posB: {
+            leftDivider: Modifications.noDivider,
+            floor: Modifications.standardFloor,
+            extraMods: []
+        },
+        posC: {
+            rightDivider: Modifications.noDivider,
+            extraMods: []
+        },
+        posD: {
+            leftDivider: Modifications.noDivider,
+            extraMods: []
+        },
     }
 }

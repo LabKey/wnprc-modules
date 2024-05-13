@@ -1,4 +1,13 @@
-import { Cage, CageState, Modifications, Rack, RackCombinors, RackTypes, RoomSchematics } from './typings';
+import {
+    Cage,
+    CageState,
+    DefaultCageState,
+    Modifications,
+    Rack,
+    RackSeparators,
+    RackTypes,
+    RoomSchematics
+} from './typings';
 
 /*
 console.log(zeroPad(5, 2)); // "05"
@@ -32,18 +41,18 @@ export const loadRoom = (name: string): Rack[] => {
     let cageNum: number = 1;
 
     // generate default cages
-    const genCages = (cnt: number, rackType: RackTypes): Cage[] => {
+    const genCages = (cnt: number, rackType: RackTypes, separators): Cage[] => {
         const cages: Cage[] = [];
         for (let i = 0; i < cnt; i++) {
             let cageState: CageState;
             let position: string;
             if(rackType === RackTypes.TwoOfTwo){
-                cageState = {
-                    divider: Modifications.solidDivider,
-                    floor: Modifications.standardFloor,
-                    extraMods: [Modifications.meshFloor]
-                }
                 position =  i < 2 ? "top" : "bottom";
+                Object.keys(DefaultCageState.rackTwoOfTwo).forEach((cagePos, idx) => {
+                    if(idx === i){
+                        cageState = DefaultCageState.rackTwoOfTwo[cagePos];
+                    }
+                })
             }
             const tempCage: Cage = {
                 id: cageNum,
@@ -63,13 +72,13 @@ export const loadRoom = (name: string): Rack[] => {
             const rackType: RackTypes = RoomSchematics[name].rackTypes.length === 1 ? RoomSchematics[name].rackTypes[0] : RoomSchematics[name].rackTypes[rackId];
             let separators; // either a divider or floor used to combine/seperate cages
             if(rackType === RackTypes.TwoOfTwo) {
-                separators = RackCombinors.rackTwoOfTwo;
+                separators = RackSeparators.rackTwoOfTwo;
             }
             const tempRack: Rack = {
                 id: rackId,
                 type: rackType.toString(),
                 separators: separators,
-                cages: genCages(RoomSchematics[name].cageNum, rackType),
+                cages: genCages(RoomSchematics[name].cageNum, rackType, separators),
 
             }
             tempRoom.push(tempRack)
@@ -106,4 +115,23 @@ export const changeStyleProperty  = (element: Element, property: string, newValu
 export const parseSeparator = (input: string): string | null => {
     const match = input.match(/^([^-]+)/);
     return match ? match[0] : null;
+}
+
+
+const convertToTitleCase = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+export const convertLocationName = (dividerName: string) => {
+    // Special cases
+    if (dividerName.toLowerCase() === 'floor') {
+        return 'Floor';
+    } else if (dividerName.toLowerCase().includes('mods')) {
+        return 'Extra Mod';
+    }
+
+    // Default case
+    const words = dividerName.split(/(?=[A-Z])/);
+    const convertedWords = words.map((word) => convertToTitleCase(word));
+    return convertedWords.join(' ');
 }

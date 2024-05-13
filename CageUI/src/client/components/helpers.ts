@@ -135,3 +135,23 @@ export const convertLocationName = (dividerName: string) => {
     const convertedWords = words.map((word) => convertToTitleCase(word));
     return convertedWords.join(' ');
 }
+
+export const getModOptions = (key) => {
+    const dividerOptions= [];
+
+    const floorOptions = [];
+
+    const extraOptions = [];
+
+    Object.keys(Modifications).forEach((mod, idx) => {
+        if(mod.includes("Divider")){
+            dividerOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
+        }else if(mod.includes("Floor")) {
+            floorOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
+        }else {
+            extraOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
+        }
+    });
+
+    return key.toLowerCase().includes("divider") ? dividerOptions : key.toLowerCase().includes("floor") ? floorOptions : extraOptions;
+}

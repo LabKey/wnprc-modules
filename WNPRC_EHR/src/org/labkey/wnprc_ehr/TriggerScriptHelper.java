@@ -1771,67 +1771,36 @@ public class TriggerScriptHelper {
     }
 
     public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord){
-        boolean validation;
+        boolean validation = true;
 
-        if (serverRecord.compareTo(clientRecord) == 0){
+        if (clientRecord.compareTo(serverRecord) == 0){
             validation = false;
             return validation;
-        }
-        switch (clientRecord){
-            case "Daily - AM/PM":
-                if (serverRecord.compareTo("Daily - AM")==0){
-                    validation = false;
-                    break;
-                }
-                if (serverRecord.compareTo("Daily - PM")==0){
-                    validation = false;
-                    break;
-                }
-            case "Daily - PM":
-            //case "ˆDaily":
-                if(serverRecord.compareTo("Monday - PM") == 0 || serverRecord.compareTo("Tuesday - PM") == 0 ||
-                        serverRecord.compareTo("Wednesday - PM") == 0 || serverRecord.compareTo("Thursday - PM") == 0 ||
-                        serverRecord.compareTo("Friday - PM") == 0 || serverRecord.compareTo("Saturday - PM") == 0 ||
-                        serverRecord.compareTo("Sunday - PM") == 0)  {
-                    validation = false;
-                    break;
-                }
-
-            default:
-                if (clientRecord.matches("Daily.*")){
-                    if(serverRecord.compareTo("Monday") == 0 || serverRecord.compareTo("Tuesday") == 0 ||
-                            serverRecord.compareTo("Wednesday") == 0 || serverRecord.compareTo("Thursday") == 0 ||
-                            serverRecord.compareTo("Friday") == 0 || serverRecord.compareTo("Saturday") == 0 ||
-                            serverRecord.compareTo("Sunday") == 0)  {
-                        validation = false;
-                        break;
-                    }
-
-                }
-
-                validation = true;
-
-        }
-        if (validation)
-        {
-            switch (serverRecord)
-            {
-                case "Daily":
-                    if (clientRecord.compareTo("Monday") == 0 || clientRecord.compareTo("Tuesday") == 0 ||
-                            clientRecord.compareTo("Wednesday") == 0 || clientRecord.compareTo("Thursday") == 0 ||
-                            clientRecord.compareTo("Friday") == 0 || clientRecord.compareTo("Saturday") == 0 ||
-                            clientRecord.compareTo("Sunday") == 0)
-                    {
-                        validation = false;
-                        break;
-                    }
-
-                default:
-                    validation = true;
-
+        } else if (clientRecord.compareTo("Daily - AM")==0){
+            if (serverRecord.compareTo("Daily - Anytime")==0){
+                validation = false;
+                return validation;
+            }else if (serverRecord.compareTo("Daily - AM/PM")==0){
+                validation = false;
+                return validation;
             }
-        }
+        } else if (clientRecord.contains("PM")){
+            if (serverRecord.contains("PM")){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.compareTo("Daily - Anytime")==0){
+            if (serverRecord.contains("PM") || serverRecord.contains("AM")){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.compareTo("Daily - AM/PM")==0){
+            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime")==0){
+                validation = false;
+                return validation;
+            }
 
+        }
         return validation;
 
     }

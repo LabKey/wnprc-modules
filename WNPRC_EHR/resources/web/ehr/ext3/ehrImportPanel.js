@@ -924,6 +924,91 @@ EHR.ext.ImportPanel.Buttons = {
         scope: this
         }
     },
+    SUBMITBLOOD: function() { return {
+        text: 'Submit',
+        name: 'submitblood',
+        requiredQC: 'Completed',
+        targetQC: 'Completed',
+        errorThreshold: 'INFO',
+        successURL : LABKEY.ActionURL.getParameter('srcURL') || LABKEY.ActionURL.getParameter('returnUrl') || LABKEY.ActionURL.getParameter('returnURL') || LABKEY.ActionURL.buildURL("ehr", "dataEntry.view"),
+        disabled: true,
+        ref: 'submitBtn',
+        handler: function(o){
+            let bloodStore =  Ext.StoreMgr.get('study||blood||||');
+            let errorField = "quantity";
+            let errorToDisplay = EHR.Ext3Utils.getBloodLimitErrorMsg({
+                store: bloodStore,
+                errorField: errorField
+            });
+            let confirmMsg = 'You are about to finalize this form.  Do you want to do this?';
+
+            if (errorToDisplay != null) {
+                Ext.Msg.confirm('Warning', errorToDisplay + 'Are you sure you want to submit?', function(v){
+                    if(v === 'yes') {
+                        Ext.Msg.confirm('Finalize Form', confirmMsg, function (v) {
+                            if (v === 'yes') {
+                                this.onSubmit(o);
+                            }
+                        }, this);
+                    }
+                }, this);
+            } else {
+                Ext.Msg.confirm('Finalize Form', confirmMsg, function(v){
+                    if(v === 'yes') {
+                        this.onSubmit(o);
+                    }
+                }, this);
+
+            }
+
+        },
+        disableOn: 'WARN',
+        scope: this
+        }
+    },
+
+    REQUESTBLOOD: function() { return {
+        text: 'Request',
+        name: 'requestblood',
+        targetQC: 'Request: Pending',
+        requiredQC: 'Request: Pending',
+        errorThreshold: 'ERROR',
+        successURL : LABKEY.ActionURL.getParameter('srcURL') || LABKEY.ActionURL.getParameter('returnUrl') || LABKEY.ActionURL.getParameter('returnURL') || LABKEY.ActionURL.buildURL("ehr", "requestServices.view"),
+        disabled: true,
+        ref: 'requestBtn',
+        handler: function(o){
+            let bloodStore =  Ext.StoreMgr.get('study||blood||||')
+            let errorField = "quantity";
+            let errorToDisplay = EHR.Ext3Utils.getBloodLimitErrorMsg({
+                store: bloodStore,
+                errorField: errorField
+            })
+
+            let confirmMsg = 'You are about to finalize this form.  Do you want to do this?';
+
+            if (errorToDisplay != null){
+                Ext.Msg.confirm('Warning', errorToDisplay + 'Are you sure you want to submit?', function(v){
+                    if(v === 'yes') {
+                        Ext.Msg.confirm('Finalize Form', confirmMsg, function (v) {
+                            if (v === 'yes') {
+                                this.onSubmit(o);
+                            }
+                        }, this);
+                    }
+                }, this);
+            } else {
+                Ext.Msg.confirm('Finalize Form', confirmMsg, function(v){
+                    if(v === 'yes') {
+                        this.onSubmit(o);
+                    }
+                },this);
+
+            }
+        },
+        disableOn: 'WARN',
+        scope: this
+        }
+    },
     /**
      * Necrospy-specific button that will create/update a record (depending on whether one already exists) in either Deaths or Prenatal Deaths (depending on the ID prefix of the animal's name).
      */

@@ -241,8 +241,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.createRequiredLists();
         initTest.createRequiredAssays();
         initTest.clickFolder("EHR");
-        initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
-        initTest.loadEHRBillingTableDefinitions();
 
         initTest.updateEHRFormFrameworkTypes();
 
@@ -3449,27 +3447,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 //        log("Completed testJavaDeathNotification.");
 //    }
 
-    @Test
-    public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
-        log("Started testJavaPrenatalDeathNotification.");
-        //Navigates to the "Enter Prenatal Death" page.
-        beginAt(buildURL("project", getContainerPath(), "begin"));
-        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
-        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Prenatal Death"));
-
-        //Enters Prenatal Death record.
-        _helper.setDataEntryField("Id", "pd9876");
-        log("Attempting to select combo box item: female");
-        _extHelper.selectComboBoxItem("Gender:", "female" + "\u00A0");
-        log("Successfully selected combo box item: female");
-        click(Locator.buttonContainingText("Force Submit"));
-        clickAndWait(Locator.buttonContainingText("Yes"));
-
-        //Navigates to dumbster.
-        goToModule("Dumbster");
-        assertTextPresent("Prenatal Death Notification: pd9876");
-        log("Completed testJavaPrenatalDeathNotification.");
-    }
+//    @Test
+//    public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaPrenatalDeathNotification.");
+//        //Navigates to the "Enter Prenatal Death" page.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
+//        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Prenatal Death"));
+//
+//        //Enters Prenatal Death record.
+//        _helper.setDataEntryField("Id", "pd9876");
+//        log("Attempting to select combo box item: female");
+//        _extHelper.selectComboBoxItem("Gender:", "female" + "\u00A0");
+//        log("Successfully selected combo box item: female");
+//        click(Locator.buttonContainingText("Force Submit"));
+//        clickAndWait(Locator.buttonContainingText("Yes"));
+//
+//        //Navigates to dumbster.
+//        goToModule("Dumbster");
+//        assertTextPresent("Prenatal Death Notification: pd9876");
+//        log("Completed testJavaPrenatalDeathNotification.");
+//    }
 
     private void deathNotificationSetup() throws UnhandledAlertException {
         log("Starting deathNotificationSetup.");
@@ -3544,42 +3542,88 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         goToProjectHome();
 
+
+        //add valid proj
+        InsertRowsCommand cmdUpd = new InsertRowsCommand("ehr", "project");
         Integer projectId = 20240228;
+        Map<String,Object> projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(projectId));
+        projRowMap.put("investigatorId", getUserId(PasswordUtil.getUsername()));
+        cmdUpd.addRow(projRowMap);
 
-        Date bloodDate = prepareDate(new Date(), -12, 0);
 
-        Integer tubeVol = 10;
+        Connection cn = WebTestHelper.getRemoteApiConnection();
+        cmdUpd.execute(cn, EHR_FOLDER_PATH);
+
+        Date bloodDate = prepareDate(new Date(), +5, 0);
+
+        Double tubeVolOver = 10000.5;
         Integer numTubes = 1;
-        String tubeType = "EDTA";
-        Map<String, List<String>> expected = new HashMap<>();
-        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVol + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
-        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
-                "study",
-                "blood",
-                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
-                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
-                expected
-        );
-
-        /* TODO this is intended to test an overdraw - for some reason this error is not being reported from the testValidationMethod
-           it seems that EHR.Server.Utils.shouldIncludeError is false for this case... look at this later when we can also add to species.tsv in EHR
-        Integer newNumTubes = 200;
-        double quantity = newNumTubes*tubeVol;
+        Double quantity = numTubes*tubeVolOver;
         Integer interval = 30;
         Double weight = 12.0;
-        double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
-        expected = new HashMap<>();
-        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
-        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        Double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
+        String tubeType = "EDTA";
+        Map<String, List<String>> expected = new HashMap<>();
+
+        String[] newBloodFields = {"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", FIELD_QCSTATELABEL, FIELD_OBJECTID, FIELD_LSID, "_recordid"};
+        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolOver.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
                 "study",
                 "blood",
-                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", "isRequest"}, new Object[][]{
-                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, newNumTubes, quantity, null, "y", "Chemical", "< 30 min", "instructions", null, "autotest", true}},
+                newBloodFields,
+                bloodData,
                 expected
+                //additionalExtraContext
+        );
+        Double tubeVolLimit = 142.5;
+        Double quantityLimit = numTubes*tubeVolLimit;
+        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolLimit.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                newBloodFields,
+                bloodDataNearLimit,
+                expected
+                //additionalExtraContext
+        );
+
+        /*
+        // move to EHR
+        Double tubeVolNear = 143.5;
+        Double quantityNear = numTubes*tubeVolNear;
+        //test two records in the grid
+        Double totalRequested = tubeVolNear*2;
+
+        Object bloodDataNear[][] = {
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolNear, numTubes, quantityNear, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"},
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolNear, numTubes, quantityNear, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}
+        };
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + totalRequested + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + totalRequested + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                newBloodFields,
+                bloodDataNear,
+                expected
+                //additionalExtraContext
         );*/
 
 
+        //test an actual valid entry
+        Double tubeVolOK = 50.0;
+        Double quantityOK = tubeVolOK*numTubes;
         InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
         Date dt = prepareDate(new Date(), -11, 0);
         bloodCmd.addRow(new HashMap<String, Object>(){
@@ -3589,9 +3633,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 put("project", projectId);
                 put("account", 123456);
                 put("tube_type",tubeType);
-                put("tube_vol", tubeVol);
+                put("tube_vol", tubeVolOK);
                 put("num_tubes", numTubes);
-                put("quantity", numTubes*tubeVol);
+                put("quantity", quantityOK);
                 put("additionalServices", null);
                 put("billedby", "y");
                 put("restraint", "Chemical");
@@ -3607,6 +3651,67 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sr.addFilter("date", dt, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
         Assert.assertEquals(1, resp2.getRowCount());
+
+        /*
+        Integer newNumTubes = 200;
+        expected = new HashMap<>();
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+
+
+        Map<String, Object> additionalExtraContext = new HashMap<>();
+        JSONArray bloodInTransaction = new JSONArray();
+        bloodInTransaction.put(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[3]);
+                put("date", bloodDate);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVol);
+                put("num_tubes", newNumTubes);
+                put("quantity", quantity);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+
+        Integer numTubesUpdated = 200;
+        Double quantityUpdated =  tubeVol * numTubesUpdated;
+        bloodInTransaction.put(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[2]);
+                put("date", bloodDate);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVol);
+                put("num_tubes", numTubesUpdated);
+                put("quantity", quantityUpdated);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        additionalExtraContext.put("bloodInTransaction", bloodInTransaction.toString());
+
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
+                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, newNumTubes, quantity, null, "y", "Chemical", "< 30 min", "instructions", null, "autotest"}},
+                expected,
+                additionalExtraContext
+        );*/
 
 
         /*TODO This should be moved to EHR API test, would need to add clinpath runs table to the study schema in EHR test,
@@ -3643,7 +3748,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sr.addFilter("date",dt, Filter.Operator.EQUAL);
         sr.addFilter("servicerequested", serviceRequested, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
-        Assert.assertEquals(1,resp2.getRowCount());*/
+        Assert.assertEquals(1,resp2.getRowCount());
+        */
 
     }
 

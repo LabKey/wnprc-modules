@@ -594,7 +594,7 @@
             }
         });
         $(document).ready(function(){
-            const animalInToday = [];
+            const calendarDates = new Map();
             const currentTime = new Date().setHours(0,0,0,0);
 
             calendar = new FullCalendar.Calendar(calendarEl, {
@@ -627,8 +627,12 @@
 
                                     successCallback(
                                         events.map(function (row) {
-                                        if (moment(row.date).isSame(currentTime) && !animalInToday.includes(row.Id)){
-                                            animalInToday.push(row.Id);
+                                        if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
+                                            var animalIds = [];
+                                            animalIds.push(row.Id);
+                                            calendarDates.set(row.date,animalIds);
+                                        }else {
+                                            calendarDates.get(row.date).push(row.Id);
                                         }
                                         var volume;
                                         if (row.volume != null) {
@@ -668,7 +672,7 @@
                                 }).then(function(data){
                                     console.log("promise returned schedule animals");
                                     if (!loadWaterTotalOnce){
-                                        loadWaterTotal($animalId, animalInToday, calendar, currentTime);
+                                        loadWaterTotal($animalId, calendarDates, calendar, currentTime);
                                         loadWaterTotalOnce = true;
                                     }
 
@@ -685,9 +689,12 @@
                                     var events = data.rows;
 
                                     successCallback(events.map(function (row) {
-                                        if (moment(row.date).isSame(currentTime) && !animalInToday.includes(row.Id)){
-                                            console.log("adding animal to array "+ row.Id);
-                                            animalInToday.push(row.Id);
+                                        if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
+                                            var animalIds = [];
+                                            animalIds.push(row.Id);
+                                            calendarDates.set(row.date, animalIds);
+                                        }else{
+                                            calendarDates.get(row.date).push(row.Id);
                                         }
                                         var volume;
                                         if (row.volume != null) {
@@ -720,6 +727,13 @@
                                         return eventObj;
 
                                     }))
+                                }).then(function (data){
+                                    debugger;
+                                    if(!loadWaterTotalOnce){
+                                        loadWaterTotal($animalId,calendarDates,calendar,currentTime);
+                                        loadWaterTotalOnce=true;
+                                    }
+
                                 })
 
                             }
@@ -1636,7 +1650,7 @@
             return row.objectIdCoalesced
         }
     }
-    function loadWaterTotal(animalId, animalInToday, calendar, currentTime){
+    function loadWaterTotal(animalId, calendarDates, calendar, currentTime){
         calendar.addEventSource(
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
@@ -1706,7 +1720,8 @@
                                             else{
                                                 eventObj.color = '#EE2020'
                                             }
-                                            if (animalInToday.includes(row.Id) && moment(row.date).isSameOrAfter(currentTime) ){
+                                            debugger;
+                                            if (calendarDates.has(row.date) && calendarDates.get(row.date).includes(row.Id) ){
                                                 eventObj.display = 'none';
                                             }else{
                                                 eventObj.display = 'auto';
@@ -1723,16 +1738,19 @@
                             })
 
                         }else{
+                            let momentStarDate = fetchInfo.start.format('Y-m-d');
+                            let momentEndDate = fetchInfo.end.format('Y-m-d');
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                                 "date~gte": fetchInfo.start.format('Y-m-d'),
                                 "date~lte": fetchInfo.end.format('Y-m-d'),
+                                "parameters": {STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate},
                                 "Id~in": animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(
                                         events.map(function (row) {
-                                            if (!animalInToday.includes(row.Id)){
+
                                                 let parsedTotalWater = 0;
                                                 let eventTitle = row.Id;
                                                 row.animalStatus=row['Id/Demographics/calculated_status'];
@@ -1784,7 +1802,7 @@
                                                 else{
                                                     eventObj.color = '#EE2020'
                                                 }
-                                                if (animalInToday.includes(row.Id) && moment(row.date).isSameOrAfter(currentTime) ){
+                                                if (calendarDates.has(row.date) && calendarDates.get(row.date).includes(row.Id)){
                                                     eventObj.display = 'none';
                                                 }else{
                                                     eventObj.display = 'auto';
@@ -1792,7 +1810,7 @@
                                                 console.log("event from waterTotal");
                                                 return eventObj;
 
-                                            }
+
                                         })
                                 );
                                 failureCallback((function (data){

@@ -1799,10 +1799,8 @@ public class TriggerScriptHelper {
                 validation = false;
                 return validation;
             }
-
         }
         return validation;
-
     }
 
     public static class WaterInfo

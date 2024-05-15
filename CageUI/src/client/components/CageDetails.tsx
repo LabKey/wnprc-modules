@@ -2,17 +2,17 @@ import * as React from 'react';
 import { useState, FC, useRef, useEffect } from 'react';
 import { Cage } from './typings';
 import { CageDetailsModifications } from './CageDetailsModifications';
+import { useCurrentContext } from './ContextManager';
 
 interface CageDetailsProps {
     isOpen: boolean;
     onClose: () => any;
-    cage: Cage;
 }
 export const CageDetails: FC<CageDetailsProps> = (props) => {
-    const { isOpen, onClose, cage } = props;
+    const { isOpen, onClose } = props;
     const modalRef = useRef(null);
-
-    if(!cage) return;
+    const {clickedCage} = useCurrentContext();
+    if(!clickedCage) return;
 
     // close modal if user clicks outside its bounds
     useEffect(() => {
@@ -37,7 +37,7 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
         <div className="details-overlay">
             <div className="details-content" ref={modalRef}>
                 <div className={'details-header'}>
-                    <h1>Cage #{cage.name}</h1>
+                    <h1>Cage #{clickedCage.name}</h1>
                     <button className="details-close-button" onClick={onClose}>
                         &times;
                     </button>
@@ -47,9 +47,7 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                     <h4>Status: OK</h4>
                 </div>
                 <div className={"details-divider"} />
-                <CageDetailsModifications
-                    cage={cage}
-                />
+                <CageDetailsModifications />
             </div>
         </div>
     );

@@ -1,23 +1,18 @@
-
+export type CagePosition = "top" | "bottom";
+export type CageType = "cage" | "pen";
 export interface Cage {
     id: number
     name: string;
     cageState: CageState;
     position: string;
+    type: CageType
 }
 
-interface RackTwoOfTwo {
-    topDivider: Modification,
-    bottomDivider: Modification,
-    leftFloor: Modification,
-    rightFloor: Modification
-}
 
 export interface Rack {
     id: number;
     type: string;
     cages: Cage[];
-    separators: RackTwoOfTwo; //TODO add additional rack interfaces
 }
 export enum RackTypes {
     OneOfOne,
@@ -28,6 +23,7 @@ export enum RackTypes {
 export enum ModTypes {
     StandardFloor,
     MeshFloor,
+    MeshFloorX2,
     NoFloor,
     SolidDivider,
     PCDivider, // protected contact
@@ -57,6 +53,16 @@ interface SchematicRoomProps {
     }
 }
 
+export type SeparatorType = "divider" | "floor";
+
+export type SeparatorPosition = `F${number}` | `T${number}` | `B${number}`;
+
+export interface SeparatorMod {
+    type: SeparatorType,
+    mod: Modification,
+    position: SeparatorPosition
+}
+export type Separators = SeparatorMod[];
 
 export interface CageState {
     leftDivider: Modification | undefined;
@@ -64,6 +70,7 @@ export interface CageState {
     floor: Modification | undefined;
     extraMods: Modification[] | undefined;
 }
+
 
 const Schematics: SchematicRoomProps = {
     "AB140-167.svg": {
@@ -97,6 +104,20 @@ export const Modifications = {
             }
         ]
     },
+    meshFloorX2: { // TODO figure out styling for this double mesh
+        name: "Mesh Floor x2",
+        mod: ModTypes.MeshFloorX2,
+        styles: [
+            {
+                property: "stroke",
+                value: "black"
+            },
+            {
+                property: "stroke-dasharray",
+                value: "10"
+            }
+        ]
+    },
     noFloor: {
         name: "No Floor",
         mod: ModTypes.NoFloor,
@@ -117,27 +138,31 @@ export const Modifications = {
     },
     pcDivider: {
         name: "Protected Contact Divider",
-        mod: ModTypes.PCDivider
+        mod: ModTypes.PCDivider,
+        styles: []
     },
     vcDivider: {
         name: "Visual Contact Divider",
-        mod: ModTypes.VCDivider
+        mod: ModTypes.VCDivider,
+        styles: []
     },
     privacyDivider: {
         name: "Privacy Divider",
-        mod: ModTypes.PrivacyDivider
+        mod: ModTypes.PrivacyDivider,
+        styles: []
     },
     noDivider: {
         name: "No Divider",
         mod: ModTypes.NoDivider,
         styles: [{
             property: "stroke",
-            value: "black"
+            value: "none"
         }]
     },
     cTunnel: {
         name: "C-Tunnel",
-        mod: ModTypes.CTunnel
+        mod: ModTypes.CTunnel,
+        styles: []
     },
     popTop: {
         name: "Pop Top",
@@ -146,11 +171,13 @@ export const Modifications = {
     },
     bumpOut: {
         name: "Bump Out",
-        mod: ModTypes.BumpOut
+        mod: ModTypes.BumpOut,
+        styles: []
     },
     playCage: {
         name: "Play Cage",
-        mod: ModTypes.PlayCage
+        mod: ModTypes.PlayCage,
+        styles: []
     },
 }
 
@@ -165,34 +192,45 @@ export const RoomSchematics = {
 }
 export const RackSeparators = {
     rackTwoOfTwo: {
-        topDivider: Modifications.noDivider,
-        bottomDivider: Modifications.noDivider,
+        topDivider: Modifications.solidDivider,
+        bottomDivider: Modifications.solidDivider,
         leftFloor: Modifications.standardFloor,
         rightFloor: Modifications.standardFloor
     },
     rackOneOfOne: {
         floor: Modifications.standardFloor
+    },
+    pen: {
+
+    },
+    penRack: {
+
+    },
+    rackHorizontal: {
+        topDivider: Modifications.solidDivider,
+        bottomDivider: Modifications.solidDivider,
+        floor: Modifications.standardFloor,
     }
 }
 
 export const DefaultCageState = {
     rackTwoOfTwo: {
         posA: {
-            rightDivider: Modifications.noDivider,
-            floor: Modifications.standardFloor,
-            extraMods: [Modifications.popTop]
+            rightDivider: {modData: RackSeparators.rackTwoOfTwo.topDivider, affCage: []},
+            leftFloor: {modData: RackSeparators.rackTwoOfTwo.leftFloor, affCage: []},
+            extraMods: [{modData: Modifications.popTop, affCage: ["#0001", "#0002"]}]
         },
         posB: {
-            leftDivider: Modifications.noDivider,
-            floor: Modifications.standardFloor,
+            leftDivider: {modData: RackSeparators.rackTwoOfTwo.topDivider, affCage: []},
+            rightFloor: {modData: RackSeparators.rackTwoOfTwo.rightFloor, affCage: []},
             extraMods: []
         },
         posC: {
-            rightDivider: Modifications.noDivider,
+            rightDivider: {modData: RackSeparators.rackTwoOfTwo.bottomDivider, affCage: []},
             extraMods: []
         },
         posD: {
-            leftDivider: Modifications.noDivider,
+            leftDivider: {modData: RackSeparators.rackTwoOfTwo.bottomDivider, affCage: []},
             extraMods: []
         },
     }

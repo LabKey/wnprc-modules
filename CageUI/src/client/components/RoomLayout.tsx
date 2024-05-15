@@ -3,20 +3,13 @@ import { FC, useRef, useState } from 'react';
 import { Cage, Rack } from './typings';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
-import { changeStyleProperty, parseCage, parseRack, parseSeparator } from './helpers';
+import { changeStyleProperty, getRackSeparators, parseCage, parseRack, parseSeparator } from './helpers';
 import { CageDetails } from './CageDetails';
+import { useCurrentContext } from './ContextManager';
 
-interface LayoutProps {
-    room: Rack[]
-}
-
-export const RoomLayout: FC<LayoutProps> = (props) => {
-    const {room} = props;
+export const RoomLayout: FC = () => {
+    const {room, setRoom, setClickedCage, setClickedRack} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [clickedCage, setClickedCage] = useState<Cage>();
-    const [clickedRack, setClickedRack] = useState<Rack>();
-
-    console.log("Room: ", room);
 
     const openDetails = () => {
         setIsOpen(true);
@@ -30,11 +23,12 @@ export const RoomLayout: FC<LayoutProps> = (props) => {
         const cage = event.target;
         const rackId: number = parseInt(parseRack(cage.parentElement.id));
         const cageId: number = parseInt(parseCage(cage.id));
+        console.log("New Room: ", room);
         const clickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = clickedRack.cages.find(cage => cage.id === cageId);
 
-        console.log("Rack: ", clickedRack);
-        console.log("Cage: ", clickedCage);
+        console.log("New Rack: ", clickedRack);
+        console.log("New Cage: ", clickedCage);
         setClickedCage(clickedCage);
         setClickedRack(clickedRack);
         openDetails();
@@ -56,11 +50,11 @@ export const RoomLayout: FC<LayoutProps> = (props) => {
                 afterInjection={(svg) => {
                     // Parses seperators styling them correctly
                     for (let i = 0; i < room.length; i++) {
-                        const currSeparators = room[i].separators;
+                        const currSeparators = getRackSeparators(room[i]);
                         const separators = svg.querySelector(`#seperators-${i + 1}`);
                         const children = [...separators.children];
                         children.forEach((childNode) => {
-                            const styles = currSeparators[parseSeparator(childNode.id)].styles;
+                            const styles = currSeparators.find(sep => sep.position === parseSeparator(childNode.id)).mod.styles;
                             styles.forEach((style) => {
                                 changeStyleProperty(childNode, style.property, style.value);
                             })
@@ -73,7 +67,6 @@ export const RoomLayout: FC<LayoutProps> = (props) => {
                 <CageDetails
                         isOpen={isOpen}
                         onClose={closeDetails}
-                        cage={clickedCage}
                 />
             }
         </div>

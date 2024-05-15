@@ -1,12 +1,12 @@
 import {
-    Cage,
-    CageState,
-    DefaultCageState,
+    Cage, CagePosition,
+    CageState, CageType,
+    DefaultCageState, Modification,
     Modifications,
     Rack,
     RackSeparators,
     RackTypes,
-    RoomSchematics
+    RoomSchematics, SeparatorMod, SeparatorPosition, Separators, SeparatorType
 } from './typings';
 
 /*
@@ -41,13 +41,15 @@ export const loadRoom = (name: string): Rack[] => {
     let cageNum: number = 1;
 
     // generate default cages
-    const genCages = (cnt: number, rackType: RackTypes, separators): Cage[] => {
+    const genCages = (cnt: number, rackType: RackTypes): Cage[] => {
         const cages: Cage[] = [];
         for (let i = 0; i < cnt; i++) {
             let cageState: CageState;
-            let position: string;
+            let position: CagePosition;
+            let type: CageType;
             if(rackType === RackTypes.TwoOfTwo){
                 position =  i < 2 ? "top" : "bottom";
+                type = 'cage';
                 Object.keys(DefaultCageState.rackTwoOfTwo).forEach((cagePos, idx) => {
                     if(idx === i){
                         cageState = DefaultCageState.rackTwoOfTwo[cagePos];
@@ -58,7 +60,8 @@ export const loadRoom = (name: string): Rack[] => {
                 id: cageNum,
                 name: zeroPad(cageNum, 4),
                 cageState: cageState,
-                position: position
+                position: position,
+                type: type
             }
             cageNum++;
             cages.push(tempCage);
@@ -70,15 +73,11 @@ export const loadRoom = (name: string): Rack[] => {
         for (let i = 0; i < RoomSchematics[name].rackNum; i++) {
             const rackId = i + 1;
             const rackType: RackTypes = RoomSchematics[name].rackTypes.length === 1 ? RoomSchematics[name].rackTypes[0] : RoomSchematics[name].rackTypes[rackId];
-            let separators; // either a divider or floor used to combine/seperate cages
-            if(rackType === RackTypes.TwoOfTwo) {
-                separators = RackSeparators.rackTwoOfTwo;
-            }
+
             const tempRack: Rack = {
                 id: rackId,
                 type: rackType.toString(),
-                separators: separators,
-                cages: genCages(RoomSchematics[name].cageNum, rackType, separators),
+                cages: genCages(RoomSchematics[name].cageNum, rackType),
 
             }
             tempRoom.push(tempRack)
@@ -154,4 +153,104 @@ export const getModOptions = (key) => {
     });
 
     return key.toLowerCase().includes("divider") ? dividerOptions : key.toLowerCase().includes("floor") ? floorOptions : extraOptions;
+}
+
+const getCageDividers = (totalBoxes, position, boxId, direction) => {
+    const boxesPerRow = totalBoxes / 2;
+    const groupBoxId = (boxId - 1) % totalBoxes + 1; // Calculate the ID within the current group
+
+    // Check if the inputs are valid
+    if (groupBoxId < 1 || groupBoxId > totalBoxes) {
+        throw new Error('Invalid box ID');
+    }
+    if (position !== "top" && position !== "bottom") {
+        throw new Error('Invalid position');
+    }
+    if (direction !== "left" && direction !== "right") {
+        throw new Error('Invalid direction');
+    }
+
+    const isTop = position === "top";
+    const isBottom = position === "bottom";
+
+    let line = null;
+
+    // Determine the line for the top boxes
+    if (isTop && groupBoxId <= boxesPerRow) {
+        if (direction === "left" && groupBoxId > 1) {
+            line = groupBoxId - 1;
+        } else if (direction === "right" && groupBoxId < boxesPerRow) {
+            line = groupBoxId;
+        }
+    }
+
+    // Determine the line for the bottom boxes
+    if (isBottom && groupBoxId > boxesPerRow) {
+        if (direction === "left" && (groupBoxId - boxesPerRow) > 1) {
+            line = groupBoxId - boxesPerRow - 1;
+        } else if (direction === "right" && (groupBoxId - boxesPerRow) < boxesPerRow) {
+            line = groupBoxId - boxesPerRow;
+        }
+    }
+
+    return line;
+}
+
+const removeDuplicatesByPosition = (arr) => {
+    const uniquePositions = new Map();
+
+    arr.forEach(item => {
+        if (!uniquePositions.has(item.position)) {
+            uniquePositions.set(item.position, item);
+        }
+    });
+
+    return Array.from(uniquePositions.values());
+}
+
+export const getRackSeparators = (rack: Rack): Separators => {
+    const separators: Separators = [];
+    for (const cage of rack.cages) {
+        for (const cageSep in cage.cageState) {
+            if(cageSep === "extraMods") continue;
+            let newSep: SeparatorMod;
+            let newType: SeparatorType;
+            let newPos: SeparatorPosition;
+            let newMod: Modification
+
+            if(cageSep.toLowerCase().includes("floor")) { // floor
+                const floorId = (cage.id - 1) % rack.cages.length + 1;
+                newType = "floor";
+                newPos = `F${floorId}` as `F${number}`;
+                newMod = cage.cageState[cageSep].modData;
+
+            }else if(cageSep.toLowerCase().includes("right")) { // right divider
+                const posId = getCageDividers(rack.cages.length, cage.position, cage.id, "right");
+                newType = "divider";
+                if(cage.position === "top") {
+                    newPos = `T${posId}` as `T${number}`;
+                }else{
+                    newPos = `B${posId}` as `T${number}`;
+                }
+                newMod = cage.cageState[cageSep].modData;
+            }else { // left divider
+                const posId = getCageDividers(rack.cages.length, cage.position, cage.id, "left");
+                newType = "divider";
+                if(cage.position === "top") {
+                    newPos = `T${posId}` as `T${number}`;
+                }else{
+                    newPos = `B${posId}` as `T${number}`;
+                }
+                newMod = cage.cageState[cageSep].modData;
+            }
+
+            newSep = {
+                type: newType,
+                mod: newMod,
+                position: newPos
+            }
+            separators.push(newSep);
+        }
+    }
+    return(removeDuplicatesByPosition(separators));
 }

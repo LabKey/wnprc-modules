@@ -7,6 +7,7 @@
         <column name="description"/>
         <column name="genCredits"/>
         <column name="groupName"/>
+        <column name="chargeId/isAutomatic"/>
     </columns>
     <sorts>
         <sort column="endDate" descending="true" />

@@ -45,8 +45,13 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
             {
                 customizeTierRates((AbstractTableInfo) table);
             }
+            else if (matches(table, "ehr_billing", "chargeableItems"))
+            {
+                customizeChargeableItems((AbstractTableInfo) table);
+            }
         }
     }
+
 
     private SQLFragment getIsActiveSql(AbstractTableInfo ti)
     {
@@ -59,6 +64,30 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
                 " WHEN (CAST(" + ExprColumn.STR_TABLE_ALIAS + ".endDate AS DATE) >= {fn curdate()}) THEN " + ti.getSqlDialect().getBooleanTRUE() + "\n" +
                 " ELSE " + ti.getSqlDialect().getBooleanFALSE() + "\n" +
                 " END)");
+    }
+
+    private void customizeChargeableItems(AbstractTableInfo ti)
+    {
+        String name = "isAutomatic";
+        if (ti.getColumn(name) == null)
+        {
+            String theQuery = "( " +
+                    "(SELECT " +
+                    "(CASE WHEN COUNT(*) = 0 " +
+                    " THEN '' " +
+                    " ELSE 'Yes'" +
+                    " END) as isAutomatic" +
+                    " FROM ehr_billing.procedureQueryChargeIdAssoc p " +
+                    "WHERE p.chargeid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+            ExprColumn col = new ExprColumn(ti, name, sql, JdbcType.VARCHAR);
+            col.setLabel("Automatically Billed Procedure?");
+            col.setUserEditable(false);
+            ti.addColumn(col);
+        }
+
     }
 
     private void customizeTierRates(AbstractTableInfo ti)

@@ -1770,7 +1770,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "unitCost",
                 "startDate",
                 "endDate",
-                "genCredits"
+                "genCredits",
+                "chargeId/isAutomatic"
         );
 
         checkColumns(linkText, expectedColumns);
@@ -1787,7 +1788,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "comment",
                 "active",
                 "startDate",
-                "endDate"
+                "endDate",
+                "isAutomatic"
         );
 
         checkColumns(linkText, expectedColumns);

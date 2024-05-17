@@ -1767,6 +1767,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         List<String> expectedColumns = Arrays.asList(
                 "chargeId",
+                "chargeId/departmentCode",
                 "unitCost",
                 "startDate",
                 "endDate",

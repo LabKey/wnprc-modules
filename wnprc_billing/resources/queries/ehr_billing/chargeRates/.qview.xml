@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="chargeId"/>
+        <column name="chargeId/departmentCode"/>
         <column name="unitCost"/>
         <column name="startDate"/>
         <column name="endDate"/>

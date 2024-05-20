@@ -1,7 +1,5 @@
 package org.labkey.wnprc_billing.domain;
 
-import org.apache.commons.net.ntp.TimeStamp;
-
 import java.util.Date;
 
 public class InvoicedItem
@@ -16,7 +14,6 @@ public class InvoicedItem
     Double _unitCost;
     Double _totalCost;
     Date _date;
-    TimeStamp _invoiceDate;
     private String _category;
 
     public int getRowId()
@@ -107,16 +104,6 @@ public class InvoicedItem
     public void setDate(Date date)
     {
         _date = date;
-    }
-
-    public TimeStamp getInvoiceDate()
-    {
-        return _invoiceDate;
-    }
-
-    public void setInvoiceDate(TimeStamp invoiceDate)
-    {
-        _invoiceDate = invoiceDate;
     }
 
     public String getCategory()

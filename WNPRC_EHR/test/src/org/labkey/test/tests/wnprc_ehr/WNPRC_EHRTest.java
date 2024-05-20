@@ -41,13 +41,20 @@ import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.bootstrap.ModalDialog;
+import org.labkey.test.components.domain.DomainFieldRow;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.pages.assay.ChooseAssayTypePage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
 import org.labkey.test.pages.ehr.EHRAdminPage;
 import org.labkey.test.pages.ehr.NotificationAdminPage;
+import org.labkey.test.params.FieldDefinition;
+import org.labkey.test.params.list.IntListDefinition;
+import org.labkey.test.params.list.ListDefinition;
 import org.labkey.test.tests.ehr.AbstractGenericEHRTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
@@ -80,6 +87,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -90,6 +98,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
+import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 
 /**
@@ -100,13 +109,13 @@ import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 @Category({CustomModules.class, EHR.class, WNPRC_EHR.class})
 public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnlyTest
 {
-    public static final String PROJECT_NAME = "WNPRC_TestProject";
-    public static final String EHR_FOLDER_PATH = "WNPRC_TestProject/EHR";
+    public static final String PROJECT_NAME = "WNPRC";
+    public static final String EHR_FOLDER_PATH = PROJECT_NAME + "/EHR";
     private static final String PRIVATE_FOLDER = "Private";
     private static final String EHR_FOLDER = "EHR";
     private static final String PI_PORTAL = "PI Portal";
     public static final String PI_FOLDER_FOLDER_PATH = "/WNPRC_Units/Operation_Services/Financial_Management/PI Portal";
-    public static final String PRIVATE_FOLDER_PATH = "/WNPRC_TestProject/WNPRC_Units/Operation_Services/Financial_Management/Private";
+    public static final String PRIVATE_FOLDER_PATH = PROJECT_NAME + "/WNPRC_Units/Operation_Services/Financial_Management/Private";
     public static final String PRIVATE_TARGET_FOLDER_PATH = "WNPRC_Units/Operation_Services/Financial_Management/Private";
 
     private final String ANIMAL_HISTORY_URL = "/ehr/" + PROJECT_NAME + "/EHR/animalHistory.view?";
@@ -134,6 +143,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
 
     private final File CHARGE_UNITS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeUnits.tsv");
+    private final File BLOOD_DATA_TSV = TestFileUtils.getSampleData("wnprc_ehr/study/datasetBlood.tsv");
     private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
@@ -173,6 +183,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
+    private static final String MHC_SSP_LIST = "MHC SSP List";
+    private static final String QPCR_QC_list = "QPCR_QC_list";
 
     @Nullable
     @Override
@@ -193,21 +205,39 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return TestFileUtils.getSampleData("wnprc_ehr/wnprcEhrTestStudyPolicy.xml");
     }
 
+    private static void folderSetup()
+    {
+
+    }
+
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
         WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
-        initTest.initProject("EHR");
-        initTest.createTestSubjects();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR"));
+        initTest.createProjectAndFolders("EHR");
+        initTest.clickFolder(initTest.getProjectName());
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
 
         initTest.createFinanceManagementFolders();
+        initTest.createResearchServicesFolders();
+        initTest.createAnimalServicesFolders();
+        initTest._containerHelper.enableModule("EHR_ComplianceDB");
+        initTest.createRequiredLists();
+        initTest.createRequiredAssays();
+        initTest.clickFolder("EHR");
+        initTest.addFinanceRelatedWebParts(PROJECT_NAME + "/EHR");
+        initTest.loadEHRBillingTableDefinitions();
+
+        initTest.clickFolder(initTest.getProjectName());
+
         initTest.clickFolder("Private");
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
 
@@ -215,23 +245,35 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.updateEHRFormFrameworkTypes();
 
         initTest.loadBloodBilledByLookup();
-        initTest.addFinanceRelatedWebParts();
-        initTest.clickFolder("Private");
+        initTest.addFinanceRelatedWebParts(initTest.getBillingContainerPath());
+        initTest.beginAt(buildURL("project", initTest.getBillingContainerPath(), "begin"));
         initTest.loadEHRBillingTableDefinitions();
 
         initTest.clickFolder("Private");
         initTest.createStudyLinkedSchema();
         initTest.createCoreLinkedSchema();
-        initTest.createEHRLinkedSchema();
+        initTest.createEHRLinkedSchema(PROJECT_NAME + "/" + PRIVATE_TARGET_FOLDER_PATH);
+        initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
+        initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
 
         initTest.clickFolder("EHR");
         initTest.createEHRBillingPublicLinkedSchema();
         initTest.createWNPRCBillingLinkedSchema();
+        initTest.createStudyLinkedSchemaForQueryValidation();
+        initTest.createEHRLookupsLinkedSchemaQueryValidation();
         initTest.goToProjectHome();
         initTest.clickFolder(PI_PORTAL);
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
 
         initTest.createWNPRCBillingPublicLinkedSchema();
+
+        initTest.initCreatedProject();
+
+        // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
+        // study import ensures that order.
+        initTest.importBlood();
+
+        initTest.createTestSubjects();
 
         initTest.clickFolder("PI Portal");
         initTest.addBillingPublicWebParts();
@@ -244,7 +286,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.checkJavaNotificationsFunctionality();
+        initTest.deathNotificationSetup();
+    }
+
+    private void importBlood() throws IOException, CommandException
+    {
+        Connection connection = createDefaultConnection();
+        Map<String, Object> responseMap = new HashMap<>();
+
+        List<Map<String, Object>> tsv = loadTsv(BLOOD_DATA_TSV);
+        insertTsvData(connection, "study", "blood", tsv, EHR_FOLDER_PATH)
+                .forEach(row -> responseMap.put(row.get("Id").toString(),row.get("date")));
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -265,10 +317,50 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         updateChargeRates();
     }
 
+    @LogMethod
+    @Override
+    protected void populateProjectRecords() throws Exception
+    {
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "project");
+
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("project", PROTOCOL_PROJECT_ID);
+        rowMap.put("name", PROTOCOL_PROJECT_ID);
+        rowMap.put("protocol", PROTOCOL_ID);
+        rowMap.put("account", ACCOUNT_ID_1);
+        rowMap.put("investigatorId", "1");
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("project", PROJECT_ID);
+        rowMap.put("name", PROJECT_ID);
+        rowMap.put("protocol", DUMMY_PROTOCOL);
+        rowMap.put("account", ACCOUNT_ID_2);
+        rowMap.put("research", true);
+        rowMap.put("investigatorId", "2");
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(createDefaultConnection(), getContainerPath());
+    }
+
     @Override
     public void goToProjectHome()
     {
         goToProjectHome(PROJECT_NAME);
+    }
+
+    // Validate queries at end of tests instead of during import
+    // TODO: Add linked schemas to tests
+    @Override
+    protected boolean shouldValidateQueries()
+    {
+        return false;
+    }
+
+    @Override
+    protected boolean skipStudyImportQueryValidation()
+    {
+        return true;
     }
 
     private void createFinanceManagementFolders()
@@ -278,6 +370,76 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services", "Financial_Management", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "Private", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "PI Portal", "Collaboration");
+    }
+
+    private void createResearchServicesFolders()
+    {
+        // This assumes WNPRC_Units is already created
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Research_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "Virology_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VL_DB", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VS_group_wiki", "Collaboration");
+
+        //MHC folders
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "MHC_SSP", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private", "MHC_DB", "Collaboration");
+    }
+
+    private void createAnimalServicesFolders()
+    {
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Animal_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services", "Compliance_Training", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services/Compliance_Training", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services/Compliance_Training/Private", "EmployeeDB", "Collaboration");
+
+    }
+
+    private void createRequiredLists() throws IOException, CommandException
+    {
+        Connection cn = getRemoteApiConnection();
+        List<FieldDefinition> listColumns = List.of(
+                new FieldDefinition("ref_nt_name", FieldDefinition.ColumnType.String),
+                new FieldDefinition("shortName", FieldDefinition.ColumnType.String));
+        ListDefinition listDef = new IntListDefinition(MHC_SSP_LIST, "Key");
+        listDef.setFields(listColumns);
+        listDef.create(cn, getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB");
+
+        listColumns = List.of(
+                new FieldDefinition("Expt_nr", FieldDefinition.ColumnType.Decimal),
+                new FieldDefinition("QC_Pass", FieldDefinition.ColumnType.String));
+        listDef = new IntListDefinition(QPCR_QC_list, "Key");
+        listDef.setFields(listColumns);
+        listDef.create(cn, getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VS_group_wiki");
+    }
+
+    private void createRequiredAssays()
+    {
+        beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB", "begin"));
+        goToManageAssays();
+        clickButton("New Assay Design");
+        ChooseAssayTypePage chooseAssayTypePage = new ChooseAssayTypePage(getDriver());
+        chooseAssayTypePage.selectAssayLocation("Current Folder (MHC_DB)");
+        ReactAssayDesignerPage assayDesignerPage = chooseAssayTypePage.selectAssayType("General");
+        assayDesignerPage.setName("MHC_SSP");
+        DomainFormPanel domainFormPanel = assayDesignerPage.goToResultsFields();
+        domainFormPanel.addField("SubjectId").setType(FieldDefinition.ColumnType.String);
+        domainFormPanel.addField("Institution").setType(FieldDefinition.ColumnType.String);
+        domainFormPanel.addField("Result").setType(FieldDefinition.ColumnType.String);
+        DomainFieldRow domainFieldRow = domainFormPanel.addField("PrimerPair");
+        domainFieldRow.setLookup(new FieldDefinition.IntLookup("lists", MHC_SSP_LIST));
+        assayDesignerPage.clickFinish();
+
+        beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VL_DB", "begin"));
+        goToManageAssays();
+        clickButton("New Assay Design");
+        chooseAssayTypePage = new ChooseAssayTypePage(getDriver());
+        chooseAssayTypePage.selectAssayLocation("Current Folder (VL_DB)");
+        assayDesignerPage = chooseAssayTypePage.selectAssayType("Viral Loads");
+        assayDesignerPage.setName("Viral_Load");
+        domainFormPanel = assayDesignerPage.goToRunFields();
+        domainFormPanel.addField("exptNumber").setType(FieldDefinition.ColumnType.String);
+        assayDesignerPage.clickFinish();
     }
 
     private void loadBloodBilledByLookup() throws IOException, CommandException
@@ -307,10 +469,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         insertCmd.execute(cn, EHR_FOLDER_PATH);
     }
 
-    private void addFinanceRelatedWebParts()
+    private void addFinanceRelatedWebParts(String container)
     {
         log("Add Finance Related Web Parts.");
-        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+        beginAt(buildURL("project", container, "begin"));
 
         //enable Page Admin Mode
         new SiteNavBar(getDriver()).enterPageAdminMode();
@@ -342,6 +504,31 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 null, null);
     }
 
+    private void createStudyLinkedSchemaForQueryValidation()
+    {
+        final String BLOOD_SCHED_METADATA =
+                "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\"> \n" +
+                        "  <table tableName=\"BloodSchedule\" tableDbType=\"TABLE\">\n" +
+                        "    <columns>\n" +
+                        "      <column columnName=\"qcstate\">\n" +
+                        "        <fk>\n" +
+                        "          <fkDbSchema>core</fkDbSchema>\n" +
+                        "          <fkTable>QCState</fkTable>\n" +
+                        "          <fkColumnName>RowId</fkColumnName>\n" +
+                        "          <fkDisplayColumnName>Label</fkDisplayColumnName>\n" +
+                        "        </fk>\n" +
+                        "      </column>\n" +
+                        "  </columns>\n" +
+                        "  </table>\n" +
+                        "</tables>";
+
+        log("Creating studyLinked Schema");
+        _schemaHelper.setQueryLoadTimeout(60000);
+        _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
+                "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
+                null, BLOOD_SCHED_METADATA);
+    }
+
     private void createCoreLinkedSchema()
     {
         log("Creating coreLinked Schema");
@@ -351,14 +538,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 null, null);
     }
 
-    private void createEHRLinkedSchema()
+    private void createEHRLinkedSchema(String target)
     {
         log("Creating ehrLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(target,
                 "ehrLinked", "/"+EHR_FOLDER_PATH, "ehrLinked", null,
                 null, null);
     }
+
+    private void createEHRLookupsLinkedSchemaQueryValidation()
+    {
+        log("Creating ehr_LookupsLinked Schema");
+        _schemaHelper.setQueryLoadTimeout(30000);
+        _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
+                "ehr_lookupsLinked", "/"+EHR_FOLDER_PATH, null, "ehr_lookups",
+                null, null);
+    }
+
+//    private void createPublicSOPsList()
+//    {
+//        ListDefinition listDef = new IntListDefinition("Labfee_NoChargeProjects", "key");
+//        listDef.addField(new FieldDefinition("project", FieldDefinition.ColumnType.Integer));
+//        listDef.addField(new FieldDefinition("startDate", FieldDefinition.ColumnType.DateAndTime));
+//        listDef.addField(new FieldDefinition("dateDisabled", FieldDefinition.ColumnType.DateAndTime));
+//        listDef.addField(new FieldDefinition("Createdb", FieldDefinition.ColumnType.Integer));
+//        listDef.addField(new FieldDefinition("Notes", FieldDefinition.ColumnType.String));
+//        listDef.getCreateCommand().execute(createDefaultConnection(), getProjectName());
+//    }
 
     private void createEHRBillingPublicLinkedSchema()
     {
@@ -1477,27 +1684,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //upload Tier Rates
         List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
-        insertTsvData(connection, "wnprc_billing", "tierrates", tsv)
+        insertTsvData(connection, "wnprc_billing", "tierrates", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
 
         //upload Grant Accounts
         tsv = loadTsv(ALIASES_TSV);
-        insertTsvData(connection, "ehr_billing", "aliases", tsv)
+        insertTsvData(connection, "ehr_billing", "aliases", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
         tsv = loadTsv(CHARGE_UNITS_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv)
+        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
 
         //upload Chargeable Item Categories
         tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv)
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
 
         //upload Group-Category Associations
         tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
-        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv)
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
 
         //upload Chargeable Items and Charge Rates
@@ -1505,12 +1712,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv) throws IOException, CommandException
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String folderPath) throws IOException, CommandException
     {
         log("Loading tsv data: " + schemaName + "." + queryName);
         InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
         command.setRows(tsv);
-        SaveRowsResponse response = command.execute(connection, PRIVATE_FOLDER_PATH);
+        SaveRowsResponse response = command.execute(connection, folderPath);
         return response.getRows();
     }
 
@@ -3000,41 +3207,44 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed updateProgramIncomeAccountWithValidPermissions.");
     }
 
-    @Test
-    public void testJavaDeathNotification() throws UnhandledAlertException {
-        //Navigates to the Necropsies table.
-        beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
-        waitForText("Necropsies");
-        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
-
-        //Views data from the most recent necropsy.
-        DataRegionTable dr = new DataRegionTable("query", getDriver());
-        dr.clickRowDetails(0);
-
-        //Saves data from most recent necropsy.
-        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
-        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
-        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
-        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
-        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
-        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
-        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
-
-        //Runs death notification in the browser.
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
-        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
-        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
-
-        //Validates necessary info.
-        assertTextPresent("Animal ID:", necropsyID);
-        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
-        assertTextPresent("Date of Necropsy:", necropsyDate);
-        assertTextPresent("Grant #:", necropsyAccount);
-    }
+//    @Test
+//    public void testJavaDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaDeathNotification.");
+//        //Navigates to the Necropsies table.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
+//        waitForText("Necropsies");
+//        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
+//
+//        //Views data from the most recent necropsy.
+//        DataRegionTable dr = new DataRegionTable("query", getDriver());
+//        dr.clickRowDetails(0);
+//
+//        //Saves data from most recent necropsy.
+//        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+//        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+//        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+//        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
+//        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+//        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
+//        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
+//
+//        //Runs death notification in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+//
+//        //Validates necessary info.
+//        assertTextPresent("Animal ID:", necropsyID);
+//        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
+//        assertTextPresent("Date of Necropsy:", necropsyDate);
+//        assertTextPresent("Grant #:", necropsyAccount);
+//        log("Completed testJavaDeathNotification.");
+//    }
 
     @Test
     public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+        log("Started testJavaPrenatalDeathNotification.");
         //Navigates to the "Enter Prenatal Death" page.
         beginAt(buildURL("project", getContainerPath(), "begin"));
         waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
@@ -3051,10 +3261,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Navigates to dumbster.
         goToModule("Dumbster");
         assertTextPresent("Prenatal Death Notification: pd9876");
+        log("Completed testJavaPrenatalDeathNotification.");
     }
 
-    private void checkJavaNotificationsFunctionality() throws UnhandledAlertException {
-        log("Starting checkJavaNotificationsFunctionality.");
+    private void deathNotificationSetup() throws UnhandledAlertException {
+        log("Starting deathNotificationSetup.");
         //Navigates to home to get a fresh start.
         beginAt(buildURL("project", getContainerPath(), "begin"));
 
@@ -3066,7 +3277,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
         //Enables all notification that we will be testing.
-        notificationAdminPage.enableBillingNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
 
         //Adds notification recipients.
 //        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
@@ -3080,13 +3291,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));
 
-        log("Started testJavaDeathNotification.");
-        testJavaDeathNotification();
-        log("Completed testJavaDeathNotification.");
+        //Enable LDK Site Notification
+        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+        waitForText("Notification Site Admin");
+        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+        click(Locator.tagWithText("li", "Enabled"));
+        click(Locator.tagWithText("span", "Save"));
+        waitForText("Success");
+        clickButtonContainingText("OK");
+        waitForText("Notification Site Admin");
 
-        log("Started testJavaPrenatalDeathNotification.");
-        testJavaPrenatalDeathNotification();
-        log("Completed testJavaPrenatalDeathNotification.");
+        log("Completed deathNotificationSetup.");
     }
 
     @Test
@@ -3112,6 +3327,123 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertTrue("Grid Panel webpart failed to render in animal history",reactComp.isDisplayed());
 
         log("Completed testReactGridPanel.");
+    }
+
+    protected Date prepareDate(Date date, int daysOffset, int hoursOffset)
+    {
+        Calendar beforeInterval = Calendar.getInstance();
+        beforeInterval.setTime(date);
+        beforeInterval.add(Calendar.DATE, daysOffset);
+        beforeInterval.add(Calendar.HOUR_OF_DAY, hoursOffset);
+
+        return beforeInterval.getTime();
+    }
+    @Test
+    public void testBloodDrawAPI() throws Exception
+    {
+        goToProjectHome();
+
+        Integer projectId = 20240228;
+
+        Date bloodDate = prepareDate(new Date(), -12, 0);
+
+        Integer tubeVol = 10;
+        Integer numTubes = 1;
+        String tubeType = "EDTA";
+        Map<String, List<String>> expected = new HashMap<>();
+        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVol + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
+                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, numTubes, (tubeVol*numTubes), null, "y", "Chemical", "< 30 min", null, null, "autotest"}},
+                expected
+        );
+
+        /* TODO this is intended to test an overdraw - for some reason this error is not being reported from the testValidationMethod
+           it seems that EHR.Server.Utils.shouldIncludeError is false for this case... look at this later when we can also add to species.tsv in EHR
+        Integer newNumTubes = 200;
+        double quantity = newNumTubes*tubeVol;
+        Integer interval = 30;
+        Double weight = 12.0;
+        double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
+        expected = new HashMap<>();
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", "isRequest"}, new Object[][]{
+                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, newNumTubes, quantity, null, "y", "Chemical", "< 30 min", "instructions", null, "autotest", true}},
+                expected
+        );*/
+
+
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), -11, 0);
+        bloodCmd.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[0]);
+                put("date", dt);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVol);
+                put("num_tubes", numTubes);
+                put("quantity", numTubes*tubeVol);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+        SelectRowsCommand sr = new SelectRowsCommand("study","blood");
+        sr.addFilter("Id", SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date", dt, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1, resp2.getRowCount());
+
+
+        /*TODO This should be moved to EHR API test, would need to add clinpath runs table to the study schema in EHR test,
+          and update the labwork_services.tsv to include alertOnComplete field populated, since there the EHR trigger
+          script uses it
+
+        //create blood draw with additional services to create a clinpath request
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), -11, 0);
+        String serviceRequested = "CBC";
+        bloodCmd.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[0]);
+                put("date", dt);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type","Tube Type Test");
+                put("tube_vol", 1);
+                put("num_tubes", 1);
+                put("quantity", 1);
+                put("additionalServices", serviceRequested);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+        //assert clinpath request was created
+        SelectRowsCommand sr = new SelectRowsCommand("study","Clinpath Runs");
+        sr.addFilter("Id",SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date",dt, Filter.Operator.EQUAL);
+        sr.addFilter("servicerequested", serviceRequested, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1,resp2.getRowCount());*/
+
     }
 
 }

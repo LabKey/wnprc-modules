@@ -249,10 +249,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.goToEHRFolder();
         initTest.createStudyLinkedSchemaForQueryValidation();
+
+        // The next several step are done in a particular order to ensure query validation passes. Change at your own risk.
+        initTest.defineQCStates();
+        initTest.setEHRModuleProperties();
+        initTest.billingSetup();
+
+        initTest.goToEHRFolder();
+        initTest.populateInitialData();
         initTest.createEHRLookupsLinkedSchemaQueryValidation();
 
         initTest.initCreatedProject();
-        initTest.billingSetup();
+
+        initTest.uploadBillingDataAndVerify();
 
         // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
         // study import ensures that order.
@@ -287,6 +296,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         goToEHRFolder();
         initTest.createEHRBillingPublicLinkedSchema();
         initTest.createWNPRCBillingLinkedSchema();
+        initTest.loadEHRBillingExtensibleCols();
 
         goToPIPortal();
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
@@ -295,8 +305,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         goToPIPortal();
         initTest.addBillingPublicWebParts();
+    }
 
-        initTest.uploadBillingDataAndVerify();
+    private void loadEHRBillingExtensibleCols()
+    {
+        log("Setup the EHR Billing table definitions");
+        EHRAdminPage.beginAt(this,getContainerPath());
+        click(Locator.linkWithText("EHR EXTENSIBLE COLUMNS"));
+        click(Locator.linkWithText("Load EHR_Billing table definitions"));
+        waitForElement(Locator.tagWithClass("span", "x4-window-header-text").withText("Success"));
+        assertExt4MsgBox("EHR_Billing tables updated successfully.", "OK");
     }
 
     private void importBlood() throws IOException, CommandException
@@ -694,7 +712,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _schemaHelper.setQueryLoadTimeout(30000);
         _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
                 "ehr_lookupsLinked", "/"+EHR_FOLDER_PATH, null, "ehr_lookups",
-                null, null);
+                "blood_billed_by", null);
     }
 
 //    private void createPublicSOPsList()
@@ -2313,7 +2331,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         catch (NoSuchElementException retry)
         {
             // Not all ehr_lookups are cleared by populateInitialData
-            // cnprc_ehr/resources/data/routes.tsv has different casing
             WebElement comboListItem = ExtHelper.Locators.comboListItem().withText("ORAL\u00a0").findElementOrNull(getDriver());
             if (comboListItem == null)
                 throw retry;

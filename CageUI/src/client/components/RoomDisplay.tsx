@@ -13,6 +13,7 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
 
     const [room, setRoom] = useState<Rack[]>([]);
     const [clickedCage, setClickedCage] = useState<Cage>();
+    const [clickedCagePartner, setClickedCagePartner] = useState<Cage>();
     const [clickedRack, setClickedRack] = useState<Rack>();
 
 
@@ -29,7 +30,9 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
                 clickedCage,
                 setClickedCage,
                 clickedRack,
-                setClickedRack
+                setClickedRack,
+                clickedCagePartner,
+                setClickedCagePartner
             }}>
                 <RoomLayout />
             </CageContext.Provider>

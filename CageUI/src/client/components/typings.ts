@@ -11,7 +11,7 @@ export interface Cage {
 
 export interface Rack {
     id: number;
-    type: string;
+    type: RackTypes;
     cages: Cage[];
 }
 export enum RackTypes {

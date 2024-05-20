@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { convertLocationName } from './helpers';
 import Select from 'react-select';
-import { Modifications, ModTypes } from './typings';
+import { Modification, Modifications, ModTypes, RackTypes } from './typings';
 import { useCurrentContext } from './ContextManager';
 
 
@@ -19,15 +19,39 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
         modOptions,
         affectedCages
     } = props;
-    const { setRoom, clickedCage, clickedRack, setClickedCage} = useCurrentContext();
+    const {
+        setRoom,
+        clickedCage,
+        clickedRack,
+        setClickedCage,
+        clickedCagePartner,
+        setClickedCagePartner
+    } = useCurrentContext();
     const changeMod = (event) => {
-
+        console.log(clickedCage, clickedCagePartner, event, modKey);
+        let tempKey;
+        if(modKey !== "rightDivider" && modKey !== "leftDivider"){
+            tempKey = modKey;
+        }else{
+            tempKey = modKey === "rightDivider" ? "leftDivider" : "rightDivider"; // switch key for opposite cage
+        }
         setClickedCage(prevState => ({
             ...prevState,
             cageState: {
                 ...prevState.cageState,
                 [modKey]: {
                     ...prevState.cageState[modKey],
+                    modData: Object.values(Modifications).find((mod) => mod.mod === event.value)
+                }
+            }
+        }));
+
+        setClickedCagePartner(prevState => ({
+            ...prevState,
+            cageState: {
+                ...prevState.cageState,
+                [tempKey]: {
+                    ...prevState.cageState[tempKey],
                     modData: Object.values(Modifications).find((mod) => mod.mod === event.value)
                 }
             }
@@ -43,6 +67,10 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                 updatedRoom[clickedRackIndex].cages.find(
                     (cage) => cage.id === clickedCage.id
                 ).cageState = clickedCage.cageState;
+
+                updatedRoom[clickedRackIndex].cages.find(
+                    (cage) => cage.id === clickedCagePartner.id
+                ).cageState = clickedCagePartner.cageState;
             }
             return updatedRoom;
         })

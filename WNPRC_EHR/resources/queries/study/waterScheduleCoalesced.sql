@@ -4,6 +4,7 @@
 
 (SELECT
     WA.id AS Id,
+    WA.id.demographics.calculated_status.code AS calculated_status,
     WA.date AS date,
     WA.date AS dateOrdered,
     WA.id.curLocation.location as location,
@@ -40,6 +41,7 @@ UNION ALL
 
 (SELECT
     WS.animalId AS Id,
+    WS.calculated_status AS calculated_status,
     WS.origDate AS origDate,
     WS.date AS dateOrdered,
     WS.location as location,

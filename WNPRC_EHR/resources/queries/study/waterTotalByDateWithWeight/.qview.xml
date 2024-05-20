@@ -17,6 +17,7 @@
         <column name="performedConcat"/>
         <column name="InnerMlsPerKg"/>
         <column name="location"/>
+        <column name="dataSource"/>
         <column name="qcstate"/>
 
     </columns>

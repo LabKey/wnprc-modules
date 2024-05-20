@@ -76,7 +76,7 @@ export const loadRoom = (name: string): Rack[] => {
 
             const tempRack: Rack = {
                 id: rackId,
-                type: rackType.toString(),
+                type: rackType,
                 cages: genCages(RoomSchematics[name].cageNum, rackType),
 
             }

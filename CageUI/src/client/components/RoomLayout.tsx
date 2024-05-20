@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { FC, useRef, useState } from 'react';
-import { Cage, Rack } from './typings';
+import { FC, useState } from 'react';
+import { Cage, RackTypes } from './typings';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
 import { changeStyleProperty, getRackSeparators, parseCage, parseRack, parseSeparator } from './helpers';
@@ -8,7 +8,7 @@ import { CageDetails } from './CageDetails';
 import { useCurrentContext } from './ContextManager';
 
 export const RoomLayout: FC = () => {
-    const {room, setRoom, setClickedCage, setClickedRack} = useCurrentContext();
+    const {room, setRoom, setClickedCage, setClickedRack, setClickedCagePartner} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {
@@ -26,11 +26,21 @@ export const RoomLayout: FC = () => {
         console.log("New Room: ", room);
         const clickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = clickedRack.cages.find(cage => cage.id === cageId);
+        let clickedCagePartner: Cage;
+        if(clickedRack.type === RackTypes.TwoOfTwo){
+            if(clickedCage.cageState.rightDivider){
+                clickedCagePartner = clickedRack.cages.find(cage => cage.id === cageId + 1);
+            }else if(clickedCage.cageState.leftDivider){
+                clickedCagePartner = clickedRack.cages.find(cage => cage.id === cageId - 1);
+            }
+        }
 
         console.log("New Rack: ", clickedRack);
         console.log("New Cage: ", clickedCage);
+        console.log("New Cage Partner: ", clickedCagePartner);
         setClickedCage(clickedCage);
         setClickedRack(clickedRack);
+        setClickedCagePartner(clickedCagePartner);
         openDetails();
 
     };

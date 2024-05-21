@@ -11,6 +11,8 @@ export interface CageContextType {
     setClickedCagePartner: React.Dispatch<React.SetStateAction<Cage | null>> | null,
     clickedRack: Rack | null,
     setClickedRack: React.Dispatch<React.SetStateAction<Rack | null>> | null,
+    cageDetails: Cage[] | null,
+    setCageDetails: React.Dispatch<React.SetStateAction<Cage[] | null>> | null,
 }
 export const CageContext = createContext<CageContextType | null>(null);
 

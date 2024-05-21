@@ -1,12 +1,18 @@
 import {
-    Cage, CagePosition,
-    CageState, CageType,
-    DefaultCageState, Modification,
+    Cage,
+    CagePosition,
+    CageState,
+    CageType,
+    DefaultCageState,
+    Modification,
     Modifications,
     Rack,
-    RackSeparators,
     RackTypes,
-    RoomSchematics, SeparatorMod, SeparatorPosition, Separators, SeparatorType
+    RoomSchematics,
+    SeparatorMod,
+    SeparatorPosition,
+    Separators,
+    SeparatorType
 } from './typings';
 
 /*
@@ -196,6 +202,25 @@ const getCageDividers = (totalBoxes, position, boxId, direction) => {
     return line;
 }
 
+// Function to find the box underneath given a box ID on top
+export const getCageUnderneath = (totalCages, cagesPerRack, cageId) => {
+
+    if (cageId < 1 || cageId > totalCages) {
+        throw new Error('Invalid box ID');
+    }
+
+    // Determine the position within the rack (0-3)
+    const positionInRack = (cageId - 1) % cagesPerRack;
+
+    // Check if the box is on the top row (position 0 or 1)
+    if (positionInRack < 2) {
+        // Calculate the ID of the box underneath
+        return cageId + 2;
+    } else {
+        return null;
+    }
+}
+
 const removeDuplicatesByPosition = (arr) => {
     const uniquePositions = new Map();
 
@@ -222,7 +247,7 @@ export const getRackSeparators = (rack: Rack): Separators => {
                 const floorId = (cage.id - 1) % rack.cages.length + 1;
                 newType = "floor";
                 newPos = `F${floorId}` as `F${number}`;
-                newMod = cage.cageState[cageSep].modData;
+                newMod = cage.cageState[cageSep].modData.mod;
 
             }else if(cageSep.toLowerCase().includes("right")) { // right divider
                 const posId = getCageDividers(rack.cages.length, cage.position, cage.id, "right");
@@ -232,7 +257,7 @@ export const getRackSeparators = (rack: Rack): Separators => {
                 }else{
                     newPos = `B${posId}` as `T${number}`;
                 }
-                newMod = cage.cageState[cageSep].modData;
+                newMod = cage.cageState[cageSep].modData.mod;
             }else { // left divider
                 const posId = getCageDividers(rack.cages.length, cage.position, cage.id, "left");
                 newType = "divider";
@@ -241,7 +266,7 @@ export const getRackSeparators = (rack: Rack): Separators => {
                 }else{
                     newPos = `B${posId}` as `T${number}`;
                 }
-                newMod = cage.cageState[cageSep].modData;
+                newMod = cage.cageState[cageSep].modData.mod;
             }
 
             newSep = {

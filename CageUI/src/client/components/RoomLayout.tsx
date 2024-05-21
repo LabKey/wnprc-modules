@@ -1,14 +1,21 @@
 import * as React from 'react';
 import { FC, useState } from 'react';
-import { Cage, RackTypes } from './typings';
+import { Cage, ModTypes, RackTypes } from './typings';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
-import { changeStyleProperty, getRackSeparators, parseCage, parseRack, parseSeparator } from './helpers';
+import {
+    changeStyleProperty,
+    getCageUnderneath,
+    getRackSeparators,
+    parseCage,
+    parseRack,
+    parseSeparator
+} from './helpers';
 import { CageDetails } from './CageDetails';
 import { useCurrentContext } from './ContextManager';
 
 export const RoomLayout: FC = () => {
-    const {room, setRoom, setClickedCage, setClickedRack, setClickedCagePartner} = useCurrentContext();
+    const {room, setCageDetails, setClickedCage, setClickedRack, setClickedCagePartner, cageDetails} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {
@@ -18,7 +25,7 @@ export const RoomLayout: FC = () => {
         setIsOpen(false);
     }
     
-
+    console.log("room: ", room);
     const handleClick = (event) => {
         const cage = event.target;
         const rackId: number = parseInt(parseRack(cage.parentElement.id));
@@ -27,20 +34,36 @@ export const RoomLayout: FC = () => {
         const clickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = clickedRack.cages.find(cage => cage.id === cageId);
         let clickedCagePartner: Cage;
+        const newCageDetails: Cage[] = [];
         if(clickedRack.type === RackTypes.TwoOfTwo){
+            newCageDetails.push(clickedCage);
             if(clickedCage.cageState.rightDivider){
                 clickedCagePartner = clickedRack.cages.find(cage => cage.id === cageId + 1);
+                if(clickedCage.cageState.rightDivider.modData.mod === ModTypes.NoDivider){
+                    newCageDetails.push(clickedCagePartner);
+                }
             }else if(clickedCage.cageState.leftDivider){
                 clickedCagePartner = clickedRack.cages.find(cage => cage.id === cageId - 1);
+                if(clickedCage.cageState.leftDivider.modData.mod === ModTypes.NoDivider){
+                    newCageDetails.push(clickedCagePartner);
+                }
+            }
+            // TODO Add floors
+            if(clickedCage.cageState?.floor.modData.mod.mod === ModTypes.NoFloor){
+                const totalCages = room.length * room[0].cages.length;
+                const bottomCageId = getCageUnderneath(totalCages, room[0].cages.length, clickedCage.id)
+                console.log("Floor: ", bottomCageId);
+                //newCageDetails.push(clickedRack.cages[3]);
             }
         }
-
         console.log("New Rack: ", clickedRack);
         console.log("New Cage: ", clickedCage);
         console.log("New Cage Partner: ", clickedCagePartner);
+        console.log("New Cage details: ", cageDetails, newCageDetails);
         setClickedCage(clickedCage);
         setClickedRack(clickedRack);
         setClickedCagePartner(clickedCagePartner);
+        setCageDetails(newCageDetails);
         openDetails();
 
     };

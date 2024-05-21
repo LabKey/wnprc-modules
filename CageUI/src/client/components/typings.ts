@@ -65,10 +65,10 @@ export interface SeparatorMod {
 export type Separators = SeparatorMod[];
 
 export interface CageState {
-    leftDivider: Modification | undefined;
-    rightDivider: Modification | undefined;
-    floor: Modification | undefined;
-    extraMods: Modification[] | undefined;
+    leftDivider: {modData: Modification, affCages: string[]} | undefined;
+    rightDivider: {modData: Modification, affCages: string[]} | undefined;
+    floor: {modData: SeparatorMod, affCages: string[]} | undefined;
+    extraMods: {modData: Modification, affCages: string[]}[] | undefined;
 }
 
 
@@ -213,24 +213,38 @@ export const RackSeparators = {
     }
 }
 
+
+// TODO Change mod Data to access from mod
 export const DefaultCageState = {
     rackTwoOfTwo: {
         posA: {
-            rightDivider: {modData: RackSeparators.rackTwoOfTwo.topDivider, affCage: []},
-            leftFloor: {modData: RackSeparators.rackTwoOfTwo.leftFloor, affCage: []},
+            rightDivider: {
+                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.topDivider, position: "T1"} as SeparatorMod,
+                affCage: []},
+            floor: {
+                modData: {type: "floor", mod: RackSeparators.rackTwoOfTwo.leftFloor, position: "F1"} as SeparatorMod,
+                affCage: []},
             extraMods: [{modData: Modifications.popTop, affCage: ["#0001", "#0002"]}]
         },
         posB: {
-            leftDivider: {modData: RackSeparators.rackTwoOfTwo.topDivider, affCage: []},
-            rightFloor: {modData: RackSeparators.rackTwoOfTwo.rightFloor, affCage: []},
+            leftDivider: {
+                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.topDivider, position: "T1"} as SeparatorMod,
+                affCage: []},
+            floor: {
+                modData: {type: "floor", mod: RackSeparators.rackTwoOfTwo.rightFloor, position: "F2"} as SeparatorMod,
+                affCage: []},
             extraMods: []
         },
         posC: {
-            rightDivider: {modData: RackSeparators.rackTwoOfTwo.bottomDivider, affCage: []},
+            rightDivider: {
+                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.bottomDivider, position: "B1"} as SeparatorMod,
+                affCage: []},
             extraMods: []
         },
         posD: {
-            leftDivider: {modData: RackSeparators.rackTwoOfTwo.bottomDivider, affCage: []},
+            leftDivider: {
+                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.bottomDivider, position: "B1"} as SeparatorMod,
+                affCage: []},
             extraMods: []
         },
     }

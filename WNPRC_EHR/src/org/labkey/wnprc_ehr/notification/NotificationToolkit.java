@@ -910,10 +910,6 @@ public class NotificationToolkit {
         return animalAssigned;
     }
 
-//    public String getEmailFromUsername(Container c, User u, String username) {
-        // TODO
-//    }
-
 
 
 

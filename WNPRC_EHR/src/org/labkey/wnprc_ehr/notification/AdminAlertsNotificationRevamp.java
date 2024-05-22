@@ -86,10 +86,7 @@ public class AdminAlertsNotificationRevamp extends AbstractEHRNotification {
         // Lists number of client errors since yesterday.
         messageBody.append("<br>\n<p><b>WARNING: There were " + myAdminAlertsNotificationObject.numClientErrorsSinceYesterday + " client errors since yesterday (" + dateToolkit.getDateXDaysFromNow(-1) + "):</b></p>");
         messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them</p>", myAdminAlertsNotificationObject.numClientErrorsSinceYesterdayURLView));
-
-        // TODO: Figure out how to touch file .adminAlertsLastRun (line 206 in adminAlerts.pl).
-        //  I can probably use File.setLastModified() for this, but check with LabKey to see where this file exists so I can verify the touch works.
-
+        
         return messageBody.toString();
     }
 

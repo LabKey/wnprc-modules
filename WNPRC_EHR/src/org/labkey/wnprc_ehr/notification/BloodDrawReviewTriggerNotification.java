@@ -76,13 +76,7 @@ public class BloodDrawReviewTriggerNotification extends AbstractEHRNotification 
 
     //Sending Options
     public void sendManually (Container container, User user, ArrayList<String> extraRecipients){
-//        if (this.requestor != null) {
-//            notificationToolkit.getEmailFromUsername(container, user, this.requestor);  // TODO: Finish this function in notificationToolkit.
-//            notificationToolkit.sendNotification(this, user, container, this.requestor);    // TODO: Update this function in notificationToolkit to handle extra users.
-//        }
-//        else {
-            notificationToolkit.sendNotification(this, user, container, extraRecipients);
-//        }
+        notificationToolkit.sendNotification(this, user, container, extraRecipients);
     }
 
 
@@ -92,6 +86,7 @@ public class BloodDrawReviewTriggerNotification extends AbstractEHRNotification 
     public String getMessageBodyHTML(Container c, User u) {
         // Set up.
         StringBuilder messageBody = new StringBuilder();
+        Boolean emptyMessage = true;
         if (this.animalIdToCheck == null || this.projectToCheck == null || this.drawDateToCheck == null) {
             // This sets up the values for testing through Notification Manager > Run Report in Browser.
             this.animalIdToCheck = "rh2514";
@@ -107,15 +102,22 @@ public class BloodDrawReviewTriggerNotification extends AbstractEHRNotification 
 
         // Verifies animal is alive.
         if (!notificationToolkit.checkIfAnimalIsAlive(c, u, animalIdToCheck)) {
+            emptyMessage = false;
             messageBody.append("<p><b>WARNING:</b> This animal is no longer alive.</p>");
         }
 
         //Verifies animal is assigned to a project.
         if (!notificationToolkit.checkProjectAssignmentStatusOnDate(c, u,animalIdToCheck, Integer.valueOf(projectToCheck), drawDateToCheck)) {
+            emptyMessage = false;
             messageBody.append("<p><b>WARNING:</b> This animal is not assigned to a project on the date of the requested blood draw.</p>");
         }
 
-        return messageBody.toString();
+        if (emptyMessage.equals(false)) {
+            return messageBody.toString();
+        }
+        else {
+            return null;
+        }
     }
 
 }

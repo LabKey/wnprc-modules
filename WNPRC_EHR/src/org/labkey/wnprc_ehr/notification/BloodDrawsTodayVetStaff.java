@@ -64,14 +64,16 @@ public class BloodDrawsTodayVetStaff extends AbstractEHRNotification {
         messageBody.append(styleToolkit.setHeaderRowBackgroundColor("#d9d9d9"));
         messageBody.append(styleToolkit.endStyle());
 
-        //Begins message info.
+        // Begins message info.
         messageBody.append("<p>This email contains all scheduled blood draws for today (for Vet Staff only).  It was run on: " + dateToolkit.getCurrentTime() + "</p>");
 
         // Creates table.
-        String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
-        NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawNotificationObject.myTableData);
-        myTable.rowColors = myBloodDrawNotificationObject.myTableRowColors;
-        messageBody.append(myTable.createBasicHTMLTable());
+        messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
+
+//        String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
+//        NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawNotificationObject.myTableData);
+//        myTable.rowColors = myBloodDrawNotificationObject.myTableRowColors;
+//        messageBody.append(myTable.createBasicHTMLTable());
 
         return messageBody.toString();
     }

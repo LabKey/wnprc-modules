@@ -64,17 +64,29 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         StringBuilder messageBody = new StringBuilder();
         BloodDrawReviewDailyObject myBloodDrawReviewObject = new BloodDrawReviewDailyObject(c, u);
 
+        // Creates CSS.
+        messageBody.append(styleToolkit.beginStyle());
+        messageBody.append(styleToolkit.setBasicTableStyle());
+        messageBody.append(styleToolkit.setHeaderRowBackgroundColor("#d9d9d9"));
+        messageBody.append(styleToolkit.endStyle());
+
         //Begins message info.
         messageBody.append("<p>This email contains any scheduled blood draws (today & future) where animals are either unassigned to a project or no longer alive.  It was run on: " + dateToolkit.getCurrentTime() + "</p>");
 
         // Lists all blood draws (today & future) where animal is not alive.
         if (!myBloodDrawReviewObject.nonAliveBloodDraws.isEmpty()) {
             messageBody.append("<p><b>There are " + myBloodDrawReviewObject.nonAliveBloodDraws.size() + " blood draws (today & future) where animal is not alive:</b></p>");
-            for (HashMap<String, String> bloodDraw: myBloodDrawReviewObject.nonAliveBloodDraws) {
-                String bloodDrawID = bloodDraw.get("id");
-                String bloodDrawDate = bloodDraw.get("date");
-                messageBody.append(bloodDrawID + " - " + bloodDrawDate + "<br>\n");
-            }
+
+            // Creates table.
+            String[] myTableColumns = new String[]{"Id", "Date of Blood Draw"};
+            NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawReviewObject.nonAliveBloodDraws);
+            messageBody.append(myTable.createBasicHTMLTable());
+
+//            for (HashMap<String, String> bloodDraw: myBloodDrawReviewObject.nonAliveBloodDraws) {
+//                String bloodDrawID = bloodDraw.get("id");
+//                String bloodDrawDate = bloodDraw.get("date");
+//                messageBody.append(bloodDrawID + " - " + bloodDrawDate + "<br>\n");
+//            }
         }
         else {
             messageBody.append("<b>There are no blood draws (today or future) where animal is not alive.</b>");
@@ -82,11 +94,18 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         // Lists all blood draws (today & future) where animal is not assigned to a project.
         if (!myBloodDrawReviewObject.unassignedBloodDraws.isEmpty()) {
             messageBody.append("<p><b>There are " + myBloodDrawReviewObject.unassignedBloodDraws.size() + " blood draws (today & future) where animal is not assigned to a project:</b></p>");
-            for (HashMap<String, String> bloodDraw: myBloodDrawReviewObject.unassignedBloodDraws) {
-                String bloodDrawID = bloodDraw.get("id");
-                String bloodDrawDate = bloodDraw.get("date");
-                messageBody.append(bloodDrawID + " - " + bloodDrawDate + "<br>\n");
-            }
+
+            // Creates table.
+            String[] myTableColumns = new String[]{"Id", "Date of Blood Draw", "Project"};
+            NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawReviewObject.unassignedBloodDraws);
+            messageBody.append(myTable.createBasicHTMLTable());
+
+//            for (HashMap<String, String> bloodDraw: myBloodDrawReviewObject.unassignedBloodDraws) {
+//                String bloodDrawID = bloodDraw.get("id");
+//                String bloodDrawDate = bloodDraw.get("date");
+//                String bloodDrawProject = bloodDraw.get("project");
+//                messageBody.append(bloodDrawID + " - " + bloodDrawDate + " - " + bloodDrawProject + "<br>\n");
+//            }
         }
         else {
             messageBody.append("<b>There are no blood draws (today or future) where animal is not assigned to a project.</b>");
@@ -109,7 +128,7 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             getUnassignedBloodDraws();
         }
 
-        ArrayList<HashMap<String,String>> nonAliveBloodDraws;
+        ArrayList<String[]> nonAliveBloodDraws = new ArrayList<>();
         // Gets all blood draws (today & future) where animal is not alive.
         void getNonAliveBloodDraws() {
             // Creates real filter.
@@ -128,11 +147,17 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             Sort mySort = new Sort("date");
             // Creates columns to retrieve.
             String[] targetColumns = new String[]{"id", "date"};
-            //Runs query.
-            nonAliveBloodDraws = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
+            // Runs query.
+            ArrayList<HashMap<String,String>> unformattedNonAliveBloodDraws = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
+
+            // Converts map to list (for displaying in table).
+            for (HashMap<String, String> currentDraw : unformattedNonAliveBloodDraws) {
+                String[] currentRow = {currentDraw.get("id"), currentDraw.get("date")};
+                nonAliveBloodDraws.add(currentRow);
+            }
         }
 
-        ArrayList<HashMap<String,String>> unassignedBloodDraws;
+        ArrayList<String[]> unassignedBloodDraws = new ArrayList<>();
         // Gets all blood draws (today & future) where animal is not assigned to a project.
         void getUnassignedBloodDraws() {
             // Creates real filter.
@@ -153,9 +178,15 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             // Creates sort.
             Sort mySort = new Sort("date");
             // Creates columns to retrieve.
-            String[] targetColumns = new String[]{"id", "date"};
-            //Runs query.
-            unassignedBloodDraws = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
+            String[] targetColumns = new String[]{"id", "date", "project"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> unformattedUnassignedBloodDraws = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
+
+            // Converts map to list (for displaying in table).
+            for (HashMap<String, String> currentDraw : unformattedUnassignedBloodDraws) {
+                String[] currentRow = {currentDraw.get("id"), currentDraw.get("date"), currentDraw.get("project")};
+                unassignedBloodDraws.add(currentRow);
+            }
         }
 
     }

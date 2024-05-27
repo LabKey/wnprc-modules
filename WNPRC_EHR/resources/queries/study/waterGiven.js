@@ -157,7 +157,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                 let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterSchedule(row.Id,row.date,row.objectid,row.volume,waterInForm);
                 if (jsonArray != null){
                     for (var i = 0; i < jsonArray.length; i++ ){
-                        let errorObject = JSON.parse(jsonArray[i]);
+                        let errorObject = jsonArray[i];
                         EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message,errorObject.severity);
 
                     }

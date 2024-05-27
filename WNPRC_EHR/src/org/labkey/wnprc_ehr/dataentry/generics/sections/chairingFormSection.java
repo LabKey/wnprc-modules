@@ -16,6 +16,7 @@ public class chairingFormSection extends SlaveFormSection
         Set<String> fields = new HashSet<>();
         fields.add("Id");
         fields.add("project");
+        fields.add("date");
         fields.add("performedby");
 
         return fields;

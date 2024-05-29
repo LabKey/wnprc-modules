@@ -392,7 +392,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new BloodDrawsTodayVetStaff(this),
                 new BloodDrawReviewDailyNotification(this),
                 new BloodDrawReviewTriggerNotification(this),
-                new AdminAlertsNotificationRevamp(this)
+                new AdminAlertsNotificationRevamp(this),
+                new ColonyManagementNotificationRevamp(this)
                 );
 
         for (Notification notification : notifications)

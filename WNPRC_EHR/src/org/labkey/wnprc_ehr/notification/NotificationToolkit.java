@@ -776,6 +776,9 @@ public class NotificationToolkit {
         return sortedList;
     }
 
+    // TODO: Remove "%3B" at the end of all queries - this is causing invalid query results.
+    //      --> %3B is code for a semicolon.
+    //      --> Update: removed semicolon being added, but now URL's containing IN:xxx,yyy,zzz don't work (i.e. cannot use multiple values for one key).
     /**
      * Creates a URL for a query matching user arguments.
      * WARNING: This should only be used with a SimpleFilter that has clauses containing only one field key.  You can use multiple clauses and multiple values for each, but each clause should only have one key.
@@ -807,14 +810,14 @@ public class NotificationToolkit {
             // Adds parameters from queryFilter.
             for (SimpleFilter.FilterClause currentClause : queryFilter.getClauses()) {
                 // Gets clause key.
-                FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with one field key.
+                FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with clauses containing one field key for each clause.
 
                 // Gets clause value.
                 StringBuilder clauseValue = new StringBuilder();
                 if (currentClause.getParamVals() != null) {
                     for (Object paramValue : currentClause.getParamVals()) {
                         clauseValue.append(paramValue.toString());
-                        clauseValue.append(";");
+//                        clauseValue.append(";");
                     }
                 }
 

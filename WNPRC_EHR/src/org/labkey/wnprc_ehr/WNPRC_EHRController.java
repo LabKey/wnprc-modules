@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.labkey.api.action.ApiResponse;
@@ -958,11 +959,28 @@ public class WNPRC_EHRController extends SpringActionController
                         }
                         //Replace <br> tags with newlines and then strip out any remaining html tags from title and description
                         //Once the strings are cleaned up, add back in the <br> tags instead of the newlines
-                        String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                        String title;
+                        if (event.has("title"))
+                        {
+                            title = event.getString("title");
+                        }
+                        else
+                        {
+                            title = "NO NAME";
+                        }
                         title = title.replaceAll("(?i)<br */?>", "\n").trim();
                         title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
-                        String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                        String description;
+                        if (event.has("description"))
+                        {
+                            description = event.getString("description");
+                        }
+                        else
+                        {
+                            description = "NO PHONE NUMBER";
+                        }
                         description = description.replaceAll("(?i)<br */?>", "\n").trim();
+                            // Handle the retrieved value
                         description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
                         if (onCallSchedule[i + 1][column].isEmpty() || onCallSchedule[i + 1][column].getString("html") == null) {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");

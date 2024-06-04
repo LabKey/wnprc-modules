@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="Id" />
+        <column name="calculated_status"/>
         <column name="dateOrdered"/>
         <column name="room"/>
         <column name="cage"/>

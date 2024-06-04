@@ -217,97 +217,100 @@
     <div class="col-md-3">
 
         <div class="row" id="infoPanels">
-            <div class="collapse panel panel-primary" id="waterInformation">
-                <div class="panel-heading"><span>Water Details</span></div>
-                <div class="panel-body" id="waterInfoPanel" data-bind="with: taskDetails">
+            <div class="panel-group" id="waterInformation" role="tablist">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <span data-parent="#infoPanels">Water Details</span>
+                        </h4>
+                    </div>
+
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" id="waterInfoPanel" data-bind="with: taskDetails">
+                            <dl class="dl-horizontal">
+                                <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
+                                <dt>Task ID:            </dt> <dd><a href="{{taskLink}}">{{taskid}}</a></dd>
+                                <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                                <dt>Location:           </dt> <dd>{{location}}</dd>
+                                <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
+                                <dt>Volume:             </dt> <dd>{{volume}}</dd>
+                                <dt>Provide Fruit:      </dt> <dd>{{provideFruitTitle}}</dd>
+                                <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
+                                <dt>Date:               </dt> <dd>{{displayDate}}</dd>
+                                <dt>Frequency:          </dt> <dd>{{frequencyMeaningCoalesced}}</dd>
+                                <dt>Time of day:        </dt> <dd>{{displaytimeofday}}</dd>
+                            </dl>
+
+                            <button class="btn btn-default" data-bind="click: $root.requestTableClickAction" data-toggle="collapse" data-target="#waterExceptionPanel"
+                                    id="waterInfo" params="" disabled>Enter Single Day Water</button>
+
+                            <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
+                                    id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
 
 
-                    <dl class="dl-horizontal">
-                        <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
-                        <dt>Task ID:            </dt> <dd><a href="{{taskLink}}">{{taskid}}</a></dd>
-                        <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{Id}}</a></dd>
-                        <dt>Location:           </dt> <dd>{{location}}</dd>
-                        <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
-                        <dt>Volume:             </dt> <dd>{{volume}}</dd>
-                        <dt>Provide Fruit:      </dt> <dd>{{provideFruitTitle}}</dd>
-                        <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
-                        <dt>Date:               </dt> <dd>{{displayDate}}</dd>
-                        <dt>Frequency:          </dt> <dd>{{frequencyMeaningCoalesced}}</dd>
-                        <dt>Time of day:        </dt> <dd>{{displaytimeofday}}</dd>
-                    </dl>
+                            <!--  Modal Definition -->
+                            <div class="modal fade" id="myModal" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" data-bind="click: $root.closeModalWindow">&times;</button>
+                                            <h4 class="modal-title">Modify Water Order</h4>
+                                        </div>
+                                        <div class="modal-body" id="modal-body">
+                                            <div>Select an option from this window:</div>
+                                            <div>End Date for Water Order: <b>{{date}}</b></div>
+                                            <div>
+                                                <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
+                                                <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                            </div>
+                                            <hr>
+                                            <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
+                                            <div class="server-return-message" id = "modelServerResponse"></div>
 
-                    <button class="btn btn-default" data-bind="click: $root.requestTableClickAction" data-toggle="collapse" data-target="#waterExceptionPanel"
-                                          id="waterInfo" params="" disabled>Enter Single Day Water</button>
-
-                    <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
-                            id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
-
-
-                    <!--  Modal Definition -->
-                    <div class="modal fade" id="myModal" role="dialog">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" data-bind="click: $root.closeModalWindow">&times;</button>
-                                    <h4 class="modal-title">Modify Water Order</h4>
-                                </div>
-                                <div class="modal-body" id="modal-body">
-                                    <div>Select an option from this window:</div>
-                                    <div>End Date for Water Order: <b>{{date}}</b></div>
-                                    <div>
-                                        <input type="checkbox" id="removelastday"  data-bind="checked: $root.removeLastDay()">
-                                        <label for="removelastday" id="removelastday_label">Exclude last day</label>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button id="proceedButton" type="button" class="btn btn-default hidden" data-bind="click: $root.proceed" >Proceed</button>
+                                            <button type="button" class="btn btn-default" data-bind="click: $root.endWaterOrder">End Water Order</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.enterNewWaterOrder">End and Start New Water Order</button>
+                                            <button type="button" class="btn btn-default" data-bind="click: $root.closeModalWindow" data-dismiss="modal">Close Window</button>
+                                        </div>
                                     </div>
-                                    <hr>
-                                    <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
-                                    <div class="server-return-message" id = "modelServerResponse"></div>
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button id="proceedButton" type="button" class="btn btn-default hidden" data-bind="click: $root.proceed" >Proceed</button>
-                                    <button type="button" class="btn btn-default" data-bind="click: $root.endWaterOrder">End Water Order</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.enterNewWaterOrder">End and Start New Water Order</button>
-                                    <button type="button" class="btn btn-default" data-bind="click: $root.closeModalWindow" data-dismiss="modal">Close Window</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
-            </div>
-
-            <div class="collapse panel panel-primary" id="waterTotalInformation">
-                <div class="panel-heading"><span>Water Total Details</span></div>
-                <div class="panel-body" id="waterTotalPanel" data-bind="with: taskDetails">
-
-
-                    <dl class="dl-horizontal">
-                        <dt>DataSource:</dt>
-                            <dd>{{dataSource}}</dd>
-                        <dt>Date:</dt>
-                            <dd>{{displayDate}}</dd>
-                        <dt>Animal ID:</dt>
-                            <dd><a href="{{animalLink}}">{{Id}}</a></dd>
-                        <dt>
-                            <!-- ko if: calculatedStatusValue() == 'Alive' -->Current Location:  <!-- /ko-->
-                            <!-- ko if: calculatedStatusValue() == 'Dead' --> Last Location:  <!-- /ko-->
-                        </dt>
-                            <dd>{{location}}</dd>
-                        <dt>Total Volume:</dt>
-                            <dd>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h5 class="panel-title">
+                            <span data-parent="#infoPanels">Water Total Details</span>
+                        </h5>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="panel-body" id="waterTotalPanel" data-bind="with: taskDetails">
+                            <dl class="dl-horizontal">
+                                <dt>DataSource:     </dt>           <dd>{{dataSource}}</dd>
+                                <dt>Date:           </dt>           <dd>{{displayDate}}</dd>
+                                <dt>Animal ID:      </dt>           <dd><a href="{{animalLink}}">{{Id}}</a></dd>
+                                <dt>
+                                    <!-- ko if: calculatedStatusValue() == 'Alive' -->Current Location:  <!-- /ko-->
+                                    <!-- ko if: calculatedStatusValue() == 'Dead' --> Last Location:  <!-- /ko-->
+                                </dt>           <dd>{{location}}</dd>
+                                <dt>Total Volume:   </dt>           <dd>
                                 <!-- ko if: conditionAtTimeValue() == 'regulated' -->{{volume}} ml<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'lixit' -->On Lixit<!-- /ko-->
                                 <!-- ko if: conditionAtTimeValue() == 'dead' -->Dead<!-- /ko-->
+                                <!-- ko if: conditionAtTimeValue() == '' --><!-- /ko-->
                             </dd>
-                        <dt>ml Per Kg:</dt>
-                            <dd>{{mlsPerKg}}</dd>
-                    </dl>
-                    <!-- ko if: mlsPerKgCal() -->
-                        <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
-                    <!-- /ko -->
+                                <dt>ml Per Kg:      </dt>           <dd>{{mlsPerKg}}</dd>
+                            </dl>
+                            <!-- ko if: mlsPerKgCal() -->
+                            <div class="Blockquote">Animal received less than 20 milliliter per kilogram of weight on this day.</div>
+                            <!-- /ko -->
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -500,6 +503,7 @@
     var calendar = {};
     var calendarEvents = {};
     var hideEditPanel = true;
+    var loadWaterTotalOnce = false;
     var allowProjects = "";
     var changeableItems = ko.observableArray();
 
@@ -590,6 +594,8 @@
             }
         });
         $(document).ready(function(){
+            const calendarDates = new Map();
+            const currentTime = new Date().setHours(0,0,0,0);
 
             calendar = new FullCalendar.Calendar(calendarEl, {
 
@@ -608,7 +614,8 @@
                             console.log(" startStr " + fetchInfo.startStr);
                             console.log(" startStr " + fetchInfo.endStr);
 
-                            console.log("inside eventSource " + allowProjects);
+                            //TODO:Knockout not working when animalId is sent
+                            //have to troubleshot error "in"when sending $animalId
 
                             if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                                 let queryConfig ={};
@@ -620,6 +627,13 @@
 
                                     successCallback(
                                         events.map(function (row) {
+                                        if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
+                                            var animalIds = [];
+                                            animalIds.push(row.Id);
+                                            calendarDates.set(row.date,animalIds);
+                                        }else {
+                                            calendarDates.get(row.date).push(row.Id);
+                                        }
                                         var volume;
                                         if (row.volume != null) {
                                             volume = row.volume + 'mL';
@@ -647,13 +661,21 @@
                                             eventObj.color = '#F78181';
                                         }
 
-
+                                        console.log("event from waterSchedule");
                                         return eventObj;
                                         })
+
                                     );
                                     failureCallback((function(data){
                                         console.log ("Error retriving waterScheduleWithWeight");
                                     }));
+                                }).then(function(data){
+                                    console.log("promise returned schedule animals");
+                                    if (!loadWaterTotalOnce){
+                                        loadWaterTotal($animalId, calendarDates, calendar, currentTime);
+                                        loadWaterTotalOnce = true;
+                                    }
+
                                 })
 
                             }
@@ -662,17 +684,24 @@
                             else{
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser, isAnimalCare, $animalId);
-
+                                console.log("fetching single animal schedule");
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
 
                                     successCallback(events.map(function (row) {
+                                        if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
+                                            var animalIds = [];
+                                            animalIds.push(row.Id);
+                                            calendarDates.set(row.date, animalIds);
+                                        }else{
+                                            calendarDates.get(row.date).push(row.Id);
+                                        }
                                         var volume;
                                         if (row.volume != null) {
                                             volume = row.volume+ 'ml';
                                         }
                                         else {
-                                            volume = 'On Lixit';
+                                            volume = ' On Lixit';
                                         }
 
                                         var eventObj = {
@@ -694,144 +723,23 @@
                                         else {
                                             eventObj.color = '#F78181';
                                         }
+                                        console.log("event from waterSchedule");
                                         return eventObj;
+
                                     }))
+                                }).then(function (data){
+                                    debugger;
+                                    if(!loadWaterTotalOnce){
+                                        loadWaterTotal($animalId,calendarDates,calendar,currentTime);
+                                        loadWaterTotalOnce=true;
+                                    }
+
                                 })
 
                             }
                         },
                         id : 'WaterScheduleCoalesced' //setting source id for full calendar
                 },
-                {
-                    events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
-                        WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
-                            "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "date~lt":  new Date()
-                        }).then(function (data) {
-                            debugger;
-                            var events = data.rows;
-
-                            successCallback(
-                                    events.map(function (row) {
-                                        let parsedTotalWater = 0;
-                                        let eventTitle = "";
-                                        if( row.conditionAtTime === 'regulated' ){
-                                            if ( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                row.TotalWater = 'none';
-                                            }else if( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Dead'){
-                                                row.TotalWater = 'Dead'
-                                                eventTitle = row.id + row['Id/Demographics/calculated_status']
-                                            }
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                parsedTotalWater = row.TotalWater;
-                                                eventTitle = row.Id + " Total: " + parsedTotalWater;
-                                            }else{
-                                                eventTitle = row.Id + row['Id/Demographics/calculated_status']
-                                            }
-
-                                        }else{
-                                            if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                row.TotalWater = 'Lixit'
-                                                eventTitle = row.Id + " on Lixit";
-                                            }else{
-                                                row.TotalWater = 'Dead'
-                                                eventTitle = row.Id + row['Id/Demographics/calculated_status']
-                                            }
-                                        }
-                                        var eventObj = {
-                                            id : LABKEY.Utils.generateUUID(),
-                                            title: eventTitle,
-                                            start: new Date(row.date),
-                                            allDay: true,
-                                            groupId : row.Id,
-                                            textColor: '#000000',
-                                            rawRowData: row
-                                        };
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
-                                            eventObj.color = '#FFFFFF';
-                                        }
-                                        else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
-                                            eventObj.color = '#FF7F50';
-                                        }
-                                        else{
-                                            eventObj.color = '#EE2020'
-                                        }
-                                        return eventObj;
-                                    })
-                            );
-                            failureCallback((function (data){
-                                console.log("error from waterTotalByDateWithWeight");
-                            }))
-
-                        })
-
-                        }else{
-
-                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
-                            "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "date~lt":  new Date(),
-                            "Id~in": $animalId
-                            }).then(function (data) {
-                                var events = data.rows;
-
-                                successCallback(
-                                        events.map(function (row) {
-                                            let parsedTotalWater = 0;
-                                            let eventTitle = "";
-                                            debugger;
-                                            if(row.conditionAtTime === 'regulated') {
-                                                if (row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                    row.TotalWater = 'none';
-                                                }else if( row.TotalWater === null && row['Id/Demographics/calculated_status'] === 'Dead'){
-                                                    row.TotalWater = 'Dead'
-                                                    eventTitle = row.Id + row['Id/Demographics/calculated_status']
-                                                }
-                                                else if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                    parsedTotalWater = row.TotalWater;
-                                                    eventTitle = row.Id + " Total: " + parsedTotalWater;
-                                                }
-
-                                            }else{
-                                                if (row['Id/Demographics/calculated_status'] === 'Alive'){
-                                                    row.TotalWater = 'Lixit'
-                                                    eventTitle = row.Id + " on Lixit";
-                                                }else{
-                                                    row.TotalWater = 'Dead'
-                                                    eventTitle = row.Id + row['Id/Demographics/calculated_status']
-                                                }
-
-                                            }
-                                            var eventObj = {
-                                                id : LABKEY.Utils.generateUUID(),
-                                                title: eventTitle,
-                                                start: new Date(row.date),
-                                                textColor: '#000000',
-                                                allDay: true,
-                                                groupId : row.Id,
-                                                rawRowData: row
-                                            };
-                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
-                                                eventObj.color = '#FFFFFF';
-                                            }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
-                                                eventObj.color = '#FF7F50';
-                                            }
-                                            else{
-                                                eventObj.color = '#EE2020'
-                                            }
-                                            return eventObj;
-                                        })
-                                );
-                                failureCallback((function (data){
-                                    console.log("error from waterTotalByDateWithWeight");
-                                }))
-                                })
-                            }
-                        },
-                    id : 'totalWater' //setting source id for full calendar
-                }
             ],
             loading: function (isLoading){
                 if (isLoading){
@@ -847,7 +755,9 @@
                             color: '#fff'
                         }
                     });
-                    $('#waterInformation').collapse('show');
+                    $('#waterInformation').collapse('hide');
+                    $('#waterTotalInformation').collapse('hide');
+                    //$('#waterInformation').collapse('show');
 
                 }else{
                     $('#water-calendar').unblock();
@@ -866,8 +776,8 @@
                 //We also have to reset the dirty flag to track any change after the event is loaded into
                 //the form to be able to change.
                 if (info.event.source.id == "totalWater") {
-                    $('#waterInformation').collapse('hide');
-                    $('#waterTotalInformation').collapse('show');
+                    $('#collapseOne').collapse('hide');
+                    $('#collapseTwo').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
                     if (info.event.extendedProps.rawRowData["Id/curLocation/location"]){
                         WebUtils.VM.taskDetails["location"](info.event.extendedProps.rawRowData["Id/curLocation/location"].toString());
@@ -877,8 +787,8 @@
 
 
                 }else{
-                    $('#waterInformation').collapse('show');
-                    $('#waterTotalInformation').collapse('hide');
+                    $('#collapseOne').collapse('show');
+                    $('#collapseTwo').collapse('hide');
                     WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 }
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();
@@ -1032,7 +942,7 @@
                 rawDate:                    ko.observable(),
                 mlsPerKg:                   ko.observable(),
                 conditionAtTime:            ko.observable(),
-                status:                     ko.observable()
+                animalStatus:               ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -1357,14 +1267,22 @@
         });
 
         WebUtils.VM.taskDetails.conditionAtTimeValue = ko.pureComputed(function(){
-            if ( WebUtils.VM.taskDetails.conditionAtTime() === 'regulated' && WebUtils.VM.taskDetails.calculatedStatusValue() === 'Alive' ){
+            if (WebUtils.VM.taskDetails.calculatedStatusValue() === 'Alive' ){
+                debugger;
+                return WebUtils.VM.taskDetails.conditionAtTime();
 
             }
-            return WebUtils.VM.taskDetails.conditionAtTime();
+            else if(WebUtils.VM.taskDetails.calculatedStatusValue() === 'Dead' ){
+                return 'dead';
+            }else{
+                return '';
+
+            }
+            //return WebUtils.VM.taskDetails.conditionAtTime();
         });
 
         WebUtils.VM.taskDetails.calculatedStatusValue = ko.pureComputed(function(){
-            return WebUtils.VM.taskDetails.status();
+            return WebUtils.VM.taskDetails.animalStatus();
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel
@@ -1624,11 +1542,24 @@
 
 
     function queryConfigFunc (fetchInfo, isSuperUser, isAnimalCare, animalId){
-        let date = new Date();
+        let today = new Date();
+        let momentStarDate = fetchInfo.start.format('Y-m-d');
+        let momentEndDate = fetchInfo.end.format('Y-m-d');
+        let numOfDate;
+        let startCalendarDate;
+
+        if (moment(today).isBetween(momentStarDate, momentEndDate)){
+            numOfDate = moment(momentEndDate).diff(today, "days", false);
+            startCalendarDate = today.format(LABKEY.extDefaultDateFormat)
+        }else{
+            numOfDate = moment(momentEndDate).diff(momentStarDate,"days",false);
+            startCalendarDate = fetchInfo.start.format(LABKEY.extDefaultDateFormat);
+        }
+        console.log("value of numofDate " + numOfDate)
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
             "date~lte": fetchInfo.end.format('Y-m-d'),
-            "parameters": {NumDays: 120, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "parameters": {NumDays: numOfDate + 1, StartDate: startCalendarDate},
             "qcstate/label~eq": "Scheduled"
         };
 
@@ -1720,6 +1651,180 @@
         }else{
             return row.objectIdCoalesced
         }
+    }
+    function loadWaterTotal(animalId, calendarDates, calendar, currentTime){
+        calendar.addEventSource(
+                {
+                    events:function (fetchInfo, successCallback, failureCallback) {
+                        if (animalId === 'undefined' || animalId === "null" || animalId === ''){
+
+                            let momentStarDate = fetchInfo.start.format('Y-m-d');
+                            let momentEndDate = fetchInfo.end.format('Y-m-d');
+
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
+                                "date~gte": fetchInfo.start.format('Y-m-d'),
+                                "date~lte": fetchInfo.end.format('Y-m-d'),
+                                "parameters": {STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate}
+
+                            }).then(function (data) {
+                                var events = data.rows;
+
+                                successCallback(
+                                        events.map(function (row) {
+                                            let parsedTotalWater = 0;
+                                            let eventTitle = row.Id;
+                                            row.animalStatus=row['Id/Demographics/calculated_status'];
+                                            if( row.conditionAtTime === 'regulated' ) {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    if (row.TotalWater === null) {
+                                                        row.TotalWater = ' none';
+                                                        parsedTotalWater = row.TotalWater;
+                                                    }
+                                                    else if (row.TotalWater !== null) {
+                                                        parsedTotalWater = row.TotalWater;
+                                                        eventTitle += " Total: ";
+                                                    }
+
+                                                }
+                                                else {
+                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                            }
+                                            else {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    row.TotalWater = ' on Lixit';
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                                else {
+                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    parsedTotalWater = row.TotalWater;
+
+                                                }
+                                            }
+                                            eventTitle += parsedTotalWater;
+
+                                            var eventObj = {
+                                                id : LABKEY.Utils.generateUUID(),
+                                                title: eventTitle,
+                                                start: new Date(row.date),
+                                                allDay: true,
+                                                groupId : row.Id,
+                                                textColor: '#000000',
+                                                rawRowData: row
+                                            };
+                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                                eventObj.color = '#FFFFFF';
+                                            }
+                                            else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                                eventObj.color = '#FF7F50';
+                                            }
+                                            else{
+                                                eventObj.color = '#EE2020'
+                                            }
+                                            debugger;
+                                            if (calendarDates.has(row.date) && calendarDates.get(row.date).includes(row.Id) ){
+                                                eventObj.display = 'none';
+                                            }else{
+                                                eventObj.display = 'auto';
+                                            }
+                                            debugger;
+                                            console.log("event from waterTotal");
+                                            return eventObj;
+                                        })
+                                );
+                                failureCallback((function (data){
+                                    console.log("error from waterTotalByDateWithWeight");
+                                }))
+
+                            })
+
+                        }else{
+                            let momentStarDate = fetchInfo.start.format('Y-m-d');
+                            let momentEndDate = fetchInfo.end.format('Y-m-d');
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
+                                "date~gte": fetchInfo.start.format('Y-m-d'),
+                                "date~lte": fetchInfo.end.format('Y-m-d'),
+                                "parameters": {STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate},
+                                "Id~in": animalId
+                            }).then(function (data) {
+                                var events = data.rows;
+
+                                successCallback(
+                                        events.map(function (row) {
+
+                                                let parsedTotalWater = 0;
+                                                let eventTitle = row.Id;
+                                                row.animalStatus=row['Id/Demographics/calculated_status'];
+                                                if( row.conditionAtTime === 'regulated' ) {
+                                                    if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                        if (row.TotalWater === null) {
+                                                            row.TotalWater = ' none';
+                                                            parsedTotalWater = row.TotalWater;
+                                                        }
+                                                        else if (row.TotalWater !== null) {
+                                                            parsedTotalWater = row.TotalWater;
+                                                            eventTitle += " Total: ";
+                                                        }
+
+                                                    }
+                                                    else {
+                                                        row.TotalWater = row.TotalWater;
+                                                        parsedTotalWater += row.TotalWater;
+                                                        eventTitle += " Total: ";
+                                                    }
+                                                }
+                                                else {
+                                                    if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                        row.TotalWater = ' on Lixit';
+                                                        parsedTotalWater = row.TotalWater;
+                                                    }
+                                                    else {
+                                                        row.TotalWater = ' on Lixit';
+                                                        parsedTotalWater = row.TotalWater;
+
+                                                    }
+                                                }
+                                                eventTitle += parsedTotalWater;
+
+                                                var eventObj = {
+                                                    id : LABKEY.Utils.generateUUID(),
+                                                    title: eventTitle,
+                                                    start: new Date(row.date),
+                                                    textColor: '#000000',
+                                                    allDay: true,
+                                                    groupId : row.Id,
+                                                    rawRowData: row
+                                                };
+                                                if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                                    eventObj.color = '#FFFFFF';
+                                                }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                                    eventObj.color = '#FF7F50';
+                                                }
+                                                else{
+                                                    eventObj.color = '#EE2020'
+                                                }
+                                                if (calendarDates.has(row.date) && calendarDates.get(row.date).includes(row.Id)){
+                                                    eventObj.display = 'none';
+                                                }else{
+                                                    eventObj.display = 'auto';
+                                                }
+                                                console.log("event from waterTotal");
+                                                return eventObj;
+
+
+                                        })
+                                );
+                                failureCallback((function (data){
+                                    console.log("error from waterTotalByDateWithWeight");
+                                }))
+                            })
+                        }
+                    },
+                    id : 'totalWater', //setting source id for full calendar
+                }
+
+        );
     }
 
 </script>

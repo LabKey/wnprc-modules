@@ -492,7 +492,28 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
                 // 12. Find protocols nearing the animal limit percentage.
                 getProtocolsNearingAnimalLimitPercentage();
             }
-
+            else if (alertType.equals("colonyAlertLite")) {
+                // 1. Find all living animals with multiple active housing records.
+                getLivingAnimalsWithMultipleActiveHousingRecords();
+                // 2. Find all animals where the housing snapshot doesn't match the housing table.
+                getLivingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable();
+                // 3. Find all records with potential housing condition problems.
+                getAllRecordsWithPotentialHousingConditionProblems();
+                // 4. Find non-continguous housing records.
+                getNonContiguousHousingRecords();
+                // 5. Find open housing records where the animal is not alive.
+                getOpenHousingRecordsWhereAnimalIsNotAlive();
+                // 6. Find living animals without an active housing record.
+                getLivingAnimalsWithoutActiveHousingRecord();
+                // 7. Find all records with problems in the calculated_status field.
+                getAllRecordsWithCalculatedStatusFieldProblems();
+                // 8. Find any active assignment where the animal is not alive.
+                getActiveAssignmentsWhereAnimalIsNotAlive();
+                // 9. Find any active assignment where the project lacks a valid protocol.
+                getActiveAssignmentsWhereProjectLacksValidProtocol();
+                // 10. Find any duplicate active assignments.
+                getDuplicateActiveAssignments();
+            }
         }
 
         // Find all living animals without a weight.
@@ -601,9 +622,10 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id", null);
 
-            //Creates URL.
+            //Creates 'view query' URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingProblems", null);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingProblems");
+            //Creates 'edit query' URL.
             StringBuilder idsToCheck = new StringBuilder();
             for (String id : returnArray) {
                 idsToCheck.append(id + ";");
@@ -669,9 +691,10 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id", null);
 
-            //Creates URL.
+            //Creates 'view query' URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingConditionProblems", myFilter);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems");
+            //Creates 'edit query' URL.
             StringBuilder idsToCheck = new StringBuilder();
             for (String id : returnArray) {
                 idsToCheck.append(id + ";");
@@ -732,17 +755,27 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         // Find all records with problems in the calculated_status field.
         ArrayList<String> recordsWithCalculatedStatusFieldProblems;                     //id
         String recordsWithCalculatedStatusFieldProblemsURLView;                         //url string (view)
+        String recordsWithCalculatedStatusFieldProblemsURLEdit;                         //url string (edit)
         private void getAllRecordsWithCalculatedStatusFieldProblems() {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id", null);
 
-            //Creates URL.
+            //Creates 'view query' URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Validate_status", null);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Validate_status");
+            //Creates 'edit query' URL.
+            StringBuilder idsToCheck = new StringBuilder();
+            for (String id : returnArray) {
+                idsToCheck.append(id + ";");
+            }
+            SimpleFilter myFilter = new SimpleFilter("ID", idsToCheck.toString(), CompareType.IN);
+//            myFilter.addCondition()
+            String editQueryURL = notificationToolkit.createQueryURL(c, "update", "study", "Demographics", myFilter);
 
             //Returns data.
             this.recordsWithCalculatedStatusFieldProblems = returnArray;
             this.recordsWithCalculatedStatusFieldProblemsURLView = viewQueryURL.toString();
+            this.recordsWithCalculatedStatusFieldProblemsURLEdit = editQueryURL.toString();
         }
 
         // Find all animals lacking any assignments.
@@ -1112,7 +1145,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
 
         // Find animals with hold codes, but not on pending.
-        ArrayList<String> animalsWithHoldCodesNotPending;                               //id
+        ArrayList<String[]> animalsWithHoldCodesNotPending;                               //id
         String animalsWithHoldCodesNotPendingURLView;                                   //url string (view)
         private void getAnimalsWithHoldCodesNotPending() {
             //Creates filter.
@@ -1121,8 +1154,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
-
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Demographics", myFilter, mySort, new String[]{"Id", "hold"});
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/assignmentSummary/NumPendingAssignments~eq=0");

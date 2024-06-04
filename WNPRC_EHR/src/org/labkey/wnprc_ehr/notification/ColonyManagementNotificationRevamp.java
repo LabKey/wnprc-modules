@@ -32,11 +32,11 @@ public class ColonyManagementNotificationRevamp extends AbstractEHRNotification 
     //Notification Details
     @Override
     public String getName() {
-        return "Colony Management Notification Revamp";
+        return "Colony Management Alerts Revamp";
     }
     @Override
     public String getDescription() {
-        return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.  It was run on: " + dateToolkit.getCurrentTime();
+        return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";
     }
     @Override
     public String getEmailSubject(Container c) {
@@ -74,7 +74,7 @@ public class ColonyManagementNotificationRevamp extends AbstractEHRNotification 
         messageBody.append("<p>This email contains a series of automatic alerts about the WNPRC colony.  It was run on: " + dateToolkit.getCurrentTime() + ".<p>");
 
         // Creates message.
-        // 1. Find all living animals without a weight. (1)
+        // 1. Find all living animals without a weight.
         if (!myColonyInformationObject.livingAnimalsWithoutWeight.isEmpty()) {
             messageBody.append("<b>WARNING: The following animals do not have a weight:</b><br>");
             for (String result : myColonyInformationObject.livingAnimalsWithoutWeight) {
@@ -148,9 +148,12 @@ public class ColonyManagementNotificationRevamp extends AbstractEHRNotification 
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myColonyInformationObject.duplicateActiveAssignmentsURLView));
             messageBody.append("<hr>\n");
         }
-        // 10. Find animals with hold codes, but not on pending.    TODO: Present info here.
+        // 10. Find animals with hold codes, but not on pending.
         if (!myColonyInformationObject.animalsWithHoldCodesNotPending.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myColonyInformationObject.animalsWithHoldCodesNotPending.size() + " animals with a hold code, but not on the pending project.</b><br>");
+            for (String[] result : myColonyInformationObject.animalsWithHoldCodesNotPending) {
+                messageBody.append(result[0] + " (" + result[1] + ")<br>");
+            }
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myColonyInformationObject.animalsWithHoldCodesNotPendingURLView));
             messageBody.append("<hr>\n");
         }

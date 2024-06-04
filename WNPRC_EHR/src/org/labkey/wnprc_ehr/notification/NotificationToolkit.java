@@ -779,6 +779,11 @@ public class NotificationToolkit {
     // TODO: Remove "%3B" at the end of all queries - this is causing invalid query results.
     //      --> %3B is code for a semicolon.
     //      --> Update: removed semicolon being added, but now URL's containing IN:xxx,yyy,zzz don't work (i.e. cannot use multiple values for one key).
+    //          --> Found out this is because the function removes ';' separator from multiple values.
+    //          --> Currently causing errors in:
+    //              ColonyInformationObject > getLivingAnimalsWithMultipleActiveHousingRecords
+    //              ColonyInformationObject > getAllRecordsWithPotentialHousingConditionProblems
+    //              ColonyInformationObject > getAllRecordsWithCalculatedStatusFieldProblems
     /**
      * Creates a URL for a query matching user arguments.
      * WARNING: This should only be used with a SimpleFilter that has clauses containing only one field key.  You can use multiple clauses and multiple values for each, but each clause should only have one key.

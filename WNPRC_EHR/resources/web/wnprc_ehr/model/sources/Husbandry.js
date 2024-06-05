@@ -230,6 +230,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             location: {
                 helpPopup : 'Location of longest chairing',
+                allowBlank: false,
                 hidden: false,
                 editorConfig : {
                     id : 'location',

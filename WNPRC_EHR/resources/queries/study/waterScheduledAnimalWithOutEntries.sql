@@ -2,6 +2,7 @@ PARAMETERS(CheckDate TIMESTAMP)
 
 SELECT
     DISTINCT(id),
+    Id.death.date AS deathDate,
     CheckDate AS date,
     project AS project,
     location as location
@@ -19,4 +20,5 @@ FROM
          )
     )
 WHERE MostRecentWaterCondition = 'regulated' AND MostRecentWaterConditionDate <= CheckDate
+AND (Id.death.date IS NULL OR CheckDate <= Id.death.date )
 ORDER BY project

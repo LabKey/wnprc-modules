@@ -1437,7 +1437,11 @@ public class NotificationToolkit {
             return returnStyle.toString();
         }
 
-        //TODO: Add documentation.
+        /**
+         * This sets the row background color for the first row (containing column titles).
+         * @param headerColor   The hex code of the desired color.
+         * @return              A string containing CSS code.
+         */
         public String setHeaderRowBackgroundColor(String headerColor) {
             StringBuilder returnStyle = new StringBuilder();
             returnStyle.append(
@@ -1446,9 +1450,6 @@ public class NotificationToolkit {
             return returnStyle.toString();
         }
 
-//        public String setRowBackgroundColor(Integer[] rowsToHighlight, String highlightColor) {
-//
-//        }
     }
 
     static class NotificationRevampTable

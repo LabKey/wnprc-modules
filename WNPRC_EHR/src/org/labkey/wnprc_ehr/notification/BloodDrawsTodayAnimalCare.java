@@ -28,11 +28,11 @@ public class BloodDrawsTodayAnimalCare extends AbstractEHRNotification {
     }
     @Override
     public String getDescription() {
-        return "TODO (Blood Draw Alert A - Animal Care)";
+        return "The report is designed to identify potential problems related to all blood draws (today) assigned to Animal Care.";
     }
     @Override
     public String getEmailSubject(Container c) {
-        return "TODO (Blood Draw Alert A - Animal Care)";
+        return "Blood Draws Today (Animal Care): " + dateToolkit.getCurrentTime();
     }
     @Override
     public String getScheduleDescription() {

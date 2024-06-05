@@ -40,11 +40,11 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
     }
     @Override
     public String getDescription() {
-        return "TODO (Blood Draw Alert A - All)";
+        return "The report is designed to identify potential problems related to all blood draws (today) assigned to any group.";
     }
     @Override
     public String getEmailSubject(Container c) {
-        return "TODO (Blood Draw Alert A - All)";
+        return "Blood Draws Today (All): " + dateToolkit.getCurrentTime();
     }
     @Override
     public String getScheduleDescription() {
@@ -110,16 +110,10 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
             //Gets the blood remaining threshold.
             Float bloodThreshold = Float.parseFloat((new WNPRC_EHRModule()).getModuleProperties().get("BloodDrawThreshold").getEffectiveValue(c));
 
-            // Creates real filter.
-//            Date todayDate = dateToolkit.getDateToday();
-//            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
-//            myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL);
-
-            // Creates test filter.
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, -500);
-            Date testDate = todayCalendar.getTime();
-            SimpleFilter myFilter = new SimpleFilter("date", testDate, CompareType.DATE_GTE);
+            // Creates filter.
+            Date todayDate = dateToolkit.getDateToday();
+            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
+            myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL);
 
             // Creates sort.
             Sort mySort = new Sort("date");

@@ -36,11 +36,11 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
     }
     @Override
     public String getDescription() {
-        return "TODO (Blood Draw Alert B)";
+        return "This report is designed to identify blood draws (today & in the future) where the animal is no longer alive, or not assigned to a project.";
     }
     @Override
     public String getEmailSubject(Container c) {
-        return "TODO (Blood Draw Alert B)";
+        return "Blood Draws Issues (Today & Future): " + dateToolkit.getCurrentTime();
     }
     @Override
     public String getScheduleDescription() {
@@ -131,17 +131,10 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         ArrayList<String[]> nonAliveBloodDraws = new ArrayList<>();
         // Gets all blood draws (today & future) where animal is not alive.
         void getNonAliveBloodDraws() {
-            // Creates real filter.
-//            Date todayDate = dateToolkit.getDateToday();
-//            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.NEQ);
-//            myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
-
-            // Creates test filter.
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, -500);
-            Date testDate = todayCalendar.getTime();
+            // Creates filter.
+            Date todayDate = dateToolkit.getDateToday();
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.NEQ);
-            myFilter.addCondition("date", testDate, CompareType.DATE_GTE);
+            myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
 
             // Creates sort.
             Sort mySort = new Sort("date");
@@ -160,20 +153,12 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         ArrayList<String[]> unassignedBloodDraws = new ArrayList<>();
         // Gets all blood draws (today & future) where animal is not assigned to a project.
         void getUnassignedBloodDraws() {
-            // Creates real filter.
-//            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
-//            myFilter.addCondition("qcstate/label", "Request: Denied", CompareType.NEQ);
-//            myFilter.addCondition("projectStatus", "", CompareType.NONBLANK);
-//            myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
-
-
-            // Creates test filter.
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, -500);
-            Date testDate = todayCalendar.getTime();
-            SimpleFilter myFilter = new SimpleFilter("qcstate/label", "Request: Denied", CompareType.NEQ);
+            // Creates filter.
+            Date todayDate = dateToolkit.getDateToday();
+            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
+            myFilter.addCondition("qcstate/label", "Request: Denied", CompareType.NEQ);
             myFilter.addCondition("projectStatus", "", CompareType.NONBLANK);
-            myFilter.addCondition("date", testDate, CompareType.DATE_GTE);
+            myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
 
             // Creates sort.
             Sort mySort = new Sort("date");

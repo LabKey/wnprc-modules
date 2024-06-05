@@ -380,8 +380,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
 
 
-
-
+    // This class retrieves colony information through a number of different queries.
+    //  There are 3 different ways to construct this object; each retrieves the necessary information for the corresponding type of notification.
+    //  It can be constructed with the arguments:
+    //      'colonyAlert'           --> For ColonyAlertsNotificationRevamp.java.
+    //      'colonyManagement'      --> For ColonyManagementNotificationRevamp.java.
+    //      'colonyAlertLite'       --> For ColonyAlertsLiteNotificationRevamp.java.
     public static class ColonyInformationObject {
         Container c;
         User u;
@@ -389,7 +393,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         NotificationToolkit notificationToolkit = new NotificationToolkit();
         NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
-        // alertType can be 'colonyAlert' or 'colonyManagement'.
+        // alertType can be 'colonyAlert' 'colonyManagement' or 'colonyAlertLite'.
         public ColonyInformationObject(Container currentContainer, User currentUser, String alertType) {
             this.c = currentContainer;
             this.u = currentUser;

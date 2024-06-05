@@ -116,8 +116,7 @@ public class AdminAlertsNotificationRevamp extends AbstractEHRNotification {
         // 1. Summarizes site usage in the past 7 days (gets list of logins).
         void getSiteUsageSummaryLastSevenDays() {
             // Creates filter.
-            Date dateSevenDaysAgo = dateToolkit.getDateXDaysFromNow(-1000);    // TODO: Remove and uncomment next line after testing.
-//        Date dateSevenDaysAgo = dateToolkit.getDateXDaysFromNow(-7);
+            Date dateSevenDaysAgo = dateToolkit.getDateXDaysFromNow(-7);
             SimpleFilter myFilter = new SimpleFilter("date", dateSevenDaysAgo, CompareType.DATE_GTE);
             // Creates columns to retrieve.
             String[] targetColumns = new String[]{"dayOfWeek", "date", "Logins"};
@@ -136,8 +135,7 @@ public class AdminAlertsNotificationRevamp extends AbstractEHRNotification {
         // 2. Gets number of client errors since yesterday.
         void getNumClientErrorsSinceYesterday() {
             // Creates filter.
-            Date dateYesterday = dateToolkit.getDateXDaysFromNow(-1000);    // TODO: Remove and uncomment next line after testing.
-//            Date dateYesterday = dateToolkit.getDateXDaysFromNow(-1);
+            Date dateYesterday = dateToolkit.getDateXDaysFromNow(-1);
             SimpleFilter myFilter = new SimpleFilter("date", dateYesterday, CompareType.DATE_GTE);
             myFilter.addCondition("key1", "LabKey Server Backup", CompareType.NEQ);
             // Runs query.

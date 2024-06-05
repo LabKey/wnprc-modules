@@ -120,7 +120,6 @@ import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNoti
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotificationRevamp;
-import org.labkey.wnprc_ehr.notification.BloodAlertsNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesSupervisorNotification;
 import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
 import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
@@ -382,11 +381,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new DeathNotificationRevamp(this),
                 new ColonyAlertsNotificationRevamp(this),
                 new AnimalRequestNotificationRevamp(this),
-                new BloodAlertsNotificationRevamp(this),
-                new BloodAlertsNotificationRevampAnimalCare(this),
-                new BloodAlertsNotificationRevampResearchStaff(this),
-                new BloodAlertsNotificationRevampSPI(this),
-                new BloodAlertsNotificationRevampVetStaff(this),
                 new BloodDrawsTodayAll(this),
                 new BloodDrawsTodayAnimalCare(this),
                 new BloodDrawsTodayVetStaff(this),

@@ -95,7 +95,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
     public String getMessageBodyHTML(Container c, User u) {
         //Creates variables & gets data.
         final StringBuilder messageBody = new StringBuilder();
-        ColonyAlertObject myColonyAlertObject = new ColonyAlertObject(c, u);
+        ColonyInformationObject myColonyAlertObject = new ColonyInformationObject(c, u, "colonyAlert");
 
         //Begins message info.
         messageBody.append("<p> This email contains a series of automatic alerts about the colony.  It was run on: " + dateToolkit.getCurrentTime() + ".</p>");
@@ -344,7 +344,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //34. Summarize events in the last 5 days.
         if (!myColonyAlertObject.birthsInLastFiveDays.isEmpty()) {
-            messageBody.append("Births since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Births since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
             for (String result : myColonyAlertObject.birthsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
@@ -352,7 +352,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //35. Deaths in the last 5 days.
         if (!myColonyAlertObject.deathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Deaths since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
             for (String result : myColonyAlertObject.deathsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
@@ -360,7 +360,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
         //36. Prenatal deaths in the last 5 days.
         if (!myColonyAlertObject.prenatalDeathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateFiveDaysAgo() + ":<br>");
+            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
             for (String result : myColonyAlertObject.prenatalDeathsInLastFiveDays) {
                 messageBody.append(result + "<br>");
             }
@@ -380,96 +380,147 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
 
 
-
-
-    public static class ColonyAlertObject {
+    // This class retrieves colony information through a number of different queries.
+    //  There are 3 different ways to construct this object; each retrieves the necessary information for the corresponding type of notification.
+    //  It can be constructed with the arguments:
+    //      'colonyAlert'           --> For ColonyAlertsNotificationRevamp.java.
+    //      'colonyManagement'      --> For ColonyManagementNotificationRevamp.java.
+    //      'colonyAlertLite'       --> For ColonyAlertsLiteNotificationRevamp.java.
+    public static class ColonyInformationObject {
         Container c;
         User u;
         Integer expiringSoonNumDays = 14;
         NotificationToolkit notificationToolkit = new NotificationToolkit();
         NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
-        public ColonyAlertObject(Container currentContainer, User currentUser) {
+        // alertType can be 'colonyAlert' 'colonyManagement' or 'colonyAlertLite'.
+        public ColonyInformationObject(Container currentContainer, User currentUser, String alertType) {
             this.c = currentContainer;
             this.u = currentUser;
 
-            //1. Find all living animals without a weight.
-            getLivingAnimalsWithoutWeight();
-            //2. Find all occupied cages without dimensions.
-            getOccupiedCagesWithoutDimensions();
-            //3. List all animals in protected contact without an adjacent pc animal.
-            getLivingAnimalsInProtectedContact();
-            //4. Find all living animals with multiple active housing records.
-            getLivingAnimalsWithMultipleActiveHousingRecords();
-            //5. Find all animals where the housing snapshot doesn't match the housing table.
-            getLivingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable();
-            //6. Find all records with potential housing condition problems.
-            getAllRecordsWithPotentialHousingConditionProblems();
-            //7. Find open housing records where the animal is not alive.
-            getOpenHousingRecordsWhereAnimalIsNotAlive();
-            //8. Find living animals without an active housing record.
-            getLivingAnimalsWithoutActiveHousingRecord();
-            //9. Find all records with problems in the calculated_status field.
-            getAllRecordsWithCalculatedStatusFieldProblems();
-            //10. Find all animals lacking any assignments.
-            getAnimalsLackingAssignments();
-            //11. Find any active assignment where the animal is not alive.
-            getActiveAssignmentsWhereAnimalIsNotAlive();
-            //12. Find any active assignment where the project lacks a valid protocol.
-            getActiveAssignmentsWhereProjectLacksValidProtocol();
-            //13. Find any duplicate active assignments.
-            getDuplicateActiveAssignments();
-            //14. Find all living siv+ animals not exempt from pair housing (20060202).
-            getLivingSivPosAnimalsNotExemptFromPairHousing();
-            //15. Find all living shiv+ animals not exempt from pair housing (20060202).
-            getLivingShivPosAnimalsNotExemptFromPairHousing();
-            //16. Find open-ended treatments where the animal is not alive.
-            getOpenEndedTreatmentsWhereAnimalIsNotAlive();
-            //17. Find open-ended problems where the animal is not alive.
-            getOpenEndedProblemsWhereAnimalIsNotAlive();
-//            //18. Find open assignments where the animal is not alive.
-//            getOpenAssignmentsWhereAnimalIsNotAlive();
-            //19. Find non-continguous housing records.
-            getNonContiguousHousingRecords();
-            //20. Find birth records in the past 90 days missing a gender.
-            getBirthRecordsMissingGender();
-            //21. Find demographics records in the past 90 days missing a gender.
-            getDemographicsMissingGender();
-            //22. Find prenatal records in the past 90 days missing a gender.
-            getPrenatalRecordsMissingGender();
-            //23. Find prenatal records in the past 90 days missing species.
-            getPrenatalRecordsMissingSpecies();
-            //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
-            getAnimalsThatDiedWithoutWeight();
-            //25. Find TB records lacking a result more than 10 days old, but less than 90.
-            getTbRecordsLackingResult();
-//            //26. Find protocols nearing the animal limit count.
-//            getProtocolsNearingAnimalLimitCount();
-//            //27. Find protocols nearing the animal limit percentage.
-//            getProtocolsNearingAnimalLimitPercentage();
-            //28. Find protocols expiring soon.
-            getProtocolsExpiringSoon();
-            //29. Find birth records without a corresponding demographics record.
-            getBirthRecordsWithoutDemographicsRecord();
-            //30. Find death records without a corresponding demographics record.
-            getDeathRecordsWithoutDemographicsRecord();
-            //31. Find animals with hold codes, but not on pending.
-            getAnimalsWithHoldCodesNotPending();
-            //32. Find assignments with projected releases today.
-            getAssignmentsWithProjectedReleasesToday();
-            //33. Find assignments with projected releases tomorrow.
-            getAssignmentsWithProjectedReleasesTomorrow();
-            //34. Summarize events in the last 5 days.
-            getBirthsInLastFiveDays();
-            //35. Deaths in the last 5 days.
-            getDeathsInLastFiveDays();
-            //36. Prenatal deaths in the last 5 days.
-            getPrenatalDeathsInLastFiveDays();
-            //37. Find the total finalized records with future dates.
-            getTotalFinalizedRecordsWithFutureDates();
+            if (alertType.equals("colonyAlert")) {
+                //1. Find all living animals without a weight.
+                getLivingAnimalsWithoutWeight();
+                //2. Find all occupied cages without dimensions.
+                getOccupiedCagesWithoutDimensions();
+                //3. List all animals in protected contact without an adjacent pc animal.
+                getLivingAnimalsInProtectedContact();
+                //4. Find all living animals with multiple active housing records.
+                getLivingAnimalsWithMultipleActiveHousingRecords();
+                //5. Find all animals where the housing snapshot doesn't match the housing table.
+                getLivingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable();
+                //6. Find all records with potential housing condition problems.
+                getAllRecordsWithPotentialHousingConditionProblems();
+                //7. Find open housing records where the animal is not alive.
+                getOpenHousingRecordsWhereAnimalIsNotAlive();
+                //8. Find living animals without an active housing record.
+                getLivingAnimalsWithoutActiveHousingRecord();
+                //9. Find all records with problems in the calculated_status field.
+                getAllRecordsWithCalculatedStatusFieldProblems();
+                //10. Find all animals lacking any assignments.
+                getAnimalsLackingAssignments();
+                //11. Find any active assignment where the animal is not alive.
+                getActiveAssignmentsWhereAnimalIsNotAlive();
+                //12. Find any active assignment where the project lacks a valid protocol.
+                getActiveAssignmentsWhereProjectLacksValidProtocol();
+                //13. Find any duplicate active assignments.
+                getDuplicateActiveAssignments();
+                //14. Find all living siv+ animals not exempt from pair housing (20060202).
+                getLivingSivPosAnimalsNotExemptFromPairHousing();
+                //15. Find all living shiv+ animals not exempt from pair housing (20060202).
+                getLivingShivPosAnimalsNotExemptFromPairHousing();
+                //16. Find open-ended treatments where the animal is not alive.
+                getOpenEndedTreatmentsWhereAnimalIsNotAlive();
+                //17. Find open-ended problems where the animal is not alive.
+                getOpenEndedProblemsWhereAnimalIsNotAlive();
+                // REMOVED 18 - Duplicate of 11 (getOpenAssignmentsWhereAnimalIsNotAlive).
+                //19. Find non-continguous housing records.
+                getNonContiguousHousingRecords();
+                //20. Find birth records in the past 90 days missing a gender.
+                getBirthRecordsMissingGender();
+                //21. Find demographics records in the past 90 days missing a gender.
+                getDemographicsMissingGender();
+                //22. Find prenatal records in the past 90 days missing a gender.
+                getPrenatalRecordsMissingGender();
+                //23. Find prenatal records in the past 90 days missing species.
+                getPrenatalRecordsMissingSpecies();
+                //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
+                getAnimalsThatDiedWithoutWeight();
+                //25. Find TB records lacking a result more than 10 days old, but less than 90.
+                getTbRecordsLackingResult();
+                // REMOVED 26 & 27 per user request (getProtocolsNearingAnimalLimitCount & getProtocolsNearingAnimalLimitPercentage).
+                //28. Find protocols expiring soon.
+                getProtocolsExpiringSoon();
+                //29. Find birth records without a corresponding demographics record.
+                getBirthRecordsWithoutDemographicsRecord();
+                //30. Find death records without a corresponding demographics record.
+                getDeathRecordsWithoutDemographicsRecord();
+                //31. Find animals with hold codes, but not on pending.
+                getAnimalsWithHoldCodesNotPending();
+                //32. Find assignments with projected releases today.
+                getAssignmentsWithProjectedReleasesToday();
+                //33. Find assignments with projected releases tomorrow.
+                getAssignmentsWithProjectedReleasesTomorrow();
+                //34. Summarize events in the last 5 days.
+                getBirthsInLastFiveDays();
+                //35. Deaths in the last 5 days.
+                getDeathsInLastFiveDays();
+                //36. Prenatal deaths in the last 5 days.
+                getPrenatalDeathsInLastFiveDays();
+                //37. Find the total finalized records with future dates.
+                getTotalFinalizedRecordsWithFutureDates();
+            }
+            else if (alertType.equals("colonyManagement")) {
+                // 1. Find all living animals without a weight.
+                getLivingAnimalsWithoutWeight();
+                // 2. Find all occupied cages without dimensions.
+                getOccupiedCagesWithoutDimensions();
+                // 3. List all animals in protected contact without an adjacent pc animal.
+                getLivingAnimalsInProtectedContact();
+                // 4. Find all records with potential housing condition problems.
+                getAllRecordsWithPotentialHousingConditionProblems();
+                // 5. Find all animals with cage size problems.
+                getAnimalsWithCageSizeProblems();
+                // 6. Find all animals lacking any assignments.
+                getAnimalsLackingAssignments();
+                // 7. Find any active assignment where the animal is not alive.
+                getActiveAssignmentsWhereAnimalIsNotAlive();
+                // 8. Find any active assignment where the project lacks a valid protocol.
+                getActiveAssignmentsWhereProjectLacksValidProtocol();
+                // 9. Find any duplicate active assignments.
+                getDuplicateActiveAssignments();
+                // 10. Find animals with hold codes, but not on pending.
+                getAnimalsWithHoldCodesNotPending();
+                // 11. Find protocols nearing the animal limit count.
+                getProtocolsNearingAnimalLimitCount();
+                // 12. Find protocols nearing the animal limit percentage.
+                getProtocolsNearingAnimalLimitPercentage();
+            }
+            else if (alertType.equals("colonyAlertLite")) {
+                // 1. Find all living animals with multiple active housing records.
+                getLivingAnimalsWithMultipleActiveHousingRecords();
+                // 2. Find all animals where the housing snapshot doesn't match the housing table.
+                getLivingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable();
+                // 3. Find all records with potential housing condition problems.
+                getAllRecordsWithPotentialHousingConditionProblems();
+                // 4. Find non-continguous housing records.
+                getNonContiguousHousingRecords();
+                // 5. Find open housing records where the animal is not alive.
+                getOpenHousingRecordsWhereAnimalIsNotAlive();
+                // 6. Find living animals without an active housing record.
+                getLivingAnimalsWithoutActiveHousingRecord();
+                // 7. Find all records with problems in the calculated_status field.
+                getAllRecordsWithCalculatedStatusFieldProblems();
+                // 8. Find any active assignment where the animal is not alive.
+                getActiveAssignmentsWhereAnimalIsNotAlive();
+                // 9. Find any active assignment where the project lacks a valid protocol.
+                getActiveAssignmentsWhereProjectLacksValidProtocol();
+                // 10. Find any duplicate active assignments.
+                getDuplicateActiveAssignments();
+            }
         }
 
-        //1. Find all living animals without a weight.
+        // Find all living animals without a weight.
         ArrayList<String> livingAnimalsWithoutWeight;                                   //id
         String livingAnimalsWithoutWeightURL;                                           //url string (view)
         private void getLivingAnimalsWithoutWeight() {
@@ -490,7 +541,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingAnimalsWithoutWeightURL = viewQueryURL.toString();
         }
 
-        //2. Find all occupied cages without dimensions.
+        // Find all occupied cages without dimensions.
         ArrayList<String[]> occupiedCagesWithoutDimensions;                             //room, cage
         String occupiedCagesWithoutDimensionsURLView;                                   //url string (view)
         String occupiedCagesWithoutDimensionsURLEdit;                                   //url string (edit)
@@ -510,7 +561,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.occupiedCagesWithoutDimensionsURLEdit = editQueryURL.toString();
         }
 
-        //3. List all animals in protected contact without an adjacent pc animal.
+        // List all animals in protected contact without an adjacent pc animal.
         ArrayList<String[]> livingAnimalsInProtectedContact;                            //id, cage, room
         String livingAnimalsInProtectedContactURLView;                                  //url string (view)
         private void getLivingAnimalsInProtectedContact() {
@@ -565,7 +616,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingAnimalsInProtectedContactURLView = viewQueryURL.toString();
         }
 
-        //4. Find all living animals with multiple active housing records.
+        // Find all living animals with multiple active housing records.
         ArrayList<String> livingAnimalsWithMultipleActiveHousingRecords;                //id
         String livingAnimalsWithMultipleActiveHousingRecordsURLView;                    //url string (view)
         String livingAnimalsWithMultipleActiveHousingRecordsURLEdit;                    //url string (edit)
@@ -575,9 +626,10 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingProblems", null, mySort, "Id", null);
 
-            //Creates URL.
+            //Creates 'view query' URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingProblems", null);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingProblems");
+            //Creates 'edit query' URL.
             StringBuilder idsToCheck = new StringBuilder();
             for (String id : returnArray) {
                 idsToCheck.append(id + ";");
@@ -593,7 +645,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingAnimalsWithMultipleActiveHousingRecordsURLEdit = editQueryURL.toString();
         }
 
-        //5. Find all animals where the housing snapshot doesn't match the housing table.
+        // Find all animals where the housing snapshot doesn't match the housing table.
         //TODO: Need to update snapshot.
         ArrayList<String> livingAnimalsWhereHousingSnapshotDoesNotMatchHousingTable;    //id
         String livingAnimalsWhereHousingSnapshotDoesNotMatchHousingTableURLView;        //url string (view)
@@ -631,7 +683,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingAnimalsWhereHousingSnapshotDoesNotMatchHousingTableURLView = viewQueryURL.toString();
         }
 
-        //6. Find all records with potential housing condition problems.
+        // Find all records with potential housing condition problems.
         ArrayList<String> recordsWithPotentialHousingConditionProblems;                 //id
         String recordsWithPotentialHousingConditionProblemsURLView;                     //url string (view)
         String recordsWithPotentialHousingConditionProblemsURLEdit;                     //url string (edit)
@@ -643,9 +695,10 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "housingConditionProblems", myFilter, mySort, "Id", null);
 
-            //Creates URL.
+            //Creates 'view query' URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "housingConditionProblems", myFilter);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems");
+            //Creates 'edit query' URL.
             StringBuilder idsToCheck = new StringBuilder();
             for (String id : returnArray) {
                 idsToCheck.append(id + ";");
@@ -661,7 +714,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.recordsWithPotentialHousingConditionProblemsURLEdit = editQueryURL.toString();
         }
 
-        //7. Find open housing records where the animal is not alive.
+        // Find open housing records where the animal is not alive.
         ArrayList<String> openHousingRecordsWhereAnimalIsNotAlive;                      //id
         String openHousingRecordsWhereAnimalIsNotAliveURLView;                          //url string (view)
         private void getOpenHousingRecordsWhereAnimalIsNotAlive() {
@@ -682,7 +735,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.openHousingRecordsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
         }
 
-        //8. Find living animals without an active housing record.
+        // Find living animals without an active housing record.
         ArrayList<String> livingAnimalsWithoutActiveHousingRecord;                      //id
         String livingAnimalsWithoutActiveHousingRecordURLView;                          //url string (view)
         private void getLivingAnimalsWithoutActiveHousingRecord() {
@@ -703,23 +756,33 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingAnimalsWithoutActiveHousingRecordURLView = viewQueryURL.toString();
         }
 
-        //9. Find all records with problems in the calculated_status field.
+        // Find all records with problems in the calculated_status field.
         ArrayList<String> recordsWithCalculatedStatusFieldProblems;                     //id
         String recordsWithCalculatedStatusFieldProblemsURLView;                         //url string (view)
+        String recordsWithCalculatedStatusFieldProblemsURLEdit;                         //url string (edit)
         private void getAllRecordsWithCalculatedStatusFieldProblems() {
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Validate_status", null, null, "Id", null);
 
-            //Creates URL.
+            //Creates 'view query' URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Validate_status", null);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Validate_status");
+            //Creates 'edit query' URL.
+            StringBuilder idsToCheck = new StringBuilder();
+            for (String id : returnArray) {
+                idsToCheck.append(id + ";");
+            }
+            SimpleFilter myFilter = new SimpleFilter("ID", idsToCheck.toString(), CompareType.IN);
+//            myFilter.addCondition()
+            String editQueryURL = notificationToolkit.createQueryURL(c, "update", "study", "Demographics", myFilter);
 
             //Returns data.
             this.recordsWithCalculatedStatusFieldProblems = returnArray;
             this.recordsWithCalculatedStatusFieldProblemsURLView = viewQueryURL.toString();
+            this.recordsWithCalculatedStatusFieldProblemsURLEdit = editQueryURL.toString();
         }
 
-        //10. Find all animals lacking any assignments.
+        // Find all animals lacking any assignments.
         ArrayList<String> animalsLackingAssignments;                                    //id
         String animalsLackingAssignmentsURLView;                                        //url string (view)
         private void getAnimalsLackingAssignments() {
@@ -740,7 +803,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.animalsLackingAssignmentsURLView = viewQueryURL.toString();
         }
 
-        //11. Find any active assignment where the animal is not alive.
+        // Find any active assignment where the animal is not alive.
         ArrayList<String> activeAssignmentsWhereAnimalIsNotAlive;                       //id
         String activeAssignmentsWhereAnimalIsNotAliveURLView;                           //url string (view)
         private void getActiveAssignmentsWhereAnimalIsNotAlive() {
@@ -759,7 +822,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.activeAssignmentsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
         }
 
-        //12. Find any active assignment where the project lacks a valid protocol.
+        // Find any active assignment where the project lacks a valid protocol.
         //REVAMP EDIT: Changed from (calculated_status does not equal alive or is null) to (calculated_status equals alive).
         ArrayList<String> activeAssignmentsWhereProjectLacksValidProtocol;              //id
         String activeAssignmentsWhereProjectLacksValidProtocolURLView;                  //url string (view)
@@ -780,7 +843,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.activeAssignmentsWhereProjectLacksValidProtocolURLView = viewQueryURL.toString();
         }
 
-        //13. Find any duplicate active assignments.
+        // Find any duplicate active assignments.
         ArrayList<String> duplicateActiveAssignments;                                   //id
         String duplicateActiveAssignmentsURLView;                                       //url string (view)
         private void getDuplicateActiveAssignments() {
@@ -796,7 +859,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.duplicateActiveAssignmentsURLView = viewQueryURL.toString();
         }
 
-        //14. Find all living siv+ animals not exempt from pair housing (20060202).
+        // Find all living siv+ animals not exempt from pair housing (20060202).
         ArrayList<String> livingSivPosAnimalsNotExemptFromPairHousing;                  //id
         String livingSivPosAnimalsNotExemptFromPairHousingURLView;                      //url string (view)
         private void getLivingSivPosAnimalsNotExemptFromPairHousing() {
@@ -816,7 +879,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingSivPosAnimalsNotExemptFromPairHousingURLView = viewQueryURL.toString();
         }
 
-        //15. Find all living shiv+ animals not exempt from pair housing (20060202).
+        // Find all living shiv+ animals not exempt from pair housing (20060202).
         ArrayList<String> livingShivPosAnimalsNotExemptFromPairHousing;                 //id
         String livingShivPosAnimalsNotExemptFromPairHousingURLView;                     //url string (view)
         private void getLivingShivPosAnimalsNotExemptFromPairHousing() {
@@ -836,7 +899,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.livingShivPosAnimalsNotExemptFromPairHousingURLView = viewQueryURL.toString();
         }
 
-        //16. Find open-ended treatments where the animal is not alive.
+        // Find open-ended treatments where the animal is not alive.
         ArrayList<String> openEndedTreatmentsWhereAnimalIsNotAlive;                     //id
         String openEndedTreatmentsWhereAnimalIsNotAliveURLView;                         //url string (view)
         private void getOpenEndedTreatmentsWhereAnimalIsNotAlive() {
@@ -855,7 +918,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.openEndedTreatmentsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
         }
 
-        //17. Find open-ended problems where the animal is not alive.
+        // Find open-ended problems where the animal is not alive.
         ArrayList<String> openEndedProblemsWhereAnimalIsNotAlive;                       //id
         String openEndedProblemsWhereAnimalIsNotAliveURLView;                           //url string (view)
         private void getOpenEndedProblemsWhereAnimalIsNotAlive() {
@@ -874,9 +937,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.openEndedProblemsWhereAnimalIsNotAliveURLView = viewQueryURL.toString();
         }
 
-        //REMOVED QUERY 18 (it was a duplicate of 11).
-
-        //19. Find non-continguous housing records.
+        // Find non-continguous housing records.
         ArrayList<String> nonContiguousHousingRecords;                                  //id
         String nonContiguousHousingRecordsURLView;                                      //url string (view)
         private void getNonContiguousHousingRecords() {
@@ -900,7 +961,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.nonContiguousHousingRecordsURLView = viewQueryURL.toString();
         }
 
-        //20. Find birth records in the past 90 days missing a gender.
+        // Find birth records in the past 90 days missing a gender.
         ArrayList<String[]> birthRecordsMissingGender;                                  //id, date
         String birthRecordsMissingGenderURLView;                                        //url string (view)
         private void getBirthRecordsMissingGender() {
@@ -919,7 +980,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.birthRecordsMissingGenderURLView = viewQueryURL.toString();
         }
 
-        //21. Find demographics records in the past 90 days missing a gender.
+        // Find demographics records in the past 90 days missing a gender.
         ArrayList<String[]> demographicsMissingGender;                                  //id, birth
         String demographicsMissingGenderURLView;                                        //url string (view)
         private void getDemographicsMissingGender() {
@@ -940,7 +1001,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.demographicsMissingGenderURLView = viewQueryURL.toString();
         }
 
-        //22. Find prenatal records in the past 90 days missing a gender.
+        // Find prenatal records in the past 90 days missing a gender.
         ArrayList<String[]> prenatalRecordsMissingGender;                               //id, date
         String prenatalRecordsMissingGenderURLView;                                     //url string (view)
         private void getPrenatalRecordsMissingGender() {
@@ -961,7 +1022,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.prenatalRecordsMissingGenderURLView = viewQueryURL.toString();
         }
 
-        //23. Find prenatal records in the past 90 days missing species.
+        // Find prenatal records in the past 90 days missing species.
         ArrayList<String[]> prenatalRecordsMissingSpecies;                              //id, date
         String prenatalRecordsMissingSpeciesURLView;                                    //url string (view)
         private void getPrenatalRecordsMissingSpecies() {
@@ -982,7 +1043,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.prenatalRecordsMissingSpeciesURLView = viewQueryURL.toString();
         }
 
-        //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
+        // Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
         ArrayList<String> animalsThatDiedWithoutWeight;                                 //id
         String animalsThatDiedWithoutWeightURLView;                                     //url string (view)
         private void getAnimalsThatDiedWithoutWeight() {
@@ -1002,7 +1063,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.animalsThatDiedWithoutWeightURLView = viewQueryURL.toString();
         }
 
-        //25. Find TB records lacking a result more than 10 days old, but less than 90.
+        // Find TB records lacking a result more than 10 days old, but less than 90.
         ArrayList<String> tbRecordsLackingResult;                                       //id
         String tbRecordsLackingResultURLView;                                           //url string (view)
         private void getTbRecordsLackingResult() {
@@ -1024,7 +1085,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
         //REMOVED QUERIES 26 & 27 (per user request).
 
-        //28. Find protocols expiring soon.
+        // Find protocols expiring soon.
         ArrayList<String> protocolsExpiringSoon;                                        //protocol
         String protocolsExpiringSoonURLView;                                            //url string (view)
         private void getProtocolsExpiringSoon() {
@@ -1046,7 +1107,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.protocolsExpiringSoonURLView = viewQueryURL.toString();
         }
 
-        //29. Find birth records without a corresponding demographics record.
+        // Find birth records without a corresponding demographics record.
         ArrayList<String> birthRecordsWithoutDemographicsRecord;                        //id
         String birthRecordsWithoutDemographicsRecordURLView;                            //url string (view)
         private void getBirthRecordsWithoutDemographicsRecord() {
@@ -1066,7 +1127,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.birthRecordsWithoutDemographicsRecordURLView = viewQueryURL.toString();
         }
 
-        //30. Find death records without a corresponding demographics record.
+        // Find death records without a corresponding demographics record.
         ArrayList<String> deathRecordsWithoutDemographicsRecord;                        //id
         String deathRecordsWithoutDemographicsRecordURLView;                            //url string (view)
         private void getDeathRecordsWithoutDemographicsRecord() {
@@ -1087,8 +1148,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.deathRecordsWithoutDemographicsRecordURLView = viewQueryURL.toString();
         }
 
-        //31. Find animals with hold codes, but not on pending.
-        ArrayList<String> animalsWithHoldCodesNotPending;                               //id
+        // Find animals with hold codes, but not on pending.
+        ArrayList<String[]> animalsWithHoldCodesNotPending;                               //id
         String animalsWithHoldCodesNotPendingURLView;                                   //url string (view)
         private void getAnimalsWithHoldCodesNotPending() {
             //Creates filter.
@@ -1097,8 +1158,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
-
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, mySort, "Id", null);
+            ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Demographics", myFilter, mySort, new String[]{"Id", "hold"});
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Demographics", myFilter);
 //            Path viewQueryURL = new Path(ActionURL.getBaseServerURL(), "query", c.getPath(), "executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/assignmentSummary/NumPendingAssignments~eq=0");
@@ -1108,7 +1169,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.animalsWithHoldCodesNotPendingURLView = viewQueryURL.toString();
         }
 
-        //32. Find assignments with projected releases today.
+        // Find assignments with projected releases today.
         ArrayList<String> assignmentsWithProjectedReleasesToday;                        //id
         String assignmentsWithProjectedReleasesTodayURLView;                            //url string (view)
         private void getAssignmentsWithProjectedReleasesToday() {
@@ -1131,12 +1192,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.assignmentsWithProjectedReleasesTodayURLView = viewQueryURL.toString();
         }
 
-        //33. Find assignments with projected releases tomorrow.
+        // Find assignments with projected releases tomorrow.
         ArrayList<String> assignmentsWithProjectedReleasesTomorrow;                     //id
         String assignmentsWithProjectedReleasesTomorrowURLView;                         //url string (view)
         private void getAssignmentsWithProjectedReleasesTomorrow() {
             //Gets info.
-            Date tomorrowDate = dateToolkit.getDateTomorrow();
+            Date tomorrowDate = dateToolkit.getDateXDaysFromNow(1);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("projectedRelease", tomorrowDate, CompareType.DATE_EQUAL);
             //Runs query.
@@ -1151,12 +1212,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.assignmentsWithProjectedReleasesTomorrowURLView = viewQueryURL.toString();
         }
 
-        //34. Summarize events in the last 5 days.
+        // Summarize events in the last 5 days.
         ArrayList<String> birthsInLastFiveDays;                                         //id
         String birthsInLastFiveDaysURLView;                                             //url string (view)
         private void getBirthsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
@@ -1173,12 +1234,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.birthsInLastFiveDaysURLView = viewQueryURL.toString();
         }
 
-        //35. Deaths in the last 5 days.
+        // Deaths in the last 5 days.
         ArrayList<String> deathsInLastFiveDays;                                         //id
         String deathsInLastFiveDaysURLView;                                             //url string (view)
         private void getDeathsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
@@ -1195,12 +1256,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.deathsInLastFiveDaysURLView = viewQueryURL.toString();
         }
 
-        //36. Prenatal deaths in the last 5 days.
+        // Prenatal deaths in the last 5 days.
         ArrayList<String> prenatalDeathsInLastFiveDays;                                 //id
         String prenatalDeathsInLastFiveDaysURLView;                                     //url string (view)
         private void getPrenatalDeathsInLastFiveDays() {
             //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateFiveDaysAgo();
+            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
             //Creates sort.
@@ -1217,7 +1278,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.prenatalDeathsInLastFiveDaysURLView = viewQueryURL.toString();
         }
 
-        //37. Find the total finalized records with future dates.
+        // Find the total finalized records with future dates.
         ArrayList<String> totalFinalizedRecordsWithFutureDates;                         //id
         String totalFinalizedRecordsWithFutureDatesURLView;                             //url string (view)
         private void getTotalFinalizedRecordsWithFutureDates() {
@@ -1238,6 +1299,62 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Returns data.
             this.totalFinalizedRecordsWithFutureDates = returnArray;
             this.totalFinalizedRecordsWithFutureDatesURLView = viewQueryURL.toString();
+        }
+
+        // Find all animals with cage size problems.
+        ArrayList<String> cagesWithSizeProblems;                                        //cage location
+        String cagesWithSizeProblemsURLView;                                            //url string (view)
+        private void getAnimalsWithCageSizeProblems() {
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("cageStatus", "ERROR", CompareType.EQUAL);
+            // Runs query.
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "CageReview", myFilter, null, "Location", null);
+
+            // Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "CageReview", myFilter);
+
+            // Returns data.
+            this.cagesWithSizeProblems = returnArray;
+            this.cagesWithSizeProblemsURLView = viewQueryURL.toString();
+        }
+
+        // Find protocols nearing the animal limit count.
+        ArrayList<HashMap<String, String>> protocolsNearingAnimalLimitCount;            //protocol
+        String protocolsNearingAnimalLimitCountURLView;                                 //url string (view)
+        private void getProtocolsNearingAnimalLimitCount() {
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("TotalRemaining", 5, CompareType.LT);
+            myFilter.addCondition("allowed", 0, CompareType.NEQ);
+            // Sets target columns.
+            String[] targetColumns = new String[]{"protocol", "allowed", "PercentUsed", "TotalRemaining", "Species", "protocol/inves"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, targetColumns);
+
+            //Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "ehr", "protocolTotalAnimalsBySpecies", myFilter);
+
+            //Returns data.
+            this.protocolsNearingAnimalLimitCount = returnArray;
+            this.protocolsNearingAnimalLimitCountURLView = viewQueryURL;
+        }
+
+        // Find protocols nearing the animal limit percentage.
+        ArrayList<HashMap<String, String>> protocolsNearingAnimalLimitPercentage;       //protocol
+        String protocolsNearingAnimalLimitPercentageURLView;                            //url string (view)
+        private void getProtocolsNearingAnimalLimitPercentage() {
+            //Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("PercentUsed", 95, CompareType.GTE);
+            // Sets target columns.
+            String[] targetColumns = new String[]{"protocol", "allowed", "PercentUsed", "TotalRemaining", "Species", "protocol/inves"};
+            //Runs query.
+            ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr", "protocolTotalAnimalsBySpecies", myFilter, null, targetColumns);
+
+            //Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "ehr", "protocolTotalAnimalsBySpecies", myFilter);
+
+            //Returns data.
+            this.protocolsNearingAnimalLimitPercentage = returnArray;
+            this.protocolsNearingAnimalLimitPercentageURLView = viewQueryURL;
         }
     }
 }

@@ -39,7 +39,7 @@ export const DocumentAttachmentPanel: FC<Props> = memo(props => {
     return (
         <>
             <Panel
-                className="panel panel-default"
+                className={'panel panel-default domain-form-panel'}
                 expanded={true}
                 onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
             >

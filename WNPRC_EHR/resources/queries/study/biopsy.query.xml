@@ -29,6 +29,9 @@
                   	<inputType>textarea</inputType>
                   	<columnTitle>Histological Description</columnTitle>
                   </column>
+                    <column columnName="performedby">
+                        <columnTitle>Pathologist</columnTitle>
+                    </column>
                   <column columnName="type">
                     <columnTitle>Type</columnTitle>
                     <fk>

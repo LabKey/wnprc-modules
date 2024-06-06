@@ -1,0 +1,19 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="procedureQueryChargeIdAssoc" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="chargeId">
+                        <columnTitle>Chargeable Item</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItemsWithGroup</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>chargeItem</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

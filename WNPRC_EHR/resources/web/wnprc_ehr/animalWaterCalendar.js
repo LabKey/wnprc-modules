@@ -5,19 +5,20 @@ let entireColony = false;
 EHR.reports.animalWaterCalendar = function (panel, tab){
 
     var animalIds = [];
-    //debugger;
     if (tab.filters.subjects){
         // tab.filters.subjects.forEach (animalId => animalIds+=animalId+';');
         // animalIds = animalIds.substring(0, animalIds.length-1);
         animalIds = tab.filters.subjects;
+        entireColony = false;
         renderCalendar (animalIds, tab);
         calendarRender++;
-    } if (panel.getFilterArray(tab).nonRemovable.length === 0){
+    } else if (panel.getFilterArray(tab).nonRemovable.length === 0){
         entireColony = true;
         panel.resolveSubjectsFromHousing(tab,renderCalendar,this);
         //renderCalendar('null', tab)
     }
     else{
+        entireColony = false
         panel.resolveSubjectsFromHousing(tab,renderCalendar,this);
         calendarRender++;
 
@@ -61,10 +62,10 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
 
             let objectConfig ={}
             if(!entireColony){
-                objectConfig = {animalIds : concatAnimals,numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,calendarLegend,waterExceptionPanel'};
+                objectConfig = {animalIds : concatAnimals,numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,waterTotalPanel,calendarLegend,waterExceptionPanel'};
 
             }else if(entireColony){
-                objectConfig = {animalIds : 'null',numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,calendarLegend,waterExceptionPanel'};
+                objectConfig = {animalIds : 'null',numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,waterTotalPanel,calendarLegend,waterExceptionPanel'};
             }
             // Render the web part to the div
             //TODO: add condition to check to request webpart only the first time

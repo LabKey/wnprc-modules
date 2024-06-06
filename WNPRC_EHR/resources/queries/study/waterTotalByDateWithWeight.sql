@@ -5,6 +5,7 @@
 
 SELECT wtbd.Id as Id,
        wtbd.date,
+       wtbd.reportEndDate,
        weigthDates.weight,
        weigthDates.startDate,
        TRUNCATE(ROUND(CAST(wtbd.TotalWater/weigthDates.weight AS NUMERIC),2),2) AS mlsPerKg,
@@ -36,7 +37,8 @@ JOIN
                         WHERE i2.date>i.date AND i2.Id = i.Id
                         ORDER BY i2.date asc limit 1
                   ) AS DATE)
-              ,timestampadd('SQL_TSI_DAY',1,CAST(curdate() AS TIMESTAMP))) AS endDate
+              ,timestampadd('SQL_TSI_DAY',120,CAST(curdate() AS TIMESTAMP))) AS endDate
+--              ,wtbd.reportEndDate) AS endDate
 
       FROM study.weight i
 
@@ -59,7 +61,8 @@ JOIN
                         WHERE wsa2.date>wsa.date AND wsa2.Id = wsa.Id
                         ORDER BY wsa2.date asc limit 1
                   ) AS DATE)
-              ,timestampadd('SQL_TSI_DAY',1,CAST(curdate() AS TIMESTAMP))) AS endDate
+              ,timestampadd('SQL_TSI_DAY',120,CAST(curdate() AS TIMESTAMP))) AS endDate
+--              ,wtbd.reportEndDate) AS endDate
 
       FROM study.waterScheduledAnimals wsa
 

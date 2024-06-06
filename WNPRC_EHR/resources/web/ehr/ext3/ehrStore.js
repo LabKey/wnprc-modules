@@ -684,12 +684,14 @@ EHR.ext.AdvancedStore = Ext.extend(LABKEY.ext.Store, {
                     if (!bloodDrawMap[id])
                         bloodDrawMap[id] = [];
 
-                    bloodDrawMap[id].push({
-                        objectid: record.get('objectid'),
-                        date: date,
-                        qcstate: record.get('QCState'),
-                        quantity: record.get('quantity')
-                    });
+                    if (record.get('objectid')){
+                        bloodDrawMap[id].push({
+                            objectid: record.get('objectid'),
+                            date: date,
+                            qcstate: record.get('QCState'),
+                            quantity: record.get('quantity')
+                        });
+                    }
                 }
             }
 

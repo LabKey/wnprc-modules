@@ -958,10 +958,10 @@ public class WNPRC_EHRController extends SpringActionController
                         }
                         //Replace <br> tags with newlines and then strip out any remaining html tags from title and description
                         //Once the strings are cleaned up, add back in the <br> tags instead of the newlines
-                        String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                        String title = event.optString("title", "NO NAME");
                         title = title.replaceAll("(?i)<br */?>", "\n").trim();
                         title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
-                        String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                        String description = event.optString("description", "NO PHONE NUMBER");
                         description = description.replaceAll("(?i)<br */?>", "\n").trim();
                         description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
                         if (onCallSchedule[i + 1][column].isEmpty() || onCallSchedule[i + 1][column].getString("html") == null) {

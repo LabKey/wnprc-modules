@@ -1389,16 +1389,16 @@ public class NotificationToolkit {
             returnStyle.append(
                     //Adds a border to the table.
                     "table, th, tr { border: 1px solid black;}" +
-                    //Adds a hover effect to rows.
-                    "tr:hover {background-color: #d9d9d9;}" +
-                    //Adds padding to each cell.
-                    "th, td {padding: 5px; text-align: center}" +
-                    //Adds vertical column lines (on right side of row's cells, but not on the row's final cell).
-                    "th, td {border-right: 1px solid #000000}" +
-                    "th:last-child, td:last-child {border-right: none}" +
-                    //Adds horizontal row lines (on bottom side of row's cells, but not on the final row's cells).
-                    "th, td {border-bottom: 1px solid #000000}" +
-                    "tr:last-child td {border-bottom: none}"
+                            //Adds a hover effect to rows.
+                            "tr:hover {background-color: #d9d9d9;}" +
+                            //Adds padding to each cell.
+                            "th, td {padding: 5px; text-align: center}" +
+                            //Adds vertical column lines (on right side of row's cells, but not on the row's final cell).
+                            "th, td {border-right: 1px solid #000000}" +
+                            "th:last-child, td:last-child {border-right: none}" +
+                            //Adds horizontal row lines (on bottom side of row's cells, but not on the final row's cells).
+                            "th, td {border-bottom: 1px solid #000000}" +
+                            "tr:last-child td {border-bottom: none}"
 
                     //TODO: Figure out how to make the bottom 2 formats work.
                     //Sets the header text format.

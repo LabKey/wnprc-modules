@@ -12,6 +12,7 @@ WORKDIR /tmp/labkey
 
 ARG LABKEY_TEAMCITY_BUILD=
 
+ 
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
@@ -27,24 +28,27 @@ FROM wnprcehr/tomcat:embedded
 RUN mkdir -p /labkey/labkey
 RUN mkdir -p /labkey/src
 RUN mkdir -p /labkey/apps
-RUN mkdir -p /labkey/labkey/config
+RUN mkdir -p /labkey/config
 
-RUN yum -y -q install \
-    systemd \
-&& yum clean all
-
+#RUN yum -y -q install \
+    
+#&& yum clean all
+COPY LabKey24.3Beta-79-UWisc/labkeyServer.jar /labkey/src
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /labkey/labkey
 ENV LABKEY_SRC /labkey/src
-COPY --from=download /tmp/labkey $LABKEY_SRC
+#COPY --from=download /tmp/labkey $LABKEY_SRC
+WORKDIR ${LABKEY_HOME}
 RUN cp $LABKEY_SRC/labkeyServer.jar $LABKEY_HOME
-COPY application.properties $LABKEY_HOME/config
-RUN cp $LABKEY_SRC/labkey_server.service /etc/systemd/system/labkey_server.service
+COPY application.properties config/
 
 COPY replacingSecrets.sh /etc/replacingSecrets.sh
 RUN chmod +x /etc/replacingSecrets.sh
 
+RUN useradd -ms /bin/bash labkey
+
+RUN chown -Rc labkey:labkey ${LABKEY_HOME}
 #RUN systemctl daemon-reload
 
 # add the session path to the tomcat config
@@ -55,5 +59,14 @@ RUN chmod +x /etc/replacingSecrets.sh
 
 EXPOSE 8080
 
+USER labkey
 #CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/replacingSecrets.sh && systemctl daemon-reload && systemctl start labkey_server ; }"]
-CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; systemctl start labkey_server ;}"]
+#CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ;}", "java", "-jar", "labkeyServer.jar"]
+#CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; java -jar /labkey/labkeyServer.jar;}"]
+#ENTRYPOINT [ "/etc/replacingSecrets.sh" ]
+
+#working 
+CMD ["java", "-XX:MaxRAMPercentage=75.0", "-Dlabkey.home=$LABKEY_HOME" , "-Dlabkey.log.home=/labkey/logs", "-Dlogback.debug=true", "-jar", "/labkey/labkey/labkeyServer.jar"]
+#ENTRYPOINT ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/replacingSecrets.sh; }" ]
+
+#CMD ["sudo", "-u", "labkey", "java","-XX:MaxRAMPercentage=75.0", "-Dlabkey.home=$LABKEY_HOME" , "-Dlabkey.log.home=/labkey/logs", "-Dlogback.debug=true", "-jar", "/labkey/labkeyServer.jar"]

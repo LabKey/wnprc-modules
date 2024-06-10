@@ -139,7 +139,8 @@ public class AdminAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("date", dateYesterday, CompareType.DATE_GTE);
             myFilter.addCondition("key1", "LabKey Server Backup", CompareType.NEQ);
             // Runs query.
-            this.numClientErrorsSinceYesterday = notificationToolkit.getTableRowCount(currentContainer, currentUser, "auditlog", "audit", "");
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(currentContainer, currentUser, "auditlog", "audit", myFilter, null, "RowId", null);
+            this.numClientErrorsSinceYesterday = Long.valueOf(returnArray.size());
             // Creates a URL to view number of client errors since yesterday.
             this.numClientErrorsSinceYesterdayURLView = notificationToolkit.createQueryURL(currentContainer, "execute", "auditlog", "audit", myFilter);
         }

@@ -14,7 +14,7 @@ EHR.reports.wnprcFullHistory = function (panel, tab) {
         title: 'Full History - '+animalIds,
         schemaName: 'study',
         queryName: 'wnprcFullHistory',
-        parameters: {'STARTTARGET': '2021-01-01', 'ENDTARGETDATE': reportEndDate},
+        parameters: {'STARTTARGET': '1947-02-10', 'ENDTARGETDATE': reportEndDate},
         filters: filterArray.nonRemovable,
         removeableFilters: filterArray.removable,
         frame: true

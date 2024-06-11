@@ -68,7 +68,12 @@ public class BloodDrawsTodayAnimalCare extends AbstractEHRNotification {
         messageBody.append("<p>This email contains all scheduled blood draws for today (for Animal Care only).  It was run on: " + dateToolkit.getCurrentTime() + "</p>");
 
         // Creates table.
-        messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
+        if (myBloodDrawNotificationObject.resultsByArea.isEmpty()) {
+            messageBody.append("There are no scheduled blood draws for this group today.");
+        }
+        else {
+            messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
+        }
 
 //        String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
 //        NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawNotificationObject.myTableData);

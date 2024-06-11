@@ -80,7 +80,12 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
         messageBody.append("<p>This email contains all scheduled blood draws for today (for all groups).  It was run on: " + dateToolkit.getCurrentTime() + "</p>");
 
         // Prints all tables.
-        messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
+        if (myBloodDrawNotificationObject.resultsByArea.isEmpty()) {
+            messageBody.append("There are no scheduled blood draws for this group today.");
+        }
+        else {
+            messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
+        }
 
 //        // Creates table.
 //        String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
@@ -287,7 +292,8 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 returnString.append("<b>AREA: </b>" + currentArea + ":<br>\n");
                 // Iterates through each room (sorted alphabetically)
                 for (String currentRoom : notificationToolkit.sortSetWithNulls(this.resultsByArea.get(currentArea).keySet())) {
-                    returnString.append("<b>ROOM: </b>" + currentRoom + ":<br>\n");
+                    Integer numResultsForRoom = this.resultsByArea.get(currentArea).get(currentRoom).size();
+                    returnString.append("<b>ROOM: </b>" + currentRoom + ": (" + numResultsForRoom + ")<br>\n");
 
                     // Creates variables.
                     ArrayList<String[]> unformattedDrawsList = this.resultsByArea.get(currentArea).get(currentRoom);

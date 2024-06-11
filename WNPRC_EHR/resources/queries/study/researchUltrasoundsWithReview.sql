@@ -42,7 +42,7 @@ SELECT
   ru.findings AS ultrasoundFindings,
   ru.remark AS ultrasoundRemarks,
   r.restraintType,
-  r.remarks AS restraintRemarks,
+  r.remark AS restraintRemarks,
   ur.date AS reviewDate,
   ur.head,
   ur.falx,

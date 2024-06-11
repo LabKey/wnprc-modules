@@ -94,7 +94,7 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
 
     //Sending Options
     public void sendManually (Container container, User user){
-        notificationToolkit.sendNotification(this, user, container);
+        notificationToolkit.sendNotification(this, user, container, null);
     }
 
 

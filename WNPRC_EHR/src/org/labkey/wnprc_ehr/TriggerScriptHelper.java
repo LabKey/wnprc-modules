@@ -52,6 +52,7 @@ import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
+import org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
@@ -214,6 +215,28 @@ public class TriggerScriptHelper {
         }
         else if (!NotificationService.get().isServiceEnabled()) {
             _log.info("Notification service is not enabled, will not send death notification");
+        }
+    }
+
+    public void sendBloodDrawReviewNotification(String animalID, String project, String drawDate, String requestor) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends Blood Draw Review Notification.
+            if (NotificationService.get().isActive(new BloodDrawReviewTriggerNotification(ehr), container)) {
+                _log.info("Using java helper to send email for Blood Draw Review Trigger (animalID: " + animalID + ").");
+                BloodDrawReviewTriggerNotification notification = new BloodDrawReviewTriggerNotification(ehr, animalID, project, drawDate);
+                ArrayList<String> extraRecipients = new ArrayList<>();
+                String requestorEmail = UserManager.getUserByDisplayName(requestor).getEmail();
+                extraRecipients.add(requestorEmail);
+                notification.sendManually(container, user, extraRecipients);
+            }
+            else {
+                _log.info("Blood Draw Review Notification is not enabled, will not send Blood Draw Review Notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send Blood Draw Review Notification");
         }
     }
 
@@ -2097,6 +2120,11 @@ public class TriggerScriptHelper {
         return  returnCondition;
     }
 
+
+    public static List<Object> filterBloodDraws(List<Object> bloodRecords, Integer limit)
+    {
+        return null;
+    }
     //This function will always have lixit as the waterSource
     public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, Map<String, Object> extraContext) throws Exception
     {

@@ -107,7 +107,7 @@ public class BehaviorDataEntryService extends SecurityEscalatedService
 
             rowMap.put("lsid", assignment.getString("lsid"));
             rowMap.put("Id", assignment.getString("id"));
-            rowMap.put("project", assignment.getString("project"));
+            rowMap.put("project", assignment.getInt("project"));
             rowMap.put("endDate", releaseDate);
 
             rowsToUpdate.add(rowMap);

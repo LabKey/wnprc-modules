@@ -41,7 +41,6 @@ public class EnterMultipleWater extends SimpleTaskForm
     @Override
     protected List<String> getButtonConfigs(){
         List<String> buttons = super.getButtonConfigs();
-        buttons.add("WNPRC_SUBMIT_WATER");
         buttons.add("WNPRC_SUBMIT_FINAL");
         buttons.remove("WNPRC_SAVE");
         buttons.remove("WNPRC_SAVE_AND_EXIT");

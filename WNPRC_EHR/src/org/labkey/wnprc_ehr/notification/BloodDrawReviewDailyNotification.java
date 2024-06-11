@@ -81,6 +81,7 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             String[] myTableColumns = new String[]{"Id", "Date of Blood Draw"};
             NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawReviewObject.nonAliveBloodDraws);
             messageBody.append(myTable.createBasicHTMLTable());
+            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myBloodDrawReviewObject.nonAliveBloodDrawsURLView));
 
 //            for (HashMap<String, String> bloodDraw: myBloodDrawReviewObject.nonAliveBloodDraws) {
 //                String bloodDrawID = bloodDraw.get("id");
@@ -99,6 +100,7 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             String[] myTableColumns = new String[]{"Id", "Date of Blood Draw", "Project"};
             NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawReviewObject.unassignedBloodDraws);
             messageBody.append(myTable.createBasicHTMLTable());
+            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myBloodDrawReviewObject.unassignedBloodDrawsURLView));
 
 //            for (HashMap<String, String> bloodDraw: myBloodDrawReviewObject.unassignedBloodDraws) {
 //                String bloodDrawID = bloodDraw.get("id");
@@ -129,6 +131,7 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         }
 
         ArrayList<String[]> nonAliveBloodDraws = new ArrayList<>();
+        String nonAliveBloodDrawsURLView;
         // Gets all blood draws (today & future) where animal is not alive.
         void getNonAliveBloodDraws() {
             // Creates filter.
@@ -148,9 +151,14 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
                 String[] currentRow = {currentDraw.get("id"), currentDraw.get("date")};
                 nonAliveBloodDraws.add(currentRow);
             }
+
+            // Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
+            this.nonAliveBloodDrawsURLView = viewQueryURL;
         }
 
         ArrayList<String[]> unassignedBloodDraws = new ArrayList<>();
+        String unassignedBloodDrawsURLView;
         // Gets all blood draws (today & future) where animal is not assigned to a project.
         void getUnassignedBloodDraws() {
             // Creates filter.
@@ -172,6 +180,10 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
                 String[] currentRow = {currentDraw.get("id"), currentDraw.get("date"), currentDraw.get("project")};
                 unassignedBloodDraws.add(currentRow);
             }
+
+            // Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
+            this.unassignedBloodDrawsURLView = viewQueryURL;
         }
 
     }

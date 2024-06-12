@@ -5,10 +5,22 @@ export interface Cage {
     name: string;
     cageState: CageState;
     position: string;
-    type: CageType
+    type: CageType;
+    adjCages: AdjCages | undefined;
 }
 
-
+export interface AdjCages {
+    leftCage: Cage | undefined;
+    rightCage: Cage | undefined;
+    floorCage: Cage | undefined;
+    ceilingCage: Cage | undefined;
+}
+export interface CageState {
+    leftDivider: {modData: SeparatorMod} | undefined;
+    rightDivider: {modData: SeparatorMod} | undefined;
+    floor: {modData: SeparatorMod} | undefined;
+    extraMods: CageMods | undefined;
+}
 export interface Rack {
     id: number;
     type: RackTypes;
@@ -31,8 +43,7 @@ export enum ModTypes {
     PrivacyDivider,
     NoDivider,
     CTunnel,
-    PopTop,
-    BumpOut,
+    Extension,
     PlayCage
 }
 
@@ -64,12 +75,15 @@ export interface SeparatorMod {
 }
 export type Separators = SeparatorMod[];
 
-export interface CageState {
-    leftDivider: {modData: Modification, affCages: string[]} | undefined;
-    rightDivider: {modData: Modification, affCages: string[]} | undefined;
-    floor: {modData: SeparatorMod, affCages: string[]} | undefined;
-    extraMods: {modData: Modification, affCages: string[]}[] | undefined;
+export interface CageMod {
+    modData: {
+        mod: Modification,
+        id: number;
+    }
 }
+
+export type CageMods = CageMod[];
+
 
 
 const Schematics: SchematicRoomProps = {
@@ -104,7 +118,7 @@ export const Modifications = {
             }
         ]
     },
-    meshFloorX2: { // TODO figure out styling for this double mesh
+    meshFloorX2: {
         name: "Mesh Floor x2",
         mod: ModTypes.MeshFloorX2,
         styles: [
@@ -114,7 +128,10 @@ export const Modifications = {
             },
             {
                 property: "stroke-dasharray",
-                value: "10"
+                value: "10 5 10"
+            },{
+                property: "stroke-width",
+                value: "2"
             }
         ]
     },
@@ -139,17 +156,44 @@ export const Modifications = {
     pcDivider: {
         name: "Protected Contact Divider",
         mod: ModTypes.PCDivider,
-        styles: []
+        styles: [{
+            property: "stroke",
+            value: "black"
+        },{
+            property: "stroke-dasharray",
+            value: "2 5 2"
+        },{
+            property: "stroke-width",
+            value: "5"
+        }]
     },
     vcDivider: {
         name: "Visual Contact Divider",
         mod: ModTypes.VCDivider,
-        styles: []
+        styles: [{
+            property: "stroke",
+            value: "black"
+        },{
+            property: "stroke-dasharray",
+            value: "5 5 5 2"
+        },{
+            property: "stroke-width",
+            value: "5"
+        }]
     },
     privacyDivider: {
         name: "Privacy Divider",
         mod: ModTypes.PrivacyDivider,
-        styles: []
+        styles: [{
+            property: "stroke",
+            value: "black"
+        },{
+            property: "stroke-dasharray",
+            value: "1 1 1 1 1 1"
+        },{
+            property: "stroke-width",
+            value: "5"
+        }]
     },
     noDivider: {
         name: "No Divider",
@@ -162,22 +206,42 @@ export const Modifications = {
     cTunnel: {
         name: "C-Tunnel",
         mod: ModTypes.CTunnel,
-        styles: []
+        styles: [{
+            property: "stroke",
+            value: "black",
+        },{
+            property: "stroke-width",
+            value: "1px",
+        }
+        ]
     },
-    popTop: {
-        name: "Pop Top",
-        mod: ModTypes.PopTop,
-        styles: []
-    },
-    bumpOut: {
-        name: "Bump Out",
-        mod: ModTypes.BumpOut,
-        styles: []
+    extension: {
+        name: "Extension",
+        mod: ModTypes.Extension,
+        styles: [{
+            property: "stroke",
+            value: "black"
+        },{
+            property: "stroke-width",
+            value: "1px"
+        },{
+            property: "fill",
+            value: "#FCB017"
+        }]
     },
     playCage: {
         name: "Play Cage",
         mod: ModTypes.PlayCage,
-        styles: []
+        styles: [{
+            property: "stroke",
+            value: "black"
+        },{
+            property: "stroke-width",
+            value: "1px"
+        },{
+            property: "fill",
+            value: "#6D88C4"
+        }]
     },
 }
 
@@ -190,61 +254,40 @@ export const RoomSchematics = {
     ab165: Schematics["AB140-167.svg"],
     ab167: Schematics["AB140-167.svg"],
 }
-export const RackSeparators = {
-    rackTwoOfTwo: {
-        topDivider: Modifications.solidDivider,
-        bottomDivider: Modifications.solidDivider,
-        leftFloor: Modifications.standardFloor,
-        rightFloor: Modifications.standardFloor
-    },
-    rackOneOfOne: {
-        floor: Modifications.standardFloor
-    },
-    pen: {
-
-    },
-    penRack: {
-
-    },
-    rackHorizontal: {
-        topDivider: Modifications.solidDivider,
-        bottomDivider: Modifications.solidDivider,
-        floor: Modifications.standardFloor,
-    }
-}
-
 
 // TODO Change mod Data to access from mod
+
+// This is based off the Cage State interface.
 export const DefaultCageState = {
     rackTwoOfTwo: {
         posA: {
             rightDivider: {
-                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.topDivider, position: "T1"} as SeparatorMod,
-                affCage: []},
+                modData: {type: "divider", mod: Modifications.solidDivider, position: "T1"} as SeparatorMod,
+            },
             floor: {
-                modData: {type: "floor", mod: RackSeparators.rackTwoOfTwo.leftFloor, position: "F1"} as SeparatorMod,
-                affCage: []},
-            extraMods: [{modData: Modifications.popTop, affCage: ["#0001", "#0002"]}]
+                modData: {type: "floor", mod: Modifications.standardFloor, position: "F1"} as SeparatorMod
+            },
+            extraMods: [{modData: {mod: Modifications.extension, id: 1}}, {modData: {mod: Modifications.cTunnel, id: 2}}] as CageMods
         },
         posB: {
             leftDivider: {
-                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.topDivider, position: "T1"} as SeparatorMod,
-                affCage: []},
+                modData: {type: "divider", mod: Modifications.solidDivider, position: "T1"} as SeparatorMod
+            },
             floor: {
-                modData: {type: "floor", mod: RackSeparators.rackTwoOfTwo.rightFloor, position: "F2"} as SeparatorMod,
-                affCage: []},
-            extraMods: []
+                modData: {type: "floor", mod: Modifications.standardFloor, position: "F2"} as SeparatorMod
+            },
+            extraMods: [{modData: {mod: Modifications.playCage, id: 1}}]
         },
         posC: {
             rightDivider: {
-                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.bottomDivider, position: "B1"} as SeparatorMod,
-                affCage: []},
-            extraMods: []
+                modData: {type: "divider", mod: Modifications.solidDivider, position: "B1"} as SeparatorMod
+            },
+            extraMods: [{modData: {mod: Modifications.cTunnel, id: 2}}]
         },
         posD: {
             leftDivider: {
-                modData: {type: "divider", mod: RackSeparators.rackTwoOfTwo.bottomDivider, position: "B1"} as SeparatorMod,
-                affCage: []},
+                modData: {type: "divider", mod: Modifications.solidDivider, position: "B1"} as SeparatorMod
+            },
             extraMods: []
         },
     }

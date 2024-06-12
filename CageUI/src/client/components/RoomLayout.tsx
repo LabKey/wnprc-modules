@@ -1,11 +1,10 @@
 import * as React from 'react';
 import { FC, useState } from 'react';
-import { Cage, ModTypes, RackTypes } from './typings';
+import { Cage } from './typings';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
 import {
-    changeStyleProperty,
-    getCageUnderneath,
+    changeStyleProperty, findCagePartners, getCageMod,
     getRackSeparators,
     parseCage,
     parseRack,
@@ -15,7 +14,7 @@ import { CageDetails } from './CageDetails';
 import { useCurrentContext } from './ContextManager';
 
 export const RoomLayout: FC = () => {
-    const {room, setCageDetails, setClickedCage, setClickedRack, setClickedCagePartner, cageDetails} = useCurrentContext();
+    const {room, setClickedCage, setClickedRack, setClickedCagePartners} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {
@@ -25,45 +24,19 @@ export const RoomLayout: FC = () => {
         setIsOpen(false);
     }
     
-    console.log("room: ", room);
     const handleClick = (event) => {
         const cage = event.target;
-        const rackId: number = parseInt(parseRack(cage.parentElement.id));
+        const rackId: number = parseInt(parseRack(cage.id));
         const cageId: number = parseInt(parseCage(cage.id));
-        console.log("New Room: ", room);
+        //const cageId: number = room
         const clickedRack = room.find(rack => rack.id === rackId);
-        const clickedCage = clickedRack.cages.find(cage => cage.id === cageId);
-        let clickedCagePartner: Cage;
-        const newCageDetails: Cage[] = [];
-        if(clickedRack.type === RackTypes.TwoOfTwo){
-            newCageDetails.push(clickedCage);
-            if(clickedCage.cageState.rightDivider){
-                clickedCagePartner = clickedRack.cages.find(cage => cage.id === cageId + 1);
-                if(clickedCage.cageState.rightDivider.modData.mod === ModTypes.NoDivider){
-                    newCageDetails.push(clickedCagePartner);
-                }
-            }else if(clickedCage.cageState.leftDivider){
-                clickedCagePartner = clickedRack.cages.find(cage => cage.id === cageId - 1);
-                if(clickedCage.cageState.leftDivider.modData.mod === ModTypes.NoDivider){
-                    newCageDetails.push(clickedCagePartner);
-                }
-            }
-            // TODO Add floors
-            if(clickedCage.cageState?.floor.modData.mod.mod === ModTypes.NoFloor){
-                const totalCages = room.length * room[0].cages.length;
-                const bottomCageId = getCageUnderneath(totalCages, room[0].cages.length, clickedCage.id)
-                console.log("Floor: ", bottomCageId);
-                //newCageDetails.push(clickedRack.cages[3]);
-            }
-        }
-        console.log("New Rack: ", clickedRack);
-        console.log("New Cage: ", clickedCage);
-        console.log("New Cage Partner: ", clickedCagePartner);
-        console.log("New Cage details: ", cageDetails, newCageDetails);
+        const clickedCage = clickedRack.cages[cageId - 1];
+
+        const newCagePartners: Cage[] = [clickedCage];
+        findCagePartners(clickedCage, clickedRack, newCagePartners);
         setClickedCage(clickedCage);
         setClickedRack(clickedRack);
-        setClickedCagePartner(clickedCagePartner);
-        setCageDetails(newCageDetails);
+        setClickedCagePartners(newCagePartners);
         openDetails();
 
     };
@@ -79,6 +52,23 @@ export const RoomLayout: FC = () => {
                     cages.forEach((cage) => {
                         cage.onclick = (event) => handleClick(event);
                     })
+                    // Update room numbers with following the current room layout
+                    room.forEach((rack) => {
+                        rack.cages.forEach((cage) => {
+                            // Construct the expected text element ID
+                            const textId = `text-${cage.id}-${rack.id + 1}`;
+                            // Find the corresponding text element
+                            const textElement = svg.querySelector(textId);
+
+                            if (textElement) {
+                                // Get the tspan child and update its content
+                                const tspanElement = textElement.querySelector('tspan');
+                                if (tspanElement) {
+                                    tspanElement.textContent = cage.id.toString();
+                                }
+                            }
+                        });
+                    });
                 }}
                 afterInjection={(svg) => {
                     // Parses seperators styling them correctly
@@ -86,6 +76,27 @@ export const RoomLayout: FC = () => {
                         const currSeparators = getRackSeparators(room[i]);
                         const separators = svg.querySelector(`#seperators-${i + 1}`);
                         const children = [...separators.children];
+                        const mods = svg.querySelector(`#modifications-${i + 1}`);
+                        console.log("Room ", room[i]);
+                        //Update modification svg props
+                        [...mods.children].forEach((childNode) => {
+                            const cageMod = getCageMod(childNode.id, room[i]);
+                            const styles = cageMod?.styles
+                            console.log(childNode.id, cageMod)
+                            if(parseSeparator(childNode.id) === "CTunnel"){ // CTunnels have multiple sub styles
+                                [...childNode.children].forEach((subChildNode) => {
+                                    styles?.forEach((style) => {
+                                        changeStyleProperty(subChildNode, style.property, style.value);
+                                    })
+                                })
+                            }else{
+                                styles?.forEach((style) => {
+                                    changeStyleProperty(childNode, style.property, style.value);
+                                })
+                            }
+                        })
+
+                        // Update separator svg props
                         children.forEach((childNode) => {
                             const styles = currSeparators.find(sep => sep.position === parseSeparator(childNode.id)).mod.styles;
                             styles.forEach((style) => {
@@ -93,7 +104,6 @@ export const RoomLayout: FC = () => {
                             })
                         })
                     }
-
                 }}
             />
             {isOpen &&

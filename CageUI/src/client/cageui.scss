@@ -4,25 +4,51 @@
 }
 
 .room-legend {
-  flex: 1;
   background-color: lightcoral;
 }
 
 .room-display {
-  display: flex;
-  flex: 4;
   background-color: lightblue;
+
+  //width: 100vw;
+  //height: 100vh;
+}
+
+.room-layout {
+  background-color: lightpink;
+  height: fit-content;
+  width: fit-content;
 }
 
 .room-container {
   display: flex;
   flex-direction: column; /* Arrange children in a column */
-  height: 75vh;
+  height: 100%;
+  width: 100%;
+}
+/* SVG Styling */
+.room-svg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.legend-svg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.room-svg svg {
+  width: 100%;
+  height: 100%;
 }
 
 .room-sub-container {
   display: flex;
-  flex: 1; /* Take up remaining space */
+  flex: 1 1 auto; /* Take up remaining space */
 }
 
 .room-header, .room-display, .room-legend {
@@ -45,6 +71,7 @@
   }
 }
 
+
 .room-header-name {
   display: inline-block;
   margin-left: 20px;
@@ -53,16 +80,7 @@
   display: inline-block;
 }
 
-.room-layout {
-  background-color: lightpink;
-  margin:0 auto
-  //background-image: url("./rooms/AB140-167.svg");
-  //display: flex;
-  //max-width: 50%;
-  //flex-wrap: wrap;
-  //flex-direction: row;
-  //flex-flow: row;
-}
+
 
 .rack-container {
   min-height: 100%;
@@ -79,6 +97,7 @@
   box-sizing: border-box;
 }
 
+
 .room-svg rect {
   fill: none;
   pointer-events: visibleFill;
@@ -86,6 +105,10 @@
 
 .room-svg tspan {
   pointer-events: none;
+}
+
+.room-svg {
+
 }
 
 .details-overlay {
@@ -203,7 +226,7 @@
 .details-table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
-  width: 30%;
+  width: auto;
 }
 
 .details-table thead{
@@ -254,4 +277,8 @@
 
 .popup-buttons button:hover {
   background: #ddd;
+}
+
+.legend-header {
+  margin-bottom: 20px;
 }

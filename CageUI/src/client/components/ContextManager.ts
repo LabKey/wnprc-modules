@@ -7,12 +7,18 @@ export interface CageContextType {
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
     clickedCage: Cage | null,
     setClickedCage: React.Dispatch<React.SetStateAction<Cage | null>> | null,
-    clickedCagePartner: Cage | null,
-    setClickedCagePartner: React.Dispatch<React.SetStateAction<Cage | null>> | null,
+    clickedCagePartners: Cage[] | null,
+    setClickedCagePartners: React.Dispatch<React.SetStateAction<Cage[] | null>> | null,
     clickedRack: Rack | null,
     setClickedRack: React.Dispatch<React.SetStateAction<Rack | null>> | null,
+    isEditing: boolean,
+    setIsEditing: React.Dispatch<React.SetStateAction<boolean>>,
+    modRows: React.JSX.Element[],
+    setModRows: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>,
     cageDetails: Cage[] | null,
     setCageDetails: React.Dispatch<React.SetStateAction<Cage[] | null>> | null,
+    saveMod: () => void,
+
 }
 export const CageContext = createContext<CageContextType | null>(null);
 

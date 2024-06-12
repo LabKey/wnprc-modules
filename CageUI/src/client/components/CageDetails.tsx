@@ -3,6 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { Cage, ModTypes } from './typings';
 import { CageDetailsModifications } from './CageDetailsModifications';
 import { useCurrentContext } from './ContextManager';
+import { findDetails } from './helpers';
 
 interface CageDetailsProps {
     isOpen: boolean;
@@ -11,7 +12,7 @@ interface CageDetailsProps {
 export const CageDetails: FC<CageDetailsProps> = (props) => {
     const { isOpen, onClose } = props;
     const modalRef = useRef(null);
-    const {clickedCage, clickedCagePartner, cageDetails} = useCurrentContext();
+    const {clickedCage, clickedRack, cageDetails, setCageDetails} = useCurrentContext();
     if(!clickedCage) return;
 
     // close modal if user clicks outside its bounds
@@ -33,17 +34,14 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
         };
     }, [isOpen, onClose]);
 
-
     useEffect(() => {
-        console.log(cageDetails.map((cage) => cage.name));
-
+        console.log("cage details: ", cageDetails)
     }, [cageDetails]);
-
     return (
         <div className="details-overlay">
             <div className="details-content" ref={modalRef}>
                 <div className={'details-header'}>
-                    <h1>Cage #{cageDetails.map((cage) => cage.name).join(", ")}</h1>
+                    <h1>Cage {cageDetails.map((cage) => cage.name).join(", ")}</h1>
                     <button className="details-close-button" onClick={onClose}>
                         &times;
                     </button>

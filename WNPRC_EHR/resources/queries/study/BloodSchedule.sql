@@ -26,6 +26,7 @@ b.qcstate,
 b.taskid,
 b.requestid,
 b.objectid,
+b.BloodRemaining,
 CASE
   WHEN (b.project = 300901 OR b.project = 400901 OR a1.project is not null) THEN null
   ELSE 'NOT ASSIGNED'
@@ -43,4 +44,3 @@ from study."Blood Draws" b
 
 LEFT JOIN study.assignment a1
   ON (a1.project = b.project AND cast(a1.date as date)  <= cast(b.date as date) AND (a1.enddate is null or cast(COALESCE(a1.enddate, curdate()) as date) >= cast(b.date as date)) AND a1.id = b.id)
-

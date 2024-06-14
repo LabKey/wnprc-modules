@@ -19,7 +19,6 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
     const saveMod = () => {
-        console.log("Saving");
         setRoom(prevRoom => {
             const updatedRoom = [...prevRoom];
             const clickedRackIndex = clickedRack.id - 1;
@@ -35,7 +34,6 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
                     ).cageState = cage.cageState;
                 })
             }
-            console.log("Updated Room: ", updatedRoom, clickedCage, clickedCagePartners);
             return updatedRoom;
         });
     }
@@ -52,7 +50,6 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
         if(!clickedCage) return;
         const newCageDetails: Cage[] = [clickedCage];
         findDetails(clickedCage, newCageDetails, clickedRack);
-        console.log("Find new cage", cageDetails, newCageDetails, clickedCage);
         setCageDetails(newCageDetails);
     }, [clickedCage]);
 

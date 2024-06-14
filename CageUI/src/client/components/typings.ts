@@ -19,7 +19,7 @@ export interface CageState {
     leftDivider: {modData: SeparatorMod} | undefined;
     rightDivider: {modData: SeparatorMod} | undefined;
     floor: {modData: SeparatorMod} | undefined;
-    extraMods: CageMods | undefined;
+    extraMod: {modData: ExtraMod} | undefined;
 }
 export interface Rack {
     id: number;
@@ -44,7 +44,8 @@ export enum ModTypes {
     NoDivider,
     CTunnel,
     Extension,
-    PlayCage
+    PlayCage,
+    NoMod
 }
 
 export interface Modification {
@@ -75,16 +76,9 @@ export interface SeparatorMod {
 }
 export type Separators = SeparatorMod[];
 
-export interface CageMod {
-    modData: {
-        mod: Modification,
-        id: number;
-    }
+export interface ExtraMod {
+    mod: Modification
 }
-
-export type CageMods = CageMod[];
-
-
 
 const Schematics: SchematicRoomProps = {
     "AB140-167.svg": {
@@ -164,7 +158,7 @@ export const Modifications = {
             value: "2 5 2"
         },{
             property: "stroke-width",
-            value: "5"
+            value: "4"
         }]
     },
     vcDivider: {
@@ -175,10 +169,10 @@ export const Modifications = {
             value: "black"
         },{
             property: "stroke-dasharray",
-            value: "5 5 5 2"
+            value: "5 10 5 10 5 10"
         },{
             property: "stroke-width",
-            value: "5"
+            value: "4"
         }]
     },
     privacyDivider: {
@@ -192,7 +186,7 @@ export const Modifications = {
             value: "1 1 1 1 1 1"
         },{
             property: "stroke-width",
-            value: "5"
+            value: "4"
         }]
     },
     noDivider: {
@@ -202,6 +196,11 @@ export const Modifications = {
             property: "stroke",
             value: "none"
         }]
+    },
+    noMod: {
+        name: "No Modification",
+        mod: ModTypes.NoMod,
+        styles: []
     },
     cTunnel: {
         name: "C-Tunnel",
@@ -267,7 +266,9 @@ export const DefaultCageState = {
             floor: {
                 modData: {type: "floor", mod: Modifications.standardFloor, position: "F1"} as SeparatorMod
             },
-            extraMods: [{modData: {mod: Modifications.extension, id: 1}}, {modData: {mod: Modifications.cTunnel, id: 2}}] as CageMods
+            extraMod: {
+                modData: {mod: Modifications.noMod}
+            }
         },
         posB: {
             leftDivider: {
@@ -276,19 +277,25 @@ export const DefaultCageState = {
             floor: {
                 modData: {type: "floor", mod: Modifications.standardFloor, position: "F2"} as SeparatorMod
             },
-            extraMods: [{modData: {mod: Modifications.playCage, id: 1}}]
+            extraMod: {
+                modData: {mod: Modifications.noMod}
+            }
         },
         posC: {
             rightDivider: {
                 modData: {type: "divider", mod: Modifications.solidDivider, position: "B1"} as SeparatorMod
             },
-            extraMods: [{modData: {mod: Modifications.cTunnel, id: 2}}]
+            extraMod: {
+                modData: {mod: Modifications.noMod}
+            }
         },
         posD: {
             leftDivider: {
                 modData: {type: "divider", mod: Modifications.solidDivider, position: "B1"} as SeparatorMod
             },
-            extraMods: []
+            extraMod: {
+                modData: {mod: Modifications.noMod}
+            }
         },
     }
 }

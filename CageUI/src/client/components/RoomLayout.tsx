@@ -82,7 +82,7 @@ export const RoomLayout: FC = () => {
                         [...mods.children].forEach((childNode) => {
                             const cageMod = getCageMod(childNode.id, room[i]);
                             const styles = cageMod?.styles
-                            console.log(childNode.id, cageMod)
+                            //console.log(childNode.id, cageMod)
                             if(parseSeparator(childNode.id) === "CTunnel"){ // CTunnels have multiple sub styles
                                 [...childNode.children].forEach((subChildNode) => {
                                     styles?.forEach((style) => {

@@ -1,12 +1,9 @@
 import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { changeCageMod, changeCageModArray, convertLocationName } from './helpers';
 import Select from 'react-select';
 import { ModTypes } from './typings';
 import { useCurrentContext } from './ContextManager';
-import { ActionURL } from '@labkey/api';
-import { ReactSVG } from 'react-svg';
-import { ConfirmationPopup } from './ConfirmationPopup';
 
 
 interface ModificationRowProps {
@@ -15,7 +12,6 @@ interface ModificationRowProps {
     modOptions: {value: ModTypes, label: string}[];
     affectedCage: string;
     cageId: number;
-    extraModId?: number;
 }
 export const ModificationRow: FC<ModificationRowProps> = (props) => {
     const {
@@ -24,7 +20,6 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
         modOptions,
         affectedCage,
         cageId,
-        extraModId,
     } = props;
     const {
         clickedCage,
@@ -36,117 +31,61 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
         setRoom,
         saveMod
     } = useCurrentContext();
-    const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
-    const [saveDelete, setSaveDelete] = useState<boolean>(false);
-    const [isValidDelete, setIsValidDelete] = useState<boolean>(false);
-    const [isValidDeleteArray, setIsValidDeleteArray] = useState<boolean>(false);
-
-    const deleteMod = () => {
-        console.log("Delete: ", extraModId, defaultMod);
-        // Deleting cTunnel, must delete from top and bottom cages
-        if(clickedCage.id === cageId) {
-            if(defaultMod === ModTypes.CTunnel){
-                changeCageMod(setClickedCage, modKey,"delete", extraModId, setIsValidDelete);
-                if(clickedCage.adjCages.floorCage){
-                    changeCageModArray(clickedCage.adjCages.floorCage.id, setClickedCagePartners, modKey,"delete", setIsValidDeleteArray, extraModId, true);
-
-                }else{
-                    changeCageModArray(clickedCage.adjCages.ceilingCage.id, setClickedCagePartners, modKey,"delete", setIsValidDeleteArray, extraModId, true);
-                }
-            }else {
-                changeCageMod(setClickedCage, modKey,"delete", extraModId, setIsValidDelete);
-                setIsValidDeleteArray(true); // Set array is valid true since this doesn't use it
-            }
-        }else {
-            const tempCC = clickedCagePartners.find((cage) => cage.id === cageId)
-            if(defaultMod === ModTypes.CTunnel){
-                changeCageModArray(cageId, setClickedCagePartners, modKey, "delete", setIsValidDeleteArray, extraModId, false)
-                if(tempCC.adjCages.floorCage){
-                    changeCageModArray(tempCC.adjCages.floorCage.id, setClickedCagePartners, modKey,"delete", setIsValidDeleteArray, extraModId, true);
-
-                }else{
-                    changeCageModArray(tempCC.adjCages.ceilingCage.id, setClickedCagePartners, modKey,"delete", setIsValidDeleteArray, extraModId, true);
-                }
-            }else{
-                changeCageModArray(cageId, setClickedCagePartners, modKey, "delete", setIsValidDeleteArray, extraModId, true)
-            }
-            setIsValidDelete(true); // set is valid true since this route doesn't use it
-        }
-    }
 
     const changeMod = (event) => {
-        console.log("CM: ", clickedCage, clickedCagePartners, event, modKey, extraModId, defaultMod);
         // Change main cage state
         // if the cage state to change is the clicked cage
         if(clickedCage.id === cageId){
-            changeCageMod(setClickedCage, modKey, event, extraModId);
-
+            changeCageMod(setClickedCage, modKey, event);
             // if changing divider from clicked cage, also change divider of adj cage
             if(modKey === "rightDivider") {
                 changeCageModArray(cageId + 1, setClickedCagePartners, "leftDivider", event);
             }else if(modKey === "leftDivider") {
                 changeCageModArray(cageId - 1, setClickedCagePartners, "rightDivider", event);
             }
-            // Changing from CTunnel mod to another mod, must remove ctunnel from cage above/below.
-            if(defaultMod === ModTypes.CTunnel){
+        }
+        else {// if changing adj cage mod from clicked cage update clicked cage and adj cage
+            changeCageModArray(cageId, setClickedCagePartners, modKey, event);
+            if(modKey === "rightDivider") {
+                changeCageMod(setClickedCage, "leftDivider", event);
+            }else if(modKey === "leftDivider") {
+                changeCageMod(setClickedCage, "rightDivider", event);
+            }
+        }
+
+        // Changing from CTunnel mod to another mod, must remove ctunnel from cage above/below.
+        if(defaultMod === ModTypes.CTunnel){
+            if(clickedCage.id === cageId){
+                event = {value: ModTypes.NoMod}
                 if(clickedCage.adjCages.floorCage){ // cage is above so change below
-                    //changeCageModArray(clickedCage.adjCages.floorCage.id, setClickedCagePartners)
+                    changeCageModArray(clickedCage.adjCages.floorCage.id, setClickedCagePartners, modKey, event);
                     // Remove mod from cage
-
-                }else if (clickedCage.adjCages.ceilingCage) {
-
+                }else{
+                    changeCageModArray(clickedCage.adjCages.ceilingCage.id, setClickedCagePartners, modKey, event);
                 }
             }
         }
-        else {// if changing adj cage mod from clicked cage update clicked cage and adj cage
 
-            if(modKey === "rightDivider") {
-                changeCageModArray(cageId, setClickedCagePartners, modKey, event);
-                changeCageMod(setClickedCage, "leftDivider", event);
-
-            }else if(modKey === "leftDivider") {
-                changeCageModArray(cageId, setClickedCagePartners, modKey, event);
-                changeCageMod(setClickedCage, "rightDivider", event);
-            }else{
-                changeCageModArray(cageId, setClickedCagePartners, modKey, event);
+        // Changing from other mod to CTunnel
+        if(event.value === ModTypes.CTunnel) {
+            if(clickedCage.id === cageId){
+                if(clickedCage.adjCages.floorCage){ // cage is above so change below
+                    changeCageModArray(clickedCage.adjCages.floorCage.id, setClickedCagePartners, modKey,  event);
+                }else{
+                    console.log("CCC: ", clickedCage.adjCages.ceilingCage);
+                    changeCageModArray(clickedCage.adjCages.ceilingCage.id, setClickedCagePartners, modKey, event);
+                }
             }
         }
     }
 
-    useEffect(() => {
-        if(isValidDelete && isValidDeleteArray) {
-            setSaveDelete(true);
-        }
-    }, [isValidDelete, isValidDeleteArray]);
-
-    useEffect(() => {
-        saveMod()
-    }, [saveDelete]);
-
     return (
         <tr>
-            {/* Place an editing button next to extra mods for deletion (can't delete floors/dividers) */
-                isEditing && modKey === "extraMods" && (<td>
-                    <ReactSVG
-                        src={`${ActionURL.getContextPath()}/cageui/static/trashcan.svg`}
-                        wrapper={"div"}
-                        onClick={() => setIsPopupOpen(true)}
-                        className={"edit-svg"}
-                    />
-                    {isPopupOpen && (
-                        <ConfirmationPopup
-                            message="Are you sure you want to delete this mod?"
-                            onConfirm={deleteMod}
-                            onCancel={() => setIsPopupOpen(false)}
-                        />
-                    )}
-                </td>)}
-            {isEditing && modKey !== "extraMods" && (<td></td>)/*Still need space here for UI */}
             <td>{convertLocationName(modKey)}</td>
             <td>
                 <Select
                     options={modOptions}
-                    isDisabled={false}// TODO add permissions to access this
+                    isDisabled={!isEditing}// TODO add permissions to access this
                     value={modOptions.find((mod) => (
                         mod.value === defaultMod
                     ))}
@@ -160,9 +99,9 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                             backgroundColor: 'inherit',
                             borderColor: 'inherit'
                         }),
-                        indicatorsContainer: (base) => ({
+                        dropdownIndicator: (base) => ({
                             ...base,
-                            color: 'inherit',
+                            color: isEditing ? 'black' : 'gray',
                         }),
                         indicatorSeparator: (base) => ({
                             ...base,
@@ -170,7 +109,7 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                         }),
                         singleValue: (base) => ({
                             ...base,
-                            color: "black",
+                            color: isEditing ? 'black' : 'dimgray',
                         }),
                     }}
                 />

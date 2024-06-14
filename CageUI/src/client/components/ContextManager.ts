@@ -18,6 +18,8 @@ export interface CageContextType {
     cageDetails: Cage[] | null,
     setCageDetails: React.Dispatch<React.SetStateAction<Cage[] | null>> | null,
     saveMod: () => void,
+    isDirty: boolean,
+    setIsDirty: React.Dispatch<React.SetStateAction<boolean>>
 
 }
 export const CageContext = createContext<CageContextType | null>(null);

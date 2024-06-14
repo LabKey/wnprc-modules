@@ -5,19 +5,21 @@
 
 .room-legend {
   background-color: lightcoral;
+  flex: 0 1 auto; /* Takes only the space it needs */
 }
 
 .room-display {
   background-color: lightblue;
-
   //width: 100vw;
+  flex: 1; /* This will make the display take the remaining space */
+
   //height: 100vh;
 }
 
 .room-layout {
   background-color: lightpink;
-  height: fit-content;
-  width: fit-content;
+  flex: 1; /* This will make the display take the remaining space */
+
 }
 
 .room-container {
@@ -27,13 +29,15 @@
   width: 100%;
 }
 /* SVG Styling */
+
 .room-svg {
   width: 100%;
-  height: 100%;
-  display: flex;
+  height: auto;
+  display: block;
   justify-content: center;
   align-items: center;
 }
+
 .legend-svg {
   width: 100%;
   height: 100%;
@@ -44,6 +48,7 @@
 .room-svg svg {
   width: 100%;
   height: 100%;
+  flex: 1;
 }
 
 .room-sub-container {
@@ -105,10 +110,6 @@
 
 .room-svg tspan {
   pointer-events: none;
-}
-
-.room-svg {
-
 }
 
 .details-overlay {
@@ -283,8 +284,7 @@
   margin-bottom: 20px;
 }
 
-.new-mod-row-btn {
-  font-size: 40px;
+.legend-header-btn {
   background-color: transparent;
   background-repeat: no-repeat;
   border: none;

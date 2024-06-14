@@ -350,7 +350,7 @@ export const getTotalCagesInRoom = (room) => {
 }
 
 // Finds the cages that are affected by the modification/separator
-export const findAffCages = (mod: string | number, cage: Cage) => {
+export const findAffCages = (mod: string, cage: Cage) => {
     let affCageName;
     if(mod === "rightDivider") {
         affCageName = cage.adjCages.rightCage.name;
@@ -358,12 +358,13 @@ export const findAffCages = (mod: string | number, cage: Cage) => {
         affCageName = cage.adjCages.leftCage.name;
     }else if(mod === "floor") {
         affCageName = cage.adjCages.floorCage.name;
-    }else { // TODO Make sure these are correct
-        if(mod === ModTypes.PlayCage){
+    }else {
+        const cageMod = cage.cageState.extraMod.modData.mod.mod;
+        if(cageMod === ModTypes.PlayCage){
             affCageName = cage.name;
-        }else if(mod === ModTypes.Extension){
+        }else if(cageMod === ModTypes.Extension){
             affCageName = cage.name;
-        }else if(mod === ModTypes.CTunnel){
+        }else if(cageMod === ModTypes.CTunnel){
             if(cage.adjCages.floorCage){
                 affCageName = cage.adjCages.floorCage.name;
             }else if(cage.adjCages.ceilingCage){
@@ -371,11 +372,7 @@ export const findAffCages = (mod: string | number, cage: Cage) => {
             }
         }
     }
-    if(affCageName){
-        return affCageName;
-    }else{
-        return;
-    }
+    return affCageName;
 }
 
 export const findCagePartners = (cage: Cage, rack: Rack, newCages: Cage[]) => {
@@ -394,101 +391,47 @@ export const findCagePartners = (cage: Cage, rack: Rack, newCages: Cage[]) => {
         !(newCages.find((tmpCage) => tmpCage.id === cage.adjCages.floorCage.id))){
         newCages.push(cage.adjCages.floorCage);
     }
-}
-
-export const changeCageModArray = (updateId: number, setClickedCagePartners, modKey: string, event, setSaveDelete?, extModId?, isDone?) => {
-    if(event === "delete"){
-        setClickedCagePartners(prevState => {
-            return prevState.map(cage =>
-                cage.id === updateId ? {
-                    ...cage,
-                    cageState: {
-                        ...cage.cageState,
-                        [modKey]: cage.cageState[modKey].filter(obj => obj.modData.id !== extModId)
-                    }
-                } : cage
-            );
-        });
-        setSaveDelete(isDone);
-    }else {
-        setClickedCagePartners(prevState => {
-            return prevState.map(cage =>
-                cage.id === updateId ? {
-                    ...cage,
-                    cageState: {
-                        ...cage.cageState,
-                        [modKey]: {
-                            ...cage.cageState[modKey],
-                            modData: {
-                                ...cage.cageState[modKey].modData,
-                                mod: Object.values(Modifications).find(mod => mod.mod === event.value)
-                            }
-                        }
-                    }
-                } : cage
-            );
-        });
+    // Ceiling
+    if(cage.adjCages.ceilingCage &&
+        !(newCages.find((tmpCage) => tmpCage.id === cage.adjCages.ceilingCage.id))){
+        newCages.push(cage.adjCages.ceilingCage);
     }
 }
 
-export const changeCageMod = (setClickedCage, modKey: string, event, updateId?: number, setSaveDelete?: any) => {
-    if(modKey === "extraMods"){
-
-        setClickedCage(prevState => {
-            if(event === "delete"){
-                setSaveDelete(true);
-                return {
-                    ...prevState,
-                    cageState: {
-                        ...prevState.cageState,
-                        [modKey]: prevState.cageState[modKey].filter(obj => obj.modData.id !== updateId)
-                    }
-                }
-            }
-            const modIndex = prevState.cageState[modKey].findIndex(
-                mod => mod.modData.id === updateId
-            );
-            if (modIndex !== -1) {
-                const updatedMods = prevState.cageState[modKey].map((mod, index) =>
-                    index === modIndex
-                        ? {
-                            ...mod,
-                            modData: {
-                                ...mod.modData,
-                                mod: Object.values(Modifications).find(
-                                    (mod) => mod.mod === event.value
-                                )
-                            }
+export const changeCageModArray = (updateId: number, setClickedCagePartners, modKey: string, event) => {
+    setClickedCagePartners(prevState => {
+        return prevState.map(cage =>
+            cage.id === updateId ? {
+                ...cage,
+                cageState: {
+                    ...cage.cageState,
+                    [modKey]: {
+                        ...cage.cageState[modKey],
+                        modData: {
+                            ...cage.cageState[modKey].modData,
+                            mod: Object.values(Modifications).find(mod => mod.mod === event.value)
                         }
-                        : mod
-                );
-                return {
-                    ...prevState,
-                    cageState: {
-                        ...prevState.cageState,
-                        [modKey]: updatedMods
-                    }
-                };
-            }else{
-                console.log("Error: Cannot edit mod that doesn't exist")
-            }
-        });
-    }
-    else{
-        setClickedCage(prevState => ({
-            ...prevState,
-            cageState: {
-                ...prevState.cageState,
-                [modKey]: {
-                    ...prevState.cageState[modKey],
-                    modData: {
-                        ...prevState.cageState[modKey].modData,
-                        mod: Object.values(Modifications).find((mod) => mod.mod === event.value)
                     }
                 }
+            } : cage
+        );
+    });
+}
+
+export const changeCageMod = (setClickedCage, modKey: string, event?) => {
+    setClickedCage(prevState => ({
+        ...prevState,
+        cageState: {
+            ...prevState.cageState,
+            [modKey]: {
+                ...prevState.cageState[modKey],
+                modData: {
+                    ...prevState.cageState[modKey].modData,
+                    mod: Object.values(Modifications).find((mod) => mod.mod === event.value)
+                }
             }
-        }));
-    }
+        }
+    }));
 }
 
 /*
@@ -522,7 +465,6 @@ export const findDetails = (clickedCage, cageDetails, rack) => {
             }
         }
     })
-
 }
 
 
@@ -534,31 +476,11 @@ export const getCageMod = (modId: string, rack: Rack) => {
     const cage = rack.cages[rackPos - 1];
     const mod = parseSeparator(modId);
     let cageMod: Modification;
-    if(cage.cageState.extraMods?.length > 0){
-        cage.cageState.extraMods.forEach((extMod, idx) => {
-            const cleanName = cleanString(extMod.modData.mod.name)
-            const cleanModName = cleanString(mod);
-            if(cleanName === cleanModName){
-                cageMod = cage.cageState.extraMods[idx].modData.mod;
-                return cageMod;
-            }
-        })
-        // if ctunnel mod check floor cage as well. (delete later I think)
-        // This is only here because the two ctunnels are not linked?
-        // What i mean is. if a cage doesn't have a ctunnel, the bottom one wont have it either
-        if(mod === "CTunnel") {
-            if(cage.adjCages.floorCage?.cageState.extraMods.length > 0){
-                cage.adjCages.floorCage.cageState.extraMods.forEach((extMod, idx) => {
-                    const cleanName = cleanString(extMod.modData.mod.name);
-                    if(cleanName !== "ctunnel") return;
-                    const cleanModName = cleanString(mod);
-                    if(cleanName === cleanModName){
-                        cageMod = cage.adjCages.floorCage.cageState.extraMods.find((tmpMod) =>
-                            tmpMod.modData.mod.mod === ModTypes.CTunnel).modData.mod;
-                    }
-                })
-            }
-        }
+    const cleanName = cleanString(cage.cageState.extraMod.modData.mod.name);
+    const cleanModName = cleanString(mod);
+    if(cleanName === cleanModName){
+        cageMod = cage.cageState.extraMod.modData.mod;
+        return cageMod;
     }
-    return cageMod
+    return cageMod;
 }

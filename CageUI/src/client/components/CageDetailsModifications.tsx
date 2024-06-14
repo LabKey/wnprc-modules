@@ -1,70 +1,43 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
-import { findAffCages, findDetails, getModOptions } from './helpers';
+import { findAffCages, getModOptions } from './helpers';
 import { ModificationRow } from './ModificationRow';
 import { useCurrentContext } from './ContextManager';
-import {ConfirmationPopup} from './ConfirmationPopup';
-import { Cage } from './typings';
+import { ConfirmationPopup } from './ConfirmationPopup';
 
 interface CageDetailsModificationsProps {
     closeDetails: () => void;
 }
 export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (props) => {
     const {closeDetails} = props;
-    const {saveMod, setRoom, clickedRack, clickedCagePartners, setIsEditing, isEditing, modRows, setModRows, cageDetails} = useCurrentContext();
+    const {saveMod, setIsEditing, modRows, setModRows, cageDetails} = useCurrentContext();
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
-    useEffect(() => {
-        console.log("I Render");
-    }, []);
     // Toggles editing mode for cage mods
     const editMode = () => {
-        console.log("Add Mod");
         setIsEditing(prevState => !prevState);
     }
 
-
     useEffect(() => {
-        console.log("Load Details: ", cageDetails);
+        const newModRows = [];
         cageDetails.forEach((cage) => {
-            const newModRows = Object.keys(cage.cageState).map((key, idx) => {
+            const tempModRows = Object.keys(cage.cageState).map((key, idx) => {
                 const modOptions = getModOptions(key);
-                if (Array.isArray(cage.cageState[key])) { // finds extra mods
-                    return(
-                        cage.cageState[key].map((mod, idx) => {
-                            if (mod.name === "") return;
-                            return(
-                                <ModificationRow
-                                    key={`extraMod-${cage.id}-${idx}`}
-                                    extraModId={cage.cageState[key][idx].modData.id}
-                                    modKey={key}
-                                    cageId={cage.id}
-                                    defaultMod={cage.cageState[key][idx].modData.mod.mod}
-                                    modOptions={modOptions}
-                                    affectedCage={findAffCages(mod.modData.mod.mod, cage)}
-                                />
-                            );
-                        }));
-                } else { // finds separators
-                    return(
-                        <ModificationRow
-                            key={`separator-${cage.id}-${idx}`}
-                            cageId={cage.id}
-                            modKey={key}
-                            defaultMod={cage.cageState[key].modData.mod.mod}
-                            modOptions={modOptions}
-                            affectedCage={findAffCages(key, cage)}
-                        />
-                    );
-                }
+                return(
+                    <ModificationRow
+                        key={key !== "extraMod" ? `separator-${cage.id}-${idx}` : `extraMod-${cage.id}-${idx}`}
+                        cageId={cage.id}
+                        modKey={key}
+                        defaultMod={cage.cageState[key].modData.mod.mod}
+                        modOptions={modOptions}
+                        affectedCage={findAffCages(key, cage)}
+                    />
+                );
             });
-            setModRows(() => [...newModRows]);
-        })
+            newModRows.push(...tempModRows);
+        });
+        setModRows(() => [...newModRows]);
+
     }, [cageDetails]);
-
-    useEffect(() => {
-        console.log("MR: ", modRows);
-    }, [modRows]);
-
 
     return (
         <div className={"details-modifications"}>
@@ -78,7 +51,7 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
             <div className={'details-mod-header'}>
                 <h2>Modifications</h2>
                 <button className="details-add-mod" onClick={editMode}>
-                    Add/Delete &#43;
+                    Edit &#9998;
                 </button>
                 <button className="details-add-mod" onClick={() => setIsPopupOpen(true)}>
                     Save
@@ -87,7 +60,6 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
             <table className={'details-table'}>
                 <thead>
                 <tr>
-                    {isEditing && (<th> </th>)}
                     <th>Location</th>
                     <th>Mod</th>
                     <th>Affected Cages</th>

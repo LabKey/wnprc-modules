@@ -24,15 +24,13 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
     const {
         clickedCage,
         setClickedCage,
-        clickedCagePartners,
         setClickedCagePartners,
         isEditing,
-        setIsEditing,
-        setRoom,
-        saveMod
+        setIsDirty
     } = useCurrentContext();
 
     const changeMod = (event) => {
+        setIsDirty(true);
         // Change main cage state
         // if the cage state to change is the clicked cage
         if(clickedCage.id === cageId){

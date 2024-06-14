@@ -14,7 +14,7 @@ import { CageDetails } from './CageDetails';
 import { useCurrentContext } from './ContextManager';
 
 export const RoomLayout: FC = () => {
-    const {room, setClickedCage, setClickedRack, setClickedCagePartners} = useCurrentContext();
+    const {room, setClickedCage, setClickedRack, setClickedCagePartners, setIsDirty} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {
@@ -22,6 +22,7 @@ export const RoomLayout: FC = () => {
     }
     const closeDetails = () => {
         setIsOpen(false);
+        setIsDirty(false);
     }
     
     const handleClick = (event) => {

@@ -17,8 +17,10 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
     const [cageDetails, setCageDetails] = useState<Cage[]>([]);
     const [clickedRack, setClickedRack] = useState<Rack>();
     const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [isDirty, setIsDirty] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
     const saveMod = () => {
+        setIsDirty(false);
         setRoom(prevRoom => {
             const updatedRoom = [...prevRoom];
             const clickedRackIndex = clickedRack.id - 1;
@@ -76,7 +78,9 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
                 setModRows,
                 cageDetails,
                 setCageDetails,
-                saveMod
+                saveMod,
+                isDirty,
+                setIsDirty
             }}>
                 <RoomLayout />
             </CageContext.Provider>

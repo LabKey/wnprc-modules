@@ -1,5 +1,17 @@
+type CageSize = {
+    width: number;
+    length: number;
+    height: number
+}
+export type CageSizeWithKey =
+    { sizeKey: "8.0", dimensions: CageSize } |
+    { sizeKey: "6.0", dimensions: CageSize } |
+    { sizeKey: "4.3", dimensions: CageSize };
+
 export type CagePosition = "top" | "bottom";
 export type CageType = "cage" | "pen";
+export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
+
 export interface Cage {
     id: number
     name: string;
@@ -7,6 +19,8 @@ export interface Cage {
     position: string;
     type: CageType;
     adjCages: AdjCages | undefined;
+    size: CageSizeWithKey;
+    manufacturer: CageBuilder
 }
 
 export interface AdjCages {
@@ -62,6 +76,8 @@ interface SchematicRoomProps {
         rackNum: number;
         cageNum: number;
         rackTypes: RackTypes[];
+        cageTypes: CageBuilder[]
+        cageSizes: CageSizeWithKey[]
     }
 }
 
@@ -80,11 +96,28 @@ export interface ExtraMod {
     mod: Modification
 }
 
+export const CageSizes: Record<string, CageSizeWithKey> = {
+    "8.0": {
+        sizeKey: "8.0",
+        dimensions: { width: 8, length: 8, height: 8 }
+    },
+    "6.0": {
+        sizeKey: "6.0",
+        dimensions: { width: 6, length: 6, height: 6 }
+    },
+    "4.3": {
+        sizeKey: "4.3",
+        dimensions: { width: 4.3, length: 4.3, height: 4.3 }
+    }
+};
+
 const Schematics: SchematicRoomProps = {
     "AB140-167.svg": {
         rackNum: 6,
         cageNum: 4,
         rackTypes: [RackTypes.TwoOfTwo], // rack types starting at cage 1 going up (single value means all racks the same)
+        cageTypes: ["Suburban"],
+        cageSizes: [CageSizes['8.0']]
     }
 }
 

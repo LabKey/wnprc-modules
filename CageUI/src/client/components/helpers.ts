@@ -1,6 +1,6 @@
 import {
-    Cage,
-    CagePosition,
+    Cage, CageBuilder,
+    CagePosition, CageSizeWithKey,
     CageState,
     CageType,
     DefaultCageState,
@@ -75,23 +75,37 @@ export const loadRoom = (name: string): Rack[] => {
     }
 
     // generate default cages
-    const genCages = (cnt: number, rackType: RackTypes): Cage[] => {
+    const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilder[], cageSizes: CageSizeWithKey[], rackId: number): Cage[] => {
         const cages: Cage[] = [];
         for (let i = 0; i < cnt; i++) {
             let cageState: CageState;
             let position: CagePosition;
             let type: CageType;
             let cagesPerRow: number;
+            let cageSize: CageSizeWithKey;
+            let rackHeight: number;
+            let manufacturer: CageBuilder;
             if(rackType === RackTypes.TwoOfTwo){
                 position =  i < 2 ? "top" : "bottom";
                 cagesPerRow = 2;
+                rackHeight = 2;
                 type = 'cage';
                 Object.keys(DefaultCageState.rackTwoOfTwo).forEach((cagePos, idx) => {
                     if(idx === i){
                         cageState = DefaultCageState.rackTwoOfTwo[cagePos];
                     }
                 })
-                rackConfigs.push({cagesPerRow: 2, rackHeight: 2});
+                rackConfigs.push({cagesPerRow: cagesPerRow, rackHeight: rackHeight});
+                if(cageSizes.length !== 1){
+                    cageSize = cageSizes[rackId - 1];
+                }else{
+                    cageSize = cageSizes[0];
+                }
+                if(cageTypes.length !== 1){
+                    manufacturer = cageTypes[rackId - 1];
+                }else{
+                    manufacturer = cageTypes[0];
+                }
             }
             const tempCage: Cage = {
                 id: cageNum,
@@ -99,7 +113,9 @@ export const loadRoom = (name: string): Rack[] => {
                 cageState: cageState,
                 position: position,
                 type: type,
-                adjCages: undefined
+                adjCages: undefined,
+                size: cageSize,
+                manufacturer: manufacturer,
             }
             cageNum++;
             cages.push(tempCage);
@@ -111,11 +127,10 @@ export const loadRoom = (name: string): Rack[] => {
         for (let i = 0; i < RoomSchematics[name].rackNum; i++) {
             const rackId = i + 1;
             const rackType: RackTypes = RoomSchematics[name].rackTypes.length === 1 ? RoomSchematics[name].rackTypes[0] : RoomSchematics[name].rackTypes[rackId];
-
             const tempRack: Rack = {
                 id: rackId,
                 type: rackType,
-                cages: genCages(RoomSchematics[name].cageNum, rackType)
+                cages: genCages(RoomSchematics[name].cageNum, rackType, RoomSchematics[name].cageTypes, RoomSchematics[name].cageSizes, rackId)
             }
             tempRoom.push(tempRack)
         }

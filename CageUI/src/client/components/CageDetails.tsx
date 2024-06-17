@@ -5,6 +5,7 @@ import { CageDetailsModifications } from './CageDetailsModifications';
 import { useCurrentContext } from './ContextManager';
 import { findDetails } from './helpers';
 import { ConfirmationPopup } from './ConfirmationPopup';
+import { CageExtraDetails } from './CageExtraDetails';
 
 interface CageDetailsProps {
     isOpen: boolean;
@@ -20,11 +21,19 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
     // close modal if user clicks outside its bounds
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if(isDirty){
-                setShowSave(true);
+            if(event.target.firstChild?.data === "Save"){
+                if (modalRef.current && !modalRef.current.contains(event.target)) {
+                    onClose();
+                }
             }
-            else if (modalRef.current && !modalRef.current.contains(event.target)) {
-                onClose();
+            else if(isDirty){
+                if(modalRef.current && !modalRef.current.contains(event.target)){
+                    setShowSave(true);
+                }
+            }else{
+                if(modalRef.current && !modalRef.current.contains(event.target)){
+                    onClose();
+                }
             }
         };
 
@@ -52,7 +61,13 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
             <div className="details-content" ref={modalRef}>
                 <div className={'details-header'}>
                     <h1>Cage {cageDetails.map((cage) => cage.name).join(", ")}</h1>
-                    <button className="details-close-button" onClick={onClose}>
+                    <button className="details-close-button" onClick={() => {
+                        if(isDirty){
+                            setShowSave(true);
+                        }else {
+                            onClose()
+                        }
+                    }}>
                         &times;
                     </button>
                 </div>
@@ -64,6 +79,8 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                 <CageDetailsModifications
                     closeDetails={onClose}
                 />
+                <div className={"details-divider"} />
+                <CageExtraDetails />
             </div>
         </div>
     );

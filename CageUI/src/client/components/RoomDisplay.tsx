@@ -20,6 +20,7 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
     const saveMod = () => {
+        console.log("Saving");
         setIsDirty(false);
         setRoom(prevRoom => {
             const updatedRoom = [...prevRoom];

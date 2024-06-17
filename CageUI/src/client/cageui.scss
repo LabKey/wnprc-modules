@@ -1,15 +1,19 @@
 
 .room-header {
-  background-color: lightgreen;
+  //background-color: lightgreen;
 }
 
-.room-legend {
-  background-color: lightcoral;
+.room-legend-close {
+  //background-color: lightcoral;
+  flex: 0 1 auto; /* Takes only the space it needs */
+}
+.room-legend-open {
+  border: 1px solid black;
   flex: 0 1 auto; /* Takes only the space it needs */
 }
 
 .room-display {
-  background-color: lightblue;
+  //background-color: lightblue;
   //width: 100vw;
   flex: 1; /* This will make the display take the remaining space */
 
@@ -17,7 +21,7 @@
 }
 
 .room-layout {
-  background-color: lightpink;
+  //background-color: lightpink;
   flex: 1; /* This will make the display take the remaining space */
 
 }
@@ -292,3 +296,4 @@
   overflow: hidden;
   outline: none;
 }
+

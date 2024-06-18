@@ -14,7 +14,7 @@ interface CageDetailsProps {
 export const CageDetails: FC<CageDetailsProps> = (props) => {
     const { isOpen, onClose } = props;
     const modalRef = useRef(null);
-    const {clickedCage, clickedRack, cageDetails, isDirty} = useCurrentContext();
+    const {clickedCage, cageDetails, isDirty} = useCurrentContext();
     const [showSave, setShowSave] = useState<boolean>(false);
     if(!clickedCage) return;
 

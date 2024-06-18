@@ -14,7 +14,7 @@ import { CageDetails } from './CageDetails';
 import { useCurrentContext } from './ContextManager';
 
 export const RoomLayout: FC = () => {
-    const {room, setClickedCage, setClickedRack, setClickedCagePartners, setIsDirty} = useCurrentContext();
+    const {room, setClickedCage, setClickedRack, setIsDirty} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {
@@ -34,11 +34,10 @@ export const RoomLayout: FC = () => {
         const clickedCage = clickedRack.cages[cageId - 1];
         console.log("CC: ", clickedCage, clickedRack);
 
-        const newCagePartners: Cage[] = [clickedCage];
-        findCagePartners(clickedCage, clickedRack, newCagePartners);
+        //const newCagePartners: Cage[] = [clickedCage];
+        //findCagePartners(clickedCage, clickedRack, newCagePartners);
         setClickedCage(clickedCage);
         setClickedRack(clickedRack);
-        setClickedCagePartners(newCagePartners);
         openDetails();
 
     };

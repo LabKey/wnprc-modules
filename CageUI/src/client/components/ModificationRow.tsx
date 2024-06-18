@@ -24,42 +24,38 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
     const {
         clickedCage,
         setClickedCage,
-        setClickedCagePartners,
         isEditing,
         setIsDirty,
         setClickedRack,
-        clickedCagePartners,
+        clickedRack
     } = useCurrentContext();
 
     const changeMod = (event) => {
         const isChangingFromCTunnel = defaultMod === ModTypes.CTunnel;
         const isChangingToCTunnel = event.value === ModTypes.CTunnel;
         setIsDirty(true);
-        // Change main cage state
+        // Change rack state
+        updateClickedRack(setClickedRack, modKey, cageId, event);
         // if the cage state to change is the clicked cage
         if(clickedCage.id === cageId){
             changeCageMod(setClickedCage, modKey, event);
             // if changing divider from clicked cage, also change divider of adj cage
             if(modKey === "rightDivider") {
-                changeCageModArray(cageId + 1, setClickedCagePartners, "leftDivider", event);
+                updateClickedRack(setClickedRack, "leftDivider", cageId + 1, event);
             }else if(modKey === "leftDivider") {
-                changeCageModArray(cageId - 1, setClickedCagePartners, "rightDivider", event);
+                updateClickedRack(setClickedRack, "rightDivider", cageId - 1, event);
             }
         }
         else {// if changing adj cage mod from clicked cage update clicked cage and adj cage
-            changeCageModArray(cageId, setClickedCagePartners, modKey, event);
             if(modKey === "rightDivider") {
                 changeCageMod(setClickedCage, "leftDivider", event);
             }else if(modKey === "leftDivider") {
                 changeCageMod(setClickedCage, "rightDivider", event);
             }
         }
-        //update clicked Rack
-        updateClickedRack(setClickedRack, modKey, cageId, event);
-
 
         if (isChangingFromCTunnel || isChangingToCTunnel) {
-            const targetCage = clickedCage.id === cageId ? clickedCage : clickedCagePartners.find(cage => cage.id === cageId);
+            const targetCage = clickedCage.id === cageId ? clickedCage : clickedRack.cages.find(cage => cage.id === cageId);
 
             if (targetCage) {
                 const newEvent = isChangingFromCTunnel ? { value: ModTypes.NoMod } : event;
@@ -67,8 +63,7 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                     ? targetCage.adjCages.floorCage.id
                     : targetCage.adjCages.ceilingCage.id;
 
-                changeCageModArray(adjCageId, setClickedCagePartners, modKey, newEvent);
-                updateClickedRack(setClickedRack, modKey, cageId, newEvent);
+                updateClickedRack(setClickedRack, modKey, adjCageId, newEvent);
             }
         }
     }

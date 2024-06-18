@@ -13,14 +13,13 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
 
     const [room, setRoom] = useState<Rack[]>([]);
     const [clickedCage, setClickedCage] = useState<Cage>();
-    const [clickedCagePartners, setClickedCagePartners] = useState<Cage[]>();
     const [cageDetails, setCageDetails] = useState<Cage[]>([]);
     const [clickedRack, setClickedRack] = useState<Rack>();
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
     const saveMod = () => {
-        console.log("Saving: ", clickedRack, clickedCage, clickedCagePartners);
+        console.log("Saving: ", clickedRack, clickedCage);
         setIsDirty(false);
         setRoom(prevRoom => {
             const updatedRoom = [...prevRoom];
@@ -31,7 +30,7 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
                     (cage) => cage.id === clickedCage.id
                 ).cageState = clickedCage.cageState;
 
-                clickedCagePartners.forEach((cage) => {
+                clickedRack.cages.forEach((cage) => {
                     updatedRoom[clickedRackIndex].cages.find(
                         (updateCage) => updateCage.id === cage.id
                     ).cageState = cage.cageState;
@@ -73,8 +72,6 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
                 setClickedCage,
                 clickedRack,
                 setClickedRack,
-                clickedCagePartners,
-                setClickedCagePartners,
                 isEditing,
                 setIsEditing,
                 modRows,

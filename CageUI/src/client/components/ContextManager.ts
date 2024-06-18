@@ -7,8 +7,6 @@ export interface CageContextType {
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
     clickedCage: Cage | null,
     setClickedCage: React.Dispatch<React.SetStateAction<Cage | null>> | null,
-    clickedCagePartners: Cage[] | null,
-    setClickedCagePartners: React.Dispatch<React.SetStateAction<Cage[] | null>> | null,
     clickedRack: Rack | null,
     setClickedRack: React.Dispatch<React.SetStateAction<Rack | null>> | null,
     isEditing: boolean,

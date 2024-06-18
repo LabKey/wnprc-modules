@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { FC } from 'react';
-import { changeCageMod, changeCageModArray, convertLocationName } from './helpers';
+import { changeCageMod, changeCageModArray, convertLocationName, updateClickedRack } from './helpers';
 import Select from 'react-select';
-import { ModTypes } from './typings';
+import { Modifications, ModTypes } from './typings';
 import { useCurrentContext } from './ContextManager';
 
 
@@ -26,10 +26,14 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
         setClickedCage,
         setClickedCagePartners,
         isEditing,
-        setIsDirty
+        setIsDirty,
+        setClickedRack,
+        clickedCagePartners,
     } = useCurrentContext();
 
     const changeMod = (event) => {
+        const isChangingFromCTunnel = defaultMod === ModTypes.CTunnel;
+        const isChangingToCTunnel = event.value === ModTypes.CTunnel;
         setIsDirty(true);
         // Change main cage state
         // if the cage state to change is the clicked cage
@@ -50,29 +54,21 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                 changeCageMod(setClickedCage, "rightDivider", event);
             }
         }
+        //update clicked Rack
+        updateClickedRack(setClickedRack, modKey, cageId, event);
 
-        // Changing from CTunnel mod to another mod, must remove ctunnel from cage above/below.
-        if(defaultMod === ModTypes.CTunnel){
-            if(clickedCage.id === cageId){
-                event = {value: ModTypes.NoMod}
-                if(clickedCage.adjCages.floorCage){ // cage is above so change below
-                    changeCageModArray(clickedCage.adjCages.floorCage.id, setClickedCagePartners, modKey, event);
-                    // Remove mod from cage
-                }else{
-                    changeCageModArray(clickedCage.adjCages.ceilingCage.id, setClickedCagePartners, modKey, event);
-                }
-            }
-        }
 
-        // Changing from other mod to CTunnel
-        if(event.value === ModTypes.CTunnel) {
-            if(clickedCage.id === cageId){
-                if(clickedCage.adjCages.floorCage){ // cage is above so change below
-                    changeCageModArray(clickedCage.adjCages.floorCage.id, setClickedCagePartners, modKey,  event);
-                }else{
-                    console.log("CCC: ", clickedCage.adjCages.ceilingCage);
-                    changeCageModArray(clickedCage.adjCages.ceilingCage.id, setClickedCagePartners, modKey, event);
-                }
+        if (isChangingFromCTunnel || isChangingToCTunnel) {
+            const targetCage = clickedCage.id === cageId ? clickedCage : clickedCagePartners.find(cage => cage.id === cageId);
+
+            if (targetCage) {
+                const newEvent = isChangingFromCTunnel ? { value: ModTypes.NoMod } : event;
+                const adjCageId = targetCage.adjCages.floorCage
+                    ? targetCage.adjCages.floorCage.id
+                    : targetCage.adjCages.ceilingCage.id;
+
+                changeCageModArray(adjCageId, setClickedCagePartners, modKey, newEvent);
+                updateClickedRack(setClickedRack, modKey, cageId, newEvent);
             }
         }
     }

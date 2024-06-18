@@ -20,7 +20,7 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
     const saveMod = () => {
-        console.log("Saving");
+        console.log("Saving: ", clickedRack, clickedCage, clickedCagePartners);
         setIsDirty(false);
         setRoom(prevRoom => {
             const updatedRoom = [...prevRoom];
@@ -37,24 +37,26 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
                     ).cageState = cage.cageState;
                 })
             }
+            console.log("New Room", updatedRoom );
             return updatedRoom;
         });
     }
+
 
     useEffect(() => {
         console.log("Room: ", room)
     }, [room]);
 
-    useEffect(() => {
-        console.log("clicked Cage: ", clickedCage)
-    }, [clickedCage]);
+
 
     useEffect(() => {
-        if(!clickedCage) return;
+        if(!clickedCage || !clickedRack) return;
         const newCageDetails: Cage[] = [clickedCage];
+
         findDetails(clickedCage, newCageDetails, clickedRack);
+        console.log("CR: ", clickedRack, newCageDetails);
         setCageDetails(newCageDetails);
-    }, [clickedCage]);
+    }, [clickedRack, clickedCage]);
 
 
     useEffect(() => {

@@ -217,7 +217,7 @@ const getCageDividers = (totalCages, position, cageId, direction) => {
 
     // Check if the inputs are valid
     if (groupCageId < 1 || groupCageId > totalCages) {
-        throw new Error('Invalid box ID');
+        throw new Error('Invalid cage ID');
     }
     if (position !== "top" && position !== "bottom") {
         throw new Error('Invalid position');
@@ -253,9 +253,9 @@ const getCageDividers = (totalCages, position, cageId, direction) => {
 }
 
 // Function to find the cage underneath given a cage ID on top
-export const getCageAboveOrBelow = (totalCages, boxId, rackConfigurations) => {
-    if (boxId < 1 || boxId > totalCages) {
-        throw new Error('Invalid box ID');
+export const getCageAboveOrBelow = (totalCages, cageId, rackConfigurations) => {
+    if (cageId < 1 || cageId > totalCages) {
+        throw new Error('Invalid cage ID');
     }
 
     let cumulativeCages = 0;
@@ -264,9 +264,9 @@ export const getCageAboveOrBelow = (totalCages, boxId, rackConfigurations) => {
         const cagesPerRack = cagesPerRow * rackHeight;
         cumulativeCages += cagesPerRack;
 
-        if (boxId <= cumulativeCages) {
-            // The box belongs to this rack
-            const positionInRack = (boxId - 1) % cagesPerRack;
+        if (cageId <= cumulativeCages) {
+            // The cage belongs to this rack
+            const positionInRack = (cageId - 1) % cagesPerRack;
             const row = Math.floor(positionInRack / cagesPerRow);
 
             let cageUnderneathId = null;
@@ -274,13 +274,13 @@ export const getCageAboveOrBelow = (totalCages, boxId, rackConfigurations) => {
 
             // Determine the cage underneath
             if (row < rackHeight - 1) {
-                cageUnderneathId = boxId + cagesPerRow;
+                cageUnderneathId = cageId + cagesPerRow;
                 cageUnderneathId = cageUnderneathId <= cumulativeCages ? cageUnderneathId : null;
             }
 
             // Determine the cage above
             if (row > 0) {
-                cageAboveId = boxId - cagesPerRow;
+                cageAboveId = cageId - cagesPerRow;
                 cageAboveId = cageAboveId > cumulativeCages - cagesPerRack ? cageAboveId : null;
             }
 
@@ -288,7 +288,7 @@ export const getCageAboveOrBelow = (totalCages, boxId, rackConfigurations) => {
         }
     }
 
-    throw new Error('Box ID does not fit within the provided rack configurations');
+    throw new Error('Cage ID does not fit within the provided rack configurations');
 }
 
 
@@ -449,6 +449,29 @@ export const changeCageMod = (setClickedCage, modKey: string, event?) => {
     }));
 }
 
+export const updateClickedRack = (setClickedRack, modKey: string, cageId: number, event) => {
+    setClickedRack(prevState => ({
+        ...prevState,
+        cages: prevState.cages.map(cage =>
+            cage.id === cageId
+                ? {
+                    ...cage,
+                    cageState: {
+                        ...cage.cageState,
+                        [modKey]: {
+                            ...cage.cageState?.[modKey],
+                            modData: {
+                                ...cage.cageState?.[modKey]?.modData,
+                                mod: Object.values(Modifications).find(mod => mod.mod === event.value)
+                            }
+                        }
+                    }
+                }
+                : cage
+        )
+    }));
+}
+
 /*
 Recursive helper function to find all the modifications attached to a cage.
 It is recursive because if a cage has no divider/floor, it should combine and repeat.
@@ -459,21 +482,21 @@ export const findDetails = (clickedCage, cageDetails, rack) => {
     Object.keys(clickedCage.cageState).forEach((key) => {
         if(key === "rightDivider"){
             if(clickedCage.cageState.rightDivider.modData.mod.mod === ModTypes.NoDivider){
-                newCage = clickedCage.adjCages.rightCage;
+                newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.rightCage.id);
                 if(cageDetails.find(cage => cage.id === newCage.id)) return;
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
         }else if(key === "leftDivider") {
             if(clickedCage.cageState.leftDivider.modData.mod.mod === ModTypes.NoDivider){
-                newCage = clickedCage.adjCages.leftCage
+                newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.leftCage.id);
                 if(cageDetails.find(cage => cage.id === newCage.id)) return;
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
         }else if(key === "floor") {
             if (clickedCage.cageState.floor.modData.mod.mod === ModTypes.NoFloor) {
-                newCage = clickedCage.adjCages.floorCage;
+                newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.floorCage.id);
                 if (cageDetails.find(cage => cage.id === newCage.id)) return;
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);

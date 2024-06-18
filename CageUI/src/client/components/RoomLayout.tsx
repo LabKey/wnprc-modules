@@ -32,6 +32,7 @@ export const RoomLayout: FC = () => {
         //const cageId: number = room
         const clickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = clickedRack.cages[cageId - 1];
+        console.log("CC: ", clickedCage, clickedRack);
 
         const newCagePartners: Cage[] = [clickedCage];
         findCagePartners(clickedCage, clickedRack, newCagePartners);

@@ -390,29 +390,6 @@ export const findAffCages = (mod: string, cage: Cage) => {
     return affCageName;
 }
 
-export const findCagePartners = (cage: Cage, rack: Rack, newCages: Cage[]) => {
-    //Check if cage has right divider
-    if(cage.adjCages.rightCage &&
-        !(newCages.find((tmpCage) => tmpCage.id === cage.adjCages.rightCage.id))){
-        newCages.push(cage.adjCages.rightCage);
-    }
-    // left divider
-    if(cage.adjCages.leftCage &&
-        !(newCages.find((tmpCage) => tmpCage.id === cage.adjCages.leftCage.id))){
-        newCages.push(cage.adjCages.leftCage);
-
-    } // floor
-    if(cage.adjCages.floorCage &&
-        !(newCages.find((tmpCage) => tmpCage.id === cage.adjCages.floorCage.id))){
-        newCages.push(cage.adjCages.floorCage);
-    }
-    // Ceiling
-    if(cage.adjCages.ceilingCage &&
-        !(newCages.find((tmpCage) => tmpCage.id === cage.adjCages.ceilingCage.id))){
-        newCages.push(cage.adjCages.ceilingCage);
-    }
-}
-
 export const changeCageModArray = (updateId: number, setClickedCagePartners, modKey: string, event) => {
     setClickedCagePartners(prevState => {
         return prevState.map(cage =>

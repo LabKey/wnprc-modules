@@ -20,7 +20,7 @@ export const RoomLegend: FC<any> = () => {
     return (
         <div className={legendStyle}>
             <button className={"legend-header-btn"} onClick={() => setShowLegend(!showLegend)}>
-                <h2 className={'legend-header'}>Legend</h2>
+                <h2 className={showLegend ? 'legend-header-open' : 'legend-header-close'}>Legend</h2>
             </button>
             {showLegend && (
                 <ReactSVG

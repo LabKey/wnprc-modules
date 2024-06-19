@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { FC, useState } from 'react';
-import { Cage } from './typings';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
 import {
-    changeStyleProperty, findCagePartners, getCageMod,
+    changeStyleProperty,
+    getCageMod,
     getRackSeparators,
     parseCage,
     parseRack,
@@ -29,13 +29,10 @@ export const RoomLayout: FC = () => {
         const cage = event.target;
         const rackId: number = parseInt(parseRack(cage.id));
         const cageId: number = parseInt(parseCage(cage.id));
-        //const cageId: number = room
         const clickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = clickedRack.cages[cageId - 1];
         console.log("CC: ", clickedCage, clickedRack);
 
-        //const newCagePartners: Cage[] = [clickedCage];
-        //findCagePartners(clickedCage, clickedRack, newCagePartners);
         setClickedCage(clickedCage);
         setClickedRack(clickedRack);
         openDetails();

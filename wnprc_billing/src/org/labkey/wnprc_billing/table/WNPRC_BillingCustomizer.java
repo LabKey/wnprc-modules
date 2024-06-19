@@ -72,17 +72,20 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
         if (ti.getColumn(name) == null)
         {
             String theQuery = "( " +
-                    "(SELECT " +
-                    "(CASE WHEN COUNT(*) = 0 " +
-                    " THEN '' " +
-                    " ELSE 'Yes'" +
-                    " END) as isAutomatic" +
+                    "(CASE WHEN (SELECT COUNT(*) " +
                     " FROM ehr_billing.procedureQueryChargeIdAssoc p " +
-                    "WHERE p.chargeid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
+                    " WHERE p.chargeid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid ) != 0 " +
+                    " THEN 'Yes' " +
+                    " WHEN " +  ExprColumn.STR_TABLE_ALIAS + ".name  = 'Per diems'" +
+                    " THEN 'Yes'" +
+                    " WHEN " +  ExprColumn.STR_TABLE_ALIAS + ".name  = 'Special Animal Per Diem'" +
+                    " THEN 'Yes'" +
+                    " ELSE ''" +
+                    " END)" +
                     ")";
 
             SQLFragment sql = new SQLFragment(theQuery);
-            ExprColumn col = new ExprColumn(ti, name, sql, JdbcType.VARCHAR);
+            ExprColumn col = new ExprColumn(ti, name, sql, JdbcType.VARCHAR, ti.getColumn("name"));
             col.setLabel("Automatically Billed Procedure?");
             col.setUserEditable(false);
             ti.addColumn(col);

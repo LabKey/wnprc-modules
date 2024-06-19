@@ -20,8 +20,9 @@ export const RoomHome: FC<RoomProps> = (props) => {
             <RoomHeader
                 name={room.name}
             />
+            <div className={"divider"}/>
             <div className={"room-sub-container"}>
-                <RoomLegend />
+                <RoomLegend/>
                 <RoomDisplay name={room.name}/>
             </div>
         </div>

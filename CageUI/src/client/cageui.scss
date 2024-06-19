@@ -3,13 +3,22 @@
   //background-color: lightgreen;
 }
 
-.room-legend-close {
+.legend-header-close {
   //background-color: lightcoral;
   flex: 0 1 auto; /* Takes only the space it needs */
+  padding: 20px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+
 }
 .room-legend-open {
-  border: 1px solid black;
   flex: 0 1 auto; /* Takes only the space it needs */
+  padding: 20px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+
 }
 
 .room-display {
@@ -31,6 +40,10 @@
   flex-direction: column; /* Arrange children in a column */
   height: 100%;
   width: 100%;
+  background-color: lightgrey;
+  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* Adds a shadow effect */
+  padding: 20px; /* Adds some padding inside the card */
 }
 /* SVG Styling */
 
@@ -181,7 +194,7 @@
   margin-top: 0;
 }
 
-.details-divider {
+.divider {
   width: calc(100% - 20px); /* Adjust width as needed */
   height: 4px; /* Adjust height as needed */
   background-color: darkgrey; /* Adjust color as needed */
@@ -285,7 +298,7 @@
   background: #ddd;
 }
 
-.legend-header {
+.legend-header-open {
   margin-bottom: 20px;
 }
 

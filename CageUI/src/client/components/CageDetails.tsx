@@ -75,11 +75,11 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                     <h4>Total: 2</h4>
                     <h4>Status: OK</h4>
                 </div>
-                <div className={"details-divider"} />
+                <div className={"divider"} />
                 <CageDetailsModifications
                     closeDetails={onClose}
                 />
-                <div className={"details-divider"} />
+                <div className={"divider"} />
                 <CageExtraDetails />
             </div>
         </div>

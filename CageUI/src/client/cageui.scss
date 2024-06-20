@@ -151,6 +151,8 @@
   border: 1px solid #888;
   width: 80%;
   height: 90%;
+  overflow-y: auto;
+
   border-radius: 25px;
 }
 
@@ -195,6 +197,14 @@
 }
 
 .divider {
+  width: calc(100% - 20px); /* Adjust width as needed */
+  height: 4px; /* Adjust height as needed */
+  background-color: darkgrey; /* Adjust color as needed */
+  margin: 10px; /* Adjust margin as needed */
+  border-radius: 5px; /* Adjust border radius for rounded corners */
+}
+
+.mini-divider {
   width: calc(100% - 20px); /* Adjust width as needed */
   height: 4px; /* Adjust height as needed */
   background-color: darkgrey; /* Adjust color as needed */
@@ -311,3 +321,6 @@
   outline: none;
 }
 
+.details-extra-header {
+  margin-left: 10px;
+}

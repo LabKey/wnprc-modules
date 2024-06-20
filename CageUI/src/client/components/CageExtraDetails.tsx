@@ -8,7 +8,7 @@ export const CageExtraDetails: FC<any> = (props) => {
 
     return(
       <div className={"details-extra"}>
-
-      </div>
+          <h2 className={"details-extra-header"}>Cage Details</h2>
+     </div>
     );
 }

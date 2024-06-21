@@ -2438,7 +2438,7 @@ public class TriggerScriptHelper {
         }
 
         //find the total animals previously used by this protocols/species
-        TableInfo ti = QueryService.get().getUserSchema(user, container, "ehr").getTable("protocolTotalAnimalsBySpecies");
+        TableInfo ti = QueryService.get().getUserSchema(user, container, "study").getTable("protocolTotalAnimalsBySpecies");
         String animalSpecies = ar.getSpecies();
         SimpleFilter filter;
         if (("Rhesus".equals(animalSpecies) || "Cynomolgus".equals(animalSpecies)))

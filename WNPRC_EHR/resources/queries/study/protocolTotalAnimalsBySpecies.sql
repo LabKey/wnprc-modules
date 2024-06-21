@@ -58,7 +58,7 @@ FROM
 
         LEFT JOIN ehr.protocol_counts pc ON (p.protocol = pc.protocol AND pc.species = p.species)
 
-WHERE p.species IS NOT NULL
+WHERE p.species IS NOT NULL and pc.allowed IS NOT NULL
 
 
 UNION ALL

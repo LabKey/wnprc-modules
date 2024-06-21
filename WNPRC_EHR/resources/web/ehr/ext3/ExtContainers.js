@@ -2265,7 +2265,7 @@ EHR.ext.AssignmentAbstractPanel = Ext.extend(EHR.ext.AbstractPanel, {
                 timeout: 0,
                 linkTarget: '_blank',
                 renderTo: this.placeForQwp.body.id,
-                schemaName: 'ehr',
+                schemaName: 'study',
                 queryName: 'protocolTotalAnimalsBySpecies',
                 //viewName: 'With Animals',
                 scope: this,

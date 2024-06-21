@@ -23,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
@@ -169,7 +170,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String ROOM_ID_LOCAL = "ab160";
     protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
 
-    protected static String[] TEST_SUBJECTS = {"r12345", "cy23456", "cj3456", "cy45678", "cy56789"};
+    protected static String[] TEST_SUBJECTS = {"r12345", "cy23456", "cj3456", "cy45678", "cy56789", "cj3457"};
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
@@ -190,6 +191,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
     private static final String MHC_SSP_LIST = "MHC SSP List";
     private static final String QPCR_QC_list = "QPCR_QC_list";
+    public static final String PROTOCOL_PROJECT_ID_2 = "795645";
+    public static final String PROTOCOL_PROJECT_ID_3 = "795646";
+    public static final String PROTOCOL_ID_2 = "protocol102";
+    public static final String PROTOCOL_ID_3 = "protocol103";
+
 
     @Nullable
     @Override
@@ -274,8 +280,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
-
-        initTest.deathNotificationSetup();
+        //initTest.deathNotificationSetup();
     }
 
     private void billingSetup() throws Exception
@@ -395,7 +400,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 {TEST_SUBJECTS[1], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {TEST_SUBJECTS[2], "Marmoset", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {TEST_SUBJECTS[3], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
-                {TEST_SUBJECTS[4], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
+                {TEST_SUBJECTS[4], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[5], "Marmoset", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
         };
         insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
         getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
@@ -407,7 +413,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 {MORE_ANIMAL_IDS[1], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {MORE_ANIMAL_IDS[2], "Rhesus", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {MORE_ANIMAL_IDS[3], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
-                {MORE_ANIMAL_IDS[4], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
         };
         insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
         getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(MORE_ANIMAL_IDS, ";"), Filter.Operator.IN));
@@ -3768,6 +3773,154 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
         Assert.assertEquals(1,resp2.getRowCount());
         */
+
+    }
+    protected String generateGUID()
+    {
+        return (String)executeScript("return LABKEY.Utils.generateUUID().toUpperCase()");
+    }
+
+    public void createProtocolAndProject(String theProtocolName, String theProjectName) throws IOException, CommandException
+    {
+        String protocolTitle = generateGUID();
+        InsertRowsCommand protocolCommand = new InsertRowsCommand("ehr", "protocol");
+        protocolCommand.addRow(Maps.of("protocol", theProtocolName, "title", protocolTitle, "approve",  new Date(653295600000L), "enddate", new Date(853295600000L) )); //;
+        // Sept. 14, 1990
+        protocolCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand protocolSelect = new SelectRowsCommand("ehr", "protocol");
+        protocolSelect.addFilter(new Filter("title", protocolTitle));
+        final String protocolId = (String)protocolSelect.execute(getApiHelper().getConnection(), getContainerPath()).getRows().get(0).get("protocol");
+        Assert.assertNotNull(StringUtils.trimToNull(protocolId));
+
+        InsertRowsCommand investigatorsCommand = new InsertRowsCommand("ehr", "investigators");
+        investigatorsCommand.addRow(Maps.of("firstName", "Testt", "lastName", "Tester"));
+        CommandResponse response = investigatorsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+        var id = ((HashMap<?, ?>) ((ArrayList<?>) response.getParsedData().get("rows")).get(0)).get("rowid");
+
+        InsertRowsCommand projectCommand = new InsertRowsCommand("ehr", "project");
+        String projectName = generateGUID();
+        projectCommand.addRow(Maps.of("project", theProjectName, "name", projectName, "protocol", protocolId, "investigatorId", id));
+        projectCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand projectSelect = new SelectRowsCommand("ehr", "project");
+        projectSelect.setColumns(List.of("project", "investigatorId/lastName"));
+        projectSelect.addFilter(new Filter("protocol", protocolId));
+        SelectRowsResponse resp = projectSelect.execute(getApiHelper().getConnection(), getContainerPath());
+        final Integer projectId = (Integer)resp.getRows().get(0).get("project");
+
+        assertEquals("Project not correct in project table", theProjectName, projectId.toString());
+
+    }
+    @Test
+    public void testAssignmentApi() throws Exception
+    {
+
+        goToProjectHome();
+
+        //create protocol and corresponding projects
+        createProtocolAndProject(PROTOCOL_ID_2, PROTOCOL_PROJECT_ID_2);
+        createProtocolAndProject(PROTOCOL_ID_3, PROTOCOL_PROJECT_ID_3);
+
+        InsertRowsCommand protocolCountsCommand = new InsertRowsCommand("ehr", "protocol_counts");
+
+        //protocol102 - macaque constraint
+        Map<String, Object> protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Cynomolgus");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        //protocol103-no cyno
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        //create assignment
+        InsertRowsCommand assignmentCommand = new InsertRowsCommand("study", "assignment");
+        assignmentCommand.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", TEST_SUBJECTS[0]);
+                put("date", prepareDate(new Date(), -10, 0));
+                put("objectid", generateGUID());
+                put("project", PROTOCOL_PROJECT_ID_2);
+            }});
+        assignmentCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        ArrayList<String> msgs = new ArrayList<>();
+        msgs.add("WARN: There are not enough spaces on protocol: " + PROTOCOL_ID_2 + ". Allowed: 1, used: 2");
+        // try 2, should fail since there is one assignment of Rhesus (macaque), and only 1 spot for that
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {MORE_ANIMAL_IDS[0], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_2, "recordID"},
+        }, Maps.of(
+                "project", msgs
+        ));
+
+        //shouldn't allow cyno to be assigned
+        ArrayList<String> msgs3 = new ArrayList<>();
+        msgs3.add("WARN: Species not allowed on protocol: " + PROTOCOL_ID_3);
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {TEST_SUBJECTS[1], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+        }, Maps.of(
+                "project", msgs3
+        ));
+
+        //shouldn't allow another marm
+        ArrayList<String> msgs2 = new ArrayList<>();
+        msgs2.add("WARN: There are not enough spaces on protocol: " + PROTOCOL_ID_3 + ". Allowed: 1, used: 2");
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {TEST_SUBJECTS[2], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+                {TEST_SUBJECTS[5], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+        }, Maps.of(
+                "project", msgs2
+        ));
 
     }
 

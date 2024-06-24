@@ -280,7 +280,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
-        //initTest.deathNotificationSetup();
+        initTest.deathNotificationSetup();
     }
 
     private void billingSetup() throws Exception
@@ -413,6 +413,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 {MORE_ANIMAL_IDS[1], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {MORE_ANIMAL_IDS[2], "Rhesus", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {MORE_ANIMAL_IDS[3], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[4], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
         };
         insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
         getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(MORE_ANIMAL_IDS, ";"), Filter.Operator.IN));

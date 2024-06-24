@@ -82,6 +82,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -2420,6 +2421,10 @@ public class TriggerScriptHelper {
 
     public String verifyProtocolCounts(final String id, Integer project, final List<Map<String, Object>> recordsInTransaction)
     {
+        final String RHESUS_SPECIES = "Rhesus";
+        final String CYNOMOLGUS_SPECIES = "Cynomolgus";
+        final String MACAQUE_SPECIES = "Macaque";
+        final String ALL_SPECIES = "All Species";
         if (id == null)
         {
             return null;
@@ -2441,17 +2446,16 @@ public class TriggerScriptHelper {
         TableInfo ti = QueryService.get().getUserSchema(user, container, "study").getTable("protocolTotalAnimalsBySpecies");
         String animalSpecies = ar.getSpecies();
         SimpleFilter filter;
-        if (("Rhesus".equals(animalSpecies) || "Cynomolgus".equals(animalSpecies)))
+        if ((RHESUS_SPECIES.equals(animalSpecies) || CYNOMOLGUS_SPECIES.equals(animalSpecies)))
         {
-            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, "All Species", "Macaque"), CompareType.IN);
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, ALL_SPECIES, MACAQUE_SPECIES), CompareType.IN);
         } else
         {
-            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, "All Species"), CompareType.IN);
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, ALL_SPECIES), CompareType.IN);
         }
         filter.addCondition(FieldKey.fromString("protocol"), protocol);
         TableSelector ts = new TableSelector(ti, filter, null);
         final List<String> errors = new ArrayList<>();
-        final String ALL_SPECIES = "All Species";
         final boolean[] noSpeciesListedOnProtocol = {true};
         ts.forEach(new Selector.ForEachBlock<ResultSet>()
         {
@@ -2489,7 +2493,7 @@ public class TriggerScriptHelper {
                         AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
 
                         //we don't want to exit the animal count if ar.species() is cyno or rhesus and the protocol's species value is macaque.
-                        if (!ALL_SPECIES.equals(species) && !("Rhesus".equals(ar.getSpecies()) || "Cynomolgus".equals(ar.getSpecies()) && "Macaque".equals(species)))
+                        if (!ALL_SPECIES.equals(species) && !(RHESUS_SPECIES.equals(ar.getSpecies()) || CYNOMOLGUS_SPECIES.equals(ar.getSpecies()) && MACAQUE_SPECIES.equals(species)))
                         {
                             //find species
                             if (ar.getSpecies() == null || !species.equals(ar.getSpecies()))

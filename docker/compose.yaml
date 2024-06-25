@@ -84,6 +84,12 @@ services:
       LK_MX_VALUE: ${LK_MX_VALUE}
       LK_MASTER_ENCRYPTION_FILE: /run/secrets/master_encryption_pwd
       LK_BASE_URL: ${LK_BASE_URL}
+      LK_MSQL_PASS: ${LK_MSQL_PASS}
+      LK_MSQL_URL: ${LK_MSQL_URL}
+      LK_MSQL_USER: ${LK_MSQL_USER}
+      LK_ARROW_PASS: ${LK_ARROW_PASS}
+      LK_ARROW_URL: ${LK_ARROW_URL}
+      LK_ARROW_USER: ${LK_ARROW_USER}
       PG_NAME: ${PG_NAME}
       PG_PASS: ${PG_PASS}
       PG_USER: ${PG_USER}

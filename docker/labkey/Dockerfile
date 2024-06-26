@@ -22,7 +22,7 @@ RUN echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
-FROM wnprcehr/cranrnutils:cranrnutils_${LK_VERSION}
+FROM wnprcehr/cranrnutils:cranrnutils_${LK_VERSION}${FB_NAME}
 
 # creating folders for LabKey installation
 RUN mkdir -p /labkey/labkey

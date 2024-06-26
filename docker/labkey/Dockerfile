@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # HELPER IMAGE (to download LabKey)
 ARG LK_VERSION
-ARG TOMCAT_IMAGE
+ARG FB_NAME
 FROM alpine:latest as download
 
 ARG LABKEY_TEAMCITY_PASSWORD

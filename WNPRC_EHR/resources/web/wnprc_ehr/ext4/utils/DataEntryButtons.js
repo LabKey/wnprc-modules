@@ -120,6 +120,52 @@
         tooltip:       "Set the status of this record to Complete, save the record, and leave this page."
     }));
 
+    var SubmitWaterButtonName = 'WNPRC_SUBMIT_WATER';
+    registerBtn(SubmitWaterButtonName, _.extend(getBtn("SUBMIT"), {
+        text: "Submit Water",
+        name: "submit_water",
+        successURL:    getReturnURL() || LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view'),
+        hideOnQCState: "Scheduled",
+        tooltip:       "Set the status of this record to Complete, save the record, and leave this page.",
+        handler: function (btn){
+            var storeCollection = this.storeCollection;
+            let waterStore = storeCollection.getServerStoreForQuery("study", "waterGiven");
+
+            if (waterStore){
+                var animalIds = [];
+                for (var idx=0; idx<waterStore.count(); idx++){
+                    var waterGivenRecord = waterStore.getAt(idx);
+                    if (waterGivenRecord !== undefined && waterGivenRecord.get('waterSource')=='lixit'){
+                       animalIds.push(waterGivenRecord.get('Id'));
+                    }
+                }
+                if(animalIds.length){
+                    var animalString = '';
+                    if (animalString.length >1){
+                        animalIds.forEach((animalId)=> animalString+=animalId+',');
+                    }else{
+                        animalString = animalIds[0];
+                    }
+
+                    Ext4.MessageBox.show({
+                        title: 'Lixit Confirmation',
+                        msg: 'Is the water line connected for animal '+ animalString,
+                        width: '300',
+                        buttons: Ext4.MessageBox.YESNO,
+                        icon: Ext4.MessageBox.QUESTION,
+                        fn: function proceed(resp){
+                            if (resp == 'yes'){
+                                this.onSubmit(btn);
+                            }else{
+                                Ext4.MessageBox.hide();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }));
+
     /*
      * Prompt the user for a yes or no answer.  Resolves on "yes" and rejects with an error with a
      * message of "canceled" if "no" is selected.

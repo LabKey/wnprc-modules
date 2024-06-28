@@ -41,6 +41,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -169,6 +171,7 @@ public class NotificationToolkit {
      * @return          The number of rows in the given table.  If none, returns 0.
      */
     public final long getTableRowCount(Container c, User u, String schema, String tableName, String qViewName) {
+        // TODO: Change this to handle null (i.e. if null is passed in as qViewName, set qViewName = "").
 
         //Creates variables.
         StringBuilder returnString = new StringBuilder();
@@ -228,7 +231,7 @@ public class NotificationToolkit {
      * @param currentUser           The current user.
      * @param currentContainer      The current container.
      */
-    public void sendNotification(Notification currentNotification, User currentUser, Container currentContainer) {
+    public void sendNotification(Notification currentNotification, User currentUser, Container currentContainer, ArrayList<String> extraRecipients) {
 
         //Retrieves email details.
         Collection<UserPrincipal> recipients = NotificationService.get().getRecipients(currentNotification, currentContainer);
@@ -255,6 +258,15 @@ public class NotificationToolkit {
                         if (a.toString() != null) {
                             emailRecipients.add(a.toString());
                         }
+                    }
+                }
+            }
+
+            //Adds extra recipients if necessary.
+            if (extraRecipients != null) {
+                if (!extraRecipients.isEmpty()) {
+                    for (String extraRecipient : extraRecipients) {
+                        emailRecipients.add(extraRecipient);
                     }
                 }
             }
@@ -448,6 +460,7 @@ public class NotificationToolkit {
         return animalSexMeaning;
     }
 
+    //TODO: Fix this so it only gets the FIRST row (check the myTable.forEach part).  Maybe add a counter and only update returnRow on first one.  (See: getTableRowAsListWithFieldKeys() -> "if (returnRow.isEmpty())")
     /**
      * Retrieves a specific row from a specific table with only necessary columns.
      * The schema, tableName, and column names can be found through the Query Schema Browser.
@@ -480,6 +493,52 @@ public class NotificationToolkit {
                         if (rs != null) {
                             for (int i = 0; i < columnsToGet.length; i++) {
                                 returnRow.add(rs.getString(columnsToGet[i]));
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        return returnRow;
+    }
+
+    // TODO: WRITE DOCUMENTATION!!!  Also might be able to merge this with original getTableRowAsList().  Also need to add try/catch w/ exception maybe?
+    //  NOTE: mySort can be null.
+    //  NOTE: This gets the first non-empty result.
+    public ArrayList<String> getTableRowAsListWithFieldKeys(Container currentContainer, User currentUser, String schema, String tableName, String targetColumnName, String targetColumnValue, String[] columnsToGet, Sort mySort) {
+        ArrayList<String> returnRow = new ArrayList<String>();
+        //Verifies table contains data before attempting to retrieve row.
+        if (getTableRowCount(currentContainer, currentUser, schema, tableName, "") > 0) {
+            //Updates table info.
+            TableInfo myTableInfo = QueryService.get().getUserSchema(currentUser, currentContainer, schema).getTable(tableName);
+            //Updates columns to be retrieved.
+            Set<FieldKey> myKeys = new HashSet<>();
+            for (String myColumn : columnsToGet) {
+                myKeys.add(FieldKey.fromString(myColumn));
+            }
+            final Map<FieldKey, ColumnInfo> myColumns = QueryService.get().getColumns(myTableInfo, myKeys);
+            //Sets up variables.
+            SimpleFilter myFilter = new SimpleFilter(FieldKey.fromString(targetColumnName), targetColumnValue, CompareType.EQUAL);
+            //Runs query with updated info.
+            TableSelector myTable = new TableSelector(myTableInfo, myColumns.values(), myFilter, mySort);
+
+            //Gets row from table.
+            if (myTable != null) {
+                myTable.forEach(new Selector.ForEachBlock<ResultSet>() {
+                    @Override
+                    public void exec(ResultSet rs) throws SQLException {
+                        if (returnRow.isEmpty()) {
+                            if (rs != null) {
+                                Results myResults = new ResultsImpl(rs, myColumns);
+                                //Goes through each column in current query row and updates currentRow.
+                                for (int i = 0; i < columnsToGet.length; i++) {
+                                    String currentColumnTitle = columnsToGet[i];
+                                    String currentColumnValue = "";
+                                    if (myResults.getString(FieldKey.fromString(currentColumnTitle)) != null) {
+                                        currentColumnValue = myResults.getString(FieldKey.fromString(currentColumnTitle));
+                                    }
+                                    returnRow.add(currentColumnValue);
+                                }
                             }
                         }
                     }
@@ -596,6 +655,7 @@ public class NotificationToolkit {
      *  Refactor all usages of getTableMultiRowMultiColumn() to use this new format, then delete the getTableMultiRowSingleColumn() function.
      * Retrieves multiple specified column values for multiple rows in a dataset using a filter and sort.
      * This is the same as getTableMultiRowMultiColumn(), except this can be used with target columns that reference other datasets (ex. "Id/Dataset/Demographics/calculated_status").  This also returns a differently formatted value.
+     * This does not return null values.  Any null values will be returned as an empty string.
      * The try/catch prevents error if the table, schema, target column, sort value, or filter do not exist.
      *      EXAMPLE GOAL:       Get ID, drawStatus, and billing group for all animals in the 'BloodSchedule' dataset with their date set for today, sorted by ID.
      *      EXAMPLE USE:        SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getDateToday(), CompareType.DATE_EQUAL);
@@ -688,6 +748,14 @@ public class NotificationToolkit {
         return sortedList;
     }
 
+    // TODO: Remove "%3B" at the end of all queries - this is causing invalid query results.
+    //      --> %3B is code for a semicolon.
+    //      --> Update: removed semicolon being added, but now URL's containing IN:xxx,yyy,zzz don't work (i.e. cannot use multiple values for one key).
+    //          --> Found out this is because the function removes ';' separator from multiple values.
+    //          --> Currently causing errors in:
+    //              ColonyInformationObject > getLivingAnimalsWithMultipleActiveHousingRecords
+    //              ColonyInformationObject > getAllRecordsWithPotentialHousingConditionProblems
+    //              ColonyInformationObject > getAllRecordsWithCalculatedStatusFieldProblems
     /**
      * Creates a URL for a query matching user arguments.
      * WARNING: This should only be used with a SimpleFilter that has clauses containing only one field key.  You can use multiple clauses and multiple values for each, but each clause should only have one key.
@@ -719,14 +787,14 @@ public class NotificationToolkit {
             // Adds parameters from queryFilter.
             for (SimpleFilter.FilterClause currentClause : queryFilter.getClauses()) {
                 // Gets clause key.
-                FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with one field key.
+                FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with clauses containing one field key for each clause.
 
                 // Gets clause value.
                 StringBuilder clauseValue = new StringBuilder();
                 if (currentClause.getParamVals() != null) {
                     for (Object paramValue : currentClause.getParamVals()) {
                         clauseValue.append(paramValue.toString());
-                        clauseValue.append(";");
+//                        clauseValue.append(";");
                     }
                 }
 
@@ -754,7 +822,73 @@ public class NotificationToolkit {
         return returnURL.toString();
     }
 
+    // TODO: COMMENT!!!
+    public Boolean checkIfAnimalIsAlive(Container c, User u, String idToCheck) {
+        try {
+            //Runs query.
+            ArrayList<String> animalDemographicRow = getTableRowAsList(c, u, "study", "Demographics", null, "id", idToCheck, new String[]{"calculated_status"});
 
+            //Checks alive status.
+            if (animalDemographicRow.get(0).equals("Alive")) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (IndexOutOfBoundsException e) {
+            // TODO: Log exception.
+            return false;
+        }
+    }
+
+    // TODO: COMMENT!!!
+    //  This checks if an animal is assigned to a certain project on a given date.
+    //      --> dateToCheck must be formatted as "yyyy-MM-dd.....".  Any trailing characters after 'dd' are ignored.
+    //      --> returns 'true' if assigned to a project, 'false' if not.
+    public Boolean checkProjectAssignmentStatusOnDate(Container c, User u, String idToCheck, Integer projectToCheck, String dateToCheck) {
+        Boolean animalAssigned = false;
+        // Checks if animal is assigned to a project.
+        if (projectToCheck.equals("300901") || projectToCheck.equals("400901")) {
+            animalAssigned = true;
+        }
+        // Gets everything in the 'assignment' dataset with the same 'id' and 'project' as the request, and an assignment 'start date' on or after the 'request date'.
+        else {
+            // Sets up query.
+            SimpleFilter myFilter = new SimpleFilter("id", idToCheck, CompareType.EQUAL);
+            myFilter.addCondition("project", projectToCheck, CompareType.EQUAL);   // TODO: Verify that currentProject will always be a numerical value.
+            myFilter.addCondition("date", dateToCheck, CompareType.DATE_LTE);
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"Id", "enddate"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "assignment", myFilter, null, targetColumns);
+
+            // Looks through each assignment for the current animal.
+            for (HashMap<String, String> assignmentRow : returnArray)
+            {
+                // Marks animal 'assigned' if there's no project end date.
+                if (assignmentRow.get("enddate").isEmpty())
+                {
+                    animalAssigned = true;
+                }
+                // Marks animal 'assigned' if the project's 'end date' is on or after the 'request date'.
+                else
+                {
+                    // Some times show up as 'yyyy-MM-dd 00:00:00.0'.  Time is inconsistent & irrelevant, so we'll just take the date.
+                    String endDateWithoutTime = assignmentRow.get("enddate").substring(0, 10);
+                    String drawDateWithoutTime = dateToCheck.substring(0, 10);
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDate formattedEndDate = LocalDate.parse(endDateWithoutTime, dateFormatter);
+                    LocalDate formattedDrawDate = LocalDate.parse(drawDateWithoutTime, dateFormatter);
+                    if (formattedEndDate.compareTo(formattedDrawDate) >= 0)
+                    {
+                        animalAssigned = true;
+                    }
+                }
+            }
+        }
+        return animalAssigned;
+    }
 
 
 
@@ -1227,10 +1361,17 @@ public class NotificationToolkit {
             returnStyle.append(
                     //Adds a border to the table.
                     "table, th, tr { border: 1px solid black;}" +
-                    //Adds a hover effect to rows.
-                    "tr:hover {background-color: #d9d9d9;}" +
-                    //Adds padding to each cell.
-                    "th, td {padding: 5px; text-align: center}"
+                            //Adds a hover effect to rows.
+                            "tr:hover {background-color: #d9d9d9;}" +
+                            //Adds padding to each cell.
+                            "th, td {padding: 5px; text-align: center}" +
+                            //Adds vertical column lines (on right side of row's cells, but not on the row's final cell).
+                            "th, td {border-right: 1px solid #000000}" +
+                            "th:last-child, td:last-child {border-right: none}" +
+                            //Adds horizontal row lines (on bottom side of row's cells, but not on the final row's cells).
+                            "th, td {border-bottom: 1px solid #000000}" +
+                            "tr:last-child td {border-bottom: none}"
+
                     //TODO: Figure out how to make the bottom 2 formats work.
                     //Sets the header text format.
 //                    "th {font-weight: bold}" +
@@ -1268,7 +1409,11 @@ public class NotificationToolkit {
             return returnStyle.toString();
         }
 
-        //TODO: Add documentation.
+        /**
+         * This sets the row background color for the first row (containing column titles).
+         * @param headerColor   The hex code of the desired color.
+         * @return              A string containing CSS code.
+         */
         public String setHeaderRowBackgroundColor(String headerColor) {
             StringBuilder returnStyle = new StringBuilder();
             returnStyle.append(
@@ -1277,9 +1422,6 @@ public class NotificationToolkit {
             return returnStyle.toString();
         }
 
-//        public String setRowBackgroundColor(Integer[] rowsToHighlight, String highlightColor) {
-//
-//        }
     }
 
     static class NotificationRevampTable
@@ -1349,18 +1491,26 @@ public class NotificationToolkit {
             return todayDate;
         }
 
-        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
-        public Date getDateTomorrow() {
-            Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, 1);
-            Date tomorrowDate = todayCalendar.getTime();
-            return tomorrowDate;
-        }
+//        //Returns tomorrow's date as Date (ex: "Thu Mar 07 13:11:02 CST 2024").
+//        public Date getDateTomorrow() {
+//            Calendar todayCalendar = Calendar.getInstance();
+//            todayCalendar.add(Calendar.DATE, 1);
+//            Date tomorrowDate = todayCalendar.getTime();
+//            return tomorrowDate;
+//        }
 
-        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
-        public Date getDateFiveDaysAgo() {
+//        //Returns five days ago's date as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
+//        public Date getDateFiveDaysAgo() {
+//            Calendar todayCalendar = Calendar.getInstance();
+//            todayCalendar.add(Calendar.DATE, -5);
+//            Date fiveDaysAgoDate = todayCalendar.getTime();
+//            return fiveDaysAgoDate;
+//        }
+
+        //Returns today's date +/- a specific number of days as Date (ex: "Fri Mar 01 13:11:02 CST 2024").
+        public Date getDateXDaysFromNow(Integer numDaysFromNow) {
             Calendar todayCalendar = Calendar.getInstance();
-            todayCalendar.add(Calendar.DATE, -5);
+            todayCalendar.add(Calendar.DATE, numDaysFromNow);
             Date fiveDaysAgoDate = todayCalendar.getTime();
             return fiveDaysAgoDate;
         }

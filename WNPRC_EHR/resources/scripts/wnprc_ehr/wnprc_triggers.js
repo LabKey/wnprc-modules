@@ -622,6 +622,12 @@ exports.init = function (EHR) {
 
     var tube_types = {}
 
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.AFTER_UPSERT, 'study', 'Blood', function (helper, scriptErrors, row) {
+        if (row.QCStateLabel === 'Request: Approved') {
+            WNPRC.Utils.getJavaHelper().sendBloodDrawReviewNotification(row.Id, row.project, row.date, row.requestor);
+        }
+    })
+
     function getHousingSQL(row) {
         var date = row.Date;
         date = EHR.Server.Utils.normalizeDate(date);
@@ -705,6 +711,13 @@ exports.init = function (EHR) {
             WNPRC.Utils.getJavaHelper().sendVvcNotification(requestid);
         }
     });*/
+
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'blood', function (event, helper) {
+        helper.setCenterCustomProps({
+            doWarnForBloodNearOverages: true,
+            bloodNearOverageThreshold: 4.0
+        })
+    });
 
     //TODO put this in INIT once we can override it
     var tube_types = {}
@@ -798,15 +811,26 @@ exports.init = function (EHR) {
                     }
 
                     if (row.objectid) {
-                        var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
-                        if (msg != null) {
-                            if (msg.toLowerCase().indexOf('unknown weight') > -1) {
-                                volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
-                            }
+                        try {
+                            var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
+                            if (msg != null) {
+                                if (msg.toLowerCase().indexOf('unknown weight') > -1) {
+                                    volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();
+                                } else if (msg.indexOf('Limit') === 0 && msg.indexOf('exceeds') === -1 ) {
+                                    volumeErrorSeverity = 'INFO';
+                                }
 
-                            //TODO: change all future bloods draws to review required, if submitted for medical purpose.
-                            EHR.Server.Utils.addError(scriptErrors, 'num_tubes', msg, volumeErrorSeverity);
-                            EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, volumeErrorSeverity);
+                                //Set the severity level to INFO for limit notices strictly
+
+
+                                //TODO: change all future bloods draws to review required, if submitted for medical purpose.
+                                EHR.Server.Utils.addError(scriptErrors, 'num_tubes', msg, volumeErrorSeverity);
+                                EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, volumeErrorSeverity);
+                            }
+                        }
+                        catch (error) {
+                            EHR.Server.Utils.addError(scriptErrors, 'num_tubes', error.message, 'ERROR');
+                            console.error(error);
                         }
                     }
                     else {
@@ -817,4 +841,9 @@ exports.init = function (EHR) {
         });
 
     }
+    EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.INIT, function(event, helper, EHR){
+        helper.setScriptOptions({
+            datasetsToClose: ['Assignment', 'Cases', 'Housing', 'Treatment Orders', 'Notes', 'Problem List', 'Protocol Assignments', 'waterOrders', 'breeding_encounters'],
+        });
+    });
 };

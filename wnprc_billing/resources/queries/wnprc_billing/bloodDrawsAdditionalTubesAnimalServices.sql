@@ -19,14 +19,15 @@ SELECT
     Id,
     date,
     project,
-    project.account.alias AS debitedAccount,
-    project.account.tier_rate.tierRate AS otherRate,
+    coalesce(account, project.account.alias) AS debitedAccount,
+    coalesce(a.tier_rate.tierRate, project.account.tier_rate.tierRate) as otherRate,
     objectid AS sourceRecord,
     null AS comment,
     CAST((num_tubes - 1) AS DOUBLE) AS quantity,
     taskId,
     performedby
 FROM studyLinked.BloodSchedule bloodSch
+    LEFT JOIN ehr_billing.aliases a ON bloodSch.account = a.alias
 WHERE
     num_tubes > 1 AND
     billedBy.value = 'a' AND

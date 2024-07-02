@@ -123,6 +123,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private final String ANIMAL_HISTORY_URL = "/ehr/" + PROJECT_NAME + "/EHR/animalHistory.view?";
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
+    protected static final String PROJECT_MEMBER_ID_2 = "test3804589"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
     private static final int ALIASES_NUM_ROWS = 4;
@@ -130,12 +131,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
     private final File CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesGroupCategoryError.tsv");
-    private static final int CHARGE_RATES_NUM_ROWS = 9;
-    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 8;
+    private static final int CHARGE_RATES_NUM_ROWS = 10;
+    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 9;
 
     private final File CHARGEABLE_ITEMS_RATES_UPDATE_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesUpdate.tsv");
-    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 12;
-    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 11;
+    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 13;
+    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 12;
 
     private final File CHARGEABLE_ITEM_CATEGORIES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemCategories.tsv");
 
@@ -355,6 +356,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("queryName", "bloodDrawsAdditionalTubesAnimalServices");
         rowMap.put("description", "Blood Draws Additional Tubes - Animal Services");
         rowMap.put("chargeId", getChargeId("Blood draws - Additional Tubes"));
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsAllTubesSPI");
+        rowMap.put("description", "Blood Draws - SPI");
+        rowMap.put("chargeId", getChargeId("Blood Draws"));
         insertCmd.addRow(rowMap);
 
         int numRows = insertCmd.execute(cn, PRIVATE_FOLDER_PATH).getRows().size();
@@ -1358,19 +1366,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         switchToWindow(1);
 
         DataRegionTable invoicedItemsByProject = new DataRegionTable("query", getDriver());
-        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "46.00",	"$1,028.95");
+        //unit cost indirect is 40
+        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "47.00",	"$1,068.95");
         actualRowData = invoicedItemsByProject.getRowDataAsText(0, "invoiceId/billingPeriodStart", "invoiceId/billingPeriodEnd", "project", "numItems", "total");
         assertEquals("Wrong row data for invoicedItemsByProject ", expectedRowData, actualRowData);
 
         log("Validating Summary By Item's total sum value");
         clickAndWait(Locator.linkContainingText("Summary By Item"));
-        assertTextPresent("Sum", "$1,028.95");
+        assertTextPresent("Sum", "$1,068.95");
 
         goBack();
 
         clickAndWait(Locator.linkContainingText("All Items"));
         DataRegionTable invoicedItems = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", 5, invoicedItems.getDataRowCount());
+        assertEquals("Wrong row count", 6, invoicedItems.getDataRowCount());
         log("Validating Totals");
         assertTextPresent("$806.00", "$13.00", "$1.95", "$195.00");
 
@@ -1523,6 +1532,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         actualRowData = bloodDrawProcedureAddnlTubes.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
         assertEquals("Wrong row data for Blood Draws with Additional tubes: ", expectedRowData, actualRowData);
         assertEquals("One row should be displayed", bloodDrawProcedureAddnlTubes.getDataRowCount(), 1);
+
+        goToBillingFolder();
+        log("Verify num. rows for 'blood draws for spi'");
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=bloodDrawsAllTubesSPI&query.date~dategte=2010-10-01&query.date~datelte=2010-10-30", PRIVATE_FOLDER_PATH));
+        DataRegionTable bloodDrawProcedureSPI = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID_2, "2010-10-18 07:30", "640991", "acct103", "1.0", "1.0", "rk");
+        actualRowData = bloodDrawProcedureSPI.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
+        assertEquals("Wrong row data for Blood Draws with Additional tubes: ", expectedRowData, actualRowData);
+        assertEquals("One row should be displayed", bloodDrawProcedureSPI.getDataRowCount(), 1);
     }
 
     private void viewChargesAdjustmentsNotYetBilled(int numRows, String filterCol, String filterVal, List<String> expectedRowData)
@@ -1949,14 +1967,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
+        testReports("Invoiced Items", 8, "test2312318","640991" , "$19.50", "$15.00",
                 "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
+        // check that the acct103 was charged and not the account associated w/ project 640991
+        testReports("Invoice Internal", 2, "acct103", "40.00");
     }
 
     private void testSummaryReports()
     {
         testReports("Invoice Runs", 1, "2010-10-01", "2010-10-31");
-        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$32.75", "$285.00");
+        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$72.75", "$285.00");
     }
 
     private void testReports(String linkText, int numRows, String... texts)

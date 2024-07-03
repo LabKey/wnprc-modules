@@ -3,57 +3,21 @@ import { FC, useState, useEffect } from 'react';
 import { Cage, Rack } from './typings';
 import { findDetails, loadRoom } from './helpers';
 import { RoomLayout } from './RoomLayout';
-import { CageContext } from './ContextManager';
+import { useCurrentContext } from './ContextManager';
 
 interface DisplayProps {
     name: string; // room type
 }
 export const RoomDisplay: FC<DisplayProps> = (props) => {
     const {name} = props;
+    const {room, clickedCage, clickedRack, setCageDetails, setRoom} = useCurrentContext();
 
-    const [room, setRoom] = useState<Rack[]>([]);
-    const [clickedCage, setClickedCage] = useState<Cage>();
-    const [cageDetails, setCageDetails] = useState<Cage[]>([]);
-    const [clickedRack, setClickedRack] = useState<Rack>();
-    const [isEditing, setIsEditing] = useState<boolean>(false);
-    const [isDirty, setIsDirty] = useState<boolean>(false);
-    const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
-    const saveMod = () => {
-        console.log("Saving: ", clickedRack, clickedCage);
-        setIsDirty(false);
-        setRoom(prevRoom => {
-            const updatedRoom = [...prevRoom];
-            const clickedRackIndex = clickedRack.id - 1;
-            if (updatedRoom[clickedRackIndex]) {
-                // Create a deep copy of the cage state object
-                updatedRoom[clickedRackIndex].cages.find(
-                    (cage) => cage.id === clickedCage.id
-                ).cageState = clickedCage.cageState;
-
-                clickedRack.cages.forEach((cage) => {
-                    updatedRoom[clickedRackIndex].cages.find(
-                        (updateCage) => updateCage.id === cage.id
-                    ).cageState = cage.cageState;
-                })
-            }
-            console.log("New Room", updatedRoom );
-            return updatedRoom;
-        });
-    }
-
-
-    useEffect(() => {
-        console.log("Room: ", room)
-    }, [room]);
-
-
-
+    // updates details if they change while popup is open
     useEffect(() => {
         if(!clickedCage || !clickedRack) return;
         const newCageDetails: Cage[] = [clickedCage];
 
         findDetails(clickedCage, newCageDetails, clickedRack);
-        console.log("CR: ", clickedRack, newCageDetails);
         setCageDetails(newCageDetails);
     }, [clickedRack, clickedCage]);
 
@@ -65,25 +29,7 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
 
     return (
         <div className={"room-display"}>
-            <CageContext.Provider value={{
-                room,
-                setRoom,
-                clickedCage,
-                setClickedCage,
-                clickedRack,
-                setClickedRack,
-                isEditing,
-                setIsEditing,
-                modRows,
-                setModRows,
-                cageDetails,
-                setCageDetails,
-                saveMod,
-                isDirty,
-                setIsDirty
-            }}>
-                <RoomLayout />
-            </CageContext.Provider>
+            <RoomLayout />
         </div>
     );
 }

@@ -1,10 +1,12 @@
 import * as React from 'react';
-import {FC} from 'react';
+import { FC, useState } from 'react';
 import { RoomHeader } from '../components/RoomHeader';
 import { RoomLegend } from '../components/RoomLegend';
 import { RoomDisplay } from '../components/RoomDisplay';
 import '../cageui.scss';
-import {Cage} from '../components/typings';
+import { Cage, Rack } from '../components/typings';
+import { RoomToolbar } from '../components/RoomToolbar';
+import { ContextProvider } from '../components/ContextManager';
 
 interface RoomProps {
     room: {
@@ -15,16 +17,23 @@ interface RoomProps {
 
 export const RoomHome: FC<RoomProps> = (props) => {
     const {room} = props;
+
+
+
     return (
-        <div className={"room-container"}>
-            <RoomHeader
-                name={room.name}
-            />
-            <div className={"divider"}/>
-            <div className={"room-sub-container"}>
-                <RoomLegend/>
-                <RoomDisplay name={room.name}/>
+        <ContextProvider>
+            <div className={"room-container"}>
+                <RoomHeader
+                    name={room.name}
+                />
+                <RoomToolbar/>
+                <div className={"divider"}/>
+                <div className={"room-sub-container"}>
+                    <RoomLegend/>
+                    <RoomDisplay name={room.name}/>
+                </div>
             </div>
-        </div>
+        </ContextProvider>
+
     );
 }

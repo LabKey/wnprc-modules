@@ -10,12 +10,8 @@ interface CageDetailsModificationsProps {
 }
 export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (props) => {
     const {closeDetails} = props;
-    const {saveMod, setIsEditing, modRows, setModRows, cageDetails} = useCurrentContext();
+    const {saveMod, modRows, setModRows, cageDetails} = useCurrentContext();
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
-    // Toggles editing mode for cage mods
-    const editMode = () => {
-        setIsEditing(prevState => !prevState);
-    }
 
     useEffect(() => {
         const newModRows = [];
@@ -51,9 +47,6 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
             )}
             <div className={'details-mod-header'}>
                 <h2>Modifications</h2>
-                <button className="details-add-mod" onClick={editMode}>
-                    Edit &#9998;
-                </button>
                 <button className="details-add-mod" onClick={() => setIsPopupOpen(true)}>
                     Save
                 </button>

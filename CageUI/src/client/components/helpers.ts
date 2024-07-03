@@ -36,13 +36,22 @@ export const parseRack = (input: string) => {
 // Helper function to get the cage number
 export const parseCage = (input: string) => {
     const regex = /rect-(\d+)/;
+
+
     const match = input.match(regex);
     if (match) {
         return match[1];
     }
     return;
 }
-
+export const parseEditRect = (input: string) => {
+    const regex = /blur-(\d+)/;
+    const match = input.match(regex);
+    if (match) {
+        return match[1];
+    }
+    return;
+}
 export const parseCageMod = (input: string) => {
     const regex = /.*?-(\d+)/;
     const match = input.match(regex);
@@ -130,7 +139,8 @@ export const loadRoom = (name: string): Rack[] => {
             const tempRack: Rack = {
                 id: rackId,
                 type: rackType,
-                cages: genCages(RoomSchematics[name].cageNum, rackType, RoomSchematics[name].cageTypes, RoomSchematics[name].cageSizes, rackId)
+                cages: genCages(RoomSchematics[name].cageNum, rackType, RoomSchematics[name].cageTypes, RoomSchematics[name].cageSizes, rackId),
+                isActive: true
             }
             tempRoom.push(tempRack)
         }
@@ -499,3 +509,13 @@ export const getCageMod = (modId: string, rack: Rack) => {
     }
     return cageMod;
 }
+
+export const updateCageIds = (updatedRacks) => {
+    let currentCageId = 1;
+    return updatedRacks.map((rack) => {
+        if (rack.isActive) {
+            rack.cages = rack.cages.map((prevCage) => ({...prevCage, id: currentCageId++ }));
+        }
+        return rack;
+    });
+};

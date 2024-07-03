@@ -24,10 +24,10 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
     const {
         clickedCage,
         setClickedCage,
-        isEditing,
         setIsDirty,
         setClickedRack,
-        clickedRack
+        clickedRack,
+        isEditEnabled
     } = useCurrentContext();
 
     const changeMod = (event) => {
@@ -74,7 +74,7 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
             <td>
                 <Select
                     options={modOptions}
-                    isDisabled={!isEditing}// TODO add permissions to access this
+                    isDisabled={!isEditEnabled}// TODO add permissions to access this
                     value={modOptions.find((mod) => (
                         mod.value === defaultMod
                     ))}
@@ -90,7 +90,7 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                         }),
                         dropdownIndicator: (base) => ({
                             ...base,
-                            color: isEditing ? 'black' : 'gray',
+                            color: isEditEnabled ? 'black' : 'gray',
                         }),
                         indicatorSeparator: (base) => ({
                             ...base,
@@ -98,7 +98,7 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
                         }),
                         singleValue: (base) => ({
                             ...base,
-                            color: isEditing ? 'black' : 'dimgray',
+                            color: isEditEnabled ? 'black' : 'dimgray',
                         }),
                     }}
                 />

@@ -39,6 +39,7 @@ export interface Rack {
     id: number;
     type: RackTypes;
     cages: Cage[];
+    isActive: boolean;
 }
 export enum RackTypes {
     OneOfOne,

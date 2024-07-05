@@ -347,7 +347,7 @@ EHR.Ext3Utils = new function(){
         },
 
         getAccountErrorMsg: function (config) {
-            let errorToDisplay = "The following records have updated account fields, and will charge to the corresponding account/PI:" + "<br>";
+            let errorToDisplay = "The following records have updated account fields, and will charge to the corresponding account / contact person:" + "<br>";
             let count = 0;
             for (let i = 0; i < config.store.errors.getCount(); i++){
                 const theError = config.store.errors.get(i);

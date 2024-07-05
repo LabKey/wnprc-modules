@@ -2448,7 +2448,7 @@ public class TriggerScriptHelper {
         String alias = projects.getJSONObject(0).get("account").toString();
         if ( null != alias && !alias.equals(account))
         {
-            return account  + " / " + getAliasRow().getJSONObject(0).get("investigatorname");
+            return account  + " / " + getAliasRow().getJSONObject(0).optString("investigatorname", getAliasRow().getJSONObject(0).optString("contact_name", "No contact listed")) ;
         }
         else
         {

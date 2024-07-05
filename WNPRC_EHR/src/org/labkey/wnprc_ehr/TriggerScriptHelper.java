@@ -52,6 +52,7 @@ import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
+import org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
@@ -214,6 +215,28 @@ public class TriggerScriptHelper {
         }
         else if (!NotificationService.get().isServiceEnabled()) {
             _log.info("Notification service is not enabled, will not send death notification");
+        }
+    }
+
+    public void sendBloodDrawReviewNotification(String animalID, String project, String drawDate, String requestor) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends Blood Draw Review Notification.
+            if (NotificationService.get().isActive(new BloodDrawReviewTriggerNotification(ehr), container)) {
+                _log.info("Using java helper to send email for Blood Draw Review Trigger (animalID: " + animalID + ").");
+                BloodDrawReviewTriggerNotification notification = new BloodDrawReviewTriggerNotification(ehr, animalID, project, drawDate);
+                ArrayList<String> extraRecipients = new ArrayList<>();
+                String requestorEmail = UserManager.getUserByDisplayName(requestor).getEmail();
+                extraRecipients.add(requestorEmail);
+                notification.sendManually(container, user, extraRecipients);
+            }
+            else {
+                _log.info("Blood Draw Review Notification is not enabled, will not send Blood Draw Review Notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send Blood Draw Review Notification");
         }
     }
 
@@ -1771,69 +1794,36 @@ public class TriggerScriptHelper {
     }
 
     public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord){
-        boolean validation;
+        boolean validation = true;
 
-        if (serverRecord.compareTo(clientRecord) == 0){
+        if (clientRecord.compareTo(serverRecord) == 0){
             validation = false;
             return validation;
-        }
-        switch (clientRecord){
-            case "Daily - AM/PM":
-                if (serverRecord.compareTo("Daily - AM")==0){
-                    validation = false;
-                    break;
-                }
-                if (serverRecord.compareTo("Daily - PM")==0){
-                    validation = false;
-                    break;
-                }
-            case "Daily":
-            //case "ˆDaily":
-                if(serverRecord.compareTo("Monday") == 0 || serverRecord.compareTo("Tuesday") == 0 ||
-                        serverRecord.compareTo("Wednesday") == 0 || serverRecord.compareTo("Thursday") == 0 ||
-                        serverRecord.compareTo("Friday") == 0 || serverRecord.compareTo("Saturday") == 0 ||
-                        serverRecord.compareTo("Sunday") == 0)  {
-                    validation = false;
-                    break;
-                }
-
-            default:
-                if (clientRecord.matches("Daily.*")){
-                    if(serverRecord.compareTo("Monday") == 0 || serverRecord.compareTo("Tuesday") == 0 ||
-                            serverRecord.compareTo("Wednesday") == 0 || serverRecord.compareTo("Thursday") == 0 ||
-                            serverRecord.compareTo("Friday") == 0 || serverRecord.compareTo("Saturday") == 0 ||
-                            serverRecord.compareTo("Sunday") == 0)  {
-                        validation = false;
-                        break;
-                    }
-
-                }
-
-                validation = true;
-
-        }
-        if (validation)
-        {
-            switch (serverRecord)
-            {
-                case "Daily":
-                    if (clientRecord.compareTo("Monday") == 0 || clientRecord.compareTo("Tuesday") == 0 ||
-                            clientRecord.compareTo("Wednesday") == 0 || clientRecord.compareTo("Thursday") == 0 ||
-                            clientRecord.compareTo("Friday") == 0 || clientRecord.compareTo("Saturday") == 0 ||
-                            clientRecord.compareTo("Sunday") == 0)
-                    {
-                        validation = false;
-                        break;
-                    }
-
-                default:
-                    validation = true;
-
+        } else if (clientRecord.compareTo("Daily - AM")==0){
+            if (serverRecord.compareTo("Daily - Anytime")==0){
+                validation = false;
+                return validation;
+            }else if (serverRecord.compareTo("Daily - AM/PM")==0){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.contains("PM")){
+            if (serverRecord.contains("PM")){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.compareTo("Daily - Anytime")==0){
+            if (serverRecord.contains("PM") || serverRecord.contains("AM")){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.compareTo("Daily - AM/PM")==0){
+            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime")==0){
+                validation = false;
+                return validation;
             }
         }
-
         return validation;
-
     }
 
     public static class WaterInfo

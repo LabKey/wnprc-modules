@@ -120,7 +120,6 @@ import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNoti
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotificationRevamp;
-import org.labkey.wnprc_ehr.notification.BloodAlertsNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesSupervisorNotification;
 import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
 import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
@@ -223,6 +222,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcOverRides.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcReports.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcHusbandryReports.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcFullHistoryReports.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/datasetButtons.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalPortal.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalWaterCalendar.js"), this);
@@ -382,12 +382,14 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new DeathNotificationRevamp(this),
                 new ColonyAlertsNotificationRevamp(this),
                 new AnimalRequestNotificationRevamp(this),
-                new BloodAlertsNotificationRevamp(this),
-                new BloodAlertsNotificationRevampAnimalCare(this),
-                new BloodAlertsNotificationRevampResearchStaff(this),
-                new BloodAlertsNotificationRevampSPI(this),
-                new BloodAlertsNotificationRevampVetStaff(this)
-//                new AdminAlertsNotificationRevamp(this)
+                new BloodDrawsTodayAll(this),
+                new BloodDrawsTodayAnimalCare(this),
+                new BloodDrawsTodayVetStaff(this),
+                new BloodDrawReviewDailyNotification(this),
+                new BloodDrawReviewTriggerNotification(this),
+                new AdminAlertsNotificationRevamp(this),
+                new ColonyManagementNotificationRevamp(this),
+                new ColonyAlertsLiteNotificationRevamp(this)
                 );
 
         for (Notification notification : notifications)

@@ -247,12 +247,16 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
         LocalDate date = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = date.minusDays(numberOfDates);
+        LocalDate endDate = LocalDate.now();
         int datesInPast = numberOfDates;
 
         for (int i = 0; i<datesInPast; i++){
 
             Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
             parameters.put("CheckDate", date);
+            parameters.put("STARTTARGET", startDate);
+            parameters.put("ENDTARGETDATE", endDate);
 
             TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("waterScheduledAnimalWithOutEntries");
             TableSelector ts = new TableSelector(ti,PageFlowUtil.set("Id","project","location"), null, null);

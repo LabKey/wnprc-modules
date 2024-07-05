@@ -622,6 +622,12 @@ exports.init = function (EHR) {
 
     var tube_types = {}
 
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.AFTER_UPSERT, 'study', 'Blood', function (helper, scriptErrors, row) {
+        if (row.QCStateLabel === 'Request: Approved') {
+            WNPRC.Utils.getJavaHelper().sendBloodDrawReviewNotification(row.Id, row.project, row.date, row.requestor);
+        }
+    })
+
     function getHousingSQL(row) {
         var date = row.Date;
         date = EHR.Server.Utils.normalizeDate(date);
@@ -835,4 +841,9 @@ exports.init = function (EHR) {
         });
 
     }
+    EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.INIT, function(event, helper, EHR){
+        helper.setScriptOptions({
+            datasetsToClose: ['Assignment', 'Cases', 'Housing', 'Treatment Orders', 'Notes', 'Problem List', 'Protocol Assignments', 'waterOrders', 'breeding_encounters'],
+        });
+    });
 };

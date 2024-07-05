@@ -65,10 +65,10 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
         if (deathID != null) {
             //Checks to see if death is prenatal or not.
             if (notificationToolkit.checkIfPrenatalID(deathID)) {
-                subject = "Prenatal Death Notification";
+                subject = "New Prenatal Death Notification";
             }
             else {
-                subject = "Death Notification";
+                subject = "New Death Notification";
             }
             //Adds ID.
             if (!deathID.isEmpty()) {
@@ -94,7 +94,7 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
 
     //Sending Options
     public void sendManually (Container container, User user){
-        notificationToolkit.sendNotification(this, user, container);
+        notificationToolkit.sendNotification(this, user, container, null);
     }
 
 

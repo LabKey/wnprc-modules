@@ -73,7 +73,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
 
     //TODO: allow updates of existing records.
-    if(!(rowDate.getTime() >= today.getTime()) && (oldRow.objectid != row.objectid)){
+    if(oldRow && !(rowDate.getTime() >= today.getTime()) && (row.objectid != oldRow.objectid)){
         EHR.Server.Utils.addError(scriptErrors, 'date', 'Only Dates in the Future Allow', 'ERROR');
     }
 
@@ -105,11 +105,10 @@ function onUpsert(helper, scriptErrors, row, oldRow){
    //console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
     if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck) {
-        console.log('value of row: frequency ' + row.frequency + ' value of waterSource ' + row.waterSource);
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.waterSource, row.objectid, row.project, this.extraContext);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {
-                var errorObject = JSON.parse(jsonArray[i]);
+                var errorObject = jsonArray[i];
                 EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
             }
         }

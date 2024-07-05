@@ -71,7 +71,7 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
     @Override
     public String getEmailSubject(Container c)
     {
-        return "[EHR Services] New Animal Request Submitted on " + dateToolkit.getCurrentTime();
+        return "[EHR Services] (Revamp) New Animal Request Submitted on " + dateToolkit.getCurrentTime();
     }
     public String getScheduleDescription()
     {
@@ -88,7 +88,7 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
     //Sending Options
     public void sendManually (Container container, User user)
     {
-        notificationToolkit.sendNotification(this, user, container);
+        notificationToolkit.sendNotification(this, user, container, null);
     }
 
 

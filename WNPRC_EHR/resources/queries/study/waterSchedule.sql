@@ -6,7 +6,7 @@
 
 SELECT
 d.id AS animalId,
-d.calculated_status,
+d.calculated_status AS calculated_status,
 s.*,
 s.objectid as treatmentid,
 --(SELECT max(d.qcstate) as label FROM study.drug d WHERE s.objectid = d.treatmentid AND s.date = d.timeordered) as treatmentStatus,

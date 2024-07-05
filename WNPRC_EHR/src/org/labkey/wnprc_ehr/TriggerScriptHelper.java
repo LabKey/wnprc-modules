@@ -89,6 +89,7 @@ public class TriggerScriptHelper {
     protected final User user;
     protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
+    public static JSONArray _aliasRow;
 
     private TriggerScriptHelper(int userId, String containerId) {
         user = UserManager.getUser(userId);
@@ -2412,5 +2413,47 @@ public class TriggerScriptHelper {
         return  returnCondition;
     }
 
+    public void setAliasRow(JSONArray alias)
+    {
+        _aliasRow = alias;
+    }
+    public JSONArray getAliasRow()
+    {
+        return _aliasRow;
+    }
+
+    public String verifyAccount(String account)
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("alias", CompareType.EQUAL, account);
+        JSONArray alias = queryFactory.selectRows("ehr_billing_public", "aliases", filter);
+
+        if (alias.length() == 0)
+        {
+            return "Account " + account + " not found in aliases table, please enter a valid account.";
+        }
+        else
+        {
+            //cache this for later use
+            setAliasRow(alias);
+            return null;
+        }
+    }
+
+    public String verifyAccountWithProject(int project, String account)
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("project", CompareType.EQUAL, project);
+        JSONArray projects = queryFactory.selectRows("ehr", "project", filter);
+        String alias = projects.getJSONObject(0).get("account").toString();
+        if ( null != alias && !alias.equals(account))
+        {
+            return account  + " / " + getAliasRow().getJSONObject(0).get("investigatorname");
+        }
+        else
+        {
+            return null;
+        }
+    }
     public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}
 }

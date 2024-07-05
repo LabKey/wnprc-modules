@@ -331,16 +331,37 @@ EHR.Ext3Utils = new function(){
         // then returns animal ids and the error msg.
         getBloodLimitErrorMsg: function (config) {
             let errorToDisplay = "";
-            if (config.store.errors.getCount() < 1) {
-                return null;
-            }
+            let count = 0;
             for (let i = 0; i < config.store.errors.getCount(); i++){
                 const theError = config.store.errors.get(i);
                 if (theError.field === config.errorField) {
+                    count++;
                     errorToDisplay = errorToDisplay + theError.record.data.Id + "'s " + theError.message + " "
                 }
             }
-            return errorToDisplay;
+            if (count === 0) {
+                return "";
+            } else {
+                return errorToDisplay;
+            }
+        },
+
+        getAccountErrorMsg: function (config) {
+            let errorToDisplay = "The following records have updated account fields, and will charge to the corresponding account/PI:" + "<br>";
+            let count = 0;
+            for (let i = 0; i < config.store.errors.getCount(); i++){
+                const theError = config.store.errors.get(i);
+                if (theError.field === config.errorField) {
+                    count++;
+                    errorToDisplay = errorToDisplay + theError.record.data.Id + ": " + theError.message + "</br>"
+                }
+            }
+            if (count === 0) {
+                return "";
+            } else {
+                return errorToDisplay;
+            }
+
         }
     }
 }

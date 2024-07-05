@@ -1,4 +1,4 @@
- gltet accounts that are in ehr_billing.aliases for active or null tierRates
+-- get accounts that are in ehr_billing.aliases for active or null tierRates
 SELECT * FROM
   (
     SELECT

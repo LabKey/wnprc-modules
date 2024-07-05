@@ -33,6 +33,7 @@ export const RoomLayout: FC = () => {
         const clickedCage = tempClickedRack.cages[cageId - 1];
         setClickedCage(clickedCage);
         setClickedRack(tempClickedRack);
+
         openDetails();
     };
 
@@ -43,7 +44,9 @@ export const RoomLayout: FC = () => {
             const updatedRacks = prevRoom.map((rack) =>
                 rack.id === rackId ? { ...rack, isActive: !rack.isActive } : rack
             );
-            return updateCageIds(updatedRacks);
+            const temp = updateCageIds(updatedRacks);
+            console.log(temp);
+            return temp;
         });
     }
 
@@ -54,17 +57,13 @@ export const RoomLayout: FC = () => {
                 wrapper={"div"}
                 className={"room-svg"}
                 beforeInjection={(svg) => {
-                    const cages = svg.querySelectorAll('rect');
-                    cages.forEach((cage) => {
-                        cage.onclick = (event) => handleClick(event);
-                    })
-                    // Update room numbers with following the current room layout
                     room.forEach((rack) => {
                         rack.cages.forEach((cage, idx) => {
                             // Construct the expected text element ID
                             const textId = `text-${idx + 1}-${rack.id}`;
                             // Find the corresponding text element
                             const textElement = svg.querySelector(`#${textId}`);
+                            const tempCage:SVGRectElement = svg.querySelector(`#rect-${idx + 1}-${rack.id}`);
 
                             if (textElement) {
                                 // Get the tspan child and update its content
@@ -72,6 +71,7 @@ export const RoomLayout: FC = () => {
                                 if (tspanElement) {
                                     if(rack.isActive){
                                         tspanElement.textContent = cage.id.toString();
+                                        tempCage.onclick = (event) => handleClick(event);
                                     }else{
                                         tspanElement.textContent = "";
                                     }

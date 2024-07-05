@@ -22,8 +22,7 @@ console.log(zeroPad(5, 4)); // "0005"
 console.log(zeroPad(5, 6)); // "000005"
  */
 
-export const zeroPad = (num, places) => String(num).padStart(places, '0')
-
+export const zeroPadName = (num, places) => {return('#' + String(num).padStart(places, '0'))};
 // Helper function to get the rack number
 export const parseRack = (input: string) => {
     const regex = /^rect-\d-(\d)$/;
@@ -118,7 +117,7 @@ export const loadRoom = (name: string): Rack[] => {
             }
             const tempCage: Cage = {
                 id: cageNum,
-                name: `#${zeroPad(cageNum, 4)}`,
+                name: zeroPadName(cageNum, 4),
                 cageState: cageState,
                 position: position,
                 type: type,
@@ -510,11 +509,18 @@ export const getCageMod = (modId: string, rack: Rack) => {
     return cageMod;
 }
 
+//Helper function to update cage id and names when a rack is removed for the rest of cages in a room
 export const updateCageIds = (updatedRacks) => {
     let currentCageId = 1;
     return updatedRacks.map((rack) => {
         if (rack.isActive) {
-            rack.cages = rack.cages.map((prevCage) => ({...prevCage, id: currentCageId++ }));
+            rack.cages = rack.cages.map((prevCage) => (
+                {
+                    ...prevCage,
+                    id: currentCageId,
+                    name: zeroPadName(currentCageId++, 4)
+                })
+            );
         }
         return rack;
     });

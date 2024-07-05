@@ -47,10 +47,7 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose]);
-
-    useEffect(() => {
-        console.log("cage details: ", cageDetails)
-    }, [cageDetails]);
+    
     return (
         <div className="details-overlay">
             {showSave && (<ConfirmationPopup

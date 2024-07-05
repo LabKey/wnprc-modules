@@ -31,7 +31,6 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
             });
             newModRows.push(...tempModRows);
         });
-        console.log("new MR: ", newModRows);
         setModRows(() => [...newModRows]);
 
     }, [cageDetails]);

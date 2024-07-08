@@ -2427,7 +2427,6 @@ public class TriggerScriptHelper {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         SimplerFilter filter = new SimplerFilter("alias", CompareType.EQUAL, account);
         JSONArray alias = queryFactory.selectRows("ehr_billing_public", "aliases", filter);
-
         if (alias.length() == 0)
         {
             return "Account " + account + " not found in aliases table, please enter a valid account.";
@@ -2445,13 +2444,19 @@ public class TriggerScriptHelper {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         SimplerFilter filter = new SimplerFilter("project", CompareType.EQUAL, project);
         JSONArray projects = queryFactory.selectRows("ehr", "project", filter);
-        String alias = projects.getJSONObject(0).get("account").toString();
-        if ( null != alias && !alias.equals(account))
+        if (projects.length() > 0)
         {
-            JSONObject aliasRow = getAliasRow().getJSONObject(0);
-            return account  + " / " + aliasRow.optString("investigatorname", aliasRow.optString("contact_name", "No contact listed")) ;
-        }
-        else
+            String alias = projects.getJSONObject(0).get("account").toString();
+            if (null != alias && !alias.equals(account))
+            {
+                JSONObject aliasRow = getAliasRow().getJSONObject(0);
+                return account  + " / " + aliasRow.optString("investigatorname", aliasRow.optString("contact_name", "No contact listed")) ;
+            }
+            else
+            {
+                return null;
+            }
+        } else
         {
             return null;
         }

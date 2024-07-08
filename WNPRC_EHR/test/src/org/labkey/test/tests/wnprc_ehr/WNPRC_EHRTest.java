@@ -3583,19 +3583,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         goToProjectHome();
 
-
-        //add valid proj
-        InsertRowsCommand cmdUpd = new InsertRowsCommand("ehr", "project");
-        Integer projectId = 20240228;
-        Map<String,Object> projRowMap = new HashMap<>();
-        projRowMap.put("project", Integer.valueOf(projectId));
-        projRowMap.put("investigatorId", getUserId(PasswordUtil.getUsername()));
-        cmdUpd.addRow(projRowMap);
-
-
-        Connection cn = WebTestHelper.getRemoteApiConnection();
-        cmdUpd.execute(cn, EHR_FOLDER_PATH);
-
         Date bloodDate = prepareDate(new Date(), +5, 0);
 
         Double tubeVolOver = 10000.5;
@@ -3606,13 +3593,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
         String tubeType = "EDTA";
         Map<String, List<String>> expected = new HashMap<>();
+        Integer project = 640991;
+        String account = "acct102";
 
         String[] newBloodFields = {"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", FIELD_QCSTATELABEL, FIELD_OBJECTID, FIELD_LSID, "_recordid"};
-        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, project, account, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolOver.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
         expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("account", Collections.singletonList("INFO: acct102 / Jon Snow"));
         expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
                 "study",
@@ -3624,10 +3614,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         );
         Double tubeVolLimit = 142.5;
         Double quantityLimit = numTubes*tubeVolLimit;
-        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        String matchingAccount = "acct101";
+        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, project, matchingAccount, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        expected = new HashMap<>();
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
         expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolLimit.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
                 "study",
                 "blood",
@@ -3671,8 +3665,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             {
                 put("Id", TEST_SUBJECTS[0]);
                 put("date", dt);
-                put("project", projectId);
-                put("account", 123456);
+                put("project", project);
+                put("account", matchingAccount);
                 put("tube_type",tubeType);
                 put("tube_vol", tubeVolOK);
                 put("num_tubes", numTubes);

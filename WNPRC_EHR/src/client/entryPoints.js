@@ -29,7 +29,6 @@ module.exports = {
     },{
         name: 'abstract',
         title: 'Abstract',
-        permission: 'read',
         path: './src/client/abstract/base',
         generateLib: true
     },{
@@ -40,7 +39,6 @@ module.exports = {
     },{
         name: 'research_ultrasounds_webpart',
         title: 'Research Ultrasounds Webpart',
-        permission: 'read',
         path: './src/client/researchUltrasounds/webpart',
         generateLib: true
     },{

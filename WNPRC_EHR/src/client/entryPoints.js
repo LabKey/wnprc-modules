@@ -2,29 +2,29 @@ module.exports = {
     apps: [{
         name: 'grid_panel',
         title: 'Default Grid',
-        permission: 'read',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/components/grid_panel'
     },{
         name: 'grid_panel_webpart',
         title: 'Default Grid Webpart',
-        permission: 'read',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/components/grid_panel/webpart',
         generateLib: true
     },{
         name: 'breeding',
         title: 'Pregnancies',
-        permission: 'read',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/breeding'
     },{
         name: 'breeding_webpart',
         title: 'Pregnancies Webpart',
-        permission: 'read',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/breeding/webpart',
         generateLib: true
     },{
         name: 'feeding',
         title: 'Feeding',
-        permission: 'read',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/feeding/base'
     },{
         name: 'abstract',
@@ -35,7 +35,7 @@ module.exports = {
     },{
         name: 'research_ultrasounds',
         title: 'Research Ultrasounds',
-        permission: 'read',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/researchUltrasounds'
     },{
         name: 'research_ultrasounds_webpart',
@@ -46,7 +46,8 @@ module.exports = {
     },{
         name: 'weight',
         title: 'Weight',
-        permission: 'login',
+        // permission: 'login',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/weight'
     }]
 };

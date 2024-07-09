@@ -8,7 +8,7 @@ module.exports = {
         {
             name: 'RequestEntry',
             title: 'WNPRC Purchasing',
-            permission: 'insert',
+            permissionClasses: ['org.labkey.api.security.permissions.InsertPermission'],
             path: './src/client/RequestEntry',
         },
     ],

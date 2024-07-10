@@ -29,7 +29,6 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.Path;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
@@ -401,11 +400,6 @@ public class DecoratedTableInfo implements TableInfo {
     @Override
     public void resetTriggers(Container c) {
         _tableInfo.resetTriggers(c);
-    }
-
-    @Override
-    public Path getNotificationKey() {
-        return _tableInfo.getNotificationKey();
     }
 
     @Override

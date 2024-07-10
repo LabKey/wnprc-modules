@@ -3,7 +3,7 @@ module.exports = {
         {
             name: 'DropdownSelect',
             title: 'Virology Frontend Page',
-            permission: 'insert',
+            permissionClasses: ['org.labkey.api.security.permissions.InsertPermission'],
             path: './src/client/AccountsForm',
             generateLib: true
         },

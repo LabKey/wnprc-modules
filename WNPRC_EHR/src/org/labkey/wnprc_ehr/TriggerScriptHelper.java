@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
 import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -27,6 +28,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.ehr.security.EHRDataAdminPermission;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -68,6 +70,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,8 +79,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -2413,4 +2418,113 @@ public class TriggerScriptHelper {
     }
 
     public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}
+
+    public String verifyProtocolCounts(final String id, Integer project, final List<Map<String, Object>> recordsInTransaction)
+    {
+        final String RHESUS_SPECIES = "Rhesus";
+        final String CYNOMOLGUS_SPECIES = "Cynomolgus";
+        final String MACAQUE_SPECIES = "Macaque";
+        final String ALL_SPECIES = "All Species";
+        if (id == null)
+        {
+            return null;
+        }
+
+        AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+        if (ar.getSpecies() == null)
+        {
+            return "Unknown species: " + id;
+        }
+
+        final String protocol = EHRService.get().getProtocolForProject(container, user, project);
+        if (protocol == null)
+        {
+            return "Unable to find protocol associated with project: " + project;
+        }
+
+        //find the total animals previously used by this protocols/species
+        TableInfo ti = QueryService.get().getUserSchema(user, container, "study").getTable("protocolTotalAnimalsBySpecies");
+        String animalSpecies = ar.getSpecies();
+        SimpleFilter filter;
+        if ((RHESUS_SPECIES.equals(animalSpecies) || CYNOMOLGUS_SPECIES.equals(animalSpecies)))
+        {
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, ALL_SPECIES, MACAQUE_SPECIES), CompareType.IN);
+        } else
+        {
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, ALL_SPECIES), CompareType.IN);
+        }
+        filter.addCondition(FieldKey.fromString("protocol"), protocol);
+        TableSelector ts = new TableSelector(ti, filter, null);
+        final List<String> errors = new ArrayList<>();
+        final boolean[] noSpeciesListedOnProtocol = {true};
+        ts.forEach(new Selector.ForEachBlock<ResultSet>()
+        {
+            @Override
+            public void exec(ResultSet rs) throws SQLException
+            {
+                int totalAllowed = rs.getInt("allowed");
+                boolean totalAllowedNull = rs.wasNull();
+                String species = rs.getString("Species");
+                Set<String> animals = new CaseInsensitiveHashSet();
+                String animalString = rs.getString("Animals");
+                if (animalString != null)
+                {
+                    animals.addAll(Arrays.asList(StringUtils.split(animalString, ",")));
+                }
+
+                animals.add(id);
+
+                if (recordsInTransaction != null && recordsInTransaction.size() > 0)
+                {
+                    for (Map<String, Object> r : recordsInTransaction)
+                    {
+                        String id = (String)r.get("Id");
+                        Number project = (Number)r.get("project");
+                        if (id == null || project == null)
+                        {
+                            continue;
+                        }
+
+                        String rowProtocol = EHRService.get().getProtocolForProject(container, user, project.intValue());
+                        if (rowProtocol == null || !rowProtocol.equals(protocol))
+                        {
+                            continue;
+                        }
+                        AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+
+                        //we don't want to exit the animal count if ar.species() is cyno or rhesus and the protocol's species value is macaque.
+                        if (!ALL_SPECIES.equals(species) && !(RHESUS_SPECIES.equals(ar.getSpecies()) || CYNOMOLGUS_SPECIES.equals(ar.getSpecies()) && MACAQUE_SPECIES.equals(species)))
+                        {
+                            //find species
+                            if (ar.getSpecies() == null || !species.equals(ar.getSpecies()))
+                            {
+                                continue;
+                            }
+                        }
+
+                        animals.add(id);
+                        if (ar.getSpecies().equals(species))
+                        {
+                            noSpeciesListedOnProtocol[0] = false;
+                        }
+                    }
+                }
+
+
+
+                int remaining = totalAllowed - animals.size();
+                if (remaining < 0)
+                {
+                    errors.add("There are not enough spaces on protocol: " + protocol + ". Allowed: " + (totalAllowedNull ? "none": totalAllowed) + ", used: " + animals.size());
+                }
+            }
+        });
+
+        if (noSpeciesListedOnProtocol[0])
+        {
+            errors.add("Species not allowed on protocol: " + protocol);
+        }
+
+        return StringUtils.join(errors, "<>");
+    }
 }

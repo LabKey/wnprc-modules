@@ -65,15 +65,14 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
     //check number of allowed animals at assign/approve time
-    if (!helper.isETL() && !helper.isQuickValidation() && helper.doStandardProtocolCountValidation() &&
+    if (!helper.isETL() && !helper.isQuickValidation() &&
             //this is designed to always perform the check on imports, but also updates where the Id was changed
             !(oldRow && oldRow.Id && oldRow.Id==row.Id) &&
             row.Id && row.project && row.date
     ){
         var assignmentsInTransaction = helper.getProperty('assignmentsInTransaction');
         assignmentsInTransaction = assignmentsInTransaction || [];
-
-        var msgs = helper.getJavaHelper().verifyProtocolCounts(row.Id, row.project, assignmentsInTransaction);
+        var msgs = WNPRC.Utils.getJavaHelper().verifyProtocolCounts(row.Id, row.project, assignmentsInTransaction);
         if (msgs){
             msgs = msgs.split("<>");
             for (var i=0;i<msgs.length;i++){

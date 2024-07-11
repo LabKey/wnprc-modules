@@ -1,43 +1,48 @@
-FROM eclipse-temurin:17-jdk-centos7
+ARG R_VERSION=4.4.1
+FROM eclipse-temurin:17-jre-jammy
+
+# Set noninteractive mode for apt-get
+ENV DEBIAN_FRONTEND noninteractive
 
 ENV LANG en_US.utf8
 
-RUN  yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum update -y
-RUN yum -y -q install \
-    #for R
-    texinfo-tex \
-    # for the timezone
-    tzdata \
-    # for downloading LabKey and Tomcat
-    wget \
-    tar \
-    gzip \
-    # for creating the netrc file from the template (envsubst)
-    gettext \
-    # for installing R and the various additional packages
-    R-3.6.0 \
-    make \
-    libcurl-devel \
-    libxml2-devel \
-    openssl-devel \
-    #required to render png
-    pango \
-    # for checking for when the database is up
-    postgresql \
- # to make the image smaller
- && yum clean all
+# Adding various application to download packages to install Postgres 15 and CRAN-R
+RUN apt-get update \
+    && apt-get -qq install -y   lsb-release \
+                                texinfo           \
+                                tzdata           \
+                                gettext          \
+                                make             \
+                                openssl          \
+                                #Linux packages needed for installing CRAN-R
+                                software-properties-common \
+                                dirmngr \
+                                #Linux packages needed for RlabKey
+                                libcurl4-openssl-dev \
+                                libssl-dev \
+    && apt-get clean
 
-# configure LabKey for tomcat
-#RUN mkdir -p conf/Catalina/localhost
-#COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
+# Download and add siging key for Postgres 15
+# https://www.linuxtechi.com/how-to-install-postgresql-on-ubuntu/
+# https://askubuntu.com/a/1456015    
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list 
+RUN wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | tee /etc/apt/trusted.gpg.d/pgdg.asc > /dev/null 2>&1
 
-# adding Tomcat custom login pattern
-#COPY server9_0_54.xml conf/server.xml
+# Download and add signing key for CRAN repository
+# https://www.r-bloggers.com/2022/08/installation-of-r-4-2-on-ubuntu-22-04-1-lts-and-tips-for-spatial-packages/
+# https://phoenixnap.com/kb/install-r-ubuntu
+RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
+RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+
+RUN apt-get update      \
+    &&  apt-get -qq install -y  postgresql-client-15 \    
+                                r-base \
+                                r-base-dev\
+    && apt-get clean
 
 # install the necessary R packages
 COPY install.r /tmp/install.r
-RUN mkdir -p /usr/share/doc/R-3.6.0/html && Rscript /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-4.4.1/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

@@ -4,3 +4,4 @@
 # whitelist the following files:
 !masterencryption.txt
 !replacingSecrets.sh
+!application.properties

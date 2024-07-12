@@ -6,7 +6,7 @@ SELECT
     coalesce(a.tier_rate.tierRate, project.account.tier_rate.tierRate) as otherRate,
     objectid AS sourceRecord,
     ('Blood Draws ' || Id) AS comment,
-    CAST(num_tubes as DOUBLE) AS quantity,
+    CAST (1 AS DOUBLE) AS quantity,
     taskId,
     performedby
 FROM studyLinked.BloodSchedule bloodSch

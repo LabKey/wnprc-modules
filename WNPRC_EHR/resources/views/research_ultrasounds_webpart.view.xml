@@ -1,7 +1,7 @@
 <view xmlns="http://labkey.org/data/xml/view" title="Research Ultrasounds">
-    <permissions>
-        <permission name="read"/>
-    </permissions>
+    <permissionClasses>
+        <permissionClass name="org.labkey.api.security.permissions.ReadPermission"/>
+    </permissionClasses>
     <dependencies>
         <dependency path="gen/research_ultrasounds_webpart"/>
     </dependencies>

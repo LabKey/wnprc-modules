@@ -2,6 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="chargeableItems" tableDbType="TABLE">
+                <javaCustomizer class = "org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer" />
                 <tableTitle>Chargeable Items</tableTitle>
                 <auditLogging>DETAILED</auditLogging>
                 <columns>

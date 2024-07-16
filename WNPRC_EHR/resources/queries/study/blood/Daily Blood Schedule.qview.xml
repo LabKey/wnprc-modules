@@ -13,7 +13,7 @@
       </column>
        <column name="date" />
        <column name="project" />
-       <column name="project/account">
+       <column name="account">
             <properties>
                 <property name="columnTitle" value="Account"/>
             </properties>

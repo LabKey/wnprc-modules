@@ -9,6 +9,7 @@
         <column name="active"/>
         <column name="startdate"/>
         <column name="enddate"/>
+        <column name="isAutomatic"/>
     </columns>
     <sorts>
         <sort column="name"/>

@@ -1,0 +1,126 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="blood" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                    </column>
+                    <column columnName="project">
+
+                    </column>
+                    <column columnName="account">
+                        <fk>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="billedby">
+                        <columnTitle>Billed By</columnTitle>
+                        <isHidden>false</isHidden>
+                        <isUnselectable>false</isUnselectable>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>blood_billed_by</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="chargetype">
+
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>bloodChargeType</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="reason">
+                        <columnTitle>Reason</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>blood_draw_reason</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="tube_type">
+                        <columnTitle>Tube Type</columnTitle>
+                    </column>
+                    <column columnName="tube_vol">
+                        <columnTitle>Tube Volume (mL)</columnTitle>
+                    </column>
+                    <column columnName="num_tubes">
+                        <columnTitle># of Tubes</columnTitle>
+                    </column>
+                    <column columnName="quantity">
+                        <columnTitle>Total Volume (mL)</columnTitle>
+                    </column>
+                    <column columnName="additionalServices">
+                        <columnTitle>Additional Services</columnTitle>
+                    </column>
+                    <column columnName="instructions">
+                        <columnTitle>Special Instructions</columnTitle>
+                        <inputType>textarea</inputType>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                        <!--<fkDbSchema>study</fkDbSchema>-->
+                        <!--<fkTable>studyDataParent</fkTable>-->
+                        <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="assayCode">
+                        <columnTitle>Assay Code</columnTitle>
+                    </column>
+                    <column columnName="daterequested">
+                        <columnTitle>Date Requested</columnTitle>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="restraint">
+                        <columnTitle>Restraint</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="restraintDuration">
+                        <columnTitle>Time Restrained</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_duration</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="BloodRemaining" wrappedColumnName="lsid">
+                        <columnTitle>Blood Remaining</columnTitle>
+                        <isHidden>false</isHidden>
+                        <isUnselectable>true</isUnselectable>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>bloodSummary</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="sampletype">
+                        <columnTitle>Sample Type</columnTitle>
+                        <defaultValue>Whole Blood</defaultValue>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>blood_sample_type</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

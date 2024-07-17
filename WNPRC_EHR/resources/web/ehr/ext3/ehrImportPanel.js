@@ -925,7 +925,7 @@ EHR.ext.ImportPanel.Buttons = {
         }
     },
     SUBMITBLOOD: function() { return {
-        text: 'Submit',
+        text: 'Submit Final',
         name: 'submitblood',
         requiredQC: 'Completed',
         targetQC: 'Completed',
@@ -942,23 +942,30 @@ EHR.ext.ImportPanel.Buttons = {
             });
             let confirmMsg = 'You are about to finalize this form.  Do you want to do this?';
 
-            if (errorToDisplay != null) {
-                Ext.Msg.confirm('Warning', errorToDisplay + 'Are you sure you want to submit?', function(v){
-                    if(v === 'yes') {
+            let accountField = "account";
+            let accountError= EHR.Ext3Utils.getAccountErrorMsg({
+                store: bloodStore,
+                errorField: accountField
+            });
+
+            if (accountError.length > 0 || errorToDisplay.length > 0) {
+
+                Ext.Msg.confirm('Warning', accountError + errorToDisplay + 'Are you sure you want to submit?', function (v) {
+                    if (v === 'yes') {
                         Ext.Msg.confirm('Finalize Form', confirmMsg, function (v) {
                             if (v === 'yes') {
                                 this.onSubmit(o);
                             }
                         }, this);
                     }
-                }, this);
+                }, this)
+
             } else {
-                Ext.Msg.confirm('Finalize Form', confirmMsg, function(v){
-                    if(v === 'yes') {
+                Ext.Msg.confirm('Finalize Form', confirmMsg, function (v) {
+                    if (v === 'yes') {
                         this.onSubmit(o);
                     }
                 }, this);
-
             }
 
         },
@@ -986,23 +993,30 @@ EHR.ext.ImportPanel.Buttons = {
 
             let confirmMsg = 'You are about to finalize this form.  Do you want to do this?';
 
-            if (errorToDisplay != null){
-                Ext.Msg.confirm('Warning', errorToDisplay + 'Are you sure you want to submit?', function(v){
-                    if(v === 'yes') {
+            let accountField = "account";
+            let accountError= EHR.Ext3Utils.getAccountErrorMsg({
+                store: bloodStore,
+                errorField: accountField
+            });
+
+            if (accountError.length > 0 || errorToDisplay.length > 0) {
+
+                Ext.Msg.confirm('Warning', accountError + errorToDisplay + 'Are you sure you want to submit?', function (v) {
+                    if (v === 'yes') {
                         Ext.Msg.confirm('Finalize Form', confirmMsg, function (v) {
                             if (v === 'yes') {
                                 this.onSubmit(o);
                             }
                         }, this);
                     }
-                }, this);
+                }, this)
+
             } else {
-                Ext.Msg.confirm('Finalize Form', confirmMsg, function(v){
-                    if(v === 'yes') {
+                Ext.Msg.confirm('Finalize Form', confirmMsg, function (v) {
+                    if (v === 'yes') {
                         this.onSubmit(o);
                     }
-                },this);
-
+                }, this);
             }
         },
         disableOn: 'WARN',

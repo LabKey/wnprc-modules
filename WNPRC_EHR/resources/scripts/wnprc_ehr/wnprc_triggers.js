@@ -10,6 +10,7 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
 // Some shortcuts to imported modules
 var logger = WNPRC.Logger;
+var WNPRCUtils = require("wnprc_ehr/WNPRC").WNPRC.Utils;
 
 // noinspection JSUnresolvedVariable
 exports.init = function (EHR) {
@@ -22,6 +23,7 @@ exports.init = function (EHR) {
 
     EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.INIT, function (event, helper, EHR) {
         EHR.Server.TriggerManager.unregisterAllHandlersForQueryNameAndEvent('study', 'blood', EHR.Server.TriggerManager.Events.BEFORE_UPSERT);
+        EHR.Server.TriggerManager.unregisterAllHandlersForQueryNameAndEvent('study', 'assignment', EHR.Server.TriggerManager.Events.BEFORE_UPSERT);
         setStudyBloodBeforeUpsertTrigger();
     });
 
@@ -835,6 +837,25 @@ exports.init = function (EHR) {
                     }
                     else {
                         console.warn('objectid not provided for blood draw, cannot calculate allowable blood volume.  this probably indicates an error with the form submitting these data')
+                    }
+                }
+
+                if (row.id && row.project && row.account) {
+                    try {
+                        var msg = WNPRCUtils.getJavaHelper().verifyAccount(row.account)
+                        if (msg != null) {
+                            EHR.Server.Utils.addError(scriptErrors, 'account', msg, 'ERROR');
+                        } else {
+                            //get account and project
+                            var accountMsg = WNPRCUtils.getJavaHelper().verifyAccountWithProject(row.project, row.account)
+                            if (accountMsg != null) {
+                                EHR.Server.Utils.addError(scriptErrors, 'account', accountMsg, 'INFO');
+                            }
+
+                        }
+                    } catch (error) {
+                        EHR.Server.Utils.addError(scriptErrors, 'account', error.message, 'ERROR');
+                        console.error(error);
                     }
                 }
             }

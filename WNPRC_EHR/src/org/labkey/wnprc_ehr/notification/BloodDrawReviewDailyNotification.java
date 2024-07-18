@@ -206,8 +206,7 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         void getBloodOverdraws() {
             // Creates filter.
             Date todayDate = dateToolkit.getDateToday();
-//            SimpleFilter myFilter = new SimpleFilter("date", todayDate, CompareType.DATE_GTE);  // TODO: Uncomment this when testing is finished.
-            SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getDateXDaysFromNow(-40000), CompareType.DATE_GTE);    // TODO: Delete this when testing is finished.
+            SimpleFilter myFilter = new SimpleFilter("date", todayDate, CompareType.DATE_GTE);
 
             // Creates sort.
             Sort mySort = new Sort("date");

@@ -1511,8 +1511,8 @@ public class NotificationToolkit {
         public Date getDateXDaysFromNow(Integer numDaysFromNow) {
             Calendar todayCalendar = Calendar.getInstance();
             todayCalendar.add(Calendar.DATE, numDaysFromNow);
-            Date fiveDaysAgoDate = todayCalendar.getTime();
-            return fiveDaysAgoDate;
+            Date dateToReturn = todayCalendar.getTime();
+            return dateToReturn;
         }
 
         //Returns today's date as String (ex: "03/06/2024").

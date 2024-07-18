@@ -214,6 +214,18 @@
     <ns:datasetPermission datasetName="behavetrem" groupName="EHR Full Updaters" role="org.labkey.ehr.security.EHRFullUpdaterRole"/>
     <ns:datasetPermission datasetName="behavetrem" groupName="EHR Request Admins" role="org.labkey.ehr.security.EHRRequestAdminRole"/>
     <ns:datasetPermission datasetName="behavetrem" groupName="EHR Requestors" role="org.labkey.ehr.security.EHRRequestorRole"/>
+    <ns:datasetPermission datasetName="BloodSchedule" groupName="EHR Administrators" role="org.labkey.ehr.security.EHRDataAdminRole"/>
+    <ns:datasetPermission datasetName="BloodSchedule" groupName="EHR Basic Submitters" role="org.labkey.ehr.security.EHRBasicSubmitterRole"/>
+    <ns:datasetPermission datasetName="BloodSchedule" groupName="EHR Full Submitters" role="org.labkey.ehr.security.EHRFullSubmitterRole"/>
+    <ns:datasetPermission datasetName="BloodSchedule" groupName="EHR Full Updaters" role="org.labkey.ehr.security.EHRFullUpdaterRole"/>
+    <ns:datasetPermission datasetName="BloodSchedule" groupName="EHR Request Admins" role="org.labkey.ehr.security.EHRRequestAdminRole"/>
+    <ns:datasetPermission datasetName="BloodSchedule" groupName="EHR Requestors" role="org.labkey.ehr.security.EHRRequestorRole"/>
+    <ns:datasetPermission datasetName="bloodSummary" groupName="EHR Administrators" role="org.labkey.ehr.security.EHRDataAdminRole"/>
+    <ns:datasetPermission datasetName="bloodSummary" groupName="EHR Basic Submitters" role="org.labkey.ehr.security.EHRBasicSubmitterRole"/>
+    <ns:datasetPermission datasetName="bloodSummary" groupName="EHR Full Submitters" role="org.labkey.ehr.security.EHRFullSubmitterRole"/>
+    <ns:datasetPermission datasetName="bloodSummary" groupName="EHR Full Updaters" role="org.labkey.ehr.security.EHRFullUpdaterRole"/>
+    <ns:datasetPermission datasetName="bloodSummary" groupName="EHR Request Admins" role="org.labkey.ehr.security.EHRRequestAdminRole"/>
+    <ns:datasetPermission datasetName="bloodSummary" groupName="EHR Requestors" role="org.labkey.ehr.security.EHRRequestorRole"/>
     <ns:datasetPermission datasetName="charges" groupName="EHR Administrators" role="org.labkey.ehr.security.EHRDataAdminRole"/>
     <ns:datasetPermission datasetName="charges" groupName="EHR Basic Submitters" role="org.labkey.ehr.security.EHRBasicSubmitterRole"/>
     <ns:datasetPermission datasetName="charges" groupName="EHR Full Submitters" role="org.labkey.ehr.security.EHRFullSubmitterRole"/>

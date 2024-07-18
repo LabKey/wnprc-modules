@@ -118,7 +118,8 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
             // Creates filter.
             Date todayDate = dateToolkit.getDateToday();
             SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
-            myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL);
+//            myFilter.addCondition("date", todayDate, CompareType.DATE_EQUAL); //TODO: Uncomment this after testing.
+            myFilter.addCondition("date", dateToolkit.getDateXDaysFromNow(-800), CompareType.DATE_GTE); //TODO: Delete this after testing.
 
             // Creates sort.
             Sort mySort = new Sort("date");

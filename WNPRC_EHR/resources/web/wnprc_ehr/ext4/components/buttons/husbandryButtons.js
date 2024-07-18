@@ -251,3 +251,27 @@ Ext4.define('EHR.window.SubmitForReviewWindowHusbandry', {
         this.callParent(arguments);
     },
 });
+
+
+EHR.DataEntryUtils.registerDataEntryFormButton('SUBMIT_WATER', {
+    text: 'Submit Water',
+    name: 'submit_water',
+    requiredQC: 'Completed',
+    targetQC: 'Scheduled',
+    errorThreshold: 'WARN',
+    successURL: LABKEY.ActionURL.getParameter('srcURL') || LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view'),
+    disabled: true,
+    itemId: 'submitWtr',
+    disableOn: 'ERROR',
+    handler: function(btn){
+        let waterGiven = btn.up('gridpanel').store;
+        if (store.getFields().get('waterSource')){
+
+
+        }
+        //var panel = btn.up('ehr-dataentrypanel');
+
+
+    }
+
+});

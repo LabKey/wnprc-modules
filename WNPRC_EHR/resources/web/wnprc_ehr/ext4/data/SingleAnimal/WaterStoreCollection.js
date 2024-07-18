@@ -1,6 +1,28 @@
 Ext4.define('WNPRC.ext.data.WaterStoreCollection', {
     extend: 'WNPRC.ext.data.TaskStoreCollection',
 
+    /*constructor: function(){
+        this.callParent(arguments);
+        this.on('update', this.onRecordUpdate, this);
+    },
+    getWaterRecordStore: function (){
+        if (this.waterRecordStore){
+            return this.waterRecordStore;
+        }
+        this.waterRecordStore = this.getClientStoreByName('waterGiven');
+        LDK.Assert.assertNotEmpty('Unbale to find water given store');
+        return this.waterRecordStore;
+
+    },
+    getWaterRecords: function(){
+        console.log("call water records");
+        var waterStore = this.getWaterRecordStore();
+        if (waterStore){
+            return waterStore;
+        }
+
+    },*/
+
     //Set a custom type (wnprc-waterserverstore) for the storeConfig
     addServerStoreFromConfig: function(config){
         var storeConfig = Ext4.apply({}, config);

@@ -10,11 +10,13 @@ import {
     parseRack,
     parseSeparator, updateCageIds
 } from './helpers';
-import { CageDetails } from './CageDetails';
 import { useCurrentContext } from './ContextManager';
+import { Popup } from './Popup';
+import { CageDetailsModifications } from './CageDetailsModifications';
+import { CageExtraDetails } from './CageExtraDetails';
 
 export const RoomLayout: FC = () => {
-    const {room, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useCurrentContext();
+    const {room, cageDetails, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useCurrentContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {
@@ -137,9 +139,20 @@ export const RoomLayout: FC = () => {
                 }}
             />
             {isOpen &&
-                <CageDetails
-                        isOpen={isOpen}
-                        onClose={closeDetails}
+                <Popup
+                    isOpen={isOpen}
+                    onClose={closeDetails}
+                    header={`Cage ${cageDetails.map((cage) => cage.name).join(", ")}`}
+                    subheader={["Total: 2", "Status: OK"]}
+                    mainContent={
+                        <>
+                            <CageDetailsModifications
+                                closeDetails={closeDetails}
+                            />
+                            <div className={"divider"}/>
+                            <CageExtraDetails/>
+                        </>
+                    }
                 />
             }
         </div>

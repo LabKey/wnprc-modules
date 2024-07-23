@@ -7,6 +7,7 @@ import '../cageui.scss';
 import { Cage, Rack } from '../components/typings';
 import { RoomToolbar } from '../components/RoomToolbar';
 import { ContextProvider } from '../components/ContextManager';
+import TestSVG from '../components/TestSVG';
 
 interface RoomProps {
     room: {
@@ -33,7 +34,7 @@ export const RoomHome: FC<RoomProps> = (props) => {
                     <RoomDisplay name={room.name}/>
                 </div>
             </div>
+            <TestSVG />
         </ContextProvider>
-
     );
 }

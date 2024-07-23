@@ -7,8 +7,8 @@ export const CageExtraDetails: FC<any> = (props) => {
     const {clickedCage} = useCurrentContext();
 
     return(
-      <div className={"details-extra"}>
-          <h2 className={"details-extra-header"}>Cage Details</h2>
+      <div>
+          <h2>Cage Details</h2>
      </div>
     );
 }

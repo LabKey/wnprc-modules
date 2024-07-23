@@ -5,8 +5,5 @@
 !install.r
 !netrc
 !pipelineConfig.xml
-!public-yum-ol7.repo
-!ROOT.xml
-!server9_0_54.xml
 !setenv.sh
 !wait-for-postgres.sh

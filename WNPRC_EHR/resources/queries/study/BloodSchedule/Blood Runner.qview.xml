@@ -23,7 +23,7 @@
                 <!--<property name="columnTitle" value="Protocol"/>-->
             <!--</properties>-->
        <!--</column>-->
-       <column name="project/account">
+       <column name="account">
             <properties>
                 <property name="columnTitle" value="Account"/>
             </properties>

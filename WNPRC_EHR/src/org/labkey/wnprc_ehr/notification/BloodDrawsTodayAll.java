@@ -105,7 +105,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
         NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
         ArrayList<String[]> myTableData = new ArrayList<>();        // List of all blood draws as [[id, blood remaining, project assignment, completion status, assigned to]]
-//        ArrayList<String> myTableRowColors = new ArrayList<>();     // List of all row colors (same length as myTableData).
+        //        ArrayList<String> myTableRowColors = new ArrayList<>();     // List of all row colors (same length as myTableData).
         HashMap<String, HashMap<String, ArrayList<String[]>>> resultsByArea = new HashMap<>();  // Area(Room(List of draws))
 
 

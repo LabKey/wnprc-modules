@@ -27,7 +27,7 @@ public class BloodDrawReviewTriggerNotification extends AbstractEHRNotification 
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
     NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
-//    String requestIdToCheck;
+    //    String requestIdToCheck;
     String animalIdToCheck;
     String projectToCheck;
     String drawDateToCheck;

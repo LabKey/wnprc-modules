@@ -8,9 +8,7 @@ install.packages('getopt',   repos='http://cran.us.r-project.org')
 install.packages('rjson',    repos='http://cran.us.r-project.org')
 install.packages('dplyr',    repos='http://cran.us.r-project.org')
 install.packages('remotes',  repos='http://cran.us.r-project.org')
-
-require('remotes')
-install_version('Rlabkey', version='2.8.2', repos='http://cran.us.r-project.org')
+install.packages('Rlabkey', repos='http://cran.us.r-project.org')
 
 require('remotes')
 install_github("luansheng/visPedigree")

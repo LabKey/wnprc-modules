@@ -1,12 +1,14 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="chargeId"/>
+        <column name="chargeId/departmentCode"/>
         <column name="unitCost"/>
         <column name="startDate"/>
         <column name="endDate"/>
         <column name="description"/>
         <column name="genCredits"/>
         <column name="groupName"/>
+        <column name="chargeId/isAutomatic"/>
     </columns>
     <sorts>
         <sort column="endDate" descending="true" />

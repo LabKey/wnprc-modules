@@ -1,22 +1,21 @@
 import * as React from 'react';
-import { FC, useEffect, useRef, useState } from 'react';
-import { Cage, ModTypes } from './typings';
-import { CageDetailsModifications } from './CageDetailsModifications';
+import { FC, JSX, useEffect, useRef, useState } from 'react';
 import { useCurrentContext } from './ContextManager';
-import { findDetails } from './helpers';
 import { ConfirmationPopup } from './ConfirmationPopup';
-import { CageExtraDetails } from './CageExtraDetails';
 
-interface CageDetailsProps {
+interface PopupProps {
     isOpen: boolean;
     onClose: () => any;
+    header: string;
+    subheader?: string[];
+    mainContent: any;
 }
-export const CageDetails: FC<CageDetailsProps> = (props) => {
-    const { isOpen, onClose } = props;
+export const Popup: FC<PopupProps> = (props) => {
+    const { isOpen, onClose, header, subheader, mainContent } = props;
     const modalRef = useRef(null);
-    const {clickedCage, cageDetails, isDirty} = useCurrentContext();
+    const { isDirty} = useCurrentContext();
     const [showSave, setShowSave] = useState<boolean>(false);
-    if(!clickedCage) return;
+    //if(!clickedCage) return;
 
     // close modal if user clicks outside its bounds
     useEffect(() => {
@@ -47,38 +46,36 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose]);
-    
+
+
     return (
-        <div className="details-overlay">
+        <div className={"popup-overlay"} onClick={(e) => e.stopPropagation()}>
             {showSave && (<ConfirmationPopup
                 message="You have unsaved data, are you sure you want to exit?"
                 onConfirm={onClose}
                 onCancel={() => setShowSave(false)}
             />)}
-            <div className="details-content" ref={modalRef}>
-                <div className={'details-header'}>
-                    <h1>Cage {cageDetails.map((cage) => cage.name).join(", ")}</h1>
-                    <button className="details-close-button" onClick={() => {
-                        if(isDirty){
+            <div className={"popup-content"} ref={modalRef}>
+                <div className={'popup-header'}>
+                    <h1>{header}</h1>
+                    <button className="popup-close-button" onClick={() => {
+                        if (isDirty) {
                             setShowSave(true);
-                        }else {
+                        } else {
                             onClose()
                         }
                     }}>
                         &times;
                     </button>
                 </div>
-                <div className={"details-subheader"}>
-                    <h4>Total: 2</h4>
-                    <h4>Status: OK</h4>
+                <div className={"popup-subheader"}>
+                    {subheader?.map((sub, idx) => (<h4 key={idx}>{sub}</h4>))}
                 </div>
-                <div className={"divider"} />
-                <CageDetailsModifications
-                    closeDetails={onClose}
-                />
-                <div className={"divider"} />
-                <CageExtraDetails />
+                <div className={"popup-sub-content"}>
+                    <div className={"divider"} />
+                    {mainContent}
+                </div>
             </div>
         </div>
     );
-};
+}

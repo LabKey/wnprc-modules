@@ -27,6 +27,11 @@
   margin-right: 10px;
 }
 
+.room-toolbar-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 
 .room-display {
   //background-color: lightblue;
@@ -137,7 +142,7 @@
   pointer-events: none;
 }
 
-.details-overlay {
+.popup-overlay {
   display: block; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
@@ -151,7 +156,7 @@
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-.details-content {
+.popup-content {
   background-color: lightgrey;
   margin: auto;
   padding: 10px;
@@ -163,7 +168,7 @@
   border-radius: 25px;
 }
 
-.details-close-button {
+.popup-close-button {
   float: right;
   font-size: 48px;
   font-weight: bold;
@@ -172,14 +177,14 @@
   background: none;
 }
 
-.details-close-button:hover,
-.details-close-button:focus {
+.popup-close-button:hover,
+.popup-close-button:focus {
   color: #000;
   text-decoration: none;
   cursor: pointer;
 }
 
-.details-header {
+.popup-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -188,26 +193,29 @@
   margin-inline: 10px
 }
 
-.details-header h1 {
+.popup-header h1 {
   margin: 0;
 }
-.details-header button {
+.popup-header button {
   margin: 0;
 }
 
 
-.details-subheader {
+.popup-subheader {
   padding-left: 10px;
 }
-.details-subheader h4{
+.popup-subheader h4{
   margin-top: 0;
+}
+
+.popup-sub-content {
+  margin: 10px
 }
 
 .divider {
   width: calc(100% - 20px); /* Adjust width as needed */
   height: 4px; /* Adjust height as needed */
   background-color: darkgrey; /* Adjust color as needed */
-  margin: 10px; /* Adjust margin as needed */
   border-radius: 5px; /* Adjust border radius for rounded corners */
 }
 
@@ -220,7 +228,6 @@
 }
 
 .details-modifications {
-  padding-left: 10px;
 }
 
 .details-mod-header {
@@ -244,10 +251,6 @@
   color: #000;
   text-decoration: none;
   cursor: pointer;
-}
-
-.details-extra{
-
 }
 
 .details-modifications ul {
@@ -328,14 +331,6 @@
   outline: none;
 }
 
-.details-extra-header {
-  margin-left: 10px;
-}
-
-
-
-
-
 /* CSS */
 .button-84 {
   align-items: center;
@@ -387,3 +382,116 @@
     height: 48px;
   }
 }
+
+// Checkbox button css
+ .checkbox-wrapper-10 .tgl {
+   display: none;
+ }
+
+.checkbox-wrapper-10:not(:last-child) {
+  margin-right: 10px; /* Adjust the spacing as needed */
+}
+
+.checkbox-wrapper-10 .tgl,
+.checkbox-wrapper-10 .tgl:after,
+.checkbox-wrapper-10 .tgl:before,
+.checkbox-wrapper-10 .tgl *,
+.checkbox-wrapper-10 .tgl *:after,
+.checkbox-wrapper-10 .tgl *:before,
+.checkbox-wrapper-10 .tgl + .tgl-btn {
+  box-sizing: border-box;
+}
+.checkbox-wrapper-10 .tgl::-moz-selection,
+.checkbox-wrapper-10 .tgl:after::-moz-selection,
+.checkbox-wrapper-10 .tgl:before::-moz-selection,
+.checkbox-wrapper-10 .tgl *::-moz-selection,
+.checkbox-wrapper-10 .tgl *:after::-moz-selection,
+.checkbox-wrapper-10 .tgl *:before::-moz-selection,
+.checkbox-wrapper-10 .tgl + .tgl-btn::-moz-selection,
+.checkbox-wrapper-10 .tgl::selection,
+.checkbox-wrapper-10 .tgl:after::selection,
+.checkbox-wrapper-10 .tgl:before::selection,
+.checkbox-wrapper-10 .tgl *::selection,
+.checkbox-wrapper-10 .tgl *:after::selection,
+.checkbox-wrapper-10 .tgl *:before::selection,
+.checkbox-wrapper-10 .tgl + .tgl-btn::selection {
+  background: none;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn {
+  outline: 0;
+  display: block;
+  width: 12em;
+  height: 2em;
+  position: relative;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn:after,
+.checkbox-wrapper-10 .tgl + .tgl-btn:before {
+  position: relative;
+  display: block;
+  content: "";
+  width: 50%;
+  height: 100%;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn:after {
+  left: 0;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn:before {
+  display: none;
+}
+.checkbox-wrapper-10 .tgl:checked + .tgl-btn:after {
+  left: 50%;
+}
+
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn {
+  padding: 2px;
+  transition: all 0.2s ease;
+  font-family: sans-serif;
+  perspective: 100px;
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:after,
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:before {
+  display: inline-block;
+  transition: all 0.4s ease;
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  line-height: 2em;
+  font-weight: bold;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 4px;
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:after {
+  content: attr(data-tg-on);
+  background: #02C66F;
+  transform: rotateY(-180deg);
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:before {
+  background: #FF3A19;
+  content: attr(data-tg-off);
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:active:before {
+  transform: rotateY(-20deg);
+}
+.checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:before {
+  transform: rotateY(180deg);
+}
+.checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:after {
+  transform: rotateY(0);
+  left: 0;
+  background: #7FC6A6;
+}
+.checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:active:after {
+  transform: rotateY(20deg);
+}
+
+// End Checkbox button css

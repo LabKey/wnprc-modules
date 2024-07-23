@@ -39,6 +39,10 @@ export interface Rack {
     id: number;
     type: RackTypes;
     cages: Cage[];
+    xPos: number;
+    yPos: number;
+    width: number;
+    height: number;
     isActive: boolean;
 }
 export enum RackTypes {

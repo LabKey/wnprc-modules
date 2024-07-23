@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { Cage, Rack } from './typings';
+import { removeCircularReferences } from './helpers';
 
 export interface CageContextType {
     room: Rack[],
@@ -19,7 +20,16 @@ export interface CageContextType {
     isDirty: boolean,
     setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
     isEditEnabled: boolean, // determines if the user has valid permissions to edit
-    setIsEditEnabled: React.Dispatch<React.SetStateAction<boolean>>
+    setIsEditEnabled: React.Dispatch<React.SetStateAction<boolean>>,
+    loading: boolean,
+    error: string,
+    localRoom: Rack[],
+    addRack: (newRack: any) => void,
+    updateLocalRacks: (id: any, newX: any, newY: any) => void,
+    saveChanges: () => void,
+    hasUnsavedChanges: boolean,
+    isDraggingEnabled: boolean,
+    setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>
 
 }
 const CageContext = createContext<CageContextType | null>(null);
@@ -45,7 +55,36 @@ export const ContextProvider = ({children}) => {
     const [isEditEnabled, setIsEditEnabled] = useState<boolean>(true);
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
+    const [isDraggingEnabled, setIsDraggingEnabled] = useState<boolean>(false);
 
+    /*
+    Context for room svg
+     */
+    const [localRoom, setLocalRoom] = useState<Rack[]>(room);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const addRack = async (newRect) => {
+        setLocalRoom(prevRectangles => [...prevRectangles, newRect]);
+    };
+
+    const updateLocalRacks = (id, newX, newY) => {
+        setLocalRoom(prevRack => prevRack.map(r =>
+            r.id === id ? { ...r, xPos: newX, yPos: newY } : r
+        ));
+    };
+
+    const saveChanges = async () => {
+        try {
+            setRoom(localRoom);
+            setError(null);
+        } catch (err) {
+            setError('Failed to save changes');
+        }
+    };
+    /*
+    End SVG context
+     */
     const saveMod = () => {
         setIsDirty(false);
         setRoom(prevRoom => {
@@ -85,7 +124,16 @@ export const ContextProvider = ({children}) => {
             isDirty,
             setIsDirty,
             isEditEnabled,
-            setIsEditEnabled
+            setIsEditEnabled,
+            localRoom,
+            loading,
+            error,
+            addRack,
+            updateLocalRacks,
+            saveChanges,
+            hasUnsavedChanges: JSON.stringify(removeCircularReferences(room)) !== JSON.stringify(removeCircularReferences(localRoom)),
+            isDraggingEnabled,
+            setIsDraggingEnabled
         }}>
             {children}
         </CageContext.Provider>

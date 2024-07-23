@@ -1,6 +1,8 @@
 import {
-    Cage, CageBuilder,
-    CagePosition, CageSizeWithKey,
+    Cage,
+    CageBuilder,
+    CagePosition, CageSizes,
+    CageSizeWithKey,
     CageState,
     CageType,
     DefaultCageState,
@@ -15,6 +17,9 @@ import {
     Separators,
     SeparatorType
 } from './typings';
+import * as d3 from 'd3';
+import * as React from 'react';
+import { useCurrentContext } from './ContextManager';
 
 /*
 console.log(zeroPad(5, 2)); // "05"
@@ -26,6 +31,14 @@ export const zeroPadName = (num, places) => {return('#' + String(num).padStart(p
 // Helper function to get the rack number
 export const parseRack = (input: string) => {
     const regex = /^rect-\d-(\d)$/;
+    const match = input.match(regex);
+    if (match) {
+        return match[1];
+    }
+    return;
+}
+export const parseAddRack = (input: string) => {
+    const regex = /add-rack-(\d+)$/;
     const match = input.match(regex);
     if (match) {
         return match[1];
@@ -60,7 +73,92 @@ export const parseCageMod = (input: string) => {
     return;
 }
 
+export const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilder[], cageSizes: CageSizeWithKey[], rackId: number, rackConfigs, cageNum): Cage[] => {
+    const cages: Cage[] = [];
+    for (let i = 0; i < cnt; i++) {
+        let cageState: CageState;
+        let position: CagePosition;
+        let type: CageType;
+        let cagesPerRow: number;
+        let cageSize: CageSizeWithKey;
+        let rackHeight: number;
+        let manufacturer: CageBuilder;
+        if(rackType === RackTypes.TwoOfTwo){
+            position =  i < 2 ? "top" : "bottom";
+            cagesPerRow = 2;
+            rackHeight = 2;
+            type = 'cage';
+            Object.keys(DefaultCageState.rackTwoOfTwo).forEach((cagePos, idx) => {
+                if(idx === i){
+                    cageState = DefaultCageState.rackTwoOfTwo[cagePos];
+                }
+            })
+            rackConfigs.push({cagesPerRow: cagesPerRow, rackHeight: rackHeight});
+            if(cageSizes.length !== 1){
+                cageSize = cageSizes[rackId - 1];
+            }else{
+                cageSize = cageSizes[0];
+            }
+            if(cageTypes.length !== 1){
+                manufacturer = cageTypes[rackId - 1];
+            }else{
+                manufacturer = cageTypes[0];
+            }
+        }
+        const tempCage: Cage = {
+            id: cageNum,
+            name: zeroPadName(cageNum, 4),
+            cageState: cageState,
+            position: position,
+            type: type,
+            adjCages: undefined,
+            size: cageSize,
+            manufacturer: manufacturer,
+        }
+        cageNum++;
+        cages.push(tempCage);
+    }
+    return cages;
+}
 
+export const addNewRack = (
+    selectedEditRect: SVGRectElement,
+    gridSize: number,
+    localRoom: Rack[],
+    room: Rack[],
+    addRack: (newRack: Rack) => void,
+    setAddingRack: (adding: boolean) => void,
+    rackType: RackTypes,
+    rackLoc?: number
+) => {
+    const rect:SVGRectElement = selectedEditRect ? selectedEditRect : d3.select(`#add-rack-${rackLoc}`).node() as SVGRectElement;
+    const id = parseInt(parseAddRack(rect.id));
+    const x = parseInt(rect.getAttribute('x')) / gridSize;
+    const y = parseInt(rect.getAttribute('y')) / gridSize;
+    const width = parseInt(rect.getAttribute('width')) / gridSize;
+    const height = parseInt(rect.getAttribute('height')) / gridSize;
+
+    if(localRoom.find((rack) => rack.id === id)){
+        return;
+    }
+
+    const cageNum = findCageCount(rackType);
+    const cageCount: number = 1;
+
+    const newRack: Rack = {
+        id: id,
+        type: rackType,
+        xPos: x,
+        yPos: y,
+        width: width,
+        height: height,
+        isActive: true,
+        cages: genCages(cageNum, rackType, ['Suburban'], [CageSizes['8.0']], id, [], cageCount)
+    };
+
+    addRack(newRack);
+    setAddingRack(false);
+};
 
 // load room racks
 export const loadRoom = (name: string): Rack[] => {
@@ -83,53 +181,7 @@ export const loadRoom = (name: string): Rack[] => {
     }
 
     // generate default cages
-    const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilder[], cageSizes: CageSizeWithKey[], rackId: number): Cage[] => {
-        const cages: Cage[] = [];
-        for (let i = 0; i < cnt; i++) {
-            let cageState: CageState;
-            let position: CagePosition;
-            let type: CageType;
-            let cagesPerRow: number;
-            let cageSize: CageSizeWithKey;
-            let rackHeight: number;
-            let manufacturer: CageBuilder;
-            if(rackType === RackTypes.TwoOfTwo){
-                position =  i < 2 ? "top" : "bottom";
-                cagesPerRow = 2;
-                rackHeight = 2;
-                type = 'cage';
-                Object.keys(DefaultCageState.rackTwoOfTwo).forEach((cagePos, idx) => {
-                    if(idx === i){
-                        cageState = DefaultCageState.rackTwoOfTwo[cagePos];
-                    }
-                })
-                rackConfigs.push({cagesPerRow: cagesPerRow, rackHeight: rackHeight});
-                if(cageSizes.length !== 1){
-                    cageSize = cageSizes[rackId - 1];
-                }else{
-                    cageSize = cageSizes[0];
-                }
-                if(cageTypes.length !== 1){
-                    manufacturer = cageTypes[rackId - 1];
-                }else{
-                    manufacturer = cageTypes[0];
-                }
-            }
-            const tempCage: Cage = {
-                id: cageNum,
-                name: zeroPadName(cageNum, 4),
-                cageState: cageState,
-                position: position,
-                type: type,
-                adjCages: undefined,
-                size: cageSize,
-                manufacturer: manufacturer,
-            }
-            cageNum++;
-            cages.push(tempCage);
-        }
-        return cages;
-    }
+
 
     if(RoomSchematics[name]){
         for (let i = 0; i < RoomSchematics[name].rackNum; i++) {
@@ -138,14 +190,29 @@ export const loadRoom = (name: string): Rack[] => {
             const tempRack: Rack = {
                 id: rackId,
                 type: rackType,
-                cages: genCages(RoomSchematics[name].cageNum, rackType, RoomSchematics[name].cageTypes, RoomSchematics[name].cageSizes, rackId),
-                isActive: true
+                cages: genCages(RoomSchematics[name].cageNum, rackType, RoomSchematics[name].cageTypes, RoomSchematics[name].cageSizes, rackId, rackConfigs, cageNum),
+                isActive: true,
+                xPos: 0,
+                yPos: 0,
+                width: 1,
+                height: 1
             }
             tempRoom.push(tempRack)
         }
         createAdjCages();
     }
     return tempRoom
+}
+
+export const findCageCount = (rackType: RackTypes) => {
+    if(rackType === RackTypes.TwoOfTwo){
+        return 4;
+    }else if (rackType === RackTypes.OneOfOne){
+        return 2;
+    }
+    else{
+        return 1;
+    }
 }
 
 // Changes stroke color of svg element nodes keeping the other styles.
@@ -525,3 +592,60 @@ export const updateCageIds = (updatedRacks) => {
         return rack;
     });
 };
+
+
+/*
+
+HELPER FUNCTIONS FOR D3/SVG MANIPULATION
+
+ */
+
+export const createDragBehavior = (
+    svgRef: React.RefObject<SVGSVGElement>,
+    gridSize: number,
+    gridWidth: number,
+    gridHeight: number,
+    updateLocalRacks: (id: number, newX: number, newY: number) => void,
+    isDraggingEnabled
+) => {
+    const calculateNewPosition = (event, svgElement, gridSize, gridWidth, gridHeight) => {
+        const svgRect = svgElement.getBoundingClientRect();
+        const x = event.sourceEvent.clientX - svgRect.left;
+        const y = event.sourceEvent.clientY - svgRect.top;
+        const newX = Math.max(0, Math.min(gridWidth - 1, Math.floor(x / gridSize)));
+        const newY = Math.max(0, Math.min(gridHeight - 1, Math.floor(y / gridSize)));
+        console.log("Drag: ", x, newX, y, newY);
+
+        return [newX, newY];
+    }
+    return d3.drag<SVGGElement, Rack>()
+        .on('start', function (event, d) {
+            if (!isDraggingEnabled) return;
+            d3.select(this).raise().attr('stroke', 'black');
+        })
+        .on('drag', function (event, d) {
+            if (!isDraggingEnabled) return;
+            const [newX, newY] = calculateNewPosition(event, svgRef.current, gridSize, gridWidth, gridHeight);
+            d3.select(this).attr('transform', `translate(${newX * gridSize}, ${newY * gridSize})`);
+        })
+        .on('end', function (event, d) {
+            if (!isDraggingEnabled) return;
+            d3.select(this).attr('stroke', null);
+            const [newX, newY] = calculateNewPosition(event, svgRef.current, gridSize, gridWidth, gridHeight);
+            updateLocalRacks(d.id, newX, newY);
+        });
+}
+
+
+export const removeCircularReferences = (obj) => {
+    const seen = new WeakSet();
+    return JSON.parse(JSON.stringify(obj, (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
+        }
+        return value;
+    }));
+}

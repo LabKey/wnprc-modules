@@ -55,6 +55,7 @@ import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification;
+import org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
@@ -243,6 +244,26 @@ public class TriggerScriptHelper {
         }
         else if (!NotificationService.get().isServiceEnabled()) {
             _log.info("Notification service is not enabled, will not send Blood Draw Review Notification");
+        }
+    }
+
+    // TODO: Should availBlood be a type: Double?
+    public void sendBloodOverdrawTriggerNotification(String animalID, String availBlood, String drawDate) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        // Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()) {
+            // Sends Overdraw Trigger Notification.
+            if (NotificationService.get().isActive(new BloodOverdrawTriggerNotification(ehr), container)) {
+                _log.info("Using java helper to send email for Blood Overdraw Trigger Notification (animalID: " + animalID + ").");
+                BloodOverdrawTriggerNotification notification = new BloodOverdrawTriggerNotification(ehr, animalID, availBlood, drawDate);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Blood Overdraw Trigger Notification is not enabled, will not send Blood Overdraw Trigger Notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send Blood Overdraw Trigger Notification");
         }
     }
 

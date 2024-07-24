@@ -630,6 +630,12 @@ exports.init = function (EHR) {
         }
     })
 
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.AFTER_UPSERT, 'study', 'bloodSummary', function (helper, scriptErrors, row) {
+        if (row.AvailBlood <= 0) {
+            WNPRC.Utils.getJavaHelper().sendBloodOverdrawTriggerNotification(row.Id, row.AvailBlood, row.date);
+        }
+    })
+
     function getHousingSQL(row) {
         var date = row.Date;
         date = EHR.Server.Utils.normalizeDate(date);

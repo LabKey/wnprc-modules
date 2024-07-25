@@ -120,7 +120,7 @@
         tooltip:       "Set the status of this record to Complete, save the record, and leave this page."
     }));
 
-    var SubmitWaterButtonName = 'WNPRC_SUBMIT_WATER';
+    /*var SubmitWaterButtonName = 'WNPRC_SUBMIT_WATER';
     registerBtn(SubmitWaterButtonName, _.extend(getBtn("SUBMIT"), {
         text: "Submit Water",
         name: "submit_water",
@@ -153,6 +153,7 @@
                         width: '300',
                         buttons: Ext4.MessageBox.YESNO,
                         icon: Ext4.MessageBox.QUESTION,
+                        scope: this,
                         fn: function proceed(resp){
                             if (resp == 'yes'){
                                 this.onSubmit(btn);
@@ -164,7 +165,7 @@
                 }
             }
         }
-    }));
+    }));*/
 
     /*
      * Prompt the user for a yes or no answer.  Resolves on "yes" and rejects with an error with a

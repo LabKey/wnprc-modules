@@ -29,6 +29,8 @@ public class EnterMultipleWater extends SimpleTaskForm
         this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Encounter.js"));
         this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterServerStore.js"));
         this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterStoreCollection.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+
 
         for (FormSection section : this.getFormSections()){
         //    section.addConfigSource("Husbandry");
@@ -41,6 +43,8 @@ public class EnterMultipleWater extends SimpleTaskForm
     @Override
     protected List<String> getButtonConfigs(){
         List<String> buttons = super.getButtonConfigs();
+        //buttons.add("WNPRC_SUBMIT_WATER");
+        buttons.add("SUBMIT_WATER");
         buttons.add("WNPRC_SUBMIT_FINAL");
         buttons.remove("WNPRC_SAVE");
         buttons.remove("WNPRC_SAVE_AND_EXIT");

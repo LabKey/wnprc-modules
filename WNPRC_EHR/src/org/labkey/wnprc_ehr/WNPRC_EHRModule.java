@@ -45,10 +45,14 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
+import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunnable;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
@@ -87,6 +91,8 @@ import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasou
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsReviewForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsTaskForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.MultipleSurgeryProcedureRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.SurgeryProcedureRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Treatments.TreatmentsForm;
@@ -115,6 +121,7 @@ import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
 import org.labkey.wnprc_ehr.notification.IrregularObsBehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
+import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
@@ -298,6 +305,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         BCReportRunner.schedule();
 
+        AdminConsole.addLink(AdminConsole.SettingsLinkType.Management, "azure auth settings", DetailsURL.fromString("/WNPRC_EHR/azureAuthenticationSettings.view").getActionURL(), AdminOperationsPermission.class);
+
+        //Schedule jobs to refresh the access tokens for all Microsoft Azure accounts
+        for (String name : AzureAccessTokenRefreshSettings.get().getNames()) {
+            Thread refreshThread = new Thread(new AzureAccessTokenRefreshRunnable(name));
+            refreshThread.setDaemon(true);
+            refreshThread.start();
+        }
+
         EHRService es = EHRService.get();
         if (loadOnStart) loadLatestDatasetMetadata(es);
     }
@@ -374,6 +390,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
+                new ViralLoadQueueNotification(this),
                 new WaterOrdersAlertNotification(this),
                 new WaterMonitoringAnimalWithOutEntriesNotification(this),
                 new WaterMonitoringNotification(this),
@@ -419,6 +436,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 NecropsyAbstractForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
+                SurgeryProcedureRequestForm.class,
+                MultipleSurgeryProcedureRequestForm.class,
                 PhysicalExamNWMForm.class,
                 PhysicalExamOWMForm.class,
                 ProblemListForm.class,

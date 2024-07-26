@@ -103,30 +103,36 @@ dependencies {
     )
 
     BuildUtils.addExternalDependency(
-        project,
-        new ExternalDependency(
-            "org.jsoup:jsoup:${jsoupVersion}",
-            "jsoup: Java HTML Parser",
-            "jsoup",
-            "https://github.com/jhy/jsoup",
-            ExternalDependency.MIT_LICENSE_NAME,
-            ExternalDependency.MIT_LICENSE_URL,
-            "Tools for parsing and manipulating HTML and CSS using the DOM"
-        )
+            project,
+            new ExternalDependency(
+                    "org.jsoup:jsoup:${jsoupVersion}",
+                    "jsoup: Java HTML Parser",
+                    "jsoup",
+                    "https://github.com/jhy/jsoup",
+                    ExternalDependency.MIT_LICENSE_NAME,
+                    ExternalDependency.MIT_LICENSE_URL,
+                    "Tools for parsing and manipulating HTML and CSS using the DOM"
+            )
     )
 
     BuildUtils.addExternalDependency(
-        project,
-        new ExternalDependency(
-            "org.reflections:reflections:${reflectionsVersion}",
-            "Reflections",
-            "Reflections",
-            "https://github.com/ronmamo/reflections",
-            "WTFPL",
-            "http://www.wtfpl.net/about/",
-            "Runtime analysis of Java classes and packages"
-        )
+            project,
+            new ExternalDependency(
+                    "org.reflections:reflections:${reflectionsVersion}",
+                    "Reflections",
+                    "Reflections",
+                    "https://github.com/ronmamo/reflections",
+                    "WTFPL",
+                    "http://www.wtfpl.net/about/",
+                    "Runtime analysis of Java classes and packages"
+            )
     )
+    
+    //ms graph api libraries
+    external 'com.microsoft.azure:msal4j:1.11.0'
+    external 'com.microsoft.graph:microsoft-graph:2.10.0'
+    external 'org.slf4j:slf4j-nop:1.8.0-beta4'
+
 
     jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
@@ -149,6 +155,10 @@ configurations.all {
     Configuration config ->
         resolutionStrategy {
             force "org.javassist:javassist:${javassistVersion}"
+
+            // Conflicts with versions in 'GoogleDrive' module
+            force "com.google.http-client:google-http-client-jackson2:${googleHttpClientVersion}"
+            force "com.google.http-client:google-http-client:${googleHttpClientVersion}"
         }
 }
 

@@ -1,0 +1,102 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="surgery_procedure" tableDbType="TABLE">
+            <tableTitle>SurgeryProcedure</tableTitle>
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
+                <updateUrl>/ehr/manageRecord.view?schemaName=study&amp;queryName=surgery_procedure&amp;keyField=lsid&amp;key=${lsid}&amp;update=1</updateUrl>
+                <!--<importUrl/>-->
+                <!--<updateUrl/>-->
+                <!--<deleteUrl/>-->
+                <!--<titleColumn>rowid</titleColumn>-->
+                <columns>
+                    <column columnName="editLink">
+                        <columnTitle>Edit Link</columnTitle>
+                        <url>/EHR/dataEntryForm.view?formType=${formtype}&amp;requestid=${requestid}&amp;returnUrl=${returnUrl}</url>
+                    </column>
+                    <column columnName="Id">
+                        <columnTitle>Animal ID</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Surgery/Procedure Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>End Time</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="procedureName">
+                        <columnTitle>Procedure</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>procedure_names</fkTable>
+                            <fkColumnName>name</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="procedureUnit">
+                        <columnTitle>Unit Confirming Request</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>procedure_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName>unit_display_name</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                        <columnTitle>Project</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>Grant</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="surgeon">
+                        <columnTitle>Surgeon</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="consultRequest">
+                        <columnTitle>New Project / Consult Request</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="biopsyNeeded">
+                        <columnTitle>Necropsy/Biopsy Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="surgeryTechNeeded">
+                        <columnTitle>Surgery Tech Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="spiNeeded">
+                        <columnTitle>SPI Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="vetNeeded">
+                        <columnTitle>Vet Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="vetNeededReason">
+                        <columnTitle>Reason Vet is Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="rooms">
+                        <columnTitle>Rooms</columnTitle>
+                    </column>
+                    <column columnName="statusChangeReason">
+                        <columnTitle>Hold/Deny Reason</columnTitle>
+                        <nullable>true</nullable>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

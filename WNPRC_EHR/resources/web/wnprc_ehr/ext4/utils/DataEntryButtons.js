@@ -656,6 +656,77 @@
     }));
 
     /*
+     * This is a wrapper on the WNPRC Request button to allow for verifying that there are rooms present in the request.
+     */
+    let roomRequestButtonName = 'ROOM_SCHEDULING_REQUEST';
+    let requestBtn = getBtn("WNPRC_REQUEST");
+    let defaultHandler = requestBtn.handler;
+    registerBtn(roomRequestButtonName, _.extend(requestBtn, {
+        disableOn: 'ERROR',
+        handler: function(btn) {
+            //let store = Ext4.StoreMgr.get('wnprc||procedure_scheduled_rooms');
+            let storeCount = Ext4.StoreMgr.getCount();
+            for (let i = 0; i < storeCount; i++) {
+                let store = Ext4.StoreMgr.getAt(i);
+                if (store.storeId && store.storeId.includes("procedure_scheduled_rooms")) {
+                    if (store.getCount() > 0) {
+                        defaultHandler(btn);
+                    } else {
+                        Ext4.Msg.alert("ERROR", "This request must contain at least 1 room.");
+                    }
+                    break;
+                }
+                Ext4.Msg.alert("ERROR", "The 'room' store could not be found. Please report this issue to an administrator");
+            }
+        }
+    }));
+
+    EHR.DataEntryUtils.registerGridButton("WNPRC_ADD_ROOM", function (config) {
+        return Ext4.Object.merge({
+            text: "Add Room",
+            tooltip: "Click to add a room to the request",
+            handler: function (btn) {
+                let grid = btn.up("gridpanel");
+                let mainPanel = grid.up("panel");
+                let items = mainPanel.items.items;
+                let formPanel;
+                let parentPanelFound = false;
+                for (let i = 0; i < items.length; i++) {
+                    //if using on a form other than surgery/procedure request, add in a check for that form here
+                    if (items[i].title === "Surgery or Procedure") {
+                        formPanel = items[i];
+                        parentPanelFound = true;
+                        break;
+                    }
+                }
+
+                let cellEditing = grid.getPlugin(grid.editingPluginId);
+                if(cellEditing) {
+                    cellEditing.completeEdit();
+                }
+
+                let model = LDK.StoreUtils.createModelInstance(grid.store, null, true);
+
+                if (parentPanelFound) {
+                    let values = formPanel.getValues();
+                    let parentDate = values.date + "T00:00:00";
+                    model.set({
+                        date: parentDate,
+                        endDate: parentDate
+                    });
+                }
+
+                grid.store.insert(0, [model]); //add a blank record in the first position
+
+                if(cellEditing) {
+                    cellEditing.startEditByPosition({row: 0, column: this.firstEditableColumn || 0});
+                }
+
+            }
+        }, config);
+    });
+
+    /*
      * Enable the save template button for all users.
      */
     var saveTemplateButtonName = "TEMPLATE";

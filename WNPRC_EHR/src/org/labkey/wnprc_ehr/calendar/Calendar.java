@@ -1,15 +1,47 @@
 package org.labkey.wnprc_ehr.calendar;
 
-import org.json.JSONArray;
-import org.labkey.api.data.Container;
-import org.labkey.api.security.User;
+import org.json.JSONObject;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public interface Calendar
 {
-    enum EventType {CALENDAR, ROOM}
-    void setUser(User u);
-    void setContainer(Container c);
-    JSONArray getEventsAsJson(String calendarId, String backgroundColor, EventType eventType, Date startDate, Date endDate) throws Exception;
+    JSONObject getEventsAsJson(LocalDate startDate, LocalDate endDate) throws Exception;
+
+    /**
+     * Makes text more readable by determining if the text should be white
+     * or black based on the lightness/darkness of the background color
+     * @param backgroundColor a string containing the background color in either RRGGBB or #RRGGBB format
+     * @return the ideal text color in #RRGGBB format
+     */
+    default String getTextColor(String backgroundColor) {
+        int r, g, b;
+        double hsp;
+        int offset = 0;
+
+        if (backgroundColor.startsWith("#")) {
+            offset = 1;
+        }
+
+        r = Integer.parseInt(backgroundColor.substring(offset, offset + 2), 16);
+        g = Integer.parseInt(backgroundColor.substring(offset + 2, offset + 4), 16);
+        b = Integer.parseInt(backgroundColor.substring(offset + 4, offset + 6), 16);
+
+        // HSP equation from http://alienryderflex.com/hsp.html
+        hsp = Math.sqrt(
+                0.299 * (r * r) +
+                0.587 * (g * g) +
+                0.114 * (b * b)
+        );
+
+        // Using the HSP value, determine whether the color is light or dark
+        if (hsp>127.5) {
+
+            return "#000000";
+        }
+        else {
+
+            return "#FFFFFF";
+        }
+    }
 }

@@ -132,11 +132,14 @@ function createNavMenu()
             ]},
             {header: 'Request Services',
             items: [
-                {name: 'Views Requests', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-requestServices.view'},
+                {name: 'View Requests', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-requestServices.view'},
                 {name: 'Request Blood Draws', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-manageRequest.view?formtype=Blood%20Draw%20Request'},
                 {name: 'Request Clinpath Services', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-manageRequest.view?formtype=Clinpath%20Request'},
                 {name: 'Request Project', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/IT/Public/query-insertQueryRow.view?schemaName=lists&query.queryName=WNPRC%20Colony%20Records%20Project%20Number%20Request%20Form'},
                 {name: 'Request Animals', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/animalrequests-app.view'}
+                {name: 'Request Surgery or Procedure', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/dataEntryForm.view?formType=SurgeryProcedureRequest'}
+
+
             ]}
         ]
     };

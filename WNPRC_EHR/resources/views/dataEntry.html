@@ -22,6 +22,9 @@
         vvcUpdateURL: '',
         vvcDeleteURL: '',
 
+        surgeryProcedureUpdateURL: '',
+        surgeryProcedureDeleteURL: '',
+
         animalRequestUpdateURL: '',
         animalRequestDeleteURL: '',
 
@@ -48,6 +51,11 @@
             if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
                 this.animalRequestUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}&update=1';
                 this.animalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
+            }
+
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'surgery_procedure', schemaName: 'study'})){
+                this.surgeryProcedureUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=surgery_procedure&keyField=lsid&key=${lsid}&update=1';
+                this.surgeryProcedureDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=surgery_procedure';
             }
 
             this.items = this.getItems();
@@ -202,88 +210,104 @@
                         }
                     }]
                 },
-
-                        {
-                            title: 'Blood Draw Requests',
-                            ref: 'BloodDrawRequests',
-                            items: [{
-                                xtype: 'ldk-querycmp',
-                                itemId: 'BloodDrawRequests',
-                                queryConfig: {
-                                    schemaName: 'study',
-                                    queryName: 'Blood Draws',
-                                    viewName: 'Blood Requests',
-                                    scope: this,
-                                    success: this.onSuccessResize,
-                                    updateURL: this.bloodUpdateURL,
-                                    deleteURL: this.bloodDeleteURL,
-                                    filters: [
-                                        LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
-                                    ],
-                                    removeableFilters: [
-                                        LABKEY.Filter.create('billedby', null, LABKEY.Filter.Types.ISBLANK)
-                                    ]
-                                }
-                            }]
-                        },
-                        {
-                            title: 'Clinpath Requests',
-                            ref: 'ClinpathRequests',
-                            items: [{
-                                itemId: 'ClinpathRequests',
-                                xtype: 'ldk-querycmp',
-                                queryConfig: {
-                                    schemaName: 'study',
-                                    queryName: 'Clinpath Runs',
-                                    viewName: 'Clinpath Requests',
-                                    updateURL: this.clinpathUpdateURL,
-                                    deleteURL: this.clinpathDeleteURL,
-                                    scope: this,
-                                    success: this.onSuccessResize,
-                                    filters: [
-                                        LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
-                                    ]
-                                }
-                            }]
-                        },
-                        {
-                            title: 'VVC Requests',
-                            ref: 'VVCRequests',
-                            items: [{
-                                itemId: 'VVCRequests',
-                                xtype: 'ldk-querycmp',
-                                queryConfig: {
-                                    schemaName: 'wnprc',
-                                    queryName: 'vvc',
-                                    viewName: 'VVC Request',
-                                    updateURL: this.vvcUpdateURL,
-                                    deleteURL: this.vvcDeleteURL,
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                }
-                            }]
-                        },
-                        {
-                            title: 'Animal Requests',
-                            ref: 'AnimalRequests',
-                            items: [{
-                                itemId: 'AnimalRequests',
-                                xtype: 'ldk-querycmp',
-                                queryConfig: {
-                                    schemaName: 'wnprc',
-                                    queryName: 'animal_requests',
-                                    viewName: 'Animal Requests',
-                                    updateURL: '',
-                                    scope: this,
-                                    success: this.onSuccessResize
-                                }
-                            }]
+                {
+                    title: 'Blood Draw Requests',
+                    ref: 'BloodDrawRequests',
+                    items: [{
+                        xtype: 'ldk-querycmp',
+                        itemId: 'BloodDrawRequests',
+                        queryConfig: {
+                            schemaName: 'study',
+                            queryName: 'Blood Draws',
+                            viewName: 'Blood Requests',
+                            scope: this,
+                            success: this.onSuccessResize,
+                            updateURL: this.bloodUpdateURL,
+                            deleteURL: this.bloodDeleteURL,
+                            filters: [
+                                LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                            ],
+                            removeableFilters: [
+                                LABKEY.Filter.create('billedby', null, LABKEY.Filter.Types.ISBLANK)
+                            ]
                         }
-                    ]
-                }}
-    );
-
-
+                    }]
+                },
+                {
+                    title: 'Clinpath Requests',
+                    ref: 'ClinpathRequests',
+                    items: [{
+                        itemId: 'ClinpathRequests',
+                        xtype: 'ldk-querycmp',
+                        queryConfig: {
+                            schemaName: 'study',
+                            queryName: 'Clinpath Runs',
+                            viewName: 'Clinpath Requests',
+                            updateURL: this.clinpathUpdateURL,
+                            deleteURL: this.clinpathDeleteURL,
+                            scope: this,
+                            success: this.onSuccessResize,
+                            filters: [
+                                LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                            ]
+                        }
+                    }]
+                },
+                {
+                    title: 'VVC Requests',
+                    ref: 'VVCRequests',
+                    items: [{
+                        itemId: 'VVCRequests',
+                        xtype: 'ldk-querycmp',
+                        queryConfig: {
+                            schemaName: 'wnprc',
+                            queryName: 'vvc',
+                            viewName: 'VVC Request',
+                            updateURL: this.vvcUpdateURL,
+                            deleteURL: this.vvcDeleteURL,
+                            scope: this,
+                            success: this.onSuccessResize
+                        }
+                    }]
+                },
+                {
+                    title: 'Surgery and Procedure Requests',
+                    ref: 'SurgeryProcedureRequests',
+                    items: [{
+                        itemId: 'SurgeryProcedureRequests',
+                        xtype: 'ldk-querycmp',
+                        queryConfig: {
+                            schemaName: 'study',
+                            queryName: 'SurgeryProcedureIndividualRequests',
+                            updateURL: this.surgeryProcedureUpdateURL,
+                            deleteURL: this.surgeryProcedureDeleteURL,
+                            scope: this,
+                            success: this.onSuccessResize,
+                            filters: [
+                                LABKEY.Filter.create('qcstate/label', 'Request: Pending;Request: Denied', LABKEY.Filter.Types.IN)
+                            ]
+                        }
+                    }]
+                },
+                {
+                    title: 'Animal Requests',
+                    ref: 'AnimalRequests',
+                    items: [{
+                        itemId: 'AnimalRequests',
+                        xtype: 'ldk-querycmp',
+                        queryConfig: {
+                            schemaName: 'wnprc',
+                            queryName: 'animal_requests',
+                            viewName: 'Animal Requests',
+                            updateURL: '',
+                            scope: this,
+                            success: this.onSuccessResize
+                        }
+                    }]
+                }
+            ]
+        }
+    });
 
     Ext4.onReady(function(){
         EHR.Security.init({

@@ -1685,7 +1685,7 @@
 
                                                 }
                                                 else {
-                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
                                                     parsedTotalWater = row.TotalWater;
                                                 }
                                             }
@@ -1695,9 +1695,8 @@
                                                     parsedTotalWater = row.TotalWater;
                                                 }
                                                 else {
-                                                    row.TotalWater = row['Id/Demographics/calculated_status'];
+                                                    row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
                                                     parsedTotalWater = row.TotalWater;
-
                                                 }
                                             }
                                             eventTitle += parsedTotalWater;
@@ -1767,9 +1766,8 @@
 
                                                     }
                                                     else {
-                                                        row.TotalWater = row.TotalWater;
+                                                        row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
                                                         parsedTotalWater += row.TotalWater;
-                                                        eventTitle += " Total: ";
                                                     }
                                                 }
                                                 else {
@@ -1778,9 +1776,8 @@
                                                         parsedTotalWater = row.TotalWater;
                                                     }
                                                     else {
-                                                        row.TotalWater = ' on Lixit';
+                                                        row.TotalWater = ' '+row['Id/Demographics/calculated_status'];;
                                                         parsedTotalWater = row.TotalWater;
-
                                                     }
                                                 }
                                                 eventTitle += parsedTotalWater;

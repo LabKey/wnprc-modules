@@ -1,0 +1,17 @@
+<html>
+<head>
+    <script type="text/javascript" nonce="<%=scriptNonce%>">
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            LABKEY.App.loadApp('DropdownSelect', 'app', {update: true});
+            document.getElementById("folder-type-set").setAttribute("style", "display:block");
+        });
+    </script>
+</head>
+
+<div id="folder-type-set" style="display:none">
+    <form method="post">
+        <div id="app"></div>
+    </form>
+</div>
+</html>

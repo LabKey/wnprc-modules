@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
 import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -27,6 +28,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.ehr.security.EHRDataAdminPermission;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -50,8 +52,11 @@ import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
+import org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
+import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.SurgeryScheduledNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
@@ -67,6 +72,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,8 +81,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -88,6 +96,7 @@ public class TriggerScriptHelper {
     protected final User user;
     protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
+    public static JSONArray _aliasRow;
 
     private TriggerScriptHelper(int userId, String containerId) {
         user = UserManager.getUser(userId);
@@ -183,16 +192,59 @@ public class TriggerScriptHelper {
         return map;
     }
 
-    public void sendDeathNotification(final List<String> ids) {
+    public void sendDeathNotification(final List<String> ids, String hostName) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends original Death Notification.
+            //Remove this if-else when new notification is approved.
+            if (NotificationService.get().isActive(new DeathNotification(), container)) {
+                for (String id : ids) {
+                    DeathNotification idNotification = new DeathNotification();
+                    idNotification.setParam(DeathNotification.idParamName, id);
+                    idNotification.sendManually(container, user);
+                }
+            }
+            else {
+                _log.info("Death Notification is not enabled, will not send death notification");
+            }
 
-        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
-            _log.info("Notification service is not enabled, will not send death notification");
-            return;
+            //Sends revamped Death Notification.
+            if (NotificationService.get().isActive(new DeathNotificationRevamp(ehr), container)) {
+                for (String id : ids) {
+                    _log.info("Using java helper to send email for animal death record: "+ id);
+                    DeathNotificationRevamp notification = new DeathNotificationRevamp(ehr, id, user, hostName);
+                    notification.sendManually(container, user);
+                }
+            }
+            else {
+                _log.info("Death Notification Revamp is not enabled, will not send death notification");
+            }
         }
-        for (String id : ids) {
-            DeathNotification idNotification = new DeathNotification();
-            idNotification.setParam(DeathNotification.idParamName, id);
-            idNotification.sendManually(container, user);
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send death notification");
+        }
+    }
+
+    public void sendBloodDrawReviewNotification(String animalID, String project, String drawDate, String requestor) {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends Blood Draw Review Notification.
+            if (NotificationService.get().isActive(new BloodDrawReviewTriggerNotification(ehr), container)) {
+                _log.info("Using java helper to send email for Blood Draw Review Trigger (animalID: " + animalID + ").");
+                BloodDrawReviewTriggerNotification notification = new BloodDrawReviewTriggerNotification(ehr, animalID, project, drawDate);
+                ArrayList<String> extraRecipients = new ArrayList<>();
+                String requestorEmail = UserManager.getUserByDisplayName(requestor).getEmail();
+                extraRecipients.add(requestorEmail);
+                notification.sendManually(container, user, extraRecipients);
+            }
+            else {
+                _log.info("Blood Draw Review Notification is not enabled, will not send Blood Draw Review Notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send Blood Draw Review Notification");
         }
     }
 
@@ -284,11 +336,11 @@ public class TriggerScriptHelper {
                 }
 
                 for (JSONObject existingMeasurement : existingMeasurements) {
-                    rowsToDelete.add(existingMeasurement);
+                    rowsToDelete.add(existingMeasurement.toMap());
                 }
 
                 for (Double newMeasurement : newMeasurements) {
-                    JSONObject newRow = new JSONObject();
+                    Map<String, Object> newRow = new HashMap<>();
                     newRow.put("Id", updatedRow.get("Id"));
                     newRow.put("date", updatedRow.get("date"));
                     newRow.put("measurement_name", updatedRow.get("measurement_name"));
@@ -309,6 +361,11 @@ public class TriggerScriptHelper {
             if (rowsToInsert.size() > 0) {
                 queryUpdater.insert(rowsToInsert);
             }
+//            try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
+//                queryUpdater.update(rowsToUpdate);
+//            } catch (Exception e) {
+//                _log.error(e);
+//            }
         }
     }
 
@@ -328,7 +385,7 @@ public class TriggerScriptHelper {
 
         List<Map<String, Object>> updateRows = new ArrayList<>();
         for (String lsid : lsids) {
-            JSONObject row = new JSONObject();
+            Map<String, Object> row = new HashMap<>();
             row.put("lsid", lsid);
             row.put("outcome", true);
             updateRows.add(row);
@@ -353,7 +410,7 @@ public class TriggerScriptHelper {
         List<Map<String, Object>> updateRows = new ArrayList<>();
         for (JSONObject row : ultrasounds) {
             row.put("followup_required", false);
-            updateRows.add(row);
+            updateRows.add(row.toMap());
         }
 
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
@@ -544,7 +601,7 @@ public class TriggerScriptHelper {
         {
             remark.append("no remarks\n");
         }
-        JSONObject encounter = new JSONObject();
+        Map<String, Object> encounter = new HashMap<>();
         encounter.put("objectid", UUID.randomUUID().toString());
         encounter.put("Id", animalsInEncounter.get(0).get("Id"));
         encounter.put("sireid", sireid.toString());
@@ -569,29 +626,34 @@ public class TriggerScriptHelper {
         if (!StringUtils.isEmpty((String) group.get(index).get("remark")) && group.get(index).get("reason").equals("Breeding ended")) {
             remarkFound = true;
             remark.append("\n")
-                    .append(group.get(index).get("Id"))
-                    .append(": ")
-                    .append(group.get(index).get("remark"));
+                .append(group.get(index).get("Id"))
+                .append(": ")
+                .append(group.get(index).get("remark"));
         }
 
         String[] sireList = openEncounter.getString("sireid").split(",");
-        for (int j = 0; j < sireList.length; j++) {
-            for(int k = 0; k < filteredHousingRows.size(); k++) {
-                if (sireList[j].equals(filteredHousingRows.get(k).get("Id")) && sdf.format(filteredHousingRows.get(k).get("date")).equals(sdf.format(group.get(index).get("date"))) && filteredHousingRows.get(k).get("reason").equals("Breeding ended")) {
-                    if (!StringUtils.isEmpty((String) filteredHousingRows.get(k).get("remark"))) {
+        for (String s : sireList)
+        {
+            for (Map<String, Object> filteredHousingRow : filteredHousingRows)
+            {
+                if (s.equals(filteredHousingRow.get("Id")) && sdf.format(filteredHousingRow.get("date")).equals(sdf.format(group.get(index).get("date"))) && filteredHousingRow.get("reason").equals("Breeding ended"))
+                {
+                    if (!StringUtils.isEmpty((String) filteredHousingRow.get("remark")))
+                    {
                         remarkFound = true;
                         remark.append("\n")
-                                .append(sireList[j])
-                                .append(": ")
-                                .append(filteredHousingRows.get(k).get("remark"));
+                            .append(s)
+                            .append(": ")
+                            .append(filteredHousingRow.get("remark"));
                     }
-                    if (filteredHousingRows.get(k).get("ejacConfirmed") != null && ((Boolean) filteredHousingRows.get(k).get("ejacConfirmed"))) {
+                    if (filteredHousingRow.get("ejacConfirmed") != null && ((Boolean) filteredHousingRow.get("ejacConfirmed")))
+                    {
                         remarkFound = true;
                         ejacConfirmed = true;
                         remark.append("\n")
-                                .append(sireList[j])
-                                .append(": ")
-                                .append("Ejaculation Confirmed");
+                            .append(s)
+                            .append(": ")
+                            .append("Ejaculation Confirmed");
                     }
                 }
             }
@@ -607,7 +669,7 @@ public class TriggerScriptHelper {
         openEncounter.put("remark", openEncounter.getString("remark") != null ? openEncounter.getString("remark") + remark : remark.toString());
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        rows.add(openEncounter);
+        rows.add(openEncounter.toMap());
         return rows;
     }
 
@@ -647,7 +709,7 @@ public class TriggerScriptHelper {
         List<Map<String, Object>> testData = new ArrayList<>();
 
         //female 1 - end
-        JSONObject row4 = new JSONObject();
+        Map<String, Object> row4 = new HashMap<>();
         row4.put("Id", "testid1");
         row4.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
         row4.put("room", "room1");
@@ -660,7 +722,7 @@ public class TriggerScriptHelper {
         testData.add(row4);
 
         //male 1a - end
-        JSONObject row5 = new JSONObject();
+        Map<String, Object> row5 = new HashMap<>();
         row5.put("Id", "testid2");
         row5.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
         row5.put("room", "room1");
@@ -673,7 +735,7 @@ public class TriggerScriptHelper {
         testData.add(row5);
 
         //male 1b - end
-        JSONObject row6 = new JSONObject();
+        Map<String, Object> row6 = new HashMap<>();
         row6.put("Id", "testid3");
         row6.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
         row6.put("room", "room1");
@@ -686,7 +748,7 @@ public class TriggerScriptHelper {
         testData.add(row6);
 
         //female 1 - start
-        JSONObject row1 = new JSONObject();
+        Map<String, Object> row1 = new HashMap<>();
         row1.put("Id", "testid1");
         row1.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
         row1.put("room", "room1");
@@ -699,7 +761,7 @@ public class TriggerScriptHelper {
         testData.add(row1);
 
         //male 1a - start
-        JSONObject row2 = new JSONObject();
+        Map<String, Object> row2 = new HashMap<>();
         row2.put("Id", "testid2");
         row2.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
         row2.put("room", "room1");
@@ -712,7 +774,7 @@ public class TriggerScriptHelper {
         testData.add(row2);
 
         //male 1b - start
-        JSONObject row3 = new JSONObject();
+        Map<String, Object> row3 = new HashMap<>();
         row3.put("Id", "testid3");
         row3.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
         row3.put("room", "room1");
@@ -725,7 +787,7 @@ public class TriggerScriptHelper {
         testData.add(row3);
 
         //female 2a - start
-        JSONObject row7 = new JSONObject();
+        Map<String, Object> row7 = new HashMap<>();
         row7.put("Id", "testid4");
         row7.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
         row7.put("room", "room2");
@@ -738,7 +800,7 @@ public class TriggerScriptHelper {
         testData.add(row7);
 
         //female 2b - start
-        JSONObject row8 = new JSONObject();
+        Map<String, Object> row8 = new HashMap<>();
         row8.put("Id", "testid5");
         row8.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
         row8.put("room", "room2");
@@ -751,7 +813,7 @@ public class TriggerScriptHelper {
         testData.add(row8);
 
         //male 2 - start
-        JSONObject row9 = new JSONObject();
+        Map<String, Object> row9 = new HashMap<>();
         row9.put("Id", "testid6");
         row9.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
         row9.put("room", "room2");
@@ -764,7 +826,7 @@ public class TriggerScriptHelper {
         testData.add(row9);
 
         //male 3 - start
-        JSONObject row13 = new JSONObject();
+        Map<String, Object> row13 = new HashMap<>();
         row13.put("Id", "testid6");
         row13.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row13.put("room", "room3");
@@ -777,7 +839,7 @@ public class TriggerScriptHelper {
         testData.add(row13);
 
         //female 2b - end
-        JSONObject row11 = new JSONObject();
+        Map<String, Object> row11 = new HashMap<>();
         row11.put("Id", "testid5");
         row11.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row11.put("room", "room2");
@@ -790,7 +852,7 @@ public class TriggerScriptHelper {
         testData.add(row11);
 
         //male 2 - end
-        JSONObject row12 = new JSONObject();
+        Map<String, Object> row12 = new HashMap<>();
         row12.put("Id", "testid6");
         row12.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row12.put("room", "room2");
@@ -803,7 +865,7 @@ public class TriggerScriptHelper {
         testData.add(row12);
 
         //female 2a/3 - end/start
-        JSONObject row10 = new JSONObject();
+        Map<String, Object> row10 = new HashMap<>();
         row10.put("Id", "testid4");
         row10.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
         row10.put("room", "room3");
@@ -819,10 +881,34 @@ public class TriggerScriptHelper {
     }
 
     public void sendAnimalRequestNotification(Integer rowid, String hostName){
-        _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
-        notification.sendManually(container, user);
+
+        //Verifies 'Notification Service' is enabled before sending notification.
+        if (NotificationService.get().isServiceEnabled()){
+            //Sends original Animal Request Notification.
+            //Remove this if-else when new notification is approved.
+            if (NotificationService.get().isActive(new AnimalRequestNotification(ehr), container)) {
+                _log.info("Using java helper to send email for animal request record: "+rowid);
+                AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Animal Request Notification is not enabled, will not send animal request notification");
+            }
+
+            //Sends revamped Animal Request Notification.
+            if (NotificationService.get().isActive(new AnimalRequestNotificationRevamp(ehr), container)) {
+                _log.info("Using java helper to send animal request notification revamp for animal request record: "+rowid);
+                AnimalRequestNotificationRevamp notification = new AnimalRequestNotificationRevamp(ehr, rowid, user, hostName);
+                notification.sendManually(container, user);
+            }
+            else {
+                _log.info("Animal Request Notification Revamp is not enabled, will not send animal request notification");
+            }
+        }
+        else if (!NotificationService.get().isServiceEnabled()) {
+            _log.info("Notification service is not enabled, will not send animal request notification");
+        }
     }
     public void sendAnimalRequestNotificationUpdate(Integer rowid, Map<String,Object> row, Map<String,Object> oldRow, String hostName){
         _log.info("Using java helper to send email for animal request record: "+rowid);
@@ -1041,7 +1127,10 @@ public class TriggerScriptHelper {
                 Container container = getContainer();
                 User user = getUser();
 
-                List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
+                BatchValidationException errors = new BatchValidationException();
+                List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
+                if (errors.hasErrors())
+                    throw errors;
                 if (updatedRows.isEmpty()){
                     returnMessage = "Error changing QCState for waterAmount table";
 
@@ -1100,7 +1189,10 @@ public class TriggerScriptHelper {
                     Container container = getContainer();
                     User user = getUser();
                     Map<String, Object> context = getExtraContext();
-                    List<Map<String, Object>> updatedRows = waterTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, context);
+                    BatchValidationException errors = new BatchValidationException();
+                    List<Map<String, Object>> updatedRows = waterTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, context);
+                    if (errors.hasErrors())
+                        throw errors;
                     if (!updatedRows.isEmpty())
                     {
                         completeWaterGivenTask(taskIds, waterTable);
@@ -1359,13 +1451,13 @@ public class TriggerScriptHelper {
 
             //Look for any orders that overlap in the waterScheduleCoalesced table
             TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
             filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
             filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
             //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","Id", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1505,7 +1597,7 @@ public class TriggerScriptHelper {
                             String htmlDate = simpleDateFormat.format(waterRecord.getDate());
 
 
-                            returnErrors.put("field", "animalId");
+                            returnErrors.put("field", "Id");
                             returnErrors.put("severity", "ERROR");
                             //returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
                             returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
@@ -1562,32 +1654,30 @@ public class TriggerScriptHelper {
                 }
 
                 //TODO: only change water schedule animals if they are not in Lixit
-                Map animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
-                if ("lixit".equals(animalCondition.get(animalId).toString())){
-                    List<Map<String, Object>> rowToAdd = null;
-
-                    JSONObject scheduledAnimalRecord = new JSONObject();
+                Map<String,Object> animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
+                if ("lixit".equals(animalCondition.get(animalId).toString()))
+                {
+                    Map<String, Object> scheduledAnimalRecord = new HashMap<>();
                     scheduledAnimalRecord.put("date", clientStartDate);
                     scheduledAnimalRecord.put("id", animalId);
                     scheduledAnimalRecord.put("condition", waterSource);
                     scheduledAnimalRecord.put("project", project);
                     scheduledAnimalRecord.put("mlsperKg",animalCondition.get("mlsPerKg"));
 
-                    rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+                    List<Map<String, Object>> rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
 
                     try
                     {
                         if(!toUpdate.isEmpty()){
                             Container container = getContainer();
                             User user = getUser();
-                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, null, null);
-                            if (updateRows.isEmpty()){
+                            BatchValidationException errors = new BatchValidationException();
+                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, errors, null, null);
+                            if (updateRows.isEmpty() || errors.hasErrors()){
                                 returnErrors.put("field", "Id");
                                 returnErrors.put("severity", "ERROR");
                                 returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
-
                             }
-
                         }
                         insertRows(rowToAdd, "study", "waterScheduledAnimals");
                     }
@@ -1599,9 +1689,7 @@ public class TriggerScriptHelper {
 
                         errorMap.put(objectId, returnErrors);
                     }
-
                 }
-
             }
 
             errorMap.forEach((objectIdString, JSONObject)->{
@@ -1671,7 +1759,7 @@ public class TriggerScriptHelper {
 
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterGivenFromDatabase = new TableSelector(waterGiven, PageFlowUtil.set("taskId", "objectid", "lsid", "animalId", "date", "project", "assignedTo", "volume"), filterWaterGiven, null);
+            TableSelector waterGivenFromDatabase = new TableSelector(waterGiven, PageFlowUtil.set("taskId", "objectid", "lsid", "Id", "date", "project", "assignedTo", "volume"), filterWaterGiven, null);
 
             waterGivenRecords.addAll(waterGivenFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1702,13 +1790,13 @@ public class TriggerScriptHelper {
 
             //Look for any orders that overlap in the waterScheduleCoalesced table
             TableInfo waterSchedule = getTableInfo("study", "waterScheduleCoalesced");
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
             filter.addCondition(FieldKey.fromString("date"), startDate.getTime(), CompareType.DATE_EQUAL);
             filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
             filter.addCondition(FieldKey.fromString("waterSource"), "regulated");
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set("taskId", "objectid", "lsid", "animalId", "date", "startDateCoalesced", "endDateCoalescedFuture", "dataSource", "project", "frequency", "assignedTo", "volume"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set("taskId", "objectid", "lsid", "Id", "date", "startDateCoalesced", "endDateCoalescedFuture", "dataSource", "project", "frequency", "assignedTo", "volume"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1719,7 +1807,7 @@ public class TriggerScriptHelper {
                 if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId()))
                 {
 
-                    if (waterRecord.getAnimalId().equals(animalId))
+                    if (waterRecord.getId().equals(animalId))
                     {
                         waterScheduledFromServer += waterRecord.getVolume();
                     }
@@ -1752,69 +1840,36 @@ public class TriggerScriptHelper {
     }
 
     public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord){
-        boolean validation;
+        boolean validation = true;
 
-        if (serverRecord.compareTo(clientRecord) == 0){
+        if (clientRecord.compareTo(serverRecord) == 0){
             validation = false;
             return validation;
-        }
-        switch (clientRecord){
-            case "Daily - AM/PM":
-                if (serverRecord.compareTo("Daily - AM")==0){
-                    validation = false;
-                    break;
-                }
-                if (serverRecord.compareTo("Daily - PM")==0){
-                    validation = false;
-                    break;
-                }
-            case "Daily":
-            //case "ˆDaily":
-                if(serverRecord.compareTo("Monday") == 0 || serverRecord.compareTo("Tuesday") == 0 ||
-                        serverRecord.compareTo("Wednesday") == 0 || serverRecord.compareTo("Thursday") == 0 ||
-                        serverRecord.compareTo("Friday") == 0 || serverRecord.compareTo("Saturday") == 0 ||
-                        serverRecord.compareTo("Sunday") == 0)  {
-                    validation = false;
-                    break;
-                }
-
-            default:
-                if (clientRecord.matches("Daily.*")){
-                    if(serverRecord.compareTo("Monday") == 0 || serverRecord.compareTo("Tuesday") == 0 ||
-                            serverRecord.compareTo("Wednesday") == 0 || serverRecord.compareTo("Thursday") == 0 ||
-                            serverRecord.compareTo("Friday") == 0 || serverRecord.compareTo("Saturday") == 0 ||
-                            serverRecord.compareTo("Sunday") == 0)  {
-                        validation = false;
-                        break;
-                    }
-
-                }
-
-                validation = true;
-
-        }
-        if (validation)
-        {
-            switch (serverRecord)
-            {
-                case "Daily":
-                    if (clientRecord.compareTo("Monday") == 0 || clientRecord.compareTo("Tuesday") == 0 ||
-                            clientRecord.compareTo("Wednesday") == 0 || clientRecord.compareTo("Thursday") == 0 ||
-                            clientRecord.compareTo("Friday") == 0 || clientRecord.compareTo("Saturday") == 0 ||
-                            clientRecord.compareTo("Sunday") == 0)
-                    {
-                        validation = false;
-                        break;
-                    }
-
-                default:
-                    validation = true;
-
+        } else if (clientRecord.compareTo("Daily - AM")==0){
+            if (serverRecord.compareTo("Daily - Anytime")==0){
+                validation = false;
+                return validation;
+            }else if (serverRecord.compareTo("Daily - AM/PM")==0){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.contains("PM")){
+            if (serverRecord.contains("PM")){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.compareTo("Daily - Anytime")==0){
+            if (serverRecord.contains("PM") || serverRecord.contains("AM")){
+                validation = false;
+                return validation;
+            }
+        } else if (clientRecord.compareTo("Daily - AM/PM")==0){
+            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime")==0){
+                validation = false;
+                return validation;
             }
         }
-
         return validation;
-
     }
 
     public static class WaterInfo
@@ -1885,7 +1940,7 @@ public class TriggerScriptHelper {
         private String objectId;
         private String waterOrderObjectId;
         private String lsid;
-        private String animalId;
+        private String Id;
         private Date date;
         private Date startDateCoalesced;
         private Date endDateCoalescedFuture;
@@ -1915,9 +1970,9 @@ public class TriggerScriptHelper {
             this.lsid = lsid;
         }
 
-        public void setAnimalId(String animalId)
+        public void setId(String Id)
         {
-            this.animalId = animalId;
+            this.Id = Id;
         }
 
         public void setDate(Date date)
@@ -1979,9 +2034,9 @@ public class TriggerScriptHelper {
             return lsid;
         }
 
-        public String getAnimalId()
+        public String getId()
         {
-            return animalId;
+            return Id;
         }
 
         public Date getDate()
@@ -2032,8 +2087,8 @@ public class TriggerScriptHelper {
                     setTaskId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("objectId") && prop.getValue() instanceof String)
                     setObjectId((String)prop.getValue());
-                else if (prop.getKey().equalsIgnoreCase("animalId") && prop.getValue() instanceof String)
-                    setAnimalId((String)prop.getValue());
+                else if (prop.getKey().equalsIgnoreCase("Id") && prop.getValue() instanceof String)
+                    setId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("startDate") && prop.getValue() instanceof Date)
                     setStartDateCoalesced((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("endDate") && prop.getValue() instanceof Date)
@@ -2111,6 +2166,11 @@ public class TriggerScriptHelper {
         return  returnCondition;
     }
 
+
+    public static List<Object> filterBloodDraws(List<Object> bloodRecords, Integer limit)
+    {
+        return null;
+    }
     //This function will always have lixit as the waterSource
     public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, Map<String, Object> extraContext) throws Exception
     {
@@ -2153,7 +2213,10 @@ public class TriggerScriptHelper {
 
                 Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
                 updateWaterOrder.put("lsid", lsid);
-                updateWaterOrder.put("enddate", startDate);
+                //closing water order the day before, new lixit orders have to be completed the first time.
+                java.time.LocalDateTime newEndDate = java.time.LocalDateTime.ofInstant(startDate.toInstant(),ZoneId.systemDefault());
+                newEndDate.minusDays(1);
+                updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
                 updateWaterOrder.put("skipWaterRegulationCheck", true);
                 toUpdate.add(updateWaterOrder);
 
@@ -2174,14 +2237,11 @@ public class TriggerScriptHelper {
                 extraContextArray.put(extraContextObject);
 
             }
-
-
         }
 
         List<Map<String, Object>> rowToAdd = null;
 
-
-        JSONObject scheduledAnimalRecord = new JSONObject();
+        Map<String, Object> scheduledAnimalRecord = new HashMap<>();
         scheduledAnimalRecord.put("date", startDate);
         scheduledAnimalRecord.put("id",animalId);
         scheduledAnimalRecord.put("condition",waterSource);
@@ -2201,8 +2261,9 @@ public class TriggerScriptHelper {
                 {
                     Container container = getContainer();
                     User user = getUser();
-                    List<Map<String, Object>> updatedRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
-                    if (updatedRows.isEmpty())
+                    BatchValidationException errors = new BatchValidationException();
+                    List<Map<String, Object>> updatedRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
+                    if (errors.hasErrors() || updatedRows.isEmpty())
                     {
                         returnErrors.put("field", "project");
                         returnErrors.put("severity", "ERROR");
@@ -2281,19 +2342,6 @@ public class TriggerScriptHelper {
             }
         }
         return thestatus;
-    }
-
-    public void sendViralLoadQueueNotification(String[] keys, Map<String,Object> emailProps) throws SQLException
-    {
-        Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
-        String recordStatus = getVLStatus(user, viralLoadContainer, (Integer) emailProps.get("status"));
-        if ("08-complete-email-Zika_portal".equals(recordStatus)){
-            //_log.info("Using java helper to send email for viral load queue record: "+key);
-            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, user, viralLoadContainer, emailProps);
-            Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-            notification.sendManually(ehrContainer);
-        }
     }
 
     // Returns a list of vendor ids if they do not match the current enteredVendorId
@@ -2391,12 +2439,9 @@ public class TriggerScriptHelper {
     {
         boolean returnCondition = false;
 
-
         TableInfo waterOrdersAccess = getTableInfo("wnprc","watermonitoring_access");
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("alloweduser/UserId"), userId);
         filter.addCondition(FieldKey.fromString("project"), project,CompareType.EQUAL);
-
-
 
         TableSelector userList = new TableSelector(waterOrdersAccess, PageFlowUtil.set("date", "alloweduser", "project"),filter, null);
         userList.setMaxRows(1);
@@ -2412,6 +2457,163 @@ public class TriggerScriptHelper {
         }
         return  returnCondition;
     }
+
+    public void setAliasRow(JSONArray alias)
+    {
+        _aliasRow = alias;
+    }
+    public JSONArray getAliasRow()
+    {
+        return _aliasRow;
+    }
+
+    public String verifyAccount(String account)
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("alias", CompareType.EQUAL, account);
+        JSONArray alias = queryFactory.selectRows("ehr_billing_public", "aliases", filter);
+        if (alias.length() == 0)
+        {
+            return "Account " + account + " not found in aliases table, please enter a valid account.";
+        }
+        else
+        {
+            //cache this for later use
+            setAliasRow(alias);
+            return null;
+        }
+    }
+
+    public String verifyAccountWithProject(int project, String account)
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("project", CompareType.EQUAL, project);
+        JSONArray projects = queryFactory.selectRows("ehr", "project", filter);
+        if (projects.length() > 0)
+        {
+            String alias = projects.getJSONObject(0).get("account").toString();
+            if (null != alias && !alias.equals(account))
+            {
+                JSONObject aliasRow = getAliasRow().getJSONObject(0);
+                return account  + " / " + aliasRow.optString("investigatorname", aliasRow.optString("contact_name", "No contact listed")) ;
+            }
+            else
+            {
+                return null;
+            }
+        } else
+        {
+            return null;
+        }
+    }
     public boolean isDataAdmin(){return getContainer().hasPermission(getUser(), EHRDataAdminPermission.class);}
 
+    public String verifyProtocolCounts(final String id, Integer project, final List<Map<String, Object>> recordsInTransaction)
+    {
+        final String RHESUS_SPECIES = "Rhesus";
+        final String CYNOMOLGUS_SPECIES = "Cynomolgus";
+        final String MACAQUE_SPECIES = "Macaque";
+        final String ALL_SPECIES = "All Species";
+        if (id == null)
+        {
+            return null;
+        }
+
+        AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+        if (ar.getSpecies() == null)
+        {
+            return "Unknown species: " + id;
+        }
+
+        final String protocol = EHRService.get().getProtocolForProject(container, user, project);
+        if (protocol == null)
+        {
+            return "Unable to find protocol associated with project: " + project;
+        }
+
+        //find the total animals previously used by this protocols/species
+        TableInfo ti = QueryService.get().getUserSchema(user, container, "study").getTable("protocolTotalAnimalsBySpecies");
+        String animalSpecies = ar.getSpecies();
+        SimpleFilter filter;
+        if ((RHESUS_SPECIES.equals(animalSpecies) || CYNOMOLGUS_SPECIES.equals(animalSpecies)))
+        {
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, ALL_SPECIES, MACAQUE_SPECIES), CompareType.IN);
+        } else
+        {
+            filter = new SimpleFilter(FieldKey.fromString("species"), PageFlowUtil.set(animalSpecies, ALL_SPECIES), CompareType.IN);
+        }
+        filter.addCondition(FieldKey.fromString("protocol"), protocol);
+        TableSelector ts = new TableSelector(ti, filter, null);
+        final List<String> errors = new ArrayList<>();
+        final boolean[] noSpeciesListedOnProtocol = {true};
+        ts.forEach(new Selector.ForEachBlock<ResultSet>()
+        {
+            @Override
+            public void exec(ResultSet rs) throws SQLException
+            {
+                int totalAllowed = rs.getInt("allowed");
+                boolean totalAllowedNull = rs.wasNull();
+                String species = rs.getString("Species");
+                Set<String> animals = new CaseInsensitiveHashSet();
+                String animalString = rs.getString("Animals");
+                if (animalString != null)
+                {
+                    animals.addAll(Arrays.asList(StringUtils.split(animalString, ",")));
+                }
+
+                animals.add(id);
+
+                if (recordsInTransaction != null && recordsInTransaction.size() > 0)
+                {
+                    for (Map<String, Object> r : recordsInTransaction)
+                    {
+                        String id = (String)r.get("Id");
+                        Number project = (Number)r.get("project");
+                        if (id == null || project == null)
+                        {
+                            continue;
+                        }
+
+                        String rowProtocol = EHRService.get().getProtocolForProject(container, user, project.intValue());
+                        if (rowProtocol == null || !rowProtocol.equals(protocol))
+                        {
+                            continue;
+                        }
+                        AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
+
+                        //we don't want to exit the animal count if ar.species() is cyno or rhesus and the protocol's species value is macaque.
+                        if (!ALL_SPECIES.equals(species) && !(RHESUS_SPECIES.equals(ar.getSpecies()) || CYNOMOLGUS_SPECIES.equals(ar.getSpecies()) && MACAQUE_SPECIES.equals(species)))
+                        {
+                            //find species
+                            if (ar.getSpecies() == null || !species.equals(ar.getSpecies()))
+                            {
+                                continue;
+                            }
+                        }
+
+                        animals.add(id);
+                        if (ar.getSpecies().equals(species))
+                        {
+                            noSpeciesListedOnProtocol[0] = false;
+                        }
+                    }
+                }
+
+
+
+                int remaining = totalAllowed - animals.size();
+                if (remaining < 0)
+                {
+                    errors.add("There are not enough spaces on protocol: " + protocol + ". Allowed: " + (totalAllowedNull ? "none": totalAllowed) + ", used: " + animals.size());
+                }
+            }
+        });
+
+        if (noSpeciesListedOnProtocol[0])
+        {
+            errors.add("Species not allowed on protocol: " + protocol);
+        }
+
+        return StringUtils.join(errors, "<>");
+    }
 }

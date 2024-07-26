@@ -2,7 +2,6 @@ package org.labkey.wnprc_compliance;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiUsageException;
@@ -17,6 +16,7 @@ import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
@@ -26,8 +26,6 @@ import org.labkey.dbutils.api.SimplerFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,14 +72,13 @@ public class AccessReportService {
         // Check to make sure we haven't done this already.
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         SimpleFilter filter = new SimplerFilter("date", CompareType.DATE_EQUAL, generatedOn);
-        JSONObject[] existingRows = queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "access_reports", filter).toJSONObjectArray();
-        if (existingRows.length > 0) {
+        List<JSONObject> existingRows = JsonUtil.toJSONObjectList(queryFactory.selectRows(WNPRC_ComplianceSchema.NAME, "access_reports", filter));
+        if (!existingRows.isEmpty()) {
             throw new ApiUsageException("This report has already been uploaded.");
         }
 
-
-        Set<String> areaNames = new HashSet();
-        Map<String, Map<String, Object>> cardInfos = new HashMap<>();
+        Set<String> areaNames = new HashSet<>();
+        Map<String, JSONObject> cardInfos = new HashMap<>();
         List<Map<String, Object>> accessData = new ArrayList<>();
 
         Pattern areaNamePattern = Pattern.compile("[\\s\\x00A0]*area: (.*)");
@@ -155,9 +152,8 @@ public class AccessReportService {
                     accessInfoJSON.put("last_entered", accessInfo.getLastEntered());
                     accessInfoJSON.put("enabled", accessInfo.isEnabled());
 
-                    accessData.add(accessInfoJSON);
+                    accessData.add(accessInfoJSON.toMap());
                 }
-
             }
         }
 
@@ -175,15 +171,14 @@ public class AccessReportService {
                 JSONObject json = new JSONObject();
                 json.put("card_id", cardNumber);
                 json.put("container", container.getId());
-                cardsList.add(json);
+                cardsList.add(json.toMap());
             }
             cardsUpdater.upsert(cardsList);
 
             SimpleQueryUpdater dataUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "access_report_data");
             dataUpdater.upsert(accessData);
 
-            List<Map<String, Object>> cardInfoList = new ArrayList<>();
-            cardInfoList.addAll(cardInfos.values());
+            List<Map<String, Object>> cardInfoList = new ArrayList<>(cardInfos.values().stream().map(JSONObject::toMap).toList());
             SimpleQueryUpdater cardInfoUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "card_info");
             cardInfoUpdater.upsert(cardInfoList);
 

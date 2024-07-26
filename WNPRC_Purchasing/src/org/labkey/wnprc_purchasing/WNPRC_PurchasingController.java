@@ -18,6 +18,11 @@ package org.labkey.wnprc_purchasing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -56,6 +63,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.ActionURL;
@@ -66,9 +74,6 @@ import org.labkey.wnprc_purchasing.security.WNPRC_PurchasingDirectorRole;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -182,7 +187,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     public class GetFolderAdminsAction extends ReadOnlyApiAction
     {
         @Override
-        public Object execute(Object o, BindException errors) throws Exception
+        public Object execute(Object o, BindException errors)
         {
             Map<String, Object> resultProperties = new HashMap<>();
             List<User> folderAdmins = getFolderAdmins(); //this doesn't include site admins
@@ -203,8 +208,16 @@ public class WNPRC_PurchasingController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
+    @Marshal(Marshaller.Jackson)
     public class SubmitRequestAction extends MutatingApiAction<RequestForm>
     {
+        @Override
+        protected ObjectMapper createRequestObjectMapper()
+        {
+            // These incoming dates include T and Z
+            return JsonUtil.createDefaultMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+        }
+
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
@@ -364,7 +377,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                             message.setRecipient(Message.RecipientType.TO, new InternetAddress(endUser.getEmail()));
                             MailHelper.send(message, getUser(), getContainer());
                         }
-                        catch (javax.mail.internet.AddressException e)
+                        catch (AddressException e)
                         {
                             _log.error("Error sending line item update message to " + endUser.getEmail() , e);
                             throw new MessagingException(e.getMessage(), e);

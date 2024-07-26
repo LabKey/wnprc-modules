@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import produce, { Draft } from 'immer';
+import { Draft, produce} from 'immer';
 import { ActionURL, Filter, getServerContext } from '@labkey/api';
 import { Alert, LoadingSpinner } from '@labkey/components';
 
@@ -249,7 +249,7 @@ export const App: FC = memo(() => {
             setLineItems(lineItemArray);
             setIsDirty(true);
 
-            if (rowIdToDelete) {
+            if (rowIdToDelete && !isReorder) {
                 const updatedRowsToDelete = produce(lineItemRowsToDelete, (draft: Draft<number[]>) => {
                     draft.push(rowIdToDelete);
                 });

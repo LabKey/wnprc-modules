@@ -13,6 +13,7 @@ public class WNPRCAddRecordsButton extends SimpleButtonConfigFactory
         super(owner, "Add Records", "window.location = LABKEY.ActionURL.buildURL('wnprc_ehr','"+ schemaName + "')");
     }
 
+    @Override
     public boolean isAvailable(TableInfo ti)
     {
         return super.isAvailable(ti) && ti.hasPermission(ti.getUserSchema().getUser(), EHRInProgressInsertPermission.class);

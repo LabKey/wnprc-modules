@@ -1,0 +1,23 @@
+networks:
+  sharedservices:
+    external: true
+
+services:
+  perlscripts:
+    image: wnprcehr/ehrcron$PERL_PROD:$LK_VERSION${LK_FB}
+    depends_on:
+      - "labkey"
+    volumes:
+      - "${PERL_BACKUP_DIR}:/backups"
+      - "${PERL_PRIMATEFS_DIR}:/mnt/IT-Backups/"
+      - "${PG_DUMP_DIR}:/usr/local/postgresql/bin"
+    networks:
+      - network1
+    environment:
+      PERL_PG_NAME: "${PERL_PG_NAME}"
+      PERL_PG_USER: "${PERL_PG_USER}"
+      PERL_LINK_URL: "${PERL_LINK_URL}"
+      LK_BACKGROUND_USER:
+      LK_BACKGROUND_USER_PASSWORD:
+      LK_BASE_URL: "${LK_BASE_URL}"
+      TZ: America/Chicago

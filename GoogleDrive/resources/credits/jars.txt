@@ -1,5 +1,0 @@
-{table}
-Filename|Component|Version|Source|License|WNPRC Dev|Purpose
-google-api-client-1.23.0.jar|Google APIs Client Library for Java|1.23.0|{link:From GitHub|https://github.com/google/google-api-java-client}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Used to connect to Google Drive
-google-api-services-drive-v3-rev85-1.23.0.jar|Google Drive API Client Library for Java|v3 rev85 1.23.0|{link:From Google|https://developers.google.com/api-client-library/java/apis/drive/v3}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Used to connect to Google Drive
-{table}

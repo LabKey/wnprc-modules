@@ -12,6 +12,7 @@ import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.googledrive.api.GoogleDriveService;
@@ -83,11 +84,9 @@ public class GoogleDriveController extends SpringActionController {
     {
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
-            ObjectMapper mapper = new ObjectMapper();
             JSONObject object = (form.getJsonObject() == null) ? new JSONObject() : form.getJsonObject();
 
-
-            RegisterServiceAccountForm registerForm = mapper.readValue(object.toString(), RegisterServiceAccountForm.class);
+            RegisterServiceAccountForm registerForm = JsonUtil.DEFAULT_MAPPER.readValue(object.toString(), RegisterServiceAccountForm.class);
 
             String id = GoogleDriveService.get().registerServiceAccount(registerForm.getDisplayName(), registerForm, getUser());
             JSONObject json = new JSONObject();

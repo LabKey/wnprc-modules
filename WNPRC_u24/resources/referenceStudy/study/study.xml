@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<study archiveVersion="11.31" label="wnprc_u24" timepointType="CONTINUOUS" subjectNounSingular="Animal" subjectNounPlural="Animals" subjectColumnName="AnimalId" description="" descriptionRendererType="TEXT_WITH_LINKS" investigator="" grant="" startDate="1990-01-01-06:00" securityType="ADVANCED_WRITE" xmlns="http://labkey.org/study/xml">
+  <qcStates showPrivateDataByDefault="true"/>
+  <datasets dir="datasets" file="datasets_manifest.xml">
+    <definition file="wnprc_u24.dataset"/>
+  </datasets>
+</study>

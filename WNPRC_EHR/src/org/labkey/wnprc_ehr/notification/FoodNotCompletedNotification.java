@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.notification;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -10,7 +11,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
-import javax.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -23,7 +24,7 @@ import static java.lang.Math.toIntExact;
 
 public class FoodNotCompletedNotification extends AbstractEHRNotification
 {
-    protected String cronString = "0 0/60 6-21 * * ?";
+    protected String cronString = "0 0 6-21 * * ?";
 
 
     public FoodNotCompletedNotification(Module owner){

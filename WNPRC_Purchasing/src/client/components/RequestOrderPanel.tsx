@@ -1,7 +1,7 @@
 import React, {FC, memo, useCallback, useEffect, useState} from 'react';
 import { Form, Panel, Row, Col } from 'react-bootstrap';
 
-import produce, { Draft } from 'immer';
+import { produce, Draft } from 'immer';
 
 import { RequestOrderModel, VendorModel } from '../model';
 
@@ -69,7 +69,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
             {/* Read only - for the Requesters and Receivers */}
             { (hasRequestId && (isReceiver || (!isReorder && isRequester))) && (
                 <Panel
-                    className="panel panel-default"
+                    className={'panel panel-default domain-form-panel'}
                     expanded={true}
                     onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
                 >
@@ -135,7 +135,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
             {/* For the Admins for new and old requests; and for the Requesters for new requests */}
             { (isAdmin || (!hasRequestId && isRequester) || (hasRequestId && isReorder && isRequester)) && (
                 <Panel
-                    className="panel panel-default"
+                    className="panel panel-default domain-form-panel"
                     expanded={true}
                     onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
                 >

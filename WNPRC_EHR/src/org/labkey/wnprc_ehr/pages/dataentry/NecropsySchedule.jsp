@@ -38,14 +38,14 @@
     String defaultAssignedUserID = "";
     String defaultAssignedDisplayName = "";
     if (defaultGroup.length() == 1) {
-        defaultAssignedUserID = defaultGroup.getJSONObject(0).getString("userid");
+        defaultAssignedUserID = String.valueOf(defaultGroup.getJSONObject(0).getInt("userid"));
         defaultAssignedDisplayName = defaultGroup.getJSONObject(0).getString("displayname");
     }
 
     JSONObject necropsySuiteLookup = new JSONObject();
     List<JSONObject> necropsySuites = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "necropsy_suite"));
     for (JSONObject json : necropsySuites) {
-        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json.toMap());
         JSONObject suiteInfo = new JSONObject();
 
         if (map.get("display_color") != null) {
@@ -247,9 +247,9 @@
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
                                         String userid = pathologist.getString("userid");
-                                        String internaluserid = pathologist.getString("internaluserid");
+                                        int internaluserid = pathologist.getInt("internaluserid");
                                 %>
-                                <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
+                                <option value="<%=internaluserid%>"><%=h(userid)%></option>
                                 <%
                                     }
                                 %>
@@ -265,9 +265,9 @@
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
                                         String userid = pathologist.getString("userid");
-                                        String internaluserid = pathologist.getString("internaluserid");
+                                        int internaluserid = pathologist.getInt("internaluserid");
                                 %>
-                                <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
+                                <option value="<%=internaluserid%>"><%=h(userid)%></option>
                                 <%
                                     }
                                 %>

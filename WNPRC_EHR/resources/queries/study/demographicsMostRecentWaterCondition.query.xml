@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="demographicsMostRecentWaterCondition" tableDbType="TABLE" useColumnOrder="true">
+            <table tableName="demographicsMostRecentWaterCondition" tableDbType="NOT_IN_DB" useColumnOrder="true">
                 <tableUrl />
                 <insertUrl />
                 <importUrl />
@@ -12,17 +12,17 @@
 
                     </column>
                     <column columnName="mostRecentWaterConditionDate">
-                        <columntitle>Start Date</columntitle>
+                        <columnTitle>Start Date Water Condition</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
                    
                     <column columnName="mostRecentWaterCondition">
-                        <columnTitle>Condition</columnTitle>
+                        <columnTitle>Water Condition</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
             </columns>

@@ -17,16 +17,19 @@
     "tsx"
   ],
   "dependencies": {
-    "@labkey/components": "2.146.0",
-    "@labkey/api": "1.10.0"
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@labkey/api": "1.27.0",
+    "@labkey/components": "2.390.4",
+    "font-awesome": "~4.7.0",
+    "immer": "~10.0.3",
+    "immutable": "~4.3.4",
+    "react-bootstrap": "~0.33.1"
   },
   "devDependencies": {
-    "@labkey/build": "6.0.0",
-    "react-bootstrap": "0.33.1",
-    "immer": "9.0.6",
-    "immutable": "3.8.2",
-    "font-awesome": "4.7.0",
-    "@labkey/eslint-config-base": "0.0.8",
-    "@labkey/eslint-config-react": "0.0.8"
+    "@labkey/build": "6.16.1",
+    "@labkey/eslint-config-base": "0.0.12",
+    "@labkey/eslint-config-react": "0.0.12"
   }
 }

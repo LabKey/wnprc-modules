@@ -103,7 +103,7 @@
     </div>
 </div>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var form = {
             displayName: ko.observable(''),

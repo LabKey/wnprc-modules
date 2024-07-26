@@ -1869,7 +1869,7 @@ EHR.ext.BloodSelectorPanel = Ext.extend(Ext.Panel, {
         LABKEY.Query.selectRows({
             schemaName: 'study',
             queryName: 'BloodSchedule',
-            sort: 'Id/curLocation/Room,Id',
+            sort: 'Id/curLocation/location,Id',
             columns: 'lsid,Id,date',
             filterArray: filterArray,
             scope: this,
@@ -2265,7 +2265,7 @@ EHR.ext.AssignmentAbstractPanel = Ext.extend(EHR.ext.AbstractPanel, {
                 timeout: 0,
                 linkTarget: '_blank',
                 renderTo: this.placeForQwp.body.id,
-                schemaName: 'ehr',
+                schemaName: 'study',
                 queryName: 'protocolTotalAnimalsBySpecies',
                 //viewName: 'With Animals',
                 scope: this,

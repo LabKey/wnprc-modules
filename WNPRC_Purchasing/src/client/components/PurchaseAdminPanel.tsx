@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, useState } from 'react';
 import { Form, Panel, Row, Col } from 'react-bootstrap';
 
-import produce, { Draft } from 'immer';
+import { produce, Draft } from 'immer';
 
 import { PurchaseAdminModel } from '../model';
 
@@ -38,7 +38,7 @@ export const PurchaseAdminPanel: FC<Props> = memo(props => {
 
     return (
         <Panel
-            className="panel panel-default"
+            className={'panel panel-default domain-form-panel'}
             expanded={true}
             onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
         >

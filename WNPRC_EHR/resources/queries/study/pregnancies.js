@@ -1,7 +1,14 @@
-var console = require('console');
 require("ehr/triggers").initScript(this);
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
+function onInit(event, helper){
+    helper.setScriptOptions({
+        allowAnyId: true,
+        allowDeadIds: true,
+        skipIdFormatCheck: true,
+        allowDatesInDistantPast: true
+    });
+}
 function onUpsert(helper, scriptErrors, row, oldRow){
 
     //validate that the dam is female
@@ -14,14 +21,13 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     //validate that the sire is male
     if (row.sireid) {
         //validate that the sire(s) are male, alive, and not duplicated
-        //also strip any non alphanumeric characters and separate sire ids by a comma
         if (row.sireid) {
-            row.sireid = row.sireid.replace(/[^A-Za-z0-9]+/g, ',');
+            row.sireid = row.sireid.replace(/\s+/g, '');
             let ids = row.sireid.split(',');
             let duplicateCount = [];
 
             for (let i = 0; i < ids.length; i++) {
-                let id = ids[i];
+                let id = ids[i].trim();
                 EHR.Server.Utils.findDemographics({
                     participant: id,
                     helper: helper,
@@ -32,7 +38,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                                 EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not male', 'ERROR');
                             }
                             if (data['calculated_status'] && data.calculated_status !== 'Alive'){
-                                EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not alive', 'ERROR');
+                                EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not alive', 'INFO');
                             }
                         }
                     }

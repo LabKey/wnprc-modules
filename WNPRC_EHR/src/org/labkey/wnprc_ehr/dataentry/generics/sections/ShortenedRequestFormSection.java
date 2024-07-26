@@ -7,16 +7,19 @@ import org.labkey.api.ehr.dataentry.RequestFormSection;
 /**
  * Created by jon on 3/15/16.
  */
-public class ShortenedRequestFormSection extends RequestFormSection {
+public class ShortenedRequestFormSection extends RequestFormSection
+{
     protected Integer maxItemsPerColumn = 3;
 
     @Override
-    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements) {
+    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements)
+    {
         JSONObject ret = super.toJSON(ctx, includeFormElements);
 
-        if ( maxItemsPerColumn != null ) {
+        if ( maxItemsPerColumn != null )
+        {
             // Make the form appear in two columns
-            JSONObject formConfig = new JSONObject(ret.get("formConfig"));
+            JSONObject formConfig = new JSONObject(ret.get("formConfig").toString());
             formConfig.put("maxItemsPerCol", maxItemsPerColumn);
             ret.put("formConfig", formConfig);
         }

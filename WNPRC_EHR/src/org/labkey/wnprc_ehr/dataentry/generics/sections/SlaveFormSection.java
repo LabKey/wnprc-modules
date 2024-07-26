@@ -9,19 +9,23 @@ import java.util.Set;
 /**
  * Created by jon on 4/13/16.
  */
-abstract public class SlaveFormSection extends SimpleFormSection {
-    public SlaveFormSection(String schemaName, String queryName, String label) {
+abstract public class SlaveFormSection extends SimpleFormSection
+{
+    public SlaveFormSection(String schemaName, String queryName, String label)
+    {
         super(schemaName, queryName, label);
 
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore");
     }
 
     @Override
-    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements) {
+    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements)
+    {
         JSONObject json = super.toJSON(ctx, includeFormElements);
 
         JSONArray slaveFields = new JSONArray();
-        for(String field : getSlaveFields()) {
+        for (String field : getSlaveFields())
+        {
             slaveFields.put(field);
         }
         json.put("slaveFieldsToInclude", slaveFields);

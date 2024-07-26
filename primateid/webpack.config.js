@@ -1,7 +1,8 @@
 const path = require('path');
 module.exports = function wp(env) {
     const base = {
-        entry: './src/ts/primateid.ts',
+        entry: './src/client/primateid.ts',
+        target: ['web', 'es5'],
         externals: {
             console: 'console',
         },
@@ -13,7 +14,9 @@ module.exports = function wp(env) {
         },
         output: {
             filename: 'primateid.webpack.js',
-            library: 'PrimateID',
+            library: {
+                name: 'PrimateID',
+            },
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.json'],
@@ -24,7 +27,10 @@ module.exports = function wp(env) {
             ...base,
             output: {
                 ...base.output,
-                libraryTarget: 'commonjs',
+                library: {
+                    name: 'PrimateID',
+                    type: 'commonjs',
+                },
                 path: path.resolve(__dirname, `resources/scripts/primateid/gen`)
             }
         },
@@ -32,7 +38,10 @@ module.exports = function wp(env) {
             ...base,
             output: {
                 ...base.output,
-                libraryTarget: 'var',
+                library: {
+                    name: 'PrimateID',
+                    type: 'var',
+                },
                 path: path.resolve(__dirname, `resources/web/primateid/gen`)
             }
         },

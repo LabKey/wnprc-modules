@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 
 import java.util.ArrayList;
@@ -32,13 +33,13 @@ public class HousingBCReport extends BusinessContinuityExcelReport {
     @Override
     public void populateWorkbook() {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
-        List<JSONObject> housings = Arrays.asList(queryFactory.selectRows("wnprc", "BCHousing").toJSONObjectArray());
+        List<JSONObject> housings = JsonUtil.toJSONObjectList(queryFactory.selectRows("wnprc", "BCHousing"));
 
         List<String> columns = Arrays.asList("Id", "Medical","viralStatus", "Weight" , "Room", "Cage", "Condition", "Remark");
 
         Map<String, List<CaseInsensitiveMapWrapper>> areas = new HashMap<>();
         for (JSONObject housing : housings) {
-            CaseInsensitiveMapWrapper caseInsensitiveMap = new CaseInsensitiveMapWrapper<Object>(housing);
+            CaseInsensitiveMapWrapper caseInsensitiveMap = new CaseInsensitiveMapWrapper<Object>(housing.toMap());
             String area = (String) caseInsensitiveMap.get("Area");
 
             // There really shouldn't be any null areas

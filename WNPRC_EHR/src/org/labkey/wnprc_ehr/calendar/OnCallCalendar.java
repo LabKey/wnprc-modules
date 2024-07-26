@@ -59,14 +59,16 @@ public class OnCallCalendar extends GoogleCalendar
         String calendarName = events.getSummary();
         List<Event> items = events.getItems();
 
-        for (int i = 0; i < items.size(); i++) {
-            Event event = items.get(i);
-            if (event.getStart().getDate() != null && event.getStart().getDate().isDateOnly()) {
+        for (Event event : items)
+        {
+            if (event.getStart().getDate() != null && event.getStart().getDate().isDateOnly())
+            {
                 LocalDate startDate = LocalDate.ofInstant(Instant.ofEpochMilli(event.getStart().getDate().getValue()), ZoneId.of("UTC"));
                 LocalDate endDate = LocalDate.ofInstant(Instant.ofEpochMilli(event.getEnd().getDate().getValue()), ZoneId.of("UTC"));
                 long daysBetween = DAYS.between(startDate, endDate);
 
-                for (int j = 0; j < daysBetween; j++) {
+                for (int j = 0; j < daysBetween; j++)
+                {
 
                     JSONObject jsonEvent = new JSONObject();
                     jsonEvent.put("title", event.getSummary());
@@ -77,12 +79,15 @@ public class OnCallCalendar extends GoogleCalendar
 
                     jsonEvents.put(jsonEvent);
                 }
-            } else {
+            }
+            else
+            {
                 LocalDate startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getStart().getDateTime().getValue()), ZoneId.systemDefault()).toLocalDate();
                 LocalDate endDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getEnd().getDateTime().getValue()), ZoneId.systemDefault()).toLocalDate();
                 long daysBetween = DAYS.between(startDate, endDate);
 
-                for (int j = 0; j <= daysBetween; j++) {
+                for (int j = 0; j <= daysBetween; j++)
+                {
                     JSONObject jsonEvent = new JSONObject();
                     jsonEvent.put("title", event.getSummary());
                     jsonEvent.put("description", event.getDescription());

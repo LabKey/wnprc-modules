@@ -1,5 +1,6 @@
 name	groupName	chargeableItemStartDate	chargeableItemEndDate	category	active	comment	unitCost	genCredits	chargeRateStartDate	chargeRateEndDate	allowBlankId
 Blood draws	Business Office	1/1/2005	12/31/2050	Blood Draws	true	This is a comment 2	10.0	true	1/1/2009	12/31/2040	true
+Blood Draws	Scientific Protocol Implementation	1/1/2004	12/31/2050	Blood Draws	true	This is a comment 2	20.0	true	1/1/2009	12/31/2040	true
 Blood draws - Additional Tubes	Business Office	1/1/2005	12/31/2050	Blood Draws	true		0.5	true	1/1/2009	1/1/2045	true
 Per diems	Business Office	1/1/2005	12/31/2050	Animal Per Diem	true		20.0	true	1/1/2007	5/1/2045	false
 Medicine A per dose	Veterinary Services	1/1/2005	12/31/2050	Misc. Fees	true		20.75	true	1/1/2007	12/31/2045	false

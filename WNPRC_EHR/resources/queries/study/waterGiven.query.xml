@@ -14,8 +14,23 @@
                     <column columnName="date">
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
+                    <column columnName="Id/curLocation/room">
+                        <columnTitle>Room</columnTitle>
+                    </column>
+                    <column columnName="Id/curLocation/cage">
+                        <columnTitle>Cage</columnTitle>
+                    </column>
                     <column columnName="dateOrdered">
                         <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="assignedto">
+                        <columnTitle>Assigned To</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_assigned</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+
                     </column>
                     <column columnName="performedby">
                         <columnTitle>Performed By</columnTitle>
@@ -42,7 +57,7 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="location">
@@ -60,15 +75,6 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>routes</fkTable>
                             <fkColumnName>route</fkColumnName>
-                        </fk>
-
-                    </column>
-                    <column columnName="assignedto">
-                        <columnTitle>Assigned To</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>husbandry_assigned</fkTable>
-                            <fkColumnName>value</fkColumnName>
                         </fk>
 
                     </column>

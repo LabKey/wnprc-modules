@@ -1,5 +1,0 @@
-{table}
-Filename|Component|Version|Source|License|Dev|Purpose
-jooq-3.8.4.jar|jOOQ|3.8.4|{link:From GitHub|https://github.com/jOOQ/jOOQ}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Database-mapping for Java
-jaxb-api-2.3.0.jar|Java Architecture for XML Binding (JAXB)|2.3.0|Oracle|{link:CDDL|https://oss.oracle.com/licenses/CDDL}|klum|Parsing XML
-{table}

@@ -77,8 +77,16 @@ public class DecoratedTableInfo implements TableInfo {
 
     @Nullable
     @Override
-    public String getSelectName() {
+    public String getSelectName()
+    {
         return _tableInfo.getSelectName();
+    }
+
+    @Nullable
+    @Override
+    public SQLFragment getSQLName()
+    {
+        return _tableInfo.getSQLName();
     }
 
     @Nullable
@@ -381,8 +389,8 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public void fireRowTrigger(Container c, User u, TriggerType type, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext) throws ValidationException {
-        _tableInfo.fireRowTrigger(c, u, type, before, rowNumber, newRow, oldRow, extraContext);
+    public void fireRowTrigger(Container c, User u, TriggerType type, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext, @Nullable Map<String, Object> existingRecord) throws ValidationException {
+        _tableInfo.fireRowTrigger(c, u, type, before, rowNumber, newRow, oldRow, extraContext, existingRecord);
     }
 
     @Override

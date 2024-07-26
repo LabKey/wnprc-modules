@@ -1,3 +1,3 @@
 module.exports = new XPages.BasePage({
-    relativeURL: 'project/WNPRC/EHR/begin.view?'
+    relativeURL: 'WNPRC/EHR/project-begin.view'
 });

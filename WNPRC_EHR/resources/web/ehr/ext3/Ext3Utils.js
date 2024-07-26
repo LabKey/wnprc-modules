@@ -322,6 +322,46 @@ EHR.Ext3Utils = new function(){
             });
 
             return new EHR.ext.ImportPanel.TaskDetailsPanel(panelCfg);
+        },
+
+        //this looks into an ext3 config.store obj for a specified error field config.errorField
+        //expects a config obj with 2 props:
+        // (1) "store" which is an ext3 store obj,
+        // (2) "errorField" which is a string that specifies which field to report
+        // then returns animal ids and the error msg.
+        getBloodLimitErrorMsg: function (config) {
+            let errorToDisplay = "";
+            let count = 0;
+            for (let i = 0; i < config.store.errors.getCount(); i++){
+                const theError = config.store.errors.get(i);
+                if (theError.field === config.errorField) {
+                    count++;
+                    errorToDisplay = errorToDisplay + theError.record.data.Id + "'s " + theError.message + " "
+                }
+            }
+            if (count === 0) {
+                return "";
+            } else {
+                return errorToDisplay;
+            }
+        },
+
+        getAccountErrorMsg: function (config) {
+            let errorToDisplay = "The following records have updated account fields, and will charge to the corresponding account / contact person:" + "<br>";
+            let count = 0;
+            for (let i = 0; i < config.store.errors.getCount(); i++){
+                const theError = config.store.errors.get(i);
+                if (theError.field === config.errorField) {
+                    count++;
+                    errorToDisplay = errorToDisplay + theError.record.data.Id + ": " + theError.message + "</br>"
+                }
+            }
+            if (count === 0) {
+                return "";
+            } else {
+                return errorToDisplay;
+            }
+
         }
     }
 }

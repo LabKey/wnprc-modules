@@ -84,7 +84,7 @@
 </div>
 
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var biopsies = <%=unsafe(biopsies.toString())%>;
         var necropsies = <%=unsafe(necropsies.toString())%>;

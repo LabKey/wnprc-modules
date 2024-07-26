@@ -29,14 +29,15 @@ import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.TruncateTableCommand;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.Pages.CreateRequestPage;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
-import org.labkey.test.componenes.CreateVendorDialog;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.components.html.SiteNavBar;
+import org.labkey.test.components.wnprc_purchasing.CreateVendorDialog;
+import org.labkey.test.pages.wnprc_purchasing.CreateRequestPage;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
 import org.labkey.test.util.ApiPermissionsHelper;
@@ -173,26 +174,25 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         selectQuery("ehr_billing", "aliases");
         clickAndWait(Locator.linkWithText("create definition"), 5000);
 
-        Locator.XPathLocator manuallyDefineFieldsLoc = Locator.tagWithClass("div", "domain-form-manual-btn");
-        click(manuallyDefineFieldsLoc);
-        setFormElement(Locator.inputByNameContaining("domainpropertiesrow-name"), extensibleCol);
+        DomainFormPanel domainFormPanel = new DomainFormPanel.DomainFormPanelFinder(getDriver()).find();
+        domainFormPanel.manuallyDefineFields(extensibleCol);
         clickButton("Save");
     }
 
     private void createUsersAndGroups()
     {
         log("Create a purchasing admin user");
-        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
+        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId();
 
         log("Create a purchasing requester users");
-        _requesterUserId1 = _userHelper.createUser(REQUESTER_USER_1).getUserId().intValue();
-        _requesterUserId2 = _userHelper.createUser(REQUESTER_USER_2).getUserId().intValue();
+        _requesterUserId1 = _userHelper.createUser(REQUESTER_USER_1).getUserId();
+        _requesterUserId2 = _userHelper.createUser(REQUESTER_USER_2).getUserId();
 
         log("Create a purchasing receiver user");
-        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId().intValue();
+        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId();
 
         log("Create a purchasing director user");
-        _directorUserId = _userHelper.createUser(PURCHASE_DIRECTOR_USER).getUserId().intValue();
+        _directorUserId = _userHelper.createUser(PURCHASE_DIRECTOR_USER).getUserId();
 
         log("Create a purchasing groups");
         _adminGroupId = _permissionsHelper.createPermissionsGroup(PURCHASE_ADMIN_GROUP);
@@ -477,7 +477,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry", Maps.of("requestRowId", requestID)));
         log("Impersonate as " + REQUESTER_USER_2);
         impersonate(REQUESTER_USER_2);
-        assertTextPresent("You do not have sufficient permissions to update this request.");
+        waitForText("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }
 
@@ -687,7 +687,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         waitAndClickAndWait(Locator.linkWithText("All Requests"));
 
         table = new DataRegionTable("query", getDriver());
-        table.setFilter("requestNum", "Equals One Of (example usage: a;b;c)", requestId1 + ";" + requestId2);
+        table.setFilter("requestNum", "Equals One Of", requestId1 + ";" + requestId2);
         assertEquals("Incorrect order status", Arrays.asList("Order Received", "Order Received"), table.getColumnDataAsText("requestStatus"));
     }
 
@@ -861,7 +861,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Verify quantity received email notif");
         goToReceiverPage();
         impersonate(RECEIVER_USER);
-        clickAndWait(Locator.linkWithText(requestId));
+        waitAndClickAndWait(Locator.linkWithText(requestId));
         requestPage = new CreateRequestPage(getDriver());
         requestPage.setQuantityReceived("15").submit();
         stopImpersonating();

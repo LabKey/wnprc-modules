@@ -116,6 +116,12 @@ EHR.model.DataModelManager.registerMetadata('NecropsyRequest', {
             },
             prosector: {
                 hidden: false
+            },
+            perfusion_soln1: {
+                hidden: false
+            },
+            perfusion_soln2:{
+                hidden: false
             }
         },
         'study.organ_weights': {

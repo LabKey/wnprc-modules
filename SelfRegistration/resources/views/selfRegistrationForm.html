@@ -1,0 +1,226 @@
+<style>
+    select {
+        font-size: 14px;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        background: transparent;
+        height: 100%;
+        width: 100%;
+        cursor: pointer;
+        outline: none;
+        padding-right: 35px;
+        border: 1px solid rgb(166, 166, 166);
+        border-radius: 1px;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        background: url(/_images/arrow_down.png) right no-repeat !important;
+        text-transform: Capitalize !important;
+        margin-top: 5px;
+        padding: 7px 8px;
+    }
+</style>
+
+
+<div class="registration-form-container">
+
+    <div class="labkey-error" id="errors"></div>
+
+    <div id="form-info">Please fill out the form to create an account on this server. All fields are required.</div>
+    <div id="registration-content" class="auth-form-body">
+        <form class="register-form" name="register" action="javascript:void(0)">
+
+            <label for="firstname">First name</label>
+            <input id="firstname" name="firstname" type="text" class="input-block i-am-an-input-field" autofocus required>
+
+            <label for="lastname">Last name</label>
+            <input id="lastname" name="lastname" type="text" class="input-block i-am-an-input-field" autofocus required>
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="text" class="input-block i-am-an-input-field" autofocus required>
+            <label for="emailConfirmation">
+                Email (verify)
+            </label>
+            <input id="emailConfirmation" name="emailConfirmation" type="text" class="input-block i-am-an-input-field">
+
+            <label for="institution">Institution</label>
+            <input id="institution" name="institution" type="text" class="input-block i-am-an-input-field" autofocus required>
+
+            <label for="projectlist">Project</label><br>
+            <select class="input-block i-am-an-input-field" id="projectlist" style="width:350px">
+                <option></option>
+            </select>
+
+            <label for="reason">Reason (max 200 characters)</label>
+            <textarea id="reason" name="reason" type="textarea" class="input-block i-am-an-input-field"  autofocus required style="width:350px; height:100px" maxlength="200"></textarea>
+
+            <div>To help protect against abuse by bots, please enter the six characters shown below (case-insensitive).<br>
+                <a href="javascript: window.location.reload()">Reload the page to get a new image.</a></div>
+            <img id="kaptcha-img" src="/kaptcha.jpg" alt="Verification text" title="Verification text" height="50" />
+            <input id="kaptchaText" name="kaptchaText" type="text" class="input-block i-am-an-input-field" autofocus required>
+
+            <div>
+                <input type="button" id="register-submit-button" class="register-submit-button"/><a class="labkey-button primary register-btn"><span>Register</span></a>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript" nonce="<%=scriptNonce%>">
+
+        LIST_VALUES = {}
+
+        function onReady() {
+            let contextPath = LABKEY.ActionURL.getContextPath();
+            $("#kaptcha-img").attr("src", contextPath + "/kaptcha.jpg");
+            LABKEY.requiresCss("/login.css");
+            getProjectList();
+            $('.register-btn').on('click', function(e){
+                e.preventDefault();
+                $('#form-info').remove();
+            })
+            $('.register-btn').click(registerUser);
+            //$('.register-btn').click(populateList);
+            $('.i-am-an-input-field').on('keypress', function(e){
+                if (e.keyCode == 13){
+                    $('.register-btn').trigger('click');
+                }
+            })
+        }
+
+        function getProjectList(){
+            LABKEY.Query.selectRows({
+                schemaName: 'lists',
+                queryName: 'projectlist',
+                success: function (data) {
+                    console.log(data);
+                    //populate the project list
+                    for (var i = 0; i < data.rows.length; i++){
+                        $('#projectlist').append($('<option/>', {
+                            value: data.rows[i].Key,
+                            text : data.rows[i].project
+                        }));
+                    }
+                    console.log('got the list!');
+                },
+                failure: function () {
+
+                }
+            })
+        }
+
+        function populateList(){
+
+            let formData = new FormData();
+            let issues = [];
+            const assignedTo = 0;
+            const issueDefName = "userregistrations"
+            const containerPath = "/Private";
+
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('selfregistration', 'updateSelfRegistrationList.api', this.containerPath),
+                method: 'POST',
+                params: {
+                    hostname : window.location.origin,
+                    containerPath: containerPath,
+                    issueDefName : issueDefName,
+                    assignedTo  : assignedTo,
+                    title       : LIST_VALUES.title,
+                    firstname   : LIST_VALUES.firstname,
+                    lastname    : LIST_VALUES.lastname,
+                    email   : LIST_VALUES.email,
+                    institution : LIST_VALUES.institution,
+                    project: LIST_VALUES.project,
+                    reason : LIST_VALUES.reason
+                },
+                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    //console.log(response)
+                }, this),
+                failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    alert("Account was created but unable to notify admins. Please contact ehrservices@g-groups.wisc.edu.");
+                }, this)
+            });
+        }
+
+        function isEmail(email) {
+            let regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            return regex.test(email);
+        }
+
+        function registerUser() {
+            let email = document.getElementById('email').value;
+            LIST_VALUES.status = 'open';
+            LIST_VALUES.firstname = document.getElementById('firstname').value;
+            LIST_VALUES.lastname = document.getElementById('lastname').value;
+            LIST_VALUES.email = email;
+            LIST_VALUES.institution = document.getElementById('institution').value;
+            LIST_VALUES.project = document.getElementById('projectlist').value;
+            LIST_VALUES.reason = document.getElementById('reason').value;
+            LIST_VALUES.title = 'Account created for ' + LIST_VALUES.firstname + ' ' + LIST_VALUES.lastname;
+
+            //short circuit and tell user to fill in required field
+            let missingInput = false;
+            let missingInputKey = '';
+            $('.register-form *').filter('.i-am-an-input-field').each(function(){
+                if (missingInput){
+                    return;
+                }
+                if ($(this).val() === '' && $(this).attr('id') != 'register-submit-button' ){
+                    missingInput = true;
+                    missingInputKey = $(this).attr('id');
+                }
+            });
+
+            if (missingInput) {
+                $('#'+missingInputKey).focus();
+                document.getElementById('errors').innerHTML = "Please fill in all required fields.";
+                return;
+            }
+
+            if (!isEmail(email)){
+                $('#email').focus();
+                document.getElementById('errors').innerHTML = "Please enter a valid email.";
+                return;
+            }
+
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('login', 'registerUser.api', "/"),
+                method: 'POST',
+                params: {
+                    email: email,
+                    emailConfirmation: document.getElementById('emailConfirmation').value,
+                    //returnUrl: LABKEY.ActionURL.getParameter("returnUrl"),
+                    skipProfile: LABKEY.ActionURL.getParameter("skipProfile") || 0,
+                    'X-LABKEY-CSRF': document.getElementById('X-LABKEY-CSRF'),
+                    kaptchaText: document.getElementById('kaptchaText').value
+                },
+                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    if (response.email)
+                    {
+                        document.getElementById('errors').innerHTML = "";
+                        document.getElementsByClassName('labkey-wp-title-text').innerHTML = "Confirm your email address";
+                        document.getElementById('registration-content').innerHTML =
+                                "Thank you for signing up! A verification email has been sent to " +
+                                "<b>" + LABKEY.Utils.encodeHtml(response.email) + "</b>" +
+                                ".  Please check your inbox to confirm your email address and complete your account setup." +
+                                " After your account is reviewed, you should have access to the respective datasets." +
+                                " Please contact WNPRC ITSS " + '(<a href="mailto:itss@primate.wisc.edu">itss@primate.wisc.edu</a>)' +  " if you encounter issues with your account.";
+                        populateList();
+                    }
+                    else
+                    {
+                        document.getElementById('errors').innerHTML = "Unknown error in creating account or sending email.  Please contact ehrservices@g-groups.wisc.edu.";
+                    }
+                }, this),
+                failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    //alert(JSON.stringify(response))
+                    if(document.getElementById('errors') && response && response.exception) {
+                        document.getElementById('errors').innerHTML = response.exception;
+                    }
+                }, this)
+            });
+
+        }
+
+        $(onReady);
+
+    </script>

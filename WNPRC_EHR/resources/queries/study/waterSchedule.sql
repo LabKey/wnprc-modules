@@ -6,7 +6,7 @@
 
 SELECT
 d.id AS animalId,
-d.calculated_status,
+d.calculated_status AS calculated_status,
 s.*,
 s.objectid as treatmentid,
 --(SELECT max(d.qcstate) as label FROM study.drug d WHERE s.objectid = d.treatmentid AND s.date = d.timeordered) as treatmentStatus,
@@ -49,6 +49,7 @@ JOIN (
 
           dr.date as origDate,
           t1.created AS created,
+          t1.id.curLocation.location as location,
           t1.id.curLocation.area as area,
           t1.id.curLocation.room as room,
           t1.id.curLocation.cage as cage,

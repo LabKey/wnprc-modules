@@ -4,8 +4,7 @@
 package org.labkey.deviceproxy.model.jooq;
 
 
-import javax.annotation.Generated;
-
+import jakarta.annotation.Generated;
 import org.jooq.ForeignKey;
 import org.jooq.UniqueKey;
 import org.jooq.impl.AbstractKeys;

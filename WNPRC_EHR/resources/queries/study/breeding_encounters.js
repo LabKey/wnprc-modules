@@ -1,5 +1,13 @@
 require("ehr/triggers").initScript(this);
 
+function onInit(event, helper){
+    helper.setScriptOptions({
+        allowAnyId: true,
+        allowDeadIds: true,
+        skipIdFormatCheck: true,
+        allowDatesInDistantPast: true
+    });
+}
 function onUpsert(helper, scriptErrors, row, oldRow){
 
     //validate that the dam is female and alive
@@ -13,7 +21,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             callback: function (data) {
                 if (data) {
                     if (data['calculated_status'] && data['calculated_status'] !== 'Alive'){
-                        EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + row.Id + ') is not alive', 'ERROR');
+                        EHR.Server.Utils.addError(scriptErrors, 'id', 'This animal (' + row.Id + ') is not alive', 'INFO');
                     }
                 }
             }
@@ -28,14 +36,13 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
     //validate that the sire(s) are male, alive, and not duplicated
-    //also strip any non alphanumeric characters and separate sire ids by a comma
     if (row.sireid) {
-        row.sireid = row.sireid.replace(/[^A-Za-z0-9]+/g, ',');
+        row.sireid = row.sireid.replace(/\s+/g, '');
         let ids = row.sireid.split(',');
         let duplicateCount = [];
 
         for (let i = 0; i < ids.length; i++) {
-            let id = ids[i];
+            let id = ids[i].trim();
             EHR.Server.Utils.findDemographics({
                 participant: id,
                 helper: helper,
@@ -46,7 +53,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                             EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not male', 'ERROR');
                         }
                         if (data['calculated_status'] && data.calculated_status !== 'Alive'){
-                            EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not alive', 'ERROR');
+                            EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal (' + id + ') is not alive', 'INFO');
                         }
                     }
                 }

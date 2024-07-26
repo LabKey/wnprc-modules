@@ -16,9 +16,16 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    //updates the project field if its an actual project
-    if (!isNaN(row.optionalproject)){
-        row.project = row.optionalproject
+
+    //only do this operation for an insert (oldRow is blank)
+    if (typeof(oldRow) == 'undefined') {
+        if (!!row.optionalproject && typeof(row.project) == 'undefined'){
+            //if the optional project is something other than a number (TBD) then we need to leave project blank
+            // because the ehr triggers.js requires it to be a number.
+            if (!isNaN(row.optionalproject)){
+                row.project = row.optionalproject
+            }
+        }
     }
 
     //sanity checks for date fields

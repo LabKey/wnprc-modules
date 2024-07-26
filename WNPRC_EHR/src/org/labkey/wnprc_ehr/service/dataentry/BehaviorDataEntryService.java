@@ -11,6 +11,7 @@ import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
@@ -99,14 +100,14 @@ public class BehaviorDataEntryService extends SecurityEscalatedService
 
         List<Map<String, Object>> rowsToUpdate = new ArrayList<>();
 
-        for (JSONObject assignment : queryFactory.selectRows("study", "CurrentBehaviorAssignments", idFilter).toJSONObjectArray())
+        for (JSONObject assignment : JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "CurrentBehaviorAssignments", idFilter)))
         {
             // Build our row map
             Map<String, Object> rowMap = new HashMap<>();
 
             rowMap.put("lsid", assignment.getString("lsid"));
             rowMap.put("Id", assignment.getString("id"));
-            rowMap.put("project", assignment.getString("project"));
+            rowMap.put("project", assignment.getInt("project"));
             rowMap.put("endDate", releaseDate);
 
             rowsToUpdate.add(rowMap);

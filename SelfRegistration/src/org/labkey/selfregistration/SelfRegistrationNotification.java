@@ -1,15 +1,15 @@
 package org.labkey.selfregistration;
 
+import jakarta.mail.Message;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.MailHelper;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.mail.Message;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static org.labkey.api.search.SearchService._log;
 
@@ -21,15 +21,19 @@ public class SelfRegistrationNotification
     protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
     protected final static SimpleDateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     protected final static SimpleDateFormat _timeFormat = new SimpleDateFormat("kk:mm");
-    protected final static String _recepientEmail = "ehrservices@g-groups.wisc.edu";
+    protected static String _recepientEmails = "";
     protected final static String _fromEmail = "ehr-do-not-reply@primate.wisc.edu";
     protected final static String _issueTrackerDefName = "userregistrations";
-    protected final static String _issueTrackerFolderName = "Private";
+    protected static String _issueTrackerFolderName = "";
+
+    public static Module srModule = ModuleLoader.getInstance().getModule(SelfRegistrationModule.NAME);
 
     public SelfRegistrationNotification(String rowid, String hostname)
     {
         rowId = rowid;
         hostName = hostname;
+        _issueTrackerFolderName = srModule.getModuleProperties().get(SelfRegistrationModule.ISSUE_TRACKER_FOLDER_LOCATION).getEffectiveValue(ContainerManager.getRoot());
+        _recepientEmails = srModule.getModuleProperties().get(SelfRegistrationModule.EMAIL_NOTIFICATION_SEND_TO_LIST).getEffectiveValue(ContainerManager.getRoot());
     }
 
     public String getName()
@@ -71,7 +75,7 @@ public class SelfRegistrationNotification
         msg.append("<p>View all of the self registrations " +
                 "<a href=\"" +
                 hostName +
-                "/query/" + _issueTrackerFolderName + "Private/executeQuery.view?schemaName=issues&query.queryName=" + _issueTrackerDefName + "\"" +
+                "/query/" + _issueTrackerFolderName + "/executeQuery.view?schemaName=issues&query.queryName=" + _issueTrackerDefName + "\"" +
                 " >here</a>.</p>");
 
         return msg.toString();
@@ -94,17 +98,13 @@ public class SelfRegistrationNotification
             msg.setFrom(_fromEmail);
             msg.setSubject(subject);
 
-            //in case we want to add more than one email later
-            List<String> emails = new ArrayList<>();
-            emails.add(_recepientEmail);
-
-            if (emails.size() == 0)
+            if (_recepientEmails.length() == 0)
             {
                 _log.warn("SelfRegistrationNotification.java: no email addresses, unable to send email");
                 return;
             }
 
-            msg.setRecipients(Message.RecipientType.TO, StringUtils.join(emails, ","));
+            msg.setRecipients(Message.RecipientType.TO, _recepientEmails);
             msg.setEncodedHtmlContent(bodyHtml);
 
             MailHelper.send(msg, currentUser, container);

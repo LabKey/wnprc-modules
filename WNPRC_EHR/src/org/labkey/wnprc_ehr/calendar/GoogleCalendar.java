@@ -4,7 +4,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
@@ -27,25 +27,29 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalTime;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
 {
-    protected User user;
-    protected Container container;
+    private User user;
+    private Container container;
 
     /** Application name. */
     private static final String APPLICATION_NAME =
             "Google Calendar API Java Quickstart";
 
     /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY =
-            JacksonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     /** Global instance of the HTTP transport. */
     private static NetHttpTransport HTTP_TRANSPORT;
@@ -59,10 +63,12 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
             Arrays.asList(CalendarScopes.CALENDAR_READONLY);
 
     private static final int MAX_EVENT_RESULTS = 2500;
-    protected static final String CALENDAR_UUID = null;
-    protected static final String DEFAULT_BG_COLOR = "#a1fffa";
-    protected Map<String, String> CALENDAR_IDS = null;
-    protected Map<String, String> CALENDAR_COLORS = null;
+    private static final long SIX_MONTHS_IN_MILLISECONDS = 1000L * 60L * 60L * 24L * 30L * 6L;
+    private static final long TWO_YEARS_IN_MILLISECONDS = 1000L * 60L * 60L * 24L * 30L * 24L;
+    private static final String CALENDAR_UUID = null;
+    private static final String DEFAULT_BG_COLOR = "#a1fffa";
+    private Map<String, String> CALENDAR_IDS = null;
+    private Map<String, String> CALENDAR_COLORS = null;
 
     static {
         try {
@@ -85,7 +91,7 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
      * @return An authorized HttpRequestInitializer object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    protected HttpRequestInitializer getCredentials() throws Exception
+    abstract protected HttpRequestInitializer getCredentials() throws Exception
     {
         // Load client secrets.
         SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, getCalendarUUID());
@@ -100,10 +106,12 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
         return new HttpCredentialsAdapter(credentials);
     }
 
+    @Override
     public void setUser(User u) {
         user = u;
     }
 
+    @Override
     public void setContainer(Container c) {
         container = c;
     }
@@ -126,7 +134,7 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
 
     // Converts a com.google.api.services.calendar.model.Events object into a JSONObject representation
     // of a fullcalendar Event Source Object (https://fullcalendar.io/docs/event-source-object)
-    protected JSONObject getJsonEventList(Events events, String calendarId) {
+    protected JSONObject getJsonEventList(Events events, String calendarId, String backgroundColor) {
         JSONObject eventSourceObject = new JSONObject();
         JSONArray jsonEvents = new JSONArray();
         String calendarName = events.getSummary();
@@ -144,8 +152,10 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
             jsonEvent.put("calendarId", calendarId);
             jsonEvent.put("calendarName", calendarName);
             String bgColor = getCalendarColors().get(calendarId);
-            jsonEvent.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+            jsonEvent.put("backgroundColor", backgroundColor);
             jsonEvent.put("textColor", getTextColor(jsonEvent.getString("backgroundColor")));
+            jsonEvent.put("eventId", i);
+            jsonEvent.put("eventListSize", events.size());
 
             jsonEvents.put(jsonEvent);
         }
@@ -193,19 +203,35 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
         return allJsonData;
     }
 
-    public JSONObject getEventsAsJson(LocalDate startDate, LocalDate endDate) throws Exception {
+
+    @Override
+    public JSONArray getEventsAsJson(String calendarId, String backgroundColor, EventType eventType, Date startDate, Date endDate) throws Exception {
         Calendar calendar = getCalendar();
+        java.util.Calendar currentDate = java.util.Calendar.getInstance();
         DateTime dateMin;
         DateTime dateMax;
 
-        // Default to 6 months back, and 2 years in the future if no start/end dates are provided
-        DateTime start = startDate != null
-                ? new DateTime(startDate.atStartOfDay(ZoneId.of("America/Chicago")).toInstant().toEpochMilli())
-                : new DateTime(LocalDate.now().minusMonths(6).atStartOfDay(ZoneId.of("America/Chicago")).toInstant().toEpochMilli());
-        DateTime end = endDate != null
-                ? new DateTime(endDate.atStartOfDay(ZoneId.of("America/Chicago")).toInstant().toEpochMilli())
-                : new DateTime(LocalDate.now().plusYears(2).atStartOfDay(ZoneId.of("America/Chicago")).toInstant().toEpochMilli());
+        if (startDate != null) {
+            ZonedDateTime startTime = ZonedDateTime.ofInstant(startDate.toInstant(), ZoneId.systemDefault()).with(LocalTime.MIN);
+            dateMin = new DateTime(startTime.toInstant().toEpochMilli());
+        } else {
+            dateMin = new DateTime(currentDate.getTimeInMillis() - SIX_MONTHS_IN_MILLISECONDS);
+        }
+        if (endDate != null) {
+            ZonedDateTime endTime = ZonedDateTime.ofInstant(endDate.toInstant(), ZoneId.systemDefault()).with(LocalTime.MAX);
+            dateMax = new DateTime(endTime.toInstant().toEpochMilli());
+        } else {
+            dateMax = new DateTime(currentDate.getTimeInMillis() + TWO_YEARS_IN_MILLISECONDS);
+        }
 
-        return getCalendarEvents(calendar, start, end);
+        return getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId, backgroundColor);
+    }
+
+    public JSONArray getEventsArray(String calendarId, String backgroundColor, EventType eventType) throws Exception {
+        return getEventsAsJson(calendarId, backgroundColor, eventType, null, null);
+    }
+
+    public JSONArray getRoomEventsArray(String roomId, String backgroundColor) throws Exception {
+        return null;
     }
 }

@@ -15,7 +15,8 @@
  */
 package org.labkey.wnprc_ehr.table;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
@@ -68,7 +69,7 @@ import java.util.Set;
  */
 public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 {
-    protected static final Logger _log = Logger.getLogger(WNPRC_EHRCustomizer.class);
+    protected static final Logger _log = LogManager.getLogger(WNPRC_EHRCustomizer.class);
     public WNPRC_EHRCustomizer()
     {
 
@@ -277,12 +278,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             super.renderGridCellContents(ctx, out);
                         }
                     }
-
-                    @Override
-                    public Object getDisplayValue(RenderContext ctx)
-                    {
-                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
-                    }
                 });
             }
         }
@@ -446,6 +441,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col20.setLabel("PrimateId");
             col20.setDescription("Unique PrimateID column to be shared across all datasets");
             ds.addColumn(col20);
+
+            BaseColumnInfo col21 = getWrappedIdCol(us, ds, "mostRecentWaterCondition", "demographicsMostRecentWaterCondition" );
+            col21.setLabel("Most Recent Water Condition");
+            col21.setDescription("Most Recent Water condition for animals in Water restricted protocols");
+            ds.addColumn(col21);
         }
 
         if (ds.getColumn("totalOffspring") == null)
@@ -1650,22 +1650,31 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String num_animals_assigned = "num_animals_assigned";
             TableInfo assignmentTable = getRealTableForDataset(table, "assignment");
 
-            String theQuery  = "( " +
-                    "(SELECT " +
-                    "(CASE WHEN COUNT(*) = 0 " +
-                    " THEN null " +
-                    " ELSE COUNT(*) " +
-                    " END) as num_animals_assigned " +
-                    " FROM studydataset." + assignmentTable.getName() + " a " +
-                    "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
-                    ")";
+            // Adding null check here to keep teamcity happy otherwise 'WNPRCComplianceTrainingTest.testSopSubmission' test
+            // results in server side error: Cannot invoke "org.labkey.api.data.TableInfo.getName()" because "assignmentTable" is null
+            // This test does not set up a full EHR folder, which is why it cannot find the assignment table.
+            if (null != assignmentTable)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
+                        "(CASE WHEN COUNT(*) = 0 " +
+                        " THEN null " +
+                        " ELSE COUNT(*) " +
+                        " END) as num_animals_assigned " +
+                        " FROM studydataset." + assignmentTable.getName() + " a " +
+                        "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
+                        ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
-            newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
-            table.addColumn(newCol);
-
+                ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
+                newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
+                table.addColumn(newCol);
+            }
+            else
+            {
+                _log.warn("Unable to customize column 'num_animals_assigned', 'study.assignment' dataset not found.");
+            }
         }
     }
 
@@ -1709,7 +1718,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         ColumnInfo sourceCol = ti.getColumn(sourceColName);
         if (sourceCol == null)
         {
-            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            // Normally this should not happen, but importing during tests will load studyData first before specific columns
+            _log.warn("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
             return;
         }
 

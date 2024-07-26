@@ -6,6 +6,7 @@
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.wnprc_ehr.TriggerScriptHelper" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JSONObject params = (JSONObject) getModelBean();
@@ -123,7 +124,7 @@
 
 <%-- In some odd edge conditions, there may be multiple necropsies associated with an animal. --%>
 <%
-    for( JSONObject necropsy : necropsies.toJSONObjectArray() ) {
+    for( JSONObject necropsy : JsonUtil.toJSONObjectList(necropsies)) {
         String cause  = necropsy.optString("causeofdeath", "");
         String taskid = necropsy.optString("taskid",       "");
 

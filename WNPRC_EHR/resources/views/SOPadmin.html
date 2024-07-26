@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
 
 Ext4.onReady(function(){
     var webpart = <%=webpartContext%>;
@@ -14,11 +14,11 @@ Ext4.onReady(function(){
         sections: [
             {header: 'SOPs',
             items: [
-                {name: 'SOP Issue Tracker', url: '<%=contextPath%>/issues/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/SOP_DB/list.view?Issues.Status~eq=open'},
-                {name: 'View/Edit SOPs', url: '<%=contextPath%>/list/'+pdfs +'/grid.view?name=SOPs'},
-                {name: 'View/Edit SOPs Required For Each Employee Category', url: '<%=contextPath%>/query' + container + '/executeQuery.view?schemaName=ehr_compliancedb&query.queryName=sopbycategory'},
-                {name: 'View/Edit Dates Employees Read Their SOPs', url: '<%=contextPath%>/query' + container + '/executeQuery.view?schemaName=ehr_compliancedb&query.queryName=SOPDates'},
-                {name: 'View The Most Recent Date Employees Read Each SOPs', url: '<%=contextPath%>/query' + container + '/executeQuery.view?schemaName=ehr_compliancedb&query.queryName=SOPrequirements'}
+                {name: 'SOP Issue Tracker', url: '<%=contextPath%>' + '/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/SOP_DB/issues-list.view?Issues.Status~eq=open'},
+                {name: 'View/Edit SOPs', url: '<%=contextPath%>/'+ pdfs +'/list-grid.view?name=SOPs'},
+                {name: 'View/Edit SOPs Required For Each Employee Category', url: '<%=contextPath%>' + container + '/query-executeQuery.view?schemaName=ehr_compliancedb&query.queryName=sopbycategory'},
+                {name: 'View/Edit Dates Employees Read Their SOPs', url: '<%=contextPath%>' + container + '/query-executeQuery.view?schemaName=ehr_compliancedb&query.queryName=SOPDates'},
+                {name: 'View The Most Recent Date Employees Read Each SOPs', url: '<%=contextPath%>' + container + '/query-executeQuery.view?schemaName=ehr_compliancedb&query.queryName=SOPrequirements'}
             ]}
         ]
     });

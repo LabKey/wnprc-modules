@@ -22,6 +22,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
+my $printableUrl = $ENV{'PERL_LINK_URL'};
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Colony Alerts Lite';
@@ -80,8 +81,8 @@ if(@{$results->{rows}}){
     };
 
     $email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with multiple active housing records.</b><br>";
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=housingProblems"."'>Click here to view these animals</a></p>\n";
-    $email_html .= "<a href='".$baseUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=".join(';', @ids)."&query.enddate~isblank'>Click here to edit housing to fix the problems</a><p>";
+    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=housingProblems"."'>Click here to view these animals</a></p>\n";
+    $email_html .= "<a href='".$printableUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=".join(';', @ids)."&query.enddate~isblank'>Click here to edit housing to fix the problems</a><p>";
     $email_html .= '<hr>';
 }
 
@@ -100,7 +101,7 @@ if(@{$results->{rows}}){
 	$doSend = 1;
 	
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals where the housing snapshot doesnt match the housing table.  The snapshot has been automatically refreshed:</b><br>";	
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot"."'>Click here to view the report again</a></p>\n";
+    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot"."'>Click here to view the report again</a></p>\n";
     $email_html .= '<hr>';
     
     system("/usr/local/labkey/automaticAlerts/updateSnapshot.pl");
@@ -129,8 +130,8 @@ if(@{$results->{rows}}){
     };
 
     $email_html .= "<b>WARNING: There are ".@{$results->{rows}}." housing records with potential problems in the condition field.</b><br>";
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems"."'>Click here to view these records</a></p>\n";
-    $email_html .= "<a href='".$baseUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=".join(';', @ids)."&query.enddate~isblank'>Click here to edit housing to fix the problems</a><p>";
+    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=housingConditionProblems&query.viewName=Problems"."'>Click here to view these records</a></p>\n";
+    $email_html .= "<a href='".$printableUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Housing&query.Id~in=".join(';', @ids)."&query.enddate~isblank'>Click here to edit housing to fix the problems</a><p>";
 
     #$email_html .= join('<br>', @ids);
     $email_html .= '<hr>';
@@ -156,7 +157,7 @@ if(@{$results->{rows}}){
 	$doSend = 1;
 	
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." housing records since $paramVal that do not have a contiguous previous or next record.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=HousingCheck&query.param.MINDATE=$paramVal"."'>Click here to view and update them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=HousingCheck&query.param.MINDATE=$paramVal"."'>Click here to view and update them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }	
 
@@ -184,7 +185,7 @@ if(@{$results->{rows}}){
     };
     	
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." housing records for animals not currently at WNPRC.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Housing&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Housing&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }
 
@@ -196,7 +197,7 @@ $results = LabKey::Query::selectRows(
     -schemaName => 'study',
     -queryName => 'Demographics',
     -filterArray => [
-    	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
+    	['calculated_status', 'eq', 'Alive'],
     	['Id/curLocation/room/room', 'isblank', ''],
     ],
     -requiredVersion => 8.3,
@@ -211,7 +212,7 @@ if(@{$results->{rows}}){
     };
     	
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals that lack an active housing record.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room/room~isblank&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";#
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room/room~isblank&query.calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";#
 	$email_html .= "<hr>\n";			
 }
 
@@ -237,8 +238,8 @@ if(@{$results->{rows}}){
     };
 
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with potential problems in the status field.</b><br>";
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Validate_status'>Click here to view these records</a></p>\n";
-    $email_html .= "<a href='".$baseUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Demographics&query.Id~in=".join(';', @ids)."'>Click here to edit demographics to fix the problems</a><p>";
+    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Validate_status'>Click here to view these records</a></p>\n";
+    $email_html .= "<a href='".$printableUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Demographics&query.Id~in=".join(';', @ids)."'>Click here to edit demographics to fix the problems</a><p>";
     $email_html .= "<hr>";
 }
 
@@ -263,8 +264,8 @@ if(@{$results->{rows}}){
 #    };
 #
 #   $email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with potential problems in the status field (based on old system).</b><br>";
-#    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Validate_status_mysql'>Click here to view these records</a></p>\n";
-#    $email_html .= "<a href='".$baseUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Demographics&query.Id~in=".join(';', @ids)."'>Click here to edit demographics to fix the problems</a><p>";
+#    $email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Validate_status_mysql'>Click here to view these records</a></p>\n";
+#    $email_html .= "<a href='".$printableUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Demographics&query.Id~in=".join(';', @ids)."'>Click here to edit demographics to fix the problems</a><p>";
 #    $email_html .= "<hr>";
 #}
 
@@ -287,7 +288,7 @@ if(@{$results->{rows}}){
     $doSend = 1;
 
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." active assignments for animals not currently at WNPRC.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive"."'>Click here to view and update them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }	
 
@@ -310,7 +311,7 @@ if(@{$results->{rows}}){
     $doSend = 1;
 
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." active assignments to a project without a valid protocol.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive&query.protocol/protocol~isblank"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Assignment&query.enddate~isblank&query.Id/Dataset/Demographics/calculated_status~neqornull=Alive&query.protocol/protocol~isblank"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }
 
@@ -328,7 +329,7 @@ if(@{$results->{rows}}){
     $doSend = 1;
 
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals double assigned to the same project.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=duplicateAssignments"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$printableUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=duplicateAssignments"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }
 

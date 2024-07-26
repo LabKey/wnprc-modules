@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasets metaDataFile="datasets_metadata.xml" xmlns="http://labkey.org/study/xml">
+  <datasets>
+    <dataset name="breeding_encounters" id="6000" category="Colony Management" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="pregnancies" id="6001" category="Colony Management" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="pregnancy_outcomes" id="6002" category="Colony Management" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="ultrasounds" id="6003" category="Colony Management" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="waterOrders" id="6012" category="Husbandry" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="waterAmount" id="6013" category="Husbandry" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="waterGiven" id="6015" category="Husbandry" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="research_ultrasounds" id="6005" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="ultrasound_measurements" id="6006" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="ultrasound_review" id="6007" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="restraints" id="6008" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="NecropsyAbstract" id="6009" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="waterScheduledAnimals" id="6010" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="singleGeneralEncounter" id="6011" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="chairing" id="6014" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="foodDeprives Snapshot" id="6004" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="alopecia" id="1061" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="foodDeprives" id="5017" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="BehaviorAbstract" id="5015" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="perDiems Snapshot" id="5014" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="MHCHaplotypes" id="5016" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="Demographics Snapshot" id="5011" showByDefault="false" category="Demographics" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="ActiveHousing" id="5010" showByDefault="false" category="ColonyManagement" demographicData="true" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="birth" id="1007" category="Clinical" demographicData="true" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="blood" id="1008" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="bcs" id="1065" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="cageObs" id="5003" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="encounters" id="1067" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="clinical_observations" id="5006" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="clinremarks" id="1047" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="dentalStatus" id="1064" showByDefault="false" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="drug" id="1014" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="final_reports" id="5009" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="obs" id="1023" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="procedures" id="1033" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="problem" id="1030" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="treatments" id="1075" showByDefault="false" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="tb" id="1035" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="teeth" id="1062" showByDefault="false" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="treatment_order" id="1037" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="weight" id="1045" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="vitals" id="1063" showByDefault="false" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="bacteriologyResults" id="1049" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="chemistryResults" id="1056" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="clinpathRuns" id="1073" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="cytologyManualResults" id="5012" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="cytologyAutomatedResults" id="5013" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="hematologyMorphology" id="1058" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="hematologyResults" id="1059" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="immunologyResults" id="1083" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="parasitologyResults" id="1052" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="urinalysisResults" id="1081" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="virologyResults" id="1054" category="ClinPath" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="arrival" id="1001" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="assignment" id="1002" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="behavetrem" id="1004" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="charges" id="5005" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="deaths" id="1048" category="Pathology" demographicData="true" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="demographics" id="1012" category="ColonyManagement" demographicData="true" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="departure" id="1013" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="feeding" id="1078" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="housing" id="1018" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="inbreeding" id="5001" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="menses" id="1060" showByDefault="false" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="notes" id="1068" showByDefault="false" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="pairtest" id="1079" showByDefault="false" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="prenatal" id="1029" category="Pathology" demographicData="true" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="biopsy" id="1006" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="morphologicDiagnosis" id="1005" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="histology" id="1070" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="necropsy" id="1022" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="necropsydiag" id="1021" showByDefault="false" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="organ_weights" id="1072" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="tissue_requests" id="1036" showByDefault="false" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="tissue_samples" id="1071" category="Pathology" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="BehaviorAbstract" id="5015" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+  </datasets>
+</datasets>

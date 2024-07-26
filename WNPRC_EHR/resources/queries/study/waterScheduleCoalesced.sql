@@ -3,9 +3,11 @@
 -- the date will match as it does with the water schedule.
 
 (SELECT
-    WA.id AS animalId,
+    WA.id AS Id,
+    WA.id.demographics.calculated_status.code AS calculated_status,
     WA.date AS date,
     WA.date AS dateOrdered,
+    WA.id.curLocation.location as location,
     WA.id.curLocation.area as area,
     WA.id.curLocation.room as room,
     WA.id.curLocation.cage as cage,
@@ -38,9 +40,11 @@ FROM study.waterAmount WA
 UNION ALL
 
 (SELECT
-    WS.animalId AS animalId,
+    WS.animalId AS Id,
+    WS.calculated_status AS calculated_status,
     WS.origDate AS origDate,
     WS.date AS dateOrdered,
+    WS.location as location,
     WS.area as area,
     WS.room as room,
     WS.cage as cage,

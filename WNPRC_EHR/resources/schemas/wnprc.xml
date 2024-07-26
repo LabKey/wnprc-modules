@@ -66,12 +66,14 @@
             <column columnName="rowid"/>
             <column columnName="principalinvestigator">
                 <measure>false</measure>
-                <dimension>true</dimension>
                 <fk>
                     <fkDbSchema>ehr</fkDbSchema>
-                    <fkTable>uniqueProtocolInvestigator</fkTable>
-                    <fkColumnName>inves</fkColumnName>
+                    <fkTable>investigatorsWithName</fkTable>
+                    <fkColumnName>rowid</fkColumnName>
                 </fk>
+            </column>
+            <column columnName="principalinvestigatorold">
+                <description>Old PI field that referenced ehr.uniqueProtocolInvestigator</description>
             </column>
             <column columnName="date"/>
             <column columnName="originneeded">
@@ -190,6 +192,11 @@
             <column columnName="optionalproject"/>
             <column columnName="internalthreadrowid"/>
             <column columnName="externalthreadrowid"/>
+            <column columnName="pregnantanimalsrequiredterminfant"/>
+            <column columnName="pregnantanimalsrequiredtermdam"/>
+            <column columnName="majorsurgery"/>
+            <column columnName="previousexposures"/>
+            <column columnName="contacts"/>
         </columns>
     </table>
     <table tableName="gestational_days" tableDbType="TABLE">
@@ -366,6 +373,56 @@
             <column columnName="created"/>
             <column columnName="modifiedby"/>
             <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="arrow_protocols" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="protocol_id"/>
+            <column columnName="protocol_title"/>
+            <column columnName="pi_name"/>
+            <column columnName="date_approved"/>
+            <column columnName="date_expiration"/>
+            <column columnName="date_modified"/>
+            <column columnName="arrow_common_name"/>
+            <column columnName="max_three_year"/>
+            <column columnName="usda_code"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="extra_protocols" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="protocol_id"/>
+            <column columnName="protocol_title"/>
+            <column columnName="pi_name"/>
+            <column columnName="date_approved"/>
+            <column columnName="date_expiration"/>
+            <column columnName="date_modified"/>
+            <column columnName="arrow_common_name"/>
+            <column columnName="max_three_year"/>
+            <column columnName="usda_code"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="urgent_treatments" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="code"/>
+            <column columnName="instructions"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
         </columns>
     </table>
 </tables>

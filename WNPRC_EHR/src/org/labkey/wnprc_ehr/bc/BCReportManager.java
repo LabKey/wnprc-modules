@@ -31,6 +31,11 @@ public class BCReportManager {
         WNPRC_EHRModule wnprc = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
         String id = wnprc.getGoogleDriveAccountId(studyContainer);
 
+        if (id == null) {
+            _log.info("No Google Drive account ID configured, not uploading reports");
+            return;
+        }
+
         try {
             DriveWrapper drive = GoogleDriveService.get().getDrive(id, user);
 

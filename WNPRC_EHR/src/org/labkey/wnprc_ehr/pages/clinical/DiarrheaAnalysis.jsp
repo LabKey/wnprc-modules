@@ -35,7 +35,7 @@
     </div>
 </div>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var diarrheaCounts = <%=diarrheaCounts%>;
 
@@ -82,7 +82,7 @@
 </script>
 
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         var diarrheaDetails = <%=diarrheaDetails%>;
 

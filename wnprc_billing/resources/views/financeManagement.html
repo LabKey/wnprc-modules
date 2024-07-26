@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=scriptNonce%>">
 
     Ext4.onReady(function(){
 
@@ -66,7 +66,7 @@
                         {name: 'WNPRC Projects', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'project', showImport: true})},
                         {name: 'Grant Accounts - Active', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'aliases', 'query.viewName': 'Active Grant Accounts', showImport: false})},
                         {name: 'Grant Accounts - ALL', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'aliases', showImport: true})},
-                        {name: 'Investigators', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'investigators', showImport: true})},
+                        {name: 'Investigators', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'investigators', 'query.viewName': 'ExcludeExternal', showImport: true})},
                         {name: 'Financial Analysts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'fiscalAuthorities', showImport: true})},
                         {name: 'Departments', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'groups',showImport: true})}
                     ]
@@ -83,7 +83,9 @@
                 },{
                     header: 'Other',
                     items: [
-                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})}
+                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})},
+                        {name: 'Update Program Income Account', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'updateProgramIncomeAccount', null)},
+                        {name: 'Add procedure queries', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'procedureQueryChargeIdAssoc'})}
                     ]
                 }]
             }]

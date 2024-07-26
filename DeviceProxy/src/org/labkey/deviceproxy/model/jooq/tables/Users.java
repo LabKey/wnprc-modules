@@ -4,11 +4,7 @@
 package org.labkey.deviceproxy.model.jooq.tables;
 
 
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Generated;
-
+import jakarta.annotation.Generated;
 import org.jooq.Field;
 import org.jooq.Schema;
 import org.jooq.Table;
@@ -18,6 +14,9 @@ import org.jooq.impl.TableImpl;
 import org.labkey.deviceproxy.model.jooq.Deviceproxy;
 import org.labkey.deviceproxy.model.jooq.Keys;
 import org.labkey.deviceproxy.model.jooq.tables.records.UsersRecord;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**

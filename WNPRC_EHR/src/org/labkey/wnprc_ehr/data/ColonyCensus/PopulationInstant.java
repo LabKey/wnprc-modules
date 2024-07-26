@@ -1,6 +1,5 @@
 package org.labkey.wnprc_ehr.data.ColonyCensus;
 
-import org.joda.time.LocalDate;
 import org.json.JSONObject;
 import org.labkey.webutils.api.json.ConvertibleToJSON;
 
@@ -10,9 +9,9 @@ import org.labkey.webutils.api.json.ConvertibleToJSON;
 public class PopulationInstant implements ConvertibleToJSON
 {
     Integer _population;
-    LocalDate _date;
+    String _date;
 
-    public PopulationInstant(LocalDate date, Integer population) {
+    public PopulationInstant(String date, Integer population) {
         _population = population;
         _date = date;
     }
@@ -21,7 +20,7 @@ public class PopulationInstant implements ConvertibleToJSON
         return _population;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return _date;
     }
 
@@ -30,7 +29,8 @@ public class PopulationInstant implements ConvertibleToJSON
     }
 
     @Override
-    public JSONObject toJSON() {
+    public JSONObject toJSON()
+    {
         JSONObject json = new JSONObject();
 
         json.put("date", _date);
@@ -38,5 +38,4 @@ public class PopulationInstant implements ConvertibleToJSON
 
         return json;
     }
-
 }

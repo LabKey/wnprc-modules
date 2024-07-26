@@ -4,7 +4,7 @@ SELECT
     waterOrderObjectId AS waterOrderObjectId,
     taskid AS taskid,
     project AS projectCoalesced,
-    animalId AS animalId,
+    Id AS Id,
     room || '-' || cage  AS location,
     date AS date,
     dateOrdered AS dateOrdered,
@@ -13,6 +13,7 @@ SELECT
     provideFruit AS provideFruit,
     provideFruitTitle AS provideFruitTitle,
     dataSource AS dataSource,
+    waterSource AS conditionAtTime,
     assignedTo AS assignedToCoalesced,
     assignedToTitle AS assignedToTitleCoalesced,
     frequency AS frequencyCoalesced,
@@ -26,14 +27,14 @@ SELECT
 
     (SELECT wg.weight AS weightAtDate
         FROM study.weight wg
-        WHERE wg.id = WCO.animalId AND CAST(substring(CAST(wg.date AS VARCHAR) , 1, 10) AS DATE) <= WCO.date
+        WHERE wg.id = WCO.Id AND CAST(substring(CAST(wg.date AS VARCHAR) , 1, 10) AS DATE) <= WCO.date
         ORDER BY wg.date DESC
         LIMIT 1
     ) AS weightAtDate,
 
     (SELECT wg.date AS weightDate
         FROM study.weight wg
-        WHERE wg.id = WCO.animalId AND CAST(substring(CAST(wg.date AS VARCHAR) , 1, 10) AS DATE) <= WCO.date
+        WHERE wg.id = WCO.Id AND CAST(substring(CAST(wg.date AS VARCHAR) , 1, 10) AS DATE) <= WCO.date
         ORDER BY wg.date DESC
         LIMIT 1
     ) AS weightDate

@@ -1,0 +1,44 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="validationSuiteSuffixCheckerRhesusDamSireID" tableDbType="TABLE">
+                <tableTitle>VALIDATION SUITE: Suffix Checker (Rhesus - Dam/Sire ID)</tableTitle>
+                <description>
+                    This query checks Rhesus parents against Rhesus ID's for similarities (ex. ID's: rhxxyy and xxyy).
+                </description>
+                <columns>
+                    <column columnName="Id">
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Id%2C-source&amp;
+                            query.Id~in=${last_four}%3Brh${last_four}
+                        </url>
+                    </column>
+                    <column columnName="sire">
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Sire%2C-source&amp;
+                            query.Sire~in=${last_four}%3Brh${last_four}
+                        </url>
+                    </column>
+                    <column columnName="dam">
+                        <url>
+                            /query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Pedigree&amp;
+                            query.sort=-Dam%2C-source&amp;
+                            query.Dam~in=${last_four}%3Brh${last_four}
+                        </url>
+                    </column>
+                    <column columnName="last_four">
+                        <columnTitle>ID Last Four Digits</columnTitle>
+                    </column>
+                    <column columnName="frequency"/>
+                    <column columnName="species"/>
+                    <column columnName="gender"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,9 @@
+# ignore everything unless otherwise specified
+*
+
+# whitelist the following files:
+!install.r
+!netrc
+!pipelineConfig.xml
+!setenv.sh
+!wait-for-postgres.sh

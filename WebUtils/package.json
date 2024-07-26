@@ -30,10 +30,10 @@
     },
     "homepage": "https://github.com/WNPRC-EHR-Services/wnprc-modules#readme",
     "dependencies": {
-        "fullcalendar": "^5.8.0"
+        "fullcalendar": "^6.1.9"
     },
     "devDependencies": {
-        "fs-extra": "^9.1.0",
-        "rimraf": "^3.0.2"
+        "fs-extra": "^11.1.1",
+        "rimraf": "^5.0.5"
     }
 }

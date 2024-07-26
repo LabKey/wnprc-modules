@@ -1,5 +1,6 @@
 package org.labkey.apikey;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -19,8 +20,6 @@ import org.labkey.apikey.api.exception.InvalidApiKey;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-
 public class ApiKeyController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ApiKeyController.class);
@@ -35,7 +34,7 @@ public class ApiKeyController extends SpringActionController
     public class BeginAction extends SimpleViewAction
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }

@@ -3,6 +3,7 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
@@ -38,9 +39,14 @@
     // Get a string to display the weight(s)
     JSONArray weights = queryFactory.selectRows("study", "weight", taskFilter);
     List<String> weightList = new ArrayList();
-    for(JSONObject weightRecord : weights.toJSONObjectArray()) {
-        String weight = weightRecord.getString("weight");
+    for (JSONObject weightRecord : JsonUtil.toJSONObjectList(weights)) {
+        String weight;
+        try{
+            weight = weightRecord.getString("weight");
 
+        }catch(Exception JSONException){
+            weight = null;
+        }
         if (weight == null) {
             weight = "[not specified]";
         }
@@ -66,7 +72,7 @@
     else if (alopecias.length() > 1) {
         List<String> alopeciaStrings = new ArrayList<>();
 
-        for (JSONObject alo : alopecias.toJSONObjectArray()) {
+        for (JSONObject alo : JsonUtil.toJSONObjectList(alopecias)) {
             alopeciaStrings.add(alo.optString("score", NOT_SPECIFIED));
         }
 
@@ -261,7 +267,7 @@
                 </thead>
                 <tbody>
                 <%
-                    for (JSONObject organ_weight : organ_weights.toJSONObjectArray()) {
+                    for (JSONObject organ_weight : JsonUtil.toJSONObjectList(organ_weights)) {
                 %>
                 <tr>
                     <td><%=h(organ_weight.optString("tissue_fs_meaning"))%></td>
@@ -284,7 +290,7 @@
     }
 %>
 
-<script type="application/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         $('.dateWithTimeThatNeedsFormatting').each(function() {
             var $this = $(this);

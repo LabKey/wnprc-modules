@@ -16,13 +16,16 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import com.microsoft.graph.models.extensions.Event;
 import org.apache.commons.text.WordUtils;
 import com.google.api.client.http.FileContent;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -178,7 +181,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class WNPRC_EHRController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_EHRController.class);
-    private static Logger _log = Logger.getLogger(WNPRC_EHRController.class);
+    private static Logger _log = LogManager.getLogger(WNPRC_EHRController.class);
 
     public WNPRC_EHRController()
     {
@@ -616,7 +619,7 @@ public class WNPRC_EHRController extends SpringActionController
         public ApiResponse execute(Object form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
-            Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
+            Map<String, Map<String, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
 
             Map<String, Object> props = new HashMap<>();
             props.put("populations", populations);
@@ -805,12 +808,12 @@ public class WNPRC_EHRController extends SpringActionController
             ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
             JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
             JSONArray newArr = new JSONArray();
-            JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
-            JSONArray header = (JSONArray) ja.get(0);
+            JSONArray ja = arr.getJSONObject(0).getJSONArray("data");
+            JSONArray header = ja.getJSONArray(0);
             for (int i = 1; i < ja.length(); i ++)
             {
                 JSONObject jo = new JSONObject();
-                JSONArray jai = (JSONArray) ja.get(i);
+                JSONArray jai = ja.getJSONArray(i);
 
                 for (int j = 0; j < header.length(); j++){
                     String label = (String) header.get(j);
@@ -841,11 +844,11 @@ public class WNPRC_EHRController extends SpringActionController
             Module m = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.NAME);
             ModuleProperty mp = m.getModuleProperties().get(VIROLOGY_RESULT_UPLOAD_FOLDER);
             JSONArray arr = ExcelFactory.convertExcelToJSON(WebdavService.get().getResolver().lookup(Path.parse("_webdav/" + mp.getEffectiveValue(getContainer()) + "/@files/" + form.getName())).getFile(),false);
-            JSONArray ja = (JSONArray) arr.getJSONObject(0).get("data");
+            JSONArray ja = arr.getJSONObject(0).getJSONArray("data");
             StringBuilder sb = new StringBuilder();
             sb.append("<style> thead { font-weight: bold } table { border-collapse: collapse; } th, td {border: 1px solid black; padding: 5px; } </style>");
             sb.append("<table><thead><tr>");
-            JSONArray header = (JSONArray) ja.get(0);
+            JSONArray header = ja.getJSONArray(0);
             for (int j = 0; j < header.length(); j++)
             {
                 sb.append("<th>");
@@ -854,11 +857,11 @@ public class WNPRC_EHRController extends SpringActionController
                 sb.append("</th>");
             }
             sb.append("</tr></thead><tbody>");
-            int previewLength = (ja.length() >= 10) ? 10 : ja.length();
+            int previewLength = Math.min(ja.length(), 10);
             for (int i = 1; i < previewLength; i ++)
             {
                 sb.append("<tr>");
-                JSONArray jai = (JSONArray) ja.get(i);
+                JSONArray jai = ja.getJSONArray(i);
                 for (int k = 0; k < jai.length(); k++)
                 {
                     sb.append("<td>");
@@ -885,7 +888,7 @@ public class WNPRC_EHRController extends SpringActionController
             return new ApiSimpleResponse(json);
         }
     }
-    
+
     public static class AzureAccessTokenEvent
     {
         private String name;
@@ -1088,19 +1091,13 @@ public class WNPRC_EHRController extends SpringActionController
                     onCallSchedule[i + 1][1] = new JSONObject().put("html", WordUtils.capitalizeFully(startDate.plusDays(i).getDayOfWeek().toString()));
                 }
 
-                Calendar onCallCalendar = new OnCallCalendar(getUser(), getContainer());
-                java.time.LocalDate start = event.getStartDate().toInstant().atZone(ZoneId.of("America/Chicago")).toLocalDate();
-                java.time.LocalDate end = event.getEndDate().toInstant().atZone(ZoneId.of("America/Chicago")).toLocalDate();
-                JSONObject allEvents = onCallCalendar.getEventsAsJson(start, end);
-
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
                 for (int i = 0; i < onCallCalendars.length; i++) {
                     JSONArray events = new JSONArray();
                     boolean calendarReadSuccessful = true;
                     try {
                         Map<String, Object> row = onCallCalendars[i];
-                        JSONObject calendarData = (JSONObject) allEvents.get(row.get("calendar_id"));
-                        events = calendarData.getJSONArray("events");
+                        events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
                     } catch (Exception e) {
                         _log.error("Error retrieving events from on-call calendar with calendarId: " + onCallCalendars[i].get("calendar_id"));
                         onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name") + "<br><span class='error-text'>Error: Failed to load</span>");
@@ -1136,13 +1133,13 @@ public class WNPRC_EHRController extends SpringActionController
                         }
                         //Replace <br> tags with newlines and then strip out any remaining html tags from title and description
                         //Once the strings are cleaned up, add back in the <br> tags instead of the newlines
-                        String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                        String title = event.optString("title", "NO NAME");
                         title = title.replaceAll("(?i)<br */?>", "\n").trim();
                         title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
-                        String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                        String description = event.optString("description", "NO PHONE NUMBER");
                         description = description.replaceAll("(?i)<br */?>", "\n").trim();
                         description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
-                        if (onCallSchedule[i + 1][column].getString("html") == null) {
+                        if (onCallSchedule[i + 1][column].isEmpty() || onCallSchedule[i + 1][column].getString("html") == null) {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
                         } else {
                             onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");
@@ -1185,7 +1182,7 @@ public class WNPRC_EHRController extends SpringActionController
                     String[] authorizedGroups = authorizedGroupsString.trim().split("\\s*,\\s*");
                     for (int j = 0; j < authorizedGroups.length; j++) {
                         Group authorizedGroup = GroupManager.getGroup(getContainer(), authorizedGroups[j], GroupEnumType.SITE);
-                        if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().isInSiteAdminGroup()) {
+                        if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().hasSiteAdminPermission()) {
                             authorizedCalendars.add(queryResults[i]);
                             break;
                         }
@@ -1234,7 +1231,7 @@ public class WNPRC_EHRController extends SpringActionController
             return "Necropsy Schedule";
         }
     }
-    
+
     @ActionNames("SurgeryProcedureSchedule")
     @RequiresLogin()
     public class SurgeryProcedureScheduleAction extends WNPRCJspPageAction
@@ -2227,14 +2224,14 @@ public class WNPRC_EHRController extends SpringActionController
             columns.add(FieldKey.fromString("requestid"));
             columns.add(FieldKey.fromString("taskid"));
         }
-        else 
+        else
         {
             columns.add(FieldKey.fromString("objectid"));
             columns.add(FieldKey.fromString("taskid"));
             columns.add(FieldKey.fromString("date"));
             columns.add(FieldKey.fromString("enddate"));
         }
-        
+
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
@@ -2860,7 +2857,7 @@ public class WNPRC_EHRController extends SpringActionController
                     {
                         for (Map<String, Object> woRow : WaterAmountRows)
                         {
-                            JSONObject waterAmountRecord = new JSONObject();
+                            Map<String, Object> waterAmountRecord = new HashMap<>();
                             waterAmountRecord.put("taskid", woRow.get("taskid"));
                             waterAmountRecord.put("objectid", event.getObjectId());
                             waterAmountRecord.put("volume", event.getVolume());
@@ -2871,15 +2868,16 @@ public class WNPRC_EHRController extends SpringActionController
                             waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
                             rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
 
-
                             service = ti.getUpdateService();
 
-                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                            BatchValidationException batchValidationException = new BatchValidationException();
+                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, batchValidationException, null, null);
+                            if (batchValidationException.hasErrors())
+                                throw batchValidationException;
                             if (updatedRows.size() != rowToUpdate.size())
                             {
                                 throw new QueryUpdateServiceException("Not all rows updated properly");
                             }
-
                         }
                     }
                     if ("delete".equals(event.getAction()))
@@ -2890,34 +2888,20 @@ public class WNPRC_EHRController extends SpringActionController
                         JSONObject rowToDelete = new JSONObject();
                         rowToDelete.put("objectId", event.getObjectId());
                         waterAmountTable.delete(rowToDelete);
-
-                        
-
                     }
 
                     transaction.commit();
                     response.put("success", true);
-
                 }
                 catch (Exception e)
                 {
-
                     response.put("success", false);
-
-                }
-                finally
-                {
-
                 }
             }
 
             return response;
-
         }
-
     }
-
-
 
     @ActionNames("CloseWaterOrder")
     @RequiresLogin
@@ -2941,10 +2925,9 @@ public class WNPRC_EHRController extends SpringActionController
 
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
                 {
-
                     for (Map<String, Object> woRow : WaterOrdersRows)
                     {
-                        JSONObject waterOrderRecord = new JSONObject();
+                        Map<String, Object> waterOrderRecord = new HashMap<>();
                         waterOrderRecord.put("taskid", woRow.get("taskid"));
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
@@ -2956,44 +2939,35 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, extraContext);
+                        BatchValidationException batchValidationException = new BatchValidationException();
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, batchValidationException, null, extraContext);
+                        if (batchValidationException.hasErrors())
+                            throw batchValidationException;
                         if (updatedRows.size() != rowToUpdate.size())
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");
                         }
-
                     }
 
                     transaction.commit();
                     response.put("success", true);
-
                 }
-                catch (BatchValidationException e){
+                catch (BatchValidationException e)
+                {
                     response.put("success", false);
-
-                    response.put("errors", createResponseWriter().getJSON(e).get("errors"));
+                    response.put("errors", createResponseWriter().toJSON(e).get("errors"));
                     response.put("extraContext", extraContext);
-
                 }
                 catch (Exception e)
                 {
-
                     response.put("success", false);
-
-
-                }
-
-                finally
-                {
-
                 }
             }
 
             return response;
-
         }
-
     }
+
     //Starts a new water order one day after the end of the currently selected water order
     // This method is used on the WaterCalendar to easily modify existing water orders.
     @ActionNames("EnterNewWaterOrder")
@@ -3020,7 +2994,7 @@ public class WNPRC_EHRController extends SpringActionController
 
                     for (Map<String, Object> woRow : WaterOrdersRows)
                     {
-                        JSONObject waterOrderRecord = new JSONObject();
+                        Map<String, Object> waterOrderRecord = new HashMap<>();
                         waterOrderRecord.put("taskid", woRow.get("taskid"));
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
@@ -3030,7 +3004,10 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                        BatchValidationException batchValidationException = new BatchValidationException();
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, batchValidationException, null, null);
+                        if (batchValidationException.hasErrors())
+                            throw errors;
                         if (updatedRows.size() != rowToUpdate.size())
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -3041,8 +3018,7 @@ public class WNPRC_EHRController extends SpringActionController
                     //Start new water order
                     List<Map<String, Object>> rowToInsert = null;
                     List<Map<String, Object>> taskToInsert = null;
-                    JSONObject taskRecord = new JSONObject();
-                    JSONObject waterOrderRow = new JSONObject();
+                    Map<String, Object> taskRecord = new HashMap<>();
 
                     String taskId = UUID.randomUUID().toString();
                     taskRecord.put("taskid", taskId);
@@ -3051,8 +3027,6 @@ public class WNPRC_EHRController extends SpringActionController
                     taskRecord.put("qcstate", EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId());
                     taskRecord.put("formType","Enter Water Orders");
                     taskRecord.put("assignedTo",getUser().getUserId());
-
-
 
                     taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
 
@@ -3066,6 +3040,7 @@ public class WNPRC_EHRController extends SpringActionController
                     StartDate.setTime(event.getEndDate());
                     StartDate.add(java.util.Calendar.DATE, 1);
 
+                    Map<String, Object> waterOrderRow = new HashMap<>();
                     waterOrderRow.put("taskid", taskId);
                     waterOrderRow.put("date",StartDate.getTime());
                     waterOrderRow.put("id",event.getAnimalId());
@@ -3091,10 +3066,6 @@ public class WNPRC_EHRController extends SpringActionController
                     if (taskToInsert.size() != insertedTask.size() || rowToInsert.size() != insertedRows.size()){
                         throw new QueryUpdateServiceException("Task record or water record not inserted");
                     }
-
-
-
-
 
                     transaction.commit();
                     //TODO: return JSON string with taskid and success

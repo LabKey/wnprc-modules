@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.updates;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -36,7 +37,7 @@ public class UpdateTo15_16 extends ModuleUpdate.ComparableUpdater
     /**
      * Logger for logging the logs
      */
-    private static final Logger LOG = Logger.getLogger(UpdateTo15_16.class);
+    private static final Logger LOG = LogManager.getLogger(UpdateTo15_16.class);
 
     /**
      * Returns a new animal history report row built from the passed name, title, query, and description as a

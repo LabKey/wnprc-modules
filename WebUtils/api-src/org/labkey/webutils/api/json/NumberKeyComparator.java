@@ -11,7 +11,7 @@ public class NumberKeyComparator implements Comparator<JSONObject> {
     // Always sort blank values last.
     public double defaultValue = Double.MAX_VALUE;
 
-    private String key;
+    private final String key;
 
     public NumberKeyComparator(String key) {
         this.key = key;

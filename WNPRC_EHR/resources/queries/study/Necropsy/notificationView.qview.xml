@@ -1,0 +1,44 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id">
+            <properties>
+                <property name="columnTitle" value="ID"/>
+            </properties>
+        </column>
+        <column name="caseno">
+            <properties>
+                <property name="columnTitle" value="Necropsy Case Number"/>
+            </properties>
+        </column>
+        <column name="taskid">
+            <properties>
+                <property name="columnTitle" value="Task ID"/>
+            </properties>
+        </column>
+        <column name="date">
+            <properties>
+                <property name="columnTitle" value="Date of Necropsy"/>
+            </properties>
+        </column>
+        <column name="timeofdeath">
+            <properties>
+                <property name="columnTitle" value="Time of Death"/>
+            </properties>
+        </column>
+        <column name="causeofdeath">
+            <properties>
+                <property name="columnTitle" value="Type of Death"/>
+            </properties>
+        </column>
+        <column name="project">
+            <properties>
+                <property name="columnTitle" value="Project"/>
+            </properties>
+        </column>
+        <column name="mannerofdeath">
+            <properties>
+                <property name="columnTitle" value="Manner of Death"/>
+            </properties>
+        </column>
+    </columns>
+</customView>

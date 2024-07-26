@@ -23,7 +23,7 @@
         </transform>
     </transforms>
     <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="date_modified">
-        <deletedRowsSource deletedSourceKeyColumnName="protocol_id" queryName="ArrowProtocolEHRDiffs" schemaName="wnprc" targetKeyColumnName="protocol"/>
+        <deletedRowsSource deletedSourceKeyColumnName="protocol_id" queryName="ArrowProtocolEHRDiffs" schemaName="wnprc" targetKeyColumnName="protocol" timestampColumnName="date_modified"/>
     </incrementalFilter>
     <schedule>
         <cron expression="0 0 3 * * ?"/>

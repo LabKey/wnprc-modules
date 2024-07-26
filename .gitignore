@@ -5,6 +5,7 @@ docker/**/logs
 docker/**/.env
 docker/.gradle
 docker/dev_*/**
+docker/secrets/*.txt
 docker/nginx/test-ehr*
 docker/nginx/cert.pem
 docker/nginx/key.pem
@@ -14,9 +15,7 @@ docker/ehrcron/scripts/pg_backup/lkbackup.ini
 **/build/
 
 **/resources/credits/dependencies.txt
-Gringots/resources/credits/jars.txt
-WNPRC_Compliance/resources/credits/jars.txt
-wnprc_billing/resources/credits/jars.txt
+**/resources/credits/jars.txt
 
 **/.gradle
 
@@ -28,6 +27,11 @@ wnprc_billing/resources/credits/jars.txt
 .storybook-out/
 
 # generated artifacts from @labkey/build
+*/resources/web/gen/
 */resources/web/*/gen/
 */resources/web/gen/
 */resources/views/gen/
+
+# log files from etls and folder imports
+*/resources/referenceStudy/etlLogs/
+*/resources/referenceStudy/*.log

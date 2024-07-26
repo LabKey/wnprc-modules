@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body id="body">
+
+    <table id="myTable" style="border: 1px solid black; font-size: 15px; width: 800px; text-align: center">
+        <tr>
+            <th style="padding:5px; font-size:20px; text-align: center; text-decoration: underline">Variable</th>
+            <th style="padding:5px; font-size:20px; text-align: center; text-decoration: underline">Current Value</th>
+            <th style="padding:5px; font-size:20px; text-align: center; text-decoration: underline">New Value</th>
+            <th></th>
+        </tr>
+        <tr>
+            <td style="padding:5px">CreditToAccount</td>
+            <td style="padding:5px" id="ctaCell1"></td>
+            <td style="padding:5px" id="ctaCell2">
+                <input type="text" id="newCreditToAccountField" name="newCreditToAccountField">
+            </td>
+            <td style="padding:5px">
+                <button id="updateCreditToAccountButton">Update CreditToAccount</button>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:5px">JETCSVSetting</td>
+            <td style="padding:5px" id="jetcsvCell1"></td>
+            <td style="padding:5px" id="jetcsvCell2">
+                <input type="text" id="newJETCSVSettingField" name="newJETCSVSettingField">
+            </td>
+            <td style="padding:5px">
+                <button id="updateJETCSVSettingButton">Update JETCSVSetting</button>
+            </td>
+        </tr>
+    </table>
+
+    <script type="text/javascript" nonce="<%=scriptNonce%>">
+        LABKEY.Utils.onReady(function(){
+            document.getElementById("updateCreditToAccountButton")['onclick'] = updateCreditToAccount;
+            document.getElementById("updateJETCSVSettingButton")['onclick'] = updateJETCSVSetting;
+            document.getElementById("body")['onload'] = getValues;
+        });
+
+        function updateCreditToAccount() {
+            let creditToAccountNewValue = document.getElementById("newCreditToAccountField").value;
+            setValues("CreditToAccount", "" + creditToAccountNewValue);
+        }
+
+        function updateJETCSVSetting() {
+            let jetCSVSettingNewValue = document.getElementById("newJETCSVSettingField").value;
+            setValues("JETCSVSetting", "" + jetCSVSettingNewValue);
+        }
+
+        //This function updates the view with the current values for 'CreditToAccount' and 'JetCsvSetting'.
+        function getValues() {
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('wnprc_billing', 'getProgramIncomeAccount', null, {}),
+                callback: function (config, success, xhr) {
+                    if (success) {
+                        let jsonResponse = JSON.parse(xhr.responseText);
+                        let currentCreditToAccount = jsonResponse.creditToAccount;
+                        let currentJETCSVSetting = jsonResponse.jetCSVSetting;
+                        document.getElementById("ctaCell1").innerHTML = currentCreditToAccount;
+                        document.getElementById("jetcsvCell1").innerHTML = currentJETCSVSetting;
+                    }
+                    else {
+                        alert('Couldn\'t get program income account.');
+                    }
+                }
+            });
+        }
+
+        //This function verifies the user has the EHRFinanceAdminPermission, then sets the new
+        // values for 'CreditToAccount' and 'JetCsvSetting'.
+        function setValues(propertyName, newValue) {
+            if ((propertyName !== "") && (newValue !== "")) {
+                //Verifies the current user has EHRFinanceAdminPermission.
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL('wnprc_billing', 'checkFinanceAdminStatus', null, {}),
+                    callback: function (config, success, xhr) {
+                        if (success) {
+                            //Sets the new module property values.
+                            let parentContainer = LABKEY.Security.currentContainer.parentId;
+                            let newPropertyValue = newValue;
+                            let propertyToUpdate = propertyName;
+                            let moduleToUpdate = "wnprc_billing"
+
+                            //Creates an object with the new module property values.
+                            let newProperties = [];
+                            newProperties.push({
+                                container: parentContainer,
+                                value: newPropertyValue,
+                                propName: propertyToUpdate,
+                                moduleName: moduleToUpdate
+                            });
+
+                            //Updates properties.
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL('core', 'saveModuleProperties', null),
+                                method: "POST",
+                                jsonData: {
+                                    properties: newProperties
+                                },
+                                headers: {
+                                    'Content-Type' : 'application/json'
+                                },
+                                callback: function (config, success, xhr) {
+                                    if (success) {
+                                        getValues();
+                                        if (propertyName == "CreditToAccount") {
+                                            document.getElementById("newCreditToAccountField").value = "";
+                                        }
+                                        else if (propertyName == "JETCSVSetting") {
+                                            document.getElementById("newJETCSVSettingField").value = "";
+                                        }
+                                    }
+                                    else {
+                                        alert("Unable to update the program income account.  AJAX response failed.");
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            alert("Unable to update the program income account.  User does not have the correct permissions.");
+                        }
+                    }
+                })
+            }
+            else {
+                alert("Unable to update the program income account.  One or more fields are empty.");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Results Panel">
+    <permissions>
+        <permission name="read"/>
+    </permissions>
+</view>

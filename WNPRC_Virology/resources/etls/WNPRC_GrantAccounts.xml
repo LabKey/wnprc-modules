@@ -1,0 +1,17 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>EHR -> RSEHR grant accounts ETL</name>
+    <description>This ETL merges the grant accounts table from ehr_billing into wnprc.grant_accounts for RSEHR</description>
+    <transforms>
+        <transform id="grant-accounts-rsehr" type="RemoteQueryTransformStep">
+            <source queryName="aliases" remoteSource="ProductionEHRServerFinance" schemaName="ehr_billing"/>
+            <destination queryName="grant_accounts" schemaName="wnprc_virology" targetOption="merge">
+                <alternateKeys>
+                    <column name="rowid"/>
+                </alternateKeys>
+            </destination>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 15 22 ? * *"/>
+    </schedule>
+</etl>

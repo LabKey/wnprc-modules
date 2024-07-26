@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 LabKey Corporation
+ * Copyright (c) 2012-2024 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,23 @@
 package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.Nullable;
-import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
-import org.labkey.remoteapi.query.Sort;
-import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
+import org.labkey.remoteapi.query.Sort;
 import org.labkey.remoteapi.query.TruncateTableCommand;
-import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
@@ -42,58 +42,67 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
+import org.labkey.test.components.bootstrap.ModalDialog;
+import org.labkey.test.components.domain.DomainFieldRow;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.ext4.Window;
+import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.pages.assay.ChooseAssayTypePage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
 import org.labkey.test.pages.ehr.EHRAdminPage;
 import org.labkey.test.pages.ehr.NotificationAdminPage;
+import org.labkey.test.params.FieldDefinition;
+import org.labkey.test.params.list.IntListDefinition;
+import org.labkey.test.params.list.ListDefinition;
 import org.labkey.test.tests.ehr.AbstractGenericEHRTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.Maps;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
-import org.labkey.test.util.core.webdav.WebDavUploadHelper;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
-import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
+import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 
 /**
@@ -104,17 +113,18 @@ import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 @Category({CustomModules.class, EHR.class, WNPRC_EHR.class})
 public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnlyTest
 {
-    public static final String PROJECT_NAME = "WNPRC_TestProject";
-    public static final String EHR_FOLDER_PATH = "WNPRC_TestProject/EHR";
+    public static final String PROJECT_NAME = "WNPRC";
+    public static final String EHR_FOLDER_PATH = PROJECT_NAME + "/EHR";
     private static final String PRIVATE_FOLDER = "Private";
     private static final String EHR_FOLDER = "EHR";
     private static final String PI_PORTAL = "PI Portal";
     public static final String PI_FOLDER_FOLDER_PATH = "/WNPRC_Units/Operation_Services/Financial_Management/PI Portal";
-    public static final String PRIVATE_FOLDER_PATH = "/WNPRC_TestProject/WNPRC_Units/Operation_Services/Financial_Management/Private";
+    public static final String PRIVATE_FOLDER_PATH = PROJECT_NAME + "/WNPRC_Units/Operation_Services/Financial_Management/Private";
     public static final String PRIVATE_TARGET_FOLDER_PATH = "WNPRC_Units/Operation_Services/Financial_Management/Private";
 
-    private final String ANIMAL_HISTORY_URL = "/ehr/" + PROJECT_NAME + "/EHR/animalHistory.view?";
+    private final String ANIMAL_HISTORY_URL = "/" + PROJECT_NAME + "/EHR/ehr-animalHistory.view";
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
+    protected static final String PROJECT_MEMBER_ID_2 = "test3804589"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
     private static final int ALIASES_NUM_ROWS = 4;
@@ -122,12 +132,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
     private final File CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesGroupCategoryError.tsv");
-    private static final int CHARGE_RATES_NUM_ROWS = 9;
-    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 8;
+    private static final int CHARGE_RATES_NUM_ROWS = 10;
+    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 9;
 
     private final File CHARGEABLE_ITEMS_RATES_UPDATE_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesUpdate.tsv");
-    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 12;
-    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 11;
+    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 13;
+    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 12;
 
     private final File CHARGEABLE_ITEM_CATEGORIES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemCategories.tsv");
 
@@ -138,10 +148,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
 
     private final File CHARGE_UNITS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeUnits.tsv");
+    private final File BLOOD_DATA_TSV = TestFileUtils.getSampleData("wnprc_ehr/study/datasetBlood.tsv");
     private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
-    private SchemaHelper _schemaHelper = new SchemaHelper(this);
+    private final SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
 
@@ -150,7 +161,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
     public static final String GEN_CREDIT_ACCT_ID = "acct103";
 
-    private Map<String, Object> aliasesMap = new HashMap<>();
+    private final Map<String, Object> aliasesMap = new HashMap<>();
 
     protected static final Double FEEDING_AMT = 12.12;
     protected static final Double WEIGHT_VAL = 12.12;
@@ -159,10 +170,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final Double HIGH_VAL = 0.12;
     protected static final String ROOM_ID_LOCAL = "ab160";
     protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
+
+    protected static String[] TEST_SUBJECTS = {"r12345", "cy23456", "cj3456", "cy45678", "cy56789", "cj3457"};
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
+    //Note: if updating this file, also update VIROLOGY_RESULT_DATA variable to match it, that way we can test
+    // the api end point which converts xlsx to JSON as well as the frontend extJS after it gets uploaded.
     private static final String CORRECT_SAMPLE_FILE_NAME = "virologyResults_correct.xlsx";
+    private static final Map<String, Object> VIROLOGY_RESULT_DATA = new HashMap<>();
+    //shortcut to getting the file content in the xlsx file.
+
     private static final String INCORRECT_FORMAT_SAMPLE_FILE_NAME = "virologyResults_baddate.xlsx";
     private static final String NO_MATCHING_RECORDS_SAMPLE_FILE_NAME = "virologyResults_nomatch.xlsx";
     private static final File CORRECT_SAMPLE_FILE = TestFileUtils.getSampleData("wnprc_ehr/clinpath/" + CORRECT_SAMPLE_FILE_NAME);
@@ -172,6 +190,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private static final String ASSIGNS_MSG_BOARD_PRIVATE_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/PrivateBoard/";
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
+    private static final String MHC_SSP_LIST = "MHC SSP List";
+    private static final String QPCR_QC_list = "QPCR_QC_list";
+    public static final String PROTOCOL_PROJECT_ID_2 = "795645";
+    public static final String PROTOCOL_PROJECT_ID_3 = "795646";
+    public static final String PROTOCOL_ID_2 = "protocol102";
+    public static final String PROTOCOL_ID_3 = "protocol103";
+
 
     @Nullable
     @Override
@@ -192,58 +217,127 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return TestFileUtils.getSampleData("wnprc_ehr/wnprcEhrTestStudyPolicy.xml");
     }
 
+    private static void folderSetup()
+    {
+
+    }
+
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
         WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
-        initTest.initProject("EHR");
-        initTest.createTestSubjects();
-        initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
-        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-
-
-        initTest.createFinanceManagementFolders();
-        initTest.clickFolder("Private");
+        initTest.createProjectAndFolders("EHR");
+        initTest.clickFolder(initTest.getProjectName());
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest.clickFolder("EHR");
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
+        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
+                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
+                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("PrimateId", "/" +
+                initTest.getProjectName(), "PrimateIdPrefix", "Prefix (2 chars max)", "XX")));
+
+        initTest.goToEHRFolder();
+        initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");
+
+        initTest.createResearchServicesFolders();
+        initTest.createAnimalServicesFolders();
+        initTest._containerHelper.enableModule("EHR_ComplianceDB");
+        initTest.createRequiredLists();
+        initTest.createRequiredAssays();
+        initTest.clickFolder("EHR");
 
         initTest.updateEHRFormFrameworkTypes();
 
-        initTest.loadBloodBilledByLookup();
-        initTest.addFinanceRelatedWebParts();
-        initTest.clickFolder("Private");
-        initTest.loadEHRBillingTableDefinitions();
+        initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
+        initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
 
-        initTest.clickFolder("Private");
-        initTest.createStudyLinkedSchema();
-        initTest.createCoreLinkedSchema();
-        initTest.createEHRLinkedSchema();
+        initTest.goToEHRFolder();
+        initTest.createStudyLinkedSchemaForQueryValidation();
 
-        initTest.clickFolder("EHR");
-        initTest.createEHRBillingPublicLinkedSchema();
-        initTest.createWNPRCBillingLinkedSchema();
-        initTest.goToProjectHome();
-        initTest.clickFolder(PI_PORTAL);
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
+        // The next several step are done in a particular order to ensure query validation passes. Change at your own risk.
+        initTest.defineQCStates();
+        initTest.setEHRModuleProperties();
+        initTest.billingSetup();
 
-        initTest.createWNPRCBillingPublicLinkedSchema();
+        initTest.goToEHRFolder();
+        initTest.populateInitialData();
+        initTest.createEHRLookupsLinkedSchemaQueryValidation();
 
-        initTest.clickFolder("PI Portal");
-        initTest.addBillingPublicWebParts();
+        initTest.initCreatedProject();
 
         initTest.uploadBillingDataAndVerify();
+
+        // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
+        // study import ensures that order.
+        initTest.importBlood();
+
+        initTest.createTestSubjects();
 
         initTest.setupClinpathVirologySection();
 
         initTest.setupAnimalRequests();
+
+        initTest.checkUpdateProgramIncomeAccount();
+        initTest.deathNotificationSetup();
+    }
+
+    private void billingSetup() throws Exception
+    {
+        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
+        initTest.createFinanceManagementFolders();
+        goToBillingFolder();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+        initTest.addFinanceRelatedWebParts(initTest.getBillingContainerPath());
+
+        goToBillingFolder();
+        initTest.loadEHRBillingTableDefinitions();
+
+        initTest.createStudyLinkedSchema();
+        initTest.createCoreLinkedSchema();
+        initTest.createEHRLinkedSchema(PROJECT_NAME + "/" + PRIVATE_TARGET_FOLDER_PATH);
+
+        goToEHRFolder();
+        initTest.createEHRBillingPublicLinkedSchema();
+        initTest.createWNPRCBillingLinkedSchema();
+        initTest.loadEHRBillingExtensibleCols();
+
+        goToPIPortal();
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
+
+        initTest.createWNPRCBillingPublicLinkedSchema();
+
+        goToPIPortal();
+        initTest.addBillingPublicWebParts();
+    }
+
+    private void loadEHRBillingExtensibleCols()
+    {
+        log("Setup the EHR Billing table definitions");
+        EHRAdminPage.beginAt(this,getContainerPath());
+        click(Locator.linkWithText("EHR EXTENSIBLE COLUMNS"));
+        click(Locator.linkWithText("Load EHR_Billing table definitions"));
+        waitForElement(Locator.tagWithClass("span", "x4-window-header-text").withText("Success"));
+        assertExt4MsgBox("EHR_Billing tables updated successfully.", "OK");
+    }
+
+    private void importBlood() throws IOException, CommandException
+    {
+        Connection connection = createDefaultConnection();
+        Map<String, Object> responseMap = new HashMap<>();
+
+        List<Map<String, Object>> tsv = loadTsv(BLOOD_DATA_TSV);
+        insertTsvData(connection, "study", "blood", tsv, EHR_FOLDER_PATH)
+                .forEach(row -> responseMap.put(row.get("Id").toString(),row.get("date")));
     }
 
     private void uploadBillingDataAndVerify() throws Exception
     {
+        log("Load billedBy lookup used in 'Blood Draws' dataset.");
+        loadBloodBilledByLookup();
+
         log("Check Extensible table columns.");
         checkExtensibleTablesCols();
 
@@ -258,6 +352,159 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Update new charge rates.");
         updateChargeRates();
+
+        log("Add procedure queries.");
+        addProcedureQueries();
+    }
+
+    private void addProcedureQueries() throws IOException, CommandException
+    {
+        log("Add procedure queries into ehr_billing.procedureQueryChargeIdAssoc table.");
+
+        goToBillingFolder();
+
+        Connection cn = WebTestHelper.getRemoteApiConnection();
+
+        log("Inserting procedure query names info into ehr_billing.procedureQueryChargeIdAssoc table.");
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_billing", "procedureQueryChargeIdAssoc");
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsOneTubeAnimalServices");
+        rowMap.put("description", "Blood Draws One Tube - Animal Services");
+        rowMap.put("chargeId", getChargeId("Blood draws"));
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsAdditionalTubesAnimalServices");
+        rowMap.put("description", "Blood Draws Additional Tubes - Animal Services");
+        rowMap.put("chargeId", getChargeId("Blood draws - Additional Tubes"));
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsAllTubesSPI");
+        rowMap.put("description", "Blood Draws - SPI");
+        rowMap.put("chargeId", getChargeId("Blood Draws"));
+        insertCmd.addRow(rowMap);
+
+        int numRows = insertCmd.execute(cn, PRIVATE_FOLDER_PATH).getRows().size();
+        log("Inserted " + numRows + " into ehr_billing.procedureQueryChargeIdAssoc table.");
+    }
+
+    @LogMethod
+    @Override
+    protected void createTestSubjects() throws Exception
+    {
+        String[] fields;
+        Object[][] data;
+        SimplePostCommand insertCommand;
+
+        //insert into demographics
+        log("Creating test subjects");
+        fields = new String[]{"Id", "Species", "Birth", "Gender", "date", "calculated_status", "objectid"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[1], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[2], "Marmoset", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[3], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[4], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[5], "Marmoset", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //for simplicity, also create the animals from MORE_ANIMAL_IDS right now
+        data = new Object[][]{
+                {MORE_ANIMAL_IDS[0], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[1], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[2], "Rhesus", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[3], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {MORE_ANIMAL_IDS[4], "Rhesus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(MORE_ANIMAL_IDS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //used as initial dates
+        Date pastDate1 = TIME_FORMAT.parse("2012-01-03 09:30");
+        Date pastDate2 = TIME_FORMAT.parse("2012-05-03 19:20");
+
+        //set housing
+        log("Creating initial housing records");
+        fields = new String[]{"Id", "date", "enddate", "room", "cage"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], pastDate1, pastDate2, getRooms()[0], CAGES[0]},
+                {TEST_SUBJECTS[0], pastDate2, null, getRooms()[0], CAGES[0]},
+                {TEST_SUBJECTS[1], pastDate1, pastDate2, getRooms()[0], CAGES[0]},
+                {TEST_SUBJECTS[1], pastDate2, null, getRooms()[2], CAGES[2]}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Housing", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "Housing", new Filter("Id", StringUtils.join(SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //set a base weight
+        log("Setting initial weights");
+        fields = new String[]{"Id", "date", "weight", "QCStateLabel"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], pastDate2, 10.5, EHRQCState.COMPLETED.label},
+                {TEST_SUBJECTS[0], new Date(), 12, EHRQCState.COMPLETED.label},
+                {TEST_SUBJECTS[1], new Date(), 12, EHRQCState.COMPLETED.label},
+                {TEST_SUBJECTS[2], new Date(), 12, EHRQCState.COMPLETED.label}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Weight", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "Weight", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //set assignment
+        log("Setting initial assignments");
+        fields = new String[]{"Id", "date", "enddate", "project"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[0], pastDate1, pastDate2, PROJECTS[0]},
+                {TEST_SUBJECTS[1], pastDate1, pastDate2, PROJECTS[0]},
+                {TEST_SUBJECTS[1], pastDate2, null, PROJECTS[2]}
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Assignment", "lsid", fields, data);
+        getApiHelper().deleteAllRecords("study", "Assignment", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+    }
+
+    @LogMethod
+    @Override
+    protected void populateProjectRecords() throws Exception
+    {
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "project");
+
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("project", PROTOCOL_PROJECT_ID);
+        rowMap.put("name", PROTOCOL_PROJECT_ID);
+        rowMap.put("protocol", PROTOCOL_ID);
+        rowMap.put("account", ACCOUNT_ID_1);
+        rowMap.put("investigatorId", "1");
+        insertCmd.addRow(rowMap);
+
+        rowMap = new HashMap<>();
+        rowMap.put("project", PROJECT_ID);
+        rowMap.put("name", PROJECT_ID);
+        rowMap.put("protocol", DUMMY_PROTOCOL);
+        rowMap.put("account", ACCOUNT_ID_2);
+        rowMap.put("research", true);
+        rowMap.put("investigatorId", "2");
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(createDefaultConnection(), getContainerPath());
+    }
+
+    private int getChargeId(String chargeName) throws IOException, CommandException
+    {
+        Connection cn = getRemoteApiConnection();
+        SelectRowsCommand selectCmd = new SelectRowsCommand("ehr_billing", "chargeableItems");
+        selectCmd.setColumns(Arrays.asList("rowId, name"));
+        selectCmd.addFilter(new Filter("name", chargeName));
+        
+        SelectRowsResponse response = selectCmd.execute(cn, getBillingContainerPath());
+        return (Integer) response.getRows().get(0).get("rowId");
     }
 
     @Override
@@ -266,13 +513,107 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         goToProjectHome(PROJECT_NAME);
     }
 
+    protected final void goToBillingFolder()
+    {
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+    }
+
+    protected final void goToPIPortal()
+    {
+        beginAt(buildURL("project", getPIPortalContainerPath(), "begin"));
+    }
+
+
+    // Validate queries at end of tests instead of during import
+    // TODO: Add linked schemas to tests
+    @Override
+    protected boolean shouldValidateQueries()
+    {
+        return false;
+    }
+
+    @Override
+    protected boolean skipStudyImportQueryValidation()
+    {
+        return false;
+    }
+
     private void createFinanceManagementFolders()
     {
-        _containerHelper.createSubfolder(getProjectName(), "WNPRC_Units", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Operation_Services", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services", "Financial_Management", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "Private", "Collaboration");
         _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "PI Portal", "Collaboration");
+    }
+
+    private void createResearchServicesFolders()
+    {
+        // This assumes WNPRC_Units is already created
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Research_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "Virology_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VL_DB", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services", "VS_group_wiki", "Collaboration");
+
+        //MHC folders
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services", "MHC_SSP", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private", "MHC_DB", "Collaboration");
+    }
+
+    private void createAnimalServicesFolders()
+    {
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Animal_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services", "Compliance_Training", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services/Compliance_Training", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Animal_Services/Compliance_Training/Private", "EmployeeDB", "Collaboration");
+
+    }
+
+    private void createRequiredLists() throws IOException, CommandException
+    {
+        Connection cn = getRemoteApiConnection();
+        List<FieldDefinition> listColumns = List.of(
+                new FieldDefinition("ref_nt_name", FieldDefinition.ColumnType.String),
+                new FieldDefinition("shortName", FieldDefinition.ColumnType.String));
+        ListDefinition listDef = new IntListDefinition(MHC_SSP_LIST, "Key");
+        listDef.setFields(listColumns);
+        listDef.create(cn, getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB");
+
+        listColumns = List.of(
+                new FieldDefinition("Expt_nr", FieldDefinition.ColumnType.Decimal),
+                new FieldDefinition("QC_Pass", FieldDefinition.ColumnType.String));
+        listDef = new IntListDefinition(QPCR_QC_list, "Key");
+        listDef.setFields(listColumns);
+        listDef.create(cn, getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VS_group_wiki");
+    }
+
+    private void createRequiredAssays()
+    {
+        beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB", "begin"));
+        goToManageAssays();
+        clickButton("New Assay Design");
+        ChooseAssayTypePage chooseAssayTypePage = new ChooseAssayTypePage(getDriver());
+        chooseAssayTypePage.selectAssayLocation("Current Folder (MHC_DB)");
+        ReactAssayDesignerPage assayDesignerPage = chooseAssayTypePage.selectAssayType("General");
+        assayDesignerPage.setName("MHC_SSP");
+        DomainFormPanel domainFormPanel = assayDesignerPage.goToResultsFields();
+        domainFormPanel.addField("SubjectId").setType(FieldDefinition.ColumnType.String);
+        domainFormPanel.addField("Institution").setType(FieldDefinition.ColumnType.String);
+        domainFormPanel.addField("Result").setType(FieldDefinition.ColumnType.String);
+        DomainFieldRow domainFieldRow = domainFormPanel.addField("PrimerPair");
+        domainFieldRow.setLookup(new FieldDefinition.IntLookup("lists", MHC_SSP_LIST));
+        assayDesignerPage.clickFinish();
+
+        beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VL_DB", "begin"));
+        goToManageAssays();
+        clickButton("New Assay Design");
+        chooseAssayTypePage = new ChooseAssayTypePage(getDriver());
+        chooseAssayTypePage.selectAssayLocation("Current Folder (VL_DB)");
+        assayDesignerPage = chooseAssayTypePage.selectAssayType("Viral Loads");
+        assayDesignerPage.setName("Viral_Load");
+        domainFormPanel = assayDesignerPage.goToRunFields();
+        domainFormPanel.addField("exptNumber").setType(FieldDefinition.ColumnType.String);
+        assayDesignerPage.clickFinish();
     }
 
     private void loadBloodBilledByLookup() throws IOException, CommandException
@@ -302,10 +643,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         insertCmd.execute(cn, EHR_FOLDER_PATH);
     }
 
-    private void addFinanceRelatedWebParts()
+    private void addFinanceRelatedWebParts(String container)
     {
         log("Add Finance Related Web Parts.");
-        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+        beginAt(buildURL("project", container, "begin"));
 
         //enable Page Admin Mode
         new SiteNavBar(getDriver()).enterPageAdminMode();
@@ -332,34 +673,79 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating studyLinked Schema");
         _schemaHelper.setQueryLoadTimeout(60000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
                 null, null);
+    }
+
+    private void createStudyLinkedSchemaForQueryValidation()
+    {
+        final String BLOOD_SCHED_METADATA =
+                "<tables xmlns=\"http://labkey.org/data/xml\" xmlns:cv=\"http://labkey.org/data/xml/queryCustomView\"> \n" +
+                        "  <table tableName=\"BloodSchedule\" tableDbType=\"TABLE\">\n" +
+                        "    <columns>\n" +
+                        "      <column columnName=\"qcstate\">\n" +
+                        "        <fk>\n" +
+                        "          <fkDbSchema>core</fkDbSchema>\n" +
+                        "          <fkTable>QCState</fkTable>\n" +
+                        "          <fkColumnName>RowId</fkColumnName>\n" +
+                        "          <fkDisplayColumnName>Label</fkDisplayColumnName>\n" +
+                        "        </fk>\n" +
+                        "      </column>\n" +
+                        "  </columns>\n" +
+                        "  </table>\n" +
+                        "</tables>";
+
+        log("Creating studyLinked Schema");
+        _schemaHelper.setQueryLoadTimeout(60000);
+        _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
+                "studyLinked", "/"+EHR_FOLDER_PATH, "studyLinked", null,
+                null, BLOOD_SCHED_METADATA);
     }
 
     private void createCoreLinkedSchema()
     {
         log("Creating coreLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH,
                 "coreLinked", "/"+EHR_FOLDER_PATH, "coreLinked", null,
                 null, null);
     }
 
-    private void createEHRLinkedSchema()
+    private void createEHRLinkedSchema(String target)
     {
         log("Creating ehrLinked Schema");
         _schemaHelper.setQueryLoadTimeout(30000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PRIVATE_TARGET_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(target,
                 "ehrLinked", "/"+EHR_FOLDER_PATH, "ehrLinked", null,
                 null, null);
     }
+
+    private void createEHRLookupsLinkedSchemaQueryValidation()
+    {
+        log("Creating ehr_LookupsLinked Schema");
+        _schemaHelper.setQueryLoadTimeout(30000);
+        _schemaHelper.createLinkedSchema("/"+EHR_FOLDER_PATH,
+                "ehr_lookupsLinked", "/"+EHR_FOLDER_PATH, null, "ehr_lookups",
+                "blood_billed_by", null);
+    }
+
+//    private void createPublicSOPsList()
+//    {
+//        ListDefinition listDef = new IntListDefinition("Labfee_NoChargeProjects", "key");
+//        listDef.addField(new FieldDefinition("project", FieldDefinition.ColumnType.Integer));
+//        listDef.addField(new FieldDefinition("startDate", FieldDefinition.ColumnType.DateAndTime));
+//        listDef.addField(new FieldDefinition("dateDisabled", FieldDefinition.ColumnType.DateAndTime));
+//        listDef.addField(new FieldDefinition("Createdb", FieldDefinition.ColumnType.Integer));
+//        listDef.addField(new FieldDefinition("Notes", FieldDefinition.ColumnType.String));
+//        listDef.getCreateCommand().execute(createDefaultConnection(), getProjectName());
+//    }
 
     private void createEHRBillingPublicLinkedSchema()
     {
         log("Creating ehr_billing_public Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), "EHR",
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + "EHR",
                 "ehr_billing_public", PRIVATE_FOLDER_PATH, "ehr_billing_public", null,
                 null, null);
     }
@@ -368,7 +754,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating wnprc_billingLinked Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), "EHR",
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + "EHR",
                 "wnprc_billingLinked", PRIVATE_FOLDER_PATH, "wnprc_billingLinked", null,
                 null, null);
     }
@@ -377,7 +763,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Creating wnprc_billing_public Linked Schema");
         _schemaHelper.setQueryLoadTimeout(20000);
-        _schemaHelper.createLinkedSchema(getProjectName(), PI_FOLDER_FOLDER_PATH,
+        _schemaHelper.createLinkedSchema(getProjectName() + "/" + PI_FOLDER_FOLDER_PATH,
                 "wnprc_billing_public", PRIVATE_FOLDER_PATH, "wnprc_billing_public", null,
                 null, null);
     }
@@ -401,15 +787,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Override
-    public void importStudy()
-    {
-        importStudyFromPath(1);
-    }
-
-    @Override
     public String getModulePath()
     {
         return "/server/modules/wnprc-modules/" + getModuleDirectory();
+    }
+
+    @Override
+    public void importStudy()
+    {
+        importFolderFromPath(1);
     }
 
     // this mocks the behavior of enterweights sql update script
@@ -417,32 +803,43 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 
-        log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
+        SelectRowsCommand sr = new SelectRowsCommand("ehr", "form_framework_types");
+        sr.addFilter(new Filter("queryname","feeding", Filter.Operator.EQUAL));
+        sr.addFilter(new Filter("framework","reactjs", Filter.Operator.EQUAL));
+        SelectRowsResponse resp = sr.execute(cn, EHR_FOLDER_PATH);
+        if (resp.getRowCount().intValue() == 0)
+        {
 
-        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap = new HashMap<>();
-        rowMap.put("schemaname", "study");
-        rowMap.put("queryname", "feeding");
-        rowMap.put("framework", "reactjs");
-        rowMap.put("url","/wnprc_ehr/feeding.view");
-        insertCmd.addRow(rowMap);
+            log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
 
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
+            InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap = new HashMap<>();
+            rowMap.put("schemaname", "study");
+            rowMap.put("queryname", "feeding");
+            rowMap.put("framework", "reactjs");
+            rowMap.put("url", "/wnprc_ehr/feeding.view");
+            insertCmd.addRow(rowMap);
 
-        log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
-        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+            insertCmd.execute(cn, EHR_FOLDER_PATH);
 
-        InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap2 = new HashMap<>();
-        rowMap2.put("schemaname", "study");
-        rowMap2.put("queryname", "weight");
-        rowMap2.put("framework", "reactjs");
-        rowMap2.put("url", "/wnprc_ehr/weight.view");
-        insertCmd2.addRow(rowMap2);
+            log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
+            log("Inserting weight as a reactjs form type into ehr.form_framework_types");
 
-        insertCmd2.execute(cn, EHR_FOLDER_PATH);
+            InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
+            Map<String, Object> rowMap2 = new HashMap<>();
+            rowMap2.put("schemaname", "study");
+            rowMap2.put("queryname", "weight");
+            rowMap2.put("framework", "reactjs");
+            rowMap2.put("url", "/wnprc_ehr/weight.view");
+            insertCmd2.addRow(rowMap2);
 
-        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+            insertCmd2.execute(cn, EHR_FOLDER_PATH);
+
+            log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+        } else
+        {
+            log("feeding/weight framework type already exists, no action needed");
+        }
     }
 
     public void setupClinpathVirologySection() throws IOException, CommandException
@@ -480,6 +877,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _fileBrowserHelper.uploadFile(CORRECT_SAMPLE_FILE);
         _fileBrowserHelper.uploadFile(INCORRECT_FORMAT_SAMPLE_FILE);
         _fileBrowserHelper.uploadFile(NO_MATCHING_RECORDS_SAMPLE_FILE);
+
+        // set up the viral load hashmap to match CORRECT_SAMPLE_FILE
+        VIROLOGY_RESULT_DATA.put("Id", "test1993532");
+        VIROLOGY_RESULT_DATA.put("Date", "2022-07-22");
+        VIROLOGY_RESULT_DATA.put("Sample Type", "Blood - EDTA Whole Blood");
+        VIROLOGY_RESULT_DATA.put("Virus", "SRV 1,2,3,4,5");
+        VIROLOGY_RESULT_DATA.put("Method", "PCR");
+        VIROLOGY_RESULT_DATA.put("Result", "-");
+        VIROLOGY_RESULT_DATA.put("Qualifier", "Negative");
+        VIROLOGY_RESULT_DATA.put("Remark", "CRL");
+
 
         // set the location of the virology results upload location
         goToEHRFolder();
@@ -520,6 +928,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void navigateToWeights()
     {
         beginAt(buildURL("wnprc_ehr", getContainerPath(), "weight"));
+        waitForElement(Locator.id("submit-all-btn"), defaultWaitForPage);
     }
 
     public void navigateToAnimalRequestForm()
@@ -546,30 +955,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void fillWeightForm(String weightVal, Integer index)
     {
-        fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
+        String animalId = ANIMAL_SUBSET_EHR_TEST[index];
+        fillAnInput("animalid_" + index, animalId );
+        sleep(1000);
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
 
         //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
 //        el2.sendKeys(Keys.TAB);
 //        el2.sendKeys(Keys.TAB);
 
-        fillAnInput("remark_"+ index.toString(), "Entered from automated test");
-        fillAnInput("restraint_" + index.toString(), "T");
+        fillAnInput("remark_"+ index, "Entered from automated test");
+        sleep(1000);
+        fillAnInput("restraint_" + index, "T");
+        waitForElement(Locator.linkWithText(animalId), WAIT_FOR_PAGE * 2); // Wait for the Animal Info window to load
     }
 
-    public void waitUntilElementIsClickable(String id)
+    public WebElement waitUntilElementIsClickable(String id)
     {
-        shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
+        return longWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
     }
 
-    public void clickNewButton(String id){
-        WebElement o = Locator.tagWithId("button",id).findElement(getDriver());
-        o.click();
+    public void clickNewButton(String id)
+    {
+        waitUntilElementIsClickable(id).click();
     }
 
     public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "feeding");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "type", "amount", "remark", "QCState", "taskid", "objectid"));
@@ -581,7 +994,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchWeightData() throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid", "objectid", "restraint_objectid"));
@@ -590,6 +1003,49 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return cmd.execute(cn, EHR_FOLDER_PATH);
     }
 
+    @Test
+    public void testWeightValidation()
+    {
+        //initialize weight of subject 3
+        String[] fields;
+        Object[][] data;
+        SimplePostCommand insertCommand;
+        fields = new String[]{"Id", "date", "weight", "QCStateLabel"};
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), 12, EHRQCState.COMPLETED.label},
+        };
+        insertCommand = getApiHelper().prepareInsertCommand("study", "Weight", "lsid", fields, data);
+        getApiHelper().doSaveRows(DATA_ADMIN.getEmail(), insertCommand, getExtraContext());
+
+        //expect weight out of range
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), null, null, 120, EHRQCState.IN_PROGRESS.label, null, null, "recordID"}
+        };
+        Map<String, List<String>> expected = new HashMap<>();
+        expected.put("weight", Arrays.asList(
+                "WARN: Weight above the allowable value of 20.0 kg for Cynomolgus",
+                "INFO: Weight gain of >10%. Last weight 12 kg")
+        );
+        getApiHelper().testValidationMessage(DATA_ADMIN.getEmail(), "study", "weight", weightFields, data, expected);
+
+        //expect INFO for +10% diff
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), null, null, 20, EHRQCState.IN_PROGRESS.label, null, null, "recordID"}
+        };
+        expected = new HashMap<>();
+        expected.put("weight", Collections.singletonList("INFO: Weight gain of >10%. Last weight 12 kg"));
+        getApiHelper().testValidationMessage(DATA_ADMIN.getEmail(), "study", "weight", weightFields, data, expected);
+
+        //expect INFO for -10% diff
+        data = new Object[][]{
+                {TEST_SUBJECTS[3], new Date(), null, null, 5, EHRQCState.IN_PROGRESS.label, null, null, "recordID"}
+        };
+        expected = new HashMap<>();
+        expected.put("weight", Collections.singletonList("INFO: Weight drop of >10%. Last weight 12 kg"));
+        getApiHelper().testValidationMessage(DATA_ADMIN.getEmail(), "study", "weight", weightFields, data, expected);
+
+        //TODO: test error threshold
+    }
 
     @Test
     public void testBilling() throws IOException, CommandException
@@ -645,7 +1101,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String msg = "You are about to set values for 2 fields on 5 records. Do you want to do this?";
 
         log ("Animals with Charge Ids - Bulk Edit via Add Batch");
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
         miscChargesGrid.clickTbarButton("Add Batch");
@@ -677,7 +1133,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Verify Debit Account drop down with list of account(s) active on the date of charge");
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
 
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
@@ -694,7 +1150,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testJETWithNonGenCreditAccount()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
 
         String startDate = LocalDateTime.now().minusDays(45).format(_dateTimeFormatter);
@@ -729,7 +1185,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         performBillingRun(startDate, endDate, ++BILLING_RUN_COUNT);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         DataRegionTable invoiceRunsDataRegionTable = getInvoiceRunsDataRegionTable();
         invoiceRunsDataRegionTable.link(0, "viewJETInvoice").click();
@@ -853,7 +1309,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String comment = "Charges without Animal Ids added via bulk edit.";
 
         log ("Animals without Charge Ids - Bulk Edit via More Options --> Bulk Edit");
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
         _helper.addRecordToGrid(miscChargesGrid);
@@ -893,7 +1349,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Running report in the browser");
         notificationAdminPage.clickRunReportInBrowser("Billing Notification");
-        verifyChargeSummary("Blood Draws", 2);
+
+        verifyChargeSummary("Blood Draws Additional Tubes - Animal Services", 1);
+        verifyChargeSummary("Blood Draws One Tube - Animal Services", 50);
+
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
 
@@ -902,7 +1361,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void verifyChargeSummary(String category, int rowCount)
     {
-        log("Verifying the " + category);
+        log("Verifying '" + category + "' charge summary in the notification");
         pushLocation();
         clickAndWait(Locator.linkWithText(category));
         DataRegionTable table = new DataRegionTable("query", getDriver());
@@ -912,11 +1371,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvestigatorFacingLinks()
     {
-        navigateToFolder(PROJECT_NAME, PI_PORTAL);
+        goToPIPortal();
         log("Give EHR Lab Read access to PI Portal folder.");
         _permissionsHelper.setPermissions("EHR Lab", "ReaderRole");
 
-        navigateToFolder(PROJECT_NAME, PI_PORTAL);
+        goToPIPortal();
         log("Impersonate as investigator@ehrstudy.test");
         impersonate(INVESTIGATOR.getEmail());
         waitForElement(Locator.linkWithText("00640991"));
@@ -932,19 +1391,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         switchToWindow(1);
 
         DataRegionTable invoicedItemsByProject = new DataRegionTable("query", getDriver());
-        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "46.00",	"$1,028.95");
+        //unit cost indirect is 40
+        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "47.00",	"$1,068.95");
         actualRowData = invoicedItemsByProject.getRowDataAsText(0, "invoiceId/billingPeriodStart", "invoiceId/billingPeriodEnd", "project", "numItems", "total");
         assertEquals("Wrong row data for invoicedItemsByProject ", expectedRowData, actualRowData);
 
         log("Validating Summary By Item's total sum value");
         clickAndWait(Locator.linkContainingText("Summary By Item"));
-        assertTextPresent("Sum", "$1,028.95");
+        assertTextPresent("Sum", "$1,068.95");
 
         goBack();
 
         clickAndWait(Locator.linkContainingText("All Items"));
         DataRegionTable invoicedItems = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", 5, invoicedItems.getDataRowCount());
+        assertEquals("Wrong row count", 6, invoicedItems.getDataRowCount());
         log("Validating Totals");
         assertTextPresent("$806.00", "$13.00", "$1.95", "$195.00");
 
@@ -977,7 +1437,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Add investigators to ehr.investigators table.");
 
-        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        goToEHRFolder();
 
         Connection cn = WebTestHelper.getRemoteApiConnection();
 
@@ -986,6 +1446,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String,Object> rowMap = new HashMap<>();
         rowMap.put("firstName", "Jon");
         rowMap.put("lastName", "Snow");
+        rowMap.put("investigatorType", "Core");
         rowMap.put("emailAddress", INVESTIGATOR_PRINCIPAL.getEmail());
         rowMap.put("userid", getUserId(INVESTIGATOR_PRINCIPAL.getEmail()));
         insertCmd.addRow(rowMap);
@@ -994,6 +1455,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap = new HashMap<>();
         rowMap.put("firstName", "Sansa");
         rowMap.put("lastName", "Stark");
+        rowMap.put("investigatorType", "External");
         rowMap.put("emailAddress", INVESTIGATOR.getEmail());
         rowMap.put("userid", getUserId(INVESTIGATOR.getEmail()));
         insertCmd.addRow(rowMap);
@@ -1033,7 +1495,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void provideBillingDataAccess() throws IOException, CommandException
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Access To Billing Data"));
         DataRegionTable dataAccessTable = new DataRegionTable("query", getDriver());
         dataAccessTable.clickInsertNewRow();
@@ -1048,6 +1510,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickButton("Submit",0);
 
         log("Verify row insert in ehr_billing.dataAccess.");
+        waitForText("Stark, Sansa");
         List<String> actualRowData = dataAccessTable.getRowDataAsText(0, "investigatorid", "userId", "project", "alldata");
         List<String> expectedRowData = Arrays.asList("Stark, Sansa", "investigator", "640991", "No");
         assertEquals("Data access row not inserted as expected: " , expectedRowData, actualRowData);
@@ -1059,37 +1522,55 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String endDate="09%2F30%2F2011";
 //        clickAndWait(Locator.bodyLinkContainingText("View Billing Queries"), WAIT_FOR_JAVASCRIPT); //firefox45 on teamcity does not load this page.
 
-        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        goToEHRFolder();
         log("Verify misc charges");
-        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=miscChargesFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", getContainerPath(), startDate, endDate));
+        beginAt(buildURL("query", getContainerPath(), "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "miscChargesFeeRates", "query.param.StartDate", startDate, "query.param.EndDate", endDate)));
         DataRegionTable miscChargesFeeRates = new DataRegionTable("query", this);
         List<String> expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-15", "640991", "acct101", "$19.50", "10.0", "$195.00", getDisplayName());
         List<String> actualRowData = miscChargesFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "totalCost", "createdby");
         assertEquals("Wrong row data for Misc Charges: ", expectedRowData, actualRowData);
         assertEquals("One row should be displayed", miscChargesFeeRates.getDataRowCount(), 1);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         log("Verify per diems");
-        beginAt(String.format("query%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=perDiemFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
+        beginAt(buildURL("query", PRIVATE_FOLDER_PATH, "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "perDiemFeeRates", "query.param.StartDate", startDate, "query.param.EndDate", endDate)));
         DataRegionTable perDiemFeeRates = new DataRegionTable("query", this);
         expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.0", "0.3", "$780.00");
         actualRowData = perDiemFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
         assertEquals("Wrong row data for Per Diems: ", expectedRowData, actualRowData);
         assertEquals("One row should be displayed", perDiemFeeRates.getDataRowCount(), 1);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        log("Verify blood draws");
-        beginAt(String.format("query%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=procedureFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
-        DataRegionTable procedureFeeRates = new DataRegionTable("query", this);
-        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "00640991", "acct101", "$13.00", "1", "0.3", "$13.00", " ");
-        actualRowData = procedureFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost", "performedby");
-        assertEquals("Wrong row data for Procedure Fee Rates/Blood Draws: ", expectedRowData, actualRowData);
-        assertEquals("Two rows should be displayed", procedureFeeRates.getDataRowCount(), 2);
+        goToBillingFolder();
+        log("Verify num. rows for 'blood draws with one tube'");
+        beginAt(buildURL("query", PRIVATE_FOLDER_PATH, "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "bloodDrawsOneTubeAnimalServices", "query.date~dategte", startDate, "query.date~datelte", endDate)));
+        DataRegionTable bloodDrawProcedureOneTube = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "640991", "acct101", "0.3", "1.0", " ");
+        actualRowData = bloodDrawProcedureOneTube.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
+        assertEquals("Wrong row data for Blood Draws with one tube: ", expectedRowData, actualRowData);
+        assertEquals("Four rows should be displayed", bloodDrawProcedureOneTube.getDataRowCount(), 4);
+
+        goToBillingFolder();
+        log("Verify num. rows for 'blood draws with additional tubes'");
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=bloodDrawsAdditionalTubesAnimalServices&query.date~dategte=2011-09-01&query.date~datelte=2011-09-30", PRIVATE_FOLDER_PATH));
+        DataRegionTable bloodDrawProcedureAddnlTubes = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "640991", "acct101", "0.3", "2.0", " ");
+        actualRowData = bloodDrawProcedureAddnlTubes.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
+        assertEquals("Wrong row data for Blood Draws with Additional tubes: ", expectedRowData, actualRowData);
+        assertEquals("One row should be displayed", bloodDrawProcedureAddnlTubes.getDataRowCount(), 1);
+
+        goToBillingFolder();
+        log("Verify num. rows for 'blood draws for spi'");
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=bloodDrawsAllTubesSPI&query.date~dategte=2010-10-01&query.date~datelte=2010-10-30", PRIVATE_FOLDER_PATH));
+        DataRegionTable bloodDrawProcedureSPI = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID_2, "2010-10-18 07:30", "640991", "acct103", "1.0", "1.0", "rk");
+        actualRowData = bloodDrawProcedureSPI.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
+        assertEquals("Wrong row data for Blood Draws with Additional tubes: ", expectedRowData, actualRowData);
+        assertEquals("One row should be displayed", bloodDrawProcedureSPI.getDataRowCount(), 1);
     }
 
     private void viewChargesAdjustmentsNotYetBilled(int numRows, String filterCol, String filterVal, List<String> expectedRowData)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         clickAndWait(Locator.bodyLinkContainingText("View Charges and Adjustments Not Yet Billed"));
 
@@ -1107,7 +1588,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void viewJET()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         DataRegionTable invoiceRunsDataRegionTable = getInvoiceRunsDataRegionTable();
         invoiceRunsDataRegionTable.link(0, "viewJETInvoice").click();
@@ -1132,7 +1613,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void viewPDF(String pdfName)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         goToSchemaBrowser();
         DataRegionTable dataRegionTable = viewQueryData("ehr_billing", "invoiceExternal");
@@ -1146,7 +1627,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public String getBillingContainerPath()
     {
-        return getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management/Private/";
+        return getProjectName() + "/" + PRIVATE_TARGET_FOLDER_PATH;
+    }
+
+    public String getPIPortalContainerPath()
+    {
+        return getProjectName() + PI_FOLDER_FOLDER_PATH;
     }
 
     private void enterCharges()
@@ -1187,7 +1673,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId2.put("quantity", "10");
         mapWithAnimalId2.put("comment", "charge 2 with animal id");
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
 
         log("Enter Misc. Charges with animal Id.");
         waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
@@ -1324,10 +1810,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         List<String> expectedColumns = Arrays.asList(
                 "chargeId",
+                "chargeId/departmentCode",
                 "unitCost",
                 "startDate",
                 "endDate",
-                "genCredits"
+                "genCredits",
+                "chargeId/isAutomatic"
         );
 
         checkColumns(linkText, expectedColumns);
@@ -1344,7 +1832,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "comment",
                 "active",
                 "startDate",
-                "endDate"
+                "endDate",
+                "isAutomatic"
         );
 
         checkColumns(linkText, expectedColumns);
@@ -1352,7 +1841,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void checkColumns(String linkText, List<String> expectedColumns)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText(linkText));
         DataRegionTable results = new DataRegionTable("query", getDriver());
         assertEquals("Wrong columns for " + linkText, expectedColumns, results.getColumnNames());
@@ -1360,31 +1849,30 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void updateChargeRates()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
 
         DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickHeaderButton("Import bulk data");
-        waitForText("Format:");
+        ImportDataPage importDataPage = drt.clickImportBulkData();
 
         log("Test for Overlapping date error during data upload");
         String error1 = "ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).";
         String error2 = "ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).";
-        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_ERROR_TSV, error1, error2);
-
-        refresh();
+        importDataPage.setFile(CHARGEABLE_ITEMS_RATES_ERROR_TSV);
+        importDataPage.submitExpectingError();
+        assertTextPresent(error1, error2);
 
         log("Test for Group-Category association during data upload");
         error1 = "ERROR: 'Scientific Protocol Implementation, Surgery' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.";
         error2 = "ERROR: 'Clinical Pathology, Surgery' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.";
-        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV, error1, error2);
-
-        refresh();
+        importDataPage.setFile(CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV);
+        importDataPage.submitExpectingError();
+        assertTextPresent(error1, error2);
 
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_UPDATE_TSV, CHARGE_RATES_NUM_UPDATE_ROWS, CHARGEABLE_ITEMS_NUM_UPDATE_ROWS);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
         assertTextPresent("Blood draws", 2);
@@ -1392,7 +1880,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent("Medicine A per dose", 2);
         assertTextPresent("vaccine supplies", 4);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Chargeable Items");
         clickAndWait(Locator.bodyLinkContainingText("Chargeable Items"));
         assertTextPresent("Blood draws", 2);
@@ -1402,21 +1890,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private void attemptUploadWithBadData(File file, String... errors)
-    {
-        click(Locator.id("uploadFileDiv2Expando"));
-        waitForText("Import Lookups by Alternate Key");
-
-        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
-        waitAndClick(Ext4Helper.Locators.ext4Button("Submit"));
-
-        waitForText("ERROR");
-        assertTextPresent(errors);
-    }
-
     private void uploadChargeRates(File file, int rateRows, int itemRows)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText("Standard Rates");
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
 
@@ -1430,7 +1906,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         drt = new DataRegionTable("query", getDriver());
         assertEquals(rateRows, drt.getDataRowCount());
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         clickAndWait(Locator.bodyLinkContainingText("Chargeable Items"));
         drt = new DataRegionTable("query", getDriver());
         assertEquals(itemRows, drt.getDataRowCount());
@@ -1450,34 +1926,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadData() throws IOException, CommandException
     {
-        Connection connection = createDefaultConnection(true);
+        Connection connection = createDefaultConnection();
         Map<String, Object> responseMap = new HashMap<>();
 
         truncateBillingTables(connection);
 
         //upload Tier Rates
         List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
-        insertTsvData(connection, "wnprc_billing", "tierrates", tsv)
+        insertTsvData(connection, "wnprc_billing", "tierrates", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
 
         //upload Grant Accounts
         tsv = loadTsv(ALIASES_TSV);
-        insertTsvData(connection, "ehr_billing", "aliases", tsv)
+        insertTsvData(connection, "ehr_billing", "aliases", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
         tsv = loadTsv(CHARGE_UNITS_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv)
+        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
 
         //upload Chargeable Item Categories
         tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv)
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
 
         //upload Group-Category Associations
         tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
-        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv)
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
 
         //upload Chargeable Items and Charge Rates
@@ -1485,12 +1961,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv) throws IOException, CommandException
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String folderPath) throws IOException, CommandException
     {
         log("Loading tsv data: " + schemaName + "." + queryName);
         InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
         command.setRows(tsv);
-        SaveRowsResponse response = command.execute(connection, PRIVATE_FOLDER_PATH);
+        SaveRowsResponse response = command.execute(connection, folderPath);
         return response.getRows();
     }
 
@@ -1503,7 +1979,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void performBillingRun(String startDate, String endDate, int billingRunCount)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitAndClickAndWait(Locator.linkContainingText("Perform Billing Run"));
         Ext4FieldRef.waitForField(this, "Start Date");
         Ext4FieldRef.getForLabel(this, "Start Date").setValue(startDate);
@@ -1516,19 +1992,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
+        testReports("Invoiced Items", 8, "test2312318","640991" , "$19.50", "$15.00",
                 "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
+        // check that the acct103 was charged and not the account associated w/ project 640991
+        testReports("Invoice Internal", 2, "acct103", "40.00");
     }
 
     private void testSummaryReports()
     {
         testReports("Invoice Runs", 1, "2010-10-01", "2010-10-31");
-        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$32.75", "$285.00");
+        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$72.75", "$285.00");
     }
 
     private void testReports(String linkText, int numRows, String... texts)
     {
-        clickFolder(PRIVATE_FOLDER);
+        goToBillingFolder();
         click(Locator.bodyLinkContainingText(linkText));
         DataRegionTable results = new DataRegionTable("query", getDriver());
         assertEquals("Wrong row count", numRows, results.getDataRowCount());
@@ -1537,10 +2015,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void testDownloadMultipleInvoices()
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         performBillingRun("11/01/2010", "11/10/2010", ++BILLING_RUN_COUNT);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         performBillingRun("11/11/2010", "11/20/2010", ++BILLING_RUN_COUNT);
 
         goToSchemaBrowser();
@@ -1564,7 +2042,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("quantity", "10");
         mapWithAnimalId.put("chargetype", "Adjustment");
         mapWithAnimalId.put("comment", "charge 1 with animal id");
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         log("Enter Misc. Charges with animal Id.");
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         enterChargesInGrid(1, mapWithAnimalId);
@@ -1572,7 +2050,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sleep(5000);
         submitForm();
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         performBillingRun("11/21/2010", "11/30/2010", ++BILLING_RUN_COUNT);
 
         goToFinanceFolderTable("Invoiced Items");
@@ -1598,7 +2076,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         invoicedItems = new DataRegionTable("query", getDriver());
         assertEquals("Invoiced Items were not deleted", invoicedItems.getDataRowCount(), invoicedItemsBeforeDelete-2);
 
-        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        goToEHRFolder();
         goToSchemaBrowser();
         DataRegionTable miscCharges = viewQueryData("ehr_billing", "miscCharges");
         miscCharges.setFilter("date", "Equals", "2010-11-22");
@@ -1608,9 +2086,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void goToFinanceFolderTable(String tableName)
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         waitForText(tableName);
         clickAndWait(Locator.bodyLinkContainingText(tableName));
+    }
+    public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert)
+    {
+        return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
     }
 
     //@Test - old ext form
@@ -1735,7 +2217,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.xpath("//div[contains(@class, 'my-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         clickBootstrapTab("Tasks Requiring Review");
         waitForElement(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']")));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']").findElements(getDriver()).size());
         String href2 = getAttribute(Locator.linkWithText(TASK_TITLE), "href");
         beginAt(href2); // Clicking opens in a new window.
         waitForElement(Locator.xpath("/*//*[contains(@class,'ehr-weight-records-grid')]"), WAIT_FOR_JAVASCRIPT);
@@ -1751,13 +2233,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         stopImpersonating();
         sleep(1000); // Weird
 
-        navigateToFolder(PROJECT_NAME, FOLDER_NAME);
+        goToEHRFolder();
         waitAndClickAndWait(Locator.linkWithText("Browse All Datasets"));
         waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Weight:", "Browse All"));
 
         (new DataRegionTable("query", this)).setFilter("date", "Equals", DATE_FORMAT.format(new Date()));
         assertTextPresent("3.333", "4.444", "5.555");
-        assertEquals("Completed was not present the expected number of times", 6, getElementCount(Locator.xpath("//td[text() = 'Completed']")));
+        assertEquals("Completed was not present the expected number of times", 6, Locator.xpath("//td[text() = 'Completed']").findElements(getDriver()).size());
     }
 
     @Test
@@ -1775,26 +2257,28 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.tagWithText("span", "Treatments & Procedures"), WAIT_FOR_JAVASCRIPT);
         waitForElement(Locator.name("Id"), WAIT_FOR_JAVASCRIPT);
         waitForElement(Locator.name("title"), WAIT_FOR_JAVASCRIPT);
-        _extHelper.selectComboBoxItem("Assigned To:", BASIC_SUBMITTER.getGroup() + "\u00A0"); // appended with a nbsp (Alt+0160)
-        _extHelper.setExtFormElementByLabel("Id:", PROJECT_MEMBER_ID + "\t");
-        click(Locator.xpath("//div[./label[normalize-space()='Id:']]//input"));
-        waitForElement(Locator.linkWithText(PROJECT_MEMBER_ID), WAIT_FOR_JAVASCRIPT);
         _helper.setDataEntryField("title", MPR_TASK_TITLE);
         waitAndClick(Locator.name("title"));
-
+        _extHelper.selectComboBoxItem("Assigned To:", BASIC_SUBMITTER.getGroup() + "\u00A0"); // appended with a nbsp (Alt+0160)
+        sleep(2000);
+        _extHelper.setExtFormElementByLabel("Id:", PROJECT_MEMBER_ID + "\t");
+        sleep(2000);
+        click(Locator.xpath("//div[./label[normalize-space()='Id:']]//input"));
+        waitForElement(Locator.linkWithText(PROJECT_MEMBER_ID), WAIT_FOR_JAVASCRIPT);
+        _helper.setDataEntryField("performedby", FULL_SUBMITTER.getEmail());
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);
         clickBootstrapTab("All Tasks");
         //TODO: make these more
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         clickBootstrapTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         clickBootstrapTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
-        assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
+        assertEquals("Incorrect number of task rows.", 1, Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE).findElements(getDriver()).size());
         stopImpersonating();
 
         // this might be a workaround (not fix) for Issue 22361
@@ -1877,7 +2361,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         catch (NoSuchElementException retry)
         {
             // Not all ehr_lookups are cleared by populateInitialData
-            // cnprc_ehr/resources/data/routes.tsv has different casing
             WebElement comboListItem = ExtHelper.Locators.comboListItem().withText("ORAL\u00a0").findElementOrNull(getDriver());
             if (comboListItem == null)
                 throw retry;
@@ -2143,8 +2626,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 .searchFor(MORE_ANIMAL_IDS[0])
                 .clickCategoryTab("General")
                 .clickReportTab("Abstract");
-        waitForElement(Locator.tagWithText("a", MORE_ANIMAL_IDS[0]).notHidden());
-        assertElementPresent(Locator.linkContainingText(MORE_ANIMAL_IDS[0]));
+        waitForElement(Locator.tagWithClass("table", "animal-info-table"));
+        assertElementPresent(Locator.tagWithClass("table", "animal-info-table"));
 
     }
 
@@ -2217,7 +2700,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         String date = LocalDateTime.now().format(_dateTimeFormatter);
         String amount = "1028.95";
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        goToBillingFolder();
         Locator invoiceLink = Locator.bodyLinkContainingText("Invoice");
         waitForElement(invoiceLink);
         scrollIntoView(invoiceLink);
@@ -2245,8 +2728,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _customizeViewsHelper.applyCustomView();
         DataRegionTable auditTable =  new DataRegionTable("query", this);
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
-        assertTrue("entry didn't contain \"paymentamountreceived:  » 1028.95\"\n" + auditLog, auditLog.contains("paymentamountreceived:  » 1028.95"));
-        assertTrue("entry didn't contain \"balancedue:  » 0.0\"\n" + auditLog, auditLog.contains("balancedue:  » 0.0"));
+        Assertions.assertThat(auditLog).as("Audit entry for ehr_billing.invoice")
+                .contains("paymentamountreceived:  \u00BB 1028.95")
+                .contains("balancedue:  \u00BB 0.0");
     }
 
     @Test
@@ -2258,39 +2742,35 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //navigate to weights form and fill it out
         beginAt(buildURL("project", getContainerPath(), "begin"));
         navigateToFeeding();
-        fillFeedingForm(FEEDING_AMT.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
+        fillFeedingForm(FEEDING_AMT.toString(), 0);
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success", 1, 50000);
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchFeedingData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("amount");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("amount");
         TestLogger.log((wt.get("value")).toString());
         Assert.assertEquals(null, FEEDING_AMT, wt.get("value"));
-
     }
 
     @Test
-    public void testWeights() throws IOException, CommandException
+    public void testWeights()
     {
       //dummy test
-
     }
+
     @Test
     public void testEnterWeights() throws IOException, CommandException
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
         clickNewButton("submit-all-btn");
-        clickAndWait(Locator.tagWithId("button","submit-final"));
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
         assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         testWeightToRestraintObjectIdRelationship();
@@ -2301,12 +2781,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(LOW_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
+
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
 
@@ -2321,7 +2801,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
     public SelectRowsResponse fetchTaskData(String taskid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("ehr", "tasks");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("rowid", "updateTitle", "formtype", "assignedto", "duedate", "createdby", "created", "qcstate"));
@@ -2329,47 +2809,35 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         cmd.setSorts(Arrays.asList(new Sort("duedate", Sort.Direction.DESCENDING), new Sort("created", Sort.Direction.DESCENDING)));
 
         return cmd.execute(cn, EHR_FOLDER_PATH);
-
     }
 
     @Test
     public void testWeightSubmitForReview() throws IOException, CommandException
     {
+        String reviewer = "EHR Full Submitters";
         navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
         waitUntilElementIsClickable("submit-review-btn");
         clickNewButton("submit-review-btn");
-        sleep(1000);
-        //waitForElement(Locator.id("reviewers"),10000);
-        waitForText("Submit for Review");
-
-        WebElement c = Locator.id("reviewers").findElement(getDriver());
-        TestLogger.log(FULL_SUBMITTER.getGroup());
-
-        Select select = new Select(c);
-        sleep(1000);
-        select.selectByIndex(2);
-        List<WebElement> l = select.getAllSelectedOptions();
-        WebElement option = l.get(0);
-        String defaultItem = option.getAttribute("value");
-        TestLogger.log(defaultItem);
-        //System.out.println(defaultItem );
-
-        sleep(1000);
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        Select assignedTo = SelectWrapper.Select(Locator.name("reviewers")).find(modalDialog);
+        waitForElement(Locator.tagWithText("option", reviewer), WAIT_FOR_PAGE);
+        assignedTo.selectByVisibleText(reviewer);
+        WebElement selectedOption = assignedTo.getFirstSelectedOption();
+        String reviewerValue = selectedOption.getAttribute("value");
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
 
         SelectRowsResponse t = fetchTaskData(taskid);
         //assert that this task's assigned to is the same as info entered above
-        JSONObject id = (JSONObject) t.getRows().get(0).get("assignedto");
-        Assert.assertEquals(null, defaultItem, id.get("value").toString());
+        Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("assignedto");
+        Assert.assertEquals(null, reviewerValue, id.get("value").toString());
 
         testWeightToRestraintObjectIdRelationship();
     }
@@ -2385,17 +2853,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Saved");
         //and check that it was actually saved and QC state is "In Progress"
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
-        JSONObject qc = (JSONObject) r.getRows().get(0).get("QCState");
+        Map<String, Object> qc = (Map<String, Object>) r.getRows().get(0).get("QCState");
         Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
 
     }
 
     public SelectRowsResponse fetchWeightDataGivenTaskRowId(String taskrowid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid"));
@@ -2411,20 +2879,22 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillWeightForm(WEIGHT_VAL.toString(),0);
         clickNewButton("add-record");
         fillWeightForm(WEIGHT_VAL.toString(),1);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
-        waitForText("Success");
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
 
+        //make sure we are done saving things
+        waitForText("My Tasks");
+        //navigate to the weights table to click on the task id
         navigateToWeightsTable();
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        Map<String, Object> taskidob = (Map<String, Object>) r.getRows().get(0).get("taskid");
         String taskid = taskidob.get("value").toString();
         SelectRowsResponse t = fetchTaskData(taskid);
-        JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
+        Map<String, Object> id = (Map<String, Object>) t.getRows().get(0).get("rowid");
         TestLogger.log("testEditAndDelete: Navigating to task id...");
         TestLogger.log(id.get("value").toString());
         waitAndClick(Locator.linkWithText(id.get("value").toString()));
@@ -2443,8 +2913,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("remove-record-btn_1");
         sleep(2000);
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
         //verify that it was deleted by counting that task has only 1 record in it
         //do a a query to get weights filtered by taskid
         SelectRowsResponse r2 =  fetchWeightDataGivenTaskRowId(id.get("value").toString());
@@ -2482,7 +2952,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public SelectRowsResponse fetchRestraintDataGivenObjectId(String objectid) throws IOException, CommandException
     {
-        Connection cn = this.createDefaultConnection(false);
+        Connection cn = createDefaultConnection();
         SelectRowsCommand cmd = new SelectRowsCommand("study", "restraints");
         cmd.setRequiredVersion(9.1);
         cmd.setColumns(Arrays.asList("Id", "date", "restraintType", "objectid"));
@@ -2494,13 +2964,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testAddBatchIds()
+    public void testAddBatchIds() throws IOException, CommandException
     {
         navigateToWeights();
         addBatchByIds();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
             assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
         }
+        // test the navigating to next weight by hitting enter
+        for (Integer i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
+            WebElement el2 = fillAnInput("weight_" + i, "0.489");
+            if (i < ANIMAL_SUBSET_EHR_TEST.length-1)
+            {
+                el2.sendKeys(Keys.ENTER);
+            }
+        }
+
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, 0.489, wt.get("value"));
+
     }
 
     @Test
@@ -2513,15 +3004,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         el.sendKeys(WEIGHT_VAL.toString());
         WebElement el2 = fillAnInput("restraint-bulk", "T");
         clickNewButton("submit-bulk");
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
         {
-            JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
+            Map<String, Object> wt = (Map<String, Object>) r.getRows().get(i).get("weight");
             Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         }
         testWeightToRestraintObjectIdRelationship();
@@ -2533,7 +3023,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         //get the weight data
         SelectRowsResponse w = fetchWeightData();
-        JSONObject wt = (JSONObject) w.getRows().get(0).get("restraint_objectid");
+        Map<String, Object> wt = (Map<String, Object>) w.getRows().get(0).get("restraint_objectid");
         SelectRowsResponse r = fetchRestraintDataGivenObjectId((String) wt.get("value"));
         Assert.assertEquals(1, r.getRows().size());
     }
@@ -2543,8 +3033,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         addBatchByLocation();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
-            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
+        for (String s : ANIMAL_SUBSET_EHR_TEST)
+        {
+            assertTextPresent(s);
         }
     }
 
@@ -2566,26 +3057,24 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         /*WebElement el2 = fillAnInput("restraint_0", "T");*/
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-        JSONObject objectid = (JSONObject) r.getRows().get(0).get("restraint_objectid");
+        Map<String, Object> objectid = (Map<String, Object>) r.getRows().get(0).get("restraint_objectid");
 
         SelectRowsResponse c = fetchRestraintDataGivenObjectId(objectid.get("value").toString());
-        JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
+        Map<String, Object> rt = (Map<String, Object>) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
         testWeightToRestraintObjectIdRelationship();
-
     }
 
     public void navigateToWeightsTable()
     {
-        beginAt(buildURL("ehr", getContainerPath(), "updateQuery.view?schemaName=study&queryName=weight"));
+        beginAt(buildURL("ehr", getContainerPath(), "updateQuery", Map.of("schemaName", "study", "queryName", "weight")));
     }
 
 
@@ -2598,10 +3087,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog.dismiss("Submit final"));
 
         navigateToWeightsTable();
         DataRegionTable table = new DataRegionTable("query", getDriver());
@@ -2616,25 +3104,28 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             sleep(500);
         }
         fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
-        waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        ModalDialog modalDialog1 = new ModalDialog.ModalDialogFinder(getDriver()).waitFor();
+        doAndWaitForPageToLoad(() -> modalDialog1.dismiss("Submit final"));
 
         SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Map<String, Object> wt = (Map<String, Object>) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
-
     }
 
     @Test
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         navigateToWeights();
+        WebElement button = Locator.tagWithId("button", "save-draft-btn").findElement(getDriver());
+        // Test that save button is disabled if no entries
+        Assert.assertFalse("Save button is enabled with no data", button.isEnabled());
+        // Test that save button is disabled if single valid id is entered
+        fillWeightForm(WEIGHT_VAL.toString(), 0);
+        Assert.assertTrue("Save button is disabled for correct id", button.isEnabled());
         addBatchByLocation();
-        // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
+        Assert.assertTrue("Save button is disabled for correct test ids", button.isEnabled());
         clickNewButton("save-draft-btn");
         sleep(2000);
         clickNewButton("save-draft-btn");
@@ -2753,8 +3244,22 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsCommand sr = new SelectRowsCommand("study","Virology Results");
         sr.addFilter("taskid", VIROLOGY_CLINPATH_TASKID, Filter.Operator.EQUAL);
         SelectRowsResponse resp2 = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
+        //check that the results got uploaded
         Assert.assertTrue(resp2.getRowCount().intValue() > 0);
+        //check that the data from in the excel file matches the results, this tests GetVirologyResultsFromFileAction action,
+        // as well as the logic the Import Results From File button in ehrGridFormPanel.js
+        Map<String, Object> resultRow = resp2.getRows().get(0);
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Id"), resultRow.get("Id"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Date"), convertToLocalDateViaSqlDate((Date) resultRow.get("date")).toString());
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Sample Type"), resultRow.get("source"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Virus"), resultRow.get("virus"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Method"), resultRow.get("method"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Result"), resultRow.get("result"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Qualifier"), resultRow.get("qualresult"));
+        Assert.assertEquals(VIROLOGY_RESULT_DATA.get("Remark"), resultRow.get("performing_lab"));
     }
+
+
 
     @Test
     public void testClinpathVirologyBulkUploadValidations()
@@ -2786,27 +3291,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //_extHelper.clickExtButton("Import");
         waitForText("Preview");
         click(Locator.extButton("Preview"));
-        //get the popup window
-        String parentWindowHandler = getDriver().getWindowHandle();
-        String subWindowHandler = null;
-
-        Set<String> handles = getDriver().getWindowHandles();
-        // preview should generate a popup window
-        Assert.assertTrue(handles.size() > 1);
-        Iterator<String> iterator = handles.iterator();
-        // we can assume the popup window is the only other window other than the parent
-        String next = null;
-        while (iterator.hasNext()){
-            next = iterator.next();
-            if (!next.equals(parentWindowHandler))
-            {
-                subWindowHandler = next;
-            }
-        }
-        // switch to popup window
-        getDriver().switchTo().window(subWindowHandler);
+        switchToWindow(1);
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("bad-date-preview-err").findElement(getDriver()).getText());
-        getDriver().switchTo().window(parentWindowHandler);
+        switchToMainWindow();
     }
 
     @Test
@@ -2830,15 +3317,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testAnimalRequestFormSubmit() throws IOException, CommandException
     {
-        navigateToFolder(PROJECT_NAME,FOLDER_NAME);
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = currentDate.format(formatter);
+        goToEHRFolder();
         populateAnimalRequestTableLookups();
         navigateToAnimalRequestForm();
         waitForText("Comments:");
         //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
 
-        UUID uid = UUID.randomUUID();
-        fillAnInputByName("principalinvestigator", "Other");
-        fillAnInputByName("externalprincipalinvestigator", uid.toString());
+        //this is dependent on the billing setup above which populates the investigators table
+        fillAnInputByName("principalinvestigator", "Snow, Jon");
         fillAnInputByName("numberofanimals", "23");
         fillAnInputByName("speciesneeded", "Cyno");
         fillAnInputByName("originneeded", "any");
@@ -2848,24 +3337,29 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("mhctype", "2");
         fillAnInputByName("viralstatus", "SPF4");
         fillAnInputByName("infectiousdisease", "Yes");
+        fillAnInputByName("majorsurgery", "Yes");
         fillAnInputByName("pregnantanimalsrequired", "Yes");
+        fillAnInputByName("pregnantanimalsrequiredterminfant", "Yes");
+        fillAnInputByName("pregnantanimalsrequiredtermdam", "Yes");
         fillAnInputByName("disposition", "Terminal");
         fillAnInputByName("executivecommitteeapproval", "Yes");
+        fillAnInputByName("previousexposures", "None");
         fillAnInputByName("optionalproject", "TBD");
         fillAnInputByName("account", "80085");
         fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
-        el.sendKeys("2022-02-11");
+        el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         fillAnInputByName("comments", "test");
+        fillAnInputByName("contacts", "test@test.com");
 
         clickAndWait(Locator.tagWithId("button","submit-final"));
         assertTextPresent("Data Entry");
         SelectRowsCommand sr = new SelectRowsCommand("wnprc","animal_requests");
-        sr.addFilter("externalprincipalinvestigator", uid, Filter.Operator.EQUAL);
+        sr.addFilter("numberofanimals",23, Filter.Operator.EQUAL);
         SelectRowsResponse resp = sr.execute(createDefaultConnection(), EHR_FOLDER_PATH);
         Assert.assertTrue(resp.getRowCount().intValue() > 0);
     }
@@ -2882,4 +3376,570 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         return ANIMAL_HISTORY_URL;
     }
+
+
+    @Test
+    public void navigateToBillingContainerWithInvalidPermissions() {
+        //This test verifies a user cannot access the Finance>Internal page without proper permissions.
+
+        //Impersonates a basic user and navigates to the Finance>Internal page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("project", getBillingContainerPath(), "begin"));
+
+        //Assumes an error is presented and the test is complete.
+        assertTextPresent("Oops! An error has occurred.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
+        //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
+
+        //Impersonates a basic user and navigates to the restricted page via a direct URL.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+
+        //Attempts to change the value.
+        //Assumes an error is presented and the test is complete.
+        fillAnInputByName("newCreditToAccountField", "asdf");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+        assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
+
+        //Exits function.
+        stopImpersonating();
+    }
+
+    @Test
+    public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
+        //This test verifies a user can update the CreditToAccount module property with proper permissions.
+
+        //Navigates to various containers and sets corresponding permissions.
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
+
+        //Navigates to the "Update Program Income Account" page and impersonates a basic finance user.
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        impersonate(BASIC_SUBMITTER.getEmail());
+
+        //Attempts to change the value.
+        fillAnInputByName("newCreditToAccountField", "testString");
+        click(Locator.tagWithId("button","updateCreditToAccountButton"));
+
+        //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
+        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+
+        //Navigates to various containers and removes corresponding permissions.
+        stopImpersonating();
+        beginAt(buildURL("project", getProjectName(), "begin"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.ReaderRole");
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.api.security.roles.EditorRole");
+        beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
+        _permissionsHelper.removePermission(BASIC_SUBMITTER.getGroup(), "org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin");
+
+    }
+
+    private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
+    {
+        log("Starting checkUpdateProgramIncomeAccount.");
+
+        navigateToBillingContainerWithInvalidPermissions();
+        log("Completed navigateToBillingContainerWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithInvalidPermissions();
+        log("Completed updateProgramIncomeAccountWithInvalidPermissions.");
+
+        updateProgramIncomeAccountWithValidPermissions();
+        log("Completed updateProgramIncomeAccountWithValidPermissions.");
+    }
+
+//    @Test
+//    public void testJavaDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaDeathNotification.");
+//        //Navigates to the Necropsies table.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        beginAt("/ehr/" + getContainerPath() + "/datasets.view");
+//        waitForText("Necropsies");
+//        waitAndClickAndWait(LabModuleHelper.getNavPanelItem("Necropsies:", VIEW_TEXT));
+//
+//        //Views data from the most recent necropsy.
+//        DataRegionTable dr = new DataRegionTable("query", getDriver());
+//        dr.clickRowDetails(0);
+//
+//        //Saves data from most recent necropsy.
+//        String necropsyIDHyperlink = Ext4FieldRef.getForLabel(this, "Id").getValue().toString();
+//        int idFrom = necropsyIDHyperlink.indexOf("new\">") + "new\">".length();
+//        int idTo = necropsyIDHyperlink.lastIndexOf("</a>");
+//        String necropsyID = necropsyIDHyperlink.substring(idFrom, idTo);
+//        String necropsyDate = Ext4FieldRef.getForLabel(this, "Necropsy Date").getValue().toString();
+//        String necropsyCaseNumber = Ext4FieldRef.getForLabel(this, "Case Number").getValue().toString();
+//        String necropsyAccount = Ext4FieldRef.getForLabel(this, "Account").getValue().toString();
+//
+//        //Runs death notification in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+//
+//        //Validates necessary info.
+//        assertTextPresent("Animal ID:", necropsyID);
+//        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
+//        assertTextPresent("Date of Necropsy:", necropsyDate);
+//        assertTextPresent("Grant #:", necropsyAccount);
+//        log("Completed testJavaDeathNotification.");
+//    }
+
+//    @Test
+//    public void testJavaPrenatalDeathNotification() throws UnhandledAlertException {
+//        log("Started testJavaPrenatalDeathNotification.");
+//        //Navigates to the "Enter Prenatal Death" page.
+//        beginAt(buildURL("project", getContainerPath(), "begin"));
+//        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Data"));
+//        waitAndClickAndWait(Locator.tagContainingText("a", "Enter Prenatal Death"));
+//
+//        //Enters Prenatal Death record.
+//        _helper.setDataEntryField("Id", "pd9876");
+//        log("Attempting to select combo box item: female");
+//        _extHelper.selectComboBoxItem("Gender:", "female" + "\u00A0");
+//        log("Successfully selected combo box item: female");
+//        click(Locator.buttonContainingText("Force Submit"));
+//        clickAndWait(Locator.buttonContainingText("Yes"));
+//
+//        //Navigates to dumbster.
+//        goToModule("Dumbster");
+//        assertTextPresent("Prenatal Death Notification: pd9876");
+//        log("Completed testJavaPrenatalDeathNotification.");
+//    }
+
+    private void deathNotificationSetup() throws UnhandledAlertException {
+        log("Starting deathNotificationSetup.");
+        //Navigates to home to get a fresh start.
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+
+        //Navigates to admin notifications page.
+        EHRAdminPage ehrAdminPage = EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
+
+        //Updates the notification user and reply email.
+        notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
+
+        //Enables all notification that we will be testing.
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.DeathNotificationRevamp");
+
+        //Adds notification recipients.
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.DeathNotification", "EHR Administrators");
+
+        //Enables dumbster.
+        _containerHelper.enableModules(Arrays.asList("Dumbster"));
+
+        //Enable LDK Site Notification
+        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+        waitForText("Notification Site Admin");
+        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+        click(Locator.tagWithText("li", "Enabled"));
+        click(Locator.tagWithText("span", "Save"));
+        waitForText("Success");
+        clickButtonContainingText("OK");
+        waitForText("Notification Site Admin");
+
+        log("Completed deathNotificationSetup.");
+    }
+
+    @Test
+    public void testReactGridPanel() throws UnhandledAlertException {
+        log("Starting testReactGridPanel.");
+        log("Testing grid panel renders for full webpage");
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "research_ultrasounds"));
+        WebElement reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue(reactComp.isDisplayed());
+
+        log("Testing grid panel renders for web parts");
+        goToEHRFolder();
+        waitAndClickAndWait(Locator.linkWithText("Animal History"));
+        AnimalHistoryPage<AnimalHistoryPage> animalHistoryPage = new AnimalHistoryPage<>(getDriver());
+        animalHistoryPage
+                .selectSingleAnimalSearch()
+                .searchFor(MORE_ANIMAL_IDS[0])
+                .clickCategoryTab("Today At Center")
+                .clickReportTab("Treatments - Incomplete");
+
+        waitForElement(Locator.byClass(".grid-panel"));
+        reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue("Grid Panel webpart failed to render in animal history",reactComp.isDisplayed());
+
+        log("Completed testReactGridPanel.");
+    }
+
+    protected Date prepareDate(Date date, int daysOffset, int hoursOffset)
+    {
+        Calendar beforeInterval = Calendar.getInstance();
+        beforeInterval.setTime(date);
+        beforeInterval.add(Calendar.DATE, daysOffset);
+        beforeInterval.add(Calendar.HOUR_OF_DAY, hoursOffset);
+
+        return beforeInterval.getTime();
+    }
+    @Test
+    public void testBloodDrawAPI() throws Exception
+    {
+        goToProjectHome();
+
+        Date bloodDate = prepareDate(new Date(), +5, 0);
+
+        Double tubeVolOver = 10000.5;
+        Integer numTubes = 1;
+        Double quantity = numTubes*tubeVolOver;
+        Integer interval = 30;
+        Double weight = 12.0;
+        Double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
+        String tubeType = "EDTA";
+        Map<String, List<String>> expected = new HashMap<>();
+        Integer project = 640991;
+        String account = "acct102";
+
+        String[] newBloodFields = {"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", FIELD_QCSTATELABEL, FIELD_OBJECTID, FIELD_LSID, "_recordid"};
+        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, project, account, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolOver.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("account", Collections.singletonList("INFO: acct102 / Jon Snow"));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                newBloodFields,
+                bloodData,
+                expected
+                //additionalExtraContext
+        );
+        Double tubeVolLimit = 142.5;
+        Double quantityLimit = numTubes*tubeVolLimit;
+        String matchingAccount = "acct101";
+        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, project, matchingAccount, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        expected = new HashMap<>();
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolLimit.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                newBloodFields,
+                bloodDataNearLimit,
+                expected
+                //additionalExtraContext
+        );
+
+        /*
+        // move to EHR
+        Double tubeVolNear = 143.5;
+        Double quantityNear = numTubes*tubeVolNear;
+        //test two records in the grid
+        Double totalRequested = tubeVolNear*2;
+
+        Object bloodDataNear[][] = {
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolNear, numTubes, quantityNear, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"},
+                {TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolNear, numTubes, quantityNear, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}
+        };
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + totalRequested + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + totalRequested + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                newBloodFields,
+                bloodDataNear,
+                expected
+                //additionalExtraContext
+        );*/
+
+
+        //test an actual valid entry
+        Double tubeVolOK = 50.0;
+        Double quantityOK = tubeVolOK*numTubes;
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), -11, 0);
+        bloodCmd.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", TEST_SUBJECTS[0]);
+                put("date", dt);
+                put("project", project);
+                put("account", matchingAccount);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVolOK);
+                put("num_tubes", numTubes);
+                put("quantity", quantityOK);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+        SelectRowsCommand sr = new SelectRowsCommand("study","blood");
+        sr.addFilter("Id", TEST_SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date", dt, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1, resp2.getRowCount());
+
+        /*
+        Integer newNumTubes = 200;
+        expected = new HashMap<>();
+        expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+        expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg)"));
+
+
+        Map<String, Object> additionalExtraContext = new HashMap<>();
+        JSONArray bloodInTransaction = new JSONArray();
+        bloodInTransaction.put(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[3]);
+                put("date", bloodDate);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVol);
+                put("num_tubes", newNumTubes);
+                put("quantity", quantity);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+
+        Integer numTubesUpdated = 200;
+        Double quantityUpdated =  tubeVol * numTubesUpdated;
+        bloodInTransaction.put(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[2]);
+                put("date", bloodDate);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type",tubeType);
+                put("tube_vol", tubeVol);
+                put("num_tubes", numTubesUpdated);
+                put("quantity", quantityUpdated);
+                put("additionalServices", null);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        additionalExtraContext.put("bloodInTransaction", bloodInTransaction.toString());
+
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
+                "study",
+                "blood",
+                new String[]{"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby"}, new Object[][]{
+                {SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVol, newNumTubes, quantity, null, "y", "Chemical", "< 30 min", "instructions", null, "autotest"}},
+                expected,
+                additionalExtraContext
+        );*/
+
+
+        /*TODO This should be moved to EHR API test, would need to add clinpath runs table to the study schema in EHR test,
+          and update the labwork_services.tsv to include alertOnComplete field populated, since there the EHR trigger
+          script uses it
+
+        //create blood draw with additional services to create a clinpath request
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), -11, 0);
+        String serviceRequested = "CBC";
+        bloodCmd.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", SUBJECTS[0]);
+                put("date", dt);
+                put("project", projectId);
+                put("account", 123456);
+                put("tube_type","Tube Type Test");
+                put("tube_vol", 1);
+                put("num_tubes", 1);
+                put("quantity", 1);
+                put("additionalServices", serviceRequested);
+                put("billedby", "y");
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+
+            }});
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+        //assert clinpath request was created
+        SelectRowsCommand sr = new SelectRowsCommand("study","Clinpath Runs");
+        sr.addFilter("Id",SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date",dt, Filter.Operator.EQUAL);
+        sr.addFilter("servicerequested", serviceRequested, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1,resp2.getRowCount());
+        */
+
+    }
+    protected String generateGUID()
+    {
+        return (String)executeScript("return LABKEY.Utils.generateUUID().toUpperCase()");
+    }
+
+    public void createProtocolAndProject(String theProtocolName, String theProjectName) throws IOException, CommandException
+    {
+        String protocolTitle = generateGUID();
+        InsertRowsCommand protocolCommand = new InsertRowsCommand("ehr", "protocol");
+        protocolCommand.addRow(Maps.of("protocol", theProtocolName, "title", protocolTitle, "approve",  new Date(653295600000L), "enddate", new Date(853295600000L) )); //;
+        // Sept. 14, 1990
+        protocolCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand protocolSelect = new SelectRowsCommand("ehr", "protocol");
+        protocolSelect.addFilter(new Filter("title", protocolTitle));
+        final String protocolId = (String)protocolSelect.execute(getApiHelper().getConnection(), getContainerPath()).getRows().get(0).get("protocol");
+        Assert.assertNotNull(StringUtils.trimToNull(protocolId));
+
+        InsertRowsCommand investigatorsCommand = new InsertRowsCommand("ehr", "investigators");
+        investigatorsCommand.addRow(Maps.of("firstName", "Testt", "lastName", "Tester"));
+        CommandResponse response = investigatorsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+        var id = ((HashMap<?, ?>) ((ArrayList<?>) response.getParsedData().get("rows")).get(0)).get("rowid");
+
+        InsertRowsCommand projectCommand = new InsertRowsCommand("ehr", "project");
+        String projectName = generateGUID();
+        projectCommand.addRow(Maps.of("project", theProjectName, "name", projectName, "protocol", protocolId, "investigatorId", id));
+        projectCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand projectSelect = new SelectRowsCommand("ehr", "project");
+        projectSelect.setColumns(List.of("project", "investigatorId/lastName"));
+        projectSelect.addFilter(new Filter("protocol", protocolId));
+        SelectRowsResponse resp = projectSelect.execute(getApiHelper().getConnection(), getContainerPath());
+        final Integer projectId = (Integer)resp.getRows().get(0).get("project");
+
+        assertEquals("Project not correct in project table", theProjectName, projectId.toString());
+
+    }
+    @Test
+    public void testAssignmentApi() throws Exception
+    {
+
+        goToProjectHome();
+
+        //create protocol and corresponding projects
+        createProtocolAndProject(PROTOCOL_ID_2, PROTOCOL_PROJECT_ID_2);
+        createProtocolAndProject(PROTOCOL_ID_3, PROTOCOL_PROJECT_ID_3);
+
+        InsertRowsCommand protocolCountsCommand = new InsertRowsCommand("ehr", "protocol_counts");
+
+        //protocol102 - macaque constraint
+        Map<String, Object> protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Cynomolgus");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        //protocol103-no cyno
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        //create assignment
+        InsertRowsCommand assignmentCommand = new InsertRowsCommand("study", "assignment");
+        assignmentCommand.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", TEST_SUBJECTS[0]);
+                put("date", prepareDate(new Date(), -10, 0));
+                put("objectid", generateGUID());
+                put("project", PROTOCOL_PROJECT_ID_2);
+            }});
+        assignmentCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        ArrayList<String> msgs = new ArrayList<>();
+        msgs.add("WARN: There are not enough spaces on protocol: " + PROTOCOL_ID_2 + ". Allowed: 1, used: 2");
+        // try 2, should fail since there is one assignment of Rhesus (macaque), and only 1 spot for that
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {MORE_ANIMAL_IDS[0], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_2, "recordID"},
+        }, Maps.of(
+                "project", msgs
+        ));
+
+        //shouldn't allow cyno to be assigned
+        ArrayList<String> msgs3 = new ArrayList<>();
+        msgs3.add("WARN: Species not allowed on protocol: " + PROTOCOL_ID_3);
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {TEST_SUBJECTS[1], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+        }, Maps.of(
+                "project", msgs3
+        ));
+
+        //shouldn't allow another marm
+        ArrayList<String> msgs2 = new ArrayList<>();
+        msgs2.add("WARN: There are not enough spaces on protocol: " + PROTOCOL_ID_3 + ". Allowed: 1, used: 2");
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {TEST_SUBJECTS[2], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+                {TEST_SUBJECTS[5], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+        }, Maps.of(
+                "project", msgs2
+        ));
+
+    }
+
 }

@@ -631,6 +631,8 @@ exports.init = function (EHR) {
     })
 
     EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.AFTER_UPSERT, 'study', 'bloodSummary', function (helper, scriptErrors, row) {
+        console.log("Attempting to run sendBloodOverdrawTriggerNotification.");
+        console.log("sendBloodOverdrawTriggerNotification - row.AvailBlood = " + row.AvailBlood);
         if (row.AvailBlood <= 0) {
             WNPRC.Utils.getJavaHelper().sendBloodOverdrawTriggerNotification(row.Id, row.AvailBlood, row.date);
         }

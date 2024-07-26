@@ -19,9 +19,9 @@ public class BloodOverdrawTriggerNotification extends AbstractEHRNotification {
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
     NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
-    String animalID;
-    String availableBlood;
-    String drawDate;
+    String animalID = null;
+    String availableBlood = null;
+    String drawDate = null;
 
 
     //Constructors
@@ -83,19 +83,17 @@ public class BloodOverdrawTriggerNotification extends AbstractEHRNotification {
         // Set up.
         StringBuilder messageBody = new StringBuilder();
 
-//         TODO: Set this up for testing.
+        // This sets up the values for testing through Notification Manager > Run Report in Browser.
         if (this.animalID == null || this.availableBlood == null || this.drawDate == null) {
-            // This sets up the values for testing through Notification Manager > Run Report in Browser.
             this.animalID = "testID";
             this.availableBlood = "testAvailBlood";
             this.drawDate = dateToolkit.getDateToday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString();
         }
-        else {
-            // Begins message info.
-            messageBody.append("<p>This email contains warning information for an animal who just had their blood overdrawn.  It was sent on: " + dateToolkit.getCurrentTime() + "</p>");
-            messageBody.append("<p>Animal ID: " + this.animalID + "</p>");
-            messageBody.append("<p>Available Blood: " + this.availableBlood + "</p>");
-        }
+
+        // Begins message info.
+        messageBody.append("<p>This email contains warning information for an animal who just had their blood overdrawn.  It was sent on: " + dateToolkit.getCurrentTime() + "</p>");
+        messageBody.append("<p>Animal ID: " + this.animalID + "</p>");
+        messageBody.append("<p>Available Blood: " + this.availableBlood + "</p>");
 
         // Returns message info.
         return messageBody.toString();

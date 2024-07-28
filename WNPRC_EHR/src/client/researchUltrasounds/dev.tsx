@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { AppContainer } from 'react-hot-loader';
 
 // Main react component
 import  {GridPanelConfig}  from '../components/GridPanelConfig';
@@ -10,21 +9,11 @@ import { gridConfig } from './configProps';
 import '../wnprc_ehr.scss';
 
 
-const render = () => {
+const render = (): void => {
     ReactDOM.render(
-        <AppContainer>
-            <GridPanelConfig
-                {...gridConfig}
-            />
-        </AppContainer>,
+        <GridPanelConfig {...gridConfig} />,
         document.getElementById('app')
     )
 };
-
-declare const module: any;
-
-if (module.hot) {
-    module.hot.accept();
-}
 
 render();

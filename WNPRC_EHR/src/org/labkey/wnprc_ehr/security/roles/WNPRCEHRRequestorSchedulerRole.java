@@ -3,7 +3,6 @@ package org.labkey.wnprc_ehr.security.roles;
 
 import org.labkey.api.ehr.security.EHRScheduledInsertPermission;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.security.Group;
 import org.labkey.api.security.SecurableResource;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.Permission;
@@ -28,7 +27,7 @@ public class WNPRCEHRRequestorSchedulerRole extends AbstractRole
             this.addPermission(permClass);
         }
 
-        addExcludedPrincipal(org.labkey.api.security.SecurityManager.getGroup(Group.groupGuests));
+        excludeGuests();
     }
 
     @Override

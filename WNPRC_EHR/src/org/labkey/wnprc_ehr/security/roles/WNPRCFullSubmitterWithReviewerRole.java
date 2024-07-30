@@ -2,7 +2,6 @@ package org.labkey.wnprc_ehr.security.roles;
 
 import org.labkey.api.ehr.security.*;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.security.Group;
 import org.labkey.api.security.SecurableResource;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -63,7 +62,7 @@ public class WNPRCFullSubmitterWithReviewerRole extends AbstractRole {
                 EHRScheduledUpdatePermission.class
         );
 
-        addExcludedPrincipal(org.labkey.api.security.SecurityManager.getGroup(Group.groupGuests));
+        excludeGuests();
     }
 
     protected WNPRCFullSubmitterWithReviewerRole(String name, String description, Class<? extends Permission>... perms) {

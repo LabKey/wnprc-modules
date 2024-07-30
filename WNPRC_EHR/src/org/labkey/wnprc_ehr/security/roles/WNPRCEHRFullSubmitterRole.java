@@ -4,7 +4,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.ehr.security.EHRStartedInsertPermission;
 import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.security.Group;
 import org.labkey.api.security.SecurableResource;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.Permission;
@@ -27,10 +26,7 @@ public class WNPRCEHRFullSubmitterRole extends AbstractRole
             this.addPermission(permClass);
         }
 
-        addExcludedPrincipal(org.labkey.api.security.SecurityManager.getGroup(Group.groupGuests));
-
-
-
+        excludeGuests();
     }
 
     @Override

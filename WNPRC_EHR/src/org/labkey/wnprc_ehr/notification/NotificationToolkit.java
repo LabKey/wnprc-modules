@@ -890,6 +890,26 @@ public class NotificationToolkit {
         return animalAssigned;
     }
 
+    // TODO: Comment.  Returns null if there is no overdraw, or overdraw amount if there is an overdraw.
+    public Double checkIfBloodDrawIsOverdraw(Container c, User u, String idToCheck, String dateToCheck) {
+        // Creates filter.
+        SimpleFilter myFilter = new SimpleFilter("Id", idToCheck, CompareType.EQUAL);
+        myFilter.addCondition("date", dateToCheck, CompareType.DATE_EQUAL);
+        // Runs query.
+        String[] targetColumns = new String[]{"BloodRemaining/AvailBlood"};
+        ArrayList<HashMap<String,String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "blood", myFilter, null, targetColumns);
+
+        // Checks results.
+        if (!returnArray.isEmpty()) {
+            for (HashMap<String, String> result : returnArray) {
+                Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
+                if (availableBlood <=0) {
+                    return availableBlood;
+                }
+            }
+        }
+        return null;
+    }
 
 
 

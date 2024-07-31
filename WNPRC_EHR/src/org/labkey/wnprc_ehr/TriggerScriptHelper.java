@@ -248,14 +248,14 @@ public class TriggerScriptHelper {
     }
 
     // TODO: Should availBlood be a type: Double?
-    public void sendBloodOverdrawTriggerNotification(String animalID, String availBlood, String drawDate) {
+    public void sendBloodOverdrawTriggerNotification(String animalID, String drawDate) {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         // Verifies 'Notification Service' is enabled before sending notification.
         if (NotificationService.get().isServiceEnabled()) {
             // Sends Overdraw Trigger Notification.
             if (NotificationService.get().isActive(new BloodOverdrawTriggerNotification(ehr), container)) {
                 _log.info("Using java helper to send email for Blood Overdraw Trigger Notification (animalID: " + animalID + ").");
-                BloodOverdrawTriggerNotification notification = new BloodOverdrawTriggerNotification(ehr, animalID, availBlood, drawDate);
+                BloodOverdrawTriggerNotification notification = new BloodOverdrawTriggerNotification(ehr, animalID, drawDate);
                 notification.sendManually(container, user);
             }
             else {

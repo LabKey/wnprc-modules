@@ -20,7 +20,6 @@ public class BloodOverdrawTriggerNotification extends AbstractEHRNotification {
     NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
     NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
     String animalID = null;
-    String availableBlood = null;
     String drawDate = null;
 
 
@@ -32,11 +31,9 @@ public class BloodOverdrawTriggerNotification extends AbstractEHRNotification {
     public BloodOverdrawTriggerNotification(Module owner) {super(owner);}
 
     //This constructor is used to actually send the notification via the "TriggerScriptHelper.java" class.
-    public BloodOverdrawTriggerNotification(Module owner, String drawAnimalID, String availBlood, String dateOfDraw) {
+    public BloodOverdrawTriggerNotification(Module owner, String drawAnimalID, String dateOfDraw) {
         super(owner);
-//        this.requestIdToCheck = requestID;
         this.animalID = drawAnimalID;
-        this.availableBlood = availBlood;
         this.drawDate = dateOfDraw;
     }
 
@@ -82,21 +79,36 @@ public class BloodOverdrawTriggerNotification extends AbstractEHRNotification {
     public String getMessageBodyHTML(Container c, User u) {
         // Set up.
         StringBuilder messageBody = new StringBuilder();
+        Double overdrawAmount = null;
 
         // This sets up the values for testing through Notification Manager > Run Report in Browser.
-        if (this.animalID == null || this.availableBlood == null || this.drawDate == null) {
+        if (this.animalID == null || this.drawDate == null) {
             this.animalID = "testID";
-            this.availableBlood = "testAvailBlood";
             this.drawDate = dateToolkit.getDateToday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString();
+            overdrawAmount = Double.valueOf(-100);
+        }
+        else {
+            overdrawAmount = notificationToolkit.checkIfBloodDrawIsOverdraw(c, u, this.animalID, this.drawDate);
         }
 
-        // Begins message info.
-        messageBody.append("<p>This email contains warning information for an animal who just had their blood overdrawn.  It was sent on: " + dateToolkit.getCurrentTime() + "</p>");
-        messageBody.append("<p>Animal ID: " + this.animalID + "</p>");
-        messageBody.append("<p>Available Blood: " + this.availableBlood + "</p>");
+        // Verifies blood is an overdraw.
+        if (overdrawAmount != null) {
+            // Begins message info.
+            messageBody.append("<p>This email contains warning information for an animal who just had their blood overdrawn.  It was sent on: " + dateToolkit.getCurrentTime() + "</p>");
+            messageBody.append("<p>Animal ID: " + this.animalID + "</p>");
+            messageBody.append("<p>Date of overdraw: " + this.drawDate + "</p>");
+            messageBody.append("<p>Available blood: " + overdrawAmount + "</p>");
 
-        // Returns message info.
-        return messageBody.toString();
+            // Returns message info.
+            return messageBody.toString();
+        }
+        // Sends no message if there is no overdraw.
+        else {
+            return null;
+        }
+
     }
+
+
 
 }

@@ -372,13 +372,18 @@ public class NotificationToolkit {
                         feeTable.forEach(new Selector.ForEachBlock<ResultSet>() {
                             @Override
                             public void exec(ResultSet rs) throws SQLException {
-                                updatedFee.append(rs.getString("prepaid"));
+                                updatedFee.append(rs.getString("prepaid")); // When value is null, this returns "null" as a string.  This is why we need to check for "null" in the next if statement.
                             }
                         });
                     }
                 }
                 if (!updatedFee.isEmpty()) {
-                    return updatedFee.toString();
+                    if (!updatedFee.toString().equals("null")) {
+                        return updatedFee.toString();
+                    }
+                    else {
+                        return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+                    }
                 }
                 else {
                     return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");

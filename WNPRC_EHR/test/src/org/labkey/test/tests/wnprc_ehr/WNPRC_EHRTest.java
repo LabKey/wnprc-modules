@@ -23,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
@@ -123,6 +124,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private final String ANIMAL_HISTORY_URL = "/" + PROJECT_NAME + "/EHR/ehr-animalHistory.view";
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
+    protected static final String PROJECT_MEMBER_ID_2 = "test3804589"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
     private static final int ALIASES_NUM_ROWS = 4;
@@ -130,12 +132,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
     private final File CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesGroupCategoryError.tsv");
-    private static final int CHARGE_RATES_NUM_ROWS = 9;
-    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 8;
+    private static final int CHARGE_RATES_NUM_ROWS = 10;
+    private static final int CHARGEABLE_ITEMS_NUM_ROWS = 9;
 
     private final File CHARGEABLE_ITEMS_RATES_UPDATE_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesUpdate.tsv");
-    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 12;
-    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 11;
+    private static final int CHARGE_RATES_NUM_UPDATE_ROWS = 13;
+    private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 12;
 
     private final File CHARGEABLE_ITEM_CATEGORIES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemCategories.tsv");
 
@@ -169,7 +171,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String ROOM_ID_LOCAL = "ab160";
     protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
 
-    protected static String[] TEST_SUBJECTS = {"r12345", "cy23456", "cj3456", "cy45678", "cy56789"};
+    protected static String[] TEST_SUBJECTS = {"r12345", "cy23456", "cj3456", "cy45678", "cy56789", "cj3457"};
     protected static final String ROOM_ID_EHR_TEST = "2341092";
     protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
 
@@ -190,6 +192,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final String ASSIGNS_MSG_BOARD_RESTRICTED_PATH = "/" + EHR_FOLDER_PATH + "/Assigns/RestrictedBoard/";
     private static final String MHC_SSP_LIST = "MHC SSP List";
     private static final String QPCR_QC_list = "QPCR_QC_list";
+    public static final String PROTOCOL_PROJECT_ID_2 = "795645";
+    public static final String PROTOCOL_PROJECT_ID_3 = "795646";
+    public static final String PROTOCOL_ID_2 = "protocol102";
+    public static final String PROTOCOL_ID_3 = "protocol103";
+
 
     @Nullable
     @Override
@@ -274,7 +281,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
-
         initTest.deathNotificationSetup();
     }
 
@@ -375,6 +381,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("chargeId", getChargeId("Blood draws - Additional Tubes"));
         insertCmd.addRow(rowMap);
 
+        rowMap = new HashMap<>();
+        rowMap.put("schemaName", "wnprc_billing");
+        rowMap.put("queryName", "bloodDrawsAllTubesSPI");
+        rowMap.put("description", "Blood Draws - SPI");
+        rowMap.put("chargeId", getChargeId("Blood Draws"));
+        insertCmd.addRow(rowMap);
+
         int numRows = insertCmd.execute(cn, PRIVATE_FOLDER_PATH).getRows().size();
         log("Inserted " + numRows + " into ehr_billing.procedureQueryChargeIdAssoc table.");
     }
@@ -395,7 +408,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 {TEST_SUBJECTS[1], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {TEST_SUBJECTS[2], "Marmoset", (new Date()).toString(), getFemale(), new Date(), "Alive", UUID.randomUUID().toString()},
                 {TEST_SUBJECTS[3], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
-                {TEST_SUBJECTS[4], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
+                {TEST_SUBJECTS[4], "Cynomolgus", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()},
+                {TEST_SUBJECTS[5], "Marmoset", (new Date()).toString(), getMale(), new Date(), "Alive", UUID.randomUUID().toString()}
         };
         insertCommand = getApiHelper().prepareInsertCommand("study", "demographics", "lsid", fields, data);
         getApiHelper().deleteAllRecords("study", "demographics", new Filter("Id", StringUtils.join(TEST_SUBJECTS, ";"), Filter.Operator.IN));
@@ -1377,19 +1391,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         switchToWindow(1);
 
         DataRegionTable invoicedItemsByProject = new DataRegionTable("query", getDriver());
-        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "46.00",	"$1,028.95");
+        //unit cost indirect is 40
+        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "47.00",	"$1,068.95");
         actualRowData = invoicedItemsByProject.getRowDataAsText(0, "invoiceId/billingPeriodStart", "invoiceId/billingPeriodEnd", "project", "numItems", "total");
         assertEquals("Wrong row data for invoicedItemsByProject ", expectedRowData, actualRowData);
 
         log("Validating Summary By Item's total sum value");
         clickAndWait(Locator.linkContainingText("Summary By Item"));
-        assertTextPresent("Sum", "$1,028.95");
+        assertTextPresent("Sum", "$1,068.95");
 
         goBack();
 
         clickAndWait(Locator.linkContainingText("All Items"));
         DataRegionTable invoicedItems = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", 5, invoicedItems.getDataRowCount());
+        assertEquals("Wrong row count", 6, invoicedItems.getDataRowCount());
         log("Validating Totals");
         assertTextPresent("$806.00", "$13.00", "$1.95", "$195.00");
 
@@ -1542,6 +1557,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         actualRowData = bloodDrawProcedureAddnlTubes.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
         assertEquals("Wrong row data for Blood Draws with Additional tubes: ", expectedRowData, actualRowData);
         assertEquals("One row should be displayed", bloodDrawProcedureAddnlTubes.getDataRowCount(), 1);
+
+        goToBillingFolder();
+        log("Verify num. rows for 'blood draws for spi'");
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=bloodDrawsAllTubesSPI&query.date~dategte=2010-10-01&query.date~datelte=2010-10-30", PRIVATE_FOLDER_PATH));
+        DataRegionTable bloodDrawProcedureSPI = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID_2, "2010-10-18 07:30", "640991", "acct103", "1.0", "1.0", "rk");
+        actualRowData = bloodDrawProcedureSPI.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "otherRate", "quantity", "performedby");
+        assertEquals("Wrong row data for Blood Draws with Additional tubes: ", expectedRowData, actualRowData);
+        assertEquals("One row should be displayed", bloodDrawProcedureSPI.getDataRowCount(), 1);
     }
 
     private void viewChargesAdjustmentsNotYetBilled(int numRows, String filterCol, String filterVal, List<String> expectedRowData)
@@ -1786,10 +1810,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         List<String> expectedColumns = Arrays.asList(
                 "chargeId",
+                "chargeId/departmentCode",
                 "unitCost",
                 "startDate",
                 "endDate",
-                "genCredits"
+                "genCredits",
+                "chargeId/isAutomatic"
         );
 
         checkColumns(linkText, expectedColumns);
@@ -1806,7 +1832,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "comment",
                 "active",
                 "startDate",
-                "endDate"
+                "endDate",
+                "isAutomatic"
         );
 
         checkColumns(linkText, expectedColumns);
@@ -1965,14 +1992,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
+        testReports("Invoiced Items", 8, "test2312318","640991" , "$19.50", "$15.00",
                 "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
+        // check that the acct103 was charged and not the account associated w/ project 640991
+        testReports("Invoice Internal", 2, "acct103", "40.00");
     }
 
     private void testSummaryReports()
     {
         testReports("Invoice Runs", 1, "2010-10-01", "2010-10-31");
-        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$32.75", "$285.00");
+        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$72.75", "$285.00");
     }
 
     private void testReports(String linkText, int numRows, String... texts)
@@ -3560,19 +3589,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         goToProjectHome();
 
-
-        //add valid proj
-        InsertRowsCommand cmdUpd = new InsertRowsCommand("ehr", "project");
-        Integer projectId = 20240228;
-        Map<String,Object> projRowMap = new HashMap<>();
-        projRowMap.put("project", Integer.valueOf(projectId));
-        projRowMap.put("investigatorId", getUserId(PasswordUtil.getUsername()));
-        cmdUpd.addRow(projRowMap);
-
-
-        Connection cn = WebTestHelper.getRemoteApiConnection();
-        cmdUpd.execute(cn, EHR_FOLDER_PATH);
-
         Date bloodDate = prepareDate(new Date(), +5, 0);
 
         Double tubeVolOver = 10000.5;
@@ -3583,13 +3599,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Double maxAllowable =  Math.round((weight * 60 * .20) * 100) / 100.0;
         String tubeType = "EDTA";
         Map<String, List<String>> expected = new HashMap<>();
+        Integer project = 640991;
+        String account = "acct102";
 
         String[] newBloodFields = {"Id", "date", "project", "account", "tube_type", "tube_vol", "num_tubes", "quantity", "additionalServices", "billedby", "restraint", "restraintDuration", "instructions", "remark", "performedby", FIELD_QCSTATELABEL, FIELD_OBJECTID, FIELD_LSID, "_recordid"};
-        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        Object bloodData[][] = {{TEST_SUBJECTS[0], bloodDate, project, account, tubeType, tubeVolOver, numTubes, quantity, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolOver.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
         expected.put("num_tubes", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("quantity", Collections.singletonList("INFO: Blood volume of " + quantity + " (" + quantity + " over " + interval + " days) exceeds the allowable volume of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
+        expected.put("account", Collections.singletonList("INFO: acct102 / Jon Snow"));
         expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
                 "study",
@@ -3601,10 +3620,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         );
         Double tubeVolLimit = 142.5;
         Double quantityLimit = numTubes*tubeVolLimit;
-        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, projectId, 123456, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        String matchingAccount = "acct101";
+        Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, project, matchingAccount, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
+        expected = new HashMap<>();
+        expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
         expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolLimit.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
+        expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
                 "study",
                 "blood",
@@ -3648,8 +3671,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             {
                 put("Id", TEST_SUBJECTS[0]);
                 put("date", dt);
-                put("project", projectId);
-                put("account", 123456);
+                put("project", project);
+                put("account", matchingAccount);
                 put("tube_type",tubeType);
                 put("tube_vol", tubeVolOK);
                 put("num_tubes", numTubes);
@@ -3768,6 +3791,154 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
         Assert.assertEquals(1,resp2.getRowCount());
         */
+
+    }
+    protected String generateGUID()
+    {
+        return (String)executeScript("return LABKEY.Utils.generateUUID().toUpperCase()");
+    }
+
+    public void createProtocolAndProject(String theProtocolName, String theProjectName) throws IOException, CommandException
+    {
+        String protocolTitle = generateGUID();
+        InsertRowsCommand protocolCommand = new InsertRowsCommand("ehr", "protocol");
+        protocolCommand.addRow(Maps.of("protocol", theProtocolName, "title", protocolTitle, "approve",  new Date(653295600000L), "enddate", new Date(853295600000L) )); //;
+        // Sept. 14, 1990
+        protocolCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand protocolSelect = new SelectRowsCommand("ehr", "protocol");
+        protocolSelect.addFilter(new Filter("title", protocolTitle));
+        final String protocolId = (String)protocolSelect.execute(getApiHelper().getConnection(), getContainerPath()).getRows().get(0).get("protocol");
+        Assert.assertNotNull(StringUtils.trimToNull(protocolId));
+
+        InsertRowsCommand investigatorsCommand = new InsertRowsCommand("ehr", "investigators");
+        investigatorsCommand.addRow(Maps.of("firstName", "Testt", "lastName", "Tester"));
+        CommandResponse response = investigatorsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+        var id = ((HashMap<?, ?>) ((ArrayList<?>) response.getParsedData().get("rows")).get(0)).get("rowid");
+
+        InsertRowsCommand projectCommand = new InsertRowsCommand("ehr", "project");
+        String projectName = generateGUID();
+        projectCommand.addRow(Maps.of("project", theProjectName, "name", projectName, "protocol", protocolId, "investigatorId", id));
+        projectCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand projectSelect = new SelectRowsCommand("ehr", "project");
+        projectSelect.setColumns(List.of("project", "investigatorId/lastName"));
+        projectSelect.addFilter(new Filter("protocol", protocolId));
+        SelectRowsResponse resp = projectSelect.execute(getApiHelper().getConnection(), getContainerPath());
+        final Integer projectId = (Integer)resp.getRows().get(0).get("project");
+
+        assertEquals("Project not correct in project table", theProjectName, projectId.toString());
+
+    }
+    @Test
+    public void testAssignmentApi() throws Exception
+    {
+
+        goToProjectHome();
+
+        //create protocol and corresponding projects
+        createProtocolAndProject(PROTOCOL_ID_2, PROTOCOL_PROJECT_ID_2);
+        createProtocolAndProject(PROTOCOL_ID_3, PROTOCOL_PROJECT_ID_3);
+
+        InsertRowsCommand protocolCountsCommand = new InsertRowsCommand("ehr", "protocol_counts");
+
+        //protocol102 - macaque constraint
+        Map<String, Object> protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Cynomolgus");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_2);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        //protocol103-no cyno
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Macaque");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Rhesus");
+        protocolCountsRow.put("allowed", 3);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "Marmoset");
+        protocolCountsRow.put("allowed", 1);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsRow = new HashMap<>();
+        protocolCountsRow.put("protocol", PROTOCOL_ID_3);
+        protocolCountsRow.put("species", "All Species");
+        protocolCountsRow.put("allowed", 2);
+        protocolCountsCommand.addRow(protocolCountsRow);
+
+        protocolCountsCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        //create assignment
+        InsertRowsCommand assignmentCommand = new InsertRowsCommand("study", "assignment");
+        assignmentCommand.addRow(new HashMap<String, Object>(){
+            {
+                put("Id", TEST_SUBJECTS[0]);
+                put("date", prepareDate(new Date(), -10, 0));
+                put("objectid", generateGUID());
+                put("project", PROTOCOL_PROJECT_ID_2);
+            }});
+        assignmentCommand.execute(getApiHelper().getConnection(), getContainerPath());
+
+        ArrayList<String> msgs = new ArrayList<>();
+        msgs.add("WARN: There are not enough spaces on protocol: " + PROTOCOL_ID_2 + ". Allowed: 1, used: 2");
+        // try 2, should fail since there is one assignment of Rhesus (macaque), and only 1 spot for that
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {MORE_ANIMAL_IDS[0], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_2, "recordID"},
+        }, Maps.of(
+                "project", msgs
+        ));
+
+        //shouldn't allow cyno to be assigned
+        ArrayList<String> msgs3 = new ArrayList<>();
+        msgs3.add("WARN: Species not allowed on protocol: " + PROTOCOL_ID_3);
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {TEST_SUBJECTS[1], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+        }, Maps.of(
+                "project", msgs3
+        ));
+
+        //shouldn't allow another marm
+        ArrayList<String> msgs2 = new ArrayList<>();
+        msgs2.add("WARN: There are not enough spaces on protocol: " + PROTOCOL_ID_3 + ". Allowed: 1, used: 2");
+        getApiHelper().testValidationMessage(PasswordUtil.getUsername(), "study", "assignment", new String[]{"Id", "date", "enddate", "project", "_recordId"}, new Object[][]{
+                {TEST_SUBJECTS[2], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+                {TEST_SUBJECTS[5], prepareDate(new Date(), 10, 0), null, PROTOCOL_PROJECT_ID_3, "recordID"},
+        }, Maps.of(
+                "project", msgs2
+        ));
 
     }
 

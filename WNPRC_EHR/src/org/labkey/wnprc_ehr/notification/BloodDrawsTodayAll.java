@@ -105,7 +105,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
         NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
         ArrayList<String[]> myTableData = new ArrayList<>();        // List of all blood draws as [[id, blood remaining, project assignment, completion status, assigned to]]
-//        ArrayList<String> myTableRowColors = new ArrayList<>();     // List of all row colors (same length as myTableData).
+        //        ArrayList<String> myTableRowColors = new ArrayList<>();     // List of all row colors (same length as myTableData).
         HashMap<String, HashMap<String, ArrayList<String[]>>> resultsByArea = new HashMap<>();  // Area(Room(List of draws))
 
 
@@ -204,19 +204,32 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 // Adds the current row to myTableData (based on group being queried).
                 if (assignmentGroup.equals("animalCare")) {
                     if (result.get("billedby/title").equals("Animal Care")) {
-                        myTableData.add(myCurrentRow);
-//                        myTableRowColors.add(currentRowColor);
+                        if (myCurrentRow[3].equals("INCOMPLETE")) {
+                            myTableData.add(0, myCurrentRow);
+                        }
+                        else {
+                            myTableData.add(myCurrentRow);
+                        }
                     }
                 }
                 else if (assignmentGroup.equals("vetStaff")) {
                     if (result.get("billedby/title").equals("Vet Staff")) {
-                        myTableData.add(myCurrentRow);
-//                        myTableRowColors.add(currentRowColor);
+                        if (myCurrentRow[3].equals("INCOMPLETE")) {
+                            myTableData.add(0, myCurrentRow);
+                        }
+                        else {
+                            myTableData.add(myCurrentRow);
+                        }
                     }
                 }
                 else {
-                    myTableData.add(myCurrentRow);
-//                    myTableRowColors.add(currentRowColor);
+                    // Adds to the beginning of the list if blood draw is incomplete, or the end of the list if the blood draw is completed.
+                    if (myCurrentRow[3].equals("INCOMPLETE")) {
+                        myTableData.add(0, myCurrentRow);
+                    }
+                    else {
+                        myTableData.add(myCurrentRow);
+                    }
                 }
             }
 
@@ -286,7 +299,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
             StringBuilder returnString = new StringBuilder();
 
             // Goes through each room in each area and presents a table showing all blood draws for that room.
-            String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
+            String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Unassigned", "Incomplete", "Group", "Other Groups Drawing Blood Today"};
             // Iterates through each area (sorted alphabetically).
             for (String currentArea : notificationToolkit.sortSetWithNulls(this.resultsByArea.keySet())) {
                 returnString.append("<b>AREA: </b>" + currentArea + ":<br>\n");

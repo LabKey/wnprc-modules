@@ -44,6 +44,8 @@ module.exports = {
     },{
         name: 'weight',
         title: 'Weight',
+        // permission: 'login',
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client/weight',
         requiresLogin: true
     }]

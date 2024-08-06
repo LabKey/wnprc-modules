@@ -131,6 +131,7 @@ export const addNewRack = (
     rackType: RackTypes,
     rackLoc?: number
 ) => {
+    console.log("Adding Rack");
     const rect:SVGRectElement = selectedEditRect ? selectedEditRect : d3.select(`#add-rack-${rackLoc}`).node() as SVGRectElement;
     const id = parseInt(parseAddRack(rect.id));
     const x = parseInt(rect.getAttribute('x')) / gridSize;
@@ -155,7 +156,6 @@ export const addNewRack = (
         isActive: true,
         cages: genCages(cageNum, rackType, ['Suburban'], [CageSizes['8.0']], id, [], cageCount)
     };
-
     addRack(newRack);
     setAddingRack(false);
 };
@@ -179,7 +179,6 @@ export const loadRoom = (name: string): Rack[] => {
             })
         })
     }
-
     // generate default cages
 
 
@@ -197,7 +196,8 @@ export const loadRoom = (name: string): Rack[] => {
                 width: 1,
                 height: 1
             }
-            tempRoom.push(tempRack)
+            tempRoom.push(tempRack);
+            cageNum += tempRack.cages.length;
         }
         createAdjCages();
     }
@@ -615,25 +615,25 @@ export const createDragBehavior = (
         const newX = Math.max(0, Math.min(gridWidth - 1, Math.floor(x / gridSize)));
         const newY = Math.max(0, Math.min(gridHeight - 1, Math.floor(y / gridSize)));
         console.log("Drag: ", x, newX, y, newY);
-
         return [newX, newY];
     }
-    return d3.drag<SVGGElement, Rack>()
-        .on('start', function (event, d) {
+    return {
+        start: function (event, d) {
             if (!isDraggingEnabled) return;
             d3.select(this).raise().attr('stroke', 'black');
-        })
-        .on('drag', function (event, d) {
+        },
+        drag: function (event, d) {
             if (!isDraggingEnabled) return;
             const [newX, newY] = calculateNewPosition(event, svgRef.current, gridSize, gridWidth, gridHeight);
             d3.select(this).attr('transform', `translate(${newX * gridSize}, ${newY * gridSize})`);
-        })
-        .on('end', function (event, d) {
+        },
+        end: function (event, d) {
             if (!isDraggingEnabled) return;
             d3.select(this).attr('stroke', null);
             const [newX, newY] = calculateNewPosition(event, svgRef.current, gridSize, gridWidth, gridHeight);
             updateLocalRacks(d.id, newX, newY);
-        });
+        }
+    };
 }
 
 

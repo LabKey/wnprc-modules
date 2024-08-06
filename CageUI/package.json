@@ -12,6 +12,7 @@
     "build-storybook": "build-storybook",
     "build": "better-npm-run build",
     "start": "cross-env NODE_ENV=development LK_MODULE=WNPRC_EHR webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
+    "startMobile": "cross-env NODE_ENV=development LK_MODULE=WNPRC_EHR webpack-dev-server --config ./watch.config.js",
     "build-prod": "better-npm-run build-prod",
     "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
   },

@@ -749,6 +749,7 @@ Ext4.override(EHR.form.field.ProjectEntryField, {
                             Ext.Msg.alert('Error', "Must supply both year and prefix");
                             return
                         }
+                        console.log("SQL: ", sqlQueryString);
 
                         LABKEY.Query.executeSql({
                             schemaName: 'study',

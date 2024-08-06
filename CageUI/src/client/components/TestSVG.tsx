@@ -7,6 +7,7 @@ import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
 import { Rack, RackTypes } from './typings';
 import { Popup } from './Popup';
+import { RackTemplate } from './RackTemplate';
 
 const TestSVG = () => {
     const svgRef = useRef(null);
@@ -59,7 +60,7 @@ const TestSVG = () => {
                 const y = (d.yPos || 0) * gridSize;
                 return `translate(${x}, ${y})`;
             })
-            .call(drag);
+            //.call(drag);
 
         groups.each(function(d) {
             const width = (d.width || 1) * gridSize;
@@ -82,7 +83,7 @@ const TestSVG = () => {
             }
         };
 
-        groups.each(function(d) {
+        groups.each(function(d, rackIdx) {
             const group = d3.select(this);
             const rackTemplate = getTemplateForRack(d.type);
 
@@ -95,7 +96,15 @@ const TestSVG = () => {
                 // Update the rack ID
                 group.select('[id="rack-x"]').attr('id', `rack-${d.id}`);
                 // Update the cage names and handle variable number of cages and get all cage elements and reverse their order
+                // Get the cage elements
                 const cageElements = group.selectAll('[id^="cage-"]').nodes().reverse();
+
+                // Calculate the midpoint of the array
+                const midpoint = Math.ceil(groups.size() / 2);
+                if(midpoint < d.id){
+                    cageElements.reverse();
+                }
+
                 // Update the cage names and handle variable number of cages
                 cageElements.forEach((cageElement, index) => {
                     const cageGroup = d3.select(cageElement);
@@ -191,58 +200,6 @@ const TestSVG = () => {
             <button onClick={saveChanges} disabled={!hasUnsavedChanges}>Save Changes</button>
             {hasUnsavedChanges && <span>You have unsaved changes</span>}
             <div>Total Cages: {totalCages}</div>
-            {addingRack &&
-                    <Popup
-                            isOpen={addingRack}
-                            onClose={() => setAddingRack(false)}
-                            header={'Insert New Rack'}
-                            mainContent={
-                                <>
-                                    <ReactSVG
-                                        src={`${ActionURL.getContextPath()}/cageui/static/FourRack.svg`}
-                                        id={'rack-template'}
-                                        wrapper={'div'}
-                                        beforeInjection={(svg) => {
-                                            const editRect:SVGElement = svg.querySelector('#edit')
-                                            console.log(editRect)
-                                            editRect.style.pointerEvents = "bounding-box";
-                                            editRect.onclick = (e) => {
-                                                addNewRack(
-                                                    selectedEditRect,
-                                                    gridSize,
-                                                    localRoom,
-                                                    room,
-                                                    addRack,
-                                                    setAddingRack,
-                                                    RackTypes.TwoOfTwo
-                                                );
-                                            };
-                                        }}
-                                    />
-                                    <ReactSVG
-                                        src={`${ActionURL.getContextPath()}/cageui/static/TwoRack.svg`}
-                                        id={"rack-template"}
-                                        wrapper={'div'}
-                                        beforeInjection={(svg) => {
-                                            const editRect:SVGElement = svg.querySelector('#edit')
-                                            editRect.style.pointerEvents = "bounding-box";
-                                            editRect.onclick = (e) => {
-                                                addNewRack(
-                                                    selectedEditRect,
-                                                    gridSize,
-                                                    localRoom,
-                                                    room,
-                                                    addRack,
-                                                    setAddingRack,
-                                                    RackTypes.OneOfOne
-                                                );
-                                            };
-                                        }}
-                                    />
-                                </>
-                            }
-                    />
-            }
         </div>
     );
 };

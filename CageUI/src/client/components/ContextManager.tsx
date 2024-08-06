@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Cage, Rack } from './typings';
 import { removeCircularReferences } from './helpers';
 
-export interface CageContextType {
+export interface RoomContextType {
     room: Rack[],
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
     clickedCage: Cage | null,
@@ -32,21 +32,42 @@ export interface CageContextType {
     setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>
 
 }
-const CageContext = createContext<CageContextType | null>(null);
 
-export const useCurrentContext = () => {
-    const context = useContext(CageContext);
+export interface LayoutContextType {
+    room: Rack[],
+    setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
+    localRoom: Rack[],
+    addRack: (newRack: any) => void,
+}
+
+const RoomContext = createContext<RoomContextType | null>(null);
+const LayoutContext = createContext<LayoutContextType | null>(null)
+
+export const useLayoutContext = () => {
+    const context = useContext(LayoutContext);
 
     if (!context) {
         throw new Error(
-            "useCurrentContext has to be used within <CurrentUserContext.Provider>"
+            "useCurrentContext has to be used within <LayoutContext.Provider>"
+        );
+    }
+
+    return context;
+}
+
+export const useCurrentContext = () => {
+    const context = useContext(RoomContext);
+
+    if (!context) {
+        throw new Error(
+            "useCurrentContext has to be used within <RoomContext.Provider>"
         );
     }
 
     return context;
 };
 
-export const ContextProvider = ({children}) => {
+export const RoomContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     const [clickedCage, setClickedCage] = useState<Cage>();
     const [cageDetails, setCageDetails] = useState<Cage[]>([]);
@@ -107,7 +128,7 @@ export const ContextProvider = ({children}) => {
     }
 
     return (
-        <CageContext.Provider value={{
+        <RoomContext.Provider value={{
             room,
             setRoom,
             clickedCage,
@@ -136,7 +157,26 @@ export const ContextProvider = ({children}) => {
             setIsDraggingEnabled
         }}>
             {children}
-        </CageContext.Provider>
+        </RoomContext.Provider>
     )
+}
 
+export const LayoutContextProvider = ({children}) => {
+    const [room, setRoom] = useState<Rack[]>([]);
+    const [localRoom, setLocalRoom] = useState<Rack[]>(room);
+
+    const addRack = async (newRect) => {
+        setLocalRoom(prevRectangles => [...prevRectangles, newRect]);
+    };
+
+    return (
+        <LayoutContext.Provider value={{
+            room,
+            setRoom,
+            localRoom,
+            addRack
+        }}>
+            {children}
+        </LayoutContext.Provider>
+    );
 }

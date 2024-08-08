@@ -920,6 +920,38 @@ public class NotificationToolkit {
         return returnURL.toString();
     }
 
+    public String createFormURL(Container c, String formType, String taskID) {
+        // Creates URL.
+        ActionURL formURL = new ActionURL();
+        formURL = new ActionURL("ehr", "taskDetails.view", c);
+        formURL.addParameter("formType", formType);
+        formURL.addParameter("taskid", taskID);
+
+        // Creates path.
+        Path returnURL = new Path(new ActionURL().getBaseServerURI(), formURL.toString());
+
+        // Returns URL.
+        return returnURL.toString();
+    }
+
+    public String createAnimalHistoryURL(Container c, String subject) {
+        // Creates URL.
+        ActionURL animalHistoryURL = new ActionURL();
+        animalHistoryURL = new ActionURL("ehr", "animalHistory.view", c);
+        String animalHistoryURLWithID = animalHistoryURL.toString() + "#subjects:" + subject;   // TODO: Try and get commented code below to work instaed of hardcoding this.  For some reason, adding parameter gives me '#subjects=' instead of '#subjects:'.
+
+//        animalHistoryURL.addParameter("#subjects", subject);
+//        animalHistoryURL.addParameter("inputType", "singleSubject");
+//        animalHistoryURL.addParameter("showReport", "0");
+//        animalHistoryURL.addParameter("activeReport", "abstract");
+
+        // Creates path.
+        Path returnURL = new Path(new ActionURL().getBaseServerURI(), animalHistoryURLWithID);
+
+        // Returns URL.
+        return returnURL.toString();
+    }
+
     // TODO: COMMENT!!!
     public Boolean checkIfAnimalIsAlive(Container c, User u, String idToCheck) {
         try {

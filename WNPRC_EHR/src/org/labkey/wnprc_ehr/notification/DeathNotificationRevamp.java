@@ -209,10 +209,9 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
                 this.animalWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
                 this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath, animalID);
 
-                //Creates task id with hyperlink.   // TODO: Don't use hardcoded URL here.
+                //Creates task id with hyperlink.
                 String necropsyTaskID = animalNecropsy.get(0).get("taskid");
-                Path taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view");
-                String taskUrlAsString = taskURL.toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
+                String taskUrlAsString = notificationToolkit.createFormURL(c, "necropsy", necropsyTaskID);
 
                 // Creates filter.
                 SimpleFilter myTaskFilter = new SimpleFilter("taskid", necropsyTaskID, CompareType.EQUAL);
@@ -366,10 +365,8 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
         public DeathDemographicObject(Container c, User u, String animalID, Boolean withHtmlPlaceHolders) {
             NotificationToolkit notificationToolkit = new NotificationToolkit();
 
-            // TODO: Update this to remove hardcoded url.
             //Gets hyperlink for animal id in animal history abstract.
-            Path animalAbstractURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view");
-            String animalAbstractUrlAsString = animalAbstractURL.toString() + "?#subjects:" + animalID + "&inputType:singleSubject&showReport:1&activeReport:abstract";
+            String animalAbstractUrlAsString = notificationToolkit.createAnimalHistoryURL(c, animalID);
             this.animalIdHyperlink = notificationToolkit.createHyperlink(animalID, animalAbstractUrlAsString);
 
             //Gets animal sex.

@@ -28,9 +28,8 @@ sed -i "s/@@msqlJdbcPassword@@/${LK_MSQL_PASS}/" /labkey/labkey/config/applicati
 echo "replacing SMTP configuration"
 sed -i "s/@@smtpHost@@/${LK_MAILSERVER}/" /labkey/labkey/config/application.properties
 sed -i "s/@@smtpPort@@/${LK_MAIL_PORT}/" /labkey/labkey/config/application.properties
-sed -i "s/@@smtpUser@@/${LK_MAIL_USER}/" /labkey/labkey/config/application.properties
 sed -i "s/@@smtpFrom@@/${LK_SERVER_EMAIL_ADDRESS}/" /labkey/labkey/config/application.properties
-sed -i "s/@@smtpAuth@@/${LK_MAIL_AUTHENTICATION}/" /labkey/config/application.properties
+sed -i "s/@@smtpAuth@@/${LK_MAIL_AUTHENTICATION}/" /labkey/labkey/config/application.properties
 
 #java -XX:MaxRAMPercentage=75.0 -Dlabkey.home=${LABKEY_HOME} -Dlabkey.log.home=/labkey/logs -Dlogback.debug=true -jar /labkey/labkey/labkeyServer.jar
 

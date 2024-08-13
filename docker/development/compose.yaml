@@ -17,18 +17,15 @@ services:
       - networkExt
     environment:
       CATALINA_OPTS:
-      JAVA_OPTS: "${LK_JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
-                  -Dmsql.user=${LK_MSQL_USER} -Dmsql.pass=${LK_MSQL_PASS} -Dmsql.url=\"${LK_MSQL_URL}\" \
-                  -Dlog4j2.formatMsgNoLookups=true"
       LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
       LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
       LK_MS_VALUE: ${LK_MS_VALUE}
       LK_MX_VALUE: ${LK_MX_VALUE}
       LK_MASTER_ENCRYPTION_FILE: /run/secrets/master_encryption_pwd
       LK_BASE_URL: ${LK_BASE_URL}
-      PG_NAME:
-      PG_PASS:
-      PG_USER:
+      PG_NAME: ${PG_NAME}
+      PG_PASS: ${PG_PASS}
+      PG_USER: ${PG_USER}
       LK_MSQL_PASS: ${LK_MSQL_PASS}
       LK_MSQL_URL: ${LK_MSQL_URL}
       LK_MSQL_USER: ${LK_MSQL_USER}

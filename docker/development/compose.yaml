@@ -39,6 +39,7 @@ services:
       LK_MAIL_USER: $LK_MAIL_USER}
       LK_MAILSERVER: ${LK_MAILSERVER}
       LK_MAIL_PORT: ${LK_MAIL_PORT}
+      LK_SERVER_EMAIL_ADDRESS: ${LK_SERVER_EMAIL_ADDRESS}
       TZ: America/Chicago
     secrets:
       - master_encryption_pwd

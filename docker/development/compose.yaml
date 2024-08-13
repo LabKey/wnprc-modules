@@ -6,6 +6,11 @@ networks:
 services:
   labkey:
     image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}
+    depends_on:
+      mailserver:
+        condition: service_started
+      postgres:
+         condition: service_healthy
     volumes:
       - "${LK_FILES_DIR}:/backups/new_files_dir"
       - "${LK_LOG_DIR}:/usr/local/tomcat/logs"
@@ -29,9 +34,16 @@ services:
       PG_NAME:
       PG_PASS:
       PG_USER:
-      LK_MSQL_USER:
-      LK_MSQL_PASS:
-      LK_MSQL_URL:
+      LK_MSQL_PASS: ${LK_MSQL_PASS}
+      LK_MSQL_URL: ${LK_MSQL_URL}
+      LK_MSQL_USER: ${LK_MSQL_USER}
+      LK_ARROW_PASS: ${LK_ARROW_PASS}
+      LK_ARROW_URL: ${LK_ARROW_URL}
+      LK_ARROW_USER: ${LK_ARROW_USER}
+      LK_MAIL_AUTHENTICATION: ${LK_MAIL_AUTHENTICATION}
+      LK_MAIL_USER: $LK_MAIL_USER}
+      LK_MAILSERVER: ${LK_MAILSERVER}
+      LK_MAIL_PORT: ${LK_MAIL_PORT}
       TZ: America/Chicago
     secrets:
       - master_encryption_pwd

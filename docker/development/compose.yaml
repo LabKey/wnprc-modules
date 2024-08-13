@@ -5,12 +5,7 @@ networks:
 
 services:
   labkey:
-    image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}
-    depends_on:
-      mailserver:
-        condition: service_started
-      postgres:
-         condition: service_healthy
+    image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}    
     volumes:
       - "${LK_FILES_DIR}:/backups/new_files_dir"
       - "${LK_LOG_DIR}:/usr/local/tomcat/logs"

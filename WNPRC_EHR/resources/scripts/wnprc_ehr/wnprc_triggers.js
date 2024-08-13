@@ -625,9 +625,12 @@ exports.init = function (EHR) {
     var tube_types = {}
 
     EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.AFTER_UPSERT, 'study', 'Blood', function (helper, scriptErrors, row) {
+        // Triggers wnprc_triggers.js to send BloodDrawReviewTriggerNotification.java.
         if (row.QCStateLabel === 'Request: Approved') {
             WNPRC.Utils.getJavaHelper().sendBloodDrawReviewNotification(row.Id, row.project, row.date, row.requestor);
         }
+        // Triggers wnprc_triggers.js to send BloodOverdrawTriggerNotification.java.
+        WNPRC.Utils.getJavaHelper().sendBloodOverdrawTriggerNotification(row.Id, row.date);
     })
 
     function getHousingSQL(row) {

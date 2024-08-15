@@ -33,21 +33,21 @@ for f in *; do
 done
 
 if $start; then
-    echo -n 'Starting main docker-compose file'
-    docker-compose -f docker-compose.yml up -d
+    echo -n 'Starting main docker compose file'
+    docker compose -f compose.yaml up -d
 
     for folder in "${listOfDevFolders[@]}"
     do
       echo -n 'Staring containers in ' $folder
-      docker-compose -f $folder/docker-compose.yml up -d
+      docker compose -f $folder/compose.yaml up -d
     done
 else
   for folder in "${listOfDevFolders[@]}"
   do
     echo 'Stopping containers in ' $folder
-    docker-compose -f $folder/docker-compose.yml down
+    docker compose -f $folder/compose.yaml down
   done
 
-  echo -n 'Stopping main docker-compose file'
-  docker-compose -f docker-compose.yml down
+  echo -n 'Stopping main docker compose file'
+  docker compose -f compose.yaml down
 fi

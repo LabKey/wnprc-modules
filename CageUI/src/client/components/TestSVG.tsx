@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { addNewRack, changeStyleProperty, createDragBehavior } from './helpers';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 import { ReactSVG } from 'react-svg';
 import { ActionURL } from '@labkey/api';
 import { Rack, RackTypes } from './typings';
@@ -25,7 +25,7 @@ const TestSVG = () => {
         room,
         isEditingRoom,
         isDraggingEnabled
-    } = useCurrentContext();
+    } = useRoomContext();
 
     const gridSize = 30; // Adjust based on your room size, in pixels the size of the grid square side
     const gridWidth = 43; // col of grid

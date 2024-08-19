@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { changeCageMod, changeCageModArray, convertLocationName, updateClickedRack } from './helpers';
 import Select from 'react-select';
 import { Modifications, ModTypes } from './typings';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 
 
 interface ModificationRowProps {
@@ -28,7 +28,7 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
         setClickedRack,
         clickedRack,
         isEditEnabled
-    } = useCurrentContext();
+    } = useRoomContext();
 
     const changeMod = (event) => {
         const isChangingFromCTunnel = defaultMod === ModTypes.CTunnel;

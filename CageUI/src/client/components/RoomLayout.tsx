@@ -10,13 +10,13 @@ import {
     parseRack,
     parseSeparator, updateCageIds
 } from './helpers';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 import { Popup } from './Popup';
 import { CageDetailsModifications } from './CageDetailsModifications';
 import { CageExtraDetails } from './CageExtraDetails';
 
 export const RoomLayout: FC = () => {
-    const {room, cageDetails, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useCurrentContext();
+    const {room, cageDetails, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useRoomContext();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openDetails = () => {

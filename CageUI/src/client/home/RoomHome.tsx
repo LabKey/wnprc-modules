@@ -7,6 +7,9 @@ import '../cageui.scss';
 import { Cage, Rack } from '../components/typings';
 import { RoomToolbar } from '../components/RoomToolbar';
 import { RoomContextProvider } from '../components/ContextManager';
+import { RoomList } from '../components/RoomList';
+import { RoomNavbar } from '../components/RoomNavbar';
+import { RoomContent } from '../components/RoomContent';
 interface RoomProps {
     room: {
         name: string;
@@ -19,15 +22,13 @@ export const RoomHome: FC<RoomProps> = (props) => {
 
     return (
         <RoomContextProvider>
-            <div className={"room-container"}>
-                <RoomHeader
-                    name={room.name}
-                />
-                <RoomToolbar/>
-                <div className={"divider"}/>
-                <div className={"room-sub-container"}>
-                    <RoomLegend/>
-                    <RoomDisplay name={room.name}/>
+            <div className={"home-container"}>
+                <RoomList />
+                <div className="page-content-wrapper">
+                    <RoomNavbar />
+                    <div className="page-content">
+                        <RoomContent />
+                    </div>
                 </div>
             </div>
         </RoomContextProvider>

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {FC} from 'react';
-import { useCurrentContext } from './ContextManager';
+import {useRoomContext } from './ContextManager';
 
 
 export const RoomToolbar: FC<any> = (props) => {
-    const {isEditEnabled, setIsEditingRoom, setClickedRack, setIsDraggingEnabled, isEditingRoom, isDraggingEnabled} = useCurrentContext();
+    const {isEditEnabled, setIsEditingRoom, setClickedRack, setIsDraggingEnabled, isEditingRoom, isDraggingEnabled} = useRoomContext();
     const handleEdit = () => {
         setIsEditingRoom(prevState => !prevState);
         console.log("Editing Room");

@@ -3,14 +3,14 @@ import { FC, useState, useEffect } from 'react';
 import { Cage, Rack } from './typings';
 import { findDetails, loadRoom } from './helpers';
 import { RoomLayout } from './RoomLayout';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 
 interface DisplayProps {
     name: string; // room type
 }
 export const RoomDisplay: FC<DisplayProps> = (props) => {
     const {name} = props;
-    const {room, clickedCage, clickedRack, setCageDetails, setRoom} = useCurrentContext();
+    const {room, clickedCage, clickedRack, setCageDetails, setRoom} = useRoomContext();
 
     // updates details if they change while popup is open
     useEffect(() => {

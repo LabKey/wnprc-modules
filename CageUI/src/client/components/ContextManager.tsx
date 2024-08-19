@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Cage, Rack } from './typings';
+import { Cage, Rack, Page } from './typings';
 import { removeCircularReferences } from './helpers';
 
 export interface RoomContextType {
+    selectedPage: Page,
+    setSelectedPage: React.Dispatch<React.SetStateAction<Page | null>> | null,
     room: Rack[],
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
     clickedCage: Cage | null,
@@ -30,7 +32,6 @@ export interface RoomContextType {
     hasUnsavedChanges: boolean,
     isDraggingEnabled: boolean,
     setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>
-
 }
 
 export interface LayoutContextType {
@@ -48,19 +49,19 @@ export const useLayoutContext = () => {
 
     if (!context) {
         throw new Error(
-            "useCurrentContext has to be used within <LayoutContext.Provider>"
+            "useRoomContext has to be used within <LayoutContext.Provider>"
         );
     }
 
     return context;
 }
 
-export const useCurrentContext = () => {
+export const useRoomContext = () => {
     const context = useContext(RoomContext);
 
     if (!context) {
         throw new Error(
-            "useCurrentContext has to be used within <RoomContext.Provider>"
+            "useRoomContext has to be used within <RoomContext.Provider>"
         );
     }
 
@@ -68,6 +69,10 @@ export const useCurrentContext = () => {
 };
 
 export const RoomContextProvider = ({children}) => {
+    // New state management
+    const [selectedPage, setSelectedPage] = useState<Page>(null);
+
+    // End new state management
     const [room, setRoom] = useState<Rack[]>([]);
     const [clickedCage, setClickedCage] = useState<Cage>();
     const [cageDetails, setCageDetails] = useState<Cage[]>([]);
@@ -154,7 +159,9 @@ export const RoomContextProvider = ({children}) => {
             saveChanges,
             hasUnsavedChanges: JSON.stringify(removeCircularReferences(room)) !== JSON.stringify(removeCircularReferences(localRoom)),
             isDraggingEnabled,
-            setIsDraggingEnabled
+            setIsDraggingEnabled,
+            selectedPage,
+            setSelectedPage
         }}>
             {children}
         </RoomContext.Provider>

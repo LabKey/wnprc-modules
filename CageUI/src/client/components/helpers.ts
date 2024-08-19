@@ -19,7 +19,7 @@ import {
 } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 
 /*
 console.log(zeroPad(5, 2)); // "05"

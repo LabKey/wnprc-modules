@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {FC} from 'react';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 
 
 export const CageExtraDetails: FC<any> = (props) => {
-    const {clickedCage} = useCurrentContext();
+    const {clickedCage} = useRoomContext();
 
     return(
       <div>

@@ -73,6 +73,19 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         //Begins message info.
         messageBody.append("<p>This email contains any scheduled blood draws (today & future) where animals are either unassigned to a project or no longer alive.  It was run on: " + dateToolkit.getCurrentTime() + "</p>");
 
+        // Lists all blood draws (today & future) where animal has blood overdrawn.
+        if (!myBloodDrawReviewObject.bloodOverdraws.isEmpty()) {
+            messageBody.append("<p><b>There are " + myBloodDrawReviewObject.bloodOverdraws.size() + " blood draws (today & future) where animal's blood will be overdrawn:</b></p>");
+
+            // Creates table.
+            String[] myTableColumns = new String[]{"Id", "Date of Blood Draw", "Available Blood"};
+            NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawReviewObject.bloodOverdraws);
+            messageBody.append(myTable.createBasicHTMLTable());
+            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myBloodDrawReviewObject.bloodOverdrawsURLView));
+        }
+        else {
+            messageBody.append("<b>There are no blood draws (today or future) where the animal's blood will be overdrawn.</b><br>\n");
+        }
         // Lists all blood draws (today & future) where animal is not alive.
         if (!myBloodDrawReviewObject.nonAliveBloodDraws.isEmpty()) {
             messageBody.append("<p><b>There are " + myBloodDrawReviewObject.nonAliveBloodDraws.size() + " blood draws (today & future) where animal is not alive:</b></p>");
@@ -111,19 +124,6 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         }
         else {
             messageBody.append("<b>There are no blood draws (today or future) where animal is not assigned to a project.</b><br>\n");
-        }
-        // Lists all blood draws (today & future) where animal has blood overdrawn.
-        if (!myBloodDrawReviewObject.bloodOverdraws.isEmpty()) {
-            messageBody.append("<p><b>There are " + myBloodDrawReviewObject.bloodOverdraws.size() + " blood draws (today & future) where animal's blood will be overdrawn:</b></p>");
-
-            // Creates table.
-            String[] myTableColumns = new String[]{"Id", "Date of Blood Draw", "Available Blood"};
-            NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawReviewObject.bloodOverdraws);
-            messageBody.append(myTable.createBasicHTMLTable());
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myBloodDrawReviewObject.bloodOverdrawsURLView));
-        }
-        else {
-            messageBody.append("<b>There are no blood draws (today or future) where the animal's blood will be overdrawn.</b><br>\n");
         }
 
         return messageBody.toString();

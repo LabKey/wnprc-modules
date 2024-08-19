@@ -11,7 +11,12 @@ export type CageSizeWithKey =
 export type CagePosition = "top" | "bottom";
 export type CageType = "cage" | "pen";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
+type PageViews = "Room" | "Rack" | "Cage";
 
+export interface Page {
+    mainView: PageViews;
+    subViewId: string;
+}
 export interface Cage {
     id: number
     name: string;

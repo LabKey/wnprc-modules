@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import { findAffCages, getModOptions } from './helpers';
 import { ModificationRow } from './ModificationRow';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 import { ConfirmationPopup } from './ConfirmationPopup';
 
 interface CageDetailsModificationsProps {
@@ -10,7 +10,7 @@ interface CageDetailsModificationsProps {
 }
 export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (props) => {
     const {closeDetails} = props;
-    const {saveMod, modRows, setModRows, cageDetails} = useCurrentContext();
+    const {saveMod, modRows, setModRows, cageDetails} = useRoomContext();
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
 
     useEffect(() => {

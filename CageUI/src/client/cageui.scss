@@ -681,7 +681,7 @@
   backface-visibility: hidden;
   transition: all 0.2s ease;
   font-family: sans-serif;
-  background: dimgray;
+  background: indianred;
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
@@ -720,4 +720,105 @@
 }
 .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:active:after {
   left: 10%;
+}
+
+
+.home-container {
+  display: flex;
+  height: 100vh; /* Full viewport height */
+  width: 100%; /* Full viewport width */
+}
+
+.room-dir {
+  width: 10%; /* Adjust width as needed */
+  border: 1px solid black;
+}
+
+.page-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 90%; /* Adjust width as needed */
+}
+
+.page-map {
+  height: 5%; /* Adjust height as needed */
+  border: 1px solid black;
+}
+
+.page-content {
+  flex-grow: 1;
+  border: 1px solid black;
+}
+
+
+// CSS for home view list of rooms
+
+.sub-room-list {
+  display: none;
+  list-style: none;
+  padding-left: 20px; /* Indent sub-rooms */
+}
+
+.room-title, .sub-room-title {
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 5px 0;
+}
+
+.sub-room-item {
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 5px 0;
+}
+
+.room-dir-header {
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: large;
+}
+
+.arrow {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid black;
+  border-right: 2px solid black;
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+}
+
+
+
+.room-dir-room-obj {
+  margin: 10px 10px 10px 5px;
+}
+.room-dir-rack-obj {
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.room-dir-cage-obj {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.room-dir-header.open .arrow {
+  transform: rotate(135deg);
+}
+
+
+.room-dir-rack-obj.open .arrow {
+  transform: rotate(135deg);
+}
+
+ul {
+  list-style-type: none;
 }

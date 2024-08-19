@@ -8,7 +8,9 @@ import { Cage, Rack } from '../components/typings';
 import { RoomToolbar } from '../components/RoomToolbar';
 import {LayoutContextProvider } from '../components/ContextManager';
 import TestSVG from '../components/TestSVG';
-import DragAndDropGrid from '../components/DragTest';
+import DragAndDropGrid from '../components/Editor';
+import { ActionURL } from '@labkey/api';
+import Editor from '../components/Editor';
 
 interface RoomProps {
     room: {
@@ -19,17 +21,18 @@ interface RoomProps {
 
 export const LayoutEditor: FC<RoomProps> = (props) => {
     const {room} = props;
+    const roomName = ActionURL.getParameter("room");
 
-
+    console.log(roomName)
 
     return (
         <LayoutContextProvider>
             <div className={"room-container"}>
                 <RoomHeader
-                    name={room.name}
+                    name={roomName}
                 />
                 <div className={"divider"}/>
-                <DragAndDropGrid />
+                <Editor />
             </div>
         </LayoutContextProvider>
     );

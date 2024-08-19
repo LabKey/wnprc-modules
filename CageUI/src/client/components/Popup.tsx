@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FC, JSX, useEffect, useRef, useState } from 'react';
-import { useCurrentContext } from './ContextManager';
+import { useRoomContext } from './ContextManager';
 import { ConfirmationPopup } from './ConfirmationPopup';
 
 interface PopupProps {
@@ -13,7 +13,7 @@ interface PopupProps {
 export const Popup: FC<PopupProps> = (props) => {
     const { isOpen, onClose, header, subheader, mainContent } = props;
     const modalRef = useRef(null);
-    const { isDirty} = useCurrentContext();
+    const { isDirty} = useRoomContext();
     const [showSave, setShowSave] = useState<boolean>(false);
     //if(!clickedCage) return;
 

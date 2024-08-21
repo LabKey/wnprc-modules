@@ -649,3 +649,14 @@ export const removeCircularReferences = (obj) => {
         return value;
     }));
 }
+
+
+export const getTranslation = (transform) => {
+    // Regex to extract the translate(x, y) values
+    const translate = transform.match(/translate\(([^)]+)\)/);
+    if (translate) {
+        const [x, y] = translate[1].split(',').map(Number);
+        return { x, y };
+    }
+    return { x: 0, y: 0 }; // Default to (0, 0) if no translation is found
+}

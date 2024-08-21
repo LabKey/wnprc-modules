@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ActionURL } from '@labkey/api';
-import { addNewRack, changeStyleProperty } from './helpers';
+import { addNewRack, changeStyleProperty, getTranslation } from './helpers';
 import { ReactSVG } from 'react-svg';
 import { useRoomContext, useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
@@ -72,23 +72,12 @@ const Editor = () => {
             .call(drag);
 
         function checkAdjacent(targetShape, draggedShape) {
-            const getCoords = (box) => {
-                if(box instanceof SVGGElement){
-                    const x = parseInt(box.getAttribute('x') || '0');
-                    const y = parseInt(box.getAttribute('y') || '0');
-                    console.log(`Coords for ${box.getAttribute('class')}:`, {x, y});
-                    return {x, y};
 
-                }else{
-                    const x = parseInt(box.attr('x') || box.attr('data-x') || '0');
-                    const y = parseInt(box.attr('y') || box.attr('data-y') || '0');
-                    console.log(`Coords for ${box.attr('class')}:`, {x, y});
-                    return {x, y};
-                }
-            };
+            const targetTransform = targetShape.attr('transform');
+            const dragTransoform = draggedShape.attr('transform');
 
-            const coords1 = getCoords(targetShape);
-            const coords2 = getCoords(draggedShape);
+            const coords1 = getTranslation(targetTransform);
+            const coords2 = getTranslation(dragTransoform);
 
             console.log("Checking adjacency:", coords1, coords2);
 
@@ -97,30 +86,15 @@ const Editor = () => {
             let verticallyAdjacent;
 
             // offset for length of group
-            if(targetShape instanceof SVGGElement){
-                horizontallyAdjacent = (
-                    Math.abs(coords1.x - coords2.x) === (boxWidth * targetShape.children.length) &&
-                    coords1.y === coords2.y
-                );
+            horizontallyAdjacent = (
+                Math.abs(coords1.x - coords2.x) === (boxWidth * targetShape.node().children.length) &&
+                coords1.y === coords2.y
+            );
 
-                verticallyAdjacent = (
-                    Math.abs(coords1.y - coords2.y) === (boxWidth * targetShape.children.length) &&
-                    coords1.x === coords2.x
-                );
-
-            }else{
-                // Check if boxes are adjacent horizontally (left or right)
-                horizontallyAdjacent = (
-                    Math.abs(coords1.x - coords2.x) === boxWidth &&
-                    coords1.y === coords2.y
-                );
-
-                // Check if boxes are adjacent vertically (top or bottom)
-                verticallyAdjacent = (
-                    Math.abs(coords1.y - coords2.y) === boxWidth &&
-                    coords1.x === coords2.x
-                );
-            }
+            verticallyAdjacent = (
+                Math.abs(coords1.y - coords2.y) === (boxWidth * targetShape.node().children.length) &&
+                coords1.x === coords2.x
+            );
             const isAdjacent = horizontallyAdjacent || verticallyAdjacent;
             console.log("Is adjacent:", isAdjacent);
             return isAdjacent;
@@ -163,54 +137,54 @@ const Editor = () => {
         async function mergeRacks(targetShape, draggedShape) {
             const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
             if (shouldMerge) {
-                if(targetShape instanceof  SVGElement){
-                    targetShape = d3.select(targetShape);
-                }
-                let mergedGroup: SVGGElement;
-                // Check if targetShape is already a merged group
-                if (targetShape.node() instanceof SVGGElement) {
-                    mergedGroup = targetShape.node();
-                } else {
-                    // Create a new merged group
-                    const tempGroup = layoutSvg.append('g')
-                        .attr('class', 'merged-group draggable')
-                        .attr('x', targetShape.attr('x'))
-                        .attr('y', targetShape.attr('y'));
+                const targetChildren = targetShape.node().children;
+                const draggedChildren = draggedShape.node().children;
 
-                    // Move targetShape into the new group
-                    tempGroup.append(() => targetShape.node().cloneNode(true))
-                        .attr('x', 0)
-                        .attr('y', 0);
-                    mergedGroup = tempGroup.node();
-                    targetShape.remove();
-                }
-                // Add draggedShape to the group
-                const draggedX = parseInt(draggedShape.attr('x'));
-                const draggedY = parseInt(draggedShape.attr('y'));
-                let clonedNode = draggedShape.node().cloneNode(true);
-                mergedGroup.appendChild(clonedNode);
-                mergedGroup.setAttribute('x', `${draggedX}`);
-                mergedGroup.setAttribute('y', `${draggedY}`);
+                // Function to convert transform to x and y attributes
+                const convertTransformToXY = (element, curIdx) => {
+                    const transform = d3.select(element).attr('transform');
+                    if(!transform) return;
+                    const {x: translateX, y: translateY} = getTranslation(transform);
 
-                console.log("XXY: ", mergedGroup)
+                    const currentX = parseFloat(d3.select(element).attr('x') || '0');
+                    const currentY = parseFloat(d3.select(element).attr('y') || '0');
+
+                    d3.select(element)
+                        .attr('x', (curIdx * gridRatio * gridSize))
+                        .attr('y', 0)
+                        .attr('transform', null);
+                }
+
+                // Convert target group's children
+                Array.from(targetChildren).forEach(((child, idx) => convertTransformToXY(child, idx)));
+
+                // Convert dragged group's children and append to the target group
+                Array.from(draggedChildren).forEach((child) => {
+                    convertTransformToXY(child, targetChildren.length); // just length since idx start at 0
+                    targetShape.append(() => (child as SVGElement).cloneNode(true));
+                });
+
+                // Remove the original dragged group
                 draggedShape.remove();
 
                 // Update the bounding box of the merged group
-                const bbox = mergedGroup.getBBox();
-                mergedGroup.setAttribute('width', String(bbox.width));
-                mergedGroup.setAttribute('height', String(bbox.height));
+                const bbox = targetShape.node().getBBox();
+                targetShape.attr('width', bbox.width)
+                    .attr('height', bbox.height);
 
-                // Make sure the merged group is draggable
-                makeDraggable(mergedGroup);
+                // Ensure the group is draggable
+                makeDraggable(targetShape.node());
 
                 console.log("Merged group updated/created at:", {
-                    x: mergedGroup.getAttribute('x'),
-                    y: mergedGroup.getAttribute('y'),
+                    x: targetShape.attr('x'),
+                    y: targetShape.attr('y'),
                     width: bbox.width,
                     height: bbox.height
                 });
             }
         }
+
+
         function makeDraggable(element) {
             const d3Element = d3.select(element);
             d3Element.call(d3.drag()
@@ -248,17 +222,17 @@ const Editor = () => {
                 const cellX = +targetCell.attr('x');
                 const cellY = +targetCell.attr('y');
                 const rackSvgId = (draggedShape.node() as SVGElement).children['rack-template'].children[0].children.item(0).id;
-                layoutSvg.append(() => draggedShape.node())
-                    .attr('transform', `translate(${cellX + 50}, ${cellY + 50})`)
+                draggedShape.classed('dragging', false);
+                // Create a group element and append it to layoutSvg
+                const group = layoutSvg.append('g')
                     .attr('class', `draggable ${rackSvgId}`)
                     .style('pointer-events', "bounding-box")
                     .call(d3.drag().on('start', startDragInLayout)
                         .on('drag', dragInLayout)
                         .on('end', endDragInLayout));
+                group.append(() => draggedShape.node());
+                group.attr('transform', `translate(${cellX + 50}, ${cellY + 50})`);
 
-                if(draggedShape.node().toString() === ""){
-
-                }
             } else {
                 draggedShape.remove();
             }
@@ -307,13 +281,8 @@ const Editor = () => {
             const x = event.x;
             const y = event.y;
             const element = d3.select(this);
-            if(element.node() instanceof  SVGGElement){
-                element.attr("transform", "translate(" + x + "," + y + ")");
-            }else{
-                element.attr('x', x)
-                    .attr('y', y);
-            }
-            console.log("Elem: ", element);
+            element.attr("transform", "translate(" + x + "," + y + ")");
+            console.log("Elem: ", element.node());
         }
 
         function endDragInLayout(event) {
@@ -326,31 +295,17 @@ const Editor = () => {
                 console.log("Drag Layout #3", shape, targetCell);
                 const cellX = +targetCell.attr('x');
                 const cellY = +targetCell.attr('y');
-                if (shape.node() instanceof SVGGElement) {
-                    shape.attr("transform", `translate(${cellX},${cellY})`);
-                    shape.attr('x', cellX)
-                        .attr('y', cellY);
-                } else {
-                    shape.attr('x', cellX)
-                        .attr('y', cellY);
-                }
-                // Only allow merging of individual rack to another indiv rack or a merged rack.
+                shape.attr("transform", `translate(${cellX},${cellY})`);
+
+                // Only allow merging of individual rack to another single rack or a merged rack.
                 // Don't allow merged racks to merge with other racks
-                if(!(shape.node() instanceof SVGGElement)) { // Don't allow merging of already merged racks
+                if(((shape.node() as SVGGElement).children.length < 2)) {
                     layoutSvg.selectAll('.draggable, .merged-box').each(function () {
                        //TODO Check for groups here it glitches because ottherBox is a group
                         const otherBox = d3.select(this);
                         console.log("ADJ BOX: ", otherBox);
-                        const parentNode = (otherBox.node() as SVGRectElement).parentNode;
-                        if(parentNode instanceof  SVGGElement){
-                            if (shape.node() !== otherBox.node() && checkAdjacent(parentNode, shape)) {
-                                mergeRacks(parentNode, shape);
-                            }
-                        }
-                        else{
-                            if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape)) {
-                                mergeRacks(otherBox, shape);
-                            }
+                        if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape)) {
+                            mergeRacks(otherBox, shape);
                         }
                     });
                 }
@@ -492,7 +447,6 @@ const Editor = () => {
             <div id={"layout-grid"} style={{width: gridWidth * gridSize, height: gridSize * gridHeight}}>
                 <svg
                     ref={svgRef}
-                    preserveAspectRatio="xMidYMid meet"
                     width={gridWidth * gridSize}
                     height={gridHeight * gridSize}
                     id="layout"

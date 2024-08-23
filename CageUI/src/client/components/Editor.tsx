@@ -86,13 +86,42 @@ const Editor = () => {
             let verticallyAdjacent;
 
             if(targetShape.attr('class').includes("vertical")){
+                let children: number = 1; // start at 1 for origin because we skip it in the loops
+                if(coords1.x < coords2.x){ // mark children on the right of origin
+                    // Start at 1 because 0 is always origin (0,0)
+                    for (let i = 1; i < targetShape.node().children.length; i++) {
+                        if(parseInt(targetShape.node().children[i].getAttribute('x')) > 0){
+                            children++;
+                        }
+                    }
+                }else{// mark children on the left of origin
+                    for (let i = 1; i < targetShape.node().children.length; i++) {
+                        if(parseInt(targetShape.node().children[i].getAttribute('x')) < 0){
+                            children++;
+                        }
+                    }
+                }
                 verticallyAdjacent = (
-                    Math.abs(coords1.x - coords2.x) === (boxWidth * targetShape.node().children.length) &&
+                    Math.abs(coords1.x - coords2.x) === (boxWidth * children) &&
                     coords1.y === coords2.y
                 );
             }else{
+                let children: number = 1;
+                if(coords1.y < coords2.y){ // mark children on the right of origin
+                    for (let i = 1; i < targetShape.node().children.length; i++) {
+                        if(parseInt(targetShape.node().children[i].getAttribute('y')) > 0){
+                            children++;
+                        }
+                    }
+                }else{// mark children on the left of origin
+                    for (let i = 1; i < targetShape.node().children.length; i++) {
+                        if(parseInt(targetShape.node().children[i].getAttribute('y')) < 0){
+                            children++;
+                        }
+                    }
+                }
                 horizontallyAdjacent = (
-                    Math.abs(coords1.y - coords2.y) === (boxWidth * targetShape.node().children.length) &&
+                    Math.abs(coords1.y - coords2.y) === (boxWidth * children) &&
                     coords1.x === coords2.x
                 );
             }
@@ -150,18 +179,55 @@ const Editor = () => {
                 const convertTransformToXY = (element, curIdx) => {
                     const transform = d3.select(element).attr('transform');
                     if(!transform) return;
-                    const {x: translateX, y: translateY} = getTranslation(transform);
+                    const {x: targetX, y: targetY} = getTranslation(targetShape.attr('transform'));
+                    const {x: dragX, y: dragY} = getTranslation(draggedShape.attr('transform'));
+                    let direction = 1; // determines direction if place on other side of target
 
-                    const currentX = parseFloat(d3.select(element).attr('x') || '0');
-                    const currentY = parseFloat(d3.select(element).attr('y') || '0');
+
                     if(element.parentElement.getAttribute('class').includes("horizontal")) {
+                        let children: number = 1;
+                        if(curIdx === 0){
+                            children = 0;
+                        }
+                        else if(dragY < targetY){
+                            direction = -1;
+                            for (let i = 1; i < targetShape.node().children.length; i++) {
+                                if(parseInt(targetShape.node().children[i].getAttribute('y')) < 0){
+                                    children++;
+                                }
+                            }
+                        }else{
+                            for (let i = 1; i < targetShape.node().children.length; i++) {
+                                if(parseInt(targetShape.node().children[i].getAttribute('y')) > 0){
+                                    children++;
+                                }
+                            }
+                        }
                         d3.select(element)
                             .attr('x', 0)
-                            .attr('y', (curIdx * gridRatio * gridSize))
+                            .attr('y', (children * gridRatio * gridSize * direction))
                             .attr('transform', null);
                     }else{
+                        let children: number = 1;
+                        if(curIdx === 0){
+                            children = 0;
+                        }
+                        else if(dragX < targetX){
+                            direction = -1;
+                            for (let i = 1; i < targetShape.node().children.length; i++) {
+                                if(parseInt(targetShape.node().children[i].getAttribute('x')) < 0){
+                                    children++;
+                                }
+                            }
+                        }else{
+                            for (let i = 1; i < targetShape.node().children.length; i++) {
+                                if(parseInt(targetShape.node().children[i].getAttribute('x')) > 0){
+                                    children++;
+                                }
+                            }
+                        }
                         d3.select(element)
-                            .attr('x', (curIdx * gridRatio * gridSize))
+                            .attr('x', (children * gridRatio * gridSize * direction))
                             .attr('y', 0)
                             .attr('transform', null);
                     }

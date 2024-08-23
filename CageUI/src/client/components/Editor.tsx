@@ -85,16 +85,17 @@ const Editor = () => {
             let horizontallyAdjacent;
             let verticallyAdjacent;
 
-            // offset for length of group
-            horizontallyAdjacent = (
-                Math.abs(coords1.x - coords2.x) === (boxWidth * targetShape.node().children.length) &&
-                coords1.y === coords2.y
-            );
-
-            verticallyAdjacent = (
-                Math.abs(coords1.y - coords2.y) === (boxWidth * targetShape.node().children.length) &&
-                coords1.x === coords2.x
-            );
+            if(targetShape.attr('class').includes("vertical")){
+                verticallyAdjacent = (
+                    Math.abs(coords1.x - coords2.x) === (boxWidth * targetShape.node().children.length) &&
+                    coords1.y === coords2.y
+                );
+            }else{
+                horizontallyAdjacent = (
+                    Math.abs(coords1.y - coords2.y) === (boxWidth * targetShape.node().children.length) &&
+                    coords1.x === coords2.x
+                );
+            }
             const isAdjacent = horizontallyAdjacent || verticallyAdjacent;
             console.log("Is adjacent:", isAdjacent);
             return isAdjacent;
@@ -133,7 +134,12 @@ const Editor = () => {
             });
         }
 
-        // Function to help merge racks together
+        /* Function to help merge racks together
+        / This function strips the transforms from the individual svg groups then applies
+        / x and y attributes to the group children. these x and y coords are relative to the new group
+        / meaning they should be starting at 0,0 and placed every grid ratio * grid size * number of previous racks
+        / pixels apart, Example, (0,0) (0,120) (0,240) if every cage is 4 cells in length and 30 pixel cells
+        */
         async function mergeRacks(targetShape, draggedShape) {
             const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
             if (shouldMerge) {
@@ -148,11 +154,18 @@ const Editor = () => {
 
                     const currentX = parseFloat(d3.select(element).attr('x') || '0');
                     const currentY = parseFloat(d3.select(element).attr('y') || '0');
+                    if(element.parentElement.getAttribute('class').includes("horizontal")) {
+                        d3.select(element)
+                            .attr('x', 0)
+                            .attr('y', (curIdx * gridRatio * gridSize))
+                            .attr('transform', null);
+                    }else{
+                        d3.select(element)
+                            .attr('x', (curIdx * gridRatio * gridSize))
+                            .attr('y', 0)
+                            .attr('transform', null);
+                    }
 
-                    d3.select(element)
-                        .attr('x', (curIdx * gridRatio * gridSize))
-                        .attr('y', 0)
-                        .attr('transform', null);
                 }
 
                 // Convert target group's children

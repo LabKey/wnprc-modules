@@ -5,7 +5,7 @@ networks:
 
 services:
   labkey:
-    image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}
+    image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}    
     volumes:
       - "${LK_FILES_DIR}:/backups/new_files_dir"
       - "${LK_LOG_DIR}:/usr/local/tomcat/logs"
@@ -17,21 +17,26 @@ services:
       - networkExt
     environment:
       CATALINA_OPTS:
-      JAVA_OPTS: "${LK_JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
-                  -Dmsql.user=${LK_MSQL_USER} -Dmsql.pass=${LK_MSQL_PASS} -Dmsql.url=\"${LK_MSQL_URL}\" \
-                  -Dlog4j2.formatMsgNoLookups=true"
       LK_BACKGROUND_USER: ${LK_BACKGROUND_USER}
       LK_BACKGROUND_USER_PASSWORD: ${LK_BACKGROUND_USER_PASSWORD}
       LK_MS_VALUE: ${LK_MS_VALUE}
       LK_MX_VALUE: ${LK_MX_VALUE}
       LK_MASTER_ENCRYPTION_FILE: /run/secrets/master_encryption_pwd
       LK_BASE_URL: ${LK_BASE_URL}
-      PG_NAME:
-      PG_PASS:
-      PG_USER:
-      LK_MSQL_USER:
-      LK_MSQL_PASS:
-      LK_MSQL_URL:
+      PG_NAME: ${PG_NAME}
+      PG_PASS: ${PG_PASS}
+      PG_USER: ${PG_USER}
+      LK_MSQL_PASS: ${LK_MSQL_PASS}
+      LK_MSQL_URL: ${LK_MSQL_URL}
+      LK_MSQL_USER: ${LK_MSQL_USER}
+      LK_ARROW_PASS: ${LK_ARROW_PASS}
+      LK_ARROW_URL: ${LK_ARROW_URL}
+      LK_ARROW_USER: ${LK_ARROW_USER}
+      LK_MAIL_AUTHENTICATION: ${LK_MAIL_AUTHENTICATION}
+      LK_MAIL_USER: $LK_MAIL_USER}
+      LK_MAILSERVER: ${LK_MAILSERVER}
+      LK_MAIL_PORT: ${LK_MAIL_PORT}
+      LK_SERVER_EMAIL_ADDRESS: ${LK_SERVER_EMAIL_ADDRESS}
       TZ: America/Chicago
     secrets:
       - master_encryption_pwd

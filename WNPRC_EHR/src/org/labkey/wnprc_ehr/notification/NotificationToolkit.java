@@ -299,6 +299,36 @@ public class NotificationToolkit {
         return("<a href=\"" + url + "\">" + displayText + "</a>");
     }
 
+//    /**
+//     * Gets an animal's weight as a 9-digit number with trailing zeroes removed.
+//     * @param currentContainer  The current container.
+//     * @param currentUser       The current user.
+//     * @param animalID          The animal ID to check the weight for.
+//     * @return                  A string representing the animal's weight.
+//     */
+//    public String getWeightFromAnimalID(Container currentContainer, User currentUser, String animalID) {
+//        //Gets the full animal weight.
+//        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", new Sort("-date"), "id", animalID, new String[]{"weight"});
+//        if (!weightRow.isEmpty()) {
+//            String fullWeight = weightRow.get(0);
+//            if (fullWeight != null) {
+//                //Gets animal weight rounded to 9 digits.
+//                String nineDigitWeight = StringUtils.substring(fullWeight, 0, 9);
+//                //Removes any trailing zeroes.
+//                BigDecimal strippedValue = new BigDecimal(nineDigitWeight).stripTrailingZeros();
+//                //Adds weight symbol.
+//                String returnWeight = "" + strippedValue + "kg";
+//                return returnWeight;
+//            }
+//            else {
+//                return "";
+//            }
+//        }
+//        else {
+//            return "";
+//        }
+//    }
+
     /**
      * Gets an animal's weight as a 9-digit number with trailing zeroes removed.
      * @param currentContainer  The current container.
@@ -307,26 +337,31 @@ public class NotificationToolkit {
      * @return                  A string representing the animal's weight.
      */
     public String getWeightFromAnimalID(Container currentContainer, User currentUser, String animalID) {
-        //Gets the full animal weight.
-        ArrayList<String> weightRow = getTableRowAsList(currentContainer, currentUser, "study", "weight", new Sort("-date"), "id", animalID, new String[]{"weight"});
+        // Creates filter.
+        SimpleFilter myFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
+        String[] myColumns = new String[]{"weight"};
+        // Runs query.
+        ArrayList<HashMap<String, String>> weightRow = getTableMultiRowMultiColumnWithFieldKeys(currentContainer, currentUser, "study", "weight", new SimpleFilter("id", animalID, CompareType.EQUAL), new Sort("-date"), new String[]{"weight"});
+
+        // Gets the full animal weight.
         if (!weightRow.isEmpty()) {
-            String fullWeight = weightRow.get(0);
+            String fullWeight = weightRow.get(0).get("weight");
             if (fullWeight != null) {
                 //Gets animal weight rounded to 9 digits.
                 String nineDigitWeight = StringUtils.substring(fullWeight, 0, 9);
-                //Removes any trailing zeroes.
-                BigDecimal strippedValue = new BigDecimal(nineDigitWeight).stripTrailingZeros();
-                //Adds weight symbol.
-                String returnWeight = "" + strippedValue + "kg";
-                return returnWeight;
-            }
-            else {
-                return "";
+                if (!fullWeight.isEmpty()) {
+                    //Removes any trailing zeroes.
+                    BigDecimal strippedValue = new BigDecimal(nineDigitWeight).stripTrailingZeros();
+                    //Adds weight symbol.
+                    String returnWeight = "" + strippedValue + "kg";
+                    return returnWeight;
+                }
+                else {
+                    return "";
+                }
             }
         }
-        else {
-            return "";
-        }
+        return "";
     }
 
     /**
@@ -372,13 +407,18 @@ public class NotificationToolkit {
                         feeTable.forEach(new Selector.ForEachBlock<ResultSet>() {
                             @Override
                             public void exec(ResultSet rs) throws SQLException {
-                                updatedFee.append(rs.getString("prepaid"));
+                                updatedFee.append(rs.getString("prepaid")); // When value is null, this returns "null" as a string.  This is why we need to check for "null" in the next if statement.
                             }
                         });
                     }
                 }
                 if (!updatedFee.isEmpty()) {
-                    return updatedFee.toString();
+                    if (!updatedFee.toString().equals("null")) {
+                        return updatedFee.toString();
+                    }
+                    else {
+                        return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
+                    }
                 }
                 else {
                     return ("Animal replacement fee to be paid (" + causeOfDeath + " death)");
@@ -420,6 +460,46 @@ public class NotificationToolkit {
         }
     }
 
+//    /**
+//     * Gets an animal's sex from their id.
+//     * @param c         The current container.
+//     * @param u         The current user.
+//     * @param animalID  The animal ID to check.
+//     * @return          A string representing the animal's sex.
+//     */
+//    public String getSexFromAnimalID(Container c, User u, String animalID) {
+//        String animalSexCode = "";
+//        String animalSexMeaning = "";
+//
+//        //Gets sex from prenatal id.
+//        if (checkIfPrenatalID(animalID)) {
+//            ArrayList<String> prenatalDeathRow = getTableRowAsList(c, u, "study", "prenatal", null, "id", animalID, new String[]{"gender"});
+//            if (!prenatalDeathRow.isEmpty()) {
+//                animalSexCode = prenatalDeathRow.get(0);
+//            }
+//        }
+//        //Gets sex from non-prenatal id.
+//        else {
+//            ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", null, "id", animalID, new String[]{"gender"});
+//            if (!demographicTableRow.isEmpty()) {
+//                animalSexCode = demographicTableRow.get(0);
+//            }
+//        }
+//
+//        //Gets the gender meaning from the gender code.
+//        if (animalSexCode != null) {
+//            if (!animalSexCode.equals("") && !animalSexCode.equals("null")) {
+//                ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", null, "code", animalSexCode, new String[]{"meaning"});
+//                if (!genderTableRow.isEmpty()) {
+//                    animalSexMeaning = genderTableRow.get(0);
+//                }
+//            }
+//        }
+//
+//        //Returns animal sex.
+//        return animalSexMeaning;
+//    }
+
     /**
      * Gets an animal's sex from their id.
      * @param c         The current container.
@@ -433,25 +513,43 @@ public class NotificationToolkit {
 
         //Gets sex from prenatal id.
         if (checkIfPrenatalID(animalID)) {
-            ArrayList<String> prenatalDeathRow = getTableRowAsList(c, u, "study", "prenatal", null, "id", animalID, new String[]{"gender"});
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
+            String[] targetColumn = new String[]{"gender"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> prenatalDeathRow = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "prenatal", myFilter, null, targetColumn);
+
+            // Checks return data.
             if (!prenatalDeathRow.isEmpty()) {
-                animalSexCode = prenatalDeathRow.get(0);
+                animalSexCode = prenatalDeathRow.get(0).get("gender");
             }
         }
         //Gets sex from non-prenatal id.
         else {
-            ArrayList<String> demographicTableRow = getTableRowAsList(c, u, "study", "demographics", null, "id", animalID, new String[]{"gender"});
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("id", animalID, CompareType.EQUAL);
+            String[] targetColumn = new String[]{"gender"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> demographicTableRow = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "demographics", myFilter, null, targetColumn);
+
+            // Checks return data.
             if (!demographicTableRow.isEmpty()) {
-                animalSexCode = demographicTableRow.get(0);
+                animalSexCode = demographicTableRow.get(0).get("gender");
             }
         }
 
         //Gets the gender meaning from the gender code.
         if (animalSexCode != null) {
             if (!animalSexCode.equals("") && !animalSexCode.equals("null")) {
-                ArrayList<String> genderTableRow = getTableRowAsList(c, u, "ehr_lookups", "gender_codes", null, "code", animalSexCode, new String[]{"meaning"});
+                // Creates filter.
+                SimpleFilter myFilter = new SimpleFilter("code", animalSexCode, CompareType.EQUAL);
+                String[] targetColumn = new String[]{"meaning"};
+                // Runs query.
+                ArrayList<HashMap<String, String>> genderTableRow = getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr_lookups", "gender_codes", myFilter, null, targetColumn);
+
+                // Checks return data.
                 if (!genderTableRow.isEmpty()) {
-                    animalSexMeaning = genderTableRow.get(0);
+                    animalSexMeaning = genderTableRow.get(0).get("meaning");
                 }
             }
         }
@@ -822,6 +920,38 @@ public class NotificationToolkit {
         return returnURL.toString();
     }
 
+    public String createFormURL(Container c, String formType, String taskID) {
+        // Creates URL.
+        ActionURL formURL = new ActionURL();
+        formURL = new ActionURL("ehr", "taskDetails.view", c);
+        formURL.addParameter("formType", formType);
+        formURL.addParameter("taskid", taskID);
+
+        // Creates path.
+        Path returnURL = new Path(new ActionURL().getBaseServerURI(), formURL.toString());
+
+        // Returns URL.
+        return returnURL.toString();
+    }
+
+    public String createAnimalHistoryURL(Container c, String subject) {
+        // Creates URL.
+        ActionURL animalHistoryURL = new ActionURL();
+        animalHistoryURL = new ActionURL("ehr", "animalHistory.view", c);
+        String animalHistoryURLWithID = animalHistoryURL.toString() + "#subjects:" + subject;   // TODO: Try and get commented code below to work instaed of hardcoding this.  For some reason, adding parameter gives me '#subjects=' instead of '#subjects:'.
+
+//        animalHistoryURL.addParameter("#subjects", subject);
+//        animalHistoryURL.addParameter("inputType", "singleSubject");
+//        animalHistoryURL.addParameter("showReport", "0");
+//        animalHistoryURL.addParameter("activeReport", "abstract");
+
+        // Creates path.
+        Path returnURL = new Path(new ActionURL().getBaseServerURI(), animalHistoryURLWithID);
+
+        // Returns URL.
+        return returnURL.toString();
+    }
+
     // TODO: COMMENT!!!
     public Boolean checkIfAnimalIsAlive(Container c, User u, String idToCheck) {
         try {
@@ -890,202 +1020,31 @@ public class NotificationToolkit {
         return animalAssigned;
     }
 
+    // TODO: Comment.  Returns null if there is no overdraw, or overdraw amount if there is an overdraw.
+    public Double checkIfBloodDrawIsOverdraw(Container c, User u, String idToCheck, String dateToCheck) {
+        // Creates filter.
+        SimpleFilter myFilter = new SimpleFilter("Id", idToCheck, CompareType.EQUAL);
+        myFilter.addCondition("date", dateToCheck, CompareType.DATE_EQUAL);
+        // Runs query.
+        String[] targetColumns = new String[]{"BloodRemaining/AvailBlood"};
+        ArrayList<HashMap<String,String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "blood", myFilter, null, targetColumns);
 
-
-
-
-    //TODO: Move this to DeathNotificationRevamp.java
-    /**
-     * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's necropsy.
-     * It contains the following data (returning blank strings for non-existent data):
-     *  If necropsy exists (true/false).
-     *  Necropsy case number.
-     *  Necropsy task id hyperlink.
-     *  Necropsy date.
-     *  Necropsy time of death.
-     *  Necropsy type of death.
-     *  Necropsy grant number.
-     *  Necropsy manner of death.
-     *  Necropsy animal weight.
-     *  Necropsy animal replacement fee.
-     */
-    public static class DeathNecropsyObject {
-        Boolean necropsyExists = false;
-        String necropsyCaseNumber = "";
-        String necropsyTaskIdHyperlink = "";
-        String necropsyDate = "";
-        String necropsyTimeOfDeath = "";
-        String necropsyTypeOfDeath = "";
-        String necropsyGrantNumber = "";
-        String necropsyMannerOfDeath = "";
-        String animalWeight = "";
-        String animalReplacementFee = "";
-
-        public DeathNecropsyObject(Container c, User u, String animalID, String hostName, Boolean withHtmlPlaceHolders) {
-            NotificationToolkit notificationToolkit = new NotificationToolkit();
-            if (notificationToolkit.getTableRowCount(c, u, "study", "Necropsy", "notificationView") > 0) {  //Added this if/else check to getTableRowAsList(), I can remove this after testing.
-                String[] targetColumns = {"caseno", "taskid", "date", "timeofdeath", "causeofdeath", "account", "mannerofdeath"};
-
-                ArrayList<String> necropsyTableRow = notificationToolkit.getTableRowAsList(c, u, "study", "necropsy", null, "id", animalID, targetColumns);
-
-                //Necropsy does exist.
-                if (!necropsyTableRow.isEmpty()) {
-                    this.necropsyExists = true;
-                    //Gets necropsy data.
-                    this.necropsyCaseNumber = necropsyTableRow.get(0);
-                    this.necropsyDate = necropsyTableRow.get(2);
-                    this.necropsyTimeOfDeath = necropsyTableRow.get(3);
-                    this.necropsyTypeOfDeath = necropsyTableRow.get(4);
-                    this.necropsyGrantNumber = necropsyTableRow.get(5);
-                    this.necropsyMannerOfDeath = necropsyTableRow.get(6);
-                    this.animalWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
-                    this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath, animalID);
-
-                    //Creates task id with hyperlink.
-                    String necropsyTaskID = necropsyTableRow.get(1);
-                    Path taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view");
-                    String taskUrlAsString = taskURL.toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
-                    String taskRowID = "";
-                    if (notificationToolkit.getTableRowCount(c, u, "ehr", "tasks", "") > 0) {  //Added this if/else check to getTableRowAsList(), I can remove this after testing.
-                        ArrayList<String> taskRow = notificationToolkit.getTableRowAsList(c, u, "ehr", "tasks", null, "taskid", necropsyTaskID, new String[]{"rowid"});
-                        if (!taskRow.isEmpty()) {
-                            taskRowID = taskRow.get(0);
-                        }
-                        this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
-                    }
-                }
-            }
-            if (withHtmlPlaceHolders) {
-                String placeholderText = "<em>Not Specified</em>";
-                if (this.necropsyCaseNumber == null) {
-                    this.necropsyCaseNumber = placeholderText;
-                }
-                else if (this.necropsyCaseNumber.equals("") || this.necropsyCaseNumber.equals("null")) {
-                    this.necropsyCaseNumber = placeholderText;
-                }
-                if (this.necropsyTaskIdHyperlink == null) {
-                    this.necropsyTaskIdHyperlink = placeholderText;
-                }
-                else if (this.necropsyTaskIdHyperlink.equals("") || this.necropsyTaskIdHyperlink.equals("null")) {
-                    this.necropsyTaskIdHyperlink = placeholderText;
-                }
-                if (this.necropsyDate == null) {
-                    this.necropsyDate = placeholderText;
-                }
-                else if (this.necropsyDate.equals("") || this.necropsyDate.equals("null")) {
-                    this.necropsyDate = placeholderText;
-                }
-                if (this.necropsyTimeOfDeath == null) {
-                    this.necropsyTimeOfDeath = placeholderText;
-                }
-                else if (this.necropsyTimeOfDeath.equals("") || this.necropsyTimeOfDeath.equals("null")) {
-                    this.necropsyTimeOfDeath = placeholderText;
-                }
-                if (this.necropsyTypeOfDeath == null) {
-                    this.necropsyTypeOfDeath = placeholderText;
-                }
-                else if (this.necropsyTypeOfDeath.equals("") || this.necropsyTypeOfDeath.equals("null")) {
-                    this.necropsyTypeOfDeath = placeholderText;
-                }
-                if (this.necropsyGrantNumber == null) {
-                    this.necropsyGrantNumber = placeholderText;
-                }
-                else if (this.necropsyGrantNumber.equals("") || this.necropsyGrantNumber.equals("null")) {
-                    this.necropsyGrantNumber = placeholderText;
-                }
-                if (this.necropsyMannerOfDeath == null) {
-                    this.necropsyMannerOfDeath = placeholderText;
-                }
-                else if (this.necropsyMannerOfDeath.equals("") || this.necropsyMannerOfDeath.equals("null")) {
-                    this.necropsyMannerOfDeath = placeholderText;
-                }
-                if (this.animalWeight == null) {
-                    this.animalWeight = placeholderText;
-                }
-                else if (this.animalWeight.equals("") || this.animalWeight.equals("null")) {
-                    this.animalWeight = placeholderText;
-                }
-                if (this.animalReplacementFee == null) {
-                    this.animalReplacementFee = placeholderText;
-                }
-                else if (this.animalReplacementFee.equals("") || this.animalReplacementFee.equals("null")) {
-                    this.animalReplacementFee = placeholderText;
+        // Checks results.
+        if (!returnArray.isEmpty()) {
+            for (HashMap<String, String> result : returnArray) {
+                Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
+                if (availableBlood <=0) {
+                    return availableBlood;
                 }
             }
         }
+        return null;
     }
 
-    //TODO: Move this to DeathNotificationRevamp.java
-    /**
-     * This is an object used in the WNPRC DeathNotification.java file that defines all the info presented for a dead animal's demographics.
-     * It contains the following data (returning blank strings for non-existent data):
-     *  Animal ID hyperlink.
-     *  Animal sex.
-     */
-    public static class DeathDemographicObject {
-        String animalIdHyperlink = "";
-        String animalSex = "";
-        String animalDam = "";
-        String animalSire = "";
-        String animalConception = "";
-        public DeathDemographicObject(Container c, User u, String animalID, Boolean withHtmlPlaceHolders) {
-            NotificationToolkit notificationToolkit = new NotificationToolkit();
-            //Gets hyperlink for animal id in animal history abstract.
-            Path animalAbstractURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view");
-            String animalAbstractUrlAsString = animalAbstractURL.toString() + "?#subjects:" + animalID + "&inputType:singleSubject&showReport:1&activeReport:abstract";
-            this.animalIdHyperlink = notificationToolkit.createHyperlink(animalID, animalAbstractUrlAsString);
 
-            //Gets animal sex.
-            String animalsex = notificationToolkit.getSexFromAnimalID(c, u, animalID);
-            this.animalSex = animalsex;
 
-            //Gets prenatal information if necessary.
-            if (notificationToolkit.checkIfPrenatalID(animalID)) {
-                ArrayList<String> prenatalDeathRow = notificationToolkit.getTableRowAsList(c, u, "study", "prenatal", null, "id", animalID, new String[]{"dam", "sire", "conception"});
-                if (!prenatalDeathRow.isEmpty())
-                {
-                    this.animalDam = prenatalDeathRow.get(0);
-                    this.animalSire = prenatalDeathRow.get(1);
-                    this.animalConception = prenatalDeathRow.get(2);
-                }
-            }
 
-            //Adds HTML placeholders for empty fields.
-            if (withHtmlPlaceHolders) {
-                String placeholderText = "<em>Not Specified</em>";
-                if (this.animalIdHyperlink == null) {
-                    this.animalIdHyperlink = placeholderText;
-                }
-                else if (this.animalIdHyperlink.equals("") || this.animalIdHyperlink.equals("null")) {
-                    this.animalIdHyperlink = placeholderText;
-                }
-                if (this.animalSex == null) {
-                    this.animalSex = placeholderText;
-                }
-                else if (this.animalSex.equals("") || this.animalSex.equals("null")) {
-                    this.animalSex = placeholderText;
-                }
-                if (this.animalDam == null) {
-                    this.animalDam = placeholderText;
-                }
-                else if (this.animalDam.equals("") || this.animalDam.equals("null")) {
-                    this.animalDam = placeholderText;
-                }
-                if (this.animalSire == null) {
-                    this.animalSire = placeholderText;
-                }
-                else if (this.animalSire.equals("") || this.animalSire.equals("null")) {
-                    this.animalSire = placeholderText;
-                }
-                if (this.animalConception == null) {
-                    this.animalConception = placeholderText;
-                }
-                else if (this.animalConception.equals("") || this.animalConception.equals("null")) {
-                    this.animalConception = placeholderText;
-                }
-            }
-        }
-    }
+
 
     /**
      * This is an object representation of a custom QView file.
@@ -1511,8 +1470,8 @@ public class NotificationToolkit {
         public Date getDateXDaysFromNow(Integer numDaysFromNow) {
             Calendar todayCalendar = Calendar.getInstance();
             todayCalendar.add(Calendar.DATE, numDaysFromNow);
-            Date fiveDaysAgoDate = todayCalendar.getTime();
-            return fiveDaysAgoDate;
+            Date dateToReturn = todayCalendar.getTime();
+            return dateToReturn;
         }
 
         //Returns today's date as String (ex: "03/06/2024").

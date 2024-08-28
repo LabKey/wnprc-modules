@@ -300,18 +300,27 @@ const Editor = () => {
             if (targetCell) {
                 const cellX = +targetCell.attr('x');
                 const cellY = +targetCell.attr('y');
-                const rackSvgId = (draggedShape.node() as SVGElement).children['rack-template'].children[0].children.item(0).id;
                 draggedShape.classed('dragging', false);
-                // Create a group element and append it to layoutSvg
-                const group = layoutSvg.append('g')
-                    .attr('class', `draggable ${rackSvgId}`)
-                    .style('pointer-events', "bounding-box")
-                    .call(d3.drag().on('start', startDragInLayout)
-                        .on('drag', dragInLayout)
-                        .on('end', endDragInLayout));
-                group.append(() => draggedShape.node());
-                group.attr('transform', `translate(${cellX + 50}, ${cellY + 50})`);
-
+                if((draggedShape.node() as SVGElement).children['rack-room-util']){
+                    layoutSvg.append(() => draggedShape.node())
+                        .attr('transform', `translate(${cellX + 50}, ${cellY + 50})`)
+                        .attr('class', "draggable")
+                        .style('pointer-events', "bounding-box")
+                        .call(d3.drag().on('start', startDragInLayout)
+                            .on('drag', dragInLayout)
+                            .on('end', endDragInLayout));
+                }else{
+                    const rackSvgId = (draggedShape.node() as SVGElement).children['rack-template'].children[0].children.item(0).id;
+                    // Create a group element and append it to layoutSvg
+                    const group = layoutSvg.append('g')
+                        .attr('class', `draggable ${rackSvgId}`)
+                        .style('pointer-events', "bounding-box")
+                        .call(d3.drag().on('start', startDragInLayout)
+                            .on('drag', dragInLayout)
+                            .on('end', endDragInLayout));
+                    group.append(() => draggedShape.node());
+                    group.attr('transform', `translate(${cellX + 50}, ${cellY + 50})`);
+                }
             } else {
                 draggedShape.remove();
             }
@@ -359,8 +368,17 @@ const Editor = () => {
             console.log("Drag Layout #2", event.x, event.y);
             const x = event.x;
             const y = event.y;
+
             const element = d3.select(this);
-            element.attr("transform", "translate(" + x + "," + y + ")");
+            if(element.node() instanceof SVGGElement){
+                element.attr("transform", "translate(" + x + "," + y + ")");
+
+            }
+            else{
+                element.attr("x", x);
+                element.attr("y", y);
+
+            }
             console.log("Elem: ", element.node());
         }
 
@@ -374,20 +392,25 @@ const Editor = () => {
                 console.log("Drag Layout #3", shape, targetCell);
                 const cellX = +targetCell.attr('x');
                 const cellY = +targetCell.attr('y');
-                shape.attr("transform", `translate(${cellX},${cellY})`);
-
-                // Only allow merging of individual rack to another single rack or a merged rack.
-                // Don't allow merged racks to merge with other racks
-                if(((shape.node() as SVGGElement).children.length < 2)) {
-                    layoutSvg.selectAll('.draggable, .merged-box').each(function () {
-                       //TODO Check for groups here it glitches because ottherBox is a group
-                        const otherBox = d3.select(this);
-                        console.log("ADJ BOX: ", otherBox);
-                        if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape)) {
-                            mergeRacks(otherBox, shape);
-                        }
-                    });
+                if(shape.node() instanceof SVGGElement){
+                    shape.attr("transform", `translate(${cellX},${cellY})`);
+                    // Only allow merging of individual rack to another single rack or a merged rack.
+                    // Don't allow merged racks to merge with other racks
+                    if(((shape.node() as SVGGElement).children.length < 2)) {
+                        layoutSvg.selectAll('.draggable, .merged-box').each(function () {
+                            //TODO Check for groups here it glitches because ottherBox is a group
+                            const otherBox = d3.select(this);
+                            console.log("ADJ BOX: ", otherBox);
+                            if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape)) {
+                                mergeRacks(otherBox, shape);
+                            }
+                        });
+                    }
+                }else{
+                    shape.attr("x", cellX);
+                    shape.attr("y", cellY);
                 }
+
 
             } else {
                 shape.remove();

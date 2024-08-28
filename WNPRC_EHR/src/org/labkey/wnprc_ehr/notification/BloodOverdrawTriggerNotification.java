@@ -100,15 +100,20 @@ public class BloodOverdrawTriggerNotification extends AbstractEHRNotification {
             messageBody.append("<p>Available blood: " + overdrawAmount + "</p>");
 
             // Returns message info.
+            this.resetClass();
             return messageBody.toString();
         }
         // Sends no message if there is no overdraw.
         else {
+            this.resetClass();
             return null;
         }
 
     }
 
-
+    public void resetClass() {
+        this.animalID = null;
+        this.drawDate = null;
+    }
 
 }

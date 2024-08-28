@@ -3872,19 +3872,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayAll").withText("Run Report In Browser"));
 
         // Validates necessary info.
-        // TODO: Assert ID: 'bloodDrawsTodayAllId1' has a red colored cell.
-        // TODO: Assert ID: 'bloodDrawsTodayAllId2' has an orange colored cell.
-        // TODO: Assert ID: 'bloodDrawsTodayAllId3' has the text 'NOT ASSIGNED' present in the row.
-        // TODO: Assert ID: 'bloodDrawsTodayAllId4' has the text 'INCOMPLETE' present in the row.
+        // Verifies a red cell exists (for blood remaining < 0).
+        assertElementVisible(Locator.tagWithAttributeContaining("td", "bgcolor", "red"));
+        // Verifies an orange cell exists (for blood remaining < bloodDrawLimit).
+        assertElementVisible(Locator.tagWithAttributeContaining("td", "bgcolor", "orange"));
+        // Verifies an incomplete cell exists (for blood not yet drawn).
+        assertElementVisible(Locator.tagContainingText("td", "INCOMPLETE"));
+        // Verifies an unassigned cell exists (for blood not yet assigned to a project).
+        assertElementVisible(Locator.tagContainingText("td", "UNASSIGNED"));
 
         // Finishes test.
         log("Completed notification revamp test: Blood Draws Today (All)");
-
-//        assertTextPresent("Animal ID:", necropsyID);
-//        assertTextPresent("Necropsy Case Number:", necropsyCaseNumber);
-//        assertTextPresent("Date of Necropsy:", necropsyDate);
-//        assertTextPresent("Grant #:", necropsyAccount);
-//        log("Completed testJavaDeathNotification.");
     }
 
     public void notificationRevampTestBloodDrawsTodayAnimalCare() throws UnhandledAlertException, IOException, CommandException {
@@ -3904,7 +3902,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayAnimalCare").withText("Run Report In Browser"));
 
         // Validates necessary info.
-        // TODO: Assert ID: 'bloodDrawsTodayAnimalCareId1' exists.
+        // Verifies a blood draw shows up here when assigned to Animal Care.
+        assertTextPresent("bloodDrawsTodayAnimalCareId1");
 
         // Finishes test.
         log("Completed notification revamp test: Blood Draws Today (Animal Care)");
@@ -3927,7 +3926,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayVetStaff").withText("Run Report In Browser"));
 
         // Validates necessary info.
-        // TODO: Assert ID: 'bloodDrawsTodayVetStaffId1' exists.
+        // Verifies a blood draw shows up here when assigned to Vet Staff.
+        assertTextPresent("bloodDrawsTodayVetStaffId1");
 
         // Finishes test.
         log("Completed notification revamp test: Blood Draws Today (Vet Staff)");
@@ -3946,7 +3946,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         myReusableFunctions.goHome();
 
         // Creates test data.
-        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId1", false, new Date(), true, Double.valueOf(2.0), false); // Testing for blood scheduled for today with a dead anima.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId1", false, new Date(), true, Double.valueOf(2.0), false); // Testing for blood scheduled for today with a dead animal.
         myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId2", true, dateTomorrow, false, Double.valueOf(2.0), false); // Testing for blood scheduled for tomorrow with an animal not assigned to a project.
 
         // Runs test email in the browser.
@@ -3955,15 +3955,61 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawReviewDailyNotification").withText("Run Report In Browser"));
 
         // Validates necessary info.
-        // TODO: Assert ID: 'bloodDrawReviewDailyId1' exists.
-        // TODO: Assert ID: 'bloodDrawReviewDailyId2' exists.
+        // Verifies the notification shows that there is a draw scheduled for a dead animal.
+        assertTextPresent("bloodDrawReviewDailyId1");
+        // Verifies the notification shows that there is a draw scheduled for an animal who is unassigned to a project.
+        assertTextPresent("bloodDrawReviewDailyId2");
 
         // Finishes test.
         log("Completed notification revamp test: Blood Draw Review (Daily)");
     }
 
     public void notificationRevampTestBloodDrawReviewTriggerNotification() throws UnhandledAlertException, IOException, CommandException {
-        // TODO.  For this one, check what the id is for the 'run in browser - testing id', then update the DB with this info.  Or should I send it and try using dumbster?
+        // Setup
+        log("Starting notification revamp test: Blood Draw Review (Trigger)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawReviewTriggerNotification").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies the notification states that there is a dead animal with a blood draw scheduled.  This is normally triggered, but here we are just testing to make sure the notification is formatted correctly and created properly.
+        assertTextPresent("This animal is no longer alive.");
+        // Verifies the notification states that there is an unassigned animal with a blood draw scheduled.  This is normally triggered, but here we are just testing to make sure the notification is formatted correctly and created properly.
+        assertTextPresent("This animal is not assigned to a project on the date of the requested blood draw.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draw Review (Trigger)");
+    }
+
+    public void notificationRevampTestBloodOverdrawTriggerNotification() throws UnhandledAlertException, IOException, CommandException
+    {
+        // Setup
+        log("Starting notification revamp test: Blood Overdraw Trigger");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "testID", true, new Date(), true, Double.valueOf(-1), true);
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodOverdrawTriggerNotification").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies the notification states that there is an unassigned animal with a blood draw scheduled today.  This is normally triggered, but here we are just testing to make sure the notification is formatted correctly and created properly.
+        assertTextPresent("This email contains warning information for an animal who just had their blood overdrawn.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Overdraw Trigger");
     }
 
     @Test
@@ -3980,15 +4026,27 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
         // Updates the notification user and reply email.
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
-        // Enables all notification that we will be testing.
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");   //TODO: Can we remake a function with an appropriate name for this?  Something like "enableNotification" maybe.
-        // Adds notification recipients.
+        // Enables all notification that we will be testing. //TODO a34: Can we remake a function with an appropriate name for this?  Something like "enableNotification" maybe.
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification");
+        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification");
+        // Adds recipients for all notifications we will be testing.
+        waitForText("Blood Draws Today (All)");
         notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll", "EHR Administrators");
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare", "EHR Administrators");
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff", "EHR Administrators");
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification", "EHR Administrators");
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification", "EHR Administrators");
+        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification", "EHR Administrators");
         // Enables dumbster.
         _containerHelper.enableModules(Arrays.asList("Dumbster"));
         // Enable LDK Site Notification
         beginAt(buildURL("ldk", "notificationSiteAdmin"));
         waitForText("Notification Site Admin");
+        waitForElement(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
         click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
         click(Locator.tagWithText("li", "Enabled"));
         click(Locator.tagWithText("span", "Save"));
@@ -4001,43 +4059,25 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         myReusableFunctions.insertValueIntoBloodBilledByDataset("vetStaff", "Vet Staff");
         myReusableFunctions.insertValueIntoBloodBilledByDataset("spi", "SPI");
 
-        // Logs completion.
-        log("Completed notificationRevampSetup()");
-
         // Runs tests.
         notificationRevampTestBloodDrawsTodayAll();
         notificationRevampTestBloodDrawsTodayAnimalCare();
         notificationRevampTestBloodDrawsTodayVetStaff();
         notificationRevampTestBloodDrawReviewDailyNotification();
         notificationRevampTestBloodDrawReviewTriggerNotification();
+        notificationRevampTestBloodOverdrawTriggerNotification();
 
+        // TODO: Run test for: Admin Alerts
+        // TODO: Run test for: Animal Request
+        // TODO: Run test for: Colony Alerts
+        // TODO: Run test for: Colony Alerts (Lite)
+        // TODO: Run test for: Colony Management
+        // TODO: Run test for: Death
+        // TODO: Run test for: Prenatal Death
 
+        // Logs completion.
+        log("Completed notificationRevampSetup().  All revamped notifications have been checked.");
 
-
-
-        // Uploads data for notification: Admin Alerts
-
-        // Uploads data for notification: Animal Request
-
-        // Uploads data for notification: Blood Draws Today (All)
-
-        // Uploads data for notification: Blood Draws Today (Animal Care)
-
-        // Uploads data for notification: Blood Draws Today (Vet Staff)
-
-        // Uploads data for notification: Blood Draw Review (Daily)
-
-        // Uploads data for notification: Blood Draw Review (Trigger)
-
-        // Uploads data for notification: Colony Alerts
-
-        // Uploads data for notification: Colony Alerts (Lite)
-
-        // Uploads data for notification: Colony Management
-
-        // Uploads data for notification: Death
-
-        // Uploads data for notification: Prenatal Death
     }
 
     public class ReusableTestFunctions {
@@ -4052,7 +4092,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                     "Query Name: " + queryName + "\n" +
                     "Values: " + valuesToInsert);
 
-            //TODO: Which one to use?
+            //TODO a34: Which one to use?
             Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 //            Connection cn = WebTestHelper.getRemoteApiConnection();
 
@@ -4123,10 +4163,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             insertValueIntoDataset("study", "demographics", demographicInfoTestData1);
             insertValueIntoDataset("study", "blood", bloodTestData1);
             insertValueIntoDataset("study", "weight", weightTestData1);
-
-            // TODO: The following fields are not included.  Make sure test still runs correctly.
-            //  Id/curLocation/room
-            //  Id/curLocation/area
         }
 
         public Integer getQCStateRowID(String qcStateLabel) throws IOException, CommandException {

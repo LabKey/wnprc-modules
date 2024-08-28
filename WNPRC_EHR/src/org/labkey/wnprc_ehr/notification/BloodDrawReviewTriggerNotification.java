@@ -129,20 +129,30 @@ public class BloodDrawReviewTriggerNotification extends AbstractEHRNotification 
                 LocalDate drawDateWithoutTime = formattedDrawDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate todaysDateWithoutTime = dateToolkit.getDateToday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 if (drawDateWithoutTime.equals(todaysDateWithoutTime)) {
+                    this.resetClass();
                     return messageBody.toString();
                 }
                 else {
+                    this.resetClass();
                     return null;
                 }
             }
             catch(Exception e) {
                 _log.error("Error executing BloodDrawReviewTriggerNotification->getMessageBodyHTML().  Could not format date of blood draw into Date().", e);
+                this.resetClass();
                 return null;
             }
         }
         else {
+            this.resetClass();
             return null;
         }
+    }
+
+    public void resetClass() {
+        this.animalIdToCheck = null;
+        this.projectToCheck = null;
+        this.drawDateToCheck = null;
     }
 
 }

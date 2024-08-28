@@ -1032,9 +1032,11 @@ public class NotificationToolkit {
         // Checks results.
         if (!returnArray.isEmpty()) {
             for (HashMap<String, String> result : returnArray) {
-                Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
-                if (availableBlood <=0) {
-                    return availableBlood;
+                if (!result.get("BloodRemaining/AvailBlood").isEmpty()) {
+                    Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
+                    if (availableBlood <=0) {
+                        return availableBlood;
+                    }
                 }
             }
         }

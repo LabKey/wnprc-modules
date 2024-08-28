@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.remoteapi.Command;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
@@ -3987,8 +3988,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Draw Review (Trigger)");
     }
 
-    public void notificationRevampTestBloodOverdrawTriggerNotification() throws UnhandledAlertException, IOException, CommandException
-    {
+    public void notificationRevampTestBloodOverdrawTriggerNotification() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Overdraw Trigger");
         ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
@@ -4010,6 +4010,53 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         // Finishes test.
         log("Completed notification revamp test: Blood Overdraw Trigger");
+    }
+
+    public void notificationRevampTestDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Death Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoNecropsyDataset("necropsyTestId1", new Date());
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        assertTextPresent("necropsyTestId1 has been marked as dead.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Death Notification Revamp");
+    }
+
+    public void notificationRevampTestPrenatalDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Prenatal Death Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoNecropsyDataset("pdNecropsyTestId2", new Date());
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        assertTextPresent("pdNecropsyTestId2 has been marked as dead.");
+        assertTextPresent("Dam");
+
+        // Finishes test.
+        log("Completed notification revamp test: Prenatal Death Notification Revamp");
     }
 
     @Test
@@ -4066,18 +4113,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         notificationRevampTestBloodDrawReviewDailyNotification();
         notificationRevampTestBloodDrawReviewTriggerNotification();
         notificationRevampTestBloodOverdrawTriggerNotification();
+        notificationRevampTestDeathNotificationRevamp();
+        notificationRevampTestPrenatalDeathNotificationRevamp();
 
         // TODO: Run test for: Admin Alerts
         // TODO: Run test for: Animal Request
         // TODO: Run test for: Colony Alerts
         // TODO: Run test for: Colony Alerts (Lite)
         // TODO: Run test for: Colony Management
-        // TODO: Run test for: Death
-        // TODO: Run test for: Prenatal Death
 
         // Logs completion.
         log("Completed notificationRevampSetup().  All revamped notifications have been checked.");
-
     }
 
     public class ReusableTestFunctions {
@@ -4163,6 +4209,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             insertValueIntoDataset("study", "demographics", demographicInfoTestData1);
             insertValueIntoDataset("study", "blood", bloodTestData1);
             insertValueIntoDataset("study", "weight", weightTestData1);
+        }
+
+        public void insertValueIntoNecropsyDataset(String animalID, Date necropsyDate) throws IOException, CommandException {
+            HashMap<String, Object> necropsyTestData = new HashMap<>();
+            necropsyTestData.put("id", animalID);
+            necropsyTestData.put("date", necropsyDate);
+            insertValueIntoDataset("study", "necropsies", necropsyTestData);
         }
 
         public Integer getQCStateRowID(String qcStateLabel) throws IOException, CommandException {

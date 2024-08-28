@@ -218,8 +218,10 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
                 String[] targetTaskColumns = new String[]{"rowid"};
                 // Runs query.
                 ArrayList<HashMap<String, String>> necropsyTask = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr", "tasks", myTaskFilter, null, targetTaskColumns);
-                String taskRowID = necropsyTask.get(0).get("rowid");
-                this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
+                if (!necropsyTask.isEmpty()) {
+                    String taskRowID = necropsyTask.get(0).get("rowid");
+                    this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
+                }
             }
 
             // Assigns 'Not Specified' placeholders for blank values.

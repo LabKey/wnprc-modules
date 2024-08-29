@@ -16,14 +16,20 @@ sed -i "s/@@jdbcURL@@/${PG_NAME}/" /labkey/labkey/config/application.properties
 
 echo "replacing ARROW credentials"
 sed -i "s/@@arrowJdbcUrl@@/${LK_ARROW_URL}/" /labkey/labkey/config/application.properties
-sed -i "s/@@arrowJdbcUsername@@/${LK_ARROW_USER}" /labkey/labkey/config/application.properties
-sed -i "s/@@arrowJdbcPassword@@/${LK_ARROW_PASS}" /labkey/labkey/config/application.properties
+sed -i "s/@@arrowJdbcUsername@@/${LK_ARROW_USER}/" /labkey/labkey/config/application.properties
+sed -i "s/@@arrowJdbcPassword@@/${LK_ARROW_PASS}/" /labkey/labkey/config/application.properties
 
 
 echo "replacing MySQL credentials"
 sed -i "s/@@msqlJdbcUrl@@/${LK_MSQL_URL}/" /labkey/labkey/config/application.properties
-sed -i "s/@@msqlJdbcUsername@@/${LK_MSQL_USER}" /labkey/labkey/config/application.properties
-sed -i "s/@@msqlJdbcPassword@@/${LK_MSQL_PASS}" /labkey/labkey/config/application.properties
+sed -i "s/@@msqlJdbcUsername@@/${LK_MSQL_USER}/" /labkey/labkey/config/application.properties
+sed -i "s/@@msqlJdbcPassword@@/${LK_MSQL_PASS}/" /labkey/labkey/config/application.properties
+
+echo "replacing SMTP configuration"
+sed -i "s/@@smtpHost@@/${LK_MAILSERVER}/" /labkey/labkey/config/application.properties
+sed -i "s/@@smtpPort@@/${LK_MAIL_PORT}/" /labkey/labkey/config/application.properties
+sed -i "s/@@smtpFrom@@/${LK_SERVER_EMAIL_ADDRESS}/" /labkey/labkey/config/application.properties
+sed -i "s/@@smtpAuth@@/${LK_MAIL_AUTHENTICATION}/" /labkey/labkey/config/application.properties
 
 #java -XX:MaxRAMPercentage=75.0 -Dlabkey.home=${LABKEY_HOME} -Dlabkey.log.home=/labkey/logs -Dlogback.debug=true -jar /labkey/labkey/labkeyServer.jar
 

@@ -4059,6 +4059,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Prenatal Death Notification Revamp");
     }
 
+    @Test
     public void notificationRevampSetup() throws UnhandledAlertException, IOException, CommandException {
         // Set up.
         log("Starting notificationRevampSetup()");

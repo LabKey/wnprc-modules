@@ -269,8 +269,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.initCreatedProject();
 
-        initTest.notificationRevampSetup();
-
         initTest.uploadBillingDataAndVerify();
 
         // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
@@ -284,6 +282,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
+
+        initTest.notificationRevampSetup();
 
     }
 
@@ -4059,7 +4059,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Prenatal Death Notification Revamp");
     }
 
-    @Test
     public void notificationRevampSetup() throws UnhandledAlertException, IOException, CommandException {
         // Set up.
         log("Starting notificationRevampSetup()");

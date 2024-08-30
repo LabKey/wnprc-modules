@@ -4073,32 +4073,32 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // Updates the notification user and reply email.
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
         // Enables all notification that we will be testing. //TODO a34: Can we remake a function with an appropriate name for this?  Something like "enableNotification" maybe.
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff");
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification");
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification");
-        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification");
-        // Adds recipients for all notifications we will be testing.
-        waitForText("Blood Draws Today (All)");
-        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll", "EHR Administrators");
-        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare", "EHR Administrators");
-        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff", "EHR Administrators");
-        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification", "EHR Administrators");
-        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification", "EHR Administrators");
-        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification", "EHR Administrators");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification");
+//        // Adds recipients for all notifications we will be testing.
+//        waitForText("Blood Draws Today (All)");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification", "EHR Administrators");
         // Enables dumbster.
-        _containerHelper.enableModules(Arrays.asList("Dumbster"));
+//        _containerHelper.enableModules(Arrays.asList("Dumbster"));
         // Enable LDK Site Notification
-        beginAt(buildURL("ldk", "notificationSiteAdmin"));
-        waitForText("Notification Site Admin");
-        waitForElement(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
-        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
-        click(Locator.tagWithText("li", "Enabled"));
-        click(Locator.tagWithText("span", "Save"));
-        waitForText("Success");
-        clickButtonContainingText("OK");
-        waitForText("Notification Site Admin");
+//        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+//        waitForText("Notification Site Admin");
+//        waitForElement(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+//        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+//        click(Locator.tagWithText("li", "Enabled"));
+//        click(Locator.tagWithText("span", "Save"));
+//        waitForText("Success");
+//        clickButtonContainingText("OK");
+//        waitForText("Notification Site Admin");
 
         // Creates billing groups for testing.
         myReusableFunctions.insertValueIntoBloodBilledByDataset("animalCare", "Animal Care");

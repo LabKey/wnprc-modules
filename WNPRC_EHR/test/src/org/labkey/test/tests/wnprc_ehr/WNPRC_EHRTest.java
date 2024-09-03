@@ -4133,24 +4133,28 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         }
 
         public void insertValueIntoDataset(String schemaName, String queryName, HashMap<String, Object> valuesToInsert) throws IOException, CommandException {
-            log("Inserting values into dataset.\n" +
-                    "Schema Name: " + schemaName + "\n" +
-                    "Query Name: " + queryName + "\n" +
-                    "Values: " + valuesToInsert);
-
-            //TODO a34: Which one to use?
-            Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+            try {
+                //TODO a34: Which one to use?
+                Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 //            Connection cn = WebTestHelper.getRemoteApiConnection();
 
-            // Gets dataset to update.
-            InsertRowsCommand insertCmd = new InsertRowsCommand(schemaName, queryName);
+                // Gets dataset to update.
+                InsertRowsCommand insertCmd = new InsertRowsCommand(schemaName, queryName);
 
-            // Creates values to insert.
-            insertCmd.addRow(valuesToInsert);
+                // Creates values to insert.
+                insertCmd.addRow(valuesToInsert);
 
-            // Inserts rows into dataset.
-            insertCmd.execute(cn, EHR_FOLDER_PATH);
+                // Inserts rows into dataset.
+                insertCmd.execute(cn, EHR_FOLDER_PATH);
 
+                log("Inserting values into dataset.\n" +
+                        "Schema Name: " + schemaName + "\n" +
+                        "Query Name: " + queryName + "\n" +
+                        "Values: " + valuesToInsert);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoDataset(), value most likely already exists in this dataset.");
+            }
         }
 
         public void insertValueIntoBloodBilledByDataset(String billingGroupRealName, String billingGroupDisplayName) throws IOException, CommandException
@@ -4162,7 +4166,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 insertValueIntoDataset("ehr_lookups", "blood_billed_by", billingGroupTestData);
             }
             catch (Exception e) {
-                log("Error executing insertValueIntoBloodBilledByDataset(), value already exists in this dataset.");
+                log("Error executing insertValueIntoBloodBilledByDataset(), value most likely already exists in this dataset.");
             }
         }
 
@@ -4179,48 +4183,58 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
          * @throws CommandException
          */
         public void insertValueIntoBloodScheduleDataset(String billingGroupRealName, String animalID, Boolean animalAlive, Date drawDate, Boolean projectAssigned, Double animalWeight, Boolean drawCompleted) throws IOException, CommandException {
-            // Creates data to pass in.
-            String livingStatus = "Dead";
-            if (animalAlive) {
-                livingStatus = "Alive";
-            }
-            Integer assignmentStatus = null;
-            if (projectAssigned) {
-                assignmentStatus = 300901;
-            }
-            Integer completionStatus = getQCStateRowID("In Progress");
-            if (drawCompleted) {
-                completionStatus = getQCStateRowID("Completed");
-            }
+            try {
+                // Creates data to pass in.
+                String livingStatus = "Dead";
+                if (animalAlive) {
+                    livingStatus = "Alive";
+                }
+                Integer assignmentStatus = null;
+                if (projectAssigned) {
+                    assignmentStatus = 300901;
+                }
+                Integer completionStatus = getQCStateRowID("In Progress");
+                if (drawCompleted) {
+                    completionStatus = getQCStateRowID("Completed");
+                }
 
-            // Creates demographic info (this updates the bloodSchedule field: 'Id/DataSet/Demographics/calculated_status').
-            HashMap<String, Object> demographicInfoTestData1 = new HashMap<>();
-            demographicInfoTestData1.put("id", animalID);
-            demographicInfoTestData1.put("calculated_status", livingStatus);
-            // Creates weight info (this updates the bloodSchedule field: 'BloodRemaining/AvailBlood').
-            HashMap<String, Object> weightTestData1 = new HashMap<>();
-            weightTestData1.put("id", animalID);
-            weightTestData1.put("date", new Date());
-            weightTestData1.put("weight", animalWeight);
-            // Creates blood info (this updates the bloodSchedule fields: 'id', 'date', 'projectStatus', 'billedby/title', and QCState/label).
-            HashMap<String, Object> bloodTestData1 = new HashMap<>();
-            bloodTestData1.put("id", animalID);
-            bloodTestData1.put("date", drawDate);
-            bloodTestData1.put("project", assignmentStatus);
-            bloodTestData1.put("billedBy", billingGroupRealName);
-            bloodTestData1.put("QCState", completionStatus);
+                // Creates demographic info (this updates the bloodSchedule field: 'Id/DataSet/Demographics/calculated_status').
+                HashMap<String, Object> demographicInfoTestData1 = new HashMap<>();
+                demographicInfoTestData1.put("id", animalID);
+                demographicInfoTestData1.put("calculated_status", livingStatus);
+                // Creates weight info (this updates the bloodSchedule field: 'BloodRemaining/AvailBlood').
+                HashMap<String, Object> weightTestData1 = new HashMap<>();
+                weightTestData1.put("id", animalID);
+                weightTestData1.put("date", new Date());
+                weightTestData1.put("weight", animalWeight);
+                // Creates blood info (this updates the bloodSchedule fields: 'id', 'date', 'projectStatus', 'billedby/title', and QCState/label).
+                HashMap<String, Object> bloodTestData1 = new HashMap<>();
+                bloodTestData1.put("id", animalID);
+                bloodTestData1.put("date", drawDate);
+                bloodTestData1.put("project", assignmentStatus);
+                bloodTestData1.put("billedBy", billingGroupRealName);
+                bloodTestData1.put("QCState", completionStatus);
 
-            // Inserts data.
-            insertValueIntoDataset("study", "demographics", demographicInfoTestData1);
-            insertValueIntoDataset("study", "blood", bloodTestData1);
-            insertValueIntoDataset("study", "weight", weightTestData1);
+                // Inserts data.
+                insertValueIntoDataset("study", "demographics", demographicInfoTestData1);
+                insertValueIntoDataset("study", "blood", bloodTestData1);
+                insertValueIntoDataset("study", "weight", weightTestData1);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoBloodScheduleDataset(), value most likely already exists in this dataset.");
+            }
         }
 
         public void insertValueIntoNecropsyDataset(String animalID, Date necropsyDate) throws IOException, CommandException {
-            HashMap<String, Object> necropsyTestData = new HashMap<>();
-            necropsyTestData.put("id", animalID);
-            necropsyTestData.put("date", necropsyDate);
-            insertValueIntoDataset("study", "necropsies", necropsyTestData);
+            try {
+                HashMap<String, Object> necropsyTestData = new HashMap<>();
+                necropsyTestData.put("id", animalID);
+                necropsyTestData.put("date", necropsyDate);
+                insertValueIntoDataset("study", "necropsies", necropsyTestData);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoNecropsyDataset(), value most likely already exists in this dataset.");
+            }
         }
 
         public Integer getQCStateRowID(String qcStateLabel) throws IOException, CommandException {

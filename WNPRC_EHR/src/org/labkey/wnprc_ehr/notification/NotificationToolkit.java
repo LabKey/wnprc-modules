@@ -956,15 +956,23 @@ public class NotificationToolkit {
     public Boolean checkIfAnimalIsAlive(Container c, User u, String idToCheck) {
         try {
             //Runs query.
-            ArrayList<String> animalDemographicRow = getTableRowAsList(c, u, "study", "Demographics", null, "id", idToCheck, new String[]{"calculated_status"});
+//            ArrayList<String> animalDemographicRow = getTableRowAsList(c, u, "study", "Demographics", null, "id", idToCheck, new String[]{"calculated_status"});
 
-            //Checks alive status.
-            if (animalDemographicRow.get(0).equals("Alive")) {
-                return true;
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("id", idToCheck, CompareType.EQUAL);
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"calculated_status"};
+            //Runs query.
+            ArrayList<HashMap<String,String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Demographics", myFilter, null, targetColumns);
+
+            if (!returnArray.isEmpty()) {
+                if (returnArray.get(0).get("calculated_status") != null) {
+                    if (returnArray.get(0).get("calculated_status").equals("Alive")) {
+                        return true;
+                    }
+                }
             }
-            else {
-                return false;
-            }
+            return false;
         }
         catch (IndexOutOfBoundsException e) {
             // TODO: Log exception.

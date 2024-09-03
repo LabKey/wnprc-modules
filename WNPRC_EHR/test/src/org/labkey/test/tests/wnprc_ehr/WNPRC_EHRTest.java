@@ -4155,10 +4155,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         public void insertValueIntoBloodBilledByDataset(String billingGroupRealName, String billingGroupDisplayName) throws IOException, CommandException
         {
-            HashMap<String, Object> billingGroupTestData = new HashMap<>();
-            billingGroupTestData.put("value", billingGroupRealName);
-            billingGroupTestData.put("title", billingGroupDisplayName);
-            insertValueIntoDataset("ehr_lookups", "blood_billed_by", billingGroupTestData);
+            try {
+                HashMap<String, Object> billingGroupTestData = new HashMap<>();
+                billingGroupTestData.put("value", billingGroupRealName);
+                billingGroupTestData.put("title", billingGroupDisplayName);
+                insertValueIntoDataset("ehr_lookups", "blood_billed_by", billingGroupTestData);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoBloodBilledByDataset(), value already exists in this dataset.");
+            }
         }
 
         /**

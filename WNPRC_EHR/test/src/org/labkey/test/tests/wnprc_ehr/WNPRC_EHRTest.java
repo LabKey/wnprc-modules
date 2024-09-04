@@ -269,6 +269,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.initCreatedProject();
 
+        initTest.goToPIPortal();
+        initTest.addBillingPublicWebParts();
         initTest.uploadBillingDataAndVerify();
 
         // Blood triggers are dependent on weights, so the blood sample data has to be imported after weights. Doing this after
@@ -311,9 +313,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
 
         initTest.createWNPRCBillingPublicLinkedSchema();
-
-        goToPIPortal();
-        initTest.addBillingPublicWebParts();
     }
 
     private void loadEHRBillingExtensibleCols()

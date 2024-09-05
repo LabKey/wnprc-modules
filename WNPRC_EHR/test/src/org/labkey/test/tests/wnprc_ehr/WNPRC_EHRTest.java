@@ -4072,6 +4072,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
         // Updates the notification user and reply email.
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
+
+        // ***PLEASE LEAVE THE FOLLOWING CODE BLOCK COMMENTED OUT - DO NOT DELETE***
+        // ***THIS WILL BE USED TO ENABLE DUMBSTER IN FUTURE NOTIFICATIONS***
         // Enables all notification that we will be testing. //TODO a34: Can we remake a function with an appropriate name for this?  Something like "enableNotification" maybe.
 //        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
 //        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");

@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.remoteapi.Command;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
@@ -283,6 +284,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
+
+        initTest.notificationRevampSetup();
 
     }
 
@@ -3377,7 +3380,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
 
-    @Test
     public void navigateToBillingContainerWithInvalidPermissions() {
         //This test verifies a user cannot access the Finance>Internal page without proper permissions.
 
@@ -3393,7 +3395,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         stopImpersonating();
     }
 
-    @Test
     public void updateProgramIncomeAccountWithInvalidPermissions() throws UnhandledAlertException {
         //This test verifies a user cannot update the CreditToAccount module property without proper permissions.
 
@@ -3412,7 +3413,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         stopImpersonating();
     }
 
-    @Test
     public void updateProgramIncomeAccountWithValidPermissions() throws UnhandledAlertException {
         //This test verifies a user can update the CreditToAccount module property with proper permissions.
 
@@ -3444,7 +3444,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
+    @Test
+    public void checkUpdateProgramIncomeAccount() throws UnhandledAlertException
     {
         log("Starting checkUpdateProgramIncomeAccount.");
 
@@ -3847,6 +3848,416 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         }, Maps.of(
                 "project", msgs2
         ));
+
+    }
+
+    // NOTIFICATION REVAMP: NEW FUNCTIONS START
+    public void notificationRevampTestBloodDrawsTodayAll() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draws Today (All)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "bloodDrawsTodayAllId1", true, new Date(), true, Double.valueOf(-1), true); // Testing for available blood OVER the limit.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "bloodDrawsTodayAllId2", true, new Date(), true, 0.1, true); // Testing for available blood NEAR the limit.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "bloodDrawsTodayAllId3", true, new Date(), false, 2.0, true); // Testing for "NOT ASSIGNED" project status.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "bloodDrawsTodayAllId4", true, new Date(), true, 2.0, false); // Testing for "INCOMPLETE" draw status.
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayAll").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies a red cell exists (for blood remaining < 0).
+        assertElementVisible(Locator.tagWithAttributeContaining("td", "bgcolor", "red"));
+        // Verifies an orange cell exists (for blood remaining < bloodDrawLimit).
+        assertElementVisible(Locator.tagWithAttributeContaining("td", "bgcolor", "orange"));
+        // Verifies an incomplete cell exists (for blood not yet drawn).
+        assertElementVisible(Locator.tagContainingText("td", "INCOMPLETE"));
+        // Verifies an unassigned cell exists (for blood not yet assigned to a project).
+        assertElementVisible(Locator.tagContainingText("td", "UNASSIGNED"));
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draws Today (All)");
+    }
+
+    public void notificationRevampTestBloodDrawsTodayAnimalCare() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draws Today (Animal Care)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("animalCare", "bloodDrawsTodayAnimalCareId1", true, new Date(), true, Double.valueOf(2.0), true); // Testing for blood draw assigned to Animal Care.
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayAnimalCare").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies a blood draw shows up here when assigned to Animal Care.
+        assertTextPresent("bloodDrawsTodayAnimalCareId1");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draws Today (Animal Care)");
+    }
+
+    public void notificationRevampTestBloodDrawsTodayVetStaff() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draws Today (Vet Staff)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawsTodayVetStaffId1", true, new Date(), true, Double.valueOf(2.0), true); // Testing for blood draw assigned to Vet Staff.
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayVetStaff").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies a blood draw shows up here when assigned to Vet Staff.
+        assertTextPresent("bloodDrawsTodayVetStaffId1");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draws Today (Vet Staff)");
+    }
+
+    public void notificationRevampTestBloodDrawReviewDailyNotification() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draw Review (Daily)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+        // Creates tomorrow's date.
+        Calendar todayCalendar = Calendar.getInstance();
+        todayCalendar.add(Calendar.DATE, 1);
+        Date dateTomorrow = todayCalendar.getTime();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId1", false, new Date(), true, Double.valueOf(2.0), false); // Testing for blood scheduled for today with a dead animal.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId2", true, dateTomorrow, false, Double.valueOf(2.0), false); // Testing for blood scheduled for tomorrow with an animal not assigned to a project.
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawReviewDailyNotification").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies the notification shows that there is a draw scheduled for a dead animal.
+        assertTextPresent("bloodDrawReviewDailyId1");
+        // Verifies the notification shows that there is a draw scheduled for an animal who is unassigned to a project.
+        assertTextPresent("bloodDrawReviewDailyId2");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draw Review (Daily)");
+    }
+
+    public void notificationRevampTestBloodDrawReviewTriggerNotification() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draw Review (Trigger)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawReviewTriggerNotification").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies the notification states that there is a dead animal with a blood draw scheduled.  This is normally triggered, but here we are just testing to make sure the notification is formatted correctly and created properly.
+        assertTextPresent("This animal is no longer alive.");
+        // Verifies the notification states that there is an unassigned animal with a blood draw scheduled.  This is normally triggered, but here we are just testing to make sure the notification is formatted correctly and created properly.
+        assertTextPresent("This animal is not assigned to a project on the date of the requested blood draw.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draw Review (Trigger)");
+    }
+
+    public void notificationRevampTestBloodOverdrawTriggerNotification() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Overdraw Trigger");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "testID", true, new Date(), true, Double.valueOf(-1), true);
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodOverdrawTriggerNotification").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        // Verifies the notification states that there is an unassigned animal with a blood draw scheduled today.  This is normally triggered, but here we are just testing to make sure the notification is formatted correctly and created properly.
+        assertTextPresent("This email contains warning information for an animal who just had their blood overdrawn.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Overdraw Trigger");
+    }
+
+    public void notificationRevampTestDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Death Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoNecropsyDataset("necropsyTestId1", new Date());
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        assertTextPresent("necropsyTestId1 has been marked as dead.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Death Notification Revamp");
+    }
+
+    public void notificationRevampTestPrenatalDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Prenatal Death Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Creates test data.
+        myReusableFunctions.insertValueIntoNecropsyDataset("pdNecropsyTestId2", new Date());
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
+
+        // Validates necessary info.
+        assertTextPresent("pdNecropsyTestId2 has been marked as dead.");
+        assertTextPresent("Dam");
+
+        // Finishes test.
+        log("Completed notification revamp test: Prenatal Death Notification Revamp");
+    }
+
+    @Test
+    public void notificationRevampSetup() throws UnhandledAlertException, IOException, CommandException {
+        // Set up.
+        log("Starting notificationRevampSetup()");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Navigates to admin notifications page.
+        EHRAdminPage ehrAdminPage = EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
+        // Updates the notification user and reply email.
+        notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
+
+        // ***PLEASE LEAVE THE FOLLOWING CODE BLOCK COMMENTED OUT - DO NOT DELETE***
+        // ***THIS WILL BE USED TO ENABLE DUMBSTER IN FUTURE NOTIFICATIONS***
+        // Enables all notification that we will be testing. //TODO a34: Can we remake a function with an appropriate name for this?  Something like "enableNotification" maybe.
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification");
+//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification");
+//        // Adds recipients for all notifications we will be testing.
+//        waitForText("Blood Draws Today (All)");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification", "EHR Administrators");
+//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification", "EHR Administrators");
+        // Enables dumbster.
+//        _containerHelper.enableModules(Arrays.asList("Dumbster"));
+        // Enable LDK Site Notification
+//        beginAt(buildURL("ldk", "notificationSiteAdmin"));
+//        waitForText("Notification Site Admin");
+//        waitForElement(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+//        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+//        click(Locator.tagWithText("li", "Enabled"));
+//        click(Locator.tagWithText("span", "Save"));
+//        waitForText("Success");
+//        clickButtonContainingText("OK");
+//        waitForText("Notification Site Admin");
+
+        // Creates billing groups for testing.
+        myReusableFunctions.insertValueIntoBloodBilledByDataset("animalCare", "Animal Care");
+        myReusableFunctions.insertValueIntoBloodBilledByDataset("vetStaff", "Vet Staff");
+        myReusableFunctions.insertValueIntoBloodBilledByDataset("spi", "SPI");
+
+        // Runs tests.
+        notificationRevampTestBloodDrawsTodayAll();
+        notificationRevampTestBloodDrawsTodayAnimalCare();
+        notificationRevampTestBloodDrawsTodayVetStaff();
+        notificationRevampTestBloodDrawReviewDailyNotification();
+        notificationRevampTestBloodDrawReviewTriggerNotification();
+        notificationRevampTestBloodOverdrawTriggerNotification();
+        notificationRevampTestDeathNotificationRevamp();
+        notificationRevampTestPrenatalDeathNotificationRevamp();
+
+        // TODO: Run test for: Admin Alerts
+        // TODO: Run test for: Animal Request
+        // TODO: Run test for: Colony Alerts
+        // TODO: Run test for: Colony Alerts (Lite)
+        // TODO: Run test for: Colony Management
+
+        // Logs completion.
+        log("Completed notificationRevampSetup().  All revamped notifications have been checked.");
+    }
+
+    public class ReusableTestFunctions {
+
+        public void goHome() {
+            beginAt(buildURL("project", getContainerPath(), "begin"));
+        }
+
+        public void insertValueIntoDataset(String schemaName, String queryName, HashMap<String, Object> valuesToInsert) throws IOException, CommandException {
+            try {
+                //TODO a34: Which one to use?
+                Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+//            Connection cn = WebTestHelper.getRemoteApiConnection();
+
+                // Gets dataset to update.
+                InsertRowsCommand insertCmd = new InsertRowsCommand(schemaName, queryName);
+
+                // Creates values to insert.
+                insertCmd.addRow(valuesToInsert);
+
+                // Inserts rows into dataset.
+                insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+                log("Inserting values into dataset.\n" +
+                        "Schema Name: " + schemaName + "\n" +
+                        "Query Name: " + queryName + "\n" +
+                        "Values: " + valuesToInsert);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoDataset(), value most likely already exists in this dataset.");
+            }
+        }
+
+        public void insertValueIntoBloodBilledByDataset(String billingGroupRealName, String billingGroupDisplayName) throws IOException, CommandException
+        {
+            try {
+                HashMap<String, Object> billingGroupTestData = new HashMap<>();
+                billingGroupTestData.put("value", billingGroupRealName);
+                billingGroupTestData.put("title", billingGroupDisplayName);
+                insertValueIntoDataset("ehr_lookups", "blood_billed_by", billingGroupTestData);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoBloodBilledByDataset(), value most likely already exists in this dataset.");
+            }
+        }
+
+        /**
+         * This function inserts data into the 'study/BloodSchedule' dataset.
+         *      This function creates the following fields in 'study/BloodSchedule': id, date, projectStatus, BloodRemaining/AvailBlood, billedby/title, and Id/DataSet/Demographics/calculated_status.
+         *      This function updates the following tables: study/demographics, study/weight, study/blood.
+         * @param billingGroupRealName
+         * @param animalID
+         * @param animalAlive
+         * @param projectAssigned
+         * @param animalWeight
+         * @throws IOException
+         * @throws CommandException
+         */
+        public void insertValueIntoBloodScheduleDataset(String billingGroupRealName, String animalID, Boolean animalAlive, Date drawDate, Boolean projectAssigned, Double animalWeight, Boolean drawCompleted) throws IOException, CommandException {
+            try {
+                // Creates data to pass in.
+                String livingStatus = "Dead";
+                if (animalAlive) {
+                    livingStatus = "Alive";
+                }
+                Integer assignmentStatus = null;
+                if (projectAssigned) {
+                    assignmentStatus = 300901;
+                }
+                Integer completionStatus = getQCStateRowID("In Progress");
+                if (drawCompleted) {
+                    completionStatus = getQCStateRowID("Completed");
+                }
+
+                // Creates demographic info (this updates the bloodSchedule field: 'Id/DataSet/Demographics/calculated_status').
+                HashMap<String, Object> demographicInfoTestData1 = new HashMap<>();
+                demographicInfoTestData1.put("id", animalID);
+                demographicInfoTestData1.put("calculated_status", livingStatus);
+                // Creates weight info (this updates the bloodSchedule field: 'BloodRemaining/AvailBlood').
+                HashMap<String, Object> weightTestData1 = new HashMap<>();
+                weightTestData1.put("id", animalID);
+                weightTestData1.put("date", new Date());
+                weightTestData1.put("weight", animalWeight);
+                // Creates blood info (this updates the bloodSchedule fields: 'id', 'date', 'projectStatus', 'billedby/title', and QCState/label).
+                HashMap<String, Object> bloodTestData1 = new HashMap<>();
+                bloodTestData1.put("id", animalID);
+                bloodTestData1.put("date", drawDate);
+                bloodTestData1.put("project", assignmentStatus);
+                bloodTestData1.put("billedBy", billingGroupRealName);
+                bloodTestData1.put("QCState", completionStatus);
+
+                // Inserts data.
+                insertValueIntoDataset("study", "demographics", demographicInfoTestData1);
+                insertValueIntoDataset("study", "blood", bloodTestData1);
+                insertValueIntoDataset("study", "weight", weightTestData1);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoBloodScheduleDataset(), value most likely already exists in this dataset.");
+            }
+        }
+
+        public void insertValueIntoNecropsyDataset(String animalID, Date necropsyDate) throws IOException, CommandException {
+            try {
+                HashMap<String, Object> necropsyTestData = new HashMap<>();
+                necropsyTestData.put("id", animalID);
+                necropsyTestData.put("date", necropsyDate);
+                insertValueIntoDataset("study", "necropsies", necropsyTestData);
+            }
+            catch (Exception e) {
+                log("Error executing insertValueIntoNecropsyDataset(), value most likely already exists in this dataset.");
+            }
+        }
+
+        public Integer getQCStateRowID(String qcStateLabel) throws IOException, CommandException {
+            // Retrieves QCState table.
+            Connection cn = createDefaultConnection();
+            SelectRowsCommand cmd = new SelectRowsCommand("core", "QCState");
+            cmd.setRequiredVersion(9.1);    // Not sure what this does, but it was used in 'fetchWeightData()'.
+            cmd.setColumns(Arrays.asList("RowId", "Label"));
+            cmd.setMaxRows(100);
+            SelectRowsResponse r = cmd.execute(cn, EHR_FOLDER_PATH);
+
+            // Goes through each QCState in the table and returns the rowID of the row matching the passed-in QCState.
+            for (Map<String, Object> currentRow : r.getRows()) {
+                String rowLabel = ((HashMap<String, Object>) currentRow.get("Label")).get("value").toString();
+                Integer rowID = Integer.valueOf(((HashMap<String, Object>) currentRow.get("RowId")).get("value").toString());
+                if (rowLabel.equals(qcStateLabel)) {
+                    return rowID;
+                }
+            }
+            return null;
+        }
 
     }
 

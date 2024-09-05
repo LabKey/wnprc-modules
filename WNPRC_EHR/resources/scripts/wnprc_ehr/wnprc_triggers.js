@@ -720,7 +720,6 @@ exports.init = function (EHR) {
     EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'blood', function (event, helper) {
         helper.setCenterCustomProps({
             doWarnForBloodNearOverages: true,
-            bloodNearOverageThreshold: 4.0
         })
     });
 

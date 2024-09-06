@@ -45,10 +45,10 @@ export const getRackFromClass = (classString: string) => {
 export const zeroPadName = (num, places) => {return('#' + String(num).padStart(places, '0'))};
 // Helper function to get the rack number
 export const parseRack = (input: string) => {
-    const regex = /^rect-\d-(\d)$/;
+    const regex = /rack-(\d+)/;
     const match = input.match(regex);
     if (match) {
-        return match[1];
+        return parseInt(match[1]);
     }
     return;
 }
@@ -62,12 +62,12 @@ export const parseAddRack = (input: string) => {
 }
 // Helper function to get the cage number
 export const parseCage = (input: string) => {
-    const regex = /rect-(\d+)/;
+    const regex = /cage-(\d+)/;
 
 
     const match = input.match(regex);
     if (match) {
-        return match[1];
+        return parseInt(match[1]);
     }
     return;
 }
@@ -678,13 +678,5 @@ export const isTextEditable = (event) => {
     } else{
         return false;
     }
-}
-
-export const changeCageNum = (e, setEdit) => {
-    console.log("xxx: cage num change");
-    setEdit(true);
-    e.stopPropagation(); // Prevent drag from starting
-    const cageNum = e.target.textContent;
-    console.log("xxx: ", cageNum);
 }
 

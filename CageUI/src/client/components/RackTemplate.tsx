@@ -7,7 +7,6 @@ import { ReactSVG } from 'react-svg';
 
 interface RackTemplateProps {
     fileName: string,
-    selectedEditRect: SVGRectElement,
     gridSize: number,
     localRoom: Rack[],
     room: Rack[],
@@ -16,7 +15,7 @@ interface RackTemplateProps {
     className?: string
 }
 export const RackTemplate: FC<RackTemplateProps> = (props) => {
-    const {fileName, selectedEditRect, gridSize, localRoom, room, setAddingRack, rackType, className} = props;
+    const {fileName, gridSize, localRoom, room, setAddingRack, rackType, className} = props;
 
 
     return (

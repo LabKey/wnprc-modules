@@ -29,8 +29,8 @@ export const RoomLayout: FC = () => {
     
     const handleClick = (event) => {
         const cage = event.target;
-        const rackId: number = parseInt(parseRack(cage.id));
-        const cageId: number = parseInt(parseCage(cage.id));
+        const rackId: number = (parseRack(cage.id));
+        const cageId: number = (parseCage(cage.id));
         const tempClickedRack = room.find(rack => rack.id === rackId);
         const clickedCage = tempClickedRack.cages[cageId - 1];
         setClickedCage(clickedCage);

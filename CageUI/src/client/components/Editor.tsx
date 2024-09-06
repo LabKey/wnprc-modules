@@ -2,9 +2,6 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ActionURL } from '@labkey/api';
-import {
-    changeCageNum,
-   } from './helpers';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
@@ -13,6 +10,7 @@ import { LayoutTooltip } from './LayoutTooltip';
 import { svg } from 'd3';
 import { CageNumInput } from './CageNumInput';
 import { getTargetCell, startDragInLayout, dragInLayout, createEndDragInLayout} from './LayoutEditorHelpers';
+import { parseCage, parseRack } from './helpers';
 interface PendingRackUpdate {
     draggedShape: any;
     cellX: number;
@@ -29,8 +27,9 @@ const Editor = () => {
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
     const [addingRack, setAddingRack] = useState<boolean>(false);
-    const [editCageNum, setEditCageNum] = useState<boolean>(false);
-    const [selectedEditRect, setSelectedEditRect] = useState<SVGRectElement>(null);
+    const [editCageNum, setEditCageState] = useState<number | null>(null);
+    const [clickedCageNum, setClickedCageNum] = useState<number>(null); // Cage number of svg id (rack specific)
+    const [clickedRackNum, setClickedRackNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
     const {
@@ -38,7 +37,9 @@ const Editor = () => {
         addRack,
         room,
         delRack,
-        cageCount
+        cageCount,
+        changeCageId,
+        cageNumChange
     } = useLayoutContext();
 
     useEffect(() => {
@@ -112,13 +113,14 @@ const Editor = () => {
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
             textElement.addEventListener('click', function (event) {
                 event.stopPropagation();
-                changeCageNum(event, setEditCageNum);
+                const cageNum: number = parseInt((event.target as SVGTSpanElement).textContent);
+                setEditCageState(cageNum);
+                setClickedCageNum(parseCage(((event.target as SVGTSpanElement).parentNode.parentNode as SVGGElement).getAttribute('id')));
+                setClickedRackNum(parseRack(((event.target as SVGTSpanElement).parentNode.parentNode.parentNode as SVGGElement).getAttribute('id')));
             });
         });
         setAddingRack(false);
     }, [cageCount]);
-
-
 
     // Effect for handling the grid layout and drag effects on the layout and from the utils
     useEffect(() => {
@@ -172,14 +174,22 @@ const Editor = () => {
                 draggedShape.remove();
             }
         }
-
     }, [ localRoom, layoutSvg]);
 
+    // Cleanup for after updating rack
     useEffect(() => {
         if(!addingRack){
             setPendingRackUpdate(null);
         }
     }, [addingRack]);
+
+    // After state is done updating for cage id change. refresh svg text and ids
+    useEffect(() => {
+        if(cageNumChange){
+            let group = layoutSvg.select(`#rack-${clickedRackNum}`).select(`#cage-${clickedCageNum}`);
+            (group.select('#name').node() as SVGTextElement).childNodes[0].textContent = cageNumChange.after.toString();
+        }
+    }, [cageNumChange]);
 
     useEffect(() => {
         if(!layoutSvg) return;
@@ -266,7 +276,6 @@ const Editor = () => {
                         <RackTemplate
                             fileName={"SingleCageRack"}
                             className={"draggable"}
-                            selectedEditRect={selectedEditRect}
                             gridSize={gridSize}
                             localRoom={localRoom}
                             room={room}
@@ -278,7 +287,6 @@ const Editor = () => {
                         <RackTemplate
                             fileName={"Pen"}
                             className={"draggable"}
-                            selectedEditRect={selectedEditRect}
                             gridSize={gridSize}
                             localRoom={localRoom}
                             room={room}
@@ -291,8 +299,10 @@ const Editor = () => {
             <div id={"layout-grid"} style={{width: gridWidth * gridSize, height: gridSize * gridHeight}}>
                 {editCageNum &&
                         <CageNumInput
-                                onSubmit={(num) => console.log("XXX New Cage Number: ",num )}
-                                onClose={() => setEditCageNum(false)}
+                                onSubmit={(num) => {
+                                    changeCageId(editCageNum, num);
+                                }}
+                                onClose={() => setEditCageState(null)}
                         />
                 }
                 <svg

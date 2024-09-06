@@ -5,23 +5,14 @@
  */
 SELECT
 	bq.*,
-	cast(CASE
-	  WHEN bq.species = 'Marmoset'
-	    THEN round(bq.weight*0.15*60, 1)
-	  ELSE
-	    round(bq.weight*0.2*60, 1)
-    END as numeric) AS MaxBlood,
-	cast(CASE
-	  WHEN bq.species = 'Marmoset'
-	    THEN round((bq.weight*0.15*60) - bq.BloodLast30, 1)
-	  ELSE
-        round((bq.weight*0.2*60) - bq.BloodLast30, 1)
-    END AS numeric) AS AvailBlood
+	cast(round(bq.weight*species.max_draw_pct*species.blood_per_kg, 1) as numeric) AS MaxBlood,
+	cast(round((bq.weight*species.max_draw_pct*species.blood_per_kg) - bq.BloodLast30, 1) AS numeric) AS AvailBlood,
+    cast(round((bq.weight*species.max_draw_pct*species.blood_per_kg) - (bq.BloodLast30 + bq.BloodNext30), 1) AS numeric) AS BloodAvailPlusThirty
 FROM
 (
 	SELECT
 	  b.*,
-	  (select species from study.demographics d where d.id = b.id) as species,
+	  (d.species) as species,
 	  (
 	    CONVERT (
 	    	(SELECT AVG(w.weight) AS _expr
@@ -109,5 +100,6 @@ FROM
               --WHERE b.id.status.status = 'Alive'
               ) bi
 	    	) b
+            JOIN study.demographics d ON d.id=b.id
 	) bq
 

@@ -62,6 +62,9 @@
                     <column columnName="AvailBlood">
                         <columnTitle>Volume Remaining After Draw (mL)</columnTitle>
                     </column>
+                    <column columnName="BloodAvailPlusThirty">
+                        <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
+                    </column>
                 </columns>
                 <titleColumn>BloodLast30</titleColumn>
             </table>

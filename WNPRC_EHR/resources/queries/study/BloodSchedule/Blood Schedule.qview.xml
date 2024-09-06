@@ -56,6 +56,7 @@
        <column name="num_tubes" />
 
        <column name="quantity" />
+       <column name="BloodRemaining/BloodAvailNowPlusThirtyDays"/>
 
        <column name="additionalServices" />
        <column name="instructions" />

@@ -233,6 +233,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/AfternoonTreatmentsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/EveningTreatmentsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/MasterTreatmentsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/panel/BloodSummaryPanel.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");

@@ -28,6 +28,9 @@
                             query.sort=-Date&amp;
                         </url>
                     </column>
+                    <column columnName="BloodAvailNowPlusThirtyDays">
+                        <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
+                    </column>
                 </columns>
                 <titleColumn>BloodLast30</titleColumn>
             </table>

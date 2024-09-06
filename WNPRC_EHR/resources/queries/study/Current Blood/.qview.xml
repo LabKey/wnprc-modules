@@ -23,6 +23,8 @@
            <!--<property name="columnTitle" value="Volume Remaining After Draw (mL)"/>-->
            <!--</properties>-->
        </column>
+       <column name="BloodAvailPlusThirty"/>
+
        <column name="MaxBlood">
             <!--<properties>-->
                 <!--<property name="columnTitle" value="Max Allowable Blood At Time"/>-->

@@ -12,26 +12,15 @@ SELECT
 	bq.weight,
 	bq.lastWeighDate,
 	cast(bq.BloodLast30 as numeric) as BloodLast30,
--- 	bq.BloodNext30,
--- 	round(bq.weight*0.2*60, 1) AS MaxBlood,
--- 	round((bq.weight*0.2*60) - bq.BloodLast30, 1) AS AvailBlood
-	cast(CASE
-	  WHEN bq.species = 'Marmoset'
-	    THEN round(bq.weight*0.15*60, 1)
-	  ELSE
-	    round(bq.weight*0.2*60, 1)
-    END as numeric) AS MaxBlood,
-	cast(CASE
-	  WHEN bq.species = 'Marmoset'
-	    THEN round((bq.weight*0.15*60) - bq.BloodLast30, 1)
-	  ELSE
-        round((bq.weight*0.2*60) - bq.BloodLast30, 1)
-    END AS numeric) AS AvailBlood
+    bq.BloodNext30,
+    cast(round(bq.weight*species.max_draw_pct*species.blood_per_kg, 1) as numeric) AS MaxBlood,
+    cast(round((bq.weight*species.max_draw_pct*species.blood_per_kg) - bq.BloodLast30, 1) AS numeric) AS AvailBlood,
+    cast(round((bq.weight*species.max_draw_pct*species.blood_per_kg) - (bq.BloodLast30 + bq.BloodNext30), 1) AS numeric) AS BloodAvailNowPlusThirtyDays
 FROM
 (
 	SELECT
 	  b.*,
-	  (select species from study.demographics d where d.id = b.id) as species,
+	  (d.species) as species,
 	  (
 	    CONVERT (
 	    	(SELECT AVG(w.weight) AS _expr
@@ -65,16 +54,18 @@ FROM
                           --AND draws.qcstate.publicdata = true
                      ), 0 )
 	  		      ) AS BloodLast30
--- 	 		    , ( COALESCE (
--- 	    			(SELECT SUM(draws.quantity) AS _expr
--- 	    		      FROM study."Blood Draws" draws
--- 	    			  WHERE draws.id=bi.id
---                           AND draws.date BETWEEN TIMESTAMPADD('SQL_TSI_DAY', 30, bi.date) AND bi.date
---                           AND (draws.qcstate.metadata.DraftData = true OR draws.qcstate.publicdata = true)
---                      ), 0 )
--- 	  		      ) AS BloodNext30
+ 	 		    , ( COALESCE (
+                     (SELECT SUM(coalesce(draws.quantity, 0)) AS _expr
+                      FROM study."Blood Draws" draws
+                      WHERE draws.id=bi.id
+                        AND (cast(draws.date as date) >= cast(TIMESTAMPADD('SQL_TSI_DAY', 29, bi.date) as date) AND cast(draws.date as date) <= cast(bi.date as date))
+                        AND cast(draws.date as date) >= bi.date
+                        AND (draws.qcstate.metadata.DraftData = true OR draws.qcstate.publicdata = true)
+                     ), 0 )
+                 ) AS BloodNext30
 	     	FROM study.blood bi
 	     	--WHERE (bi.qcstate.metadata.DraftData = true OR bi.qcstate.publicdata = true)
 	    	) b
+            JOIN study.demographics d ON d.id=b.id
 	) bq
 

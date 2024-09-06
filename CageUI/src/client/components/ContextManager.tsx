@@ -2,43 +2,46 @@ import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Cage, Rack, Page } from './typings';
 import { removeCircularReferences } from './helpers';
+import { svg } from 'd3';
 
 export interface RoomContextType {
-    selectedPage: Page,
-    setSelectedPage: React.Dispatch<React.SetStateAction<Page | null>> | null,
-    room: Rack[],
-    setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
-    clickedCage: Cage | null,
-    setClickedCage: React.Dispatch<React.SetStateAction<Cage | null>> | null,
-    clickedRack: Rack | null,
-    setClickedRack: React.Dispatch<React.SetStateAction<Rack | null>> | null,
-    isEditingRoom: boolean, // determines when the user is in edit mode
-    setIsEditingRoom: React.Dispatch<React.SetStateAction<boolean>>,
-    modRows: React.JSX.Element[],
-    setModRows: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>,
-    cageDetails: Cage[] | null,
-    setCageDetails: React.Dispatch<React.SetStateAction<Cage[] | null>> | null,
-    saveMod: () => void,
-    isDirty: boolean,
-    setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
-    isEditEnabled: boolean, // determines if the user has valid permissions to edit
-    setIsEditEnabled: React.Dispatch<React.SetStateAction<boolean>>,
-    loading: boolean,
-    error: string,
-    localRoom: Rack[],
-    addRack: (newRack: any) => void,
-    updateLocalRacks: (id: any, newX: any, newY: any) => void,
-    saveChanges: () => void,
-    hasUnsavedChanges: boolean,
-    isDraggingEnabled: boolean,
-    setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>
+    selectedPage: Page;
+    setSelectedPage: React.Dispatch<React.SetStateAction<Page | null>> | null;
+    room: Rack[];
+    setRoom: React.Dispatch<React.SetStateAction<Rack[]>>;
+    clickedCage: Cage | null;
+    setClickedCage: React.Dispatch<React.SetStateAction<Cage | null>> | null;
+    clickedRack: Rack | null;
+    setClickedRack: React.Dispatch<React.SetStateAction<Rack | null>> | null;
+    isEditingRoom: boolean, // determines when the user is in edit mod;
+    setIsEditingRoom: React.Dispatch<React.SetStateAction<boolean>>;
+    modRows: React.JSX.Element[];
+    setModRows: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>;
+    cageDetails: Cage[] | null;
+    setCageDetails: React.Dispatch<React.SetStateAction<Cage[] | null>> | null;
+    saveMod: () => void;
+    isDirty: boolean;
+    setIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
+    isEditEnabled: boolean, // determines if the user has valid permissions to edi;
+    setIsEditEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    loading: boolean;
+    error: string;
+    localRoom: Rack[];
+    saveChanges: () => void;
+    hasUnsavedChanges: boolean;
+    isDraggingEnabled: boolean;
+    setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    cageCount: number;
 }
 
 export interface LayoutContextType {
-    room: Rack[],
-    setRoom: React.Dispatch<React.SetStateAction<Rack[]>>,
-    localRoom: Rack[],
-    addRack: (newRack: any) => void,
+    room: Rack[];
+    setRoom: React.Dispatch<React.SetStateAction<Rack[]>>;
+    localRoom: Rack[];
+    addRack: (id: number, svgId: string) => void;
+    setCageCount: React.Dispatch<React.SetStateAction<number>>;
+    cageCount: number;
+    delRack: (id: number) => void;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -82,6 +85,7 @@ export const RoomContextProvider = ({children}) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
     const [isDraggingEnabled, setIsDraggingEnabled] = useState<boolean>(false);
+    const [cageCount, setCageCount] = useState<number>(0);
 
     /*
     Context for room svg
@@ -89,16 +93,6 @@ export const RoomContextProvider = ({children}) => {
     const [localRoom, setLocalRoom] = useState<Rack[]>(room);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    const addRack = async (newRect) => {
-        setLocalRoom(prevRectangles => [...prevRectangles, newRect]);
-    };
-
-    const updateLocalRacks = (id, newX, newY) => {
-        setLocalRoom(prevRack => prevRack.map(r =>
-            r.id === id ? { ...r, xPos: newX, yPos: newY } : r
-        ));
-    };
 
     const saveChanges = async () => {
         try {
@@ -154,14 +148,13 @@ export const RoomContextProvider = ({children}) => {
             localRoom,
             loading,
             error,
-            addRack,
-            updateLocalRacks,
             saveChanges,
             hasUnsavedChanges: JSON.stringify(removeCircularReferences(room)) !== JSON.stringify(removeCircularReferences(localRoom)),
             isDraggingEnabled,
             setIsDraggingEnabled,
             selectedPage,
-            setSelectedPage
+            setSelectedPage,
+            cageCount
         }}>
             {children}
         </RoomContext.Provider>
@@ -171,17 +164,36 @@ export const RoomContextProvider = ({children}) => {
 export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     const [localRoom, setLocalRoom] = useState<Rack[]>(room);
+    const [cageCount, setCageCount] = useState<number>(0);
 
-    const addRack = async (newRect) => {
-        setLocalRoom(prevRectangles => [...prevRectangles, newRect]);
+
+    const addRack = (id: number, svgId: string) => {
+        const newRack: Rack = {
+            cages: [],
+            id: id,
+            isActive: false,
+            type: undefined
+        };
+        console.log("Adding rack: ", id, svgId, newRack);
+        setLocalRoom(prevRacks => [...prevRacks, newRack]);
+        setCageCount(prevState => prevState + 1);
     };
+
+    const delRack = (id: number) => {
+        if(cageCount == 0) return;
+        setLocalRoom(prevRacks =>  prevRacks.filter(rack => rack.id !== id));
+        setCageCount(prevState => prevState - 1);
+    }
 
     return (
         <LayoutContext.Provider value={{
             room,
             setRoom,
             localRoom,
-            addRack
+            addRack,
+            cageCount,
+            setCageCount,
+            delRack
         }}>
             {children}
         </LayoutContext.Provider>

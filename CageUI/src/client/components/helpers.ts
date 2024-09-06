@@ -1,7 +1,8 @@
 import {
     Cage,
     CageBuilder,
-    CagePosition, CageSizes,
+    CagePosition,
+    CageSizes,
     CageSizeWithKey,
     CageState,
     CageType,
@@ -19,7 +20,6 @@ import {
 } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
-import { useRoomContext } from './ContextManager';
 
 /*
 console.log(zeroPad(5, 2)); // "05"
@@ -27,6 +27,21 @@ console.log(zeroPad(5, 4)); // "0005"
 console.log(zeroPad(5, 6)); // "000005"
  */
 
+export const getRackType = (input: string): RackTypes => {
+    if(input.includes("two")){
+        return RackTypes.OneOfOne;
+    }else{
+        return RackTypes.Pen;
+    }
+}
+export const getRackFromClass = (classString: string) => {
+    let rackClass = classString.match(/rack-\d+/);
+
+    if (rackClass) {
+        let rackId = rackClass[0].split('-')[1];
+        return rackId;
+    }
+}
 export const zeroPadName = (num, places) => {return('#' + String(num).padStart(places, '0'))};
 // Helper function to get the rack number
 export const parseRack = (input: string) => {
@@ -136,8 +151,6 @@ export const addNewRack = (
     const id = parseInt(parseAddRack(rect.id));
     const x = parseInt(rect.getAttribute('x')) / gridSize;
     const y = parseInt(rect.getAttribute('y')) / gridSize;
-    const width = parseInt(rect.getAttribute('width')) / gridSize;
-    const height = parseInt(rect.getAttribute('height')) / gridSize;
 
     if(localRoom.find((rack) => rack.id === id)){
         return;
@@ -151,8 +164,6 @@ export const addNewRack = (
         type: rackType,
         xPos: x,
         yPos: y,
-        width: width,
-        height: height,
         isActive: true,
         cages: genCages(cageNum, rackType, ['Suburban'], [CageSizes['8.0']], id, [], cageCount)
     };
@@ -193,8 +204,6 @@ export const loadRoom = (name: string): Rack[] => {
                 isActive: true,
                 xPos: 0,
                 yPos: 0,
-                width: 1,
-                height: 1
             }
             tempRoom.push(tempRack);
             cageNum += tempRack.cages.length;
@@ -660,3 +669,22 @@ export const getTranslation = (transform) => {
     }
     return { x: 0, y: 0 }; // Default to (0, 0) if no translation is found
 }
+
+export const isTextEditable = (event) => {
+    // Check if the parent <text> element is editable
+    const textElement = event.sourceEvent.target.closest('text');
+    if (textElement && textElement.getAttribute('contentEditable') === 'true') {
+        return true;
+    } else{
+        return false;
+    }
+}
+
+export const changeCageNum = (e, setEdit) => {
+    console.log("xxx: cage num change");
+    setEdit(true);
+    e.stopPropagation(); // Prevent drag from starting
+    const cageNum = e.target.textContent;
+    console.log("xxx: ", cageNum);
+}
+

@@ -1,3 +1,5 @@
+import * as d3 from 'd3';
+
 type CageSize = {
     width: number;
     length: number;
@@ -16,6 +18,13 @@ type PageViews = "Room" | "Rack" | "Cage";
 export interface Page {
     mainView: PageViews;
     subViewId: string;
+}
+export interface EndDragLayoutProps {
+    gridSize: number;
+    gridRatio: number;
+    MAX_SNAP_DISTANCE: number;
+    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
+    delRack: (id: number) => void;
 }
 export interface Cage {
     id: number
@@ -44,10 +53,8 @@ export interface Rack {
     id: number;
     type: RackTypes;
     cages: Cage[];
-    xPos: number;
-    yPos: number;
-    width: number;
-    height: number;
+    xPos?: number;
+    yPos?: number;
     isActive: boolean;
 }
 export enum RackTypes {

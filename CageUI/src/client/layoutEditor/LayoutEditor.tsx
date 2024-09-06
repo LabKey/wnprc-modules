@@ -7,7 +7,6 @@ import '../cageui.scss';
 import { Cage, Rack } from '../components/typings';
 import { RoomToolbar } from '../components/RoomToolbar';
 import {LayoutContextProvider } from '../components/ContextManager';
-import TestSVG from '../components/TestSVG';
 import DragAndDropGrid from '../components/Editor';
 import { ActionURL } from '@labkey/api';
 import Editor from '../components/Editor';

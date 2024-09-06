@@ -42,6 +42,8 @@ export interface LayoutContextType {
     setCageCount: React.Dispatch<React.SetStateAction<number>>;
     cageCount: number;
     delRack: (id: number) => void;
+    changeCageId: (idBefore: number, idAfter: number) => void;
+    cageNumChange: {before: number, after: number};
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -165,7 +167,7 @@ export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     const [localRoom, setLocalRoom] = useState<Rack[]>(room);
     const [cageCount, setCageCount] = useState<number>(0);
-
+    const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
 
     const addRack = (id: number, svgId: string) => {
         const newRack: Rack = {
@@ -185,6 +187,20 @@ export const LayoutContextProvider = ({children}) => {
         setCageCount(prevState => prevState - 1);
     }
 
+    const changeCageId = (idBefore: number, idAfter: number) => {
+        if(cageCount == 0){
+            return;
+        }
+        if(localRoom.find(rack => rack.id === idAfter)){
+            console.log("Please add a different id that doesnt exist in the current room");
+            return;
+        }
+        setLocalRoom(prevRacks =>  prevRacks.map(rack =>
+            rack.id === idBefore ? { ...rack, id: idAfter } : rack
+        ));
+        setCageNumChange({before: idBefore, after: idAfter});
+    }
+
     return (
         <LayoutContext.Provider value={{
             room,
@@ -193,7 +209,9 @@ export const LayoutContextProvider = ({children}) => {
             addRack,
             cageCount,
             setCageCount,
-            delRack
+            delRack,
+            changeCageId,
+            cageNumChange
         }}>
             {children}
         </LayoutContext.Provider>

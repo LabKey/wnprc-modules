@@ -14,7 +14,7 @@ export const CageNumInput: FC<CageNumInputProps> = (props) => {
         setInputValue(e.target.value);
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && inputValue.trim() !== '') {
             const numericValue = parseFloat(inputValue);
             if (!isNaN(numericValue)) {
@@ -31,7 +31,7 @@ export const CageNumInput: FC<CageNumInputProps> = (props) => {
                     type="text"
                     value={inputValue}
                     onChange={handleChange}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
                     autoFocus
                     placeholder="Enter a number"
                     className="popup-input"

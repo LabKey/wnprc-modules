@@ -218,8 +218,10 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
                 String[] targetTaskColumns = new String[]{"rowid"};
                 // Runs query.
                 ArrayList<HashMap<String, String>> necropsyTask = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr", "tasks", myTaskFilter, null, targetTaskColumns);
-                String taskRowID = necropsyTask.get(0).get("rowid");
-                this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
+                if (!necropsyTask.isEmpty()) {
+                    String taskRowID = necropsyTask.get(0).get("rowid");
+                    this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
+                }
             }
 
             // Assigns 'Not Specified' placeholders for blank values.
@@ -254,100 +256,6 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
                 }
             }
         }
-
-//        public DeathNecropsyObject(Container c, User u, String animalID, String hostName, Boolean withHtmlPlaceHolders) {
-//            NotificationToolkit notificationToolkit = new NotificationToolkit();
-//
-//            if (notificationToolkit.getTableRowCount(c, u, "study", "Necropsy", "notificationView") > 0) {  //Added this if/else check to getTableRowAsList(), I can remove this after testing.
-//                String[] targetColumns = {"caseno", "taskid", "date", "timeofdeath", "causeofdeath", "account", "mannerofdeath"};
-//
-//                ArrayList<String> necropsyTableRow = notificationToolkit.getTableRowAsList(c, u, "study", "necropsy", null, "id", animalID, targetColumns);
-//
-//                //Necropsy does exist.
-//                if (!necropsyTableRow.isEmpty()) {
-//                    this.necropsyExists = true;
-//                    //Gets necropsy data.
-//                    this.necropsyCaseNumber = necropsyTableRow.get(0);
-//                    this.necropsyDate = necropsyTableRow.get(2);
-//                    this.necropsyTimeOfDeath = necropsyTableRow.get(3);
-//                    this.necropsyTypeOfDeath = necropsyTableRow.get(4);
-//                    this.necropsyGrantNumber = necropsyTableRow.get(5);
-//                    this.necropsyMannerOfDeath = necropsyTableRow.get(6);
-//                    this.animalWeight = notificationToolkit.getWeightFromAnimalID(c, u, animalID);
-//                    this.animalReplacementFee = notificationToolkit.getAnimalReplacementFee(c, u, this.necropsyTypeOfDeath, animalID);
-//
-//                    //Creates task id with hyperlink.
-//                    String necropsyTaskID = necropsyTableRow.get(1);
-//                    Path taskURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "taskDetails.view");
-//                    String taskUrlAsString = taskURL.toString() + "?formtype=Necropsy&taskid=" + necropsyTaskID;
-//                    String taskRowID = "";
-//                    if (notificationToolkit.getTableRowCount(c, u, "ehr", "tasks", "") > 0) {  //Added this if/else check to getTableRowAsList(), I can remove this after testing.
-//                        ArrayList<String> taskRow = notificationToolkit.getTableRowAsList(c, u, "ehr", "tasks", null, "taskid", necropsyTaskID, new String[]{"rowid"});
-//                        if (!taskRow.isEmpty()) {
-//                            taskRowID = taskRow.get(0);
-//                        }
-//                        this.necropsyTaskIdHyperlink = notificationToolkit.createHyperlink(taskRowID, taskUrlAsString);
-//                    }
-//                }
-//            }
-//            if (withHtmlPlaceHolders) {
-//                String placeholderText = "<em>Not Specified</em>";
-//                if (this.necropsyCaseNumber == null) {
-//                    this.necropsyCaseNumber = placeholderText;
-//                }
-//                else if (this.necropsyCaseNumber.equals("") || this.necropsyCaseNumber.equals("null")) {
-//                    this.necropsyCaseNumber = placeholderText;
-//                }
-//                if (this.necropsyTaskIdHyperlink == null) {
-//                    this.necropsyTaskIdHyperlink = placeholderText;
-//                }
-//                else if (this.necropsyTaskIdHyperlink.equals("") || this.necropsyTaskIdHyperlink.equals("null")) {
-//                    this.necropsyTaskIdHyperlink = placeholderText;
-//                }
-//                if (this.necropsyDate == null) {
-//                    this.necropsyDate = placeholderText;
-//                }
-//                else if (this.necropsyDate.equals("") || this.necropsyDate.equals("null")) {
-//                    this.necropsyDate = placeholderText;
-//                }
-//                if (this.necropsyTimeOfDeath == null) {
-//                    this.necropsyTimeOfDeath = placeholderText;
-//                }
-//                else if (this.necropsyTimeOfDeath.equals("") || this.necropsyTimeOfDeath.equals("null")) {
-//                    this.necropsyTimeOfDeath = placeholderText;
-//                }
-//                if (this.necropsyTypeOfDeath == null) {
-//                    this.necropsyTypeOfDeath = placeholderText;
-//                }
-//                else if (this.necropsyTypeOfDeath.equals("") || this.necropsyTypeOfDeath.equals("null")) {
-//                    this.necropsyTypeOfDeath = placeholderText;
-//                }
-//                if (this.necropsyGrantNumber == null) {
-//                    this.necropsyGrantNumber = placeholderText;
-//                }
-//                else if (this.necropsyGrantNumber.equals("") || this.necropsyGrantNumber.equals("null")) {
-//                    this.necropsyGrantNumber = placeholderText;
-//                }
-//                if (this.necropsyMannerOfDeath == null) {
-//                    this.necropsyMannerOfDeath = placeholderText;
-//                }
-//                else if (this.necropsyMannerOfDeath.equals("") || this.necropsyMannerOfDeath.equals("null")) {
-//                    this.necropsyMannerOfDeath = placeholderText;
-//                }
-//                if (this.animalWeight == null) {
-//                    this.animalWeight = placeholderText;
-//                }
-//                else if (this.animalWeight.equals("") || this.animalWeight.equals("null")) {
-//                    this.animalWeight = placeholderText;
-//                }
-//                if (this.animalReplacementFee == null) {
-//                    this.animalReplacementFee = placeholderText;
-//                }
-//                else if (this.animalReplacementFee.equals("") || this.animalReplacementFee.equals("null")) {
-//                    this.animalReplacementFee = placeholderText;
-//                }
-//            }
-//        }
     }
 
     /**

@@ -187,7 +187,7 @@ const Editor = () => {
     useEffect(() => {
         if(cageNumChange){
             let group = layoutSvg.select(`#rack-${clickedRackNum}`).select(`#cage-${clickedCageNum}`);
-            (group.select('#name').node() as SVGTextElement).childNodes[0].textContent = cageNumChange.after.toString();
+            (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
         }
     }, [cageNumChange]);
 

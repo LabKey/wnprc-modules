@@ -256,7 +256,9 @@ public class TriggerScriptHelper {
             if (NotificationService.get().isActive(new BloodOverdrawTriggerNotification(ehr), container)) {
                 _log.info("Using java helper to send email for Blood Overdraw Trigger Notification (animalID: " + animalID + ").");
                 BloodOverdrawTriggerNotification notification = new BloodOverdrawTriggerNotification(ehr, animalID, drawDate);
-                notification.sendManually(container, user);
+                if (notification != null) {
+                    notification.sendManually(container, user);
+                }
             }
             else {
                 _log.info("Blood Overdraw Trigger Notification is not enabled, will not send Blood Overdraw Trigger Notification");

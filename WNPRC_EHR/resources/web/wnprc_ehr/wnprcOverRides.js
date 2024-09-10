@@ -742,7 +742,7 @@ Ext4.override(EHR.form.field.ProjectEntryField, {
                             return "SELECT caseno FROM (" + sources.join(" UNION ") + ")";
                         })();
 
-                        var sqlQueryString = "SELECT cast(SUBSTRING(MAX(caseno), 6, 8) AS INTEGER) as caseno ";
+                        var sqlQueryString = "SELECT MAX(cast(SUBSTRING(caseno, 6, 8) AS INTEGER)) as caseno ";
                         sqlQueryString += " FROM ( " + sourceClause + " )";
 
                         if (!year || !prefix) {

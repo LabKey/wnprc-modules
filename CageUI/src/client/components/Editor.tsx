@@ -5,25 +5,22 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { RackTypes, EndDragLayoutProps} from './typings';
+import { RackTypes, EndDragLayoutProps, PendingRackUpdate } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { svg } from 'd3';
 import { CageNumInput } from './CageNumInput';
-import { getTargetCell, startDragInLayout, dragInLayout, createEndDragInLayout} from './LayoutEditorHelpers';
+import {
+    startDragInLayout,
+    dragInLayout,
+    createEndDragInLayout,
+    drawGrid, updateGrid, getTargetRect, placeAndScaleGroup
+} from './LayoutEditorHelpers';
 import { parseCage, parseRack } from './helpers';
-interface PendingRackUpdate {
-    draggedShape: any;
-    cellX: number;
-    cellY: number;
-    id: number;
-}
+
 const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
-    const gridSize = 30; // Adjust based on your room size, in pixels the size of the grid square side
-    const gridWidth = 43; // col of grid
-    const gridHeight = 27; // row of grid
-    const gridRatio = 4; // how many grid cells to equal the cage side length
-    const svgRef = useRef(null);
+    const SVG_WIDTH = 1290;
+    const SVG_HEIGHT = 810;
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
     const [addingRack, setAddingRack] = useState<boolean>(false);
@@ -31,6 +28,7 @@ const Editor = () => {
     const [clickedCageNum, setClickedCageNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [clickedRackNum, setClickedRackNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
+    const [gridSize, setGridSize] = useState<number>(50);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
     const {
         localRoom,
@@ -47,15 +45,32 @@ const Editor = () => {
         console.log("xxx LocalRoom: ", localRoom);
     }, [room, localRoom]);
 
+    /*
     useEffect(() => {
-        if (!svgRef.current || !utilsRef.current) return;
+        if (!svgRef.current || !utilsRef.current || layoutSvg) return;
         const tempLayoutSvg = d3.select<SVGElement, any>('#layout')
             .attr('width', gridWidth * gridSize)
-            .attr('height', gridHeight * gridSize);
+            .attr('height', gridHeight * gridSize)
+            .append('g').attr("id", "zoomable-area");
+
+        const zoomProps: HandleZoomProps = {
+            gridSize: gridSize,
+            svgWidth: gridWidth * gridSize,
+            svgHeight: gridHeight * gridSize,
+            layoutSvg: tempLayoutSvg
+        }
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 5])  // Set zoom scale limits
+            .on('zoom', createHandleZoom(zoomProps));
+
+        // Apply zoom behavior to the SVG
+        tempLayoutSvg.call(zoom);
+
         setLayoutSvg(tempLayoutSvg)
         setShowGrid(true);
-    }, [svgRef, utilsRef.current]);
+    }, [svgRef, utilsRef.current]);*/
 
+    // This effect updates racks for adding to the room and merging
     useEffect(() => {
         if(!pendingRackUpdate) return;
         const {draggedShape, cellX, cellY, id} = pendingRackUpdate;
@@ -63,14 +78,16 @@ const Editor = () => {
 
         let group;
         if ((draggedShape.node() as SVGElement).children['rack-room-util']) {
-            group = layoutSvg.append(() => draggedShape.node())
-                .attr('transform', `translate(${cellX + 50}, ${cellY + 50})`)
-                .attr('class', "draggable")
+            group = layoutSvg.append('g')
+                .data([{x: cellX, y: cellY}])
+                .attr('class', "draggable room-obj")
                 .style('pointer-events', "bounding-box");
+            group.append(() => draggedShape.node());
         } else {
             let rackSvgId = "";
             const rackGroup = draggedShape.select('#rack-x');
             const cageIdText = draggedShape.select('#name');
+            const transform = d3.zoomTransform(layoutSvg.node());
 
             // Change the id of the group in the pre-created svg img, and set class name for top level group.
             if(!rackGroup.empty()){
@@ -86,16 +103,16 @@ const Editor = () => {
             console.log("XXX: ", rackSvgId);
 
             group = layoutSvg.append('g')
-                .attr('class', `draggable ${rackSvgId}`)
+                .data([{x: cellX, y: cellY}])
+                .attr('class', `draggable ${rackSvgId} room-obj`)
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
-            group.attr('transform', `translate(${cellX + 50}, ${cellY + 50})`);
-
+            placeAndScaleGroup(group, cellX, cellY, gridSize, transform);
         }
 
         const addProps: EndDragLayoutProps = {
             gridSize: gridSize,
-            gridRatio: gridRatio,
+            gridRatio: 3,// todo fix should be the ratio of boxes to fit a cage
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack
@@ -161,11 +178,11 @@ const Editor = () => {
             const svgRect = (layoutSvg.node() as SVGRectElement).getBoundingClientRect();
             const x = event.sourceEvent.clientX - svgRect.left;
             const y = event.sourceEvent.clientY - svgRect.top;
-            const targetCell = getTargetCell(x, y, gridSize, MAX_SNAP_DISTANCE, layoutSvg);
-
-            if (targetCell) {
-                const cellX = +targetCell.attr('x');
-                const cellY = +targetCell.attr('y');
+            const transform = d3.zoomTransform(layoutSvg.node());
+            const targetRect = getTargetRect(x, y, gridSize, transform);
+            if (targetRect) {
+                const cellX = targetRect.x;
+                const cellY = targetRect.y;
                 const newId = localRoom.length + 1;
                 setPendingRackUpdate({draggedShape: draggedShape, cellX: cellX, cellY: cellY, id: newId});
                 setAddingRack(true);
@@ -190,11 +207,12 @@ const Editor = () => {
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
         }
     }, [cageNumChange]);
-
+/*
     useEffect(() => {
         if(!layoutSvg) return;
+        console.log("Wiping progress")
         if (showGrid) {
-            const gridLines = drawGrid();
+            const gridLines = drawGrid(1, gridSize * gridWidth,gridSize * gridHeight, gridSize );
             gridLines.forEach(line => {
                 layoutSvg.append('rect')
                     .attr('class', 'cell')
@@ -203,7 +221,9 @@ const Editor = () => {
                     .attr('width', line.width)
                     .attr('height', line.height)
                     .attr('fill', 'none')
-                    .attr('stroke', 'lightblue');
+                    .attr('stroke', 'lightblue')
+                    .style('pointer-events', 'bounding-box');  // Disable pointer events for zoom
+
             });
         } else {
             layoutSvg.append('rect')
@@ -215,22 +235,67 @@ const Editor = () => {
                 .attr('fill', 'none')
                 .attr('stroke', 'blue')
         }
-    }, [showGrid]);
-    // Effect for handling the rotation of objects in the svg layout
-    const drawGrid = () => {
-        const gridLines = [];
-        for (let i = 0; i < gridHeight; i++) {
-            for (let j = 0; j < gridWidth; j++) {
-                gridLines.push({
-                    x: j * gridSize,
-                    y: i * gridSize,
-                    width: 30,
-                    height: 30
-                });
-            }
+    }, [showGrid]);*/
+    // Create a zoom behavior
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 5])
+        .on("zoom", handleZoom);
+
+    // Create a drag behavior
+    const dragGrid = d3.drag()
+        .on("drag", handleDrag);
+    // Function to handle zoom
+    function handleZoom(event) {
+        const transform = event.transform;
+        layoutSvg.select("g.grid").attr("transform", transform);
+        // Apply zoom/pan to each individual "room-object" group, preserving their relative positions
+        layoutSvg.selectAll(".room-obj").each(function(d: any) {
+            const group = d3.select(this);
+            console.log("wtf")
+            // Use type assertion to tell TypeScript that d has x and y properties
+            const newX = transform.applyX((d as { x: number }).x);
+            const newY = transform.applyY((d as { y: number }).y);
+
+            // Apply the transformed position and zoom scale
+            group.attr("transform", `translate(${newX}, ${newY}) scale(${transform.k})`);
+        });
+
+        // Dynamically regenerate the grid based on current transform (zoom level)
+        updateGrid(transform, SVG_WIDTH, SVG_HEIGHT, gridSize);
+    }
+
+    // Function to handle drag
+    function handleDrag(event) {
+        const g = d3.select("g.grid");
+        const dx = event.dx;
+        const dy = event.dy;
+        const currentTransform = g.attr("transform") || "translate(0, 0)";
+        const newTransform = currentTransform.replace(/translate\(([^,]+),([^)]+)\)/, (match, x, y) => {
+            const newX = parseFloat(x) + dx;
+            const newY = parseFloat(y) + dy;
+            return `translate(${newX}, ${newY})`;
+        });
+        g.attr("transform", newTransform);
+    }
+
+    useEffect(() => {
+       /* do {
+            setTimeout(() => {}, 1000);
+        }while (d3.select('#layout-svg').empty())*/
+        setLayoutSvg(d3.select('#layout-svg'));
+    }, []);
+
+    useEffect(() => {
+        if(!layoutSvg) return;
+        const updateGridProps = {
+            width: SVG_WIDTH,
+            height: SVG_HEIGHT,
+            gridSize: gridSize
         }
-        return gridLines;
-    };
+        drawGrid(layoutSvg, updateGridProps)
+        layoutSvg.call(zoom); // Enable zoom
+        layoutSvg.select("g.grid").call(dragGrid);
+    }, [layoutSvg]);
 
     const handleSave = () => {
         console.log("Saving layout");
@@ -296,7 +361,7 @@ const Editor = () => {
                     </LayoutTooltip>
                 </div>
             </div>
-            <div id={"layout-grid"} style={{width: gridWidth * gridSize, height: gridSize * gridHeight}}>
+            <div id={"layout-grid"} style={{width: SVG_WIDTH, height: SVG_HEIGHT}}>
                 {editCageNum &&
                         <CageNumInput
                                 onSubmit={(num) => {
@@ -306,11 +371,10 @@ const Editor = () => {
                         />
                 }
                 <svg
-                    ref={svgRef}
-                    width={gridWidth * gridSize}
-                    height={gridHeight * gridSize}
-                    id="layout"
-                />
+                    width={SVG_WIDTH}
+                    height={SVG_HEIGHT}
+                    id="layout-svg"
+                ></svg>
             </div>
             <div id={"layout-toolbar"}>
                 <div className="checkbox-wrapper-8">

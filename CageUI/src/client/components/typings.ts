@@ -19,6 +19,21 @@ export interface Page {
     mainView: PageViews;
     subViewId: string;
 }
+
+export interface HandleZoomProps {
+    svgHeight: number;
+    svgWidth: number;
+    gridSize: number;
+    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
+}
+
+export interface PendingRackUpdate {
+    draggedShape: any;
+    cellX: number;
+    cellY: number;
+    id: number;
+}
+
 export interface EndDragLayoutProps {
     gridSize: number;
     gridRatio: number;

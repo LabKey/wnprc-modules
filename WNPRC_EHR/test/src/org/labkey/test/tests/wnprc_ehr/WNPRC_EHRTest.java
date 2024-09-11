@@ -285,8 +285,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.notificationRevampSetup();
-
+//        initTest.notificationRevampSetup(); //TODO: to uncomment, fix issue mentioned here - https://www.labkey.org/WNPRC/support%20tickets/issues-details.view?issueId=51256
     }
 
     private void billingSetup() throws Exception

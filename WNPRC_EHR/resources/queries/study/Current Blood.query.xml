@@ -26,7 +26,7 @@
                         </url>
                     </column>                  
                     <column columnName="BloodNext30">
-                        <columnTitle>Next 30 Days (inclusive)</columnTitle>
+                        <columnTitle>Next 30 Days (excluding today)</columnTitle>
                         <url>/query/executeQuery.view?schemaName=study&amp;
                             query.queryName=Blood Draws&amp;
                             query.viewName=Blood Summary&amp;
@@ -63,6 +63,7 @@
                         <columnTitle>Volume Remaining After Draw (mL)</columnTitle>
                     </column>
                     <column columnName="BloodAvailPlusThirty">
+                        <columnTitle>Volume Remaining Over Next 30 Days</columnTitle>
                         <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
                     </column>
                 </columns>

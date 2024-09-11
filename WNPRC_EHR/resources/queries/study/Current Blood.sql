@@ -51,7 +51,7 @@ FROM
 	    		      FROM study."Blood Draws" draws
 	    			  WHERE draws.id=bi.id
                           AND draws.date <= TIMESTAMPADD('SQL_TSI_DAY', 29, bi.date)
-                          AND cast(draws.date as date) >= bi.date
+                          AND cast(draws.date as date) > bi.date
                           --AND draws.date BETWEEN bi.date AND TIMESTAMPADD('SQL_TSI_DAY', 29, bi.date)
                           AND (draws.qcstate.metadata.DraftData = true OR draws.qcstate.publicdata = true)
                           --when counting forwards, dont include this date

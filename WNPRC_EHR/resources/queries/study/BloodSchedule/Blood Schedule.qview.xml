@@ -56,7 +56,11 @@
        <column name="num_tubes" />
 
        <column name="quantity" />
-       <column name="BloodRemaining/BloodAvailNowPlusThirtyDays"/>
+       <column name="BloodRemaining/BloodAvailNowPlusThirtyDays">
+           <properties>
+               <property name="columnTitle" value="Volume Remaining Over Next 30 Days"/>
+           </properties>
+       </column>
 
        <column name="additionalServices" />
        <column name="instructions" />

@@ -1,11 +1,62 @@
-
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { getRackFromClass, getTranslation, isTextEditable } from './helpers';
-import { EndDragLayoutProps } from './typings';
-import { useLayoutContext } from './ContextManager';
-import { id } from '@labkey/api/dist/labkey/Utils';
+import { EndDragLayoutProps, HandleZoomProps } from './typings';
 
+/*export const  drawGrid = (scale, visibleWidth, visibleHeight, gridSize) => {
+    const gridLines = [];
+
+    // Calculate the number of rows and columns to fill the visible area
+    const numRows = Math.ceil(visibleHeight / (gridSize * scale));  // Rows based on visible height
+    const numCols = Math.ceil(visibleWidth / (gridSize * scale));   // Columns based on visible width
+
+    // Generate grid cells to fill the entire visible area
+    for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+            gridLines.push({
+                x: j * gridSize * scale,    // Adjust the cell position based on zoom scale
+                y: i * gridSize * scale,
+                width: gridSize * scale,    // Adjust cell size based on zoom scale
+                height: gridSize * scale
+            });
+        }
+    }
+    return gridLines;
+};
+*/
+export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
+    layoutSvg.append("g").attr("class", "grid");
+    updateGrid(d3.zoomIdentity, updateGridProps.width, updateGridProps.height, updateGridProps.gridSize); // Draw grid with the initial view
+}
+
+export const updateGrid = (transform, width, height, gridSize) => {
+    const g = d3.select("g.grid");
+    g.selectAll(".cell").remove(); // Clear existing grid
+
+    // Compute the current visible area based on the transformation
+    const visibleWidth = width / transform.k;
+    const visibleHeight = height / transform.k;
+
+    // Calculate grid bounds (starting and ending points) based on transform
+    const xMin = Math.floor(-transform.x / transform.k / gridSize) * gridSize;
+    const yMin = Math.floor(-transform.y / transform.k / gridSize) * gridSize;
+    const xMax = Math.ceil((width - transform.x) / transform.k / gridSize) * gridSize;
+    const yMax = Math.ceil((height - transform.y) / transform.k / gridSize) * gridSize;
+
+    // Draw the grid within the current visible area
+    for (let x = xMin; x < xMax; x += gridSize) {
+        for (let y = yMin; y < yMax; y += gridSize) {
+            g.append("rect")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("class", "cell")
+                .attr("width", gridSize)
+                .attr("height", gridSize)
+                .attr("fill", "none")
+                .attr("stroke", "lightgray");
+        }
+    }
+}
 // Confirmation popup for merging two racks
 function showConfirmationPopup(box1, box2) {
     return new Promise((resolve) => {
@@ -207,6 +258,22 @@ function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio) {
     return isAdjacent;
 }
 
+export const getTargetRect =(x, y, gridSize, transform) => {
+    // Adjust the coordinates based on the current zoom and pan transform
+    const adjustedX = (x - transform.x) / transform.k;
+    const adjustedY = (y - transform.y) / transform.k;
+
+    // Calculate the column and row index based on the grid size
+    const col = Math.floor(adjustedX / gridSize);
+    const row = Math.floor(adjustedY / gridSize);
+
+    // Return the top-left corner coordinates of the rectangle
+    return {
+        x: col * gridSize,
+        y: row * gridSize,
+    };
+}
+
 // This function rounds the x and y coords to the nearest cell for lock on placement
 export const getTargetCell = (x: number, y: number, gridSize: number, MAX_SNAP_DISTANCE: number, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>) => {
     const cells = layoutSvg.selectAll('.cell');
@@ -271,12 +338,13 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
             const {gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg, delRack} = props;
             const shape = d3.select(this);
             shape.classed('active', false);
-            const targetCell = getTargetCell(event.x, event.y, gridSize, MAX_SNAP_DISTANCE, layoutSvg);
+            const transform = d3.zoomTransform(layoutSvg.node());
+            const targetCell = getTargetRect(event.x, event.y, gridSize, transform);
 
             if (targetCell) {
                 console.log('Drag Layout #3', shape, targetCell);
-                const cellX = +targetCell.attr('x');
-                const cellY = +targetCell.attr('y');
+                const cellX = targetCell.x;
+                const cellY = targetCell.y;
                 if (shape.node() instanceof SVGGElement) {
                     shape.attr('transform', `translate(${cellX},${cellY})`);
                     // Only allow merging of individual rack to another single rack or a merged rack.
@@ -302,4 +370,15 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
             }
         }
     );
+}
+
+export const placeAndScaleGroup = (group, x, y, gridSize, transform) => {
+    // Adjust the coordinates to the nearest grid square
+    const rect = getTargetRect(x, y, gridSize, transform);
+
+    // Scale the group to match the grid size relative to the current zoom level
+    const scale = transform.k;  // Scale inversely to zoom
+
+    // Apply the transform (translate to snap to the grid, and scale)
+    group.attr("transform", `translate(${rect.x}, ${rect.y}) scale(${scale})`);
 }

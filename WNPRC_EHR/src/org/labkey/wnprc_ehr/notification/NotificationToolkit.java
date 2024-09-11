@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -956,15 +957,23 @@ public class NotificationToolkit {
     public Boolean checkIfAnimalIsAlive(Container c, User u, String idToCheck) {
         try {
             //Runs query.
-            ArrayList<String> animalDemographicRow = getTableRowAsList(c, u, "study", "Demographics", null, "id", idToCheck, new String[]{"calculated_status"});
+//            ArrayList<String> animalDemographicRow = getTableRowAsList(c, u, "study", "Demographics", null, "id", idToCheck, new String[]{"calculated_status"});
 
-            //Checks alive status.
-            if (animalDemographicRow.get(0).equals("Alive")) {
-                return true;
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("id", idToCheck, CompareType.EQUAL);
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"calculated_status"};
+            //Runs query.
+            ArrayList<HashMap<String,String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Demographics", myFilter, null, targetColumns);
+
+            if (!returnArray.isEmpty()) {
+                if (returnArray.get(0).get("calculated_status") != null) {
+                    if (returnArray.get(0).get("calculated_status").equals("Alive")) {
+                        return true;
+                    }
+                }
             }
-            else {
-                return false;
-            }
+            return false;
         }
         catch (IndexOutOfBoundsException e) {
             // TODO: Log exception.
@@ -1032,10 +1041,36 @@ public class NotificationToolkit {
         // Checks results.
         if (!returnArray.isEmpty()) {
             for (HashMap<String, String> result : returnArray) {
-                Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
-                if (availableBlood <=0) {
-                    return availableBlood;
+                if (!result.get("BloodRemaining/AvailBlood").isEmpty()) {
+                    Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
+                    if (availableBlood <=0) {
+                        return availableBlood;
+                    }
                 }
+            }
+        }
+        return null;
+    }
+
+    public Float getBloodThresholdForAnimal(Container c, User u, String animalID) {
+        // Runs query to get passed in animal's species.
+        SimpleFilter mySpeciesFilter = new SimpleFilter("Id", animalID, CompareType.EQUAL);
+        String[] targetColumnsSpecies = new String[]{"species"};
+        ArrayList<HashMap<String, String>> speciesArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "demographics", mySpeciesFilter, null, targetColumnsSpecies);
+
+        // Gets passed in animal's species.
+        if (!speciesArray.isEmpty()) {
+            String currentSpecies = speciesArray.get(0).get("species");
+
+            // Runs query to get passed in animal's blood draw threshold.
+            SimpleFilter myFilter = new SimpleFilter("common", currentSpecies, CompareType.EQUAL);
+            String[] targetColumnsThreshold = new String[]{"blood_threshold_warning"};
+            ArrayList<HashMap<String, String>> thresholdArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr_lookups", "species", myFilter, null, targetColumnsThreshold);
+
+            // Gets passed in animal's blood draw limit.
+            if (!thresholdArray.isEmpty()) {
+                Float currentThreshold = Float.valueOf(thresholdArray.get(0).get("blood_threshold_warning"));
+                return currentThreshold;
             }
         }
         return null;

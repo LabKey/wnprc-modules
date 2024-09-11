@@ -113,7 +113,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
         //  assignementGroup can be 'all', 'animalCare', or 'vetStaff'.
         BloodDrawsTodayObject(Container c, User u, String assignmentGroup) {
             //Gets the blood remaining threshold.
-            Float bloodThreshold = Float.parseFloat((new WNPRC_EHRModule()).getModuleProperties().get("BloodDrawThreshold").getEffectiveValue(c));
+//            Float bloodThreshold = Float.parseFloat((new WNPRC_EHRModule()).getModuleProperties().get("BloodDrawThreshold").getEffectiveValue(c));
 
             // Creates filter.
             Date todayDate = dateToolkit.getDateToday();
@@ -139,6 +139,9 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 //  6: Area
                 //  7: Room
                 //  8: Row color
+
+                // Gets blood threshold for current row.
+                Float bloodThreshold = notificationToolkit.getBloodThresholdForAnimal(c, u, result.get("id"));
 
                 // Updates id.
                 myCurrentRow[0] = result.get("id");

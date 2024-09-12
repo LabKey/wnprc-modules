@@ -7,7 +7,7 @@ import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
 import { RackTypes, EndDragLayoutProps, PendingRackUpdate } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
-import { svg } from 'd3';
+import { svg, zoomTransform } from 'd3';
 import { CageNumInput } from './CageNumInput';
 import {
     startDragInLayout,
@@ -27,7 +27,7 @@ const Editor = () => {
     const [clickedCageNum, setClickedCageNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [clickedRackNum, setClickedRackNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
-    const [gridSize, setGridSize] = useState<number>(50);
+    const [gridSize, setGridSize] = useState<number>(30);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
     const {
         localRoom,
@@ -85,7 +85,7 @@ const Editor = () => {
         } else {
             let rackSvgId = "";
             const rackGroup = draggedShape.select('#rack-x');
-            const cageIdText = draggedShape.select('#name');
+            const cageIdText = draggedShape.select('tspan');
             const transform = d3.zoomTransform(layoutSvg.node());
 
             // Change the id of the group in the pre-created svg img, and set class name for top level group.
@@ -97,16 +97,15 @@ const Editor = () => {
                     rackGroup.attr('id', newRackId); // Set the new ID
                 }
             }
-
-            cageIdText.node().children[0].textContent = `${cageCount}`
+            cageIdText.node().textContent = `${cageCount}`
             console.log("XXX: ", rackSvgId);
 
             group = layoutSvg.append('g')
-                .data([{x: cellX, y: cellY}])
                 .attr('class', `draggable ${rackSvgId} room-obj`)
                 .style('pointer-events', "bounding-box");
+
             group.append(() => draggedShape.node());
-            placeAndScaleGroup(group, cellX, cellY, gridSize, transform);
+            placeAndScaleGroup(group, cellX, cellY, transform);
         }
 
         const addProps: EndDragLayoutProps = {
@@ -178,7 +177,9 @@ const Editor = () => {
             const x = event.sourceEvent.clientX - svgRect.left;
             const y = event.sourceEvent.clientY - svgRect.top;
             const transform = d3.zoomTransform(layoutSvg.node());
+            console.log("dropping on: ", x, y);
             const targetRect = getTargetRect(x, y, gridSize, transform);
+            console.log("Drop target: ", targetRect.x, targetRect.y)
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
@@ -206,38 +207,10 @@ const Editor = () => {
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
         }
     }, [cageNumChange]);
-/*
-    useEffect(() => {
-        if(!layoutSvg) return;
-        console.log("Wiping progress")
-        if (showGrid) {
-            const gridLines = drawGrid(1, gridSize * gridWidth,gridSize * gridHeight, gridSize );
-            gridLines.forEach(line => {
-                layoutSvg.append('rect')
-                    .attr('class', 'cell')
-                    .attr('x', line.x)
-                    .attr('y', line.y)
-                    .attr('width', line.width)
-                    .attr('height', line.height)
-                    .attr('fill', 'none')
-                    .attr('stroke', 'lightblue')
-                    .style('pointer-events', 'bounding-box');  // Disable pointer events for zoom
 
-            });
-        } else {
-            layoutSvg.append('rect')
-                .attr('class', 'outline')
-                .attr('x', 0)
-                .attr('y', 0)
-                .attr('width', gridWidth * gridSize)
-                .attr('height', gridHeight * gridSize)
-                .attr('fill', 'none')
-                .attr('stroke', 'blue')
-        }
-    }, [showGrid]);*/
     // Create a zoom behavior
     const zoom = d3.zoom()
-        .scaleExtent([0.1, 5])
+        .scaleExtent([0.6, 1])
         .on("zoom", handleZoom);
 
     // Create a drag behavior

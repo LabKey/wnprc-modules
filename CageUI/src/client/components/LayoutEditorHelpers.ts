@@ -322,7 +322,7 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                 console.log('Drag Layout #3', shape, targetCell);
                 const cellX = targetCell.x;
                 const cellY = targetCell.y;
-                placeAndScaleGroup(shape, cellX, cellY, gridSize, transform);
+                placeAndScaleGroup(shape, cellX, cellY, transform);
 
                 // Only allow merging of individual rack to another single rack or a merged rack.
                 if ((shape.node() as SVGGElement).children.length < 2) {
@@ -346,14 +346,14 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
     );
 }
 
-export const placeAndScaleGroup = (group, x, y, gridSize, transform) => {
-    // Adjust the coordinates to the nearest grid square
-    const rect = getTargetRect(x, y, gridSize, transform);
-
+export const placeAndScaleGroup = (group, x, y, transform) => {
     // Scale the group to match the grid size relative to the current zoom level
     const scale = transform.k;  // Scale inversely to zoom
 
+    // Adjust x and y for transform
+    const newX = transform.applyX(x);
+    const newY = transform.applyY(y);
     // Apply the transform (translate to snap to the grid, and scale)
-    group.attr("transform", `translate(${rect.x}, ${rect.y}) scale(${scale})`);
-    group.data([{x: x, y: y}])
+    group.attr("transform", `translate(${newX}, ${newY}) scale(${scale})`)
+        .data([{x: x, y: y}]); // keep data x and y because these are pre transform coords
 }

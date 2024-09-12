@@ -95,7 +95,7 @@ function makeDraggable(element, props) {
     const d3Element = d3.select(element);
     d3Element.call(d3.drag()
         .on('start', startDragInLayout)
-        .on('drag', dragInLayout)
+        .on('drag', createDragInLayout({layoutSvg: props.layoutSvg}))
         .on('end', createEndDragInLayout(props)));
 }
 /* Function to help merge racks together
@@ -259,52 +259,22 @@ function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio) {
 }
 
 export const getTargetRect =(x, y, gridSize, transform) => {
-    // Adjust the coordinates based on the current zoom and pan transform
-    const adjustedX = (x - transform.x) / transform.k;
-    const adjustedY = (y - transform.y) / transform.k;
+    // Adjust the grid size according to the current zoom level
+    const adjustedGridSize = gridSize;
 
-    // Calculate the column and row index based on the grid size
-    const col = Math.floor(adjustedX / gridSize);
-    const row = Math.floor(adjustedY / gridSize);
+    // Adjust the coordinates based on the current zoom and pan transform
+    const adjustedX = transform.invertX(x);
+    const adjustedY = transform.invertY(y);
+
+    // Calculate the column and row index based on the adjusted grid size
+    const col = Math.floor(adjustedX / adjustedGridSize);
+    const row = Math.floor(adjustedY / adjustedGridSize);
 
     // Return the top-left corner coordinates of the rectangle
     return {
-        x: col * gridSize,
-        y: row * gridSize,
+        x: col * adjustedGridSize,
+        y: row * adjustedGridSize,
     };
-}
-
-// This function rounds the x and y coords to the nearest cell for lock on placement
-export const getTargetCell = (x: number, y: number, gridSize: number, MAX_SNAP_DISTANCE: number, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>) => {
-    const cells = layoutSvg.selectAll('.cell');
-    let nearestCell = null;
-    let minDistance = Infinity;
-
-    cells.each(function() {
-        const cell = d3.select(this);
-        const cellX = +cell.attr('x');
-        const cellY = +cell.attr('y');
-        const cellCenterX = cellX + (gridSize / 2);  // half the cell width
-        const cellCenterY = cellY + (gridSize / 2);  // half the cell height
-        const dx = x - cellCenterX;
-        const dy = y - cellCenterY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        //console.log(`Cell at (${cellX},${cellY}), distance: ${distance}`);
-
-        if (distance < minDistance) {
-            minDistance = distance;
-            nearestCell = cell;
-        }
-    });
-    console.log("Nearest cell:", nearestCell ? `at (${nearestCell.attr('x')},${nearestCell.attr('y')})` : "not found", "Distance:", minDistance);
-    if (minDistance <= MAX_SNAP_DISTANCE) {
-        console.log(`Snapping to cell at (${nearestCell.attr('x')},${nearestCell.attr('y')}), distance: ${minDistance}`);
-        return nearestCell;
-    } else {
-        console.log(`No cell within snapping distance. Nearest was ${minDistance} away.`);
-        return null;
-    }
 }
 
 // Layout Drag Helpers
@@ -318,19 +288,24 @@ export function startDragInLayout(event) {
     d3.select(this).raise().classed('active', true);
 }
 
-export function dragInLayout(event) {
-    console.log('Drag Layout #2', event.x, event.y);
-    const x = event.x;
-    const y = event.y;
-
-    const element = d3.select(this);
-    if (element.node() instanceof SVGGElement) {
-        element.attr('transform', `translate(${x},${y})`);
-    } else {
-        element.attr('x', x).attr('y', y);
-    }
-    console.log('Elem: ', element.node());
+export function createDragInLayout(dragProps) {
+    return(
+        function dragInLayout(event) {
+            const {layoutSvg} = dragProps;
+            console.log('Drag Layout #2', event.x, event.y);
+            const element = d3.select(this);
+            const transform = d3.zoomTransform(layoutSvg.node());
+            const scale = transform.k;
+            // Adjust position for the zoom/pan transform
+            const newX = transform.applyX(event.x); // Apply zoom and pan to x
+            const newY = transform.applyY(event.y); // Apply zoom and pan to y
+            element.attr('transform', `translate(${newX},${newY}) scale(${scale})`);
+        }
+    )
 }
+
+
+// TODO add data for x and y new coords to svg group .data()
 
 export function createEndDragInLayout(props: EndDragLayoutProps) {
     return (
@@ -339,26 +314,25 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
             const shape = d3.select(this);
             shape.classed('active', false);
             const transform = d3.zoomTransform(layoutSvg.node());
+            console.log('Drag Layout event #3', event.x, event.y);
+
             const targetCell = getTargetRect(event.x, event.y, gridSize, transform);
 
             if (targetCell) {
                 console.log('Drag Layout #3', shape, targetCell);
                 const cellX = targetCell.x;
                 const cellY = targetCell.y;
-                if (shape.node() instanceof SVGGElement) {
-                    shape.attr('transform', `translate(${cellX},${cellY})`);
-                    // Only allow merging of individual rack to another single rack or a merged rack.
-                    if ((shape.node() as SVGGElement).children.length < 2) {
-                        layoutSvg.selectAll('.draggable, .merged-box').each(function () {
-                            const otherBox = d3.select(this);
-                            console.log('ADJ BOX: ', otherBox);
-                            if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio)) {
-                                mergeRacks(otherBox, shape, gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg);
-                            }
-                        });
-                    }
-                } else {
-                    shape.attr('x', cellX).attr('y', cellY);
+                placeAndScaleGroup(shape, cellX, cellY, gridSize, transform);
+
+                // Only allow merging of individual rack to another single rack or a merged rack.
+                if ((shape.node() as SVGGElement).children.length < 2) {
+                    layoutSvg.selectAll('.draggable, .merged-box').each(function () {
+                        const otherBox = d3.select(this);
+                        console.log('ADJ BOX: ', otherBox);
+                        if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio)) {
+                            mergeRacks(otherBox, shape, gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg);
+                        }
+                    });
                 }
             } else {
                 // remove rack from room
@@ -381,4 +355,5 @@ export const placeAndScaleGroup = (group, x, y, gridSize, transform) => {
 
     // Apply the transform (translate to snap to the grid, and scale)
     group.attr("transform", `translate(${rect.x}, ${rect.y}) scale(${scale})`);
+    group.data([{x: x, y: y}])
 }

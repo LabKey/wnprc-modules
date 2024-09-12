@@ -11,9 +11,8 @@ import { svg } from 'd3';
 import { CageNumInput } from './CageNumInput';
 import {
     startDragInLayout,
-    dragInLayout,
     createEndDragInLayout,
-    drawGrid, updateGrid, getTargetRect, placeAndScaleGroup
+    drawGrid, updateGrid, getTargetRect, placeAndScaleGroup, createDragInLayout
 } from './LayoutEditorHelpers';
 import { parseCage, parseRack } from './helpers';
 
@@ -119,7 +118,7 @@ const Editor = () => {
         };
         // Reattach drag listeners for interaction within layout
         group.call(d3.drag().on('start', startDragInLayout)
-            .on('drag', dragInLayout)
+            .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
             .on('end', createEndDragInLayout(addProps)));
 
         // Reattach click listener for text editing

@@ -174,59 +174,32 @@ async function mergeRacks(targetShape, draggedShape, gridSize, gridRatio, MAX_SN
 }
 
 // This checks the adjacency of two racks to determine if they can be merged
-function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio) {
+function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio, layoutSvg) {
 
     const targetTransform = targetShape.attr('transform');
-    const dragTransoform = draggedShape.attr('transform');
+    const dragTransform = draggedShape.attr('transform');
+    const transform = d3.zoomTransform(layoutSvg.node());
 
-    const coords1 = getTranslation(targetTransform);
-    const coords2 = getTranslation(dragTransoform);
+    const targetCoords = getTranslation(targetTransform);
+    const dragCoords = getTranslation(dragTransform);
+    console.log("Checking adjacency:", targetCoords, dragCoords);
 
-    console.log("Checking adjacency:", coords1, coords2);
+    const boxWidth = gridSize * gridRatio;
+    const scaledBoxWidth = boxWidth * transform.k; // scale to zoom
 
-    const boxWidth = gridSize * gridRatio;  // Assuming each box is 4 grid cells wide
-    let horizontallyAdjacent;
-    let verticallyAdjacent;
+    let horizontallyAdjacent = false;
+    let verticallyAdjacent = false;
 
-    if(targetShape.attr('class').includes("vertical")){
-        let children: number = 1; // start at 1 for origin because we skip it in the loops
-        if(coords1.x < coords2.x){ // mark children on the right of origin
-            // Start at 1 because 0 is always origin (0,0)
-            for (let i = 1; i < targetShape.node().children.length; i++) {
-                if(parseInt(targetShape.node().children[i].getAttribute('x')) > 0){
-                    children++;
-                }
-            }
-        }else{// mark children on the left of origin
-            for (let i = 1; i < targetShape.node().children.length; i++) {
-                if(parseInt(targetShape.node().children[i].getAttribute('x')) < 0){
-                    children++;
-                }
-            }
-        }
-        verticallyAdjacent = (
-            Math.abs(coords1.x - coords2.x) === (boxWidth * children) &&
-            coords1.y === coords2.y
-        );
-    }else{
-        let children: number = 1;
-        if(coords1.y < coords2.y){ // mark children on the right of origin
-            for (let i = 1; i < targetShape.node().children.length; i++) {
-                if(parseInt(targetShape.node().children[i].getAttribute('y')) > 0){
-                    children++;
-                }
-            }
-        }else{// mark children on the left of origin
-            for (let i = 1; i < targetShape.node().children.length; i++) {
-                if(parseInt(targetShape.node().children[i].getAttribute('y')) < 0){
-                    children++;
-                }
-            }
-        }
-        horizontallyAdjacent = (
-            Math.abs(coords1.y - coords2.y) === (boxWidth * children) &&
-            coords1.x === coords2.x
-        );
+    // Check for horizontal adjacency
+    if (Math.abs(targetCoords.x - dragCoords.x) === scaledBoxWidth &&
+        targetCoords.y === dragCoords.y) {
+        console.log("Adj found: x");
+        horizontallyAdjacent = true;
+    }// Check for vertical adjacency
+    else if (Math.abs(targetCoords.y - dragCoords.y) === scaledBoxWidth &&
+        targetCoords.x === dragCoords.x) {
+        console.log("Adj found: y");
+        verticallyAdjacent = true;
     }
     const isAdjacent = horizontallyAdjacent || verticallyAdjacent;
     console.log("Is adjacent:", isAdjacent);
@@ -312,16 +285,15 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                 const cellY = targetCell.y;
                 placeAndScaleGroup(shape, cellX, cellY, transform);
 
-                // Only allow merging of individual rack to another single rack or a merged rack.
-                if ((shape.node() as SVGGElement).children.length < 2) {
-                    layoutSvg.selectAll('.draggable, .merged-box').each(function () {
-                        const otherBox = d3.select(this);
-                        console.log('ADJ BOX: ', otherBox);
-                        if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio)) {
-                            mergeRacks(otherBox, shape, gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg);
-                        }
-                    });
-                }
+                // Merge Behavior
+                layoutSvg.selectAll('.draggable').each(function () {
+                    const otherBox = d3.select(this);
+                    console.log('ADJ BOX: ', otherBox);
+                    if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio, layoutSvg)) {
+                        console.log("merging: ", shape.node(), otherBox.node())
+                        //mergeRacks(otherBox, shape, gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg);
+                    }
+                });
             } else {
                 // remove rack from room
                 console.log("deleting rack from room", getRackFromClass(shape.attr('class')));

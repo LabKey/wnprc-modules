@@ -20,6 +20,8 @@ const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
     const SVG_WIDTH = 1290;
     const SVG_HEIGHT = 810;
+    const GRID_RATIO = 4;
+    const GRID_SIZE = 30;
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
     const [addingRack, setAddingRack] = useState<boolean>(false);
@@ -27,7 +29,6 @@ const Editor = () => {
     const [clickedCageNum, setClickedCageNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [clickedRackNum, setClickedRackNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
-    const [gridSize, setGridSize] = useState<number>(30);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
     const {
         localRoom,
@@ -83,8 +84,8 @@ const Editor = () => {
         }
 
         const addProps: EndDragLayoutProps = {
-            gridSize: gridSize,
-            gridRatio: 3,// todo fix should be the ratio of boxes to fit a cage
+            gridSize: GRID_SIZE,
+            gridRatio: GRID_RATIO,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack
@@ -153,7 +154,7 @@ const Editor = () => {
             // Apply transforms for zoom on shape to scale to correct size when placed
             const transform = d3.zoomTransform(layoutSvg.node());
             // Discovers the grid cell to lock onto
-            const targetRect = getTargetRect(x, y, gridSize, transform);
+            const targetRect = getTargetRect(x, y, GRID_SIZE, transform);
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
@@ -206,7 +207,7 @@ const Editor = () => {
         });
 
         // Dynamically regenerate the grid based on current transform (zoom level)
-        updateGrid(transform, SVG_WIDTH, SVG_HEIGHT, gridSize);
+        updateGrid(transform, SVG_WIDTH, SVG_HEIGHT, GRID_SIZE);
     }
 
     // Function to handle drag
@@ -235,7 +236,7 @@ const Editor = () => {
         const updateGridProps = {
             width: SVG_WIDTH,
             height: SVG_HEIGHT,
-            gridSize: gridSize
+            gridSize: GRID_SIZE
         }
         drawGrid(layoutSvg, updateGridProps)
         layoutSvg.call(zoom); // Enable zoom
@@ -286,7 +287,7 @@ const Editor = () => {
                         <RackTemplate
                             fileName={"SingleCageRack"}
                             className={"draggable"}
-                            gridSize={gridSize}
+                            gridSize={GRID_SIZE}
                             localRoom={localRoom}
                             room={room}
                             setAddingRack={setAddingRack}
@@ -297,7 +298,7 @@ const Editor = () => {
                         <RackTemplate
                             fileName={"Pen"}
                             className={"draggable"}
-                            gridSize={gridSize}
+                            gridSize={GRID_SIZE}
                             localRoom={localRoom}
                             room={room}
                             setAddingRack={setAddingRack}

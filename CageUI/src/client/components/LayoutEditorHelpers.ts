@@ -266,10 +266,11 @@ export const getTargetRect =(x, y, gridSize, transform) => {
     const adjustedX = transform.invertX(x);
     const adjustedY = transform.invertY(y);
 
+
     // Calculate the column and row index based on the adjusted grid size
     const col = Math.floor(adjustedX / adjustedGridSize);
     const row = Math.floor(adjustedY / adjustedGridSize);
-
+    console.log("target rect: ", x, y, col, row, adjustedX, adjustedY);
     // Return the top-left corner coordinates of the rectangle
     return {
         x: col * adjustedGridSize,
@@ -314,9 +315,10 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
             const shape = d3.select(this);
             shape.classed('active', false);
             const transform = d3.zoomTransform(layoutSvg.node());
-            console.log('Drag Layout event #3', event.x, event.y);
-
-            const targetCell = getTargetRect(event.x, event.y, gridSize, transform);
+            const svgRect = (layoutSvg.node() as SVGRectElement).getBoundingClientRect();
+            const x = event.sourceEvent.clientX - svgRect.left;
+            const y = event.sourceEvent.clientY - svgRect.top;
+            const targetCell = getTargetRect(x, y, gridSize, transform);
 
             if (targetCell) {
                 console.log('Drag Layout #3', shape, targetCell);

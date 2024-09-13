@@ -12,7 +12,7 @@ import { CageNumInput } from './CageNumInput';
 import {
     startDragInLayout,
     createEndDragInLayout,
-    drawGrid, updateGrid, getTargetRect, placeAndScaleGroup, createDragInLayout
+    drawGrid, updateGrid, getTargetRect, placeAndScaleGroup, createDragInLayout, getLayoutOffset
 } from './LayoutEditorHelpers';
 import { parseCage, parseRack } from './helpers';
 
@@ -43,31 +43,6 @@ const Editor = () => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
     }, [room, localRoom]);
-
-    /*
-    useEffect(() => {
-        if (!svgRef.current || !utilsRef.current || layoutSvg) return;
-        const tempLayoutSvg = d3.select<SVGElement, any>('#layout')
-            .attr('width', gridWidth * gridSize)
-            .attr('height', gridHeight * gridSize)
-            .append('g').attr("id", "zoomable-area");
-
-        const zoomProps: HandleZoomProps = {
-            gridSize: gridSize,
-            svgWidth: gridWidth * gridSize,
-            svgHeight: gridHeight * gridSize,
-            layoutSvg: tempLayoutSvg
-        }
-        const zoom = d3.zoom()
-            .scaleExtent([0.5, 5])  // Set zoom scale limits
-            .on('zoom', createHandleZoom(zoomProps));
-
-        // Apply zoom behavior to the SVG
-        tempLayoutSvg.call(zoom);
-
-        setLayoutSvg(tempLayoutSvg)
-        setShowGrid(true);
-    }, [svgRef, utilsRef.current]);*/
 
     // This effect updates racks for adding to the room and merging
     useEffect(() => {
@@ -170,10 +145,14 @@ const Editor = () => {
         // Drag end for dragging from the utilities to the layout
         function dragEnded(event) {
             const draggedShape = d3.select('.dragging');
-            const svgRect = (layoutSvg.node() as SVGRectElement).getBoundingClientRect();
-            const x = event.sourceEvent.clientX - svgRect.left;
-            const y = event.sourceEvent.clientY - svgRect.top;
+            // sync x and y to the layout svg
+            const {x,y} = getLayoutOffset({
+                clientX: event.sourceEvent.clientX,
+            clientY: event.sourceEvent.clientY,
+            layoutSvg: layoutSvg})
+            // Apply transforms for zoom on shape to scale to correct size when placed
             const transform = d3.zoomTransform(layoutSvg.node());
+            // Discovers the grid cell to lock onto
             const targetRect = getTargetRect(x, y, gridSize, transform);
             if (targetRect) {
                 const cellX = targetRect.x;

@@ -608,44 +608,6 @@ export const updateCageIds = (updatedRacks) => {
 HELPER FUNCTIONS FOR D3/SVG MANIPULATION
 
  */
-
-export const createDragBehavior = (
-    svgRef: React.RefObject<SVGSVGElement>,
-    gridSize: number,
-    gridWidth: number,
-    gridHeight: number,
-    updateLocalRacks: (id: number, newX: number, newY: number) => void,
-    isDraggingEnabled
-) => {
-    const calculateNewPosition = (event, svgElement, gridSize, gridWidth, gridHeight) => {
-        const svgRect = svgElement.getBoundingClientRect();
-        const x = event.sourceEvent.clientX - svgRect.left;
-        const y = event.sourceEvent.clientY - svgRect.top;
-        const newX = Math.max(0, Math.min(gridWidth - 1, Math.floor(x / gridSize)));
-        const newY = Math.max(0, Math.min(gridHeight - 1, Math.floor(y / gridSize)));
-        console.log("Drag: ", x, newX, y, newY);
-        return [newX, newY];
-    }
-    return {
-        start: function (event, d) {
-            if (!isDraggingEnabled) return;
-            d3.select(this).raise().attr('stroke', 'black');
-        },
-        drag: function (event, d) {
-            if (!isDraggingEnabled) return;
-            const [newX, newY] = calculateNewPosition(event, svgRef.current, gridSize, gridWidth, gridHeight);
-            d3.select(this).attr('transform', `translate(${newX * gridSize}, ${newY * gridSize})`);
-        },
-        end: function (event, d) {
-            if (!isDraggingEnabled) return;
-            d3.select(this).attr('stroke', null);
-            const [newX, newY] = calculateNewPosition(event, svgRef.current, gridSize, gridWidth, gridHeight);
-            updateLocalRacks(d.id, newX, newY);
-        }
-    };
-}
-
-
 export const removeCircularReferences = (obj) => {
     const seen = new WeakSet();
     return JSON.parse(JSON.stringify(obj, (key, value) => {

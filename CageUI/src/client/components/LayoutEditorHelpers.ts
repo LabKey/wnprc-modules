@@ -1,29 +1,8 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { getRackFromClass, getTranslation, isTextEditable } from './helpers';
-import { EndDragLayoutProps, HandleZoomProps } from './typings';
+import { EndDragLayoutProps, OffsetProps } from './typings';
 
-/*export const  drawGrid = (scale, visibleWidth, visibleHeight, gridSize) => {
-    const gridLines = [];
-
-    // Calculate the number of rows and columns to fill the visible area
-    const numRows = Math.ceil(visibleHeight / (gridSize * scale));  // Rows based on visible height
-    const numCols = Math.ceil(visibleWidth / (gridSize * scale));   // Columns based on visible width
-
-    // Generate grid cells to fill the entire visible area
-    for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-            gridLines.push({
-                x: j * gridSize * scale,    // Adjust the cell position based on zoom scale
-                y: i * gridSize * scale,
-                width: gridSize * scale,    // Adjust cell size based on zoom scale
-                height: gridSize * scale
-            });
-        }
-    }
-    return gridLines;
-};
-*/
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
     updateGrid(d3.zoomIdentity, updateGridProps.width, updateGridProps.height, updateGridProps.gridSize); // Draw grid with the initial view
@@ -32,10 +11,6 @@ export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>,
 export const updateGrid = (transform, width, height, gridSize) => {
     const g = d3.select("g.grid");
     g.selectAll(".cell").remove(); // Clear existing grid
-
-    // Compute the current visible area based on the transformation
-    const visibleWidth = width / transform.k;
-    const visibleHeight = height / transform.k;
 
     // Calculate grid bounds (starting and ending points) based on transform
     const xMin = Math.floor(-transform.x / transform.k / gridSize) * gridSize;
@@ -258,6 +233,15 @@ function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio) {
     return isAdjacent;
 }
 
+//Offset for the top left corner of the layout, without doing this objects will randomly jump when dragging and placing
+export const getLayoutOffset = (props: OffsetProps) => {
+    const {layoutSvg, clientX, clientY} = props;
+    const svgRect = (layoutSvg.node() as SVGRectElement).getBoundingClientRect();
+    const x = clientX - svgRect.left;
+    const y = clientY - svgRect.top;
+    return {x: x, y: y};
+}
+
 export const getTargetRect =(x, y, gridSize, transform) => {
     // Adjust the grid size according to the current zoom level
     const adjustedGridSize = gridSize;
@@ -266,11 +250,9 @@ export const getTargetRect =(x, y, gridSize, transform) => {
     const adjustedX = transform.invertX(x);
     const adjustedY = transform.invertY(y);
 
-
     // Calculate the column and row index based on the adjusted grid size
     const col = Math.floor(adjustedX / adjustedGridSize);
     const row = Math.floor(adjustedY / adjustedGridSize);
-    console.log("target rect: ", x, y, col, row, adjustedX, adjustedY);
     // Return the top-left corner coordinates of the rectangle
     return {
         x: col * adjustedGridSize,
@@ -297,10 +279,11 @@ export function createDragInLayout(dragProps) {
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
             const scale = transform.k;
-            // Adjust position for the zoom/pan transform
-            const newX = transform.applyX(event.x); // Apply zoom and pan to x
-            const newY = transform.applyY(event.y); // Apply zoom and pan to y
-            element.attr('transform', `translate(${newX},${newY}) scale(${scale})`);
+            const {x,y} = getLayoutOffset({
+                clientX: event.sourceEvent.clientX,
+                clientY: event.sourceEvent.clientY,
+                layoutSvg: layoutSvg})
+            element.attr('transform', `translate(${x},${y}) scale(${scale})`);
         }
     )
 }
@@ -315,9 +298,12 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
             const shape = d3.select(this);
             shape.classed('active', false);
             const transform = d3.zoomTransform(layoutSvg.node());
-            const svgRect = (layoutSvg.node() as SVGRectElement).getBoundingClientRect();
-            const x = event.sourceEvent.clientX - svgRect.left;
-            const y = event.sourceEvent.clientY - svgRect.top;
+
+            const {x,y} = getLayoutOffset({
+                clientX: event.sourceEvent.clientX,
+                clientY: event.sourceEvent.clientY,
+                layoutSvg: layoutSvg})
+
             const targetCell = getTargetRect(x, y, gridSize, transform);
 
             if (targetCell) {

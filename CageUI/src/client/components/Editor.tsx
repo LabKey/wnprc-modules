@@ -98,7 +98,6 @@ const Editor = () => {
                 }
             }
             cageIdText.node().textContent = `${cageCount}`
-            console.log("XXX: ", rackSvgId);
 
             group = layoutSvg.append('g')
                 .attr('class', `draggable ${rackSvgId} room-obj`)
@@ -153,7 +152,6 @@ const Editor = () => {
 
         // Drag start for dragging from the utilities to the layout
         function dragStarted(event: d3.D3DragEvent<SVGElement, any, any>) {
-            console.log("Dragging");
             const shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
             d3.select(shape)
                 .style('pointer-events', 'none')
@@ -166,7 +164,6 @@ const Editor = () => {
         // Drag move for dragging from the utilities to the layout
 
         function dragging(event) {
-            console.log("dragging #2");
             d3.select('.dragging')
                 .attr('transform', `translate(${event.x}, ${event.y})`);
         }
@@ -177,9 +174,7 @@ const Editor = () => {
             const x = event.sourceEvent.clientX - svgRect.left;
             const y = event.sourceEvent.clientY - svgRect.top;
             const transform = d3.zoomTransform(layoutSvg.node());
-            console.log("dropping on: ", x, y);
             const targetRect = getTargetRect(x, y, gridSize, transform);
-            console.log("Drop target: ", targetRect.x, targetRect.y)
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
@@ -223,7 +218,6 @@ const Editor = () => {
         // Apply zoom/pan to each individual "room-object" group, preserving their relative positions
         layoutSvg.selectAll(".room-obj").each(function(d: any) {
             const group = d3.select(this);
-            console.log("wtf")
             // Use type assertion to tell TypeScript that d has x and y properties
             const newX = transform.applyX((d as { x: number }).x);
             const newY = transform.applyY((d as { y: number }).y);

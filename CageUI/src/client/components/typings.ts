@@ -27,6 +27,12 @@ export interface HandleZoomProps {
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
 }
 
+export interface OffsetProps {
+    clientX: number;
+    clientY: number;
+    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
+}
+
 export interface PendingRackUpdate {
     draggedShape: any;
     cellX: number;

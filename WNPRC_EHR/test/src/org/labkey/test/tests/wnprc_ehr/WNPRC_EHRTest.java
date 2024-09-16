@@ -284,9 +284,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
-
-        initTest.notificationRevampSetup();
-
     }
 
     private void billingSetup() throws Exception

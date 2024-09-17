@@ -16,8 +16,38 @@ function onComplete(event, errors, helper) {
     var ids = helper.getRows().map(function (row) {
         return row.row.id;
     });
+    var animalDateMap= [];
+    let clientRows = helper.getRows();
+
+    console.log("number of rows "+ clientRows.length);
+    if (clientRows){
+
+        for (var i= 0; i < clientRows.length; i++){
+            console.log("animalId "+clientRows[i].row.id);
+            if (!animalDateMap[clientRows[i].row.id]){
+                console.log("creating item for animalDateMap");
+                animalDateMap[clientRows[i].row.id] = [];
+            }
+            animalDateMap[clientRows[i].row.id].push({
+                //animalId: clientRows[i].row.id,
+                deathdate : clientRows[i].row.date
+            });
+
+        }
+
+    }
+    /*console.log("array line 37 " + Object.values(animalDateMap).length);
+
+    for (var i = 0; i < animalDateMap.length; i++){
+        console.log("array value " + animalDateMap[i]);
+    }*/
+
+    WNPRC.Utils.getJavaHelper().removeWaterAmounts(animalDateMap);
 
     //Sends notification.
     var hostName = 'https://' + LABKEY.serverName;
     WNPRC.Utils.getJavaHelper().sendDeathNotification(ids, hostName);
+
+
+
 }

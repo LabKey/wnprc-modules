@@ -2576,4 +2576,43 @@ public class TriggerScriptHelper {
 
         return StringUtils.join(errors, "<>");
     }
+    public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
+    {
+        String animalId = "rh1234";
+        Date animalDeath = new Date("2024-09-04");
+        if (checkIfAnimalInCondition(animalId, animalDeath).size()>0){
+            Calendar filterDate = Calendar.getInstance();
+            filterDate.setTime(animalDeath);
+
+            TableInfo waterAmount= getTableInfo("study", "waterAmount");
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
+            filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_GTE);
+            filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
+
+            Sort sort = new Sort();
+            sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.ASC, false);
+
+            TableSelector ts = new TableSelector(waterAmount, filter,sort);
+            final List<Map<String, Object>> rowTobeUpdated = new ArrayList<>();
+            ts.forEach(new Selector.ForEachBlock<ResultSet>()
+            {
+                    @Override
+                    public void exec(ResultSet rs) throws SQLException
+                    {
+                        String objectid =rs.getString("objectId");
+                        Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
+                        toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
+                        toUpdate.put("objectid",objectid);
+                        rowTobeUpdated.add(toUpdate);
+
+                    }
+            });
+            //Table.update(getUser(),waterAmount,toUpdate, objectid);
+            if (waterAmount.getUpdateService()!=null){
+                waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,null,null,null,null);
+            }
+
+
+        }
+    }
 }

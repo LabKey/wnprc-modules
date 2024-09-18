@@ -19,7 +19,7 @@ export const RackTemplate: FC<RackTemplateProps> = (props) => {
 
 
     return (
-        <div className={"rack-template"}>
+        <div className={"cage-template"}>
             <ReactSVG
                 src={`${ActionURL.getContextPath()}/cageui/static/${fileName}.svg`}
                 id={'rack-template'}
@@ -30,7 +30,6 @@ export const RackTemplate: FC<RackTemplateProps> = (props) => {
                 beforeInjection={(svg) => {
                     // Select all <tspan> elements
                     const tspans = svg.querySelectorAll('tspan');
-
                     // Iterate through each <tspan> and make its parent <text> content editable
                     tspans.forEach(node => {
                         const textElement = node.parentElement;

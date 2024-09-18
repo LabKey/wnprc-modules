@@ -73,105 +73,101 @@ function makeDraggable(element, props) {
         .on('drag', createDragInLayout({layoutSvg: props.layoutSvg}))
         .on('end', createEndDragInLayout(props)));
 }
-/* Function to help merge racks together
-/ This function strips the transforms from the individual svg groups then applies
-/ x and y attributes to the group children. these x and y coords are relative to the new group
-/ meaning they should be starting at 0,0 and placed every grid ratio * grid size * number of previous racks
-/ pixels apart, Example, (0,0) (0,120) (0,240) if every cage is 4 cells in length and 30 pixel cells
-*/
-async function mergeRacks(targetShape, draggedShape, gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg) {
-    const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
-    if (shouldMerge) {
-        const targetChildren = targetShape.node().children;
-        const draggedChildren = draggedShape.node().children;
+// Function to help merge racks together by resetting groups to local coords
+function resetNodeTranslations(node1, node2) {
+    const nodes = [node1, node2];
 
-        // Function to convert transform to x and y attributes
-        const convertTransformToXY = (element, curIdx) => {
-            const transform = d3.select(element).attr('transform');
-            if(!transform) return;
-            const {x: targetX, y: targetY} = getTranslation(targetShape.attr('transform'));
-            const {x: dragX, y: dragY} = getTranslation(draggedShape.attr('transform'));
-            let direction = 1; // determines direction if place on other side of target
-
-
-            if(element.parentElement.getAttribute('class').includes("horizontal")) {
-                let children: number = 1;
-                if(curIdx === 0){
-                    children = 0;
-                }
-                else if(dragY < targetY){
-                    direction = -1;
-                    for (let i = 1; i < targetShape.node().children.length; i++) {
-                        if(parseInt(targetShape.node().children[i].getAttribute('y')) < 0){
-                            children++;
-                        }
-                    }
-                }else{
-                    for (let i = 1; i < targetShape.node().children.length; i++) {
-                        if(parseInt(targetShape.node().children[i].getAttribute('y')) > 0){
-                            children++;
-                        }
-                    }
-                }
-                d3.select(element)
-                    .attr('x', 0)
-                    .attr('y', (children * gridRatio * gridSize * direction))
-                    .attr('transform', null);
-            }else{
-                let children: number = 1;
-                if(curIdx === 0){
-                    children = 0;
-                }
-                else if(dragX < targetX){
-                    direction = -1;
-                    for (let i = 1; i < targetShape.node().children.length; i++) {
-                        if(parseInt(targetShape.node().children[i].getAttribute('x')) < 0){
-                            children++;
-                        }
-                    }
-                }else{
-                    for (let i = 1; i < targetShape.node().children.length; i++) {
-                        if(parseInt(targetShape.node().children[i].getAttribute('x')) > 0){
-                            children++;
-                        }
-                    }
-                }
-                d3.select(element)
-                    .attr('x', (children * gridRatio * gridSize * direction))
-                    .attr('y', 0)
-                    .attr('transform', null);
+    // Get the current translation for each node
+    const getTranslation = (node) => {
+        const currentTransform = node.getAttribute("transform");
+        if (currentTransform) {
+            const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
+            if (translateMatch) {
+                return translateMatch[1].split(',').map(Number);
             }
         }
+        return [0, 0]; // Default if no translation is found
+    };
 
-        // Convert target group's children
-        Array.from(targetChildren).forEach(((child, idx) => convertTransformToXY(child, idx)));
+    // Get the translations of the two nodes
+    const [translateX1, translateY1] = getTranslation(node1);
+    const [translateX2, translateY2] = getTranslation(node2);
 
-        // Convert dragged group's children and append to the target group
-        Array.from(draggedChildren).forEach((child) => {
-            convertTransformToXY(child, targetChildren.length); // just length since idx start at 0
-            targetShape.append(() => (child as SVGElement).cloneNode(true));
-        });
+    // Calculate the relative distance between the two nodes
+    const relativeTranslateX = translateX2 - translateX1;
+    const relativeTranslateY = translateY2 - translateY1;
 
-        // Remove the original dragged group
+    // Reset the first node to (0, 0)
+    node1.setAttribute("transform", `translate(0, 0)`);
+
+    // Set the second node relative to the first node's new position (keeping the distance)
+    node2.setAttribute("transform", `translate(${relativeTranslateX}, ${relativeTranslateY})`);
+}
+
+async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack) {
+    const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
+    if (shouldMerge) {
+        console.log("Merge: ", targetShape.node(), draggedShape.node());
+
+        const mergedGroup = layoutSvg.append('g')
+            .attr('class', targetShape.attr('class'));
+
+
+        //determine if target or dragged, is a previous rack with more than 1 cage
+        if(targetShape.selectChildren().nodes().length === 1) {
+
+        }
+        // Clone the target and dragged shapes before appending
+        let clonedTargetShape = targetShape.node().cloneNode(true);
+        let clonedDraggedShape = draggedShape.node().cloneNode(true);
+
+        //Reset translates to new local group
+        resetNodeTranslations(clonedTargetShape, clonedDraggedShape)
+
+        clonedTargetShape.classList = ""
+        clonedDraggedShape.classList = ""
+        clonedTargetShape.style = ""
+        clonedDraggedShape.style = ""
+
+        // Append the cloned shapes to the new group
+        mergedGroup.node().appendChild(clonedTargetShape);
+        mergedGroup.node().appendChild(clonedDraggedShape);
+
+        // Copy the transform attribute from the targetShape to the merged group
+        const transformAttr = targetShape.attr('transform');
+        if (transformAttr) {
+            mergedGroup.attr('transform', transformAttr);
+        }
+
+        // Copy any inline styles from the targetShape to the merged group
+        const styleAttr = targetShape.attr('style');
+        if (styleAttr) {
+            mergedGroup.attr('style', styleAttr);
+        }
+
+        //Attach data from target to new shape
+        const targetData = targetShape.datum()
+        if(targetData) {
+            mergedGroup.data([{x: targetData.x, y: targetData.y}])
+        }
+
+        //
+        const addProps: EndDragLayoutProps = {
+            gridSize: gridSize,
+            gridRatio: gridRatio,
+            MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
+            layoutSvg: layoutSvg,
+            delRack: delRack
+        };
+        mergedGroup.call(d3.drag().on('start', startDragInLayout)
+            .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
+            .on('end', createEndDragInLayout(addProps)));
+        // Remove the original shapes from the DOM
+        targetShape.remove();
         draggedShape.remove();
-
-        // Update the bounding box of the merged group
-        const bbox = targetShape.node().getBBox();
-        targetShape.attr('width', bbox.width)
-            .attr('height', bbox.height);
-
-        // Ensure the group is draggable
-        const addProps = {gridSize: gridSize, MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE, layoutSvg: layoutSvg}
-        makeDraggable(targetShape.node(), addProps);
-
-        console.log("Merged group updated/created at:", {
-            x: targetShape.attr('x'),
-            y: targetShape.attr('y'),
-            width: bbox.width,
-            height: bbox.height
-        });
     }
 }
+
 
 // This checks the adjacency of two racks to determine if they can be merged
 function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio, layoutSvg) {
@@ -261,9 +257,6 @@ export function createDragInLayout(dragProps) {
     )
 }
 
-
-// TODO add data for x and y new coords to svg group .data()
-
 export function createEndDragInLayout(props: EndDragLayoutProps) {
     return (
         function endDragInLayout(event) {
@@ -290,13 +283,12 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                     const otherBox = d3.select(this);
                     console.log('ADJ BOX: ', otherBox);
                     if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio, layoutSvg)) {
-                        console.log("merging: ", shape.node(), otherBox.node())
-                        //mergeRacks(otherBox, shape, gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg);
+                        mergeRacks(otherBox, shape, layoutSvg, gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack);
                     }
                 });
             } else {
                 // remove rack from room
-                console.log("deleting rack from room", getRackFromClass(shape.attr('class')));
+                console.log("deleting cage from room", getRackFromClass(shape.attr('class')));
                 const idToDel = parseInt(getRackFromClass(shape.attr('class')));
                 delRack(idToDel);
                 shape.remove();

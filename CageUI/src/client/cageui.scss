@@ -497,20 +497,20 @@
 
 // End Checkbox button css
 
-.rack-templates {
+.cage-templates {
   display: flex;
   justify-content: space-around; /* Ensure equal spacing around the templates */
   gap: 10px; /* Add space between each template */
 }
 
-.rack-template {
+.cage-template {
   display: flex;
   flex-direction: column; /* Arrange items in a column */
   align-items: center; /* Center items horizontally */
   padding: 10px; /* Add padding around each template */
 }
 
-.rack-template h2 {
+.cage-template h2 {
   margin: 0 0 10px 0; /* Add space below the name */
   text-align: center; /* Center the name */
 }

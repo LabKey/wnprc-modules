@@ -59,24 +59,23 @@ const Editor = () => {
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
         } else {
-            let rackSvgId = "";
-            const rackGroup = draggedShape.select('#rack-x');
+            const cageGroup = draggedShape.select('#cage-x');
             const cageIdText = draggedShape.select('tspan');
             const transform = d3.zoomTransform(layoutSvg.node());
 
             // Change the id of the group in the pre-created svg img, and set class name for top level group.
-            if(!rackGroup.empty()){
-                const currentId = rackGroup.attr('id');
+            if(!cageGroup.empty()){
+                const currentId = cageGroup.attr('id');
+                // set first cage in rack to be 1
                 if(currentId){
-                    const newRackId = currentId.replace('rack-x', `rack-${id}`)
-                    rackSvgId = newRackId;
-                    rackGroup.attr('id', newRackId); // Set the new ID
+                    const newRackId = currentId.replace('cage-x', `cage-1`)
+                    cageGroup.attr('id', newRackId); // Set the new ID
                 }
             }
             cageIdText.node().textContent = `${cageCount}`
 
             group = layoutSvg.append('g')
-                .attr('class', `draggable ${rackSvgId} room-obj`)
+                .attr('class', `draggable rack-${id} room-obj`)
                 .style('pointer-events', "bounding-box");
 
             group.append(() => draggedShape.node());
@@ -159,9 +158,13 @@ const Editor = () => {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
                 const newId = localRoom.length + 1;
-                setPendingRackUpdate({draggedShape: draggedShape, cellX: cellX, cellY: cellY, id: newId});
+                setPendingRackUpdate({
+                    draggedShape: draggedShape,
+                    cellX: cellX,
+                    cellY: cellY,
+                    id: newId});
                 setAddingRack(true);
-                addRack(newId, `rack-${newId}`);
+                addRack(newId);
             } else {
                 draggedShape.remove();
             }
@@ -282,7 +285,7 @@ const Editor = () => {
                         </svg>
                     </LayoutTooltip>
                 </div>
-                <div className={'rack-templates'}>
+                <div className={'cage-templates'}>
                     <LayoutTooltip text={"1x0"}>
                         <RackTemplate
                             fileName={"SingleCageRack"}

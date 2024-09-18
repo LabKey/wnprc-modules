@@ -38,7 +38,7 @@ export interface LayoutContextType {
     room: Rack[];
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>;
     localRoom: Rack[];
-    addRack: (id: number, svgId: string) => void;
+    addRack: (id: number) => void;
     setCageCount: React.Dispatch<React.SetStateAction<number>>;
     cageCount: number;
     delRack: (id: number) => void;
@@ -169,17 +169,20 @@ export const LayoutContextProvider = ({children}) => {
     const [cageCount, setCageCount] = useState<number>(0);
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
 
-    const addRack = (id: number, svgId: string) => {
+    const addRack = (id: number) => {
         const newRack: Rack = {
             cages: [],
             id: id,
             isActive: false,
             type: undefined
         };
-        console.log("Adding rack: ", id, svgId, newRack);
         setLocalRoom(prevRacks => [...prevRacks, newRack]);
         setCageCount(prevState => prevState + 1);
     };
+
+    const mergeRack = (targetId: number, dragId: number) => {
+
+    }
 
     const delRack = (id: number) => {
         if(cageCount == 0) return;

@@ -285,8 +285,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.notificationRevampSetup();
-
+//        initTest.notificationRevampSetup(); //TODO: to uncomment, fix issue mentioned here - https://www.labkey.org/WNPRC/support%20tickets/issues-details.view?issueId=51256
     }
 
     private void billingSetup() throws Exception
@@ -4058,7 +4057,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Prenatal Death Notification Revamp");
     }
 
-    @Test
+    //TODO: is this a setup or a test? its being called from doSetup() and also has a @Test annotation.
+    //@Test
     public void notificationRevampSetup() throws UnhandledAlertException, IOException, CommandException {
         // Set up.
         log("Starting notificationRevampSetup()");
@@ -4109,6 +4109,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         myReusableFunctions.insertValueIntoBloodBilledByDataset("spi", "SPI");
 
         // Runs tests.
+        // TODO: separate these tests out so they run individually and keep above as part of the setup for below tests
         notificationRevampTestBloodDrawsTodayAll();
         notificationRevampTestBloodDrawsTodayAnimalCare();
         notificationRevampTestBloodDrawsTodayVetStaff();

@@ -75,7 +75,8 @@ const Editor = () => {
             cageIdText.node().textContent = `${cageCount}`
 
             group = layoutSvg.append('g')
-                .attr('class', `draggable rack-${id} room-obj`)
+                .attr('class', `draggable rack room-obj`)
+                .attr('id', `rack-${id}`)
                 .style('pointer-events', "bounding-box");
 
             group.append(() => draggedShape.node());
@@ -104,8 +105,24 @@ const Editor = () => {
                 event.stopPropagation();
                 const cageNum: number = parseInt((event.target as SVGTSpanElement).textContent);
                 setEditCageState(cageNum);
-                setClickedCageNum(parseCage(((event.target as SVGTSpanElement).parentNode.parentNode as SVGGElement).getAttribute('id')));
-                setClickedRackNum(parseRack(((event.target as SVGTSpanElement).parentNode.parentNode.parentNode as SVGGElement).getAttribute('id')));
+                // Use closest to find the nearest element that contains 'rack-' in the class name
+                const rackGroupElement = (event.target as SVGTSpanElement).closest('[id*="rack-"]');
+                const cageGroupElement = (event.target as SVGTSpanElement).closest('[id*="cage-"]');
+
+                if (rackGroupElement && /^rack-\d+$/.test(rackGroupElement.id)) {
+                    if(cageGroupElement && /^cage-\d+$/.test(cageGroupElement.id)){
+                        // Valid cage and rack
+                        setClickedCageNum(parseCage((cageGroupElement as SVGGElement).getAttribute('id')));
+                        setClickedRackNum(parseRack((rackGroupElement as SVGGElement).getAttribute('id')));
+                        console.log("Found the valid Rack, Cage:", rackGroupElement, cageGroupElement);
+                    }
+                    else{
+                        console.log("No group for cage found")
+                    }
+                    // Do something with the found element
+                } else {
+                    console.log("No group for rack found");
+                }
             });
         });
         setAddingRack(false);

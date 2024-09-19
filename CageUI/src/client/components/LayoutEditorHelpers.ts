@@ -110,7 +110,8 @@ async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridR
         console.log("Merge: ", targetShape.node(), draggedShape.node());
 
         const mergedGroup = layoutSvg.append('g')
-            .attr('class', targetShape.attr('class'));
+            .attr('class', targetShape.attr('class'))
+            .attr('id', targetShape.attr('id'));
 
 
         //determine if target or dragged, is a previous rack with more than 1 cage
@@ -128,6 +129,8 @@ async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridR
         clonedDraggedShape.classList = ""
         clonedTargetShape.style = ""
         clonedDraggedShape.style = ""
+
+        //TODO fix ids for cages after they get added to a new rack
 
         // Append the cloned shapes to the new group
         mergedGroup.node().appendChild(clonedTargetShape);

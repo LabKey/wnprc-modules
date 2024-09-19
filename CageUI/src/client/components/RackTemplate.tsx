@@ -22,7 +22,7 @@ export const RackTemplate: FC<RackTemplateProps> = (props) => {
         <div className={"cage-template"}>
             <ReactSVG
                 src={`${ActionURL.getContextPath()}/cageui/static/${fileName}.svg`}
-                id={'rack-template'}
+                id={'cage-template'}
                 wrapper={'svg'}
                 className={className}
                 width={"250"}

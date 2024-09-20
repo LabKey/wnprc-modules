@@ -37,13 +37,17 @@ const Editor = () => {
         delRack,
         cageCount,
         changeCageId,
-        cageNumChange
+        cageNumChange,
+        cageLocs,
+        addNewCageLocation,
+        moveCageLocation
     } = useLayoutContext();
 
     useEffect(() => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
-    }, [room, localRoom]);
+        console.log("Cage Locs: " ,cageLocs)
+    }, [room, localRoom, cageLocs]);
 
     // This effect updates racks for adding to the room and merging
     useEffect(() => {
@@ -81,6 +85,12 @@ const Editor = () => {
 
             group.append(() => draggedShape.node());
             placeAndScaleGroup(group, cellX, cellY, transform);
+            addNewCageLocation({
+                num: cageLocs.length + 1,
+                cellX: cellX,
+                cellY: cellY,
+                scale: transform.k
+            });
         }
 
         const addProps: EndDragLayoutProps = {
@@ -88,7 +98,8 @@ const Editor = () => {
             gridRatio: GRID_RATIO,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
-            delRack: delRack
+            delRack: delRack,
+            moveCage: moveCageLocation
         };
         // Reattach drag listeners for interaction within layout
         group.call(d3.drag().on('start', startDragInLayout)
@@ -258,7 +269,7 @@ const Editor = () => {
             height: SVG_HEIGHT,
             gridSize: GRID_SIZE
         }
-        drawGrid(layoutSvg, updateGridProps)
+        drawGrid(layoutSvg, updateGridProps);
         layoutSvg.call(zoom); // Enable zoom
         layoutSvg.select("g.grid").call(dragGrid);
     }, [layoutSvg]);

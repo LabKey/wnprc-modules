@@ -1,6 +1,6 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
-import { getRackFromClass, getTranslation, isTextEditable } from './helpers';
+import { getRackFromClass, getTranslation, isTextEditable, parseCage } from './helpers';
 import { EndDragLayoutProps, OffsetProps } from './typings';
 import { zoom, zoomTransform } from 'd3';
 
@@ -110,7 +110,7 @@ function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
 
 
 
-async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack) {
+async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack, moveCage) {
     const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
     if (shouldMerge) {
         console.log("Merge: ", targetShape.node(), draggedShape.node());
@@ -171,7 +171,8 @@ async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridR
             gridRatio: gridRatio,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
-            delRack: delRack
+            delRack: delRack,
+            moveCage: moveCage
         };
         mergedGroup.call(d3.drag().on('start', startDragInLayout)
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
@@ -182,7 +183,7 @@ async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridR
     }
 }
 
-
+// TODO add threshold of 0.2
 // This checks the adjacency of two racks to determine if they can be merged
 function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio, layoutSvg) {
 
@@ -274,7 +275,7 @@ export function createDragInLayout(dragProps) {
 export function createEndDragInLayout(props: EndDragLayoutProps) {
     return (
         function endDragInLayout(event) {
-            const {gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg, delRack} = props;
+            const {gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg, delRack, moveCage} = props;
             const shape = d3.select(this);
             shape.classed('active', false);
             const transform = d3.zoomTransform(layoutSvg.node());
@@ -291,13 +292,30 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                 const cellX = targetCell.x;
                 const cellY = targetCell.y;
                 placeAndScaleGroup(shape, cellX, cellY, transform);
+                ///moveCage();
+
+                //Update all shape placements
+                if(shape.selectChildren().size() > 1) {
+                    //group of groups
+                    shape.selectChildren().each(function () {
+                        const currChild = d3.select(this);
+                        const currCage = currChild.select('[id*="cage-"]');
+                    })
+
+                }else{
+                    // group of svg
+                    const currCage = shape.select( '[id*="cage-"]');
+                    const rackId = parseCage(currCage.attr('id'));
+
+                    moveCage(rackId, cellX, cellY, transform.k);
+                }
 
                 // Merge Behavior
                 layoutSvg.selectAll('.draggable').each(function () {
                     const otherBox = d3.select(this);
                     console.log('ADJ BOX: ', otherBox);
                     if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio, layoutSvg)) {
-                        mergeRacks(otherBox, shape, layoutSvg, gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack);
+                        mergeRacks(otherBox, shape, layoutSvg, gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack, moveCage);
                     }
                 });
             } else {
@@ -306,7 +324,6 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                 const idToDel = parseInt(getRackFromClass(shape.attr('class')));
                 delRack(idToDel);
                 shape.remove();
-
             }
         }
     );

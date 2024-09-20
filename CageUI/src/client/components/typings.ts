@@ -20,6 +20,13 @@ export interface Page {
     subViewId: string;
 }
 
+export interface CageLocations {
+    num: number;
+    cellX: number;
+    cellY: number;
+    scale: number;
+}
+
 export interface HandleZoomProps {
     svgHeight: number;
     svgWidth: number;
@@ -46,6 +53,7 @@ export interface EndDragLayoutProps {
     MAX_SNAP_DISTANCE: number;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (id: number) => void;
+    moveCage: (cageNum: number, x: number, y: number, k: number) => void;
 }
 export interface Cage {
     id: number

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Cage, Rack, Page } from './typings';
+import { Cage, Rack, Page, CageLocations } from './typings';
 import { removeCircularReferences } from './helpers';
 import { svg } from 'd3';
 
@@ -37,6 +37,8 @@ export interface RoomContextType {
 export interface LayoutContextType {
     room: Rack[];
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>;
+    cageLocs: CageLocations[];
+    setCageLocs: React.Dispatch<React.SetStateAction<CageLocations[]>>;
     localRoom: Rack[];
     addRack: (id: number) => void;
     setCageCount: React.Dispatch<React.SetStateAction<number>>;
@@ -44,6 +46,8 @@ export interface LayoutContextType {
     delRack: (id: number) => void;
     changeCageId: (idBefore: number, idAfter: number) => void;
     cageNumChange: {before: number, after: number};
+    addNewCageLocation: (newCage: CageLocations) => void;
+    moveCageLocation: (cageNum: number, x: number, y: number, k: number) => void;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -165,6 +169,7 @@ export const RoomContextProvider = ({children}) => {
 
 export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
+    const [cageLocs, setCageLocs] = useState<CageLocations[]>([])
     const [localRoom, setLocalRoom] = useState<Rack[]>(room);
     const [cageCount, setCageCount] = useState<number>(0);
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
@@ -183,6 +188,32 @@ export const LayoutContextProvider = ({children}) => {
     const mergeRack = (targetId: number, dragId: number) => {
 
     }
+
+    const addNewCageLocation = (newCage: CageLocations) => {
+        setCageLocs((prevCageLocs) => {
+            // Add the new box location
+            const updatedCageLocs = [...prevCageLocs, newCage];
+
+            // Set the scale of all boxes to the scale of the new box location
+            return updatedCageLocs.map(box => ({
+                ...box,
+                scale: newCage.scale,
+            }));
+        });
+    };
+
+    const moveCageLocation = (cageNum: number, x: number, y: number, k: number) => {
+        console.log("Cage Move: ", cageNum, x, y);
+        setCageLocs((prevCageLocs) =>
+            prevCageLocs.map(cage =>
+                cage.num === cageNum
+                    ? { ...cage, cellX: x, cellY: y, scale: k }  // Update x, y, and scale of the target box
+                    : { ...cage, scale: k }  // Only update the scale of other boxes
+            )
+        );
+
+    };
+
 
     const delRack = (id: number) => {
         if(cageCount == 0) return;
@@ -214,7 +245,11 @@ export const LayoutContextProvider = ({children}) => {
             setCageCount,
             delRack,
             changeCageId,
-            cageNumChange
+            cageNumChange,
+            cageLocs,
+            setCageLocs,
+            addNewCageLocation,
+            moveCageLocation
         }}>
             {children}
         </LayoutContext.Provider>

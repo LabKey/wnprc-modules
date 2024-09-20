@@ -2,6 +2,7 @@
 import * as d3 from 'd3';
 import { getRackFromClass, getTranslation, isTextEditable } from './helpers';
 import { EndDragLayoutProps, OffsetProps } from './typings';
+import { zoom, zoomTransform } from 'd3';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -74,9 +75,7 @@ function makeDraggable(element, props) {
         .on('end', createEndDragInLayout(props)));
 }
 // Function to help merge racks together by resetting groups to local coords
-function resetNodeTranslations(node1, node2) {
-    const nodes = [node1, node2];
-
+function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
     // Get the current translation for each node
     const getTranslation = (node) => {
         const currentTransform = node.getAttribute("transform");
@@ -86,23 +85,30 @@ function resetNodeTranslations(node1, node2) {
                 return translateMatch[1].split(',').map(Number);
             }
         }
-        return [0, 0]; // Default if no translation is found
+        return [0, 0]; // Default if no transform is found
     };
 
-    // Get the translations of the two nodes
+    // Get the zoom transform of the layout SVG
+    const layoutTransform = d3.zoomTransform(layoutSvg.node());
+
+    // Get the translations of the two nodes (current positions)
     const [translateX1, translateY1] = getTranslation(node1);
     const [translateX2, translateY2] = getTranslation(node2);
 
-    // Calculate the relative distance between the two nodes
-    const relativeTranslateX = translateX2 - translateX1;
-    const relativeTranslateY = translateY2 - translateY1;
+    // Calculate the dynamic distance between the two nodes before resetting
+    // Remove the zoom scale from the distance to keep it zoom-independent
+    const distanceX = (translateX2 - translateX1) / layoutTransform.k;  // Correct the distance using zoom scale
+    const distanceY = (translateY2 - translateY1) / layoutTransform.k;  // Correct Y in case there's any Y translation
 
-    // Reset the first node to (0, 0)
+    // Reset the first node to (0, 0) in the new group
     node1.setAttribute("transform", `translate(0, 0)`);
 
-    // Set the second node relative to the first node's new position (keeping the distance)
-    node2.setAttribute("transform", `translate(${relativeTranslateX}, ${relativeTranslateY})`);
+    // Set the second node to be exactly at the dynamic distance relative to the first node
+    node2.setAttribute("transform", `translate(${distanceX}, ${distanceY})`);
 }
+
+
+
 
 async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack) {
     const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
@@ -114,16 +120,21 @@ async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridR
             .attr('id', targetShape.attr('id'));
 
 
-        //determine if target or dragged, is a previous rack with more than 1 cage
-        if(targetShape.selectChildren().nodes().length === 1) {
 
-        }
         // Clone the target and dragged shapes before appending
         let clonedTargetShape = targetShape.node().cloneNode(true);
         let clonedDraggedShape = draggedShape.node().cloneNode(true);
 
+        //determine if target or dragged, is a previous rack with more than 1 cage
+        if(clonedTargetShape.childNodes.length > 1) {
+            clonedTargetShape.each(function () {
+                const targetCage = d3.select(this);
+                console.log("More than 1 merge: ", targetCage);
+            })
+        }
+
         //Reset translates to new local group
-        resetNodeTranslations(clonedTargetShape, clonedDraggedShape)
+        resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg)
 
         clonedTargetShape.classList = ""
         clonedDraggedShape.classList = ""

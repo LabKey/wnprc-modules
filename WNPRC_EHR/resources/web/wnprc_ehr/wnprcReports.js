@@ -1248,9 +1248,6 @@ EHR.reports['abstract'] = function(panel, tab){
 };
 
 EHR.reports.BloodSummary = function(panel, tab){
-    var filterArray = panel.getFilterArray(tab);
-    var title = panel.getTitleSuffix();
-
     tab.add({
         html: 'This report summarizes the blood available for the animals below.  ' +
                 '<br><br>If there have been recent blood draws for the animal, a graph will show the available blood over time.  On the graph, dots indicate dates when either blood was drawn or a previous blood draw fell off.  The horizontal lines indicate the maximum allowable blood that can be drawn on that date.',
@@ -1262,7 +1259,7 @@ EHR.reports.BloodSummary = function(panel, tab){
 
     if (subjects.length){
         tab.add({
-            xtype: 'wnprc-bloodsummarypanel',
+            xtype: 'ehr-bloodsummarypanel',
             subjects: subjects
         });
     }
@@ -1270,7 +1267,7 @@ EHR.reports.BloodSummary = function(panel, tab){
     {
         panel.resolveSubjectsFromHousing(tab, function(subjects, tab){
             tab.add({
-                xtype: 'wnprc-bloodsummarypanel',
+                xtype: 'ehr-bloodsummarypanel',
                 subjects: subjects
             });
         }, this);

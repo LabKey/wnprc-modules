@@ -3574,7 +3574,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Double tubeVolOK = 50.0;
         Double quantityOK = tubeVolOK*numTubes;
         InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
-        Date dt = prepareDate(new Date(), -4, 0);
+        Date dt = prepareDate(new Date(), -11, 0);
         bloodCmd.addRow(new HashMap<String, Object>(){
             {
                 put("Id", TEST_SUBJECTS[0]);

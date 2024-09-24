@@ -5,7 +5,7 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { RackTypes, EndDragLayoutProps, PendingRackUpdate } from './typings';
+import { RackTypes, PendingRackUpdate, LayoutDragProps } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { svg, zoomTransform } from 'd3';
 import { CageNumInput } from './CageNumInput';
@@ -68,13 +68,11 @@ const Editor = () => {
             const transform = d3.zoomTransform(layoutSvg.node());
 
             // Change the id of the group in the pre-created svg img, and set class name for top level group.
-            if(!cageGroup.empty()){
-                const currentId = cageGroup.attr('id');
-                // set first cage in rack to be 1
-                if(currentId){
-                    const newRackId = currentId.replace('cage-x', `cage-1`)
-                    cageGroup.attr('id', newRackId); // Set the new ID
-                }
+            const currentId = cageGroup.attr('id');
+            // set first cage in rack to be 1
+            if(currentId){
+                const newRackId = currentId.replace('cage-x', `cage-${cageLocs?.length + 1 || 1}`)
+                cageGroup.attr('id', newRackId); // Set the new ID
             }
             cageIdText.node().textContent = `${cageCount}`
 
@@ -86,20 +84,21 @@ const Editor = () => {
             group.append(() => draggedShape.node());
             placeAndScaleGroup(group, cellX, cellY, transform);
             addNewCageLocation({
-                num: cageLocs.length + 1,
+                num: cageLocs.length + 1 || 1,
                 cellX: cellX,
                 cellY: cellY,
                 scale: transform.k
             });
         }
 
-        const addProps: EndDragLayoutProps = {
+        const addProps: LayoutDragProps = {
             gridSize: GRID_SIZE,
             gridRatio: GRID_RATIO,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
-            moveCage: moveCageLocation
+            moveCage: moveCageLocation,
+            localRoom: localRoom
         };
         // Reattach drag listeners for interaction within layout
         group.call(d3.drag().on('start', startDragInLayout)

@@ -47,13 +47,14 @@ export interface PendingRackUpdate {
     id: number;
 }
 
-export interface EndDragLayoutProps {
+export interface LayoutDragProps {
     gridSize: number;
     gridRatio: number;
     MAX_SNAP_DISTANCE: number;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (id: number) => void;
     moveCage: (cageNum: number, x: number, y: number, k: number) => void;
+    localRoom: Rack[];
 }
 export interface Cage {
     id: number

@@ -202,8 +202,8 @@ export const LayoutContextProvider = ({children}) => {
         });
     };
 
+    // TODO for some reason this is only changing the first cage in the state always num 1, fix it
     const moveCageLocation = (cageNum: number, x: number, y: number, k: number) => {
-        console.log("Cage Move: ", cageNum, x, y);
         setCageLocs((prevCageLocs) =>
             prevCageLocs.map(cage =>
                 cage.num === cageNum

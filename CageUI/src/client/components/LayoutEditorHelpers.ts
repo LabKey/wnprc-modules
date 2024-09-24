@@ -1,7 +1,7 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
-import { getRackFromClass, getTranslation, isTextEditable, parseCage } from './helpers';
-import { EndDragLayoutProps, OffsetProps } from './typings';
+import { getRackFromClass, getTranslation, isTextEditable, parseCage, parseRack } from './helpers';
+import { LayoutDragProps, OffsetProps } from './typings';
 import { zoom, zoomTransform } from 'd3';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
@@ -110,8 +110,17 @@ function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
 
 
 
-async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack, moveCage) {
+async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDragProps) {
     const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
+    const {
+        layoutSvg,
+        gridSize,
+        gridRatio,
+        MAX_SNAP_DISTANCE,
+        delRack,
+        moveCage,
+        localRoom
+    } = layoutDragProps
     if (shouldMerge) {
         console.log("Merge: ", targetShape.node(), draggedShape.node());
 
@@ -166,13 +175,14 @@ async function mergeRacks(targetShape, draggedShape, layoutSvg,  gridSize, gridR
         }
 
         //
-        const addProps: EndDragLayoutProps = {
+        const addProps: LayoutDragProps = {
             gridSize: gridSize,
             gridRatio: gridRatio,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
-            moveCage: moveCage
+            moveCage: moveCage,
+            localRoom: localRoom
         };
         mergedGroup.call(d3.drag().on('start', startDragInLayout)
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
@@ -272,10 +282,18 @@ export function createDragInLayout(dragProps) {
     )
 }
 
-export function createEndDragInLayout(props: EndDragLayoutProps) {
+export function createEndDragInLayout(props: LayoutDragProps) {
     return (
         function endDragInLayout(event) {
-            const {gridSize, gridRatio, MAX_SNAP_DISTANCE, layoutSvg, delRack, moveCage} = props;
+            const {
+                gridSize,
+                gridRatio,
+                MAX_SNAP_DISTANCE,
+                layoutSvg,
+                delRack,
+                moveCage,
+                localRoom
+            } = props;
             const shape = d3.select(this);
             shape.classed('active', false);
             const transform = d3.zoomTransform(layoutSvg.node());
@@ -292,22 +310,25 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                 const cellX = targetCell.x;
                 const cellY = targetCell.y;
                 placeAndScaleGroup(shape, cellX, cellY, transform);
-                ///moveCage();
 
                 //Update all shape placements
                 if(shape.selectChildren().size() > 1) {
+                    const currRack = parseRack(shape.attr('id'));
                     //group of groups
                     shape.selectChildren().each(function () {
                         const currChild = d3.select(this);
                         const currCage = currChild.select('[id*="cage-"]');
-                    })
-
+                        const cageNum = parseCage(currCage.attr('id'));
+                        const currCoords = getTranslation(currChild.attr('transform'));
+                        const newX = currCoords.x + cellX;
+                        const newY = currCoords.y + cellY;
+                        moveCage(cageNum, newX, newY, transform.k);
+                    });
                 }else{
                     // group of svg
                     const currCage = shape.select( '[id*="cage-"]');
-                    const rackId = parseCage(currCage.attr('id'));
-
-                    moveCage(rackId, cellX, cellY, transform.k);
+                    const cageNum = parseCage(currCage.attr('id'));
+                    moveCage(cageNum, cellX, cellY, transform.k);
                 }
 
                 // Merge Behavior
@@ -315,7 +336,7 @@ export function createEndDragInLayout(props: EndDragLayoutProps) {
                     const otherBox = d3.select(this);
                     console.log('ADJ BOX: ', otherBox);
                     if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio, layoutSvg)) {
-                        mergeRacks(otherBox, shape, layoutSvg, gridSize, gridRatio, MAX_SNAP_DISTANCE, delRack, moveCage);
+                        mergeRacks(otherBox, shape, props);
                     }
                 });
             } else {

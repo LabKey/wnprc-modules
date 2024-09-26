@@ -915,6 +915,7 @@ public class TriggerScriptHelper {
             if (NotificationService.get().isActive(new AnimalRequestUpdateNotificationRevamp(ehr), container)) {
                 _log.info("Using java helper to send animal request update notification revamp for animal request record: " + rowid);
                 AnimalRequestUpdateNotificationRevamp notification = new AnimalRequestUpdateNotificationRevamp(ehr, rowid, user, container, hostName, row, oldRow);
+                notification.sendManually(container, user);
             }
         }
         else if (!NotificationService.get().isServiceEnabled()) {

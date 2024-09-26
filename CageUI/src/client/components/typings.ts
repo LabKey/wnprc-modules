@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import * as React from 'react';
 
 type CageSize = {
     width: number;
@@ -54,10 +55,11 @@ export interface LayoutDragProps {
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (id: number) => void;
     moveCage: (cageNum: number, x: number, y: number, k: number) => void;
-    localRoom: Rack[];
+    setCurrCage: React.Dispatch<React.SetStateAction<number>>
 }
 export interface Cage {
-    id: number
+    id: number // Id local to rack
+    cageNum: number // Id local to room
     name: string;
     cageState: CageState;
     position: string;
@@ -81,7 +83,7 @@ export interface CageState {
 }
 export interface Rack {
     id: number;
-    type: RackTypes;
+    type?: RackTypes;
     cages: Cage[];
     xPos?: number;
     yPos?: number;

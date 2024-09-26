@@ -1,1 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?><svg id="pen-rack-template" xmlns="http://www.w3.org/2000/svg" width="239.91" height="239.91" viewBox="0 0 239.91 239.91"><g id="rack-x"><g id="modifications"><rect id="playCage-1" x="120" y="206.52" width="41.34" height="32.97" style="fill:none; stroke-width:0px;"/><rect id="extension-1" x="120" y="206.52" width="41.34" height="32.97" style="fill:none; stroke-width:0px;"/></g><g id="cage-1"><text id="name" transform="translate(115.67 127.97) scale(.93 1)" style="fill:#010101; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:25.58px;"><tspan x="0" y="0">x</tspan></text><rect id="cageRect" x=".5" y=".5" width="238.91" height="238.91" style="fill:none; stroke-width:0px;"/></g><rect id="border" x=".5" y=".5" width="238.91" height="238.91" style="fill:none; stroke:#010101; stroke-miterlimit:10;"/><g id="edit"><rect id="edit-blur" x=".5" y=".5" width="239" height="239" style="fill:none; opacity:.9; stroke-width:0px;"/><path id="add-rack" d="M120,100.08c10.98,0,19.92,8.94,19.92,19.92s-8.94,19.92-19.92,19.92-19.92-8.94-19.92-19.92,8.94-19.92,19.92-19.92ZM120,96.1c-13.2,0-23.9,10.7-23.9,23.9s10.7,23.9,23.9,23.9,23.9-10.7,23.9-23.9-10.7-23.9-23.9-23.9ZM131.95,121.99h-9.96v9.96h-3.98v-9.96h-9.96v-3.98h9.96v-9.96h3.98v9.96h9.96v3.98Z" style="fill:none; stroke-width:0px;"/><path id="del-rack" d="M120,100.08c10.98,0,19.92,8.94,19.92,19.92s-8.94,19.92-19.92,19.92-19.92-8.94-19.92-19.92,8.94-19.92,19.92-19.92ZM120,96.1c-13.2,0-23.9,10.7-23.9,23.9s10.7,23.9,23.9,23.9,23.9-10.7,23.9-23.9-10.7-23.9-23.9-23.9ZM131.95,121.99h-23.9v-3.98h23.9v3.98Z" style="fill:none; stroke-width:0px;"/></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="cage_template" xmlns="http://www.w3.org/2000/svg" width="239.91" height="239.91"
+     viewBox="0 0 239.91 239.91">
+    <g id="cage-x">
+        <g id="modifications">
+            <rect id="playCage-1" x="120" y="206.52" width="41.34" height="32.97" style="fill:none; stroke-width:0px;"/>
+            <rect id="extension-1" x="120" y="206.52" width="41.34" height="32.97"
+                  style="fill:none; stroke-width:0px;"/>
+        </g>
+        <g id="cage-1">
+            <text id="name" transform="translate(115.67 127.97) scale(.93 1)"
+                  style="fill:#010101; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:25.58px;">
+                <tspan x="0" y="0">x</tspan>
+            </text>
+            <rect id="cageRect" x=".5" y=".5" width="238.91" height="238.91" style="fill:none; stroke-width:0px;"/>
+        </g>
+        <rect id="border" x=".5" y=".5" width="238.91" height="238.91"
+              style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
+        <g id="edit">
+            <rect id="edit-blur" x=".5" y=".5" width="239" height="239"
+                  style="fill:none; opacity:.9; stroke-width:0px;"/>
+            <path id="add-rack"
+                  d="M120,100.08c10.98,0,19.92,8.94,19.92,19.92s-8.94,19.92-19.92,19.92-19.92-8.94-19.92-19.92,8.94-19.92,19.92-19.92ZM120,96.1c-13.2,0-23.9,10.7-23.9,23.9s10.7,23.9,23.9,23.9,23.9-10.7,23.9-23.9-10.7-23.9-23.9-23.9ZM131.95,121.99h-9.96v9.96h-3.98v-9.96h-9.96v-3.98h9.96v-9.96h3.98v9.96h9.96v3.98Z"
+                  style="fill:none; stroke-width:0px;"/>
+            <path id="del-rack"
+                  d="M120,100.08c10.98,0,19.92,8.94,19.92,19.92s-8.94,19.92-19.92,19.92-19.92-8.94-19.92-19.92,8.94-19.92,19.92-19.92ZM120,96.1c-13.2,0-23.9,10.7-23.9,23.9s10.7,23.9,23.9,23.9,23.9-10.7,23.9-23.9-10.7-23.9-23.9-23.9ZM131.95,121.99h-23.9v-3.98h23.9v3.98Z"
+                  style="fill:none; stroke-width:0px;"/>
+        </g>
+    </g>
+</svg>

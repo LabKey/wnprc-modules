@@ -1,6 +1,6 @@
 import {
     Cage,
-    CageBuilder,
+    CageBuilder, CageLocations,
     CagePosition,
     CageSizes,
     CageSizeWithKey,
@@ -122,6 +122,7 @@ export const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilde
         }
         const tempCage: Cage = {
             id: cageNum,
+            cageNum: cageNum,
             name: zeroPadName(cageNum, 4),
             cageState: cageState,
             position: position,
@@ -642,3 +643,11 @@ export const isTextEditable = (event) => {
     }
 }
 
+export const areCagesInSameRack = (rack: Rack, cage1: CageLocations, cage2: CageLocations) => {
+    if (!rack.cages || !Array.isArray(rack.cages)) {
+        return false;
+    }
+
+    const nums = rack.cages.map(item => item.cageNum);
+    return nums.includes(cage1.num) && nums.includes(cage2.num);
+}

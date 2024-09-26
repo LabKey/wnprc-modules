@@ -48,6 +48,8 @@ export interface LayoutContextType {
     cageNumChange: {before: number, after: number};
     addNewCageLocation: (newCage: CageLocations) => void;
     moveCageLocation: (cageNum: number, x: number, y: number, k: number) => void;
+    mergeLocalRacks: (targetNum: number, draggedNum: number) => void;
+    getCageCount: () => number;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -171,12 +173,23 @@ export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     const [cageLocs, setCageLocs] = useState<CageLocations[]>([])
     const [localRoom, setLocalRoom] = useState<Rack[]>(room);
-    const [cageCount, setCageCount] = useState<number>(0);
+    const [cageCount, setCageCount] = useState<number>(1);
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
 
     const addRack = (id: number) => {
+        const firstCage: Cage = {
+            adjCages: undefined,
+            cageState: undefined,
+            id: 1,
+            cageNum: cageCount,
+            manufacturer: undefined,
+            name: '',
+            position: '',
+            size: undefined,
+            type: undefined
+        };
         const newRack: Rack = {
-            cages: [],
+            cages: [firstCage],
             id: id,
             isActive: false,
             type: undefined
@@ -185,8 +198,37 @@ export const LayoutContextProvider = ({children}) => {
         setCageCount(prevState => prevState + 1);
     };
 
-    const mergeRack = (targetId: number, dragId: number) => {
+    const mergeLocalRacks = (targetNum: number, dragNum: number) => {
+        console.log("context merge: ", targetNum, dragNum, localRoom);
 
+        setLocalRoom(prevRacks => {
+            const targetRack = prevRacks.find(r => r.id === targetNum);
+            const dragRack = prevRacks.find(r => r.id === dragNum);
+
+            if (!targetRack || !dragRack) {
+                console.error("One or both racks not found");
+                return prevRacks;
+            }
+
+            // Merge cages and reassign local IDs
+            const mergedCages = [...targetRack.cages, ...dragRack.cages].map((cage, index) => ({
+                ...cage,
+                id: index + 1, // Reassign local IDs
+            }));
+
+            // Create new merged rack
+            const mergedRack: Rack = {
+                id: targetRack.id, // Use the larger ID for the merged rack
+                type: targetRack.type || dragRack.type,
+                cages: mergedCages,
+                xPos: targetRack.xPos || dragRack.xPos,
+                yPos: targetRack.yPos || dragRack.yPos,
+                isActive: true,
+            };
+
+            // Filter out the original racks and add the merged rack
+            return prevRacks.filter(r => r.id !== targetRack.id && r.id !== dragRack.id).concat(mergedRack);
+        });
     }
 
     const addNewCageLocation = (newCage: CageLocations) => {
@@ -235,6 +277,10 @@ export const LayoutContextProvider = ({children}) => {
         setCageNumChange({before: idBefore, after: idAfter});
     }
 
+    const getCageCount = () => {
+        return (cageLocs?.length + 1) || 1;
+    }
+
     return (
         <LayoutContext.Provider value={{
             room,
@@ -249,7 +295,9 @@ export const LayoutContextProvider = ({children}) => {
             cageLocs,
             setCageLocs,
             addNewCageLocation,
-            moveCageLocation
+            moveCageLocation,
+            mergeLocalRacks,
+            getCageCount
         }}>
             {children}
         </LayoutContext.Provider>

@@ -1,8 +1,9 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { getRackFromClass, getTranslation, isTextEditable, parseCage, parseRack } from './helpers';
-import { LayoutDragProps, OffsetProps } from './typings';
+import { CageLocations, LayoutDragProps, OffsetProps } from './typings';
 import { zoom, zoomTransform } from 'd3';
+import { cloneElement } from 'react';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -34,7 +35,7 @@ export const updateGrid = (transform, width, height, gridSize) => {
     }
 }
 // Confirmation popup for merging two racks
-function showConfirmationPopup(box1, box2) {
+function showConfirmationPopup() {
     return new Promise((resolve) => {
         // Create a simple popup
         const popup = d3.select('body').append('div')
@@ -110,8 +111,37 @@ function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
 
 
 
-async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDragProps) {
-    const shouldMerge = await showConfirmationPopup(targetShape, draggedShape);
+export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps) {
+    let newCageNums;
+    function resetElementProperties(element) {
+        element.classList = "";
+        element.style = "";
+        element.id = `cage-${newCageNums}`;
+        newCageNums++;
+    }
+
+    function processChildNodes(element, mergedGroup) {
+        d3.select(element).selectAll(':scope > g').each(function () {
+            const targetCage = d3.select(this);
+            resetElementProperties(this);
+            mergedGroup.node().appendChild(this);
+            console.log("More than 1 merge: ", targetCage);
+        });
+    }
+
+    function processShape(shape, mergedGroup) {
+        if (shape.childNodes.length <= 1) {
+            const tempCage = d3.select(shape).select('[id^=cage-]');
+            // id of svg group (cage-x) that is the one we manage in SingleCageRack.svg
+            tempCage.attr("id", 'grouped-cage');
+            resetElementProperties(shape);
+            mergedGroup.node().appendChild(shape);
+        } else {
+            processChildNodes(shape, mergedGroup);
+        }
+    }
+
+    const shouldMerge = await showConfirmationPopup();
     const {
         layoutSvg,
         gridSize,
@@ -119,7 +149,7 @@ async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDrag
         MAX_SNAP_DISTANCE,
         delRack,
         moveCage,
-        localRoom
+        setCurrCage
     } = layoutDragProps
     if (shouldMerge) {
         console.log("Merge: ", targetShape.node(), draggedShape.node());
@@ -127,34 +157,23 @@ async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDrag
         const mergedGroup = layoutSvg.append('g')
             .attr('class', targetShape.attr('class'))
             .attr('id', targetShape.attr('id'));
-
+        newCageNums = 1;
 
 
         // Clone the target and dragged shapes before appending
         let clonedTargetShape = targetShape.node().cloneNode(true);
         let clonedDraggedShape = draggedShape.node().cloneNode(true);
-
-        //determine if target or dragged, is a previous rack with more than 1 cage
-        if(clonedTargetShape.childNodes.length > 1) {
-            clonedTargetShape.each(function () {
-                const targetCage = d3.select(this);
-                console.log("More than 1 merge: ", targetCage);
-            })
-        }
+        processShape(clonedTargetShape, mergedGroup);
+        processShape(clonedDraggedShape, mergedGroup);
 
         //Reset translates to new local group
         resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg)
 
-        clonedTargetShape.classList = ""
-        clonedDraggedShape.classList = ""
-        clonedTargetShape.style = ""
-        clonedDraggedShape.style = ""
-
-        //TODO fix ids for cages after they get added to a new rack
-
+        console.log("merge racks: ", targetShape.node().closest('[id^=rack-]'), draggedShape.node().closest('[id^=rack-]'))
         // Append the cloned shapes to the new group
-        mergedGroup.node().appendChild(clonedTargetShape);
-        mergedGroup.node().appendChild(clonedDraggedShape);
+        const targetRackNum = parseRack(targetShape.node().closest('[id^=rack-]').getAttribute('id'))
+        const draggedRackNum = parseRack(draggedShape.node().closest('[id^=rack-]').getAttribute('id'))
+        mergeLocalRacks(targetRackNum, draggedRackNum)
 
         // Copy the transform attribute from the targetShape to the merged group
         const transformAttr = targetShape.attr('transform');
@@ -174,7 +193,7 @@ async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDrag
             mergedGroup.data([{x: targetData.x, y: targetData.y}])
         }
 
-        //
+
         const addProps: LayoutDragProps = {
             gridSize: gridSize,
             gridRatio: gridRatio,
@@ -182,7 +201,7 @@ async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDrag
             layoutSvg: layoutSvg,
             delRack: delRack,
             moveCage: moveCage,
-            localRoom: localRoom
+            setCurrCage: setCurrCage
         };
         mergedGroup.call(d3.drag().on('start', startDragInLayout)
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
@@ -193,32 +212,24 @@ async function mergeRacks(targetShape, draggedShape, layoutDragProps: LayoutDrag
     }
 }
 
-// TODO add threshold of 0.2
 // This checks the adjacency of two racks to determine if they can be merged
-function checkAdjacent(targetShape, draggedShape, gridSize, gridRatio, layoutSvg) {
+export function checkAdjacent(targetCage: CageLocations, draggedCage: CageLocations, gridSize: number, gridRatio: number) {
 
-    const targetTransform = targetShape.attr('transform');
-    const dragTransform = draggedShape.attr('transform');
-    const transform = d3.zoomTransform(layoutSvg.node());
-
-    const targetCoords = getTranslation(targetTransform);
-    const dragCoords = getTranslation(dragTransform);
-    console.log("Checking adjacency:", targetCoords, dragCoords);
+    console.log("Adj Cage ", targetCage, draggedCage)
 
     const boxWidth = gridSize * gridRatio;
-    const scaledBoxWidth = boxWidth * transform.k; // scale to zoom
 
     let horizontallyAdjacent = false;
     let verticallyAdjacent = false;
 
     // Check for horizontal adjacency
-    if (Math.abs(targetCoords.x - dragCoords.x) === scaledBoxWidth &&
-        targetCoords.y === dragCoords.y) {
+    if (Math.abs(targetCage.cellX - draggedCage.cellX) === boxWidth &&
+        targetCage.cellY === draggedCage.cellY) {
         console.log("Adj found: x");
         horizontallyAdjacent = true;
     }// Check for vertical adjacency
-    else if (Math.abs(targetCoords.y - dragCoords.y) === scaledBoxWidth &&
-        targetCoords.x === dragCoords.x) {
+    else if (Math.abs(targetCage.cellY - draggedCage.cellY) === boxWidth &&
+        targetCage.cellX === draggedCage.cellX)  {
         console.log("Adj found: y");
         verticallyAdjacent = true;
     }
@@ -287,12 +298,10 @@ export function createEndDragInLayout(props: LayoutDragProps) {
         function endDragInLayout(event) {
             const {
                 gridSize,
-                gridRatio,
-                MAX_SNAP_DISTANCE,
                 layoutSvg,
                 delRack,
                 moveCage,
-                localRoom
+                setCurrCage
             } = props;
             const shape = d3.select(this);
             shape.classed('active', false);
@@ -315,10 +324,12 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 if(shape.selectChildren().size() > 1) {
                     const currRack = parseRack(shape.attr('id'));
                     //group of groups
-                    shape.selectChildren().each(function () {
+                    shape.selectChildren().each(function (d, index) {
                         const currChild = d3.select(this);
-                        const currCage = currChild.select('[id*="cage-"]');
-                        const cageNum = parseCage(currCage.attr('id'));
+                        const cageNum = parseCage(currChild.attr('id'));
+                        if(index === 0){ // When in a rack, only the cage at index 0 can snap to other cages
+                            setCurrCage(cageNum);
+                        }
                         const currCoords = getTranslation(currChild.attr('transform'));
                         const newX = currCoords.x + cellX;
                         const newY = currCoords.y + cellY;
@@ -328,17 +339,9 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                     // group of svg
                     const currCage = shape.select( '[id*="cage-"]');
                     const cageNum = parseCage(currCage.attr('id'));
+                    setCurrCage(cageNum);
                     moveCage(cageNum, cellX, cellY, transform.k);
                 }
-
-                // Merge Behavior
-                layoutSvg.selectAll('.draggable').each(function () {
-                    const otherBox = d3.select(this);
-                    console.log('ADJ BOX: ', otherBox);
-                    if (shape.node() !== otherBox.node() && checkAdjacent(otherBox, shape, gridSize, gridRatio, layoutSvg)) {
-                        mergeRacks(otherBox, shape, props);
-                    }
-                });
             } else {
                 // remove rack from room
                 console.log("deleting cage from room", getRackFromClass(shape.attr('class')));

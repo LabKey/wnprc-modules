@@ -1,1 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?><svg id="cage_template" xmlns="http://www.w3.org/2000/svg" width="120.5" height="120.5" viewBox="0 0 120.5 120.5"><g id="cage-x"><g id="modifications"><rect id="playCage-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/><rect id="extension-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/></g><g id="cage"><path id="XCage" d="M.5,120h119.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/><path id="YCage" d="M.5,120V.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/><path id="YCage-2" d="M120,120V.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/><path id="XCage-2" d="M.5.5h119.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/><text id="name" transform="translate(54.72 68.22) scale(.93 1)" style="fill:#010101; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:25.58px;"><tspan x="0" y="0">x</tspan></text><rect id="cageRect" x=".5" y=".5" width="119.5" height="119.5" style="fill:none; stroke-width:0px;"/></g><g id="edit"><rect id="edit-blur" x=".5" y=".5" width="119.5" height="119.5" style="fill:none; opacity:.9; stroke-width:0px;"/></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="cage_template" xmlns="http://www.w3.org/2000/svg" width="120.5" height="120.5" viewBox="0 0 120.5 120.5">
+    <g id="cage-x">
+        <g id="modifications">
+            <rect id="playCage-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/>
+            <rect id="extension-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/>
+        </g>
+        <g id="cage">
+            <path id="XCage" d="M.5,120h119.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>
+            <path id="YCage" d="M.5,120V.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>
+            <path id="YCage-2" d="M120,120V.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>
+            <path id="XCage-2" d="M.5.5h119.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>
+            <text id="name" transform="translate(54.72 68.22) scale(.93 1)"
+                  style="fill:#010101; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:25.58px;">
+                <tspan x="0" y="0">x</tspan>
+            </text>
+            <rect id="cageRect" x=".5" y=".5" width="119.5" height="119.5" style="fill:none; stroke-width:0px;"/>
+        </g>
+        <g id="edit">
+            <rect id="edit-blur" x=".5" y=".5" width="119.5" height="119.5"
+                  style="fill:none; opacity:.9; stroke-width:0px;"/>
+        </g>
+    </g>
+</svg>

@@ -284,6 +284,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setupAnimalRequests();
 
         initTest.checkUpdateProgramIncomeAccount();
+
+        initTest.notificationRevampSetup(); //TODO: to uncomment, fix issue mentioned here - https://www.labkey.org/WNPRC/support%20tickets/issues-details.view?issueId=51256
     }
 
     private void billingSetup() throws Exception
@@ -3530,8 +3532,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Object bloodDataNearLimit[][] = {{TEST_SUBJECTS[0], bloodDate, project, matchingAccount, tubeType, tubeVolLimit, numTubes, quantityLimit, null, "y", "Chemical", "< 30 min", null, null,  "autotest", EHRQCState.REQUEST_PENDING.label, null, null, "_recordID"}};
         expected = new HashMap<>();
         expected.put("project", Collections.singletonList("INFO: Not assigned to the protocol on this date"));
-        expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
-        expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 4.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("num_tubes", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 6.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
+        expected.put("quantity", Collections.singletonList("INFO: Limit notice! Blood volume of " + tubeVolLimit + " (" + tubeVolLimit + " over " + interval + " days) is within 6.0 mL of the max allowable limit of " + maxAllowable + " mL (weight: " + weight + " kg).\n"));
         expected.put("instructions", Collections.singletonList("ERROR: Tube volume \"" + tubeVolLimit.toString() + "\" does not exist for tube type \"" + tubeType + "\". Please provide instructions for the custom volume and tube type combination."));
         expected.put("_validateOnly", Collections.singletonList("ERROR: Ignore this error"));
         getApiHelper().testValidationMessage(PasswordUtil.getUsername(),
@@ -3849,6 +3851,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     // NOTIFICATION REVAMP: NEW FUNCTIONS START
+    @Test
     public void notificationRevampTestBloodDrawsTodayAll() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Draws Today (All)");
@@ -3882,6 +3885,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Draws Today (All)");
     }
 
+    @Test
     public void notificationRevampTestBloodDrawsTodayAnimalCare() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Draws Today (Animal Care)");
@@ -3906,6 +3910,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Draws Today (Animal Care)");
     }
 
+    @Test
     public void notificationRevampTestBloodDrawsTodayVetStaff() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Draws Today (Vet Staff)");
@@ -3930,6 +3935,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Draws Today (Vet Staff)");
     }
 
+    @Test
     public void notificationRevampTestBloodDrawReviewDailyNotification() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Draw Review (Daily)");
@@ -3961,6 +3967,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Draw Review (Daily)");
     }
 
+    @Test
     public void notificationRevampTestBloodDrawReviewTriggerNotification() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Draw Review (Trigger)");
@@ -3984,6 +3991,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Draw Review (Trigger)");
     }
 
+    @Test
     public void notificationRevampTestBloodOverdrawTriggerNotification() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Blood Overdraw Trigger");
@@ -4008,6 +4016,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Blood Overdraw Trigger");
     }
 
+    @Test
     public void notificationRevampTestDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Death Notification Revamp");
@@ -4031,6 +4040,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Death Notification Revamp");
     }
 
+    @Test
     public void notificationRevampTestPrenatalDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
         // Setup
         log("Starting notification revamp test: Prenatal Death Notification Revamp");
@@ -4055,7 +4065,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Completed notification revamp test: Prenatal Death Notification Revamp");
     }
 
-    @Test
     public void notificationRevampSetup() throws UnhandledAlertException, IOException, CommandException {
         // Set up.
         log("Starting notificationRevampSetup()");
@@ -4106,14 +4115,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         myReusableFunctions.insertValueIntoBloodBilledByDataset("spi", "SPI");
 
         // Runs tests.
-        notificationRevampTestBloodDrawsTodayAll();
-        notificationRevampTestBloodDrawsTodayAnimalCare();
-        notificationRevampTestBloodDrawsTodayVetStaff();
-        notificationRevampTestBloodDrawReviewDailyNotification();
-        notificationRevampTestBloodDrawReviewTriggerNotification();
-        notificationRevampTestBloodOverdrawTriggerNotification();
-        notificationRevampTestDeathNotificationRevamp();
-        notificationRevampTestPrenatalDeathNotificationRevamp();
+        // TODO: separate these tests out so they run individually and keep above as part of the setup for below tests
+//        notificationRevampTestBloodDrawsTodayAll();
+//        notificationRevampTestBloodDrawsTodayAnimalCare();
+//        notificationRevampTestBloodDrawsTodayVetStaff();
+//        notificationRevampTestBloodDrawReviewDailyNotification();
+//        notificationRevampTestBloodDrawReviewTriggerNotification();
+//        notificationRevampTestBloodOverdrawTriggerNotification();
+//        notificationRevampTestDeathNotificationRevamp();
+//        notificationRevampTestPrenatalDeathNotificationRevamp();
 
         // TODO: Run test for: Admin Alerts
         // TODO: Run test for: Animal Request

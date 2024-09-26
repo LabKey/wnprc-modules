@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -1051,13 +1052,39 @@ public class NotificationToolkit {
         return null;
     }
 
-    public void sendEmptyNotificationRevamp(Container c, User u, String notificationType) {
+    public void sendEmptyNotificationRevamp(Container c, User u, String notificationType)
+    {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         _log.info("Using NotificationToolkit to send email for Empty Notification Revamp (notificationType: " + notificationType + ").");
         EmptyNotificationRevamp notification = new EmptyNotificationRevamp(ehr, notificationType);
-        if (notification != null) {
+        if (notification != null)
+        {
             notification.sendManually(c, u);
         }
+    }
+
+    public Float getBloodThresholdForAnimal(Container c, User u, String animalID) {
+        // Runs query to get passed in animal's species.
+        SimpleFilter mySpeciesFilter = new SimpleFilter("Id", animalID, CompareType.EQUAL);
+        String[] targetColumnsSpecies = new String[]{"species"};
+        ArrayList<HashMap<String, String>> speciesArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "demographics", mySpeciesFilter, null, targetColumnsSpecies);
+
+        // Gets passed in animal's species.
+        if (!speciesArray.isEmpty()) {
+            String currentSpecies = speciesArray.get(0).get("species");
+
+            // Runs query to get passed in animal's blood draw threshold.
+            SimpleFilter myFilter = new SimpleFilter("common", currentSpecies, CompareType.EQUAL);
+            String[] targetColumnsThreshold = new String[]{"blood_threshold_warning"};
+            ArrayList<HashMap<String, String>> thresholdArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "ehr_lookups", "species", myFilter, null, targetColumnsThreshold);
+
+            // Gets passed in animal's blood draw limit.
+            if (!thresholdArray.isEmpty()) {
+                Float currentThreshold = Float.valueOf(thresholdArray.get(0).get("blood_threshold_warning"));
+                return currentThreshold;
+            }
+        }
+        return null;
     }
 
 

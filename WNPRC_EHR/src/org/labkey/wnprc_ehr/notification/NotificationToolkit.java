@@ -1052,6 +1052,17 @@ public class NotificationToolkit {
         return null;
     }
 
+    public void sendEmptyNotificationRevamp(Container c, User u, String notificationType)
+    {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        _log.info("Using NotificationToolkit to send email for Empty Notification Revamp (notificationType: " + notificationType + ").");
+        EmptyNotificationRevamp notification = new EmptyNotificationRevamp(ehr, notificationType);
+        if (notification != null)
+        {
+            notification.sendManually(c, u);
+        }
+    }
+
     public Float getBloodThresholdForAnimal(Container c, User u, String animalID) {
         // Runs query to get passed in animal's species.
         SimpleFilter mySpeciesFilter = new SimpleFilter("Id", animalID, CompareType.EQUAL);

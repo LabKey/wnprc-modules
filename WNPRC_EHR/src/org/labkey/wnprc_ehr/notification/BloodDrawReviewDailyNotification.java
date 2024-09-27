@@ -125,6 +125,22 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
         else {
             messageBody.append("<b>There are no blood draws (today or future) where animal is not assigned to a project.</b><br>\n");
         }
+        // Lists all blood draws (today & future) not yet approved.
+        if (!myBloodDrawReviewObject.bloodDrawsNotApproved.isEmpty()) {
+            messageBody.append("<p><b>WARNING: </b>There are " + myBloodDrawReviewObject.bloodDrawsNotApproved.size() + " blood draws requested that have not been approved or denied yet.</p>");
+            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myBloodDrawReviewObject.bloodDrawsNotApprovedURLView));
+        }
+        else {
+            messageBody.append("<b>There are no blood draws (today or future) where blood draw is not yet approved.</b><br>\n");
+        }
+        // Lists all blood draws (today & future) not yet assigned to a group (i.e. SPI, Animal Care, Vet Staff).
+        if (!myBloodDrawReviewObject.bloodDrawsNotAssignedToGroup.isEmpty()) {
+            messageBody.append("<p><b>WARNING: </b>There are " + myBloodDrawReviewObject.bloodDrawsNotAssignedToGroup.size() + " blood draws requested that have not been assigned to a group.</p>");
+            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myBloodDrawReviewObject.bloodDrawsNotAssignedToGroupURLView));
+        }
+        else {
+            messageBody.append("<b>There are no blood draws (today or future) where blood draw is not yet assigned to a group.</b><br>\n");
+        }
 
         return messageBody.toString();
     }
@@ -142,6 +158,8 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             getNonAliveBloodDraws();
             getUnassignedBloodDraws();
             getBloodOverdraws();
+            getBloodDrawsNotApproved();
+            getBloodDrawsNotAssignedToGroup();
         }
 
         ArrayList<String[]> nonAliveBloodDraws = new ArrayList<>();
@@ -230,5 +248,48 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "BloodSchedule", myFilter);
             this.bloodOverdrawsURLView = viewQueryURL;
         }
+
+        ArrayList<HashMap<String, String>> bloodDrawsNotApproved = new ArrayList<>();
+        String bloodDrawsNotApprovedURLView;
+        void getBloodDrawsNotApproved() {
+            // Creates filter.
+            Date todayDate = dateToolkit.getDateToday();
+            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
+            myFilter.addCondition("qcstate/label", "Request: Pending", CompareType.EQUAL);
+            myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
+
+            // Creates sort.
+            Sort mySort = new Sort("date");
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"id"};
+            // Runs query.
+            bloodDrawsNotApproved = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Blood Draws", myFilter, mySort, targetColumns);
+
+            // Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Blood Draws", myFilter);
+            this.bloodDrawsNotApprovedURLView = viewQueryURL;
+        }
+
+        ArrayList<HashMap<String, String>> bloodDrawsNotAssignedToGroup = new ArrayList<>();
+        String bloodDrawsNotAssignedToGroupURLView;
+        void getBloodDrawsNotAssignedToGroup() {
+            Date todayDate = dateToolkit.getDateToday();
+            SimpleFilter myFilter = new SimpleFilter("Id/DataSet/Demographics/calculated_status", "Alive", CompareType.EQUAL);
+            myFilter.addCondition("qcstate/label", "Request: Denied", CompareType.NEQ);
+            myFilter.addCondition("billedby", "", CompareType.ISBLANK);
+            myFilter.addCondition("date", todayDate, CompareType.DATE_GTE);
+
+            // Creates sort.
+            Sort mySort = new Sort("date");
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"id"};
+            // Runs query.
+            bloodDrawsNotAssignedToGroup = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Blood Draws", myFilter, mySort, targetColumns);
+
+            // Creates URL.
+            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Blood Draws", myFilter);
+            this.bloodDrawsNotAssignedToGroupURLView = viewQueryURL;
+        }
+
     }
 }

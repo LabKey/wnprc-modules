@@ -71,6 +71,7 @@ const Editor = () => {
             if(inSameRack){
                 return;
             }
+            console.log("curr: ", currCage)
             const mergeAvail = checkAdjacent(cage, currCage, GRID_SIZE, GRID_RATIO);
             if(mergeAvail){
                 const targetShape = layoutSvg.select(`[id*="cage-${cage.num}"]`);

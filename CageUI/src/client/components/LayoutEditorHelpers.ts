@@ -4,6 +4,7 @@ import { getRackFromClass, getTranslation, isTextEditable, parseCage, parseRack 
 import { CageLocations, LayoutDragProps, OffsetProps } from './typings';
 import { zoom, zoomTransform } from 'd3';
 import { cloneElement } from 'react';
+import { id } from '@labkey/api/dist/labkey/Utils';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -109,11 +110,40 @@ function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
 }
 
 
+function findNestedCageElement(parentId) {
+    // Find the parent element (in this case, the outermost <g> element)
+    const parentElement = document.getElementById(parentId);
 
+    if (!parentElement) {
+        console.error('Parent element not found');
+        return null;
+    }
+
+    // Use a recursive function to search through all nested elements
+    function searchNestedElements(element) {
+        // Check if the current element's ID starts with 'cage-'
+        if (element.id && element.id.startsWith('cage-')) {
+            return element;
+        }
+
+        // If not found, search through child elements
+        for (let child of element.children) {
+            const result = searchNestedElements(child);
+            if (result) return result;
+        }
+
+        return null;
+    }
+
+    // Start the search from the parent element
+    return searchNestedElements(parentElement);
+}
 
 export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps) {
-    let newCageNums;
+    let newCageNums = parseCage((findNestedCageElement(targetShape.attr('id')) as SVGElement).getAttribute('id'));
+    console.log("newCafgeNums: ", newCageNums)
     function resetElementProperties(element) {
+        console.log("Resetting: ", parseCage(targetShape.attr('id')))
         element.classList = "";
         element.style = "";
         element.id = `cage-${newCageNums}`;
@@ -157,7 +187,7 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
         const mergedGroup = layoutSvg.append('g')
             .attr('class', targetShape.attr('class'))
             .attr('id', targetShape.attr('id'));
-        newCageNums = 1;
+        //newCageNums = 1;
 
 
         // Clone the target and dragged shapes before appending
@@ -322,7 +352,6 @@ export function createEndDragInLayout(props: LayoutDragProps) {
 
                 //Update all shape placements
                 if(shape.selectChildren().size() > 1) {
-                    const currRack = parseRack(shape.attr('id'));
                     //group of groups
                     shape.selectChildren().each(function (d, index) {
                         const currChild = d3.select(this);

@@ -174,7 +174,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         selectQuery("ehr_billing", "aliases");
         clickAndWait(Locator.linkWithText("create definition"), 5000);
 
-        DomainFormPanel domainFormPanel = new DomainFormPanel.DomainFormPanelFinder(getDriver()).find();
+        DomainFormPanel domainFormPanel = new DomainFormPanel.DomainFormPanelFinder(getDriver()).withTitle("Fields").waitFor();
+        domainFormPanel.expand();
         domainFormPanel.manuallyDefineFields(extensibleCol);
         clickButton("Save");
     }

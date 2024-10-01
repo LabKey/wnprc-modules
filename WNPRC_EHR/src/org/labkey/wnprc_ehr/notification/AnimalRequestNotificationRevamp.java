@@ -1,12 +1,16 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
 {
@@ -87,6 +91,21 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
         final StringBuilder msg = new StringBuilder();
         Date now = new Date();
 
+        // Assigns data if none exists.  This is used for testing with the 'Run Report in Browser' option.
+        if (rowId == null) {
+            // Creates filter.
+            Sort mySort = new Sort("-date");
+            // Creates columns to retrieve.
+            String[] targetColumns = new String[]{"rowid"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "wnprc", "animal_requests", null, mySort, targetColumns);
+
+            // Assigns most recent rowID to class 'rowId' variable.
+            if (!returnArray.isEmpty()) {
+                this.rowId = Integer.valueOf(returnArray.get(0).get("rowid"));
+            }
+        }
+
         //Sets data.
         String currentDate = AbstractEHRNotification._dateFormat.format(now);
         String currentTime = AbstractEHRNotification._timeFormat.format(now);
@@ -105,7 +124,14 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
         msg.append("<p>View all of the animal requests " + allRequestsHyperlink + ".</p>");
 
         //Returns string.
+        this.resetClass();
         return msg.toString();
+    }
+
+    public void resetClass() {
+        this.rowId = null;
+        this.currentUser = null;
+        this.hostName = null;
     }
 
 }

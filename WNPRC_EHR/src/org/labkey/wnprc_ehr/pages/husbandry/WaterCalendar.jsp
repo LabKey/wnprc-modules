@@ -594,6 +594,8 @@
             }
         });
         $(document).ready(function(){
+            //Map of animals added for each day in the calendar
+            //This map is used by loadWaterTotal to show or hide the total water for the day
             const calendarDates = new Map();
             const currentTime = new Date().setHours(0,0,0,0);
 
@@ -627,42 +629,48 @@
 
                                     successCallback(
                                         events.map(function (row) {
-                                        if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
-                                            var animalIds = [];
-                                            animalIds.push(row.Id);
-                                            calendarDates.set(row.date,animalIds);
-                                        }else {
-                                            calendarDates.get(row.date).push(row.Id);
-                                        }
-                                        var volume;
-                                        if (row.volume != null) {
-                                            volume = row.volume + 'mL';
-                                        }
-                                        else {
-                                            volume = "On Lixit";
-                                        }
-                                        var eventObj = {
-                                            id : LABKEY.Utils.generateUUID(),
-                                            title: row.Id + ' ' + volume,
-                                            start: new Date(row.date),
-                                            allDay: true,
-                                            groupId : groupId(row),
-                                            rawRowData: row,
-                                            textColor: '#000000',
-                                            //editable: true,
-                                            description: 'Water for animal ' + row.Id
-                                        };
+                                        //if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
+                                        //creating an array per day to store animalIds
+                                        //there are cases where the water amount do not get completed on the day.
+                                        //The calendar should display even if the water amount was not complete it.
+                                            var dateIndex = new Date(row.date);
+                                            dateIndex=dateIndex.getFullYear() +'-'+dateIndex.getMonth()+'-'+dateIndex.getDate();
+                                            if (!calendarDates.get(dateIndex)){
+                                                var animalIds = [];
+                                                animalIds.push(row.Id);
+                                                calendarDates.set(dateIndex,animalIds);
+                                            }else {
+                                                calendarDates.get(dateIndex).push(row.Id);
+                                            }
+                                            var volume;
+                                            if (row.volume != null) {
+                                                volume = row.volume + 'mL';
+                                            }
+                                            else {
+                                                volume = "On Lixit";
+                                            }
+                                            var eventObj = {
+                                                id : LABKEY.Utils.generateUUID(),
+                                                title: row.Id + ' ' + volume,
+                                                start: new Date(row.date),
+                                                allDay: true,
+                                                groupId : groupId(row),
+                                                rawRowData: row,
+                                                textColor: '#000000',
+                                                //editable: true,
+                                                description: 'Water for animal ' + row.Id
+                                            };
 
-                                        if (row.assignedToCoalesced in husbandryAssignmentLookup) {
-                                            eventObj.color = husbandryAssignmentLookup[row.assignedToCoalesced].color;
+                                            if (row.assignedToCoalesced in husbandryAssignmentLookup) {
+                                                eventObj.color = husbandryAssignmentLookup[row.assignedToCoalesced].color;
 
-                                        }
-                                        else {
-                                            eventObj.color = '#F78181';
-                                        }
+                                            }
+                                            else {
+                                                eventObj.color = '#F78181';
+                                            }
 
-                                        console.log("event from waterSchedule");
-                                        return eventObj;
+                                            console.log("event from waterSchedule");
+                                            return eventObj;
                                         })
 
                                     );
@@ -688,45 +696,48 @@
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
 
-                                    successCallback(events.map(function (row) {
-                                        if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
-                                            var animalIds = [];
-                                            animalIds.push(row.Id);
-                                            calendarDates.set(row.date, animalIds);
-                                        }else{
-                                            calendarDates.get(row.date).push(row.Id);
-                                        }
-                                        var volume;
-                                        if (row.volume != null) {
-                                            volume = row.volume+ 'ml';
-                                        }
-                                        else {
-                                            volume = ' On Lixit';
-                                        }
+                                    successCallback(
+                                            events.map(function (row) {
+                                                if (!calendarDates.get(row.date)){
+                                                //if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
+                                                    var animalIds = [];
+                                                    animalIds.push(row.Id);
+                                                    calendarDates.set(row.date, animalIds);
+                                                }else{
+                                                    calendarDates.get(row.date).push(row.Id);
+                                                }
+                                                var volume;
+                                                if (row.volume != null) {
+                                                    volume = row.volume+ 'ml';
+                                                }
+                                                else {
+                                                    volume = ' On Lixit';
+                                                }
 
-                                        var eventObj = {
-                                            id : LABKEY.Utils.generateUUID(),
-                                            title: row.Id + ' ' + volume,
-                                            start: new Date(row.date),
-                                            allDay: true,
-                                            textColor: '#000000',
-                                            groupId : groupId(row),
-                                            rawRowData: row,
-                                            //editable: true,
-                                            description: 'Water for animal ' + row.Id
-                                        };
+                                                var eventObj = {
+                                                    id : LABKEY.Utils.generateUUID(),
+                                                    title: row.Id + ' ' + volume,
+                                                    start: new Date(row.date),
+                                                    allDay: true,
+                                                    textColor: '#000000',
+                                                    groupId : groupId(row),
+                                                    rawRowData: row,
+                                                    //editable: true,
+                                                    description: 'Water for animal ' + row.Id
+                                                };
 
-                                        if (row.assignedToCoalesced in husbandryAssignmentLookup) {
-                                            eventObj.color = husbandryAssignmentLookup[row.assignedToCoalesced].color;
+                                                if (row.assignedToCoalesced in husbandryAssignmentLookup) {
+                                                    eventObj.color = husbandryAssignmentLookup[row.assignedToCoalesced].color;
 
-                                        }
-                                        else {
-                                            eventObj.color = '#F78181';
-                                        }
-                                        console.log("event from waterSchedule");
-                                        return eventObj;
+                                                }
+                                                else {
+                                                    eventObj.color = '#F78181';
+                                                }
+                                                console.log("event from waterSchedule");
+                                                return eventObj;
 
-                                    }))
+                                            })
+                                    )
                                 }).then(function (data){
                                     debugger;
                                     if(!loadWaterTotalOnce){
@@ -1545,20 +1556,25 @@
         let momentEndDate = fetchInfo.end.format('Y-m-d');
         let numOfDate;
         let startCalendarDate;
+        debugger;
 
+        //Calculate if today is between the calendar start date and the calendar end date
+        //If the user navigates to the next month we only calculate the dates for that month and
+        //ignore the current date.
         if (moment(today).isBetween(momentStarDate, momentEndDate)){
             numOfDate = moment(momentEndDate).diff(today, "days", false);
             startCalendarDate = today.format(LABKEY.extDefaultDateFormat)
-        }else{
+        }else if(moment(momentStartDate).isAfter(today)){
             numOfDate = moment(momentEndDate).diff(momentStarDate,"days",false);
             startCalendarDate = fetchInfo.start.format(LABKEY.extDefaultDateFormat);
         }
         console.log("value of numofDate " + numOfDate)
         let configObject = {
-            "date~gte": fetchInfo.start.format('Y-m-d'),
-            "date~lte": fetchInfo.end.format('Y-m-d'),
             "parameters": {NumDays: numOfDate + 1, StartDate: startCalendarDate},
-            "qcstate/label~eq": "Scheduled"
+            "qcstate/label~eq": "Scheduled",
+            "date~dategte": fetchInfo.start.format('Y-m-d'),
+            "date~datelte": fetchInfo.end.format('Y-m-d')
+            //"Id/Demographics/calculated_status~eq": "Alive"
         };
 
 
@@ -1720,7 +1736,9 @@
                                                 eventObj.color = '#EE2020'
                                             }
                                             debugger;
-                                            if (calendarDates.has(row.date) && calendarDates.get(row.date).includes(row.Id) ){
+                                            var dateIndex = new Date(row.date);
+                                            dateIndex=dateIndex.getFullYear() +'-'+dateIndex.getMonth()+'-'+dateIndex.getDate();
+                                            if (calendarDates.has(dateIndex) && calendarDates.get(dateIndex).includes(row.Id) ){
                                                 eventObj.display = 'none';
                                             }else{
                                                 eventObj.display = 'auto';

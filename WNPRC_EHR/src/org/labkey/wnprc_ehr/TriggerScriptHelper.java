@@ -4,9 +4,9 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,16 +17,16 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Results;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.Selector;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.ehr.security.EHRDataAdminPermission;
@@ -39,14 +39,15 @@ import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
+import org.labkey.api.study.security.SecurityEscalator;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -60,9 +61,9 @@ import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -82,7 +83,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -2578,41 +2578,54 @@ public class TriggerScriptHelper {
     }
     public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
     {
-        String animalId = "rh1234";
-        Date animalDeath = new Date("2024-09-04");
-        if (checkIfAnimalInCondition(animalId, animalDeath).size()>0){
-            Calendar filterDate = Calendar.getInstance();
-            filterDate.setTime(animalDeath);
+        if (animalDateMap != null){
+            for (Map<String, Object> record : animalDateMap){
+                String Id = (String)record.get("animalId");
+                Date animalDeath = (Timestamp)record.get("deathDate");
+                //Date animalDeath = new Date(DateUtil.parseISODateTime((String)record.get("deathDate")));
+                if (!checkIfAnimalInCondition(Id, animalDeath).isEmpty()){
+                    Calendar filterDate = Calendar.getInstance();
+                    filterDate.setTime(animalDeath);
 
-            TableInfo waterAmount= getTableInfo("study", "waterAmount");
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
-            filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_GTE);
-            filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
+                    TableInfo waterAmount= getTableInfo("study", "waterAmount");
+                    SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), Id);
+                    filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_GTE);
+                    filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
 
-            Sort sort = new Sort();
-            sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.ASC, false);
+                    Sort sort = new Sort();
+                    sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.ASC, false);
 
-            TableSelector ts = new TableSelector(waterAmount, filter,sort);
-            final List<Map<String, Object>> rowTobeUpdated = new ArrayList<>();
-            ts.forEach(new Selector.ForEachBlock<ResultSet>()
-            {
-                    @Override
-                    public void exec(ResultSet rs) throws SQLException
+                    TableSelector ts = new TableSelector(waterAmount, filter,sort);
+                    final List<Map<String, Object>> rowTobeUpdated = new ArrayList<>();
+                    final List<Map<String,Object>> oldKeys = new ArrayList<>();
+
+                    ts.forEach(new Selector.ForEachBlock<ResultSet>()
                     {
-                        String objectid =rs.getString("objectId");
-                        Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
-                        toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
-                        toUpdate.put("objectid",objectid);
-                        rowTobeUpdated.add(toUpdate);
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException
+                        {
+                            String objectid =rs.getString("objectId");
+                            Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
+                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
+                            toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
+                            toUpdate.put("objectid",objectid);
+                            rowTobeUpdated.add(toUpdate);
 
+                            keyMap.put("objectid", objectid);
+                            oldKeys.add(keyMap);
+
+                        }
+                    });
+                    //Table.update(getUser(),waterAmount,toUpdate, objectid);
+                    if (waterAmount.getUpdateService()!=null){
+                        BatchValidationException errors = new BatchValidationException();
+                        waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,oldKeys,errors,null,null);
                     }
-            });
-            //Table.update(getUser(),waterAmount,toUpdate, objectid);
-            if (waterAmount.getUpdateService()!=null){
-                waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,null,null,null,null);
+                }
             }
-
-
         }
+
+
+
     }
 }

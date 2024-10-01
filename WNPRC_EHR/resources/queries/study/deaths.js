@@ -24,13 +24,10 @@ function onComplete(event, errors, helper) {
 
         for (var i= 0; i < clientRows.length; i++){
             console.log("animalId "+clientRows[i].row.id);
-            if (!animalDateMap[clientRows[i].row.id]){
-                console.log("creating item for animalDateMap");
-                animalDateMap[clientRows[i].row.id] = [];
-            }
-            animalDateMap[clientRows[i].row.id].push({
-                //animalId: clientRows[i].row.id,
-                deathdate : clientRows[i].row.date
+
+            animalDateMap.push({
+                animalId: clientRows[i].row.id,
+                deathDate : clientRows[i].row.date
             });
 
         }

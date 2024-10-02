@@ -721,6 +721,11 @@ exports.init = function (EHR) {
         helper.setCenterCustomProps({
             doWarnForBloodNearOverages: true,
         })
+
+        helper.setScriptOptions({
+            defaultAllowedDaysForFutureRequest: 60,
+        })
+
     });
 
     //TODO put this in INIT once we can override it

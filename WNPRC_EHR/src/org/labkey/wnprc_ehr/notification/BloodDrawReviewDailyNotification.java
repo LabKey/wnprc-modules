@@ -229,16 +229,16 @@ public class BloodDrawReviewDailyNotification extends AbstractEHRNotification {
             // Creates sort.
             Sort mySort = new Sort("date");
             // Creates columns to retrieve.
-            String[] targetColumns = new String[]{"id", "date", "BloodRemaining/AvailBlood"};
+            String[] targetColumns = new String[]{"id", "date", "BloodRemaining/allowableBlood"};
             // Runs query.
             ArrayList<HashMap<String, String>> unformattedUpcomingBloodDraws = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
 
             // Converts map to list (for displaying in table).
             for (HashMap<String, String> currentDraw : unformattedUpcomingBloodDraws) {
                 // Verifies there is data because some older blood draws don't list available blood.
-                if (!currentDraw.get("BloodRemaining/AvailBlood").isEmpty()) {
-                    if (Double.valueOf(currentDraw.get("BloodRemaining/AvailBlood")) <= 0) {
-                        String[] currentRow = {currentDraw.get("id"), currentDraw.get("date"), currentDraw.get("BloodRemaining/AvailBlood")};
+                if (!currentDraw.get("BloodRemaining/allowableBlood").isEmpty()) {
+                    if (Double.valueOf(currentDraw.get("BloodRemaining/allowableBlood")) <= 0) {
+                        String[] currentRow = {currentDraw.get("id"), currentDraw.get("date"), currentDraw.get("BloodRemaining/allowableBlood")};
                         bloodOverdraws.add(currentRow);
                     }
                 }

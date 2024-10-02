@@ -15,10 +15,11 @@
  */
 --this query is designed to return any dates when allowable blood draw volume changes
 --this includes dates of blood draws, plus the date those draws drop off
-PARAMETERS(DATE_INTERVAL INTEGER)
+PARAMETERS(DATE_INTERVAL INTEGER DEFAULT 30)
 
 SELECT
   b2.id,
+  b2.status,
   b2.dateOnly,
   b2.quantity,
   DATE_INTERVAL as blood_draw_interval,
@@ -29,12 +30,14 @@ FROM (
   SELECT
     b.id,
     b.dateOnly,
+    GROUP_CONCAT(b.status,'') as status,
     sum(b.quantity) as quantity
 
   FROM (
     --find all blood draws within the interval, looking backwards
     SELECT
       b.id,
+      b.qcstate as status,
       b.dateOnly,
       b.quantity,
     FROM study.blood b
@@ -45,6 +48,7 @@ FROM (
     --join 1 row for the current date
     SELECT
       d1.id,
+      null as status,
       curdate() as dateOnly,
       0 as quantity,
     FROM study.demographics d1
@@ -55,6 +59,7 @@ FROM (
     --add one row for each date when the draw drops off the record
     SELECT
       b.id,
+      null as status,
       timestampadd('SQL_TSI_DAY', DATE_INTERVAL, b.dateOnly),
       0 as quantity,
     FROM study.blood b

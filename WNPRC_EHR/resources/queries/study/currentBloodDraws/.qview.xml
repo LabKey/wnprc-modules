@@ -1,0 +1,42 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="species" />
+        <column name="date" />
+        <column name="Id/curLocation/room"/>
+        <column name="Id/curLocation/cage"/>
+        <column name="status" />
+        <column name="quantity" />
+        <!--<column name="minDate" />-->
+        <!--<column name="maxDate" />-->
+        <column name="bloodPrevious">
+            <!--<properties>-->
+            <!--<property name="columnTitle" value="Drawn in Previous 30 Days"/>-->
+            <!--</properties>-->
+        </column>
+        <column name="bloodFuture">
+        </column>
+        <column name="allowableBlood">
+            <!--<properties>-->
+            <!--<property name="columnTitle" value="Volume Remaining After Draw (mL)"/>-->
+            <!--</properties>-->
+        </column>
+        <column name="BloodAvailPlusThirty"/>
+
+        <column name="maxAllowableBlood">
+            <!--<properties>-->
+            <!--<property name="columnTitle" value="Max Allowable Blood At Time"/>-->
+            <!--</properties>-->
+        </column>
+        <column name="mostRecentWeight" />
+    </columns>
+    <sorts>
+        <sort column="date" />
+        <sort column="Id/curLocation/room"/>
+        <sort column="Id/curLocation/cage"/>
+        <sort column="Id" />
+    </sorts>
+    <!--<filters>-->
+    <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

@@ -123,7 +123,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
             // Creates sort.
             Sort mySort = new Sort("date");
             // Creates columns to retrieve.
-            String[] targetColumns = new String[]{"id", "qcstate/label", "projectStatus", "BloodRemaining/AvailBlood", "billedby/title", "Id/curLocation/room", "Id/curLocation/area"};
+            String[] targetColumns = new String[]{"id", "qcstate/label", "projectStatus", "BloodRemaining/allowableBlood", "billedby/title", "Id/curLocation/room", "Id/curLocation/area"};
             //Runs query.
             ArrayList<HashMap<String,String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "BloodSchedule", myFilter, mySort, targetColumns);
 
@@ -146,7 +146,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 // Updates id.
                 myCurrentRow[0] = result.get("id");
                 // Updates blood remaining.
-                myCurrentRow[1] = result.get("BloodRemaining/AvailBlood");
+                myCurrentRow[1] = result.get("BloodRemaining/allowableBlood");
                 // Updates project status (this checks if animal is assigned to a project).
                 if (!result.get("qcstate/label").equals("Request: Denied") && !result.get("projectStatus").isEmpty()) {
                     myCurrentRow[2] = "UNASSIGNED";
@@ -180,25 +180,25 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
 
                 //Updates row colors.
                 myCurrentRow[8] = "white";
-                if (!result.get("BloodRemaining/AvailBlood").isEmpty()) {
-                    Float availBlood = Float.parseFloat(result.get("BloodRemaining/AvailBlood"));
-                    if (availBlood <= 0) {
+                if (!result.get("BloodRemaining/allowableBlood").isEmpty()) {
+                    Float allowableBlood = Float.parseFloat(result.get("BloodRemaining/allowableBlood"));
+                    if (allowableBlood <= 0) {
                         // If blood draw is over limit, color it red.
                         myCurrentRow[8] = "red";
                     }
-                    else if (availBlood <= bloodThreshold) {
+                    else if (allowableBlood <= bloodThreshold) {
                         // If blood draw is over threshold limit, color it orange.
                         myCurrentRow[8] = "orange";
                     }
                 }
 //                String currentRowColor = "white";
-//                if (!result.get("BloodRemaining/AvailBlood").isEmpty()) {
-//                    Float availBlood = Float.parseFloat(result.get("BloodRemaining/AvailBlood"));
-//                    if (availBlood <= 0) {
+//                if (!result.get("BloodRemaining/allowableBlood").isEmpty()) {
+//                    Float allowableBlood = Float.parseFloat(result.get("BloodRemaining/allowableBlood"));
+//                    if (allowableBlood <= 0) {
 //                        // If blood draw is over limit, color it red.
 //                        currentRowColor = "red";
 //                    }
-//                    else if (availBlood <= bloodThreshold) {
+//                    else if (allowableBlood <= bloodThreshold) {
 //                        // If blood draw is over threshold limit, color it orange.
 //                        currentRowColor = "orange";
 //                    }

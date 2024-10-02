@@ -34,7 +34,7 @@
                 <property name="columnTitle" value="Condition"/>
             </properties>
         </column>
-        <column name="Id/availBlood/MostRecentWeight">
+        <column name="Id/BloodRemaining/mostRecentWeight">
             <properties>
                 <property name="columnTitle" value="Current Weight (kg)"/>
             </properties>
@@ -45,22 +45,22 @@
                 <property name="columnTitle" value="Active Assignments"/>
             </properties>
         </column>
-        <column name="Id/availBlood/MaxBlood">
+        <column name="Id/allowableBlood/maxAllowableBlood">
             <properties>
                 <property name="columnTitle" value="Max Blood Per 30 Days"/>
             </properties>
         </column>
-        <column name="Id/availBlood/BloodLast30">
+        <column name="Id/allowableBlood/bloodPrevious">
             <properties>
                 <property name="columnTitle" value="Drawn in Last 30 Days"/>
             </properties>
         </column>
-        <column name="Id/availBlood/BloodNext30">
+        <column name="Id/allowableBlood/bloodFuture">
             <properties>
                 <property name="columnTitle" value="Scheduled in Next 30 Days"/>
             </properties>
         </column>
-        <column name="Id/availBlood/AvailBlood">
+        <column name="Id/allowableBlood/allowableBlood">
             <properties>
                 <property name="columnTitle" value="Available Blood Today"/>
             </properties>

@@ -38,7 +38,7 @@
                 <property name="columnTitle" value="20% Volume By Weight"/>
             </properties>
        </column>
-       <column name="BloodRemaining/AvailBlood">
+       <column name="BloodRemaining/allowableBlood">
             <properties>
                 <property name="columnTitle" value="Volume Remaining After Draw (mL)"/>
             </properties>

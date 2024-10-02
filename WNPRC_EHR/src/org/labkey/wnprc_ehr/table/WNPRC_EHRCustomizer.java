@@ -364,7 +364,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col10.setDescription("Calculates the total number of days each animal has been single housed, if applicable.");
             ds.addColumn(col10);
 
-            BaseColumnInfo bloodCol = getWrappedIdCol(us, ds, "AvailBlood", "demographicsBloodSummary");
+            BaseColumnInfo bloodCol = getWrappedIdCol(us, ds, "allowableBlood", "currentBloodDraws");
             bloodCol.setLabel("Blood Remaining");
             bloodCol.setDescription("Calculates the total blood draw and remaining, which is determine by weight and blood drawn in the past 30 days.");
             ds.addColumn(bloodCol);

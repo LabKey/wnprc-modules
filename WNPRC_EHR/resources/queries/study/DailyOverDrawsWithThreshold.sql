@@ -17,9 +17,9 @@ SELECT b.Id,
        b.restraintTime,
        b.instructions,
        b.restraintDuration,
-       b.BloodRemaining.AvailBlood,
+       b.BloodRemaining.allowableBlood,
        b.QCState,
        b.QCState.label
 FROM "Blood Draws" b
 LEFT JOIN ehr_lookups.species e ON e.common = b.Id.Demographics.species
-WHERE b.BloodRemaining.AvailBlood < e.blood_threshold_warning AND  b.date > curdate() AND b.date < cast(TIMESTAMPADD('SQL_TSI_DAY', 1, curdate()) as date) AND b.QCState.label <> 'Request: Denied'
+WHERE b.BloodRemaining.allowableBlood < e.blood_threshold_warning AND  b.date > curdate() AND b.date < cast(TIMESTAMPADD('SQL_TSI_DAY', 1, curdate()) as date) AND b.QCState.label <> 'Request: Denied'

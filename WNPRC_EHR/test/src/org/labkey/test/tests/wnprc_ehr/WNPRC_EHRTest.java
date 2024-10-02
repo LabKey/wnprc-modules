@@ -4181,7 +4181,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         /**
          * This function inserts data into the 'study/BloodSchedule' dataset.
-         *      This function creates the following fields in 'study/BloodSchedule': id, date, projectStatus, BloodRemaining/AvailBlood, billedby/title, and Id/DataSet/Demographics/calculated_status.
+         *      This function creates the following fields in 'study/BloodSchedule': id, date, projectStatus, BloodRemaining/allowableBlood, billedby/title, and Id/DataSet/Demographics/calculated_status.
          *      This function updates the following tables: study/demographics, study/weight, study/blood.
          * @param billingGroupRealName
          * @param animalID
@@ -4211,7 +4211,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 HashMap<String, Object> demographicInfoTestData1 = new HashMap<>();
                 demographicInfoTestData1.put("id", animalID);
                 demographicInfoTestData1.put("calculated_status", livingStatus);
-                // Creates weight info (this updates the bloodSchedule field: 'BloodRemaining/AvailBlood').
+                // Creates weight info (this updates the bloodSchedule field: 'BloodRemaining/allowableBlood').
                 HashMap<String, Object> weightTestData1 = new HashMap<>();
                 weightTestData1.put("id", animalID);
                 weightTestData1.put("date", new Date());

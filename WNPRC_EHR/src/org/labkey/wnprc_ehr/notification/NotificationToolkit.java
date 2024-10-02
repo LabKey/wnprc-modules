@@ -1035,14 +1035,14 @@ public class NotificationToolkit {
         SimpleFilter myFilter = new SimpleFilter("Id", idToCheck, CompareType.EQUAL);
         myFilter.addCondition("date", dateToCheck, CompareType.DATE_EQUAL);
         // Runs query.
-        String[] targetColumns = new String[]{"BloodRemaining/AvailBlood"};
+        String[] targetColumns = new String[]{"BloodRemaining/allowableBlood"};
         ArrayList<HashMap<String,String>> returnArray = getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "blood", myFilter, null, targetColumns);
 
         // Checks results.
         if (!returnArray.isEmpty()) {
             for (HashMap<String, String> result : returnArray) {
-                if (!result.get("BloodRemaining/AvailBlood").isEmpty()) {
-                    Double availableBlood = Double.valueOf(result.get("BloodRemaining/AvailBlood"));
+                if (!result.get("BloodRemaining/allowableBlood").isEmpty()) {
+                    Double availableBlood = Double.valueOf(result.get("BloodRemaining/allowableBlood"));
                     if (availableBlood <=0) {
                         return availableBlood;
                     }

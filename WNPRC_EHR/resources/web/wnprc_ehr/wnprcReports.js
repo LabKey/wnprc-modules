@@ -661,6 +661,26 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 };
 
+EHR.reports.currentBloodDraws = function(panel, tab) {
+    var filterArray = panel.getFilterArray(tab);
+    var title = panel.getTitleSuffix();
+
+    var config = panel.getQWPConfig({
+        schemaName: 'study',
+        queryName: 'currentBloodDraws',
+        title: "Current Blood " + title,
+        parameters: {'interval': '30'},
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+}
+
 EHR.reports.bloodChemistry = function(panel, tab){
     var filterArray = panel.getFilterArray(tab);
     var title = panel.getTitleSuffix();

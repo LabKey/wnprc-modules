@@ -244,7 +244,6 @@ export const LayoutContextProvider = ({children}) => {
         });
     };
 
-    // TODO for some reason this is only changing the first cage in the state always num 1, fix it
     const moveCageLocation = (cageNum: number, x: number, y: number, k: number) => {
         setCageLocs((prevCageLocs) =>
             prevCageLocs.map(cage =>
@@ -255,7 +254,6 @@ export const LayoutContextProvider = ({children}) => {
         );
 
     };
-
 
     const delRack = (id: number) => {
         if(cageCount == 0) return;
@@ -274,6 +272,10 @@ export const LayoutContextProvider = ({children}) => {
         setLocalRoom(prevRacks =>  prevRacks.map(rack =>
             rack.id === idBefore ? { ...rack, id: idAfter } : rack
         ));
+        setCageLocs(prevCages =>  prevCages.map(cage =>
+            cage.num === idBefore ? { ...cage, num: idAfter } : cage
+        ));
+
         setCageNumChange({before: idBefore, after: idAfter});
     }
 

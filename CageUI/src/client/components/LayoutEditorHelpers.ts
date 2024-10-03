@@ -77,25 +77,18 @@ function makeDraggable(element, props) {
         .on('end', createEndDragInLayout(props)));
 }
 // Function to help merge racks together by resetting groups to local coords
-function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
-    // Get the current translation for each node
-    const getTranslation = (node) => {
-        const currentTransform = node.getAttribute("transform");
-        if (currentTransform) {
-            const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
-            if (translateMatch) {
-                return translateMatch[1].split(',').map(Number);
-            }
-        }
-        return [0, 0]; // Default if no transform is found
-    };
+function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
 
     // Get the zoom transform of the layout SVG
     const layoutTransform = d3.zoomTransform(layoutSvg.node());
 
+    if(targetNode.childNodes.length > 1){
+
+    }
+
     // Get the translations of the two nodes (current positions)
-    const [translateX1, translateY1] = getTranslation(node1);
-    const [translateX2, translateY2] = getTranslation(node2);
+    const {x: translateX1, y: translateY1} = getTranslation(targetNode.getAttribute('transform'));
+    const {x: translateX2, y: translateY2} = getTranslation(draggedNode.getAttribute('transform'));
 
     // Calculate the dynamic distance between the two nodes before resetting
     // Remove the zoom scale from the distance to keep it zoom-independent
@@ -103,12 +96,11 @@ function resetNodeTranslationsWithZoom(node1, node2, layoutSvg) {
     const distanceY = (translateY2 - translateY1) / layoutTransform.k;  // Correct Y in case there's any Y translation
 
     // Reset the first node to (0, 0) in the new group
-    node1.setAttribute("transform", `translate(0, 0)`);
+    targetNode.setAttribute("transform", `translate(0, 0)`);
 
     // Set the second node to be exactly at the dynamic distance relative to the first node
-    node2.setAttribute("transform", `translate(${distanceX}, ${distanceY})`);
+    draggedNode.setAttribute("transform", `translate(${distanceX}, ${distanceY})`);
 }
-
 
 function findNestedCageElement(parentId) {
     // Find the parent element (in this case, the outermost <g> element)
@@ -141,18 +133,25 @@ function findNestedCageElement(parentId) {
 
 export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps) {
     let newCageNums = parseCage((findNestedCageElement(targetShape.attr('id')) as SVGElement).getAttribute('id'));
-    console.log("newCafgeNums: ", newCageNums)
+    // Make sure cages don't have the wrong styles/classes and correct cage numbering for merge
     function resetElementProperties(element) {
-        console.log("Resetting: ", parseCage(targetShape.attr('id')))
         element.classList = "";
         element.style = "";
         element.id = `cage-${newCageNums}`;
         newCageNums++;
     }
 
-    function processChildNodes(element, mergedGroup) {
+    // add starting x and y for each group to then increment its local subgroup coords by.
+    // Example: 2 nodes, 0,0 and 120,0 start at 0,0 add 120,0
+    // second 2 nodes, 0,0 and 120,0 start at 240,0 add 0,0 and 120,0. etc
+    function processChildNodes(element: SVGGElement, mergedGroup) {
+        const {x: startX, y: startY} = getTranslation(element.getAttribute('transform'))
         d3.select(element).selectAll(':scope > g').each(function () {
             const targetCage = d3.select(this);
+            const {x: localX, y: localY} = getTranslation(targetCage.attr('transform'));
+            const newX = startX + localX
+            const newY = startY + localY
+            targetCage.attr('transform', `translate(${newX},${newY})`)
             resetElementProperties(this);
             mergedGroup.node().appendChild(this);
             console.log("More than 1 merge: ", targetCage);
@@ -193,11 +192,12 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
         // Clone the target and dragged shapes before appending
         let clonedTargetShape = targetShape.node().cloneNode(true);
         let clonedDraggedShape = draggedShape.node().cloneNode(true);
+        //Reset translates to new local group
+        resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg)
+
         processShape(clonedTargetShape, mergedGroup);
         processShape(clonedDraggedShape, mergedGroup);
 
-        //Reset translates to new local group
-        resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg)
 
         console.log("merge racks: ", targetShape.node().closest('[id^=rack-]'), draggedShape.node().closest('[id^=rack-]'))
         // Append the cloned shapes to the new group

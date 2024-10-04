@@ -41,7 +41,7 @@ FROM (
       b.dateOnly,
       b.quantity,
     FROM study.blood b
-    WHERE b.dateOnly > timestampadd('SQL_TSI_DAY', -1 * DATE_INTERVAL, curdate()) AND b.project.research = TRUE
+    WHERE b.dateOnly > timestampadd('SQL_TSI_DAY', -1 * DATE_INTERVAL, curdate())
 
     UNION ALL
 
@@ -63,7 +63,7 @@ FROM (
       timestampadd('SQL_TSI_DAY', DATE_INTERVAL, b.dateOnly),
       0 as quantity,
     FROM study.blood b
-    WHERE timestampadd('SQL_TSI_DAY', DATE_INTERVAL, b.dateOnly) >= timestampadd('SQL_TSI_DAY', -1 * DATE_INTERVAL, curdate()) AND b.project.research = TRUE
+    WHERE timestampadd('SQL_TSI_DAY', DATE_INTERVAL, b.dateOnly) >= timestampadd('SQL_TSI_DAY', -1 * DATE_INTERVAL, curdate())
 
   ) b
 

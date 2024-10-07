@@ -1,21 +1,28 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { svg } from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { RackTypes, PendingRackUpdate, LayoutDragProps } from './typings';
+import { EditCageNumProps, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
-import { svg, zoomTransform } from 'd3';
 import { CageNumInput } from './CageNumInput';
 import {
-    startDragInLayout,
-    createEndDragInLayout,
     checkAdjacent,
-    drawGrid, updateGrid, getTargetRect, placeAndScaleGroup, createDragInLayout, getLayoutOffset, mergeRacks
+    createDragInLayout,
+    createEndDragInLayout,
+    drawGrid,
+    getLayoutOffset,
+    getTargetRect,
+    mergeRacks,
+    placeAndScaleGroup,
+    setupEditCageNumEvent,
+    startDragInLayout,
+    updateGrid
 } from './LayoutEditorHelpers';
-import { areCagesInSameRack, parseCage, parseRack } from './helpers';
+import { areCagesInSameRack } from './helpers';
 
 const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
@@ -27,9 +34,7 @@ const Editor = () => {
     const [showGrid, setShowGrid] = useState<boolean>(false);
     const [addingRack, setAddingRack] = useState<boolean>(false);
     const [editCageNum, setEditCageNum] = useState<number | null>(null);
-    const [clickedCageNum, setClickedCageNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [draggedCageNum, setDraggedCageNum] = useState<number>(null);
-    const [clickedRackNum, setClickedRackNum] = useState<number>(null); // Cage number of svg id (rack specific)
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
     const {
@@ -44,7 +49,9 @@ const Editor = () => {
         addNewCageLocation,
         moveCageLocation,
         mergeLocalRacks,
-        getCageCount
+        getCageCount,
+        clickedRack,
+        setClickedRack
     } = useLayoutContext();
 
     useEffect(() => {
@@ -57,7 +64,6 @@ const Editor = () => {
         if(cageLocs.length === 0 || !draggedCageNum ) return;
         console.log("Dragged cage: ", draggedCageNum);
         const currCage = cageLocs.find((cage) => cage.num === draggedCageNum)
-
 
         cageLocs.forEach((cage) => {
             if(draggedCageNum === cage.num) return; // cant merge into itself
@@ -88,7 +94,11 @@ const Editor = () => {
                     moveCage: moveCageLocation,
                     setCurrCage: setDraggedCageNum
                 };
-                mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps);
+                const editCageNumProps: EditCageNumProps = {
+                    setEditCageNum: setEditCageNum,
+                    setClickedRackNum: setClickedRack
+                }
+                mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, editCageNumProps);
             }
         });
         setDraggedCageNum(null);
@@ -156,29 +166,8 @@ const Editor = () => {
             textElement.setAttribute('contentEditable', 'true');
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-            textElement.addEventListener('click', function (event) {
-                event.stopPropagation();
-                const cageNum: number = parseInt((event.target as SVGTSpanElement).textContent);
-                setEditCageNum(cageNum);
-                // Use closest to find the nearest element that contains 'rack-' in the class name
-                const rackGroupElement = (event.target as SVGTSpanElement).closest('[id*="rack-"]');
-                const cageGroupElement = (event.target as SVGTSpanElement).closest('[id*="cage-"]');
-
-                if (rackGroupElement && /^rack-\d+$/.test(rackGroupElement.id)) {
-                    if(cageGroupElement && /^cage-\d+$/.test(cageGroupElement.id)){
-                        // Valid cage and rack
-                        setClickedCageNum(parseCage((cageGroupElement as SVGGElement).getAttribute('id')));
-                        setClickedRackNum(parseRack((rackGroupElement as SVGGElement).getAttribute('id')));
-                        console.log("Found the valid Rack, Cage:", rackGroupElement, cageGroupElement);
-                    }
-                    else{
-                        console.log("No group for cage found")
-                    }
-                    // Do something with the found element
-                } else {
-                    console.log("No group for rack found");
-                }
-            });
+            // Return the cleanup function to remove the event listener when the component unmounts
+            setupEditCageNumEvent(textElement, setEditCageNum, setClickedRack);
         });
         setAddingRack(false);
     }, [cageCount]);
@@ -253,7 +242,7 @@ const Editor = () => {
     // After state is done updating for cage id change. refresh svg text and ids
     useEffect(() => {
         if(cageNumChange){
-            let group = layoutSvg.select(`#rack-${clickedRackNum}`).select(`#cage-${cageNumChange.before}`).attr('id', `cage-${cageNumChange.after}`);
+            let group = layoutSvg.select(`#rack-${clickedRack}`).select(`#cage-${cageNumChange.before}`).attr('id', `cage-${cageNumChange.after}`);
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
         }
     }, [cageNumChange]);

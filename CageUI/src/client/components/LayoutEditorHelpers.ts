@@ -1,7 +1,7 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { getRackFromClass, getTranslation, isTextEditable, parseCage, parseRack } from './helpers';
-import { CageLocations, LayoutDragProps, OffsetProps } from './typings';
+import { CageLocations, EditCageNumProps, LayoutDragProps, OffsetProps } from './typings';
 import { zoom, zoomTransform } from 'd3';
 import { cloneElement } from 'react';
 import { id } from '@labkey/api/dist/labkey/Utils';
@@ -131,13 +131,53 @@ function findNestedCageElement(parentId) {
     return searchNestedElements(parentElement);
 }
 
-export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps) {
+export function setupEditCageNumEvent(
+    element: SVGTextElement,
+    setEditCageNum: (num: number) => void,
+    setClickedRackNum: (num: number) => void
+): () => void {
+    const handleClick = function(this: SVGTextElement, event: MouseEvent) {
+        event.stopPropagation();
+        const target = event.target as SVGTSpanElement;
+        const cageNum = parseInt(target.textContent || '0');
+        setEditCageNum(cageNum);
+
+        const rackGroupElement = target.closest('[id*="rack-"]') as SVGGElement | null;
+        const cageGroupElement = target.closest('[id*="cage-"]') as SVGGElement | null;
+
+        if (rackGroupElement && /^rack-\d+$/.test(rackGroupElement.id)) {
+            if (cageGroupElement && /^cage-\d+$/.test(cageGroupElement.id)) {
+                // Valid cage and rack
+                const rackId = rackGroupElement.getAttribute('id');
+                if (rackId) {
+                    setClickedRackNum(parseRack(rackId));
+                }
+                console.log("Found the valid Rack, Cage:", rackGroupElement, cageGroupElement);
+            } else {
+                console.log("No group for cage found");
+            }
+        } else {
+            console.log("No group for rack found");
+        }
+    };
+
+    element.addEventListener('click', handleClick);
+
+    // Return a function to remove the event listener if needed
+    return () => {
+        element.removeEventListener('click', handleClick);
+    };
+}
+
+export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps, editCageNumProps: EditCageNumProps) {
     let newCageNums = parseCage((findNestedCageElement(targetShape.attr('id')) as SVGElement).getAttribute('id'));
     // Make sure cages don't have the wrong styles/classes and correct cage numbering for merge
     function resetElementProperties(element) {
         element.classList = "";
         element.style = "";
         element.id = `cage-${newCageNums}`;
+        const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
+        setupEditCageNumEvent(textEle, editCageNumProps.setEditCageNum, editCageNumProps.setClickedRackNum);
         newCageNums++;
     }
 
@@ -169,7 +209,9 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
             processChildNodes(shape, mergedGroup);
         }
     }
-
+    // return if another merge option is available,
+    // prevents double merging when adding cages to a rack surrounded by multiple target points (aka other cages)
+    if(!d3.select('.popup').empty()) return;
     const shouldMerge = await showConfirmationPopup();
     const {
         layoutSvg,

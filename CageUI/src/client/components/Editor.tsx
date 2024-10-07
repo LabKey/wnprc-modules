@@ -139,7 +139,7 @@ const Editor = () => {
             group.append(() => draggedShape.node());
             placeAndScaleGroup(group, cellX, cellY, transform);
             addNewCageLocation({
-                num: cageLocs.length + 1 || 1,
+                num: getCageCount(),
                 cellX: cellX,
                 cellY: cellY,
                 scale: transform.k

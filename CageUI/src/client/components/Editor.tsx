@@ -218,7 +218,7 @@ const Editor = () => {
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
-                const newId = localRoom.length + 1;
+                const newId = cageLocs.reduce((max, obj) => (obj.num > max ? obj.num : max), 0);
                 setPendingRackUpdate({
                     draggedShape: draggedShape,
                     cellX: cellX,

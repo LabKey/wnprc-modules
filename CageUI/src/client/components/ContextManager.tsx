@@ -287,7 +287,7 @@ export const LayoutContextProvider = ({children}) => {
     }
 
     const getCageCount = () => {
-        return (cageLocs?.length + 1) || 1;
+        return cageLocs.reduce((max, obj) => (obj.num > max ? obj.num : max), 0) + 1;
     }
 
     return (

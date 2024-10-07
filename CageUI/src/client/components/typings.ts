@@ -45,7 +45,7 @@ export interface PendingRackUpdate {
     draggedShape: any;
     cellX: number;
     cellY: number;
-    id: number;
+    rackId: number;
 }
 
 export interface EditCageNumProps {

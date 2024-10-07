@@ -107,7 +107,7 @@ const Editor = () => {
     // This effect updates racks for adding to the room and merging
     useEffect(() => {
         if(!pendingRackUpdate) return;
-        const {draggedShape, cellX, cellY, id} = pendingRackUpdate;
+        const {draggedShape, cellX, cellY, rackId} = pendingRackUpdate;
         draggedShape.classed('dragging', false);
 
         let group;
@@ -133,7 +133,7 @@ const Editor = () => {
 
             group = layoutSvg.append('g')
                 .attr('class', `draggable rack room-obj`)
-                .attr('id', `rack-${id}`)
+                .attr('id', `rack-${rackId}`)
                 .style('pointer-events', "bounding-box");
 
             group.append(() => draggedShape.node());
@@ -218,12 +218,12 @@ const Editor = () => {
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
-                const newId = cageLocs.reduce((max, obj) => (obj.num > max ? obj.num : max), 0);
+                const newId = localRoom.reduce((max, obj) => (obj.id > max ? obj.id : max), 0) + 1;
                 setPendingRackUpdate({
                     draggedShape: draggedShape,
                     cellX: cellX,
                     cellY: cellY,
-                    id: newId});
+                    rackId: newId});
                 setAddingRack(true);
                 addRack(newId);
             } else {

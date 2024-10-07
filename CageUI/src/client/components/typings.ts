@@ -48,6 +48,10 @@ export interface PendingRackUpdate {
     id: number;
 }
 
+export interface EditCageNumProps {
+    setClickedRackNum: React.Dispatch<React.SetStateAction<number>>
+    setEditCageNum: React.Dispatch<React.SetStateAction<number>>
+}
 export interface LayoutDragProps {
     gridSize: number;
     gridRatio: number;

@@ -1,6 +1,8 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.checkerframework.checker.units.qual.A;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.labkey.api.action.Action;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -27,6 +29,8 @@ import java.sql.Array;
 import java.sql.ResultSet;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -40,6 +44,8 @@ import org.labkey.api.data.Results;
 import org.labkey.study.xml.Lab;
 
 import javax.script.ScriptEngine;
+
+import static org.labkey.api.search.SearchService._log;
 
 
 /**
@@ -96,6 +102,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         //Creates variables & gets data.
         final StringBuilder messageBody = new StringBuilder();
         ColonyInformationObject myColonyAlertObject = new ColonyInformationObject(c, u, "colonyAlert");
+
+        // Creates CSS.
+        messageBody.append(styleToolkit.beginStyle());
+        messageBody.append(styleToolkit.setBasicTableStyle());
+        messageBody.append(styleToolkit.setHeaderRowBackgroundColor("#d9d9d9"));
+        messageBody.append(styleToolkit.endStyle());
 
         //Begins message info.
         messageBody.append("<p> This email contains a series of automatic alerts about the colony.  It was run on: " + dateToolkit.getCurrentTime() + ".</p>");
@@ -373,6 +385,19 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myColonyAlertObject.totalFinalizedRecordsWithFutureDatesURLView));
             messageBody.append("<hr>\n");
         }
+        //38. Find any animals assigned to an inactivated project or deactivated protocol.
+        if (!myColonyAlertObject.animalsWithInvalidProjectOrProtocol.isEmpty()) {
+            // Creates HTML table to return.
+            String[] myTableColumns = new String[]{"Id", "Project", "Project End Date", "Protocol", "Protocol End Date"};
+            NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myColonyAlertObject.animalsWithInvalidProjectOrProtocol);
+
+            // Displays message.
+            messageBody.append("<b>WARNING: There are " + myColonyAlertObject.animalsWithInvalidProjectOrProtocol.size() + " living animals with inactivated projects or deactivated protocols.</b><br>");
+            messageBody.append(myTable.createBasicHTMLTable());
+            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view all Assignments.<br>\n", myColonyAlertObject.animalsWithInvalidProjectOrProtocolURLView));
+            messageBody.append("<hr>\n");
+
+        }
 
         //Returns string.
         return messageBody.toString();
@@ -469,6 +494,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
                 getPrenatalDeathsInLastFiveDays();
                 //37. Find the total finalized records with future dates.
                 getTotalFinalizedRecordsWithFutureDates();
+                //38. Find any animals assigned to an inactivated project or deactivated protocol.
+                getAnimalsWithInvalidProjectOrProtocol();
             }
             else if (alertType.equals("colonyManagement")) {
                 // 1. Find all living animals without a weight.
@@ -1355,6 +1382,83 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Returns data.
             this.protocolsNearingAnimalLimitPercentage = returnArray;
             this.protocolsNearingAnimalLimitPercentageURLView = viewQueryURL;
+        }
+
+        // Find any animals assigned to an inactivated project or deactivated protocol.
+        ArrayList<String[]> animalsWithInvalidProjectOrProtocol = new ArrayList<>();   //
+        String animalsWithInvalidProjectOrProtocolURLView;
+        private void getAnimalsWithInvalidProjectOrProtocol() {
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/calculated_status", "Alive", CompareType.EQUAL);
+//            myFilter.addCondition("project/protocol", "", CompareType.NONBLANK);
+            // Gets columns to retrieve.
+            String[] targetColumns = new String[]{"id", "project", "project/protocol", "project/enddate", "project/protocol/enddate"};
+            // Runs query.
+            ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Assignment", myFilter, null, targetColumns);
+
+            // Sets up a Try/Catch block to catch date parsing errors.
+            try {
+                // Sets variables.
+                SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Date formattedCurrentDate = myFormat.parse(dateToolkit.getCurrentTime());
+
+                for (HashMap<String, String> result : returnArray) {
+                    //  0: ID
+                    //  1: Project
+                    //  2: Project End Date
+                    //  3: Protocol
+                    //  4: Protocol End Date
+                    String[] myCurrentRow = new String[5];
+                    myCurrentRow[1] = "";
+                    myCurrentRow[2] = "";
+                    myCurrentRow[3] = "";
+                    myCurrentRow[4] = "";
+
+                    // Retrieves row data.
+                    String currentID = result.get("id");
+                    String currentProject = result.get("project");
+                    String currentProtocol = result.get("project/protocol");
+                    String currentProjectEnd = result.get("project/enddate");
+                    String currentProtocolEnd = result.get("project/protocol/enddate");
+                    Boolean projectOrProtocolExpired = false;
+
+                    // Adds id.
+                    myCurrentRow[0] = currentID;
+                    // Checks project.
+                    if (currentProject != null && currentProjectEnd != null) {
+                        if (!currentProject.isEmpty() && !currentProjectEnd.isEmpty()) {
+                            Date formattedProjectEnd = myFormat.parse(currentProjectEnd);
+                            if (formattedCurrentDate.compareTo(formattedProjectEnd) > 0) {
+                                myCurrentRow[1] = currentProject;
+                                myCurrentRow[2] = currentProjectEnd;
+                                projectOrProtocolExpired = true;
+                            }
+                        }
+                    }
+                    // Checks protocol.
+                    if (currentProtocol != null && currentProtocolEnd != null) {
+                        if (!currentProtocol.isEmpty() && !currentProtocolEnd.isEmpty()) {
+                            Date formattedProtocolEnd = myFormat.parse(currentProtocolEnd);
+                            if (formattedCurrentDate.compareTo(formattedProtocolEnd) > 0) {
+                                myCurrentRow[3] = currentProtocol;
+                                myCurrentRow[4] = currentProtocolEnd;
+                                projectOrProtocolExpired = true;
+                            }
+                        }
+                    }
+
+                    // Adds row to return list if there is an expired project or protocol.
+                    if (projectOrProtocolExpired) {
+                        animalsWithInvalidProjectOrProtocol.add(myCurrentRow);
+                    }
+                }
+            }
+            catch (ParseException e) {
+                _log.error("There was a parsing exception for: ColonyAlertsNotificationRevamp->getAnimalsWithInvalidProjectOrProtocol", e);
+            }
+
+            // Creates url link to the assignments table.
+            this.animalsWithInvalidProjectOrProtocolURLView = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", null);
         }
     }
 }

@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.data.Results;
 import org.labkey.api.ldk.notification.AbstractNotification;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -110,7 +111,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
 
     protected void saveValues(Container c, Map<String, String> newValues)
     {
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(c, getClass().getName(), true);
+        WritablePropertyMap map = PropertyManager.getWritableProperties(c, getClass().getName(), true);
 
         Long lastSaveMills = map.containsKey(lastSave) ? Long.parseLong(map.get(lastSave)) : null;
 

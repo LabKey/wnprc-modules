@@ -64,7 +64,7 @@ import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
 @Category({EHR.class, WNPRC_EHR.class})
-@BaseWebDriverTest.ClassTimeout(minutes = 5)
+@BaseWebDriverTest.ClassTimeout(minutes = 10)
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     //folders

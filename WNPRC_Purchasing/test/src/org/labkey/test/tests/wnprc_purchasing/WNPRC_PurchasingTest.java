@@ -406,7 +406,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Create new Request - START");
         goToRequesterPage();
-        clickButton("Create Request");
+        waitForElement(Locator.linkWithText("Create Request")).click();
         final CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
         requestPage.setAccountsToCharge("acct100 - Assay Services")

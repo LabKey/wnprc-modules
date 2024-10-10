@@ -41,8 +41,6 @@ export interface LayoutContextType {
     setCageLocs: React.Dispatch<React.SetStateAction<CageLocations[]>>;
     localRoom: Rack[];
     addRack: (id: number) => void;
-    setCageCount: React.Dispatch<React.SetStateAction<number>>;
-    cageCount: number;
     delRack: (id: number) => void;
     changeCageId: (idBefore: number, idAfter: number) => void;
     cageNumChange: {before: number, after: number};
@@ -52,6 +50,9 @@ export interface LayoutContextType {
     getCageCount: () => number;
     clickedRack: number;
     setClickedRack: React.Dispatch<React.SetStateAction<number>>;
+    clickedCage: number;
+    setClickedCage: React.Dispatch<React.SetStateAction<number>>;
+    delCage: () => void;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -175,16 +176,16 @@ export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     const [cageLocs, setCageLocs] = useState<CageLocations[]>([])
     const [localRoom, setLocalRoom] = useState<Rack[]>(room);
-    const [cageCount, setCageCount] = useState<number>(1);
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
     const [clickedRack, setClickedRack] = useState<number | null>(null);
+    const [clickedCage, setClickedCage] = useState<number | null>(null);
 
     const addRack = (id: number) => {
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
             id: 1,
-            cageNum: cageCount,
+            cageNum: getCageCount(),
             manufacturer: undefined,
             name: '',
             position: '',
@@ -198,7 +199,6 @@ export const LayoutContextProvider = ({children}) => {
             type: undefined
         };
         setLocalRoom(prevRacks => [...prevRacks, newRack]);
-        setCageCount(prevState => prevState + 1);
     };
 
     const mergeLocalRacks = (targetNum: number, dragNum: number) => {
@@ -259,16 +259,22 @@ export const LayoutContextProvider = ({children}) => {
     };
 
     const delRack = (id: number) => {
-        if(cageCount == 0) return;
+        if(getCageCount() == 0) return;
         setLocalRoom(prevRacks =>  prevRacks.filter(rack => rack.id !== id));
-        setCageCount(prevState => prevState - 1);
+    }
+
+    const delCage = () => {
+        if(getCageCount() == 0) return;
+        console.log("deleting: ", clickedCage)
     }
 
     const changeCageId = (idBefore: number, idAfter: number) => {
-        if(cageCount == 0){
+        if(getCageCount() == 0){
             return;
         }
-        if(localRoom.find(rack => rack.id === idAfter)){
+        if(localRoom.find(rack => rack.cages.find(cage =>
+            cage.cageNum === idAfter
+        ))){
             console.log("Please add a different id that doesnt exist in the current room");
             return;
         }
@@ -296,8 +302,6 @@ export const LayoutContextProvider = ({children}) => {
             setRoom,
             localRoom,
             addRack,
-            cageCount,
-            setCageCount,
             delRack,
             changeCageId,
             cageNumChange,
@@ -308,7 +312,10 @@ export const LayoutContextProvider = ({children}) => {
             mergeLocalRacks,
             getCageCount,
             clickedRack,
-            setClickedRack
+            setClickedRack,
+            clickedCage,
+            setClickedCage,
+            delCage
         }}>
             {children}
         </LayoutContext.Provider>

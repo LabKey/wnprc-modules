@@ -6,7 +6,7 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { EditCageNumProps, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
+import { CageActionProps, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
@@ -22,7 +22,8 @@ import {
     startDragInLayout,
     updateGrid
 } from './LayoutEditorHelpers';
-import { areCagesInSameRack } from './helpers';
+import { areCagesInSameRack, parseRack } from './helpers';
+import EditorContextMenu from './EditorContextMenu';
 
 const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
@@ -33,16 +34,22 @@ const Editor = () => {
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
     const [addingRack, setAddingRack] = useState<boolean>(false);
-    const [editCageNum, setEditCageNum] = useState<number | null>(null);
     const [draggedCageNum, setDraggedCageNum] = useState<number>(null);
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
+    const [renameCage, setRenameCage] = useState<boolean>(false);
+
+    const [ctxMenuStyle, setCtxMenuStyle] = useState({
+        display: 'none',
+        left: '',
+        top: '',
+    });
+
     const {
         localRoom,
         addRack,
         room,
         delRack,
-        cageCount,
         changeCageId,
         cageNumChange,
         cageLocs,
@@ -51,8 +58,16 @@ const Editor = () => {
         mergeLocalRacks,
         getCageCount,
         clickedRack,
-        setClickedRack
+        setClickedRack,
+        clickedCage,
+        setClickedCage,
+        delCage
     } = useLayoutContext();
+
+    const handleClickRename = (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        setRenameCage(true);
+    };
 
     useEffect(() => {
         console.log("xxx Room: ", room);
@@ -94,11 +109,12 @@ const Editor = () => {
                     moveCage: moveCageLocation,
                     setCurrCage: setDraggedCageNum
                 };
-                const editCageNumProps: EditCageNumProps = {
-                    setEditCageNum: setEditCageNum,
-                    setClickedRackNum: setClickedRack
+                const cageActionProps: CageActionProps = {
+                    setEditCageNum: setClickedCage,
+                    setClickedRackNum: setClickedRack,
+                    setCtxMenuStyle: setCtxMenuStyle,
                 }
-                mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, editCageNumProps);
+                mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps);
             }
         });
         setDraggedCageNum(null);
@@ -144,6 +160,7 @@ const Editor = () => {
                 cellY: cellY,
                 scale: transform.k
             });
+            addRack(rackId);
         }
 
         const addProps: LayoutDragProps = {
@@ -167,10 +184,10 @@ const Editor = () => {
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
             // Return the cleanup function to remove the event listener when the component unmounts
-            setupEditCageNumEvent(textElement, setEditCageNum, setClickedRack);
+            setupEditCageNumEvent(textElement, setClickedCage, setClickedRack, setCtxMenuStyle);
         });
         setAddingRack(false);
-    }, [cageCount]);
+    }, [pendingRackUpdate]);
 
     // Effect for handling the grid layout and drag effects on the layout and from the utils
     useEffect(() => {
@@ -225,7 +242,6 @@ const Editor = () => {
                     cellY: cellY,
                     rackId: newId});
                 setAddingRack(true);
-                addRack(newId);
             } else {
                 draggedShape.remove();
             }
@@ -307,6 +323,14 @@ const Editor = () => {
         layoutSvg.select("g.grid").call(dragGrid);
     }, [layoutSvg]);
 
+    const handleContextMenuClose = () => {
+        setCtxMenuStyle({
+            display: 'none',
+            left: '',
+            top: '',
+        });
+    };
+
     const handleSave = () => {
         console.log("Saving layout");
     }
@@ -324,7 +348,7 @@ const Editor = () => {
     }
 
     return (
-        <div className={"layout-editor"}>
+        <div className={"layout-editor"} onClick={handleContextMenuClose}>
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Door"}>
@@ -372,12 +396,12 @@ const Editor = () => {
                 </div>
             </div>
             <div id={"layout-grid"} style={{width: SVG_WIDTH, height: SVG_HEIGHT}}>
-                {editCageNum &&
+                {(renameCage) &&
                         <CageNumInput
                                 onSubmit={(num) => {
-                                    changeCageId(editCageNum, num);
+                                    changeCageId(clickedCage, num);
                                 }}
-                                onClose={() => setEditCageNum(null)}
+                                onClose={() => setRenameCage(false)}
                         />
                 }
                 <svg
@@ -422,6 +446,7 @@ const Editor = () => {
                 >Save
                 </button>
             </div>
+            <EditorContextMenu ctxMenuStyle={ctxMenuStyle} onClickOutside={handleContextMenuClose} onClickDelete={delCage} onClickRename={handleClickRename}/>
         </div>
     );
 };

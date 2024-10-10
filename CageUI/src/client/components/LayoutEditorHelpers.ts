@@ -1,10 +1,11 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { getRackFromClass, getTranslation, isTextEditable, parseCage, parseRack } from './helpers';
-import { CageLocations, EditCageNumProps, LayoutDragProps, OffsetProps } from './typings';
+import { CageActionProps, CageLocations, LayoutDragProps, OffsetProps } from './typings';
 import { zoom, zoomTransform } from 'd3';
 import { cloneElement } from 'react';
 import { id } from '@labkey/api/dist/labkey/Utils';
+import * as React from 'react';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -133,43 +134,43 @@ function findNestedCageElement(parentId) {
 
 export function setupEditCageNumEvent(
     element: SVGTextElement,
-    setEditCageNum: (num: number) => void,
-    setClickedRackNum: (num: number) => void
+    setClickedCageNum: (num: number) => void,
+    setClickedRackNum: (num: number) => void,
+    setCtxMenuStyle:  React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
 ): () => void {
-    const handleClick = function(this: SVGTextElement, event: MouseEvent) {
-        event.stopPropagation();
-        const target = event.target as SVGTSpanElement;
-        const cageNum = parseInt(target.textContent || '0');
-        setEditCageNum(cageNum);
 
-        const rackGroupElement = target.closest('[id*="rack-"]') as SVGGElement | null;
-        const cageGroupElement = target.closest('[id*="cage-"]') as SVGGElement | null;
+    const handleContextMenu = function(this: SVGTextElement, event: MouseEvent) {
+        event.preventDefault();
+        console.log("Open Menu: ", this)
+        const rackGroupElement = this.closest('[id^="rack-"]') as SVGGElement | null;
+        const cageGroupElement = this.closest('[id^="cage-"]') as SVGGElement | null;
 
-        if (rackGroupElement && /^rack-\d+$/.test(rackGroupElement.id)) {
-            if (cageGroupElement && /^cage-\d+$/.test(cageGroupElement.id)) {
-                // Valid cage and rack
-                const rackId = rackGroupElement.getAttribute('id');
-                if (rackId) {
-                    setClickedRackNum(parseRack(rackId));
-                }
-                console.log("Found the valid Rack, Cage:", rackGroupElement, cageGroupElement);
-            } else {
-                console.log("No group for cage found");
-            }
-        } else {
-            console.log("No group for rack found");
-        }
-    };
+        const cageNum = parseCage(cageGroupElement.id);
+        const rackNum = parseRack(rackGroupElement.id);
+        setClickedCageNum(cageNum);
+        setClickedRackNum(rackNum);
 
-    element.addEventListener('click', handleClick);
+        setCtxMenuStyle({
+            display: 'block',
+            left: `${event.pageX - 10}px`,
+            top: `${event.pageY - 10}px`,
+        });
+    }
+
+    // find the cage sibling element of text to attach context menu to
+    const cageElement = element.closest('[id^="cage-"]');
+
+    d3.select(cageElement).attr('style', 'pointer-events: bounding-box')
+    cageElement.addEventListener('contextmenu', handleContextMenu);
+    //element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.addEventListener('contextmenu', handleContextMenu);
 
     // Return a function to remove the event listener if needed
     return () => {
-        element.removeEventListener('click', handleClick);
+        cageElement.removeEventListener('contextmenu', handleContextMenu);
     };
 }
 
-export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps, editCageNumProps: EditCageNumProps) {
+export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, layoutDragProps: LayoutDragProps, cageActionProps: CageActionProps) {
     let newCageNums = parseCage((findNestedCageElement(targetShape.attr('id')) as SVGElement).getAttribute('id'));
     // Make sure cages don't have the wrong styles/classes and correct cage numbering for merge
     function resetElementProperties(element) {
@@ -177,7 +178,7 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
         element.style = "";
         element.id = `cage-${newCageNums}`;
         const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
-        setupEditCageNumEvent(textEle, editCageNumProps.setEditCageNum, editCageNumProps.setClickedRackNum);
+        setupEditCageNumEvent(textEle, cageActionProps.setEditCageNum, cageActionProps.setClickedRackNum, cageActionProps.setCtxMenuStyle);
         newCageNums++;
     }
 

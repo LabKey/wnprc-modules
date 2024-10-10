@@ -48,9 +48,10 @@ export interface PendingRackUpdate {
     rackId: number;
 }
 
-export interface EditCageNumProps {
-    setClickedRackNum: React.Dispatch<React.SetStateAction<number>>
-    setEditCageNum: React.Dispatch<React.SetStateAction<number>>
+export interface CageActionProps {
+    setClickedRackNum: React.Dispatch<React.SetStateAction<number>>;
+    setEditCageNum: React.Dispatch<React.SetStateAction<number>>;
+    setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>;
 }
 export interface LayoutDragProps {
     gridSize: number;

@@ -996,13 +996,14 @@
 
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "CloseWaterOrder", null, {
-                        lsid:               waterOrder.lsid,
-                        taskId:             waterOrder.taskid,
-                        objectId:           waterOrder.objectIdCoalesced,
-                        animalId:           waterOrder.Id,
-                        endDate:            waterOrder.date,
-                        dataSource:         waterOrder.dataSource,
-                        skipWaterRegulationCheck:     true
+                        lsid:                       waterOrder.lsid,
+                        taskId:                     waterOrder.taskid,
+                        objectId:                   waterOrder.objectIdCoalesced,
+                        animalId:                   waterOrder.Id,
+                        endDate:                    waterOrder.date,
+                        dataSource:                 waterOrder.dataSource,
+                        closeRecord:                "true",
+                        skipWaterRegulationCheck:   'true'
 
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -1087,6 +1088,7 @@
                         objectId:           waterOrder.objectIdCoalesced,
                         animalId:           waterOrder.Id,
                         endDate:            waterOrder.date,
+                        closeRecord:        true,
                         dataSource:         waterOrder.dataSource
 
                     }),

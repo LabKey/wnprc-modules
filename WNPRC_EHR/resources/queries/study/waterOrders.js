@@ -105,6 +105,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
    //console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
     if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck) {
+        console.log("close record "+ row.closingRecord);
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.waterSource, row.objectid, row.project, this.extraContext);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {
@@ -115,11 +116,21 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         row.date = rowDate;
     }
 
+    if (row.Id && row.date && row.enddate && row.project && row.objectid &&  row.closingRecord){
+        let jsonArray = WNPRC.Utils.getJavaHelper().closeWaterOrder(row.id, row.date, row.enddate, row.project, row.objectid, row.closingRecord);
+        if (jsonArray != null) {
+            for (var i = 0; i < jsonArray.length; i++) {
+                var errorObject = jsonArray[i];
+                EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
+            }
+        }
+    }
+
     //if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
     //TODO: by pass water regulation to change water order to lixit and also chnage the water regulated animals data
     if ( row.waterSource == 'lixit' && !row.skipWaterRegulationCheck && !oldRow){
 
-        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,this.extraContext);
+        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,row.closingRecord,this.extraContext);
         let jsonExtraContext = this.extraContext.extraContextArray;
 
         if (jsonArray != null){

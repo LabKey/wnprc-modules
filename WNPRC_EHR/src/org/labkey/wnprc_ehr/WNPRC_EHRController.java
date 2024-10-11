@@ -1546,6 +1546,7 @@ public class WNPRC_EHRController extends SpringActionController
                         waterOrderRecord.put("taskid", woRow.get("taskid"));
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
+                        waterOrderRecord.put("closingRecord", event.isCloseRecord());
                         if (event.isSkipWaterRegulationCheck()){
                             waterOrderRecord.put("skipWaterRegulationCheck", true);
                         }
@@ -1731,6 +1732,7 @@ public class WNPRC_EHRController extends SpringActionController
         private String frequency;
         private String assignedTo;
         private String action;
+        private boolean closeRecord;
         private boolean skipWaterRegulationCheck;
 
 
@@ -1885,6 +1887,15 @@ public class WNPRC_EHRController extends SpringActionController
         public String getAction()
         {
             return action;
+        }
+
+        public boolean isCloseRecord()
+        {
+            return closeRecord;
+        }
+
+        public void setCloseRecord(boolean closeRecord){
+            this.closeRecord= closeRecord;
         }
 
         public boolean isSkipWaterRegulationCheck()

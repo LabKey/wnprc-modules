@@ -1376,11 +1376,11 @@ public class TriggerScriptHelper {
         JSONArray extraContextArray = new JSONArray();
 
         boolean existingOrder = false;
+       // boolean closingWaterRecord = closingRecord;
 
         Map<String, JSONObject> majorErrorMap = new HashMap<>();
         Map<String, JSONObject> errorMap = new HashMap<>();
 
-        //TODO: Check is the animal is at least one time in the WaterSchedule Table
         if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
             JSONObject returnErrors = new JSONObject();
             returnErrors.put("field", "Id");
@@ -1574,7 +1574,8 @@ public class TriggerScriptHelper {
                         }
                     }
                     if (!returnErrors.isEmpty() && checkIfAnimalInCondition(animalId,clientStartDate).size()>0){
-                        errorMap.put(waterRecord.getObjectId(), returnErrors);
+                        JSONObject returnErrorsExport = new JSONObject(returnErrors,JSONObject.getNames(returnErrors));
+                        errorMap.put(waterRecord.getObjectId(), returnErrorsExport);
                         extraContext.put("extraContextArray", extraContextArray);
                     }
                 }
@@ -1795,36 +1796,188 @@ public class TriggerScriptHelper {
 
     }
 
+    public JSONArray closeWaterOrder(String animalId, Date clientStartDate, Date clientEndDate, Integer project, String objectId,  boolean closingRecord){
+        JSONArray arrayOfErrors = new JSONArray();
+        Map<String, JSONObject> majorErrorMap = new HashMap<>();
+        Map<String, JSONObject> errorMap = new HashMap<>();
+
+        if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
+            JSONObject returnErrors = new JSONObject();
+            returnErrors.put("field", "Id");
+            returnErrors.put("severity","ERROR");
+            returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
+            majorErrorMap.put(objectId, returnErrors);
+
+        }
+
+        if (majorErrorMap.isEmpty()){
+            //Closing existing lixit order in the system and adding a record in the waterScheduleAnimals table
+            TableInfo waterOrders = getTableInfo("study","waterOrders");
+            SimpleFilter filterOrders = new SimpleFilter (FieldKey.fromString("objectid"), objectId);
+            filterOrders.addCondition(FieldKey.fromString("Id"), animalId, CompareType.EQUAL);
+
+            TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","frequency","enddate"),filterOrders,null);
+            Map <String,Object>[] waterOrderObject = waterOrderRecords.getMapArray();
+
+
+            if (waterOrderObject.length > 0){
+                List<Map<String, Object>> toUpdate = new ArrayList<>();
+                List<Map<String, Object>> oldKeys = new ArrayList<>();
+
+                for (Map<String,Object> waterOrderMap : waterOrderObject){
+                    String lsid = ConvertHelper.convert(waterOrderMap.get("lsid"), String.class);
+                    Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
+                    updateWaterOrder.put("lsid", lsid);
+                    updateWaterOrder.put("enddate",clientEndDate);
+                    updateWaterOrder.put("skipWaterRegulationCheck", true);
+                    toUpdate.add(updateWaterOrder);
+                    Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
+                    keyMap.put("lsid", lsid);
+                    oldKeys.add(keyMap);
+                }
+                try
+                {
+                    if (!toUpdate.isEmpty())
+                    {
+                        Container container = getContainer();
+                        User user = getUser();
+                        BatchValidationException errors = new BatchValidationException();
+                        List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
+                        if (updateRows.isEmpty() || errors.hasErrors())
+                        {
+                            JSONObject returnErrors = new JSONObject();
+                            returnErrors.put("field", "Id");
+                            returnErrors.put("severity", "ERROR");
+                            returnErrors.put("message", "Error closing water orders.");
+
+                            errorMap.put(objectId, returnErrors);
+                        }
+                    }
+                }
+                catch(Exception e){
+                    JSONObject returnErrors = new JSONObject();
+                    returnErrors.put("field", "project");
+                    returnErrors.put("severity", "ERROR");
+                    returnErrors.put("message", "Error closing water order.");
+
+                    errorMap.put(objectId, returnErrors);
+
+                }
+            }
+            errorMap.forEach((objectIdString, JSONObject)->{
+                arrayOfErrors.put(JSONObject);
+            });
+        }
+        majorErrorMap.forEach((objectIdString, JSONObject)->{
+            arrayOfErrors.put(JSONObject);
+        });
+
+        return arrayOfErrors;
+
+    }
+
     public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {
         return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
     }
 
-    public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord){
+    public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord)
+    {
         boolean validation = true;
 
-        if (clientRecord.compareTo(serverRecord) == 0){
+        if (clientRecord.compareTo(serverRecord) == 0)
+        {
             validation = false;
             return validation;
-        } else if (clientRecord.compareTo("Daily - AM")==0){
-            if (serverRecord.compareTo("Daily - Anytime")==0){
-                validation = false;
-                return validation;
-            }else if (serverRecord.compareTo("Daily - AM/PM")==0){
-                validation = false;
-                return validation;
-            }
-        } else if (clientRecord.contains("PM")){
-            if (serverRecord.contains("PM")){
+        }
+        else if (clientRecord.compareTo("Daily - AM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - Anytime") == 0)
+            {
                 validation = false;
                 return validation;
             }
-        } else if (clientRecord.compareTo("Daily - Anytime")==0){
-            if (serverRecord.contains("PM") || serverRecord.contains("AM")){
+            else if (serverRecord.compareTo("Daily - AM/PM") == 0)
+            {
                 validation = false;
                 return validation;
             }
-        } else if (clientRecord.compareTo("Daily - AM/PM")==0){
-            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime")==0){
+        }
+        else if (clientRecord.compareTo("Daily - PM") == 0)
+        {
+            if (serverRecord.contains("PM"))
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Daily - Anytime") == 0)
+        {
+            if (serverRecord.contains("PM") || serverRecord.contains("AM"))
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Daily - AM/PM") == 0)
+        {
+            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Sunday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Monday - PM") == 0)
+        {
+                if (serverRecord.compareTo("Daily - PM") == 0)
+                {
+                    validation = false;
+                    return validation;
+                }
+        }
+        else if (clientRecord.compareTo("Tuesday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Wednesday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Thursday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Friday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Saturday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
                 validation = false;
                 return validation;
             }

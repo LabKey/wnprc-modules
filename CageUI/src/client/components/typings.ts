@@ -62,6 +62,7 @@ export interface LayoutDragProps {
     moveCage: (cageNum: number, x: number, y: number, k: number) => void;
     setCurrCage: React.Dispatch<React.SetStateAction<number>>
 }
+
 export interface Cage {
     id: number // Id local to rack
     cageNum: number // Id local to room

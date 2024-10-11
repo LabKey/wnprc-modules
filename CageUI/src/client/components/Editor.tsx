@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { svg } from 'd3';
+import { BaseType, svg } from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
@@ -96,6 +96,7 @@ const Editor = () => {
             const mergeAvail = checkAdjacent(cage, currCage, GRID_SIZE, GRID_RATIO);
             if(mergeAvail){
                 const targetShape = layoutSvg.select(`[id*="cage-${cage.num}"]`);
+                if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
                 const targetRack = (targetShape.node() as SVGGElement).closest('[id^=rack-]');
                 const draggedShape = layoutSvg.select(`[id*="cage-${draggedCageNum}"]`);
                 const draggedRack = (draggedShape.node() as SVGGElement).closest('[id^=rack-]');
@@ -134,7 +135,8 @@ const Editor = () => {
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
         } else {
-            const cageGroup = draggedShape.select('#cage-x');
+            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = draggedShape.select('#cage-x');
+            if(cageGroup.empty()) return; // Sometimes cage group isn't bound correctly causing a random crash
             const cageIdText = draggedShape.select('tspan');
             const transform = d3.zoomTransform(layoutSvg.node());
 

@@ -6,7 +6,7 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { CageActionProps, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
+import { CageActionProps, CageLocations, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
@@ -19,7 +19,7 @@ import {
     mergeRacks,
     placeAndScaleGroup,
     setupEditCageNumEvent,
-    startDragInLayout,
+    createStartDragInLayout,
     updateGrid
 } from './LayoutEditorHelpers';
 import { areCagesInSameRack, parseRack } from './helpers';
@@ -34,7 +34,6 @@ const Editor = () => {
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
     const [addingRack, setAddingRack] = useState<boolean>(false);
-    const [draggedCageNum, setDraggedCageNum] = useState<number>(null);
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
     const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
     const [renameCage, setRenameCage] = useState<boolean>(false);
@@ -52,16 +51,15 @@ const Editor = () => {
         delRack,
         changeCageId,
         cageNumChange,
-        cageLocs,
-        addNewCageLocation,
-        moveCageLocation,
+        moveRackLocation,
         mergeLocalRacks,
         getCageCount,
         clickedRack,
         setClickedRack,
         clickedCage,
         setClickedCage,
-        delCage
+        delCage,
+        cageLocs
     } = useLayoutContext();
 
     const handleClickRename = (event: React.MouseEvent<HTMLElement>) => {
@@ -75,13 +73,16 @@ const Editor = () => {
         console.log("xxx Locs: ", cageLocs);
     }, [room, localRoom, cageLocs]);
 
+    // Effect checks for merging after a rack is moved
     useEffect(() => {
-        if(cageLocs.length === 0 || !draggedCageNum ) return;
-        console.log("Dragged cage: ", draggedCageNum);
-        const currCage = cageLocs.find((cage) => cage.num === draggedCageNum)
+        if(cageLocs.length === 0 || !clickedCage ) return;
+        console.log("Dragged cage: ", clickedCage);
+
+        //const targetRack = localRoom.find(rack => rack.id === clickedRack);
+        const currCage = cageLocs.find((cage) => cage.num === clickedCage)
 
         cageLocs.forEach((cage) => {
-            if(draggedCageNum === cage.num) return; // cant merge into itself
+            if(clickedCage === cage.num) return; // cant merge into itself
             let inSameRack = false;
 
             localRoom.forEach(rack => {
@@ -90,15 +91,15 @@ const Editor = () => {
                     return;
                 }
             });
-            if(inSameRack){
+            if(inSameRack) {
                 return;
             }
             const mergeAvail = checkAdjacent(cage, currCage, GRID_SIZE, GRID_RATIO);
-            if(mergeAvail){
+            if(mergeAvail) {
                 const targetShape = layoutSvg.select(`[id*="cage-${cage.num}"]`);
                 if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
                 const targetRack = (targetShape.node() as SVGGElement).closest('[id^=rack-]');
-                const draggedShape = layoutSvg.select(`[id*="cage-${draggedCageNum}"]`);
+                const draggedShape = layoutSvg.select(`[id*="cage-${clickedCage}"]`);
                 const draggedRack = (draggedShape.node() as SVGGElement).closest('[id^=rack-]');
                 console.log("Merging: ", targetRack, draggedRack);
                 const layoutDragProps: LayoutDragProps = {
@@ -107,8 +108,7 @@ const Editor = () => {
                     gridRatio: GRID_RATIO,
                     gridSize: GRID_SIZE,
                     layoutSvg: layoutSvg,
-                    moveCage: moveCageLocation,
-                    setCurrCage: setDraggedCageNum
+                    moveRack: moveRackLocation
                 };
                 const cageActionProps: CageActionProps = {
                     setEditCageNum: setClickedCage,
@@ -118,10 +118,10 @@ const Editor = () => {
                 mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps);
             }
         });
-        setDraggedCageNum(null);
+        setClickedCage(null);
     }, [cageLocs])
 
-    // This effect updates racks for adding to the room and merging
+    // This effect updates racks for adding to the room
     useEffect(() => {
         if(!pendingRackUpdate) return;
         const {draggedShape, cellX, cellY, rackId} = pendingRackUpdate;
@@ -142,7 +142,6 @@ const Editor = () => {
 
             // Change the id of the group in the pre-created svg img, and set class name for top level group.
             const currentId = cageGroup.attr('id');
-            // set first cage in rack to be 1
             if(currentId){
                 const newRackId = currentId.replace('cage-x', `cage-${getCageCount()}`)
                 cageGroup.attr('id', newRackId); // Set the new ID
@@ -156,13 +155,7 @@ const Editor = () => {
 
             group.append(() => draggedShape.node());
             placeAndScaleGroup(group, cellX, cellY, transform);
-            addNewCageLocation({
-                num: getCageCount(),
-                cellX: cellX,
-                cellY: cellY,
-                scale: transform.k
-            });
-            addRack(rackId);
+            addRack(rackId, cellX, cellY, transform.k);
         }
 
         const addProps: LayoutDragProps = {
@@ -171,11 +164,10 @@ const Editor = () => {
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
-            moveCage: moveCageLocation,
-            setCurrCage: setDraggedCageNum
+            moveRack: moveRackLocation
         };
         // Reattach drag listeners for interaction within layout
-        group.call(d3.drag().on('start', startDragInLayout)
+        group.call(d3.drag().on('start', createStartDragInLayout({setRack: setClickedRack}))
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
             .on('end', createEndDragInLayout(addProps)));
 

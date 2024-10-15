@@ -142,7 +142,7 @@ export const RoomLayout: FC = () => {
                 <Popup
                     isOpen={isOpen}
                     onClose={closeDetails}
-                    header={`Cage ${cageDetails.map((cage) => cage.name).join(", ")}`}
+                    header={`Cage ${cageDetails.map((cage) => cage.cageNum).join(", ")}`}
                     subheader={["Total: 2", "Status: OK"]}
                     mainContent={
                         <>

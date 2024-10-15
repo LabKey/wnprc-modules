@@ -12,20 +12,12 @@ export type CageSizeWithKey =
     { sizeKey: "4.3", dimensions: CageSize };
 
 export type CagePosition = "top" | "bottom";
-export type CageType = "cage" | "pen";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
 type PageViews = "Room" | "Rack" | "Cage";
 
 export interface Page {
     mainView: PageViews;
     subViewId: string;
-}
-
-export interface CageLocations {
-    num: number;
-    cellX: number;
-    cellY: number;
-    scale: number;
 }
 
 export interface HandleZoomProps {
@@ -59,20 +51,25 @@ export interface LayoutDragProps {
     MAX_SNAP_DISTANCE: number;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (id: number) => void;
-    moveCage: (cageNum: number, x: number, y: number, k: number) => void;
-    setCurrCage: React.Dispatch<React.SetStateAction<number>>
+    moveRack: (rackNum: number, x: number, y: number, k: number) => void;
 }
 
 export interface Cage {
     id: number // Id local to rack
     cageNum: number // Id local to room
-    name: string;
     cageState: CageState;
-    position: string;
+    position: CagePosition;
     type: CageType;
     adjCages: AdjCages | undefined;
-    size: CageSizeWithKey;
-    manufacturer: CageBuilder
+    x: number; // x coordinate of cage in rack coordinate plane
+    y: number; // y coordinate of cage in rack coordinate plane
+}
+
+export interface CageLocations {
+    num: number;
+    cellX: number;
+    cellY: number;
+    scale: number;
 }
 
 export interface AdjCages {
@@ -89,10 +86,11 @@ export interface CageState {
 }
 export interface Rack {
     id: number;
-    type?: RackTypes;
+    type: RackTypes;
     cages: Cage[];
-    xPos?: number;
-    yPos?: number;
+    x: number; // x coordinate of rack in layout coordinate plane
+    y: number; // y coordinate of rack in layout coordinate plane
+    scale: number; // k scaling vector in layout coordinate plane
     isActive: boolean;
 }
 export enum RackTypes {
@@ -101,6 +99,13 @@ export enum RackTypes {
     Pen,
     MultiHorizontal
 }
+export enum CageType {
+    Cage,
+    Pen,
+    TempCage,
+    PlayCage
+}
+
 export enum ModTypes {
     StandardFloor,
     MeshFloor,

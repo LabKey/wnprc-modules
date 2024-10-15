@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { FC } from 'react';
 import { ActionURL } from '@labkey/api';
-import { addNewRack } from './helpers';
 import { Rack, RackTypes } from './typings';
 import { ReactSVG } from 'react-svg';
 

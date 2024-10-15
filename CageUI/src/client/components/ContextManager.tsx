@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { Cage, Rack, Page, CageLocations } from './typings';
+import { createContext, useCallback, useContext, useState } from 'react';
+import { Cage, CageLocations, Page, Rack, RackTypes } from './typings';
 import { removeCircularReferences } from './helpers';
-import { svg } from 'd3';
 
 export interface RoomContextType {
     selectedPage: Page;
@@ -38,14 +37,12 @@ export interface LayoutContextType {
     room: Rack[];
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>;
     cageLocs: CageLocations[];
-    setCageLocs: React.Dispatch<React.SetStateAction<CageLocations[]>>;
     localRoom: Rack[];
-    addRack: (id: number) => void;
+    addRack: (id: number, x: number, y: number, scale: number) => void;
     delRack: (id: number) => void;
     changeCageId: (idBefore: number, idAfter: number) => void;
     cageNumChange: {before: number, after: number};
-    addNewCageLocation: (newCage: CageLocations) => void;
-    moveCageLocation: (cageNum: number, x: number, y: number, k: number) => void;
+    moveRackLocation: (rackId: number, x: number, y: number, k: number) => void;
     mergeLocalRacks: (targetNum: number, draggedNum: number) => void;
     getCageCount: () => number;
     clickedRack: number;
@@ -175,30 +172,53 @@ export const RoomContextProvider = ({children}) => {
 export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     const [cageLocs, setCageLocs] = useState<CageLocations[]>([])
-    const [localRoom, setLocalRoom] = useState<Rack[]>(room);
+    const [localRoom, setLocalRoom] = useState<Rack[]>([]);
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
     const [clickedRack, setClickedRack] = useState<number | null>(null);
     const [clickedCage, setClickedCage] = useState<number | null>(null);
 
-    const addRack = (id: number) => {
+    const addRack = (id: number, x: number, y: number, scale: number) => {
+        const newCageNum = getCageCount();
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
             id: 1,
-            cageNum: getCageCount(),
-            manufacturer: undefined,
-            name: '',
-            position: '',
-            size: undefined,
-            type: undefined
+            cageNum: newCageNum,
+            position: 'top',
+            type: undefined,
+            x: 0,
+            y: 0,
         };
+
+        // First cage in rack is always at rack starting position as well
+        const newCageLoc: CageLocations = {
+            num: newCageNum,
+            cellX: x,
+            cellY: y,
+            scale: scale
+        }
+
         const newRack: Rack = {
             cages: [firstCage],
             id: id,
-            isActive: false,
-            type: undefined
+            isActive: true,
+            type: RackTypes.OneOfOne,
+            x: x,
+            y: y,
+            scale: scale
         };
         setLocalRoom(prevRacks => [...prevRacks, newRack]);
+
+        setCageLocs((prevCageLocs) => {
+            // Add the new box location
+            const updatedCageLocs = [...prevCageLocs, newCageLoc];
+
+            // Set the scale of all boxes to the scale of the new box location
+            return updatedCageLocs.map(box => ({
+                ...box,
+                scale: newCageLoc.scale,
+            }));
+        });
     };
 
     const mergeLocalRacks = (targetNum: number, dragNum: number) => {
@@ -224,9 +244,10 @@ export const LayoutContextProvider = ({children}) => {
                 id: targetRack.id, // Use the larger ID for the merged rack
                 type: targetRack.type || dragRack.type,
                 cages: mergedCages,
-                xPos: targetRack.xPos || dragRack.xPos,
-                yPos: targetRack.yPos || dragRack.yPos,
-                isActive: true,
+                x: targetRack.x || dragRack.x,
+                y: targetRack.y || dragRack.y,
+                scale: targetRack.scale || dragRack.scale,
+                isActive: targetRack.isActive || dragRack.isActive,
             };
 
             // Filter out the original racks and add the merged rack
@@ -234,28 +255,43 @@ export const LayoutContextProvider = ({children}) => {
         });
     }
 
-    const addNewCageLocation = (newCage: CageLocations) => {
-        setCageLocs((prevCageLocs) => {
-            // Add the new box location
-            const updatedCageLocs = [...prevCageLocs, newCage];
+    const moveRackLocation = (rackId: number, x: number, y: number, k: number) => {
+        // Update localRoom and then find the moved rack to update cageLocs
+        setLocalRoom((prevState) => {
+            const updatedLocalRoom = prevState.map(rack =>
+                rack.id === rackId
+                    ? {
+                        ...rack,
+                        x: x, // Update rack's new x position
+                        y: y, // Update rack's new y position
+                        scale: k
+                    }
+                    : rack
+            );
 
-            // Set the scale of all boxes to the scale of the new box location
-            return updatedCageLocs.map(box => ({
-                ...box,
-                scale: newCage.scale,
-            }));
+            // After updating localRoom, use updatedLocalRoom to adjust cageLocs
+            setCageLocs((prevCageLocs) =>
+                prevCageLocs.map(cage => {
+                    // Find if the cage belongs to the moved rack
+                    const isInMovedRack = updatedLocalRoom.find(rack =>
+                        rack.id === rackId &&
+                        rack.cages.some(rackCage => rackCage.cageNum === cage.num)
+                    );
+
+                    return isInMovedRack
+                        ? {
+                            ...cage,
+                            // New absolute positions for cages
+                            cellX: x + isInMovedRack.x, // Add rack's new x position
+                            cellY: y + isInMovedRack.y, // Add rack's new y position
+                            scale: k  // Update scale
+                        }
+                        : cage; // Leave other cages unchanged
+                })
+            );
+
+            return updatedLocalRoom as Rack[]; // Return the updated localRoom
         });
-    };
-
-    const moveCageLocation = (cageNum: number, x: number, y: number, k: number) => {
-        setCageLocs((prevCageLocs) =>
-            prevCageLocs.map(cage =>
-                cage.num === cageNum
-                    ? { ...cage, cellX: x, cellY: y, scale: k }  // Update x, y, and scale of the target box
-                    : { ...cage, scale: k }  // Only update the scale of other boxes
-            )
-        );
-
     };
 
     const delRack = (id: number) => {
@@ -303,12 +339,10 @@ export const LayoutContextProvider = ({children}) => {
             localRoom,
             addRack,
             delRack,
+            cageLocs,
             changeCageId,
             cageNumChange,
-            cageLocs,
-            setCageLocs,
-            addNewCageLocation,
-            moveCageLocation,
+            moveRackLocation,
             mergeLocalRacks,
             getCageCount,
             clickedRack,

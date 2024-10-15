@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import { ActionURL } from '@labkey/api';
-import { changeStyleProperty, getRackSeparators, parseSeparator } from './helpers';
+//import { changeStyleProperty, getRackSeparators, parseSeparator } from './helpers';
 import { ReactSVG } from 'react-svg';
 
 export const RoomLegend: FC<any> = () => {

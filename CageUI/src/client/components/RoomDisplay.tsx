@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC, useState, useEffect } from 'react';
 import { Cage, Rack } from './typings';
-import { findDetails, loadRoom } from './helpers';
+import { findDetails } from './helpers';
 import { RoomLayout } from './RoomLayout';
 import { useRoomContext } from './ContextManager';
 
@@ -24,7 +24,7 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
 
     useEffect(() => {
         // Load room data only once when the component mounts
-        setRoom(loadRoom(name));
+        //setRoom(loadRoom(name));
     }, []);
 
     return (

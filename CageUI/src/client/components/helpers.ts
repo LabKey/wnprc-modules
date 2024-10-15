@@ -87,7 +87,7 @@ export const parseCageMod = (input: string) => {
     }
     return;
 }
-
+/*
 export const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilder[], cageSizes: CageSizeWithKey[], rackId: number, rackConfigs, cageNum): Cage[] => {
     const cages: Cage[] = [];
     for (let i = 0; i < cnt; i++) {
@@ -136,7 +136,8 @@ export const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilde
     }
     return cages;
 }
-
+*/
+/*
 export const addNewRack = (
     selectedEditRect: SVGRectElement,
     gridSize: number,
@@ -212,7 +213,7 @@ export const loadRoom = (name: string): Rack[] => {
         createAdjCages();
     }
     return tempRoom
-}
+}*/
 
 export const findCageCount = (rackType: RackTypes) => {
     if(rackType === RackTypes.TwoOfTwo){
@@ -395,7 +396,7 @@ const removeDuplicatesByPosition = (arr) => {
 
 /*
 Finds the separator modifications that should be mapped to the svg
- */
+*/
 export const getRackSeparators = (rack: Rack): Separators => {
     const separators: Separators = [];
     for (const cage of rack.cages) {
@@ -450,6 +451,7 @@ export const getTotalCagesInRoom = (room) => {
     }, 0);
 }
 
+/*
 // Finds the cages that are affected by the modification/separator
 export const findAffCages = (mod: string, cage: Cage) => {
     let affCageName;
@@ -474,7 +476,7 @@ export const findAffCages = (mod: string, cage: Cage) => {
         }
     }
     return affCageName;
-}
+}*/
 
 export const changeCageModArray = (updateId: number, setClickedCagePartners, modKey: string, event) => {
     setClickedCagePartners(prevState => {

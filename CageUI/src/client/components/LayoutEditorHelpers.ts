@@ -69,14 +69,7 @@ function showConfirmationPopup() {
     });
 }
 
-// This function makes the element draggable in the layout editor
-function makeDraggable(element, props) {
-    const d3Element = d3.select(element);
-    d3Element.call(d3.drag()
-        .on('start', startDragInLayout)
-        .on('drag', createDragInLayout({layoutSvg: props.layoutSvg}))
-        .on('end', createEndDragInLayout(props)));
-}
+
 // Function to help merge racks together by resetting groups to local coords
 function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
 
@@ -220,8 +213,7 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
         gridRatio,
         MAX_SNAP_DISTANCE,
         delRack,
-        moveCage,
-        setCurrCage
+        moveRack
     } = layoutDragProps
     if (shouldMerge) {
         console.log("Merge: ", targetShape.node(), draggedShape.node());
@@ -273,10 +265,9 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
-            moveCage: moveCage,
-            setCurrCage: setCurrCage
+            moveRack: moveRack
         };
-        mergedGroup.call(d3.drag().on('start', startDragInLayout)
+        mergedGroup.call(d3.drag().on('start', createStartDragInLayout({setRack: cageActionProps.setClickedRackNum}))
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
             .on('end', createEndDragInLayout(addProps)));
         // Remove the original shapes from the DOM
@@ -339,14 +330,20 @@ export const getTargetRect =(x, y, gridSize, transform) => {
 }
 
 // Layout Drag Helpers
-export function startDragInLayout(event) {
-    // Check if the parent <text> element is editable, return if not
-    if (isTextEditable(event)) {
-        event.on('drag', null).on('end', null); // Detach drag and end events
-        return;
-    }
-    console.log('Drag Layout #1', d3.select(this));
-    d3.select(this).raise().classed('active', true);
+export function createStartDragInLayout(startDragProps) {
+    return(
+        function startDragInLayout(event) {
+            const {setRack} = startDragProps;
+            // Check if the parent <text> element is editable, return if not
+            if (isTextEditable(event)) {
+                event.on('drag', null).on('end', null); // Detach drag and end events
+                return;
+            }
+            setRack(parseRack(d3.select(this).attr('id')));
+            console.log('Drag Layout #1', parseRack(d3.select(this).attr('id')));
+            d3.select(this).raise().classed('active', true);
+        }
+    );
 }
 
 export function createDragInLayout(dragProps) {
@@ -373,8 +370,7 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 gridSize,
                 layoutSvg,
                 delRack,
-                moveCage,
-                setCurrCage
+                moveRack
             } = props;
             const shape = d3.select(this);
             shape.classed('active', false);
@@ -393,6 +389,13 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 const cellY = targetCell.y;
                 placeAndScaleGroup(shape, cellX, cellY, transform);
 
+                console.log("#3: ", cellX, cellY, shape.node());
+                moveRack(parseRack(shape.attr('id')), cellX, cellY, transform.k);
+
+                // Set rack state correctly with move/updated coords
+
+
+                /*
                 //Update all shape placements
                 if(shape.selectChildren().size() > 1) {
                     //group of groups
@@ -413,7 +416,7 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                     const cageNum = parseCage(currCage.attr('id'));
                     setCurrCage(cageNum);
                     moveCage(cageNum, cellX, cellY, transform.k);
-                }
+                }*/
             } else {
                 // remove rack from room
                 console.log("deleting cage from room", getRackFromClass(shape.attr('class')));

@@ -6,7 +6,7 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { CageActionProps, CageLocations, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
+import { Cage, CageActionProps, CageLocations, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
@@ -75,18 +75,21 @@ const Editor = () => {
 
     // Effect checks for merging after a rack is moved
     useEffect(() => {
-        if(cageLocs.length === 0 || !clickedCage ) return;
-        console.log("Dragged cage: ", clickedCage);
+        if(cageLocs.length === 0 || !clickedRack ) return;
+        console.log("Dragged rack 1: ", clickedRack);
 
         //const targetRack = localRoom.find(rack => rack.id === clickedRack);
-        const currCage = cageLocs.find((cage) => cage.num === clickedCage)
+
+        //This is the first cage in the dragged rack that will determine if a merge is possible
+        const currCage: Cage = localRoom.find(rack => rack.id === clickedRack).cages.find((cage) => cage.id === 1);
+        const currCageLoc: CageLocations = cageLocs.find((cage) => cage.num === currCage.cageNum);
 
         cageLocs.forEach((cage) => {
-            if(clickedCage === cage.num) return; // cant merge into itself
+            if(currCage.cageNum === cage.num) return; // cant merge into itself
             let inSameRack = false;
 
             localRoom.forEach(rack => {
-                if(areCagesInSameRack(rack, cage, currCage)) {
+                if(areCagesInSameRack(rack, cage, currCageLoc)) {
                     inSameRack = true;
                     return;
                 }
@@ -94,12 +97,12 @@ const Editor = () => {
             if(inSameRack) {
                 return;
             }
-            const mergeAvail = checkAdjacent(cage, currCage, GRID_SIZE, GRID_RATIO);
+            const mergeAvail = checkAdjacent(cage, currCageLoc, GRID_SIZE, GRID_RATIO);
             if(mergeAvail) {
                 const targetShape = layoutSvg.select(`[id*="cage-${cage.num}"]`);
                 if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
                 const targetRack = (targetShape.node() as SVGGElement).closest('[id^=rack-]');
-                const draggedShape = layoutSvg.select(`[id*="cage-${clickedCage}"]`);
+                const draggedShape = layoutSvg.select(`[id*="cage-${currCage.cageNum}"]`);
                 const draggedRack = (draggedShape.node() as SVGGElement).closest('[id^=rack-]');
                 console.log("Merging: ", targetRack, draggedRack);
                 const layoutDragProps: LayoutDragProps = {
@@ -118,7 +121,7 @@ const Editor = () => {
                 mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps);
             }
         });
-        setClickedCage(null);
+        setClickedRack(null);
     }, [cageLocs])
 
     // This effect updates racks for adding to the room

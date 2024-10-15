@@ -269,26 +269,28 @@ export const LayoutContextProvider = ({children}) => {
                     : rack
             );
 
-            // After updating localRoom, use updatedLocalRoom to adjust cageLocs
-            setCageLocs((prevCageLocs) =>
-                prevCageLocs.map(cage => {
-                    // Find if the cage belongs to the moved rack
-                    const isInMovedRack = updatedLocalRoom.find(rack =>
-                        rack.id === rackId &&
-                        rack.cages.some(rackCage => rackCage.cageNum === cage.num)
-                    );
+            // Find the moved rack to access its cages
+            const movedRack = updatedLocalRoom.find(rack => rack.id === rackId);
 
-                    return isInMovedRack
-                        ? {
-                            ...cage,
-                            // New absolute positions for cages
-                            cellX: x + isInMovedRack.x, // Add rack's new x position
-                            cellY: y + isInMovedRack.y, // Add rack's new y position
-                            scale: k  // Update scale
-                        }
-                        : cage; // Leave other cages unchanged
-                })
-            );
+            // Update cageLocs based on the new rack coordinates
+            if (movedRack) {
+                setCageLocs((prevCageLocs) =>
+                    prevCageLocs.map(cage => {
+                        // Check if the cage belongs to the moved rack using cageNum
+                        const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
+
+                        return movedRackCage
+                            ? {
+                                ...cage,
+                                // Update the cage's coordinates by adding its own coordinates to the new rack's coordinates
+                                cellX: x + movedRackCage.x, // Add new rack's x position to cage's local x
+                                cellY: y + movedRackCage.y, // Add new rack's y position to cage's local y
+                                scale: k // Update scale if needed
+                            }
+                            : cage; // Leave other cages unchanged
+                    })
+                );
+            }
 
             return updatedLocalRoom as Rack[]; // Return the updated localRoom
         });

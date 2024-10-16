@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useCallback, useContext, useState } from 'react';
 import { Cage, CageLocations, Page, Rack, RackTypes } from './typings';
-import { removeCircularReferences } from './helpers';
+import { getTranslation, removeCircularReferences } from './helpers';
 
 export interface RoomContextType {
     selectedPage: Page;
@@ -43,7 +43,7 @@ export interface LayoutContextType {
     changeCageId: (idBefore: number, idAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveRackLocation: (rackId: number, x: number, y: number, k: number) => void;
-    mergeLocalRacks: (targetNum: number, draggedNum: number) => void;
+    mergeLocalRacks: (targetRackNum: number, draggedRackNum: number, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     getCageCount: () => number;
     clickedRack: number;
     setClickedRack: React.Dispatch<React.SetStateAction<number>>;
@@ -221,8 +221,9 @@ export const LayoutContextProvider = ({children}) => {
         });
     };
 
-    const mergeLocalRacks = (targetNum: number, dragNum: number) => {
-        console.log("context merge: ", targetNum, dragNum, localRoom);
+    const mergeLocalRacks = (targetNum, dragNum, newGroup) => {
+        console.log("context merge: ", newGroup, targetNum, dragNum);
+
 
         setLocalRoom(prevRacks => {
             const targetRack = prevRacks.find(r => r.id === targetNum);
@@ -239,11 +240,17 @@ export const LayoutContextProvider = ({children}) => {
                 id: index + 1, // Reassign local IDs
             }));
 
+            const updatedCages: Cage[] = mergedCages.map(cage => {
+                const newCage = newGroup.select(`#cage-${cage.cageNum}`);
+                const cageCoords = getTranslation(newCage.attr('transform'));
+                return {...cage, x: cageCoords.x, y: cageCoords.y }
+            })
+
             // Create new merged rack
             const mergedRack: Rack = {
                 id: targetRack.id, // Use the larger ID for the merged rack
                 type: targetRack.type || dragRack.type,
-                cages: mergedCages,
+                cages: updatedCages,
                 x: targetRack.x || dragRack.x,
                 y: targetRack.y || dragRack.y,
                 scale: targetRack.scale || dragRack.scale,

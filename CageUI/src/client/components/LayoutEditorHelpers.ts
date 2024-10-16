@@ -221,8 +221,6 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
         const mergedGroup = layoutSvg.append('g')
             .attr('class', targetShape.attr('class'))
             .attr('id', targetShape.attr('id'));
-        //newCageNums = 1;
-
 
         // Clone the target and dragged shapes before appending
         let clonedTargetShape = targetShape.node().cloneNode(true);
@@ -238,7 +236,6 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
         // Append the cloned shapes to the new group
         const targetRackNum = parseRack(targetShape.node().closest('[id^=rack-]').getAttribute('id'))
         const draggedRackNum = parseRack(draggedShape.node().closest('[id^=rack-]').getAttribute('id'))
-        mergeLocalRacks(targetRackNum, draggedRackNum)
 
         // Copy the transform attribute from the targetShape to the merged group
         const transformAttr = targetShape.attr('transform');
@@ -258,6 +255,7 @@ export async function mergeRacks(targetShape, draggedShape, mergeLocalRacks, lay
             mergedGroup.data([{x: targetData.x, y: targetData.y}])
         }
 
+        mergeLocalRacks(targetRackNum, draggedRackNum, mergedGroup)
 
         const addProps: LayoutDragProps = {
             gridSize: gridSize,

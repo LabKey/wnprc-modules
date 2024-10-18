@@ -1,18 +1,17 @@
 import {
     Cage,
-    CageBuilder, CageLocations,
+    CageBuilder,
     CagePosition,
     CageSizes,
     CageSizeWithKey,
     CageState,
     CageType,
-    DefaultCageState,
+    DefaultCageState, LocationCoords,
     Modification,
     Modifications,
     ModTypes,
     Rack,
     RackTypes,
-    RoomSchematics,
     SeparatorMod,
     SeparatorPosition,
     Separators,
@@ -27,13 +26,7 @@ console.log(zeroPad(5, 4)); // "0005"
 console.log(zeroPad(5, 6)); // "000005"
  */
 
-export const getRackType = (input: string): RackTypes => {
-    if(input.includes("two")){
-        return RackTypes.OneOfOne;
-    }else{
-        return RackTypes.Pen;
-    }
-}
+
 export const getRackFromClass = (classString: string) => {
     let rackClass = classString.match(/rack-\d+/);
 
@@ -214,17 +207,6 @@ export const loadRoom = (name: string): Rack[] => {
     }
     return tempRoom
 }*/
-
-export const findCageCount = (rackType: RackTypes) => {
-    if(rackType === RackTypes.TwoOfTwo){
-        return 4;
-    }else if (rackType === RackTypes.OneOfOne){
-        return 2;
-    }
-    else{
-        return 1;
-    }
-}
 
 // Changes stroke color of svg element nodes keeping the other styles.
 export const changeStyleProperty  = (element: Element, property: string, newValue: string): void => {
@@ -645,7 +627,7 @@ export const isTextEditable = (event) => {
     }
 }
 
-export const areCagesInSameRack = (rack: Rack, cage1: CageLocations, cage2: CageLocations) => {
+export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: LocationCoords) => {
     if (!rack.cages || !Array.isArray(rack.cages)) {
         return false;
     }

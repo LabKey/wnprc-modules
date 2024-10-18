@@ -35,6 +35,7 @@ export interface OffsetProps {
 
 export interface PendingRackUpdate {
     draggedShape: any;
+    rackType: RackTypes;
     cellX: number;
     cellY: number;
     rackId: number;
@@ -52,6 +53,7 @@ export interface LayoutDragProps {
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (id: number) => void;
     moveRack: (rackNum: number, x: number, y: number, k: number) => void;
+    rackType: RackTypes;
 }
 
 export interface Cage {
@@ -60,17 +62,21 @@ export interface Cage {
     cageState: CageState;
     position: CagePosition;
     type: CageType;
+    size: CageSizeWithKey;
     adjCages: AdjCages | undefined;
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
 }
 
-export interface CageLocations {
+export interface LocationCoords {
     num: number;
     cellX: number;
     cellY: number;
-    scale: number;
 }
+
+export type UnitLocations = {
+    [key in RackTypes]: LocationCoords[];
+};
 
 export interface AdjCages {
     leftCage: Cage | undefined;
@@ -93,17 +99,21 @@ export interface Rack {
     scale: number; // k scaling vector in layout coordinate plane
     isActive: boolean;
 }
+
 export enum RackTypes {
-    OneOfOne,
-    TwoOfTwo,
-    Pen,
-    MultiHorizontal
+    Cage = "cage",
+    Pen = "pen",
+    TempCage = "tempCage",
+    PlayCage = "playCage"
 }
+
+
 export enum CageType {
-    Cage,
+    Allentown,
+    Suburban,
+    Lenderking,
+    Nursury,
     Pen,
-    TempCage,
-    PlayCage
 }
 
 export enum ModTypes {
@@ -170,16 +180,6 @@ export const CageSizes: Record<string, CageSizeWithKey> = {
         dimensions: { width: 4.3, length: 4.3, height: 4.3 }
     }
 };
-
-const Schematics: SchematicRoomProps = {
-    "AB140-167.svg": {
-        rackNum: 6,
-        cageNum: 4,
-        rackTypes: [RackTypes.TwoOfTwo], // rack types starting at cage 1 going up (single value means all racks the same)
-        cageTypes: ["Suburban"],
-        cageSizes: [CageSizes['8.0']]
-    }
-}
 
 //TODO finish styles
 export const Modifications = {
@@ -336,18 +336,6 @@ export const Modifications = {
         }]
     },
 }
-
-export const RoomSchematics = {
-    ab140: Schematics["AB140-167.svg"],
-    ab142: Schematics["AB140-167.svg"],
-    ab144: Schematics["AB140-167.svg"],
-    ab161: Schematics["AB140-167.svg"],
-    ab163: Schematics["AB140-167.svg"],
-    ab165: Schematics["AB140-167.svg"],
-    ab167: Schematics["AB140-167.svg"],
-}
-
-// TODO Change mod Data to access from mod
 
 // This is based off the Cage State interface.
 export const DefaultCageState = {

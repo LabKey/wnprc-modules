@@ -1,6 +1,15 @@
 import * as React from 'react';
-import { createContext, useCallback, useContext, useState } from 'react';
-import { Cage, CageLocations, Page, Rack, RackTypes } from './typings';
+import { createContext, useContext, useState } from 'react';
+import {
+    Cage,
+    CageSizes,
+    CageType,
+    LocationCoords,
+    Page,
+    Rack,
+    RackTypes,
+    UnitLocations
+} from './typings';
 import { getTranslation, removeCircularReferences } from './helpers';
 
 export interface RoomContextType {
@@ -36,20 +45,22 @@ export interface RoomContextType {
 export interface LayoutContextType {
     room: Rack[];
     setRoom: React.Dispatch<React.SetStateAction<Rack[]>>;
-    cageLocs: CageLocations[];
+    unitLocs: UnitLocations;
     localRoom: Rack[];
-    addRack: (id: number, x: number, y: number, scale: number) => void;
+    addRack: (id: number, x: number, y: number, newScale: number, rackType: RackTypes) => void;
     delRack: (id: number) => void;
     changeCageId: (idBefore: number, idAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveRackLocation: (rackId: number, x: number, y: number, k: number) => void;
     mergeLocalRacks: (targetRackNum: number, draggedRackNum: number, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
-    getCageCount: () => number;
+    getNextCageNum: (rackType: RackTypes) => number;
     clickedRack: number;
     setClickedRack: React.Dispatch<React.SetStateAction<number>>;
     clickedCage: number;
     setClickedCage: React.Dispatch<React.SetStateAction<number>>;
     delCage: () => void;
+    scale: number;
+    setScale: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -171,54 +182,56 @@ export const RoomContextProvider = ({children}) => {
 
 export const LayoutContextProvider = ({children}) => {
     const [room, setRoom] = useState<Rack[]>([]);
-    const [cageLocs, setCageLocs] = useState<CageLocations[]>([])
+    const [unitLocs, setUnitLocs] = useState<UnitLocations>({
+        [RackTypes.Pen]: [],
+        [RackTypes.Cage]: [],
+        [RackTypes.PlayCage]: [],
+        [RackTypes.TempCage]: [],
+    });
     const [localRoom, setLocalRoom] = useState<Rack[]>([]);
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
     const [clickedRack, setClickedRack] = useState<number | null>(null);
     const [clickedCage, setClickedCage] = useState<number | null>(null);
+    // instead of tying scale to each location, manage one scale for the whole layout
+    const [scale, setScale] = useState<number>(1);
 
-    const addRack = (id: number, x: number, y: number, scale: number) => {
-        const newCageNum = getCageCount();
+    const addRack = (id: number, x: number, y: number, newScale: number, rackType: RackTypes) => {
+        const newCageNum = getNextCageNum(rackType);
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
             id: 1,
             cageNum: newCageNum,
             position: 'top',
-            type: undefined,
+            type: rackType === RackTypes.Pen ? CageType.Pen : CageType.Allentown,
+            size: CageSizes['8.0'],
             x: 0,
             y: 0,
         };
 
         // First cage in rack is always at rack starting position as well
-        const newCageLoc: CageLocations = {
+        const newCageLoc: LocationCoords = {
             num: newCageNum,
             cellX: x,
-            cellY: y,
-            scale: scale
+            cellY: y
         }
 
         const newRack: Rack = {
             cages: [firstCage],
             id: id,
             isActive: true,
-            type: RackTypes.OneOfOne,
+            type: rackType,
             x: x,
             y: y,
-            scale: scale
+            scale: newScale
         };
         setLocalRoom(prevRacks => [...prevRacks, newRack]);
 
-        setCageLocs((prevCageLocs) => {
-            // Add the new box location
-            const updatedCageLocs = [...prevCageLocs, newCageLoc];
-
-            // Set the scale of all boxes to the scale of the new box location
-            return updatedCageLocs.map(box => ({
-                ...box,
-                scale: newCageLoc.scale,
-            }));
-        });
+        setUnitLocs(prevState => ({
+            ...prevState,
+            [rackType]: [...prevState[rackType], newCageLoc] // Append the new location to the correct array
+        }));
+        setScale(newScale);
     };
 
     const mergeLocalRacks = (targetNum, dragNum, newGroup) => {
@@ -281,65 +294,91 @@ export const LayoutContextProvider = ({children}) => {
 
             // Update cageLocs based on the new rack coordinates
             if (movedRack) {
-                setCageLocs((prevCageLocs) =>
-                    prevCageLocs.map(cage => {
-                        // Check if the cage belongs to the moved rack using cageNum
-                        const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
-
-                        return movedRackCage
-                            ? {
-                                ...cage,
-                                // Update the cage's coordinates by adding its own coordinates to the new rack's coordinates
-                                cellX: x + movedRackCage.x, // Add new rack's x position to cage's local x
-                                cellY: y + movedRackCage.y, // Add new rack's y position to cage's local y
-                                scale: k // Update scale if needed
-                            }
-                            : cage; // Leave other cages unchanged
+                setUnitLocs((prevUnitLocations) =>
+                    ({
+                        ...prevUnitLocations,
+                        // Access the correct unit location array using rack type
+                        [movedRack.type]: prevUnitLocations[movedRack.type].map(cage => {
+                            // Check if the cage belongs to the moved rack using cageNum
+                            const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
+                            return movedRackCage
+                                ? {
+                                    ...cage,
+                                    // Update the cage's coordinates by adding its own coordinates to the new rack's coordinates
+                                    cellX: x + movedRackCage.x, // Add new rack's x position to cage's local x
+                                    cellY: y + movedRackCage.y, // Add new rack's y position to cage's local y
+                                }
+                                : cage; // Leave other cages unchanged
+                        })
                     })
                 );
             }
-
             return updatedLocalRoom as Rack[]; // Return the updated localRoom
         });
     };
 
     const delRack = (id: number) => {
-        if(getCageCount() == 0) return;
         setLocalRoom(prevRacks =>  prevRacks.filter(rack => rack.id !== id));
     }
 
     const delCage = () => {
-        if(getCageCount() == 0) return;
         console.log("deleting: ", clickedCage)
     }
 
     const changeCageId = (idBefore: number, idAfter: number) => {
-        if(getCageCount() == 0){
-            return;
-        }
         if(localRoom.find(rack => rack.cages.find(cage =>
             cage.cageNum === idAfter
         ))){
             console.log("Please add a different id that doesnt exist in the current room");
             return;
         }
-        setLocalRoom(prevRacks => prevRacks.map(rack =>
-            rack.id === clickedRack
-                ? {...rack, cages: rack.cages.map(cage =>
-                        cage.cageNum === idBefore ? {...cage, cageNum: idAfter} : cage
-                    )}
-                : rack
-        ));
-        setCageLocs(prevCages =>  prevCages.map(cage =>
-            cage.num === idBefore ? { ...cage, num: idAfter } : cage
-        ));
+        setLocalRoom(prevRacks => {
+            // Find the clicked rack
+            const currRack = prevRacks.find(rack => rack.id === clickedRack);
+
+            if (!currRack) return prevRacks; // If the clicked rack is not found, return the previous state
+
+            // Update the local room by updating the cage numbers in the clicked rack
+            const updatedLocalRoom = prevRacks.map(rack =>
+                rack.id === clickedRack
+                    ? {
+                        ...rack,
+                        cages: rack.cages.map(cage =>
+                            cage.cageNum === idBefore ? { ...cage, cageNum: idAfter } : cage
+                        )
+                    }
+                    : rack
+            );
+
+            // Now update the unit locations using the rackType from currRack
+            setUnitLocs(prevUnitLocations => ({
+                ...prevUnitLocations,
+                // Access the correct unit location array based on clickedRack's rackType
+                [currRack.type]: prevUnitLocations[currRack.type].map(cage =>
+                    cage.num === idBefore ? { ...cage, num: idAfter } : cage
+                )
+            }));
+
+            return updatedLocalRoom; // Return the updated local room state
+        });
 
         setCageNumChange({before: idBefore, after: idAfter});
     }
 
-    const getCageCount = () => {
-        return cageLocs.reduce((max, obj) => (obj.num > max ? obj.num : max), 0) + 1;
-    }
+    const getNextCageNum = (rackType: RackTypes) => {
+        const cages = unitLocs[rackType];
+
+        // If no cages exist for this rackType, return 1 as the first available cage number
+        if (!cages || cages.length === 0) {
+            return 1;
+        }
+
+        // Get the maximum cageNum in the current array of cages
+        const maxCageNum = Math.max(...cages.map(cage => cage.num));
+
+        // Return the next available cageNum (max + 1)
+        return maxCageNum + 1;
+    };
 
     return (
         <LayoutContext.Provider value={{
@@ -348,17 +387,19 @@ export const LayoutContextProvider = ({children}) => {
             localRoom,
             addRack,
             delRack,
-            cageLocs,
+            unitLocs,
             changeCageId,
             cageNumChange,
             moveRackLocation,
             mergeLocalRacks,
-            getCageCount,
+            getNextCageNum,
             clickedRack,
             setClickedRack,
             clickedCage,
             setClickedCage,
-            delCage
+            delCage,
+            scale,
+            setScale
         }}>
             {children}
         </LayoutContext.Provider>

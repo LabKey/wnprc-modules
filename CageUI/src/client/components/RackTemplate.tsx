@@ -6,15 +6,10 @@ import { ReactSVG } from 'react-svg';
 
 interface RackTemplateProps {
     fileName: string,
-    gridSize: number,
-    localRoom: Rack[],
-    room: Rack[],
-    setAddingRack: (adding: boolean) => void,
-    rackType: RackTypes,
     className?: string
 }
 export const RackTemplate: FC<RackTemplateProps> = (props) => {
-    const {fileName, gridSize, localRoom, room, setAddingRack, rackType, className} = props;
+    const {fileName, className} = props;
 
 
     return (
@@ -26,16 +21,6 @@ export const RackTemplate: FC<RackTemplateProps> = (props) => {
                 className={className}
                 width={"250"}
                 height={"250"}
-                beforeInjection={(svg) => {
-                    // Select all <tspan> elements
-                    const tspans = svg.querySelectorAll('tspan');
-                    // Iterate through each <tspan> and make its parent <text> content editable
-                    tspans.forEach(node => {
-                        const textElement = node.parentElement;
-                        node.style.pointerEvents = "none";
-
-                    });
-                }}
             />
         </div>
     );

@@ -6,30 +6,31 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { Cage, CageActionProps, CageLocations, LayoutDragProps, PendingRackUpdate, RackTypes } from './typings';
+import { Cage, CageActionProps, LayoutDragProps, LocationCoords, PendingRackUpdate, RackTypes } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
     checkAdjacent,
     createDragInLayout,
     createEndDragInLayout,
+    createStartDragInLayout,
     drawGrid,
     getLayoutOffset,
     getTargetRect,
     mergeRacks,
     placeAndScaleGroup,
     setupEditCageNumEvent,
-    createStartDragInLayout,
     updateGrid
 } from './LayoutEditorHelpers';
-import { areCagesInSameRack, parseRack } from './helpers';
+import { areCagesInSameRack } from './helpers';
 import EditorContextMenu from './EditorContextMenu';
 
 const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
     const SVG_WIDTH = 1290;
     const SVG_HEIGHT = 810;
-    const GRID_RATIO = 4;
+    const CAGE_GRID_RATIO = 4;
+    const PEN_GRID_RATIO = 4;
     const GRID_SIZE = 30;
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
@@ -53,13 +54,13 @@ const Editor = () => {
         cageNumChange,
         moveRackLocation,
         mergeLocalRacks,
-        getCageCount,
+        getNextCageNum,
         clickedRack,
         setClickedRack,
         clickedCage,
         setClickedCage,
         delCage,
-        cageLocs
+        unitLocs
     } = useLayoutContext();
 
     const handleClickRename = (event: React.MouseEvent<HTMLElement>) => {
@@ -70,64 +71,74 @@ const Editor = () => {
     useEffect(() => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
-        console.log("xxx Locs: ", cageLocs);
-    }, [room, localRoom, cageLocs]);
+        console.log("xxx Locs: ", unitLocs);
+    }, [room, localRoom, unitLocs]);
 
     // Effect checks for merging after a rack is moved
     useEffect(() => {
-        if(cageLocs.length === 0 || !clickedRack ) return;
-        console.log("Dragged rack 1: ", clickedRack);
+        if(!clickedRack) return;
+        const rackType = localRoom.find(rack => rack.id === clickedRack).type;
 
-        //const targetRack = localRoom.find(rack => rack.id === clickedRack);
+        console.log("Dragged rack 1: ", clickedRack);
 
         //This is the first cage in the dragged rack that will determine if a merge is possible
         const currCage: Cage = localRoom.find(rack => rack.id === clickedRack).cages.find((cage) => cage.id === 1);
-        const currCageLoc: CageLocations = cageLocs.find((cage) => cage.num === currCage.cageNum);
 
-        cageLocs.forEach((cage) => {
-            if(currCage.cageNum === cage.num) return; // cant merge into itself
-            let inSameRack = false;
+        const currCageLoc: LocationCoords = unitLocs[rackType].find((cage) => cage.num === currCage.cageNum);
 
-            localRoom.forEach(rack => {
-                if(areCagesInSameRack(rack, cage, currCageLoc)) {
-                    inSameRack = true;
+        // rackType is the string for the enum here, cages is the array of locations for that unit
+        Object.entries(unitLocs).forEach(([rackType, cages]) => {
+            if(cages.length === 0) return;
+            cages.forEach((cage) => {
+                if(currCage.cageNum === cage.num) return; // cant merge into itself
+                let inSameRack = false;
+
+                localRoom.forEach(rack => {
+                    if(areCagesInSameRack(rack, cage, currCageLoc)) {
+                        inSameRack = true;
+                        return;
+                    }
+                });
+                if(inSameRack) {
                     return;
                 }
-            });
-            if(inSameRack) {
-                return;
-            }
-            const mergeAvail = checkAdjacent(cage, currCageLoc, GRID_SIZE, GRID_RATIO);
-            if(mergeAvail) {
-                const targetShape = layoutSvg.select(`[id*="cage-${cage.num}"]`);
-                if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
-                const targetRack = (targetShape.node() as SVGGElement).closest('[id^=rack-]');
-                const draggedShape = layoutSvg.select(`[id*="cage-${currCage.cageNum}"]`);
-                const draggedRack = (draggedShape.node() as SVGGElement).closest('[id^=rack-]');
-                console.log("Merging: ", targetRack, draggedRack);
-                const layoutDragProps: LayoutDragProps = {
-                    MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
-                    delRack: delRack,
-                    gridRatio: GRID_RATIO,
-                    gridSize: GRID_SIZE,
-                    layoutSvg: layoutSvg,
-                    moveRack: moveRackLocation
-                };
-                const cageActionProps: CageActionProps = {
-                    setEditCageNum: setClickedCage,
-                    setClickedRackNum: setClickedRack,
-                    setCtxMenuStyle: setCtxMenuStyle,
+                const gridRatio = rackType === RackTypes.Pen ? PEN_GRID_RATIO : CAGE_GRID_RATIO;
+
+                const mergeAvail = checkAdjacent(cage, currCageLoc, GRID_SIZE, gridRatio);
+                if(mergeAvail) {
+                    const targetShape = layoutSvg.select(`[id*="${rackType}-${cage.num}"]`);
+                    if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
+                    const targetRack = (targetShape.node() as SVGGElement).closest('[id^=rack-]');
+                    const draggedShape = layoutSvg.select(`[id*="${rackType}-${currCage.cageNum}"]`);
+                    const draggedRack = (draggedShape.node() as SVGGElement).closest('[id^=rack-]');
+                    console.log("Merging: ", targetRack, draggedRack);
+                    const layoutDragProps: LayoutDragProps = {
+                        MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
+                        delRack: delRack,
+                        gridRatio: gridRatio,
+                        gridSize: GRID_SIZE,
+                        layoutSvg: layoutSvg,
+                        moveRack: moveRackLocation,
+                        rackType: RackTypes[rackType]
+                    };
+                    const cageActionProps: CageActionProps = {
+                        setEditCageNum: setClickedCage,
+                        setClickedRackNum: setClickedRack,
+                        setCtxMenuStyle: setCtxMenuStyle,
+                    }
+                    mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps);
                 }
-                mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps);
-            }
+            })
         });
         setClickedRack(null);
-    }, [cageLocs])
+    }, [unitLocs])
 
     // This effect updates racks for adding to the room
     useEffect(() => {
         if(!pendingRackUpdate) return;
-        const {draggedShape, cellX, cellY, rackId} = pendingRackUpdate;
+        const {draggedShape, cellX, cellY, rackId, rackType} = pendingRackUpdate;
+        const gridRatio = rackType === RackTypes.Pen ? PEN_GRID_RATIO : CAGE_GRID_RATIO;
+
         draggedShape.classed('dragging', false);
 
         let group;
@@ -138,7 +149,8 @@ const Editor = () => {
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
         } else {
-            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = draggedShape.select('#cage-x');
+
+            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = draggedShape.select(`#${rackType}-x`);
             if(cageGroup.empty()) return; // Sometimes cage group isn't bound correctly causing a random crash
             const cageIdText = draggedShape.select('tspan');
             const transform = d3.zoomTransform(layoutSvg.node());
@@ -146,10 +158,10 @@ const Editor = () => {
             // Change the id of the group in the pre-created svg img, and set class name for top level group.
             const currentId = cageGroup.attr('id');
             if(currentId){
-                const newRackId = currentId.replace('cage-x', `cage-${getCageCount()}`)
+                const newRackId = currentId.replace(`${rackType}-x`, `${rackType}-${getNextCageNum(rackType)}`)
                 cageGroup.attr('id', newRackId); // Set the new ID
             }
-            cageIdText.node().textContent = `${getCageCount()}`;
+            cageIdText.node().textContent = `${getNextCageNum(rackType)}`;
 
             group = layoutSvg.append('g')
                 .attr('class', `draggable rack room-obj`)
@@ -158,16 +170,17 @@ const Editor = () => {
 
             group.append(() => draggedShape.node());
             placeAndScaleGroup(group, cellX, cellY, transform);
-            addRack(rackId, cellX, cellY, transform.k);
+            addRack(rackId, cellX, cellY, transform.k, rackType);
         }
 
         const addProps: LayoutDragProps = {
             gridSize: GRID_SIZE,
-            gridRatio: GRID_RATIO,
+            gridRatio: gridRatio,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
-            moveRack: moveRackLocation
+            moveRack: moveRackLocation,
+            rackType: rackType
         };
         // Reattach drag listeners for interaction within layout
         group.call(d3.drag().on('start', createStartDragInLayout({setRack: setClickedRack}))
@@ -181,7 +194,7 @@ const Editor = () => {
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
             // Return the cleanup function to remove the event listener when the component unmounts
-            setupEditCageNumEvent(textElement, setClickedCage, setClickedRack, setCtxMenuStyle);
+            setupEditCageNumEvent(textElement, setClickedCage, setClickedRack, setCtxMenuStyle, rackType);
         });
         setAddingRack(false);
     }, [pendingRackUpdate]);
@@ -233,8 +246,16 @@ const Editor = () => {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
                 const newId = localRoom.reduce((max, obj) => (obj.id > max ? obj.id : max), 0) + 1;
+                const draggedNodeId = ((draggedShape.node() as SVGElement).firstChild.firstChild as SVGElement).getAttribute('id');
+                let rackType;
+                if(draggedNodeId.includes("pen")){
+                    rackType = RackTypes.Pen;
+                }else{
+                    rackType = RackTypes.Cage;
+                }
                 setPendingRackUpdate({
                     draggedShape: draggedShape,
+                    rackType: rackType,
                     cellX: cellX,
                     cellY: cellY,
                     rackId: newId});
@@ -368,26 +389,16 @@ const Editor = () => {
                     </LayoutTooltip>
                 </div>
                 <div className={'cage-templates'}>
-                    <LayoutTooltip text={"1x0"}>
+                    <LayoutTooltip text={"Single Cage"}>
                         <RackTemplate
                             fileName={"SingleCageRack"}
                             className={"draggable"}
-                            gridSize={GRID_SIZE}
-                            localRoom={localRoom}
-                            room={room}
-                            setAddingRack={setAddingRack}
-                            rackType={RackTypes.OneOfOne}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Pen"}>
                         <RackTemplate
                             fileName={"Pen"}
                             className={"draggable"}
-                            gridSize={GRID_SIZE}
-                            localRoom={localRoom}
-                            room={room}
-                            setAddingRack={setAddingRack}
-                            rackType={RackTypes.OneOfOne}
                         />
                     </LayoutTooltip>
                 </div>

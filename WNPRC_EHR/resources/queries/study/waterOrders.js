@@ -101,11 +101,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors, 'waterSource', 'Water Source is required when entering new orders.', 'ERROR');
     }
 
-    //console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
-   //console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
-   // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
-    if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck) {
-        console.log("close record "+ row.closingRecord);
+    if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck && !row.closingRecord ) {
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.waterSource, row.objectid, row.project, this.extraContext);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {

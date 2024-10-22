@@ -1455,10 +1455,10 @@ public class TriggerScriptHelper {
 
                         if (loopDate.compareTo(convertToLocalDateViaSqlDate(waterRecord.getDate()))==0){
 
-                            String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency", "wnprc" );
+                            String serverFrequencyMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency", "wnprc" );
 
                             //Check frequency compatibility with water orders in the server
-                            if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
+                            if (!checkFrequencyCompatibility(serverFrequencyMeaning, meaningFrequency))
                             {
 
                                 //Formatting the dates to return a legible date for error message
@@ -1511,7 +1511,7 @@ public class TriggerScriptHelper {
                                     //Adding dataSource, objetcId, severity and message to the exception in case of error
                                     returnErrors.put("dataSource", waterRecord.getDataSource());
                                     returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
-                                            " End Date: " + endFormattedDate +" Frequency: "+waterRecord.getFrequency() +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "' target=\"_blank\" rel=\"noopener noreferrer\"><b> EDIT</b></a>");
+                                            " End Date: " + endFormattedDate +" Frequency: "+serverFrequencyMeaning +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "' target=\"_blank\" rel=\"noopener noreferrer\"><b> EDIT</b></a>");
                                     returnErrors.put("objectId", waterRecord.getObjectId());
                                     returnErrors.put("severity", "ERROR");
 

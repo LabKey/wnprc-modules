@@ -20,17 +20,18 @@ import {
     mergeRacks,
     placeAndScaleGroup,
     setupEditCageNumEvent,
-    updateGrid
+    updateGrid,
+    areCagesInSameRack
 } from './LayoutEditorHelpers';
-import { areCagesInSameRack } from './helpers';
 import EditorContextMenu from './EditorContextMenu';
+import { convertCageNumToNum, convertCageNumToType } from './helpers';
 
 const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
     const SVG_WIDTH = 1290;
     const SVG_HEIGHT = 810;
     const CAGE_GRID_RATIO = 4;
-    const PEN_GRID_RATIO = 4;
+    const PEN_GRID_RATIO = 8;
     const GRID_SIZE = 30;
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
@@ -87,14 +88,15 @@ const Editor = () => {
         const currCageLoc: LocationCoords = unitLocs[rackType].find((cage) => cage.num === currCage.cageNum);
 
         // rackType is the string for the enum here, cages is the array of locations for that unit
-        Object.entries(unitLocs).forEach(([rackType, cages]) => {
+        Object.entries(unitLocs).forEach(([unitRackType, cages]) => {
             if(cages.length === 0) return;
             cages.forEach((cage) => {
                 if(currCage.cageNum === cage.num) return; // cant merge into itself
                 let inSameRack = false;
-
+                //TODO fix this bug with checking if pens/cages/tempCages/playCages are in the same "rack"
                 localRoom.forEach(rack => {
                     if(areCagesInSameRack(rack, cage, currCageLoc)) {
+                        console.log("Same Rack: ", rack, cage, currCageLoc);
                         inSameRack = true;
                         return;
                     }
@@ -102,14 +104,14 @@ const Editor = () => {
                 if(inSameRack) {
                     return;
                 }
-                const gridRatio = rackType === RackTypes.Pen ? PEN_GRID_RATIO : CAGE_GRID_RATIO;
+                const gridRatio = convertCageNumToType(cage.num) === RackTypes.Pen ? PEN_GRID_RATIO : CAGE_GRID_RATIO;
 
                 const mergeAvail = checkAdjacent(cage, currCageLoc, GRID_SIZE, gridRatio);
                 if(mergeAvail) {
-                    const targetShape = layoutSvg.select(`[id*="${rackType}-${cage.num}"]`);
+                    const targetShape = layoutSvg.select(`[id*="${unitRackType}-${convertCageNumToNum(cage.num)}"]`);
                     if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
                     const targetRack = (targetShape.node() as SVGGElement).closest('[id^=rack-]');
-                    const draggedShape = layoutSvg.select(`[id*="${rackType}-${currCage.cageNum}"]`);
+                    const draggedShape = layoutSvg.select(`[id*="${unitRackType}-${convertCageNumToNum(currCage.cageNum)}"]`);
                     const draggedRack = (draggedShape.node() as SVGGElement).closest('[id^=rack-]');
                     console.log("Merging: ", targetRack, draggedRack);
                     const layoutDragProps: LayoutDragProps = {
@@ -119,14 +121,15 @@ const Editor = () => {
                         gridSize: GRID_SIZE,
                         layoutSvg: layoutSvg,
                         moveRack: moveRackLocation,
-                        rackType: RackTypes[rackType]
+                        rackType: Object.values(RackTypes).find(type => type === unitRackType) as RackTypes,
                     };
                     const cageActionProps: CageActionProps = {
                         setEditCageNum: setClickedCage,
                         setClickedRackNum: setClickedRack,
                         setCtxMenuStyle: setCtxMenuStyle,
                     }
-                    mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps);
+
+                    mergeRacks(d3.select(targetRack), d3.select(draggedRack), mergeLocalRacks, layoutDragProps, cageActionProps,targetShape, draggedShape);
                 }
             })
         });

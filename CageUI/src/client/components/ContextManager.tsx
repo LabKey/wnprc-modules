@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import {
-    Cage,
+    Cage, CageNumber,
     CageSizes,
     CageType,
     LocationCoords,
@@ -10,7 +10,9 @@ import {
     RackTypes,
     UnitLocations
 } from './typings';
-import { getTranslation, removeCircularReferences } from './helpers';
+import { convertCageNumToNum, getTranslation, removeCircularReferences } from './helpers';
+import { testCagesInRoom, testLayoutHistory, testRoomObj } from '../layoutEditor/testData';
+import { buildNewLocalRoom } from './LayoutEditorHelpers';
 
 export interface RoomContextType {
     selectedPage: Page;
@@ -180,8 +182,12 @@ export const RoomContextProvider = ({children}) => {
     )
 }
 
-export const LayoutContextProvider = ({children}) => {
+export const LayoutContextProvider = ({children, prevRoom}) => {
     const [room, setRoom] = useState<Rack[]>([]);
+    /* unit locations resembles each rack type and their respective locations in a room, since location is geospatial
+        it does not need to remember anything other than x and y coords for that group of racks. The reason for having
+        different objects for each rack type is to keep a separate numbering system for each type of rack.
+    */
     const [unitLocs, setUnitLocs] = useState<UnitLocations>({
         [RackTypes.Pen]: [],
         [RackTypes.Cage]: [],
@@ -196,7 +202,7 @@ export const LayoutContextProvider = ({children}) => {
     const [scale, setScale] = useState<number>(1);
 
     const addRack = (id: number, x: number, y: number, newScale: number, rackType: RackTypes) => {
-        const newCageNum = getNextCageNum(rackType);
+        const newCageNum: CageNumber = `${rackType}-${getNextCageNum(rackType)}`;
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
@@ -254,7 +260,7 @@ export const LayoutContextProvider = ({children}) => {
             }));
 
             const updatedCages: Cage[] = mergedCages.map(cage => {
-                const newCage = newGroup.select(`#cage-${cage.cageNum}`);
+                const newCage = newGroup.select(`#${cage.cageNum}`);
                 const cageCoords = getTranslation(newCage.attr('transform'));
                 return {...cage, x: cageCoords.x, y: cageCoords.y }
             })
@@ -327,24 +333,24 @@ export const LayoutContextProvider = ({children}) => {
 
     const changeCageId = (idBefore: number, idAfter: number) => {
         if(localRoom.find(rack => rack.cages.find(cage =>
-            cage.cageNum === idAfter
+            convertCageNumToNum(cage.cageNum) === idAfter
         ))){
             console.log("Please add a different id that doesnt exist in the current room");
             return;
         }
-        setLocalRoom(prevRacks => {
+        setLocalRoom((prevRacks: Rack[]) => {
             // Find the clicked rack
-            const currRack = prevRacks.find(rack => rack.id === clickedRack);
+            const currRack: Rack = prevRacks.find(rack => rack.id === clickedRack);
 
             if (!currRack) return prevRacks; // If the clicked rack is not found, return the previous state
 
             // Update the local room by updating the cage numbers in the clicked rack
-            const updatedLocalRoom = prevRacks.map(rack =>
+            const updatedLocalRoom: Rack[] = prevRacks.map((rack: Rack): Rack =>
                 rack.id === clickedRack
                     ? {
                         ...rack,
-                        cages: rack.cages.map(cage =>
-                            cage.cageNum === idBefore ? { ...cage, cageNum: idAfter } : cage
+                        cages: rack.cages.map((cage: Cage): Cage =>
+                            convertCageNumToNum(cage.cageNum) === idBefore ? { ...cage, cageNum: `${currRack.type}-${idAfter}` } as Cage : cage
                         )
                     }
                     : rack
@@ -355,7 +361,7 @@ export const LayoutContextProvider = ({children}) => {
                 ...prevUnitLocations,
                 // Access the correct unit location array based on clickedRack's rackType
                 [currRack.type]: prevUnitLocations[currRack.type].map(cage =>
-                    cage.num === idBefore ? { ...cage, num: idAfter } : cage
+                    convertCageNumToNum(cage.num) === idBefore ? { ...cage, num: `${currRack.type}-${idAfter}` } : cage
                 )
             }));
 
@@ -374,11 +380,29 @@ export const LayoutContextProvider = ({children}) => {
         }
 
         // Get the maximum cageNum in the current array of cages
-        const maxCageNum = Math.max(...cages.map(cage => cage.num));
+        const maxCageNum = Math.max(...cages.map(cage => convertCageNumToNum(cage.num)));
 
         // Return the next available cageNum (max + 1)
         return maxCageNum + 1;
     };
+
+    // Loads a room into state if it is not null
+    useEffect(() => {
+        if(!prevRoom) return;
+        // Test data on pre created objects to determine a working backend
+        // TODO Query statement to fetch layout history data based on room
+        const layoutData = testLayoutHistory;
+        // TODO Query statement to fetch cage data based racks in room at the time
+        const rackData = testCagesInRoom;
+
+        //TODO query statement to fetch room objects based on location in layout history
+        const roomObjData = testRoomObj;
+
+        const newLocalRoom = buildNewLocalRoom(layoutData, rackData, roomObjData);
+
+        console.log("Load Data: ");
+
+    }, [prevRoom]);
 
     return (
         <LayoutContext.Provider value={{

@@ -57,8 +57,8 @@ export interface LayoutDragProps {
 }
 
 export interface Cage {
-    id: number // Id local to rack
-    cageNum: number // Id local to room
+    id: number; // Id local to rack
+    cageNum: CageNumber; // Id local to room
     cageState: CageState;
     position: CagePosition;
     type: CageType;
@@ -69,7 +69,7 @@ export interface Cage {
 }
 
 export interface LocationCoords {
-    num: number;
+    num: CageNumber;
     cellX: number;
     cellY: number;
 }
@@ -104,16 +104,15 @@ export enum RackTypes {
     Cage = "cage",
     Pen = "pen",
     TempCage = "tempCage",
-    PlayCage = "playCage"
+    PlayCage = "attachedPlayCage"
 }
 
-
 export enum CageType {
-    Allentown,
-    Suburban,
-    Lenderking,
-    Nursury,
-    Pen,
+    Allentown = "allentown",
+    Suburban = "suburban",
+    Lenderking = "lenderking",
+    Nursury = "nursury",
+    Pen = "pen",
 }
 
 export enum ModTypes {
@@ -150,6 +149,8 @@ interface SchematicRoomProps {
         cageSizes: CageSizeWithKey[]
     }
 }
+
+export type CageNumber = `${RackTypes}-${number}`
 
 export type SeparatorType = "divider" | "floor";
 

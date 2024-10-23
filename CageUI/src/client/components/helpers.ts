@@ -1,6 +1,6 @@
 import {
     Cage,
-    CageBuilder,
+    CageBuilder, CageNumber,
     CagePosition,
     CageSizes,
     CageSizeWithKey,
@@ -627,11 +627,13 @@ export const isTextEditable = (event) => {
     }
 }
 
-export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: LocationCoords) => {
-    if (!rack.cages || !Array.isArray(rack.cages)) {
-        return false;
-    }
-
-    const nums = rack.cages.map(item => item.cageNum);
-    return nums.includes(cage1.num) && nums.includes(cage2.num);
+export const convertCageNumToNum = (num: CageNumber) => {
+    const parts = num.split('-');
+    const cageNum = parts[1];
+    return parseInt(cageNum);
+}
+export const convertCageNumToType = (num: CageNumber) => {
+    const parts = num.split('-');
+    const cageNum = parts[0];
+    return cageNum;
 }

@@ -10,6 +10,7 @@ import {LayoutContextProvider } from '../components/ContextManager';
 import DragAndDropGrid from '../components/Editor';
 import { ActionURL } from '@labkey/api';
 import Editor from '../components/Editor';
+import { testRoom } from './testData';
 
 interface RoomProps {
     room: {
@@ -19,20 +20,21 @@ interface RoomProps {
 }
 
 export const LayoutEditor: FC<RoomProps> = (props) => {
-    const {room} = props;
+    //const {room} = props;
     const roomName = ActionURL.getParameter("room");
 
     console.log(roomName)
+    const room = testRoom;
 
     return (
-        <LayoutContextProvider>
+        <LayoutContextProvider prevRoom={room} children={
             <div className={"room-container"}>
                 <RoomHeader
                     name={roomName}
                 />
                 <div className={"divider"}/>
-                <Editor />
+                <Editor/>
             </div>
-        </LayoutContextProvider>
+        }/>
     );
 }

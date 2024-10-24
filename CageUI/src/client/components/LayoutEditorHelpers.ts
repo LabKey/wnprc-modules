@@ -1,8 +1,18 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { convertCageNumToNum, getRackFromClass, getTranslation, isTextEditable, parseCage, parseRack } from './helpers';
-import { CageActionProps, CageNumber, LayoutDragProps, LocationCoords, OffsetProps, Rack, RackTypes } from './typings';
+import {
+    CageActionProps,
+    CageNumber,
+    LayoutDragProps,
+    LayoutHistoryData,
+    LocationCoords,
+    OffsetProps,
+    Rack,
+    RackTypes, RoomItem
+} from './typings';
 import * as React from 'react';
+import { testCagesInRoom } from '../layoutEditor/testData';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -446,12 +456,38 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
     return nums.includes(cage1.num) && nums.includes(cage2.num);
 }
 
-export const buildNewLocalRoom = (layoutData, rackData, roomObjData) => {
-    const newLocalRoom = [];
+export const generateRack = (rack: LayoutHistoryData): Rack => {
+
+    // TODO query cages table and find the cages in rack.objectId
+    const cagesInRack = testCagesInRoom.map((cage) => cage.rack === rack.objectId);
+    console.log("Gen Layout Data Rack: ", rack);
+
+    const newRackState: Rack = {
+        cages: [],
+        id: 0,
+        isActive: false,
+        scale: 0,
+        type: undefined,
+        x: 0,
+        y: 0
+    }
+    return newRackState;
+}
+
+export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roomObjData) => {
+    const newLocalRoom: RoomItem[] = [];
     // First parse through layout data to get rack and room object coords
     layoutData.forEach((roomObj) => {
+        if(roomObj.objectType === "caging"){ // Room object is an enclosure for animals
+            newLocalRoom.push(generateRack(roomObj));
+        } else{ // Room object is something else in the room, ex. Door
 
+        }
     })
 
     return(newLocalRoom);
+}
+
+export const isRack = (itemType: string): itemType is RackTypes => {
+    return Object.values(RackTypes).includes(itemType as RackTypes);
 }

@@ -15,6 +15,20 @@ export type CagePosition = "top" | "bottom";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
 type PageViews = "Room" | "Rack" | "Cage";
 
+type RoomItemTypes = "caging" | "room";
+
+export interface LayoutHistoryData {
+    rowid: number;
+    objectId: string;
+    objectType: RoomItemTypes;
+    startDate: string;
+    endDate: string | null;
+    x: number;
+    y: number;
+    scale: number;
+    room: string
+}
+
 export interface Page {
     mainView: PageViews;
     subViewId: string;
@@ -100,6 +114,24 @@ export interface Rack {
     isActive: boolean;
 }
 
+
+export interface RoomObject {
+    id: number;
+    type: RoomObjectTypes
+    x: number;
+    y: number;
+    scale: number;
+}
+
+export type RoomItem = Rack | RoomObject;
+
+export enum RoomObjectTypes {
+    RoomDivider,
+    Drain,
+    Door
+}
+
+// these string names are used to id divs in the svgs
 export enum RackTypes {
     Cage = "cage",
     Pen = "pen",

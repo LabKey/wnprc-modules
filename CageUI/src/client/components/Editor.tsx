@@ -6,7 +6,7 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { Cage, CageActionProps, LayoutDragProps, LocationCoords, PendingRackUpdate, RackTypes } from './typings';
+import { Cage, CageActionProps, LayoutDragProps, LocationCoords, PendingRackUpdate, Rack, RackTypes } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
@@ -21,7 +21,7 @@ import {
     placeAndScaleGroup,
     setupEditCageNumEvent,
     updateGrid,
-    areCagesInSameRack
+    areCagesInSameRack, isRack
 } from './LayoutEditorHelpers';
 import EditorContextMenu from './EditorContextMenu';
 import { convertCageNumToNum, convertCageNumToType } from './helpers';
@@ -53,7 +53,7 @@ const Editor = () => {
         delRack,
         changeCageId,
         cageNumChange,
-        moveRackLocation,
+        moveObjLocation,
         mergeLocalRacks,
         getNextCageNum,
         clickedRack,
@@ -79,11 +79,11 @@ const Editor = () => {
     useEffect(() => {
         if(!clickedRack) return;
         const rackType = localRoom.find(rack => rack.id === clickedRack).type;
-
+        if(!isRack(rackType.toString())) return;
         console.log("Dragged rack 1: ", clickedRack);
 
         //This is the first cage in the dragged rack that will determine if a merge is possible
-        const currCage: Cage = localRoom.find(rack => rack.id === clickedRack).cages.find((cage) => cage.id === 1);
+        const currCage: Cage = (localRoom.find(rack => rack.id === clickedRack) as Rack).cages.find((cage) => cage.id === 1);
 
         const currCageLoc: LocationCoords = unitLocs[rackType].find((cage) => cage.num === currCage.cageNum);
 
@@ -95,7 +95,8 @@ const Editor = () => {
                 let inSameRack = false;
                 //TODO fix this bug with checking if pens/cages/tempCages/playCages are in the same "rack"
                 localRoom.forEach(rack => {
-                    if(areCagesInSameRack(rack, cage, currCageLoc)) {
+                    if(!isRack(rack.type.toString())) return;
+                    if(areCagesInSameRack(rack as Rack, cage, currCageLoc)) {
                         console.log("Same Rack: ", rack, cage, currCageLoc);
                         inSameRack = true;
                         return;
@@ -120,7 +121,7 @@ const Editor = () => {
                         gridRatio: gridRatio,
                         gridSize: GRID_SIZE,
                         layoutSvg: layoutSvg,
-                        moveRack: moveRackLocation,
+                        moveRack: moveObjLocation,
                         rackType: Object.values(RackTypes).find(type => type === unitRackType) as RackTypes,
                     };
                     const cageActionProps: CageActionProps = {
@@ -134,7 +135,7 @@ const Editor = () => {
             })
         });
         setClickedRack(null);
-    }, [unitLocs])
+    }, [unitLocs]);
 
     // This effect updates racks for adding to the room
     useEffect(() => {
@@ -182,7 +183,7 @@ const Editor = () => {
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
-            moveRack: moveRackLocation,
+            moveRack: moveObjLocation,
             rackType: rackType
         };
         // Reattach drag listeners for interaction within layout

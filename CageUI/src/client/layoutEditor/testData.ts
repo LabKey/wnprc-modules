@@ -1,3 +1,4 @@
+import { LayoutHistoryData } from '../components/typings';
 
 export const testCageModifications = [
     {
@@ -131,7 +132,7 @@ export const testRoomObj = {
    If object type is room then query the room objects table if needed. Since room objects don't use sub coords there is
    no need to do this if you are loading a layout. Just place the correct object at the location as it is in layout history
  */
-export const testLayoutHistory = [
+export const testLayoutHistory: LayoutHistoryData[] = [
     {
         rowid: 1,
         objectId: testCage1.rack,

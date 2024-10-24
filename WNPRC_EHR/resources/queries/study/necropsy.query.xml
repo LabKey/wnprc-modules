@@ -2,7 +2,7 @@
     <metadata> 
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="necropsies" tableDbType="TABLE">
-                <tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>
+                <tableUrl>/WNPRC_EHR-necropsyDetails.view?key=${objectid}&amp;requestid=${requestid}</tableUrl>
                 <insertUrl />
                 <importUrl />
                 <updateUrl />

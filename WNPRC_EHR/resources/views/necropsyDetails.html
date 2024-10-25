@@ -10,32 +10,32 @@
     var requestid = LABKEY.ActionURL.getParameter('requestid');
     var webpart = <%=webpartContext%>;
     var domSpec = [{
-      tag: 'div',
-      id: 'necropsyDetails_' + webpart.wrapperDivId
+        tag: 'div',
+        id: 'necropsyDetails_' + webpart.wrapperDivId
     },{
-      tag: 'div',
-      style: 'padding-bottom: 10px;',
-      id: 'necropsyReport_' + webpart.wrapperDivId
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyReport_' + webpart.wrapperDivId
     },{
-      tag: 'div',
-      style: 'padding-bottom: 10px;',
-      id: 'necropsyDiagnosis_' + webpart.wrapperDivId
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyTissues_' + webpart.wrapperDivId
     },{
-      tag: 'div',
-      style: 'padding-bottom: 10px;',
-      id: 'necropsyImages_' + webpart.wrapperDivId
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyWeights_' + webpart.wrapperDivId
     },{
-      tag: 'div',
-      style: 'padding-bottom: 10px;',
-      id: 'necropsyHistology_' + webpart.wrapperDivId
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyDiagnosis_' + webpart.wrapperDivId
     },{
-      tag: 'div',
-      style: 'padding-bottom: 10px;',
-      id: 'necropsyTissues_' + webpart.wrapperDivId
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyImages_' + webpart.wrapperDivId
     },{
-      tag: 'div',
-      style: 'padding-bottom: 10px;',
-      id: 'necropsyWeights_' + webpart.wrapperDivId
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyHistology_' + webpart.wrapperDivId
     }]
 
     var el = Ext4.get(webpart.wrapperDivId);

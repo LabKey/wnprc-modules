@@ -6,10 +6,20 @@ import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
 import { RackTemplate } from './RackTemplate';
-import { Cage, CageActionProps, LayoutDragProps, LocationCoords, PendingRackUpdate, Rack, RackTypes } from './typings';
+import {
+    Cage,
+    CageActionProps,
+    LayoutDragProps,
+    LocationCoords,
+    PendingRoomUpdate,
+    Rack,
+    RackTypes,
+    RoomItemTypes
+} from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
+    areCagesInSameRack,
     checkAdjacent,
     createDragInLayout,
     createEndDragInLayout,
@@ -17,11 +27,11 @@ import {
     drawGrid,
     getLayoutOffset,
     getTargetRect,
+    isRack,
     mergeRacks,
     placeAndScaleGroup,
     setupEditCageNumEvent,
-    updateGrid,
-    areCagesInSameRack, isRack
+    updateGrid
 } from './LayoutEditorHelpers';
 import EditorContextMenu from './EditorContextMenu';
 import { convertCageNumToNum, convertCageNumToType } from './helpers';
@@ -30,14 +40,14 @@ const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
     const SVG_WIDTH = 1290;
     const SVG_HEIGHT = 810;
-    const CAGE_GRID_RATIO = 4;
-    const PEN_GRID_RATIO = 8;
+    const SMALL_GRID_RATIO = 4;
+    const LARGE_GRID_RATIO = 8;
     const GRID_SIZE = 30;
     const utilsRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(false);
-    const [addingRack, setAddingRack] = useState<boolean>(false);
+    const [addingRoomItem, setAddingRoomItem] = useState<boolean>(false);
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
-    const [pendingRackUpdate, setPendingRackUpdate] = useState<PendingRackUpdate>(null);
+    const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
     const [renameCage, setRenameCage] = useState<boolean>(false);
 
     const [ctxMenuStyle, setCtxMenuStyle] = useState({
@@ -105,7 +115,7 @@ const Editor = () => {
                 if(inSameRack) {
                     return;
                 }
-                const gridRatio = convertCageNumToType(cage.num) === RackTypes.Pen ? PEN_GRID_RATIO : CAGE_GRID_RATIO;
+                const gridRatio = convertCageNumToType(cage.num) === RackTypes.Pen || convertCageNumToType(cage.num) === RackTypes.PlayCage ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
                 const mergeAvail = checkAdjacent(cage, currCageLoc, GRID_SIZE, gridRatio);
                 if(mergeAvail) {
@@ -139,21 +149,26 @@ const Editor = () => {
 
     // This effect updates racks for adding to the room
     useEffect(() => {
-        if(!pendingRackUpdate) return;
-        const {draggedShape, cellX, cellY, rackId, rackType} = pendingRackUpdate;
-        const gridRatio = rackType === RackTypes.Pen ? PEN_GRID_RATIO : CAGE_GRID_RATIO;
+        if(!pendingRoomUpdate) return;
+        const {draggedShape, cellX, cellY, objId, objType, rackType} = pendingRoomUpdate;
+        let gridRatio: number;
+        let group;
 
         draggedShape.classed('dragging', false);
-
-        let group;
-        if ((draggedShape.node() as SVGElement).children['rack-room-util']) {
+        
+        if (objType === 'room') {
             group = layoutSvg.append('g')
                 .data([{x: cellX, y: cellY}])
                 .attr('class', "draggable room-obj")
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
         } else {
-
+            // Determine the grid ratio for merging depending on size of dragged object
+            if(rackType === RackTypes.Pen || rackType === RackTypes.PlayCage){
+                gridRatio = LARGE_GRID_RATIO;
+            }else{
+                gridRatio = SMALL_GRID_RATIO;
+            }
             const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = draggedShape.select(`#${rackType}-x`);
             if(cageGroup.empty()) return; // Sometimes cage group isn't bound correctly causing a random crash
             const cageIdText = draggedShape.select('tspan');
@@ -169,12 +184,12 @@ const Editor = () => {
 
             group = layoutSvg.append('g')
                 .attr('class', `draggable rack room-obj`)
-                .attr('id', `rack-${rackId}`)
+                .attr('id', `rack-${objId}`)
                 .style('pointer-events', "bounding-box");
 
             group.append(() => draggedShape.node());
             placeAndScaleGroup(group, cellX, cellY, transform);
-            addRack(rackId, cellX, cellY, transform.k, rackType);
+            addRack(objId, cellX, cellY, transform.k, rackType);
         }
 
         const addProps: LayoutDragProps = {
@@ -200,8 +215,8 @@ const Editor = () => {
             // Return the cleanup function to remove the event listener when the component unmounts
             setupEditCageNumEvent(textElement, setClickedCage, setClickedRack, setCtxMenuStyle, rackType);
         });
-        setAddingRack(false);
-    }, [pendingRackUpdate]);
+        setAddingRoomItem(false);
+    }, [pendingRoomUpdate]);
 
     // Effect for handling the grid layout and drag effects on the layout and from the utils
     useEffect(() => {
@@ -249,21 +264,48 @@ const Editor = () => {
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
-                const newId = localRoom.reduce((max, obj) => (obj.id > max ? obj.id : max), 0) + 1;
-                const draggedNodeId = ((draggedShape.node() as SVGElement).firstChild.firstChild as SVGElement).getAttribute('id');
-                let rackType;
-                if(draggedNodeId.includes("pen")){
+                // TODO currently the next avail rack id, fix to obj id and add a new field for rack ids or convert to obj ids only
+                const draggedNodeId = ((draggedShape.node() as SVGElement).firstChild.firstChild as SVGElement).getAttribute('id') || ((draggedShape.node() as SVGElement).firstChild as SVGElement).getAttribute('id');
+                let rackType; // todo fix this rack type to be object type
+                let objType: RoomItemTypes;
+                let newId: number;
+                if(draggedNodeId.includes("pen")) {
                     rackType = RackTypes.Pen;
-                }else{
-                    rackType = RackTypes.Cage;
                 }
-                setPendingRackUpdate({
+                else if (draggedNodeId.includes('tempCage')){
+                    rackType = RackTypes.TempCage;
+                }else if (draggedNodeId.includes('playCage')){
+                    rackType = RackTypes.PlayCage;
+                }else if (draggedNodeId.includes('cage')) {
+                    rackType = RackTypes.Cage;
+                }else{
+                    rackType = null;
+                }
+                // TODO might not need objType since rackType = null means its a room object
+                if(rackType){
+                    objType = 'caging';
+                    // get new id for rack
+                    newId = localRoom.reduce((max, obj) => {
+                        if (!isRack(obj.type.toString())) return max;
+                        return obj.id > max ? obj.id : max;
+                    }, 0) + 1;
+                }else{
+                    objType = 'room';
+                    // get new id for room object
+                    newId = localRoom.reduce((max, obj) => {
+                        if (isRack(obj.type.toString())) return max;
+                        return obj.id > max ? obj.id : max;
+                    }, 0) + 1;
+                }
+                setPendingRoomUpdate({
                     draggedShape: draggedShape,
-                    rackType: rackType,
+                    objType: objType,
                     cellX: cellX,
                     cellY: cellY,
-                    rackId: newId});
-                setAddingRack(true);
+                    objId: newId,
+                    rackType: rackType
+                });
+                setAddingRoomItem(true);
             } else {
                 draggedShape.remove();
             }
@@ -272,10 +314,10 @@ const Editor = () => {
 
     // Cleanup for after updating rack
     useEffect(() => {
-        if(!addingRack){
-            setPendingRackUpdate(null);
+        if(!addingRoomItem){
+            setPendingRoomUpdate(null);
         }
-    }, [addingRack]);
+    }, [addingRoomItem]);
 
     // After state is done updating for cage id change. refresh svg text and ids
     useEffect(() => {

@@ -186,7 +186,8 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
     const [room, setRoom] = useState<Rack[]>([]);
     /* unit locations resembles each rack type and their respective locations in a room, since location is geospatial
         it does not need to remember anything other than x and y coords for that group of racks. The reason for having
-        different objects for each rack type is to keep a separate numbering system for each type of rack.
+        different objects for each rack type is to keep a separate numbering system for each type of rack. Additionally
+        this state is tracked for detecting merging.
     */
     const [unitLocs, setUnitLocs] = useState<UnitLocations>({
         [RackTypes.Pen]: [],

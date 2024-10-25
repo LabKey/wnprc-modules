@@ -1,4 +1,4 @@
-import { LayoutHistoryData } from '../components/typings';
+import { LayoutHistoryData, RackTypes, RoomItem, RoomObjectTypes } from '../components/typings';
 
 export const testCageModifications = [
     {
@@ -189,3 +189,21 @@ export const testCageHistory = {
     flooring: testCageModifications[1].rowid,
     modification: testCageModifications[2].rowid
 }
+
+
+const testObj: RoomItem[] = [{
+    id: 1,
+    type: RackTypes.Cage,
+    cages: [],
+    x: 0,
+    y: 0,
+    scale: 1,
+    isActive: true
+}, {
+    id: 1,
+    type: RoomObjectTypes.Drain,
+    x: 0,
+    y: 0,
+    scale: 1
+}]
+

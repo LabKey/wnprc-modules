@@ -15,7 +15,7 @@ export type CagePosition = "top" | "bottom";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
 type PageViews = "Room" | "Rack" | "Cage";
 
-type RoomItemTypes = "caging" | "room";
+export type RoomItemTypes = 'caging' | 'room';
 
 export interface LayoutHistoryData {
     rowid: number;
@@ -47,12 +47,13 @@ export interface OffsetProps {
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
 }
 
-export interface PendingRackUpdate {
+export interface PendingRoomUpdate {
     draggedShape: any;
-    rackType: RackTypes;
+    objType: RoomItemTypes;
     cellX: number;
     cellY: number;
-    rackId: number;
+    objId: number;
+    rackType: RackTypes | null;
 }
 
 export interface CageActionProps {

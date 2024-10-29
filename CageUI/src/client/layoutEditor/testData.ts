@@ -1,4 +1,12 @@
-import { LayoutHistoryData, RackTypes, RoomItem, RoomObjectTypes } from '../components/typings';
+import {
+    EHRCage,
+    EHRCageType,
+    EHRRoom,
+    LayoutHistoryData,
+    RackTypes,
+    RoomItem,
+    RoomObjectTypes
+} from '../components/typings';
 
 export const testCageModifications = [
     {
@@ -15,7 +23,7 @@ export const testCageModifications = [
     }
 ];
 
-export const testRoom = {
+export const testRoom: EHRRoom = {
     rowid: 68,
     room: "ab140",
     building: "",
@@ -25,8 +33,8 @@ export const testRoom = {
     maxCages: 26
 }
 
-export const testCageTypes1 = {
-    rowid: 1,
+export const testCageTypes1: EHRCageType = {
+    rowid: 3,
     cagetype: "cage-at-6.7",
     type: "cage",
     manufacturer: "allentown",
@@ -39,8 +47,8 @@ export const testCageTypes1 = {
     description: "6.7 sq ft allentown cage"
 }
 
-export const testCageTypes2 = {
-    rowid: 2,
+export const testCageTypes2: EHRCageType = {
+    rowid: 4,
     cagetype: "pen-uk-44",
     type: "pen",
     manufacturer: "unknown",
@@ -53,65 +61,77 @@ export const testCageTypes2 = {
     description: "44 sq ft pen"
 }
 
-export const testCage1 = {
+export const testCage1: EHRCage = {
     rowid: 1,
-    location: "rck1-0001",
+    location: "rck1-1",
+    position: "top",
     cageNum: "0001",
+    rackNum: 1,
     x: 0,
     y: 0,
     rack: "rck1",
-    cagetype: testCageTypes1.cagetype,
+    cagetype: testCageTypes1,
     room: testRoom.room
 }
-export const testCage2 = {
+export const testCage2: EHRCage = {
     rowid: 2,
-    location: "rck1-0002",
+    location: "rck1-2",
+    position: "top",
     cageNum: "0002",
+    rackNum: 2,
     x: 120,
     y: 0,
     rack: "rck1",
-    cagetype: testCageTypes1.cagetype,
+    cagetype: testCageTypes1,
     room: testRoom.room
 }
-export const testCage3 = {
+export const testCage3: EHRCage = {
     rowid: 3,
-    location: "rck1-0003",
+    location: "rck1-3",
+    position: "bottom",
     cageNum: "0003",
+    rackNum: 3,
     x: 0,
     y: 120,
     rack: "rck1",
-    cagetype: testCageTypes1.cagetype,
+    cagetype: testCageTypes1,
     room: testRoom.room
 }
-export const testCage4 = {
+export const testCage4: EHRCage = {
     rowid: 4,
-    location: "rck1-0004",
+    location: "rck1-4",
+    position: "bottom",
     cageNum: "0004",
+    rackNum: 4,
     x: 120,
     y: 120,
     rack: "rck1",
-    cagetype: testCageTypes1.cagetype,
+    cagetype: testCageTypes1,
     room: testRoom.room
 }
-export const testCage5 = {
+export const testCage5: EHRCage = {
     rowid: 5,
-    location: "pen1-0001",
+    location: "pen1-1",
+    position: "none",
     cageNum: "0001",
+    rackNum: 1,
     x: 0,
     y: 0,
     rack: "pen1",
-    cagetype: testCageTypes2.cagetype,
+    cagetype: testCageTypes2,
     room: testRoom.room
 }
 
-export const testCage6 = {
+export const testCage6: EHRCage = {
     rowid: 6,
-    location: "rck2-0001",
-    cageNum: "0001",
+    location: "rck2-1",
+    position: "none",
+    cageNum: "0005",
+    rackNum: 1,
     x: 0,
     y: 0,
     rack: "rck2",
-    cagetype: testCageTypes1.cagetype,
+    cagetype: testCageTypes1,
     room: testRoom.room
 }
 
@@ -136,7 +156,7 @@ export const testLayoutHistory: LayoutHistoryData[] = [
     {
         rowid: 1,
         objectId: testCage1.rack,
-        objectType: "caging",
+        objectType: RackTypes.Cage,
         startDate: "2024-10-22",
         endDate: null,
         x: 0,
@@ -147,7 +167,7 @@ export const testLayoutHistory: LayoutHistoryData[] = [
     {
         rowid: 2,
         objectId: testRoomObj.location,
-        objectType: "room",
+        objectType: RoomObjectTypes.Door,
         startDate: "2024-10-22",
         endDate: null,
         x: 300,
@@ -158,7 +178,7 @@ export const testLayoutHistory: LayoutHistoryData[] = [
     {
         rowid: 3,
         objectId: testCage5.rack,
-        objectType: "caging",
+        objectType: RackTypes.Pen,
         startDate: "2024-10-22",
         endDate: null,
         x: 0,
@@ -168,7 +188,7 @@ export const testLayoutHistory: LayoutHistoryData[] = [
     },{
         rowid: 4,
         objectId: testCage6.rack,
-        objectType: "caging",
+        objectType: RackTypes.Cage,
         startDate: "2024-10-22",
         endDate: null,
         x: 0,
@@ -189,21 +209,3 @@ export const testCageHistory = {
     flooring: testCageModifications[1].rowid,
     modification: testCageModifications[2].rowid
 }
-
-
-const testObj: RoomItem[] = [{
-    id: 1,
-    type: RackTypes.Cage,
-    cages: [],
-    x: 0,
-    y: 0,
-    scale: 1,
-    isActive: true
-}, {
-    id: 1,
-    type: RoomObjectTypes.Drain,
-    x: 0,
-    y: 0,
-    scale: 1
-}]
-

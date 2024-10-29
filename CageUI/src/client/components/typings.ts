@@ -11,16 +11,15 @@ export type CageSizeWithKey =
     { sizeKey: "6.0", dimensions: CageSize } |
     { sizeKey: "4.3", dimensions: CageSize };
 
-export type CagePosition = "top" | "bottom";
+export type CagePosition = "top" | "bottom" | "none";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
 type PageViews = "Room" | "Rack" | "Cage";
 
-export type RoomItemTypes = 'caging' | 'room';
 
 export interface LayoutHistoryData {
     rowid: number;
     objectId: string;
-    objectType: RoomItemTypes;
+    objectType: RoomItemType;
     startDate: string;
     endDate: string | null;
     x: number;
@@ -49,15 +48,14 @@ export interface OffsetProps {
 
 export interface PendingRoomUpdate {
     draggedShape: any;
-    objType: RoomItemTypes;
+    itemType: RoomItemType;
     cellX: number;
     cellY: number;
-    objId: number;
-    rackType: RackTypes | null;
+    itemId: string;
 }
 
 export interface CageActionProps {
-    setClickedRackNum: React.Dispatch<React.SetStateAction<number>>;
+    setClickedRack: React.Dispatch<React.SetStateAction<string>>;
     setEditCageNum: React.Dispatch<React.SetStateAction<number>>;
     setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>;
 }
@@ -66,21 +64,62 @@ export interface LayoutDragProps {
     gridRatio: number;
     MAX_SNAP_DISTANCE: number;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
-    delRack: (id: number) => void;
-    moveRack: (rackNum: number, x: number, y: number, k: number) => void;
-    rackType: RackTypes;
+    delRack: (rackId: string) => void;
+    moveItem: (itemId: string, x: number, y: number, k: number) => void;
+    itemType: RoomItemType;
+}
+
+export interface StartDragProps {
+    setRoomItem: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface Cage {
     id: number; // Id local to rack
     cageNum: CageNumber; // Id local to room
+    rack: string;
     cageState: CageState;
     position: CagePosition;
-    type: CageType;
-    size: CageSizeWithKey;
-    adjCages: AdjCages | undefined;
+    type: EHRCageType;
+    adjCages: AdjCages | undefined; //TODO adjCages is for modifications, no need to store the data in backend but make sure its needed when I start work on that part
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
+}
+
+export interface EHRCageType {
+    rowid: number;
+    cagetype: string;
+    type: string;
+    manufacturer: string;
+    length: number;
+    width: number;
+    height: number;
+    sqft: number;
+    supportsTunnel: boolean;
+    abbreviation: string;
+    description: string;
+}
+
+export interface EHRRoom {
+    rowid: number;
+    room: string;
+    building: string;
+    area: string;
+    housingType: number | null;
+    housingCondition: number | null;
+    maxCages: number;
+}
+
+export interface EHRCage {
+    rowid: number; // unique row id
+    location: string; // location of cage following format 'rack-rackNum'
+    position: CagePosition; // position of cage in rack
+    cageNum: string; // number of cage in room for cagetype.type
+    rackNum: number; // number of cage in rack
+    x: number; // x coordinate
+    y: number; // y coordinate
+    rack: string; // unique rack id
+    cagetype: EHRCageType; // Rack/Cage Type
+    room: string; // unique room name
 }
 
 export interface LocationCoords {
@@ -106,7 +145,7 @@ export interface CageState {
     extraMod: {modData: ExtraMod} | undefined;
 }
 export interface Rack {
-    id: number;
+    itemId: string; // rack id
     type: RackTypes;
     cages: Cage[];
     x: number; // x coordinate of rack in layout coordinate plane
@@ -117,7 +156,7 @@ export interface Rack {
 
 
 export interface RoomObject {
-    id: number;
+    itemId: string; // object id
     type: RoomObjectTypes
     x: number;
     y: number;
@@ -126,10 +165,12 @@ export interface RoomObject {
 
 export type RoomItem = Rack | RoomObject;
 
+export type RoomItemType = RoomObjectTypes | RackTypes;
+
 export enum RoomObjectTypes {
-    RoomDivider,
-    Drain,
-    Door
+    RoomDivider = "roomDivider",
+    Drain = "drain",
+    Door = "door"
 }
 
 // these string names are used to id divs in the svgs
@@ -198,6 +239,35 @@ export type Separators = SeparatorMod[];
 
 export interface ExtraMod {
     mod: Modification
+}
+
+export const DEFAULT_CAGE_TYPE: EHRCageType = {
+    rowid: 1,
+    abbreviation: 'uk', // abbreviation of manufacturer
+    cagetype: 'cage-uk-0.0', // naming convention is 'type-abbreviation-sqft'
+    description: 'unknown default cage',
+    height: 0.0,
+    length: 0.0,
+    manufacturer: 'unknown',
+    sqft: 0.0,
+    supportsTunnel: false,
+    type: 'cage',
+    width: 0.0
+}
+
+export const DEFAULT_PEN_TYPE: EHRCageType = {
+    rowid: 2,
+    abbreviation: 'uk',
+    cagetype: 'pen-uk-0.0',
+    description: 'unknown default pen',
+    height: 0.0,
+    length: 0.0,
+    manufacturer: 'unknown',
+    sqft: 0.0,
+    supportsTunnel: false,
+    type: 'pen',
+    width: 0.0
+
 }
 
 export const CageSizes: Record<string, CageSizeWithKey> = {

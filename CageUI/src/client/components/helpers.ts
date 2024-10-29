@@ -45,14 +45,7 @@ export const parseRack = (input: string) => {
     }
     return;
 }
-export const parseAddRack = (input: string) => {
-    const regex = /add-rack-(\d+)$/;
-    const match = input.match(regex);
-    if (match) {
-        return match[1];
-    }
-    return;
-}
+
 // Helper function to get the cage number
 export const parseCage = (input: string) => {
     const regex = /cage-(\d+)/;
@@ -64,6 +57,27 @@ export const parseCage = (input: string) => {
     }
     return;
 }
+
+export const parseRoomItem = (input: string) => {
+    const regex = /\w+-(\d+)/; // matches "string-number"
+
+    const match = input.match(regex);
+    if (match) {
+        return parseInt(match[1]);
+    }
+    return;
+}
+
+export const parseItemType = (input: string) => {
+    const regex = /\w+-\w+-(\d+)/; // matches "string-string-number"
+
+    const match = input.match(regex);
+    if (match) {
+        return match[1];
+    }
+    return;
+}
+
 export const parseEditRect = (input: string) => {
     const regex = /blur-(\d+)/;
     const match = input.match(regex);

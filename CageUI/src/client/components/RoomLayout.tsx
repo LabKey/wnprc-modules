@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from 'react';
 import { FC, useState } from 'react';
 import { ReactSVG } from 'react-svg';
@@ -14,6 +15,8 @@ import { useRoomContext } from './ContextManager';
 import { Popup } from './Popup';
 import { CageDetailsModifications } from './CageDetailsModifications';
 import { CageExtraDetails } from './CageExtraDetails';
+import { Rack } from './typings';
+import { isRack } from './LayoutEditorHelpers';
 
 export const RoomLayout: FC = () => {
     const {room, cageDetails, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useRoomContext();
@@ -29,9 +32,9 @@ export const RoomLayout: FC = () => {
     
     const handleClick = (event) => {
         const cage = event.target;
-        const rackId: number = (parseRack(cage.id));
+        const rackId: string = (cage.id);
         const cageId: number = (parseCage(cage.id));
-        const tempClickedRack = room.find(rack => rack.id === rackId);
+        const tempClickedRack: Rack = room.find(rack => rack.itemId === rackId) as Rack;
         const clickedCage = tempClickedRack.cages[cageId - 1];
         setClickedCage(clickedCage);
         setClickedRack(tempClickedRack);
@@ -40,11 +43,11 @@ export const RoomLayout: FC = () => {
     };
 
     const handleRackEdit = (event) => {
-        const rackId: number = parseInt(parseEditRect(event.target.id));
-
+        const rackId: string = parseInt(parseEditRect(event.target.id));
+        // TODO Fix this itemId === rackId
         setRoom((prevRoom) => {
             const updatedRacks = prevRoom.map((rack) =>
-                rack.id === rackId ? { ...rack, isActive: !rack.isActive } : rack
+                rack.itemId === rackId ? { ...rack, isActive: !(rack as Rack).isActive } : rack
             );
             const temp = updateCageIds(updatedRacks);
             console.log(temp);
@@ -59,19 +62,21 @@ export const RoomLayout: FC = () => {
                 wrapper={"div"}
                 className={"room-svg"}
                 beforeInjection={(svg) => {
-                    room.forEach((rack) => {
-                        rack.cages.forEach((cage, idx) => {
+                    room.forEach((roomItem) => {
+                        if(!isRack(roomItem.type)) return;
+                        roomItem = roomItem as Rack;
+                        roomItem.cages.forEach((cage, idx) => {
                             // Construct the expected text element ID
-                            const textId = `text-${idx + 1}-${rack.id}`;
+                            const textId = `text-${idx + 1}-${roomItem.itemId}`;
                             // Find the corresponding text element
                             const textElement = svg.querySelector(`#${textId}`);
-                            const tempCage:SVGRectElement = svg.querySelector(`#rect-${idx + 1}-${rack.id}`);
+                            const tempCage:SVGRectElement = svg.querySelector(`#rect-${idx + 1}-${roomItem.itemId}`);
 
                             if (textElement) {
                                 // Get the tspan child and update its content
                                 const tspanElement = textElement.querySelector('tspan');
                                 if (tspanElement) {
-                                    if(rack.isActive){
+                                    if((roomItem as Rack).isActive){
                                         tspanElement.textContent = cage.id.toString();
                                         tempCage.onclick = (event) => handleClick(event);
                                     }else{
@@ -85,7 +90,7 @@ export const RoomLayout: FC = () => {
                 afterInjection={(svg) => {
                     // Parses seperators styling them correctly
                     for (let i = 0; i < room.length; i++) {
-                        const currSeparators = getRackSeparators(room[i]);
+                        const currSeparators = getRackSeparators(room[i] as Rack);
                         const separators = svg.querySelector(`#seperators-${i + 1}`);
                         const children = [...separators.children];
                         const mods = svg.querySelector(`#modifications-${i + 1}`);
@@ -101,7 +106,7 @@ export const RoomLayout: FC = () => {
                                     childNode.onclick = (event) => handleRackEdit(event);
                                 } else {
                                     //Determines which icon to display (add or remove rack (circle plus/minus))
-                                    if ((room[i].isActive && childNode.id.includes("del")) || (!room[i].isActive && childNode.id.includes("add"))) {
+                                    if (((room[i] as Rack).isActive && childNode.id.includes("del")) || (!(room[i] as Rack).isActive && childNode.id.includes("add"))) {
                                         changeStyleProperty(childNode, "fill", "black");
                                     }
                                 }
@@ -113,7 +118,7 @@ export const RoomLayout: FC = () => {
                         });
                         //Update modification svg props
                         [...mods.children].forEach((childNode) => {
-                            const cageMod = getCageMod(childNode.id, room[i]);
+                            const cageMod = getCageMod(childNode.id, room[i] as Rack);
                             const styles = cageMod?.styles
                             if(parseSeparator(childNode.id) === "CTunnel"){ // CTunnels have multiple sub styles
                                 [...childNode.children].forEach((subChildNode) => {

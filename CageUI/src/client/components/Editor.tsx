@@ -65,7 +65,7 @@ const Editor = () => {
         changeCageNum,
         cageNumChange,
         moveObjLocation,
-        mergeLocalRacks,
+        doRackAction,
         getNextCageNum,
         selectedObj,
         setSelectedObj,
@@ -89,18 +89,17 @@ const Editor = () => {
     // Effect checks for merging after a rack is moved
     useEffect(() => {
         if(!selectedObj) return;
-        const draggedRackType = localRoom.find(rack => rack.itemId === selectedObj).type;
-        const targetRackType = localRoom.find(rack => rack.itemId === selectedObj).type;
-        if(!isRack(draggedRackType)) return;
+        const draggedRackType = localRoom.racks.find(rack => rack.itemId === selectedObj).type;
+        const targetRackType = localRoom.racks.find(rack => rack.itemId === selectedObj).type;
+        if(!draggedRackType || !targetRackType){
+            return;
+        }
         console.log("Dragged rack 1: ", selectedObj);
 
         //This is the first cage in the dragged rack that will determine if a merge is possible
-        const draggedCage: Cage = (localRoom.find(roomItem => {
-            if(isRack(roomItem.type)){
-                return roomItem.itemId === selectedObj;
-            }
-            return false;
-        }) as Rack).cages.find((cage) => cage.id === 1);
+        const draggedCage: Cage = (localRoom.racks.find(rack => {
+                return rack.itemId === selectedObj;
+        })).cages.find((cage) => cage.id === 1);
 
         const draggedCageLoc: LocationCoords = unitLocs[draggedRackType].find((cage) => cage.num === draggedCage.cageNum);
 
@@ -111,10 +110,9 @@ const Editor = () => {
                 if(draggedCage.cageNum === targetCageLoc.num) return; // cant merge into itself
                 let inSameRack = false;
                 //TODO fix this bug with checking if pens/cages/tempCages/playCages are in the same "rack"
-                localRoom.forEach(roomItem => {
-                    if(!isRack(roomItem.type)) return;
-                    if(areCagesInSameRack(roomItem as Rack, targetCageLoc, draggedCageLoc)) {
-                        console.log("Same Rack: ", roomItem, targetCageLoc, draggedCageLoc);
+                localRoom.racks.forEach(rack => {
+                    if(areCagesInSameRack(rack, targetCageLoc, draggedCageLoc)) {
+                        console.log("Same Rack: ", rack, targetCageLoc, draggedCageLoc);
                         inSameRack = true;
                         return;
                     }
@@ -122,29 +120,23 @@ const Editor = () => {
                 if(inSameRack) {
                     return;
                 }
-                const gridRatio = convertCageNumToType(targetCageLoc.num) === RackTypes.Pen || convertCageNumToType(targetCageLoc.num) === RackTypes.PlayCage ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
                 const mergeAvail = checkAdjacent(targetCageLoc, draggedCageLoc, GRID_SIZE, gridRatio);
                 if(mergeAvail) {
                     const targetShape = layoutSvg.select(`[id^="${targetCageLoc.num}"]`);
                     if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
                     const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*=rack]');
-                    const targetRack = localRoom.find(roomItem => {
-                        if(isRack(roomItem.type)){
-                            return roomItem.itemId === targetRackShape.getAttribute('id');
-                        }
-                        return false;
-                    }) as Rack;
+                    const targetRack = localRoom.racks.find(rack => {
+                        return rack.itemId === targetRackShape.getAttribute('id');
+                    });
                     const targetCage = targetRack.cages.find((cage) => cage.cageNum === targetShape.attr('id') as CageNumber);
 
                     const draggedShape = layoutSvg.select(`[id^="${draggedCageLoc.num}"]`);
                     const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*=rack]');
-                    const draggedRack = localRoom.find(roomItem => {
-                        if(isRack(roomItem.type)){
-                            return roomItem.itemId === draggedRackShape.getAttribute('id');
-                        }
-                        return false;
-                    }) as Rack;
+                    const draggedRack = localRoom.racks.find(rack => {
+                            return rack.itemId === draggedRackShape.getAttribute('id');
+                    });
                     const draggedCage = targetRack.cages.find((cage) => cage.cageNum === targetShape.attr('id') as CageNumber);
 
 
@@ -164,7 +156,7 @@ const Editor = () => {
                         setCtxMenuStyle: setCtxMenuStyle,
                     }
 
-                    mergeRacks(targetRack, draggedRack, mergeLocalRacks, layoutDragProps, cageActionProps, targetCage, draggedCage);
+                    mergeRacks(targetRack, draggedRack, doRackAction, layoutDragProps, cageActionProps, targetCage, draggedCage);
                 }
             })
         });
@@ -260,7 +252,19 @@ const Editor = () => {
 
         // Drag start for dragging from the utilities to the layout
         function dragStarted(event: d3.D3DragEvent<SVGElement, any, any>) {
-            const shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
+            let shape: SVGElement;
+            /*
+               Selections can be picky depending on where the user clicks to drag the object,
+               make sure it always assigns the shape to the top level SVG element for the object
+             */
+            if(event.sourceEvent.target.nodeName === 'tspan'){
+                shape = (event.sourceEvent.target as SVGTSpanElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+            }else if(event.sourceEvent.target.nodeName === 'path'){
+                shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+            }else{
+                shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
+            }
+
             d3.select(shape)
                 .style('pointer-events', 'none')
                 .attr('class', 'dragging');
@@ -277,7 +281,7 @@ const Editor = () => {
         }
         // Drag end for dragging from the utilities to the layout
         function dragEnded(event) {
-            const draggedShape = d3.select('.dragging');
+            const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging');
             // sync x and y to the layout svg
             const {x,y} = getLayoutOffset({
                 clientX: event.sourceEvent.clientX,
@@ -290,9 +294,11 @@ const Editor = () => {
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
-                // TODO currently the next avail rack id, fix to obj id and add a new field for rack ids or convert to obj ids only
+
+                // First expression is if dragged shape is a rack, the second is a room object.
                 const draggedNodeId = ((draggedShape.node() as SVGElement).firstChild.firstChild as SVGElement).getAttribute('id') || ((draggedShape.node() as SVGElement).firstChild as SVGElement).getAttribute('id');
-                let itemType: RoomItemType; // todo fix this rack type to be object type
+
+                let itemType: RoomItemType;
                 let newId: string;
                 if(draggedNodeId.includes("pen")) {
                     itemType = RackTypes.Pen;
@@ -301,20 +307,16 @@ const Editor = () => {
                 }else if (draggedNodeId.includes('door')){
                     itemType = RoomObjectTypes.Door;
                 }
-                // TODO might not need objType since rackType = null means its a room object
+
                 if(isRack(itemType)){
                     // get new id for rack
-                    const tempId = localRoom.reduce((max, obj) => {
-                        if (!isRack(obj.type)) return max;
-                        obj = obj as Rack;
+                    const tempId = localRoom.racks.reduce((max, obj) => {
                         return parseRoomItem(obj.itemId) > max ?  parseRoomItem(obj.itemId) : max;
                     }, 0) + 1;
                     newId = `default-rack-${tempId}`;
                 }else{
                     // get new id for room object
-                    const tempId = localRoom.reduce((max, obj) => {
-                        if (isRack(obj.type)) return max;
-                        obj = obj as RoomObject;
+                    const tempId = localRoom.objects.reduce((max, obj) => {
                         return  parseRoomItem(obj.itemId)> max ? parseRoomItem(obj.itemId) : max;
                     }, 0) + 1;
                     newId = `default-object-${tempId}`;

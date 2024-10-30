@@ -14,6 +14,8 @@ export type CageSizeWithKey =
 export type CagePosition = "top" | "bottom" | "none";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
 type PageViews = "Room" | "Rack" | "Cage";
+export type RackActions = 'merge' | 'connect' | 'cancel';
+
 
 
 export interface LayoutHistoryData {
@@ -65,7 +67,7 @@ export interface LayoutDragProps {
     MAX_SNAP_DISTANCE: number;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (rackId: string) => void;
-    moveItem: (itemId: string, x: number, y: number, k: number) => void;
+    moveItem: (itemId: string, type: RoomItemType, x: number, y: number, k: number) => void;
     itemType: RoomItemType;
 }
 
@@ -84,6 +86,13 @@ export interface Cage {
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
 }
+
+export interface Room {
+    room: string;
+    racks: Rack[];
+    objects: RoomObject[];
+}
+
 
 export interface EHRCageType {
     rowid: number;
@@ -144,8 +153,10 @@ export interface CageState {
     floor: {modData: SeparatorMod} | undefined;
     extraMod: {modData: ExtraMod} | undefined;
 }
+
 export interface Rack {
     itemId: string; // rack id
+    groupId: number; // racks with the same groupId are connected
     type: RackTypes;
     cages: Cage[];
     x: number; // x coordinate of rack in layout coordinate plane
@@ -153,7 +164,6 @@ export interface Rack {
     scale: number; // k scaling vector in layout coordinate plane
     isActive: boolean;
 }
-
 
 export interface RoomObject {
     itemId: string; // object id

@@ -2295,7 +2295,7 @@ public class TriggerScriptHelper {
 
         Map<String, JSONObject> errorMap = new HashMap<>();
 
-        if(checkIfAnimalInCondition(animalId,startDate).size()==0 || checkIfAnimalInCondition(animalId,startDate).get(animalId).equals("lixit")){
+        if(checkIfAnimalInCondition(animalId, startDate).isEmpty() || checkIfAnimalInCondition(animalId,startDate).get(animalId).equals("lixit")){
             returnErrors.put("field","waterSource");
             returnErrors.put("severity", "ERROR");
             returnErrors.put("message", "Error animal not in WaterScheduleAnimal table or is already in "+waterSource +" condition");
@@ -2328,7 +2328,7 @@ public class TriggerScriptHelper {
                 updateWaterOrder.put("lsid", lsid);
                 //closing water order the day before, new lixit orders have to be completed the first time.
                 java.time.LocalDateTime newEndDate = java.time.LocalDateTime.ofInstant(startDate.toInstant(),ZoneId.systemDefault());
-                newEndDate.minusDays(1);
+                newEndDate = newEndDate.minusDays(1);
                 updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
                 updateWaterOrder.put("skipWaterRegulationCheck", true);
                 toUpdate.add(updateWaterOrder);

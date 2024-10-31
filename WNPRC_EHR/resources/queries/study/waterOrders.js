@@ -54,7 +54,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         });
         var animalRestricted = {};
         animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalInCondition(row.Id, row.date);
-        //console.log (animalRestricted);
         if (!animalRestricted && !row.skipWaterRegulationCheck){
             EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or is already in ' + row.waterSource + ' condition.', 'ERROR');
         }
@@ -124,14 +123,15 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     //if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
     //TODO: by pass water regulation to change water order to lixit and also chnage the water regulated animals data
-    if ( row.waterSource == 'lixit' && !row.skipWaterRegulationCheck && !oldRow){
+    console.log("value of "+ row.waterSource + " value of skip water "+row.skipWaterRegulationCheck);
+    if ( row.waterSource === 'lixit' && !row.skipWaterRegulationCheck && !oldRow){
 
-        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,row.closingRecord,this.extraContext);
+        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,this.extraContext);
         let jsonExtraContext = this.extraContext.extraContextArray;
 
         if (jsonArray != null){
             for (var i=0; i < jsonArray.length; i++){
-                let errorObject = JSON.parse(jsonArray[i]);
+                let errorObject = jsonArray[i];
                 EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message, errorObject.severity);
 
             }

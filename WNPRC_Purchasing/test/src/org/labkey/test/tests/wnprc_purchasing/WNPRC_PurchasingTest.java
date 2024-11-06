@@ -962,7 +962,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         if (getCurrentUser().equals("purchaseadmin@test.com"))
         {
             clickAndWait(Locator.linkWithText("All Open Requests"));
-            DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).waitFor();
+            DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).withName("query").waitFor();
             table.setFilter("requester", "Equals", "purchaseadmin");
             return table.getDataAsText(0, "requestNum");
         }

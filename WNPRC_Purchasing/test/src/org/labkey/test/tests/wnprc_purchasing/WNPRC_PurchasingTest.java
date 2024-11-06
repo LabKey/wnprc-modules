@@ -386,7 +386,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Verifying the request created");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
-        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).waitFor();
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
@@ -962,13 +962,13 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         if (getCurrentUser().equals("purchaseadmin@test.com"))
         {
             clickAndWait(Locator.linkWithText("All Open Requests"));
-            DataRegionTable table = new DataRegionTable("query", getDriver());
+            DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).waitFor();
             table.setFilter("requester", "Equals", "purchaseadmin");
             return table.getDataAsText(0, "requestNum");
         }
         else
         {
-            DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+            DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).waitFor();
             return table.getDataAsText(table.getDataRowCount() - 1, "rowId");
         }
     }

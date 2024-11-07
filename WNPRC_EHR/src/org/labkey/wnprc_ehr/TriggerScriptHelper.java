@@ -8,6 +8,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
@@ -2290,9 +2291,6 @@ public class TriggerScriptHelper {
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();
         JSONObject returnErrors = new JSONObject();
-
-
-
         Map<String, JSONObject> errorMap = new HashMap<>();
 
         if(checkIfAnimalInCondition(animalId, startDate).isEmpty() || checkIfAnimalInCondition(animalId,startDate).get(animalId).equals("lixit")){
@@ -2307,12 +2305,14 @@ public class TriggerScriptHelper {
         TableInfo waterOrders = getTableInfo("study","waterOrders");
         SimpleFilter filter = new SimpleFilter (FieldKey.fromString("id"), animalId);
         filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
+        //filter.addCondition(FieldKey.fromString("date"),startDate,CompareType.DATE_LT);
         filter.addCondition(FieldKey.fromString("enddateCoalescedFuture"),startDate,CompareType.DATE_GT);
 
         TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "objectid","id", "date","volume","frequency","enddateCoalescedFuture"),filter,null);
         Map <String,Object>[] waterOrderObjects = waterOrderRecords.getMapArray();
         List<Map<String, Object>> toUpdate = new ArrayList<>();
         List<Map<String, Object>> oldKeys = new ArrayList<>();
+        List<Map<String, Object>> waterAmounts = new ArrayList<>();
 
         if (waterOrderObjects.length >0)
         {
@@ -2329,7 +2329,14 @@ public class TriggerScriptHelper {
                 //closing water order the day before, new lixit orders have to be completed the first time.
                 java.time.LocalDateTime newEndDate = java.time.LocalDateTime.ofInstant(startDate.toInstant(),ZoneId.systemDefault());
                 newEndDate = newEndDate.minusDays(1);
-                updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
+                if (ConvertHelper.convert(waterOrderMap.get("date"), Date.class).before(startDate)){
+                    updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
+
+                }else if(ConvertHelper.convert(waterOrderMap.get("date"), Date.class).after(startDate)){
+                    updateWaterOrder.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
+                }
+
+
                 updateWaterOrder.put("skipWaterRegulationCheck", true);
                 toUpdate.add(updateWaterOrder);
 
@@ -2352,6 +2359,14 @@ public class TriggerScriptHelper {
             }
         }
 
+        Map<String,Object> keyMapAmount = new CaseInsensitiveHashMap<>();
+        keyMapAmount.put("animalId", animalId);
+        Timestamp timestamp = new Timestamp(startDate.getTime());
+        keyMapAmount.put("endDate", timestamp);
+        waterAmounts.add(keyMapAmount);
+
+        removeWaterAmounts(waterAmounts, arrayOfErrors);
+
         List<Map<String, Object>> rowToAdd = null;
 
         Map<String, Object> scheduledAnimalRecord = new HashMap<>();
@@ -2366,7 +2381,7 @@ public class TriggerScriptHelper {
         //service = ti.getUpdateService();
 
         //if(errorMap.get(animalId)!= null &&  !"ERROR".equals(errorMap.get(animalId).get("severity")))
-        if( arrayOfErrors.length() > 0 &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
+        if(!arrayOfErrors.isEmpty() &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
         {
             try
             {
@@ -2397,7 +2412,7 @@ public class TriggerScriptHelper {
 
             }
         }
-        if (extraContextArray.length()>0){
+        if (!extraContextArray.isEmpty()){
             extraContext.put("extraContextArray", extraContextArray);
         }
 
@@ -2729,12 +2744,20 @@ public class TriggerScriptHelper {
 
         return StringUtils.join(errors, "<>");
     }
-    public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
+
+    public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException{
+        removeWaterAmounts(animalDateMap, null);
+    }
+
+    public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap, @Nullable JSONArray errorArray) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
     {
+
+
+
         if (animalDateMap != null){
             for (Map<String, Object> record : animalDateMap){
                 String Id = (String)record.get("animalId");
-                Date animalDeath = (Timestamp)record.get("deathDate");
+                Date animalDeath = (Timestamp)record.get("endDate");
                 //Date animalDeath = new Date(DateUtil.parseISODateTime((String)record.get("deathDate")));
                 if (!checkIfAnimalInCondition(Id, animalDeath).isEmpty()){
                     Calendar filterDate = Calendar.getInstance();
@@ -2757,6 +2780,13 @@ public class TriggerScriptHelper {
                         @Override
                         public void exec(ResultSet rs) throws SQLException
                         {
+                            JSONObject returnErrors = new JSONObject();
+                            returnErrors.put("field", "waterSource");
+                            returnErrors.put("severity", "INFO");
+                            returnErrors.put("message", "Water Amounts for " + rs.getString("id") + " on "+rs.getString("date")+ " is going to be delete.");
+                            if (errorArray != null){
+                                errorArray.put(returnErrors);
+                            }
                             String objectid =rs.getString("objectId");
                             Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
                             Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
@@ -2777,8 +2807,5 @@ public class TriggerScriptHelper {
                 }
             }
         }
-
-
-
     }
 }

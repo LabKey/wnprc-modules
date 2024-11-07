@@ -27,7 +27,7 @@ function onComplete(event, errors, helper) {
 
             animalDateMap.push({
                 animalId: clientRows[i].row.id,
-                deathDate : clientRows[i].row.date
+                endDate : clientRows[i].row.date
             });
 
         }

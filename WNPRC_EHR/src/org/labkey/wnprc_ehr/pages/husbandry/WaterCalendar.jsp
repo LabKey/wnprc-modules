@@ -1554,7 +1554,7 @@
 
     function queryConfigFunc (fetchInfo, isSuperUser, isAnimalCare, animalId){
         let today = new Date();
-        let momentStarDate = fetchInfo.start.format('Y-m-d');
+        let momentStartDate = fetchInfo.start.format('Y-m-d');
         let momentEndDate = fetchInfo.end.format('Y-m-d');
         let numOfDate;
         let startCalendarDate;
@@ -1563,11 +1563,11 @@
         //Calculate if today is between the calendar start date and the calendar end date
         //If the user navigates to the next month we only calculate the dates for that month and
         //ignore the current date.
-        if (moment(today).isBetween(momentStarDate, momentEndDate)){
+        if (moment(today).isBetween(momentStartDate, momentEndDate)){
             numOfDate = moment(momentEndDate).diff(today, "days", false);
             startCalendarDate = today.format(LABKEY.extDefaultDateFormat)
         }else if(moment(momentStartDate).isAfter(today)){
-            numOfDate = moment(momentEndDate).diff(momentStarDate,"days",false);
+            numOfDate = moment(momentEndDate).diff(momentStartDate,"days",false);
             startCalendarDate = fetchInfo.start.format(LABKEY.extDefaultDateFormat);
         }
         console.log("value of numofDate " + numOfDate)

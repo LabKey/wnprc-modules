@@ -320,7 +320,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Verifying the request created");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
-        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).refindWhenNeeded();
         assertEquals("Invalid number of requests ", 1, table.getDataRowCount());
         assertEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
@@ -386,7 +386,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Verifying the request created");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
-        DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).waitFor();
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).refindWhenNeeded();
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
@@ -962,13 +962,13 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         if (getCurrentUser().equals("purchaseadmin@test.com"))
         {
             clickAndWait(Locator.linkWithText("All Open Requests"));
-            DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).withName("query").waitFor();
+            DataRegionTable table = DataRegionTable.DataRegion(getDriver()).withName("query").refindWhenNeeded();
             table.setFilter("requester", "Equals", "purchaseadmin");
             return table.getDataAsText(0, "requestNum");
         }
         else
         {
-            DataRegionTable table = new DataRegionTable.DataRegionFinder(getDriver()).waitFor();
+            DataRegionTable table = DataRegionTable.DataRegion(getDriver()).refindWhenNeeded();
             return table.getDataAsText(table.getDataRowCount() - 1, "rowId");
         }
     }

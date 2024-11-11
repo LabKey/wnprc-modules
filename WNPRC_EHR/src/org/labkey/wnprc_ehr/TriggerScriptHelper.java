@@ -67,6 +67,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -2783,7 +2784,11 @@ public class TriggerScriptHelper {
                             JSONObject returnErrors = new JSONObject();
                             returnErrors.put("field", "waterSource");
                             returnErrors.put("severity", "INFO");
-                            returnErrors.put("message", "Water Amounts for " + rs.getString("id") + " on "+rs.getString("date")+ " is going to be delete.");
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                            LocalDateTime waterDate = LocalDateTime.parse(rs.getString("date"),formatter);
+                            DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            DateTimeFormatter formatterTime = DateTimeFormatter.ofPattern("HH:mm");
+                            returnErrors.put("message", "Water Amount for " + rs.getString("id") + " on " + waterDate.format(formatterDate) + " at " + waterDate.format(formatterTime) + " will be deleted.");
                             if (errorArray != null){
                                 errorArray.put(returnErrors);
                             }

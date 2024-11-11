@@ -15,6 +15,7 @@ export type CagePosition = "top" | "bottom" | "none";
 export type CageBuilder = "Allentown" | "Suburban" | "Lenderking";
 type PageViews = "Room" | "Rack" | "Cage";
 export type RackActions = 'merge' | 'connect' | 'cancel';
+export type GroupId = `rack-group-${number}`;
 
 
 
@@ -57,8 +58,7 @@ export interface PendingRoomUpdate {
 }
 
 export interface CageActionProps {
-    setClickedRack: React.Dispatch<React.SetStateAction<string>>;
-    setEditCageNum: React.Dispatch<React.SetStateAction<number>>;
+    setEditCageNum: React.Dispatch<React.SetStateAction<string>>;
     setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>;
 }
 export interface LayoutDragProps {
@@ -156,7 +156,7 @@ export interface CageState {
 
 export interface Rack {
     itemId: string; // rack id
-    groupId: number; // racks with the same groupId are connected
+    groupId: GroupId; // racks with the same groupId are connected
     type: RackTypes;
     cages: Cage[];
     x: number; // x coordinate of rack in layout coordinate plane

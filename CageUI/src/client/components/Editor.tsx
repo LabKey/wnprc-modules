@@ -25,17 +25,17 @@ import {
     createDragInLayout,
     createEndDragInLayout,
     createStartDragInLayout,
-    drawGrid,
+    drawGrid, findSelectObjRack,
     getLayoutOffset,
     getTargetRect,
     isRack,
     mergeRacks,
     placeAndScaleGroup,
-    setupEditCageNumEvent,
+    setupEditCageEvent, showLayoutEditorError,
     updateGrid
 } from './LayoutEditorHelpers';
 import EditorContextMenu from './EditorContextMenu';
-import { convertCageNumToNum, convertCageNumToType, parseRoomItem } from './helpers';
+import { convertCageNumToNum, convertCageNumToType, parseRoomItemNum, parseRoomItemType } from './helpers';
 
 const Editor = () => {
     const MAX_SNAP_DISTANCE = 100;  // Adjust this value as needed
@@ -69,8 +69,6 @@ const Editor = () => {
         getNextCageNum,
         selectedObj,
         setSelectedObj,
-        clickedCage,
-        setClickedCage,
         delCage,
         unitLocs
     } = useLayoutContext();
@@ -88,18 +86,18 @@ const Editor = () => {
 
     // Effect checks for merging after a rack is moved
     useEffect(() => {
-        if(!selectedObj) return;
-        const draggedRackType = localRoom.racks.find(rack => rack.itemId === selectedObj).type;
-        const targetRackType = localRoom.racks.find(rack => rack.itemId === selectedObj).type;
-        if(!draggedRackType || !targetRackType){
+        if(!selectedObj || cageNumChange) return;
+        if(selectedObj.includes('group')) return; // unable to merge connected racks
+        const draggedRack = localRoom.racks.find(rack => rack.itemId === selectedObj);
+        const draggedRackType = draggedRack.type;
+
+        if(!draggedRackType){
             return;
         }
         console.log("Dragged rack 1: ", selectedObj);
 
         //This is the first cage in the dragged rack that will determine if a merge is possible
-        const draggedCage: Cage = (localRoom.racks.find(rack => {
-                return rack.itemId === selectedObj;
-        })).cages.find((cage) => cage.id === 1);
+        const draggedCage: Cage = draggedRack.cages.find((cage) => cage.id === 1);
 
         const draggedCageLoc: LocationCoords = unitLocs[draggedRackType].find((cage) => cage.num === draggedCage.cageNum);
 
@@ -120,6 +118,7 @@ const Editor = () => {
                 if(inSameRack) {
                     return;
                 }
+                const targetRackType = parseRoomItemType(targetCageLoc.num) as RackTypes;
                 const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
                 const mergeAvail = checkAdjacent(targetCageLoc, draggedCageLoc, GRID_SIZE, gridRatio);
@@ -150,9 +149,9 @@ const Editor = () => {
                         moveItem: moveObjLocation,
                         itemType: Object.values(RackTypes).find(type => type === unitRackType) as RackTypes,
                     };
+
                     const cageActionProps: CageActionProps = {
-                        setEditCageNum: setClickedCage,
-                        setClickedRack: setSelectedObj,
+                        setEditCageNum: setSelectedObj,
                         setCtxMenuStyle: setCtxMenuStyle,
                     }
 
@@ -173,39 +172,36 @@ const Editor = () => {
         draggedShape.classed('dragging', false);
         const transform = d3.zoomTransform(layoutSvg.node());
         
-        if (!isRack(itemType)) {
+        if (!isRack(itemType)) { // adding dragged room object
             group = layoutSvg.append('g')
                 .data([{x: cellX, y: cellY}])
                 .attr('class', "draggable room-obj")
                 .attr('id', `${itemId}`)
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
-        } else {
+        } else { // adding dragged caging unit
             // Determine the grid ratio for merging depending on size of dragged object
             if(itemType === RackTypes.Pen || itemType === RackTypes.PlayCage){
                 gridRatio = LARGE_GRID_RATIO;
             }else{
                 gridRatio = SMALL_GRID_RATIO;
             }
-            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = draggedShape.select(`#${itemType}-x`);
-            if(cageGroup.empty()) return; // Sometimes cage group isn't bound correctly causing a random crash
-            const cageIdText = draggedShape.select('tspan');
-
-
-            // Change the id of the group in the pre-created svg img, and set class name for top level group.
-            const currentId = cageGroup.attr('id');
-            if(currentId){
-                const newRackId = currentId.replace(`${itemType}-x`, `${itemType}-${getNextCageNum(itemType as RackTypes)}`)
-                cageGroup.attr('id', newRackId); // Set the new ID
-            }
-            cageIdText.node().textContent = `${getNextCageNum(itemType as RackTypes)}`;
 
             group = layoutSvg.append('g')
-                .attr('class', `draggable rack`)
+                .attr('class', 'draggable rack')
                 .attr('id', `${itemId}`)
-                .style('pointer-events', "bounding-box");
+                .style('pointer-events', 'bounding-box');
 
-            group.append(() => draggedShape.node());
+            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = group.append('g')
+                .attr('id', `${itemType}-${getNextCageNum(itemType as RackTypes)}`)
+                .attr('transform', `translate(0,0)`)
+                .append(() => draggedShape.node());
+
+            const cageIdText: SVGTSpanElement = cageGroup.select('tspan').node() as SVGTSpanElement;
+
+            cageIdText.textContent = `${getNextCageNum(itemType as RackTypes)}`;
+
+
             placeAndScaleGroup(group, cellX, cellY, transform);
         }
         addRoomItem(itemType, itemId, cellX, cellY, transform.k);
@@ -230,8 +226,7 @@ const Editor = () => {
             textElement.setAttribute('contentEditable', 'true');
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-            // Return the cleanup function to remove the event listener when the component unmounts
-            setupEditCageNumEvent(textElement, setClickedCage, setSelectedObj, setCtxMenuStyle, itemType as RackTypes);
+            setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, itemType as RackTypes);
         });
         setAddingRoomItem(false);
     }, [pendingRoomUpdate]);
@@ -311,13 +306,13 @@ const Editor = () => {
                 if(isRack(itemType)){
                     // get new id for rack
                     const tempId = localRoom.racks.reduce((max, obj) => {
-                        return parseRoomItem(obj.itemId) > max ?  parseRoomItem(obj.itemId) : max;
+                        return parseRoomItemNum(obj.itemId) > max ?  parseRoomItemNum(obj.itemId) : max;
                     }, 0) + 1;
                     newId = `default-rack-${tempId}`;
                 }else{
                     // get new id for room object
                     const tempId = localRoom.objects.reduce((max, obj) => {
-                        return  parseRoomItem(obj.itemId)> max ? parseRoomItem(obj.itemId) : max;
+                        return  parseRoomItemNum(obj.itemId)> max ? parseRoomItemNum(obj.itemId) : max;
                     }, 0) + 1;
                     newId = `default-object-${tempId}`;
                 }
@@ -345,8 +340,10 @@ const Editor = () => {
     // After state is done updating for cage id change. refresh svg text and ids
     useEffect(() => {
         if(cageNumChange){
-            let group = layoutSvg.select(`#rack-${selectedObj}`).select(`#cage-${cageNumChange.before}`).attr('id', `cage-${cageNumChange.after}`);
+            let group = layoutSvg.select(`#${selectedObj}`).attr('id', `cage-${cageNumChange.after}`);
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
+            setCtxMenuStyle({ display: 'none', top: '0px', left: '0px' });
+            setSelectedObj(null);
         }
     }, [cageNumChange]);
 
@@ -476,7 +473,7 @@ const Editor = () => {
                 {(renameCage) &&
                         <CageNumInput
                                 onSubmit={(num) => {
-                                    changeCageNum(clickedCage, num);
+                                    changeCageNum(parseRoomItemNum(selectedObj), num);
                                 }}
                                 onClose={() => setRenameCage(false)}
                         />

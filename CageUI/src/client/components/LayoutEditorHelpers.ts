@@ -1,24 +1,23 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
-import {
-    convertCageNumToNum,
-    getRackFromClass,
-    getTranslation,
-    isTextEditable,
-    parseCage,
-    parseRack,
-    parseRoomItem
-} from './helpers';
+import { convertCageNumToNum, getTranslation, isTextEditable, parseRack, parseRoomItemType } from './helpers';
 import {
     Cage,
     CageActionProps,
-    CageNumber, CageState, EHRCage,
+    EHRCage,
+    GroupId,
     LayoutDragProps,
     LayoutHistoryData,
     LocationCoords,
     OffsetProps,
-    Rack, RackActions,
-    RackTypes, RoomItem, RoomItemType, RoomObject, RoomObjectTypes, StartDragProps
+    Rack,
+    RackActions,
+    RackTypes,
+    RoomItem,
+    RoomItemType,
+    RoomObject,
+    RoomObjectTypes,
+    StartDragProps
 } from './typings';
 import * as React from 'react';
 import { testCagesInRoom } from '../layoutEditor/testData';
@@ -95,7 +94,32 @@ function showConfirmationPopup(): Promise<RackActions> {
     });
 }
 
+// Confirmation popup for merging two racks
+export function showLayoutEditorError(errorMsg: string) {
+    return new Promise((resolve) => {
+        // Create a simple popup
+        const popup = d3.select('body').append('div')
+            .attr('class', 'popup')
+            .style('position', 'absolute')
+            .style('top', '50%')
+            .style('left', '50%')
+            .style('transform', 'translate(-50%, -50%)')
+            .style('background', 'white')
+            .style('padding', '20px')
+            .style('border', '1px solid black');
 
+        popup.append('p')
+            .text(errorMsg);
+
+        // Cancel button
+        popup.append('button')
+            .text('Ok')
+            .on('click', () => {
+                popup.remove();
+                resolve(true);
+            });
+    });
+}
 
 // Function to help merge racks together by resetting groups to local coords
 function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
@@ -148,22 +172,18 @@ function findNestedCageElement(parentId) {
     return searchNestedElements(parentElement);
 }
 
-export function setupEditCageNumEvent(
+export function setupEditCageEvent(
     element: SVGTextElement,
-    setClickedCageNum: (num: number) => void,
-    setClickedRack: (itemId: string) => void,
+    setClickedCage: (cageId: string) => void,
     setCtxMenuStyle:  React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
     rackType: RackTypes
 ): () => void {
-    const handleContextMenu = function(this: SVGTextElement, event: MouseEvent) {
+    const handleContextMenu = function(this: SVGGElement, event: MouseEvent) {
         event.preventDefault();
-        console.log("Open Menu: ", this)
-        const rackGroupElement = this.closest('[id^="rack-"]') as SVGGElement | null;
         const cageGroupElement = this.closest(`[id^=${rackType}-]`) as SVGGElement | null;
+        console.log("Open Menu: ", cageGroupElement)
 
-        const cageNum = parseCage(cageGroupElement.id);
-        setClickedCageNum(cageNum);
-        setClickedRack(rackGroupElement.id);
+        setClickedCage(cageGroupElement.id);
 
         setCtxMenuStyle({
             display: 'block',
@@ -172,16 +192,14 @@ export function setupEditCageNumEvent(
         });
     }
 
-    // find the cage sibling element of text to attach context menu to
-    const cageElement = element.closest(`[id^=${rackType}-]`);
+    // Attach context menu to the parent
+    const cageGroupElement: SVGGElement = element.closest(`[id^=${rackType}]`) as SVGGElement;
 
-    d3.select(cageElement).attr('style', 'pointer-events: bounding-box')
-    cageElement.addEventListener('contextmenu', handleContextMenu);
-    //element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.addEventListener('contextmenu', handleContextMenu);
+    d3.select(cageGroupElement).attr('style', 'pointer-events: bounding-box')
+    cageGroupElement.addEventListener('contextmenu', handleContextMenu);
 
-    // Return a function to remove the event listener if needed
     return () => {
-        cageElement.removeEventListener('contextmenu', handleContextMenu);
+        cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
     };
 }
 
@@ -205,13 +223,17 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
     // TODO fix this so that it matches correct types while maintaining their correct numbering system
     let newCageNums = convertCageNumToNum(targetRack.cages.find(cage => cage.id === 1).cageNum);
 
+    function isConnected(selectionNode){
+        return !!selectionNode.closest(`[id*='group']`);
+    }
+
     // Make sure cages don't have the wrong styles/classes and correct cage numbering for merge
     function resetElementProperties(element, shapeType) {
-        element.classList = "";
+        element.classList = `grouped-${shapeType}`;
         element.style = "";
-        element.id = `${shapeType.type}-${newCageNums}`;
+        element.id = `${shapeType}-${newCageNums}`;
         const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
-        setupEditCageNumEvent(textEle, cageActionProps.setEditCageNum, cageActionProps.setClickedRack, cageActionProps.setCtxMenuStyle, itemType as RackTypes);
+        setupEditCageEvent(textEle, cageActionProps.setEditCageNum, cageActionProps.setCtxMenuStyle, itemType as RackTypes);
         newCageNums++;
     }
 
@@ -222,27 +244,29 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
         const {x: startX, y: startY} = getTranslation(element.getAttribute('transform'))
         d3.select(element).selectAll(':scope > g').each(function () {
             const targetCage = d3.select(this);
+            const shapeType = parseRoomItemType(targetCage.attr('id'));
             const {x: localX, y: localY} = getTranslation(targetCage.attr('transform'));
             const newX = startX + localX
             const newY = startY + localY
             targetCage.attr('transform', `translate(${newX},${newY})`)
-            resetElementProperties(this, "testing");
+            resetElementProperties(this, shapeType);
             mergedGroup.node().appendChild(this);
             console.log("More than 1 merge: ", targetCage);
         });
     }
 
     function processShape(shape, shapeType, mergedGroup) {
-        if (shape.childNodes.length <= 1) {
+        processChildNodes(shape, mergedGroup);
+
+        /*if (shape.childNodes.length <= 1) {
 
             const tempCage = d3.select(shape).select(`[id^=${shapeType.type}-]`);
-            // id of svg group (shapeType-x) that is the one we manage in svg files
-            tempCage.attr("id", `grouped-${shapeType.type}`);
-            resetElementProperties(shape, shapeType);
-            mergedGroup.node().appendChild(shape);
+            //tempCage.classed(`grouped-${shapeType.type}`, true); // add grouped class to indicate its part of a group
+            resetElementProperties(tempCage.node(), shapeType);
+            mergedGroup.node().appendChild(tempCage.node());
         } else { // for groups of multiple shapes/cages
             processChildNodes(shape, mergedGroup);
-        }
+        }*/
     }
     // return if another merge option is available,
     // prevents double merging when adding cages to a rack surrounded by multiple target points (aka other cages)
@@ -256,13 +280,17 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
 
         let newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>;
 
-        console.log("Merge: ", targetRackShape.node(), targetRackShape.node());
+        console.log("Merge: ", targetRackShape.node(), draggedRackShape.node());
 
         // Clone the target and dragged shapes before using
         let clonedTargetShape = targetRackShape.node().cloneNode(true) as Element;
         let clonedDraggedShape = draggedRackShape.node().cloneNode(true) as Element;
 
         if(action === 'merge'){
+            if(isConnected(draggedRackShape.node()) || isConnected(targetRackShape.node())){
+                await showLayoutEditorError("Invalid Configuration: Please do not merge connected racks");
+                return;
+            }
             newGroup = layoutSvg.append('g')
                 .attr('class', targetRackShape.attr('class'))
                 .attr('id', targetRackShape.attr('id'));
@@ -290,7 +318,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
         }else{ // action = connect
             newGroup = layoutSvg.append('g')
                 .attr('class', 'draggable rack-group')
-                .attr('id', `rack-group-${targetRack.groupId}`);
+                .attr('id', targetRack.groupId);
 
             resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg);
 
@@ -321,7 +349,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
             moveItem: moveItem,
             itemType: itemType
         };
-        newGroup.call(d3.drag().on('start', createStartDragInLayout({setRoomItem: cageActionProps.setClickedRack}))
+        newGroup.call(d3.drag().on('start', createStartDragInLayout({setRoomItem: cageActionProps.setEditCageNum}))
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
             .on('end', createEndDragInLayout(addProps)));
 
@@ -535,7 +563,7 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
         const newRackState: Rack = {
             cages: cageState,
             itemId: rack.objectId, // TODO fix this so that it is correct id of rack, need list of rack ids managed by center or naming convention for them
-            groupId: groupId,
+            groupId: `rack-group-${groupId}` as GroupId,
             isActive: true,
             scale: rack.scale,
             type: rack.objectType as RackTypes,
@@ -573,4 +601,10 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
 
 export const isRack = (itemType: RoomItemType): itemType is RackTypes => {
     return Object.values(RackTypes).includes(itemType as RackTypes);
+}
+
+export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
+    return racks.find(rack => {
+        return rack.cages.find((cage) => cage.cageNum === obj)
+    });
 }

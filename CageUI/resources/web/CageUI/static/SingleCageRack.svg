@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="cage_template" xmlns="http://www.w3.org/2000/svg" width="120.5" height="120.5" viewBox="0 0 120.5 120.5">
-    <g id="cage-x">
+    <g id="cage">
         <g id="modifications">
             <rect id="playCage-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/>
             <rect id="extension-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/>
         </g>
-        <g id="cage">
+        <g id="sub-cage">
             <path id="XCage" d="M.5,120h119.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>
             <path id="YCage" d="M.5,120V.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>
             <path id="YCage-2" d="M120,120V.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>

@@ -58,22 +58,32 @@ export const parseCage = (input: string) => {
     return;
 }
 
-export const parseRoomItem = (input: string) => {
+export const parseRoomItemNum = (input: string): number => {
     const regex = /\w+-(\d+)/; // matches "string-number"
 
     const match = input.match(regex);
-    if (match) {
+    if (match) { // if a match return the number
         return parseInt(match[1]);
     }
     return;
 }
 
-export const parseItemType = (input: string) => {
+export const parseRoomItemType = (input: string): string => {
+    const regex = /^(\w+)-\d+$/; // matches "string-number"
+
+    const match = input.match(regex);
+    if (match) { // if a match return the type
+        return match[1];
+    }
+    return;
+}
+
+export const parseConnectedId = (input: string) => {
     const regex = /\w+-\w+-(\d+)/; // matches "string-string-number"
 
     const match = input.match(regex);
     if (match) {
-        return match[1];
+        return parseInt(match[2]);
     }
     return;
 }

@@ -3,16 +3,16 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import {
     Cage, CageNumber,
     CageSizes,
-    CageType, DEFAULT_CAGE_TYPE, DEFAULT_PEN_TYPE, LayoutHistoryData,
+    CageType, DEFAULT_CAGE_TYPE, DEFAULT_PEN_TYPE, GroupId, LayoutHistoryData,
     LocationCoords,
     Page,
     Rack, RackActions,
     RackTypes, Room, RoomItem, RoomItemType, RoomObject, RoomObjectTypes,
     UnitLocations
 } from './typings';
-import { convertCageNumToNum, getTranslation, parseItemType, removeCircularReferences } from './helpers';
+import { convertCageNumToNum, getTranslation, removeCircularReferences } from './helpers';
 import { testCagesInRoom, testLayoutHistory, testRoomObj } from '../layoutEditor/testData';
-import { buildNewLocalRoom, isRack } from './LayoutEditorHelpers';
+import { buildNewLocalRoom, findSelectObjRack, isRack } from './LayoutEditorHelpers';
 
 export interface RoomContextType {
     selectedPage: Page;
@@ -58,8 +58,6 @@ export interface LayoutContextType {
     getNextCageNum: (rackType: RackTypes) => number;
     selectedObj: string;
     setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
-    clickedCage: number;
-    setClickedCage: React.Dispatch<React.SetStateAction<number>>;
     delCage: () => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
@@ -237,7 +235,7 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         const newRack: Rack = {
             cages: [firstCage],
             itemId: id,
-            groupId: groupCount,
+            groupId: `rack-group-${groupCount}` as GroupId,
             isActive: true,
             type: rackType,
             x: x,
@@ -274,7 +272,12 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             });
 
             if (!targetRack || !dragRack) {
-                console.error("One or both racks not found");
+                console.log("One or both racks not found");
+                return prevRoom;
+            }
+
+            if(targetRack.type !== dragRack.type){
+                console.log("Impossible configuration detected, please only merge racks of the same type");
                 return prevRoom;
             }
 
@@ -312,10 +315,44 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         });
     }
 
+    const connectLocalRacks = (targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
+        setLocalRoom(prevRoom => {
+            let targetRack: Rack = prevRoom.racks.find((r: Rack) => {
+                return r.itemId === targetId;
+            });
+
+            let dragRack: Rack = prevRoom.racks.find((r: Rack) => {
+                return r.itemId === dragId;
+            });
+
+            if (!targetRack || !dragRack) {
+                console.error("One or both racks not found");
+                return prevRoom;
+            }
+
+            // Update the room to match the new group ids
+            const updatedRacks = prevRoom.racks.map((r: Rack) => {
+                if (r.itemId === dragId) {
+                    return { ...r, groupId: targetRack.groupId };
+                }
+                return r;
+            });
+
+            setGroupCount(prevState => prevState - 1); // update group since we lose the 2nd one
+
+            // Return the updated room
+            return {
+                ...prevRoom,
+                racks: updatedRacks
+            };
+        })
+    }
+
     const doRackAction = (action: RackActions, targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
         if(action === 'merge'){
             mergeLocalRacks(targetId, dragId, newGroup);
-        }else{ // action = cancel
+        }else{ // action = connect
+            connectLocalRacks(targetId, dragId, newGroup);
 
         }
     }
@@ -356,10 +393,16 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
 
             // Update cageLocs based on the new rack coordinates
             if (itemKey === 'racks') {
-                // Find the moved rack to access its cages
+                const idKey = itemId.includes('group') ? 'groupId' : 'itemId'; // determine if moving rack or group of racks
                 const movedRack: Rack = updatedLocalRoom.racks.find(rack => {
-                        return rack.itemId === itemId;
+                    return rack[idKey] === itemId;
                 });
+
+                // Find the moved rack to access its cages
+                if(!movedRack){
+                    console.log("Failed to update cages location for rack");
+                    return prevRoom; // cannot find an available rack id to move
+                }
 
                 setUnitLocs((prevUnitLocations) =>
                     ({
@@ -404,28 +447,31 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             return;
         }
 
+        console.log("Change Cage Num State: ", numBefore, numAfter);
+
         setLocalRoom((prevRoom) => {
             // Find the clicked rack
-            const currRack: Rack = prevRoom.racks.find(rack => {
-                return rack.itemId === selectedObj
-            });
+            const currRack: Rack = findSelectObjRack(prevRoom.racks, selectedObj);
 
             if (!currRack) return prevRoom; // If the clicked rack is not found, return the previous state
 
             // Update the local room by updating the cage numbers in the clicked rack
-            const updatedLocalRoom: Room = ({
+            const updatedLocalRoom: Room = {
                 ...prevRoom,
                 racks: prevRoom.racks.map((rack: Rack): Rack =>
-                    rack.itemId === selectedObj
+                    rack.cages.some((cage: Cage) => cage.cageNum === selectedObj) // Check if any cage matches selectedObj
                         ? {
                             ...rack,
                             cages: rack.cages.map((cage: Cage): Cage =>
-                                convertCageNumToNum(cage.cageNum) === numBefore ? { ...cage, cageNum: `${currRack.type}-${numAfter}` } as Cage : cage
+                                cage.cageNum === selectedObj // Only update the cage with matching cageNum
+                                    ? { ...cage, cageNum: `${currRack.type}-${numAfter}` } as Cage
+                                    : cage
                             )
                         }
-                        : rack
-                )}
-            );
+                        : rack // No match, return the rack as is
+                )
+            };
+
 
             // Now update the unit locations using the rackType from currRack
             setUnitLocs(prevUnitLocations => ({
@@ -490,8 +536,6 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             getNextCageNum,
             selectedObj,
             setSelectedObj,
-            clickedCage,
-            setClickedCage,
             delCage,
             scale,
             setScale

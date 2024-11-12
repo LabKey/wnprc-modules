@@ -37,7 +37,7 @@ EHR.reports.totalWaterByDay = function (panel, tab) {
 
     var target = tab.add({tag: 'span', style: 'padding-bottom: 20px'});
     tab.doLayout();
-    var reportStartDate = new Date("2021-01-01");
+    var reportStartDate = new Date("1947-02-10");
     reportStartDate = reportStartDate.format(LABKEY.extDefaultDateFormat);
     var reportEndDate = new Date();
     reportEndDate = reportEndDate.format(LABKEY.extDefaultDateFormat);

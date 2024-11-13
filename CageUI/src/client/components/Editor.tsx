@@ -15,7 +15,7 @@ import {
     Rack,
     RackTypes,
     RoomItemType, RoomObject,
-    RoomObjectTypes
+    RoomObjectTypes, UnitLocations
 } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
@@ -87,7 +87,62 @@ const Editor = () => {
     // Effect checks for merging after a rack is moved
     useEffect(() => {
         if(!selectedObj || cageNumChange) return;
-        if(selectedObj.includes('group')) return; // unable to merge connected racks
+
+        // if selectedObj is a group of racks, make dragged rack the group of racks
+        if(selectedObj.includes('group')){
+            const draggedRackGroup: Rack[] = localRoom.racks.filter((rack) => rack.groupInfo.groupId === selectedObj);
+            const draggedCagesGroup: string[] = draggedRackGroup.flatMap((rack) => rack.cages.map(cage => cage.cageNum));
+
+            // Create temp object of cage locations not in the dragged group
+            const cagesNotInDragged: UnitLocations = (() => {
+                const tempLocs: UnitLocations = {...unitLocs};
+
+                draggedRackGroup.forEach((rack) => {
+                    tempLocs[rack.type] = tempLocs[rack.type].filter((unit) => !draggedCagesGroup.includes(unit.num))
+                })
+
+                return tempLocs;
+            })();
+
+            // Temp object of cages within the dragged group
+            const cagesInDragged: UnitLocations = (() => {
+                const tempLocs: UnitLocations = {
+                    attachedPlayCage: [],
+                    cage: [],
+                    pen: [],
+                    tempCage: []
+                };
+
+                draggedRackGroup.forEach((rack) => {
+                    tempLocs[rack.type] = unitLocs[rack.type].filter((unit) => draggedCagesGroup.includes(unit.num))
+                })
+
+                return tempLocs;
+            })();
+
+            //Based off previous objects determine if a merge is possible
+
+            Object.entries(cagesInDragged).forEach(([draggedRackType, draggedCageLocs]) => {
+                if(draggedCageLocs.length === 0) return;
+
+                draggedCageLocs.forEach((dragLoc) => {
+                    Object.entries(cagesNotInDragged).forEach(([targetRackType, targetCageLocs]) => {
+                        if(targetCageLocs.length === 0) return;
+                        const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                        targetCageLocs.forEach((targetLoc) => {
+                            const mergeAvail = checkAdjacent(targetLoc, dragLoc, GRID_SIZE, gridRatio);
+                            if(mergeAvail) {
+                                console.log("Found a possible connection option");
+                            }
+                        })
+                    })
+                })
+
+            })
+
+            console.log("End connected testing", cagesNotInDragged, cagesInDragged);
+            return;
+        }
         const draggedRack = localRoom.racks.find(rack => rack.itemId === selectedObj);
         const draggedRackType = draggedRack.type;
 
@@ -136,10 +191,9 @@ const Editor = () => {
                     const draggedRack = localRoom.racks.find(rack => {
                             return rack.itemId === draggedRackShape.getAttribute('id');
                     });
-                    const draggedCage = targetRack.cages.find((cage) => cage.cageNum === targetShape.attr('id') as CageNumber);
+                    const draggedCage = draggedRack.cages.find((cage) => cage.cageNum === draggedShape.attr('id') as CageNumber);
 
 
-                    console.log("Merging: ", targetRack, draggedRack);
                     const layoutDragProps: LayoutDragProps = {
                         MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
                         delRack: delRack,

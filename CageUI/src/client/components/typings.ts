@@ -154,13 +154,28 @@ export interface CageState {
     extraMod: {modData: ExtraMod} | undefined;
 }
 
+/*
+   This describes details about groups of connected racks.
+   When a new rack is added this will be populated as a new group, and the x and y will be the starting position of that
+   group relative to the layout grid.
+   This object tells us that the rack is part of a group with that groupId.
+   It should be the same for all racks within that group. The reasoning for this is because
+   if we have two racks that become connected the rack x and y coords can be added to this group x and y coords to find
+   their layout grid positioning, similar to how cages behave in racks.
+*/
+export interface RackGroupInfo {
+    groupId: GroupId;
+    x: number;
+    y: number;
+}
+
 export interface Rack {
     itemId: string; // rack id
-    groupId: GroupId; // racks with the same groupId are connected
+    groupInfo: RackGroupInfo;
     type: RackTypes;
     cages: Cage[];
-    x: number; // x coordinate of rack in layout coordinate plane
-    y: number; // y coordinate of rack in layout coordinate plane
+    x: number; // x coordinate of rack relative to the rack group
+    y: number; // y coordinate of rack relative to the rack group
     scale: number; // k scaling vector in layout coordinate plane
     isActive: boolean;
 }

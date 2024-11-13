@@ -70,7 +70,7 @@ function showConfirmationPopup(): Promise<RackActions> {
 
         // Merge button
         popup.append('button')
-            .text('Merge')
+            .text('Merge Cages')
             .on('click', () => {
                 popup.remove();
                 resolve('merge');
@@ -78,7 +78,7 @@ function showConfirmationPopup(): Promise<RackActions> {
 
         // Connect button
         popup.append('button')
-            .text('Connect')
+            .text('Connect Racks')
             .on('click', () => {
                 popup.remove();
                 resolve('connect');
@@ -121,7 +121,7 @@ export function showLayoutEditorError(errorMsg: string) {
     });
 }
 
-// Function to help merge racks together by resetting groups to local coords
+// Function to help merge/connect racks together by resetting groups to local coords
 function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
 
     // Get the zoom transform of the layout SVG
@@ -203,6 +203,13 @@ export function setupEditCageEvent(
     };
 }
 
+/*
+    Helper function to either connect racks or merge cages
+
+    One can think of a merge as at the cage level and connections are at a rack level.
+    Even though cages can not be added/removed from racks in reality, for layout building purposes they can.
+
+ */
 export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackAction, layoutDragProps: LayoutDragProps, cageActionProps: CageActionProps, targetCage: Cage, draggedCage: Cage) {
     if(!d3.select('.popup').empty()) return;
     const action: RackActions = await showConfirmationPopup();
@@ -216,8 +223,11 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
         itemType
     } = layoutDragProps;
 
-    const targetType = targetCage.type;
     const draggedType = draggedCage.type;
+
+    console.log("Performing Merge");
+    console.log("Racks: ", targetRack, draggedRack);
+    console.log("Cages: ", targetCage, draggedCage);
 
     // Start cage count at the first cage in the target shape
     // TODO fix this so that it matches correct types while maintaining their correct numbering system
@@ -255,8 +265,28 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
         });
     }
 
-    function processShape(shape, shapeType, mergedGroup) {
-        processChildNodes(shape, mergedGroup);
+    function processShape(shape, action, mergedGroup) {
+        if(action === 'merge'){
+            processChildNodes(shape, mergedGroup);
+        }else{
+            // On the first connection shape is a default rack. if connecting to a group it will be a group of default racks
+            if(shape.getAttribute('class') === 'rack-group'){
+                const {x: startX, y: startY} = getTranslation(shape.getAttribute('transform'))
+
+                d3.select(shape).selectAll(':scope > g').each(function () {
+                    const targetRack = d3.select(this);
+                    const shapeType = parseRoomItemType(targetRack.attr('id'));
+                    const {x: localX, y: localY} = getTranslation(targetRack.attr('transform'));
+                    const newX = startX + localX
+                    const newY = startY + localY
+                    targetRack.attr('transform', `translate(${newX},${newY})`)
+                    //resetElementProperties(this, shapeType);
+                    mergedGroup.node().appendChild(this);
+                });
+            }else{
+                mergedGroup.node().appendChild(shape);
+            }
+        }
 
         /*if (shape.childNodes.length <= 1) {
 
@@ -272,10 +302,10 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
     // prevents double merging when adding cages to a rack surrounded by multiple target points (aka other cages)
 
     if (action !== 'cancel') {
-        const targetRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
+        let targetRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
             = layoutSvg.select(`[id^=${targetRack.itemId}]`);
 
-        const draggedRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
+        let draggedRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
             = layoutSvg.select(`[id^=${draggedRack.itemId}]`);
 
         let newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>;
@@ -286,9 +316,16 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
         let clonedTargetShape = targetRackShape.node().cloneNode(true) as Element;
         let clonedDraggedShape = draggedRackShape.node().cloneNode(true) as Element;
 
+        let targetRackId = clonedTargetShape.id;
+        let draggedRackId = clonedDraggedShape.id;
+
         if(action === 'merge'){
             if(isConnected(draggedRackShape.node()) || isConnected(targetRackShape.node())){
                 await showLayoutEditorError("Invalid Configuration: Please do not merge connected racks");
+                return;
+            }
+            if(draggedCage.type.type !== targetCage.type.type){
+                await showLayoutEditorError("Invalid Configuration: Please do not merge cages of different types, use connection instead");
                 return;
             }
             newGroup = layoutSvg.append('g')
@@ -297,11 +334,8 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
             //Reset translates to new local group
             resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg);
 
-            processShape(clonedTargetShape, targetType, newGroup);
-            processShape(clonedDraggedShape, draggedType, newGroup);
-
-
-
+            processShape(clonedTargetShape, action, newGroup);
+            processShape(clonedDraggedShape, action, newGroup);
 
             // Copy any inline styles from the targetShape to the merged group
             const styleAttr = targetRackShape.attr('style');
@@ -315,23 +349,46 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
                 newGroup.data([{x: targetData.x, y: targetData.y}])
             }
 
-        }else{ // action = connect
+        }
+        else{ // action = connect
+            // TODO Bug with issue regarding helper functions base off the fact that they states/svgs are grouped
+            // TODO however they are not when they are connected
+
+            /*
+                TODO steps
+                1. Fix connecting already connected groups
+                    - This should pull the racks out of the target connected group, and dragged connected groups
+                        then add them to a new connected group, with the same group id as the target.
+
+             */
+            const connectedGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
+                = layoutSvg.select(`#${targetRack.groupInfo.groupId}`);
+
+            if(!connectedGroupShape.empty()){
+                clonedTargetShape = connectedGroupShape.node().cloneNode(true) as Element;
+                targetRackShape = connectedGroupShape;
+
+            }
+
             newGroup = layoutSvg.append('g')
                 .attr('class', 'draggable rack-group')
-                .attr('id', targetRack.groupId);
+                .attr('id', targetRack.groupInfo.groupId);
 
             resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg);
 
             d3.select(clonedTargetShape).classed('draggable', false);
             d3.select(clonedDraggedShape).classed('draggable', false);
 
-            newGroup.node().appendChild(clonedTargetShape);
-            newGroup.node().appendChild(clonedDraggedShape);
+
+            processShape(clonedTargetShape, action, newGroup);
+            processShape(clonedDraggedShape,action, newGroup);
+
+            console.log("End Processing: ", newGroup);
+            //newGroup.node().appendChild(clonedTargetShape);
+            //newGroup.node().appendChild(clonedDraggedShape);
 
         }
-        // Append the cloned shapes to the new group
-        const targetRackId = targetRackShape.node().closest('[id*=rack]').getAttribute('id');
-        const draggedRackId = draggedRackShape.node().closest('[id*=rack]').getAttribute('id');
+        //TODO fix bug here with id getting/ different for merge vs connect
 
         // Copy the transform attribute from the targetShape to the merged group
         const transformAttr = targetRackShape.attr('transform');
@@ -563,7 +620,11 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
         const newRackState: Rack = {
             cages: cageState,
             itemId: rack.objectId, // TODO fix this so that it is correct id of rack, need list of rack ids managed by center or naming convention for them
-            groupId: `rack-group-${groupId}` as GroupId,
+            groupInfo: {
+                groupId: `rack-group-${groupId}` as GroupId,
+                x: rack.x,
+                y: rack.y
+            },
             isActive: true,
             scale: rack.scale,
             type: rack.objectType as RackTypes,

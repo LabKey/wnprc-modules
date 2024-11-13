@@ -1,13 +1,22 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
-    Cage, CageNumber,
-    CageSizes,
-    CageType, DEFAULT_CAGE_TYPE, DEFAULT_PEN_TYPE, GroupId, LayoutHistoryData,
+    Cage,
+    CageNumber,
+    DEFAULT_CAGE_TYPE,
+    DEFAULT_PEN_TYPE,
+    GroupId,
+    LayoutHistoryData,
     LocationCoords,
     Page,
-    Rack, RackActions,
-    RackTypes, Room, RoomItem, RoomItemType, RoomObject, RoomObjectTypes,
+    Rack,
+    RackActions, RackGroupInfo,
+    RackTypes,
+    Room,
+    RoomItem,
+    RoomItemType,
+    RoomObject,
+    RoomObjectTypes,
     UnitLocations
 } from './typings';
 import { convertCageNumToNum, getTranslation, removeCircularReferences } from './helpers';
@@ -235,11 +244,15 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         const newRack: Rack = {
             cages: [firstCage],
             itemId: id,
-            groupId: `rack-group-${groupCount}` as GroupId,
+            groupInfo: {
+                groupId: `rack-group-${groupCount}` as GroupId,
+                x: x,
+                y: y
+            },
             isActive: true,
             type: rackType,
-            x: x,
-            y: y,
+            x: 0,
+            y: 0,
             scale: newScale
         };
 
@@ -275,7 +288,8 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
                 console.log("One or both racks not found");
                 return prevRoom;
             }
-
+            console.log("Context merge: ", targetRack, dragRack);
+            // different rack types can be connected but not merged
             if(targetRack.type !== dragRack.type){
                 console.log("Impossible configuration detected, please only merge racks of the same type");
                 return prevRoom;
@@ -297,7 +311,7 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             const mergedRack: Rack = {
                 itemId: targetRack.itemId, // Use the larger ID for the merged rack
                 type: targetRack.type,
-                groupId: targetRack.groupId,
+                groupInfo: targetRack.groupInfo,
                 cages: updatedCages,
                 x: targetRack.x,
                 y: targetRack.y,
@@ -317,25 +331,34 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
 
     const connectLocalRacks = (targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
         setLocalRoom(prevRoom => {
-            let targetRack: Rack = prevRoom.racks.find((r: Rack) => {
+            let targetRackGroup: Rack = prevRoom.racks.find((r: Rack) => {
                 return r.itemId === targetId;
             });
 
-            let dragRack: Rack = prevRoom.racks.find((r: Rack) => {
+            let dragRackGroup: Rack = prevRoom.racks.find((r: Rack) => {
                 return r.itemId === dragId;
             });
 
-            if (!targetRack || !dragRack) {
+            if (!targetRackGroup || !dragRackGroup) {
                 console.error("One or both racks not found");
                 return prevRoom;
             }
-
-            // Update the room to match the new group ids
+            console.log("Connect new group: ", newGroup);
+            // TODO Confirm this is working as intended, possible error might occur when dealing with different sized connections
+            // Update the room to match the new group ids and update x and y to be local to the rack group instead of canvas
             const updatedRacks = prevRoom.racks.map((r: Rack) => {
+                const tempRack = newGroup.select(`#${r.itemId}`);
+                if(tempRack.empty()) return r;
+                const newRackCoords = getTranslation(tempRack.attr('transform'));
                 if (r.itemId === dragId) {
-                    return { ...r, groupId: targetRack.groupId };
+                    return {
+                        ...r,
+                        x: newRackCoords.x,
+                        y: newRackCoords.y,
+                        groupInfo: targetRackGroup.groupInfo
+                    };
                 }
-                return r;
+                return {...r, x: newRackCoords.x, y: newRackCoords.y};
             });
 
             setGroupCount(prevState => prevState - 1); // update group since we lose the 2nd one
@@ -353,7 +376,6 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             mergeLocalRacks(targetId, dragId, newGroup);
         }else{ // action = connect
             connectLocalRacks(targetId, dragId, newGroup);
-
         }
     }
 
@@ -382,46 +404,110 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
 
             const itemKey = isRack(type) ? 'racks' : 'objects';
 
-            updatedLocalRoom = {
-                ...prevRoom,
-                [itemKey]: prevRoom[itemKey].map(item =>
-                    item.itemId === itemId
-                        ? { ...item, x, y, scale: k }
-                        : item
-                )
-            };
-
             // Update cageLocs based on the new rack coordinates
             if (itemKey === 'racks') {
                 const idKey = itemId.includes('group') ? 'groupId' : 'itemId'; // determine if moving rack or group of racks
-                const movedRack: Rack = updatedLocalRoom.racks.find(rack => {
-                    return rack[idKey] === itemId;
-                });
-
-                // Find the moved rack to access its cages
-                if(!movedRack){
-                    console.log("Failed to update cages location for rack");
-                    return prevRoom; // cannot find an available rack id to move
-                }
-
-                setUnitLocs((prevUnitLocations) =>
-                    ({
-                        ...prevUnitLocations,
-                        // Access the correct unit location array using rack type
-                        [movedRack.type]: prevUnitLocations[movedRack.type].map(cage => {
-                            // Check if the cage belongs to the moved rack using cageNum
-                            const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
-                            return movedRackCage
+                if(idKey === 'itemId'){
+                    updatedLocalRoom = {
+                        ...prevRoom,
+                        racks: prevRoom.racks.map(item =>
+                            item.itemId === itemId
                                 ? {
-                                    ...cage,
-                                    // Update the cage's coordinates by adding its own coordinates to the new rack's coordinates
-                                    cellX: x + movedRackCage.x, // Add new rack's x position to cage's local x
-                                    cellY: y + movedRackCage.y, // Add new rack's y position to cage's local y
+                                    ...item,
+                                    groupInfo: {
+                                        ...item.groupInfo,
+                                        x: x,
+                                        y: y
+                                    },
+                                    scale: k
                                 }
-                                : cage; // Leave other cages unchanged
+                                : item
+                        )
+                    };
+                    const movedRack = updatedLocalRoom.racks.find(rack => {
+                        return rack.itemId === itemId;
+                    }) as Rack;
+
+                    // Find the moved rack to access its cages
+                    if(!movedRack){
+                        console.log("Failed to update cages location for rack");
+                        return prevRoom; // cannot find an available rack id to move
+                    }
+
+                    setUnitLocs((prevUnitLocations) =>
+                        ({
+                            ...prevUnitLocations,
+                            // Access the correct unit location array using rack type
+                            [movedRack.type]: prevUnitLocations[movedRack.type].map(cage => {
+                                // Check if the cage belongs to the moved rack using cageNum
+                                const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
+                                return movedRackCage
+                                    ? {
+                                        ...cage,
+                                        // Update the cage's coordinates by adding its own coordinates to the new rack's coordinates
+                                        cellX: x + movedRackCage.x, // Add new rack's x position to cage's local x
+                                        cellY: y + movedRackCage.y, // Add new rack's y position to cage's local y
+                                    }
+                                    : cage; // Leave other cages unchanged
+                            })
                         })
-                    })
-                );
+                    );
+                }else{
+                    const newGroupInfo: RackGroupInfo = {
+                        groupId: itemId as GroupId,
+                        x: x,
+                        y: y
+                    }
+                    updatedLocalRoom = {
+                        ...prevRoom,
+                        racks: prevRoom.racks.map(item =>
+                            item.groupInfo.groupId === itemId
+                                ? {
+                                    ...item,
+                                    groupInfo: newGroupInfo,
+                                    scale: k
+                                }
+                                : item
+                        )
+                    };
+                    const movedRacks = updatedLocalRoom.racks.filter(rack => {
+                        return rack.groupInfo.groupId === itemId;
+                    }) as Rack[];
+
+                    // Find the moved rack to access its cages
+                    if(movedRacks.length === 0){
+                        console.log("Failed to update cages location for rack");
+                        return prevRoom; // cannot find an available rack id to move
+                    }
+                    setUnitLocs((prevUnitLocations) => {
+                        const updatedUnitLocations = { ...prevUnitLocations };
+                        movedRacks.forEach((movedRack) => {
+                            updatedUnitLocations[movedRack.type] = updatedUnitLocations[movedRack.type].map((cage) => {
+                                const movedRackCage = movedRack.cages.find((rackCage) => rackCage.cageNum === cage.num);
+                                if (movedRackCage) {
+                                    return {
+                                        ...cage,
+                                        // Update the cage position based on the rack and its cage position
+                                        cellX: x + movedRackCage.x + movedRack.x,
+                                        cellY: y + movedRackCage.y + movedRack.y,
+                                    };
+                                }
+                                return cage;
+                            });
+                        });
+                        return updatedUnitLocations;
+                    });
+                }
+            }else{
+                // Update non rack/caging object
+                updatedLocalRoom = {
+                    ...prevRoom,
+                    [itemKey]: prevRoom[itemKey].map(item =>
+                        item.itemId === itemId
+                            ? { ...item, x, y, scale: k }
+                            : item
+                    )
+                };
             }
             return updatedLocalRoom; // Return the updated localRoom
         });

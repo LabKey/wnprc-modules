@@ -698,13 +698,15 @@
 
                                     successCallback(
                                             events.map(function (row) {
-                                                if (!calendarDates.get(row.date)){
+                                                var dateIndex = new Date(row.date);
+                                                dateIndex=dateIndex.getFullYear() +'-'+dateIndex.getMonth()+'-'+dateIndex.getDate();
+                                                if (!calendarDates.get(dateIndex)){
                                                 //if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
                                                     var animalIds = [];
                                                     animalIds.push(row.Id);
-                                                    calendarDates.set(row.date, animalIds);
+                                                    calendarDates.set(dateIndex, animalIds);
                                                 }else{
-                                                    calendarDates.get(row.date).push(row.Id);
+                                                    calendarDates.get(dateIndex).push(row.Id);
                                                 }
                                                 var volume;
                                                 if (row.volume != null) {
@@ -1558,7 +1560,6 @@
         let momentEndDate = fetchInfo.end.format('Y-m-d');
         let numOfDate;
         let startCalendarDate;
-        debugger;
 
         //Calculate if today is between the calendar start date and the calendar end date
         //If the user navigates to the next month we only calculate the dates for that month and
@@ -1690,9 +1691,21 @@
                                             let parsedTotalWater = 0;
                                             let eventTitle = row.Id;
                                             row.animalStatus=row['Id/Demographics/calculated_status'];
+                                            let dateIndexWaterTotal = new Date(row.date);
+                                            dateIndexWaterTotal = dateIndexWaterTotal.getFullYear() + '-' + dateIndexWaterTotal.getMonth() + '-' + dateIndexWaterTotal.getDate();
+                                            let animalInDay = false
+                                            if (calendarDates.has(dateIndexWaterTotal)){
+                                                let animalIdArray = [];
+                                                animalIdArray = calendarDates.get(dateIndexWaterTotal);
+                                                for(var i = 0; i < animalIdArray.length; i++){
+                                                    if (animalIdArray[i] === row.Id){
+                                                        animalInDay = true;
+                                                    }
+                                                }
+                                            }
                                             if( row.conditionAtTime === 'regulated' ) {
                                                 if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                    if (row.TotalWater === null) {
+                                                    if (row.TotalWater === null && !animalInDay) {
                                                         row.TotalWater = ' none';
                                                         parsedTotalWater = row.TotalWater;
                                                     }
@@ -1737,10 +1750,7 @@
                                             else{
                                                 eventObj.color = '#EE2020'
                                             }
-                                            debugger;
-                                            var dateIndex = new Date(row.date);
-                                            dateIndex=dateIndex.getFullYear() +'-'+dateIndex.getMonth()+'-'+dateIndex.getDate();
-                                            if (calendarDates.has(dateIndex) && calendarDates.get(dateIndex).includes(row.Id) ){
+                                            if (calendarDates.has(dateIndexWaterTotal) && calendarDates.get(dateIndexWaterTotal).includes(row.Id) ){
                                                 eventObj.display = 'none';
                                             }else{
                                                 eventObj.display = 'auto';
@@ -1773,9 +1783,22 @@
                                                 let parsedTotalWater = 0;
                                                 let eventTitle = row.Id;
                                                 row.animalStatus=row['Id/Demographics/calculated_status'];
+                                                let dateIndexWaterTotal = new Date(row.date);
+                                                dateIndexWaterTotal = dateIndexWaterTotal.getFullYear() + '-' + dateIndexWaterTotal.getMonth() + '-' + dateIndexWaterTotal.getDate();
+                                                let animalInDay = false
+                                                if (calendarDates.has(dateIndexWaterTotal)){
+                                                    let animalIdArray = [];
+                                                    animalIdArray = calendarDates.get(dateIndexWaterTotal);
+                                                    for(var i = 0; i < animalIdArray.length; i++){
+                                                        if (animalIdArray[i] === row.Id){
+                                                            console.log(animalIdArray[i] + " animalId " + row.Id );
+                                                            animalInDay = true;
+                                                        }
+                                                    }
+                                                }
                                                 if( row.conditionAtTime === 'regulated' ) {
                                                     if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                        if (row.TotalWater === null) {
+                                                        if (row.TotalWater === null && !animalInDay) {
                                                             row.TotalWater = ' none';
                                                             parsedTotalWater = row.TotalWater;
                                                         }
@@ -1819,7 +1842,7 @@
                                                 else{
                                                     eventObj.color = '#EE2020'
                                                 }
-                                                if (calendarDates.has(row.date) && calendarDates.get(row.date).includes(row.Id)){
+                                                if (calendarDates.has(dateIndexWaterTotal) && calendarDates.get(dateIndexWaterTotal).includes(row.Id)){
                                                     eventObj.display = 'none';
                                                 }else{
                                                     eventObj.display = 'auto';

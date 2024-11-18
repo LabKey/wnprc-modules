@@ -14,7 +14,7 @@ import {
     PendingRoomUpdate,
     Rack,
     RackTypes,
-    RoomItemType, RoomObject,
+    RoomItemClass, RoomObject,
     RoomObjectTypes, UnitLocations
 } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
@@ -88,6 +88,10 @@ const Editor = () => {
     useEffect(() => {
         if(!selectedObj || cageNumChange) return;
 
+        let mergeAvail: boolean = false;
+        let targetCageLoc;
+        let draggedCageLoc;
+
         // if selectedObj is a group of racks, make dragged rack the group of racks
         if(selectedObj.includes('group')){
             const draggedRackGroup: Rack[] = localRoom.racks.filter((rack) => rack.groupInfo.groupId === selectedObj);
@@ -121,112 +125,113 @@ const Editor = () => {
             })();
 
             //Based off previous objects determine if a merge is possible
-
             Object.entries(cagesInDragged).forEach(([draggedRackType, draggedCageLocs]) => {
-                if(draggedCageLocs.length === 0) return;
-
+                if(draggedCageLocs.length === 0 || mergeAvail) return;
                 draggedCageLocs.forEach((dragLoc) => {
+                    if(mergeAvail) return;
                     Object.entries(cagesNotInDragged).forEach(([targetRackType, targetCageLocs]) => {
-                        if(targetCageLocs.length === 0) return;
+                        if(targetCageLocs.length === 0 || mergeAvail) return;
                         const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
                         targetCageLocs.forEach((targetLoc) => {
-                            const mergeAvail = checkAdjacent(targetLoc, dragLoc, GRID_SIZE, gridRatio);
-                            if(mergeAvail) {
-                                console.log("Found a possible connection option");
+                            if(mergeAvail) return;
+                            mergeAvail = checkAdjacent(targetLoc, dragLoc, GRID_SIZE, gridRatio);
+                            if(mergeAvail){
+                                targetCageLoc = targetLoc;
+                                draggedCageLoc = dragLoc;
                             }
                         })
                     })
                 })
-
-            })
-
+            });
             console.log("End connected testing", cagesNotInDragged, cagesInDragged);
-            return;
-        }
-        const draggedRack = localRoom.racks.find(rack => rack.itemId === selectedObj);
-        const draggedRackType = draggedRack.type;
+        }else{
+            const draggedRack = localRoom.racks.find(rack => rack.itemId === selectedObj);
+            const draggedRackType = draggedRack.type;
 
-        if(!draggedRackType){
-            return;
-        }
-        console.log("Dragged rack 1: ", selectedObj);
+            if(!draggedRackType){
+                return;
+            }
+            console.log("Dragged rack 1: ", selectedObj);
 
-        //This is the first cage in the dragged rack that will determine if a merge is possible
-        const draggedCage: Cage = draggedRack.cages.find((cage) => cage.id === 1);
+            //This is the first cage in the dragged rack that will determine if a merge is possible
+            const draggedCage: Cage = draggedRack.cages.find((cage) => cage.id === 1);
 
-        const draggedCageLoc: LocationCoords = unitLocs[draggedRackType].find((cage) => cage.num === draggedCage.cageNum);
+            draggedCageLoc = unitLocs[draggedRackType].find((cage) => cage.num === draggedCage.cageNum);
 
-        // rackType is the string for the enum here, cages is the array of locations for that unit
-        Object.entries(unitLocs).forEach(([unitRackType, cageLocs]) => {
-            if(cageLocs.length === 0) return;
-            cageLocs.forEach((targetCageLoc) => {
-                if(draggedCage.cageNum === targetCageLoc.num) return; // cant merge into itself
-                let inSameRack = false;
-                //TODO fix this bug with checking if pens/cages/tempCages/playCages are in the same "rack"
-                localRoom.racks.forEach(rack => {
-                    if(areCagesInSameRack(rack, targetCageLoc, draggedCageLoc)) {
-                        console.log("Same Rack: ", rack, targetCageLoc, draggedCageLoc);
-                        inSameRack = true;
+            // rackType is the string for the enum here, cages is the array of locations for that unit
+            Object.entries(unitLocs).forEach(([unitRackType, cageLocs]) => {
+                if(cageLocs.length === 0 || mergeAvail) return;
+                cageLocs.forEach((targetLoc) => {
+                    if(draggedCage.cageNum === targetLoc.num || mergeAvail) return; // cant merge into itself
+                    let inSameRack = false;
+                    //TODO fix this bug with checking if pens/cages/tempCages/playCages are in the same "rack"
+                    localRoom.racks.forEach(rack => {
+                        if(areCagesInSameRack(rack, targetLoc, draggedCageLoc)) {
+                            console.log("Same Rack: ", rack, targetLoc, draggedCageLoc);
+                            inSameRack = true;
+                            return;
+                        }
+                    });
+                    if(inSameRack) {
                         return;
                     }
-                });
-                if(inSameRack) {
-                    return;
-                }
-                const targetRackType = parseRoomItemType(targetCageLoc.num) as RackTypes;
-                const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                    const targetRackType = parseRoomItemType(targetLoc.num) as RackTypes;
+                    const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
-                const mergeAvail = checkAdjacent(targetCageLoc, draggedCageLoc, GRID_SIZE, gridRatio);
-                if(mergeAvail) {
-                    const targetShape = layoutSvg.select(`[id^="${targetCageLoc.num}"]`);
-                    if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
-                    const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*=rack]');
-                    const targetRack = localRoom.racks.find(rack => {
-                        return rack.itemId === targetRackShape.getAttribute('id');
-                    });
-                    const targetCage = targetRack.cages.find((cage) => cage.cageNum === targetShape.attr('id') as CageNumber);
-
-                    const draggedShape = layoutSvg.select(`[id^="${draggedCageLoc.num}"]`);
-                    const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*=rack]');
-                    const draggedRack = localRoom.racks.find(rack => {
-                            return rack.itemId === draggedRackShape.getAttribute('id');
-                    });
-                    const draggedCage = draggedRack.cages.find((cage) => cage.cageNum === draggedShape.attr('id') as CageNumber);
-
-
-                    const layoutDragProps: LayoutDragProps = {
-                        MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
-                        delRack: delRack,
-                        gridRatio: gridRatio,
-                        gridSize: GRID_SIZE,
-                        layoutSvg: layoutSvg,
-                        moveItem: moveObjLocation,
-                        itemType: Object.values(RackTypes).find(type => type === unitRackType) as RackTypes,
-                    };
-
-                    const cageActionProps: CageActionProps = {
-                        setEditCageNum: setSelectedObj,
-                        setCtxMenuStyle: setCtxMenuStyle,
+                    mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, GRID_SIZE, gridRatio);
+                    if(mergeAvail){
+                        targetCageLoc = targetLoc;
                     }
+                })
+            });
+            console.log("End Merge testing: ");
+        }
 
-                    mergeRacks(targetRack, draggedRack, doRackAction, layoutDragProps, cageActionProps, targetCage, draggedCage);
-                }
-            })
-        });
+        if(mergeAvail) {
+            const targetShape = layoutSvg.select(`[id^="${targetCageLoc.num}"]`);
+            if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
+            const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*=rack]');
+            const targetRack = localRoom.racks.find(rack => {
+                return rack.itemId === targetRackShape.getAttribute('id');
+            });
+            const targetCage = targetRack.cages.find((cage) => cage.cageNum === targetShape.attr('id') as CageNumber);
+
+            const draggedShape = layoutSvg.select(`[id^="${draggedCageLoc.num}"]`);
+            const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*=rack]');
+            const draggedRack = localRoom.racks.find(rack => {
+                return rack.itemId === draggedRackShape.getAttribute('id');
+            });
+            const draggedCage = draggedRack.cages.find((cage) => cage.cageNum === draggedShape.attr('id') as CageNumber);
+
+            const layoutDragProps: LayoutDragProps = {
+                MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
+                delRack: delRack,
+                gridSize: GRID_SIZE,
+                layoutSvg: layoutSvg,
+                moveItem: moveObjLocation,
+                itemClass: 'caging', // only caging units can be connected/merged
+            };
+
+            const cageActionProps: CageActionProps = {
+                setEditCageNum: setSelectedObj,
+                setCtxMenuStyle: setCtxMenuStyle,
+            }
+
+            mergeRacks(targetRack, draggedRack, doRackAction, layoutDragProps, cageActionProps, targetCage, draggedCage);
+        }
         setSelectedObj(null);
     }, [unitLocs]);
 
     // This effect updates racks for adding to the room
+    //TODO change itemTypee to be rack types given the change in the two and need for separation
     useEffect(() => {
         if(!pendingRoomUpdate) return;
-        const {draggedShape, cellX, cellY, itemId, itemType} = pendingRoomUpdate;
-        let gridRatio: number;
+        const {draggedShape, cellX, cellY, itemId, updateItemType, itemTypeClass} = pendingRoomUpdate;
         let group;
 
         draggedShape.classed('dragging', false);
         const transform = d3.zoomTransform(layoutSvg.node());
-        
-        if (!isRack(itemType)) { // adding dragged room object
+        if (itemTypeClass !== 'caging') { // adding dragged room object
             group = layoutSvg.append('g')
                 .data([{x: cellX, y: cellY}])
                 .attr('class', "draggable room-obj")
@@ -234,40 +239,33 @@ const Editor = () => {
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
         } else { // adding dragged caging unit
-            // Determine the grid ratio for merging depending on size of dragged object
-            if(itemType === RackTypes.Pen || itemType === RackTypes.PlayCage){
-                gridRatio = LARGE_GRID_RATIO;
-            }else{
-                gridRatio = SMALL_GRID_RATIO;
-            }
 
             group = layoutSvg.append('g')
-                .attr('class', 'draggable rack')
+                .attr('class', `draggable rack type-${updateItemType as RackTypes}`)
                 .attr('id', `${itemId}`)
                 .style('pointer-events', 'bounding-box');
 
             const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = group.append('g')
-                .attr('id', `${itemType}-${getNextCageNum(itemType as RackTypes)}`)
+                .attr('id', `${updateItemType}-${getNextCageNum(updateItemType as RackTypes)}`)
                 .attr('transform', `translate(0,0)`)
                 .append(() => draggedShape.node());
 
             const cageIdText: SVGTSpanElement = cageGroup.select('tspan').node() as SVGTSpanElement;
 
-            cageIdText.textContent = `${getNextCageNum(itemType as RackTypes)}`;
+            cageIdText.textContent = `${getNextCageNum(updateItemType as RackTypes)}`;
 
 
             placeAndScaleGroup(group, cellX, cellY, transform);
         }
-        addRoomItem(itemType, itemId, cellX, cellY, transform.k);
+        addRoomItem(itemTypeClass, updateItemType, itemId, cellX, cellY, transform.k);
 
         const addProps: LayoutDragProps = {
             gridSize: GRID_SIZE,
-            gridRatio: gridRatio,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
             moveItem: moveObjLocation,
-            itemType: itemType as RackTypes
+            itemClass: itemTypeClass
         };
         // Reattach drag listeners for interaction within layout
         group.call(d3.drag().on('start', createStartDragInLayout({setRoomItem: setSelectedObj}))
@@ -280,7 +278,7 @@ const Editor = () => {
             textElement.setAttribute('contentEditable', 'true');
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-            setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, itemType as RackTypes);
+            setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, updateItemType as RackTypes);
         });
         setAddingRoomItem(false);
     }, [pendingRoomUpdate]);
@@ -347,17 +345,27 @@ const Editor = () => {
                 // First expression is if dragged shape is a rack, the second is a room object.
                 const draggedNodeId = ((draggedShape.node() as SVGElement).firstChild.firstChild as SVGElement).getAttribute('id') || ((draggedShape.node() as SVGElement).firstChild as SVGElement).getAttribute('id');
 
-                let itemType: RoomItemType;
+                let itemType: RoomItemClass;
+                let updateItemType: RackTypes | RoomObjectTypes;
                 let newId: string;
                 if(draggedNodeId.includes("pen")) {
-                    itemType = RackTypes.Pen;
+                    updateItemType = RackTypes.Pen;
+                    itemType = 'caging';
                 }else if (draggedNodeId.includes('cage')) {
-                    itemType = RackTypes.Cage;
-                }else if (draggedNodeId.includes('door')){
-                    itemType = RoomObjectTypes.Door;
+                    updateItemType = RackTypes.Cage;
+                    itemType = 'caging';
+                }else if (draggedNodeId.includes('door')) {
+                    updateItemType = RoomObjectTypes.Door;
+                    itemType = 'roomObj';
+                }else if (draggedNodeId.includes('drain')) {
+                    updateItemType = RoomObjectTypes.Drain;
+                    itemType = 'roomObj';
+                }else if (draggedNodeId.includes('penConnector')) {
+                    updateItemType = RoomObjectTypes.Connector;
+                    itemType = 'cagingObj';
                 }
 
-                if(isRack(itemType)){
+                if(itemType === 'caging'){
                     // get new id for rack
                     const tempId = localRoom.racks.reduce((max, obj) => {
                         return parseRoomItemNum(obj.itemId) > max ?  parseRoomItemNum(obj.itemId) : max;
@@ -372,10 +380,11 @@ const Editor = () => {
                 }
                 setPendingRoomUpdate({
                     draggedShape: draggedShape,
-                    itemType: itemType,
                     cellX: cellX,
                     cellY: cellY,
                     itemId: newId,
+                    itemTypeClass: itemType,
+                    updateItemType: updateItemType
                 });
                 setAddingRoomItem(true);
             } else {

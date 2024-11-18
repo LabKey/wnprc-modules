@@ -1,6 +1,13 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
-import { convertCageNumToNum, getTranslation, isTextEditable, parseRack, parseRoomItemType } from './helpers';
+import {
+    convertCageNumToNum,
+    getTranslation, getTypeClassFromElement,
+    isTextEditable,
+    parseGroupId,
+    parseRack,
+    parseRoomItemType
+} from './helpers';
 import {
     Cage,
     CageActionProps,
@@ -14,7 +21,7 @@ import {
     RackActions,
     RackTypes,
     RoomItem,
-    RoomItemType,
+    RoomItemClass,
     RoomObject,
     RoomObjectTypes,
     StartDragProps
@@ -192,9 +199,9 @@ export function setupEditCageEvent(
         });
     }
 
-    // Attach context menu to the parent
+    // Attach context menu to the lowest level group for that cage.
     const cageGroupElement: SVGGElement = element.closest(`[id^=${rackType}]`) as SVGGElement;
-
+    console.log("Attach menu: ", cageGroupElement)
     d3.select(cageGroupElement).attr('style', 'pointer-events: bounding-box')
     cageGroupElement.addEventListener('contextmenu', handleContextMenu);
 
@@ -216,11 +223,10 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
     const {
         layoutSvg,
         gridSize,
-        gridRatio,
         MAX_SNAP_DISTANCE,
         delRack,
         moveItem,
-        itemType
+        itemClass
     } = layoutDragProps;
 
     const draggedType = draggedCage.type;
@@ -231,76 +237,70 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
 
     // Start cage count at the first cage in the target shape
     // TODO fix this so that it matches correct types while maintaining their correct numbering system
-    let newCageNums = convertCageNumToNum(targetRack.cages.find(cage => cage.id === 1).cageNum);
+    //let newCageNums = convertCageNumToNum(targetRack.cages.find(cage => cage.id === 1).cageNum);
 
     function isConnected(selectionNode){
         return !!selectionNode.closest(`[id*='group']`);
     }
 
-    // Make sure cages don't have the wrong styles/classes and correct cage numbering for merge
-    function resetElementProperties(element, shapeType) {
-        element.classList = `grouped-${shapeType}`;
-        element.style = "";
-        element.id = `${shapeType}-${newCageNums}`;
+    // Make sure cages don't have the wrong styles, give merged cages a grouped class
+    function resetElementProperties(element, shapeType, action) {
+        if(action === 'merge'){
+            element.classList = `grouped-${shapeType}`;
+            element.style = "";
+        }
         const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
-        setupEditCageEvent(textEle, cageActionProps.setEditCageNum, cageActionProps.setCtxMenuStyle, itemType as RackTypes);
-        newCageNums++;
+        setupEditCageEvent(textEle, cageActionProps.setEditCageNum, cageActionProps.setCtxMenuStyle, shapeType as RackTypes);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
     // Example: 2 nodes, 0,0 and 120,0 start at 0,0 add 120,0
     // second 2 nodes, 0,0 and 120,0 start at 240,0 add 0,0 and 120,0. etc
-    function processChildNodes(element: SVGGElement, mergedGroup) {
+    function processChildNodes(element: SVGGElement, mergedGroup, action: RackActions) {
         const {x: startX, y: startY} = getTranslation(element.getAttribute('transform'))
         d3.select(element).selectAll(':scope > g').each(function () {
-            const targetCage = d3.select(this);
-            const shapeType = parseRoomItemType(targetCage.attr('id'));
-            const {x: localX, y: localY} = getTranslation(targetCage.attr('transform'));
-            const newX = startX + localX
-            const newY = startY + localY
-            targetCage.attr('transform', `translate(${newX},${newY})`)
-            resetElementProperties(this, shapeType);
+            const targetShape = d3.select(this);
+            let shapeType;
+            if(action === 'merge'){
+                shapeType = parseRoomItemType(targetShape.attr('id'));
+            }else{
+                shapeType = getTypeClassFromElement(targetShape.node());
+            }
+            const {x: localX, y: localY} = getTranslation(targetShape.attr('transform'));
+            const newX = startX + localX;
+            const newY = startY + localY;
+            targetShape.attr('transform', `translate(${newX},${newY})`);
+
+            // When connecting merged groups that have been connected before make sure to reset each cage but
+            // add the rack shape instead of cage shape
+            const mergedChildren = d3.select(this).selectAll(':scope > g');
+            if(!mergedChildren.empty()){
+                mergedChildren.each(function () {
+                    resetElementProperties(this, shapeType, action);
+                })
+            }else{
+                resetElementProperties(this, shapeType, action);
+            }
             mergedGroup.node().appendChild(this);
-            console.log("More than 1 merge: ", targetCage);
         });
     }
 
     function processShape(shape, action, mergedGroup) {
         if(action === 'merge'){
-            processChildNodes(shape, mergedGroup);
+            processChildNodes(shape, mergedGroup, action);
         }else{
-            // On the first connection shape is a default rack. if connecting to a group it will be a group of default racks
-            if(shape.getAttribute('class') === 'rack-group'){
-                const {x: startX, y: startY} = getTranslation(shape.getAttribute('transform'))
-
+            if(shape.getAttribute('class').includes('rack-group')){
+                processChildNodes(shape, mergedGroup, action);
+            }else{// When connecting racks for the first time
+                // this iteration is for connecting a merged rack, have to reset each cage in the rack but add the rack shape not the cage shape
                 d3.select(shape).selectAll(':scope > g').each(function () {
-                    const targetRack = d3.select(this);
-                    const shapeType = parseRoomItemType(targetRack.attr('id'));
-                    const {x: localX, y: localY} = getTranslation(targetRack.attr('transform'));
-                    const newX = startX + localX
-                    const newY = startY + localY
-                    targetRack.attr('transform', `translate(${newX},${newY})`)
-                    //resetElementProperties(this, shapeType);
-                    mergedGroup.node().appendChild(this);
+                    resetElementProperties(this, getTypeClassFromElement(shape), action);
                 });
-            }else{
+
                 mergedGroup.node().appendChild(shape);
             }
         }
-
-        /*if (shape.childNodes.length <= 1) {
-
-            const tempCage = d3.select(shape).select(`[id^=${shapeType.type}-]`);
-            //tempCage.classed(`grouped-${shapeType.type}`, true); // add grouped class to indicate its part of a group
-            resetElementProperties(tempCage.node(), shapeType);
-            mergedGroup.node().appendChild(tempCage.node());
-        } else { // for groups of multiple shapes/cages
-            processChildNodes(shape, mergedGroup);
-        }*/
     }
-    // return if another merge option is available,
-    // prevents double merging when adding cages to a rack surrounded by multiple target points (aka other cages)
-
     if (action !== 'cancel') {
         let targetRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
             = layoutSvg.select(`[id^=${targetRack.itemId}]`);
@@ -351,23 +351,22 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
 
         }
         else{ // action = connect
-            // TODO Bug with issue regarding helper functions base off the fact that they states/svgs are grouped
-            // TODO however they are not when they are connected
 
-            /*
-                TODO steps
-                1. Fix connecting already connected groups
-                    - This should pull the racks out of the target connected group, and dragged connected groups
-                        then add them to a new connected group, with the same group id as the target.
-
-             */
-            const connectedGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
+            // If connecting already connected groups these will be populated
+            const connectedTargetGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
                 = layoutSvg.select(`#${targetRack.groupInfo.groupId}`);
 
-            if(!connectedGroupShape.empty()){
-                clonedTargetShape = connectedGroupShape.node().cloneNode(true) as Element;
-                targetRackShape = connectedGroupShape;
+            const connectedDragGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
+                = layoutSvg.select(`#${draggedRack.groupInfo.groupId}`);
 
+            if(!connectedTargetGroupShape.empty()){
+                clonedTargetShape = connectedTargetGroupShape.node().cloneNode(true) as Element;
+                targetRackShape = connectedTargetGroupShape;
+            }
+
+            if(!connectedDragGroupShape.empty()){
+                clonedDraggedShape = connectedDragGroupShape.node().cloneNode(true) as Element;
+                draggedRackShape = connectedDragGroupShape;
             }
 
             newGroup = layoutSvg.append('g')
@@ -379,16 +378,11 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
             d3.select(clonedTargetShape).classed('draggable', false);
             d3.select(clonedDraggedShape).classed('draggable', false);
 
-
             processShape(clonedTargetShape, action, newGroup);
             processShape(clonedDraggedShape,action, newGroup);
 
             console.log("End Processing: ", newGroup);
-            //newGroup.node().appendChild(clonedTargetShape);
-            //newGroup.node().appendChild(clonedDraggedShape);
-
         }
-        //TODO fix bug here with id getting/ different for merge vs connect
 
         // Copy the transform attribute from the targetShape to the merged group
         const transformAttr = targetRackShape.attr('transform');
@@ -399,12 +393,11 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
 
         const addProps: LayoutDragProps = {
             gridSize: gridSize,
-            gridRatio: gridRatio,
             MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
             layoutSvg: layoutSvg,
             delRack: delRack,
             moveItem: moveItem,
-            itemType: itemType
+            itemClass: itemClass
         };
         newGroup.call(d3.drag().on('start', createStartDragInLayout({setRoomItem: cageActionProps.setEditCageNum}))
             .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
@@ -513,7 +506,7 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 layoutSvg,
                 delRack,
                 moveItem,
-                itemType
+                itemClass
             } = props;
             const shape = d3.select(this);
             shape.classed('active', false);
@@ -533,7 +526,7 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 placeAndScaleGroup(shape, cellX, cellY, transform);
 
                 console.log("#3: ", cellX, cellY, shape.node());
-                moveItem(shape.attr('id'), itemType, cellX, cellY, transform.k);
+                moveItem(shape.attr('id'), itemClass, cellX, cellY, transform.k);
 
                 // Set rack state correctly with move/updated coords
 
@@ -647,20 +640,20 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
         });
 
     }
-
+    //TODO Fix this
     // First parse through layout data to get rack and room object coords
-    layoutData.forEach((roomItem) => {
+    /*layoutData.forEach((roomItem) => {
         if(isRack(roomItem.objectType)){ // Room object is an enclosure for animals
             newLocalRoom.push(generateRack(roomItem));
         } else{ // Room object is something else in the room, ex. Door
             newLocalRoom.push(generateRoomObj(roomItem))
         }
-    })
+    })*/
 
     return(newLocalRoom);
 }
 
-export const isRack = (itemType: RoomItemType): itemType is RackTypes => {
+export const isRack = (itemType: RackTypes | RoomObjectTypes): itemType is RackTypes => {
     return Object.values(RackTypes).includes(itemType as RackTypes);
 }
 
@@ -669,3 +662,27 @@ export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
         return rack.cages.find((cage) => cage.cageNum === obj)
     });
 }
+
+// Finds the next avail group id number
+export const findNextGroupId = (groups: GroupId[]): number => {
+    const groupNumbers = groups
+        .map(group => parseGroupId(group))
+        .filter(num => num !== undefined)
+        .sort((a, b) => a - b);
+
+    // return 1 if no groups exist
+    if (groupNumbers.length === 0) {
+        return 1;
+    }
+
+    // Find the first missing number/group id in case gaps exist
+    // Ex. groups = [rack-group-1, rack-group-4] returns 2
+    for (let i = 0; i < groupNumbers.length; i++) {
+        if (groupNumbers[i] !== i + 1) {
+            return i + 1; // Return the missing number
+        }
+    }
+
+    // If no gaps were found, return the next number
+    return groupNumbers[groupNumbers.length - 1] + 1;
+};

@@ -476,6 +476,7 @@ const Editor = () => {
             left: '',
             top: '',
         });
+        setSelectedObj(null);
     };
 
     const handleSave = () => {
@@ -583,7 +584,11 @@ const Editor = () => {
                 >Save
                 </button>
             </div>
-            <EditorContextMenu ctxMenuStyle={ctxMenuStyle} onClickOutside={handleContextMenuClose} onClickDelete={delCage} onClickRename={handleClickRename}/>
+            <EditorContextMenu
+                ctxMenuStyle={ctxMenuStyle}
+                onClickDelete={delCage}
+                onClickRename={handleClickRename}
+            />
         </div>
     );
 };

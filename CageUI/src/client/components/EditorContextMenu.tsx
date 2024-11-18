@@ -9,7 +9,6 @@ interface EditorContextMenuProps {
         top: string;
         left: string;
     };
-    onClickOutside: () => void;
     onClickDelete: () => void;
     onClickRename: (e: React.MouseEvent<HTMLElement>) => void;
 }
@@ -17,24 +16,10 @@ interface EditorContextMenuProps {
 const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     const {
         ctxMenuStyle,
-        onClickOutside,
         onClickDelete,
         onClickRename
     } = props;
     const menuRef = useRef<HTMLMenuElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                onClickOutside();
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [onClickOutside]);
 
     const handleRenameClick = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();

@@ -10,7 +10,7 @@ import {
     LocationCoords,
     Page,
     Rack,
-    RackActions, RackGroupInfo,
+    RackActions, RackGroup,
     RackTypes,
     Room,
     RoomItem,
@@ -27,7 +27,7 @@ import {
     removeCircularReferences
 } from './helpers';
 import { testCagesInRoom, testLayoutHistory, testRoomObj } from '../layoutEditor/testData';
-import { buildNewLocalRoom, findNextGroupId, findSelectObjRack, isRack } from './LayoutEditorHelpers';
+import { buildNewLocalRoom, findNextGroupId, findRackInGroup, findSelectObjRack, isRack } from './LayoutEditorHelpers';
 
 export interface RoomContextType {
     selectedPage: Page;
@@ -198,7 +198,7 @@ export const RoomContextProvider = ({children}) => {
 export const LayoutContextProvider = ({children, prevRoom}) => {
     const [room, setRoom] = useState<Room>({
         room: "new-layout",
-        racks: [],
+        rackGroups: [],
         objects: []
     });
     /* unit locations resembles each rack type and their respective locations in a room, since location is geospatial
@@ -214,7 +214,7 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
     });
     const [localRoom, setLocalRoom] = useState<Room>({
         room:"new-layout",
-        racks: [],
+        rackGroups: [],
         objects: []
     });
 
@@ -237,9 +237,12 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             id: 1,
             cageNum: newCageNum,
             position: 'top',
-            type: rackType === RackTypes.Pen ? DEFAULT_PEN_TYPE : DEFAULT_CAGE_TYPE,
             x: 0,
             y: 0,
+            length: 0,
+            width: 0,
+            height: 0,
+            sqft: 0
         };
 
         // First cage in rack is always at rack starting position as well
@@ -252,23 +255,25 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         const newRack: Rack = {
             cages: [firstCage],
             itemId: id,
-            groupInfo: {
-                groupId: newGroupId,
-                x: x,
-                y: y
-            },
             isActive: true,
-            type: rackType,
+            type: rackType === RackTypes.Pen ? DEFAULT_PEN_TYPE : DEFAULT_CAGE_TYPE,
             x: 0,
-            y: 0,
-            scale: newScale
+            y: 0
         };
+
+        const newRackGroup: RackGroup = {
+            groupId: newGroupId,
+            racks: [newRack],
+            x: x,
+            y: y,
+            scale: newScale,
+        }
 
         setActiveGroups(prevState => [...prevState, newGroupId]);
 
         setLocalRoom(prevRoom => ({
             ...prevRoom,
-            racks: [...prevRoom.racks, newRack]
+            rackGroups: [...prevRoom.rackGroups, newRackGroup]
         }));
 
         setUnitLocs(prevState => ({
@@ -284,13 +289,9 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         console.log("context merge: ", newGroup, targetId, dragId);
 
         setLocalRoom(prevRoom => {
-            let targetRack: Rack = prevRoom.racks.find((r: Rack) => {
-                    return r.itemId === targetId;
-            });
 
-            let dragRack: Rack = prevRoom.racks.find((r: Rack) => {
-                    return r.itemId === dragId;
-            });
+            let {rack: targetRack, rackGroup: targetGroup} = findRackInGroup(targetId, prevRoom.rackGroups);
+            let {rack: dragRack, rackGroup: dragGroup} = findRackInGroup(dragId, prevRoom.rackGroups);
 
             if (!targetRack || !dragRack) {
                 console.log("One or both racks not found");
@@ -319,67 +320,81 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
             const mergedRack: Rack = {
                 itemId: targetRack.itemId, // Use the larger ID for the merged rack
                 type: targetRack.type,
-                groupInfo: targetRack.groupInfo,
                 cages: updatedCages,
                 x: targetRack.x,
                 y: targetRack.y,
-                scale: targetRack.scale,
                 isActive: targetRack.isActive,
             };
 
+            const mergedRackGroup: RackGroup = {
+                groupId: targetGroup.groupId,
+                x: targetGroup.x,
+                y: targetGroup.y,
+                scale: targetGroup.scale,
+                racks: targetGroup.racks.filter(r => {
+                    return r.itemId !== targetRack.itemId;
+                }).concat(mergedRack)
+            }
+
             // When merging two racks we lose the dragged group
-            setActiveGroups(prevGroups => prevGroups.filter(group => group !== dragRack.groupInfo.groupId));
+            setActiveGroups(prevGroups => prevGroups.filter(group => group !== dragGroup.groupId));
 
             // Filter out the original racks and add the merged rack
             return ({
                 ...prevRoom,
-                racks: prevRoom.racks.filter(r => {
-                    return r.itemId !== targetRack.itemId && r.itemId !== dragRack.itemId;
-                }).concat(mergedRack)
+                rackGroups: prevRoom.rackGroups.filter(r => {
+                    return r.groupId !== targetGroup.groupId && r.groupId !== dragGroup.groupId;
+                }).concat(mergedRackGroup)
             });
         });
     }
 
     const connectLocalRacks = (targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
         setLocalRoom(prevRoom => {
-            let targetRackGroup: Rack = prevRoom.racks.find((r: Rack) => {
-                return r.itemId === targetId;
-            });
+            let {rack: targetRack, rackGroup: targetGroup} = findRackInGroup(targetId, prevRoom.rackGroups);
+            let {rack: dragRack, rackGroup: dragGroup} = findRackInGroup(dragId, prevRoom.rackGroups);
 
-            let dragRackGroup: Rack = prevRoom.racks.find((r: Rack) => {
-                return r.itemId === dragId;
-            });
-
-            if (!targetRackGroup || !dragRackGroup) {
+            if (!targetRack || !dragRack) {
                 console.error("One or both racks not found");
                 return prevRoom;
             }
             console.log("Connect new group: ", newGroup);
             // TODO Confirm this is working as intended, possible error might occur when dealing with different sized connections
             // Update the room to match the new group ids and update x and y to be local to the new rack group
-            const updatedRacks = prevRoom.racks.map((r: Rack) => {
-                const tempRack = newGroup.select(`#${r.itemId}`);
-                if(tempRack.empty()) return r;
-                const newRackCoords = getTranslation(tempRack.attr('transform'));
-                // Convert dragged groups to new target group
-                if (r.groupInfo.groupId === dragRackGroup.groupInfo.groupId) {
+            const updatedRackGroups = prevRoom.rackGroups.map((group: RackGroup) => {
+                if (group.groupId === targetGroup.groupId) {
+                    const updatedRacks = [
+                        ...group.racks,
+                        ...dragGroup.racks.map((r: Rack) => {
+                            const tempRack = newGroup.select(`#${r.itemId}`);
+                            const newRackCoords = getTranslation(tempRack.attr('transform'));
+                            return {
+                                ...r,
+                                x: newRackCoords.x,
+                                y: newRackCoords.y,
+                                groupId: targetGroup.groupId
+                            };
+                        })
+                    ];
                     return {
-                        ...r,
-                        x: newRackCoords.x,
-                        y: newRackCoords.y,
-                        groupInfo: targetRackGroup.groupInfo
+                        ...group,
+                        racks: updatedRacks
                     };
                 }
-                return {...r, x: newRackCoords.x, y: newRackCoords.y};
-            });
+                if (group.groupId === dragGroup.groupId) {
+                    return null;
+                }
+                return group;
+            }).filter((group): group is RackGroup => group !== null); // filter out the drag group
+
 
             // When connecting two racks we lose the dragged group
-            setActiveGroups(prevGroups => prevGroups.filter(group => group !== dragRackGroup.groupInfo.groupId));
+            setActiveGroups(prevGroups => prevGroups.filter(group => group !== dragGroup.groupId));
 
             // Return the updated room
             return {
                 ...prevRoom,
-                racks: updatedRacks
+                rackGroups: updatedRackGroups
             };
         })
     }
@@ -421,23 +436,19 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
                 if(idKey === 'itemId'){
                     updatedLocalRoom = {
                         ...prevRoom,
-                        racks: prevRoom.racks.map(item =>
-                            item.itemId === itemId
+                        rackGroups: prevRoom.rackGroups.map(group =>
+                            group.racks.some(item => item.itemId === itemId)
                                 ? {
-                                    ...item,
-                                    groupInfo: {
-                                        ...item.groupInfo,
-                                        x: x,
-                                        y: y
-                                    },
+                                    ...group,
+                                    x: x,
+                                    y: y,
                                     scale: k
                                 }
-                                : item
+                                : group
                         )
                     };
-                    const movedRack = updatedLocalRoom.racks.find(rack => {
-                        return rack.itemId === itemId;
-                    }) as Rack;
+
+                    const {rack: movedRack} = findRackInGroup(itemId, updatedLocalRoom.rackGroups);
 
                     // Find the moved rack to access its cages
                     if(!movedRack){
@@ -449,7 +460,7 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
                         ({
                             ...prevUnitLocations,
                             // Access the correct unit location array using rack type
-                            [movedRack.type]: prevUnitLocations[movedRack.type].map(cage => {
+                            [movedRack.type.type]: prevUnitLocations[movedRack.type.type].map(cage => {
                                 // Check if the cage belongs to the moved rack using cageNum
                                 const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
                                 return movedRackCage
@@ -464,26 +475,23 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
                         })
                     );
                 }else{
-                    const newGroupInfo: RackGroupInfo = {
-                        groupId: itemId as GroupId,
-                        x: x,
-                        y: y
-                    }
                     updatedLocalRoom = {
                         ...prevRoom,
-                        racks: prevRoom.racks.map(item =>
-                            item.groupInfo.groupId === itemId
+                        rackGroups: prevRoom.rackGroups.map(group =>
+                            group.groupId === itemId
                                 ? {
-                                    ...item,
-                                    groupInfo: newGroupInfo,
+                                    ...group,
+                                    x: x,
+                                    y: y,
                                     scale: k
                                 }
-                                : item
+                                : group
                         )
                     };
-                    const movedRacks = updatedLocalRoom.racks.filter(rack => {
-                        return rack.groupInfo.groupId === itemId;
-                    }) as Rack[];
+
+                    const movedRacks = updatedLocalRoom.rackGroups.find(group => {
+                        return group.groupId === itemId;
+                    }).racks;
 
                     // Find the moved rack to access its cages
                     if(movedRacks.length === 0){
@@ -493,7 +501,7 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
                     setUnitLocs((prevUnitLocations) => {
                         const updatedUnitLocations = { ...prevUnitLocations };
                         movedRacks.forEach((movedRack) => {
-                            updatedUnitLocations[movedRack.type] = updatedUnitLocations[movedRack.type].map((cage) => {
+                            updatedUnitLocations[movedRack.type.type] = updatedUnitLocations[movedRack.type.type].map((cage) => {
                                 const movedRackCage = movedRack.cages.find((rackCage) => rackCage.cageNum === cage.num);
                                 if (movedRackCage) {
                                     return {
@@ -525,12 +533,12 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
     };
 
     const delRack = (rackId: string) => {
-        setLocalRoom(prevRoom =>  ({
+        /*setLocalRoom(prevRoom =>  ({
             ...prevRoom,
             racks: prevRoom.racks.filter(roomItem => {
                 return roomItem.itemId !== rackId;
             })
-        }));
+        }));*/
     }
 
     const delCage = () => {
@@ -549,34 +557,42 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
 
         setLocalRoom((prevRoom) => {
             // Find the clicked rack
-            const currRack: Rack = findSelectObjRack(prevRoom.racks, selectedObj);
+            let currRack: Rack;
+            prevRoom.rackGroups.forEach(group => {
+                if(currRack) return;
+                currRack = findSelectObjRack(group.racks, selectedObj)
+            })
 
             if (!currRack) return prevRoom; // If the clicked rack is not found, return the previous state
 
             // Update the local room by updating the cage numbers in the clicked rack
             const updatedLocalRoom: Room = {
                 ...prevRoom,
-                racks: prevRoom.racks.map((rack: Rack): Rack =>
-                    rack.cages.some((cage: Cage) => cage.cageNum === selectedObj) // Check if any cage matches selectedObj
-                        ? {
-                            ...rack,
-                            cages: rack.cages.map((cage: Cage): Cage =>
-                                cage.cageNum === selectedObj // Only update the cage with matching cageNum
-                                    ? { ...cage, cageNum: `${currRack.type}-${numAfter}` } as Cage
-                                    : cage
-                            )
-                        }
-                        : rack // No match, return the rack as is
-                )
+                rackGroups: prevRoom.rackGroups.map((group: RackGroup): RackGroup => ({
+                    ...group,
+                    racks: group.racks.map((rack: Rack): Rack =>
+                        rack.cages.some((cage: Cage) => cage.cageNum === selectedObj) // Check if any cage matches selectedObj
+                            ? {
+                                ...rack,
+                                cages: rack.cages.map((cage: Cage): Cage =>
+                                    cage.cageNum === selectedObj // Only update the cage with matching cageNum
+                                        ? { ...cage, cageNum: `${rack.type}-${numAfter}` } as Cage
+                                        : cage
+                                )
+                            }
+                            : rack
+                    )
+                }))
             };
+
 
 
             // Now update the unit locations using the rackType from currRack
             setUnitLocs(prevUnitLocations => ({
                 ...prevUnitLocations,
                 // Access the correct unit location array based on clickedRack's rackType
-                [currRack.type]: prevUnitLocations[currRack.type].map(cage =>
-                    convertCageNumToNum(cage.num) === numBefore ? { ...cage, num: `${currRack.type}-${numAfter}` } : cage
+                [currRack.type.type]: prevUnitLocations[currRack.type.type].map(cage =>
+                    convertCageNumToNum(cage.num) === numBefore ? { ...cage, num: `${currRack.type.type}-${numAfter}` } : cage
                 )
             }));
 
@@ -610,10 +626,7 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         // TODO Query statement to fetch cage data based racks in room at the time
         const rackData = testCagesInRoom;
 
-        //TODO query statement to fetch room objects based on location in layout history
-        const roomObjData = testRoomObj;
-
-        const newLocalRoom: RoomItem[] = buildNewLocalRoom(layoutData, rackData, roomObjData);
+        const newLocalRoom: RoomItem[] = buildNewLocalRoom(layoutData, rackData);
 
         console.log("Load Data: ", newLocalRoom);
 

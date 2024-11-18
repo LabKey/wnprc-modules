@@ -25,7 +25,7 @@ import {
     createDragInLayout,
     createEndDragInLayout,
     createStartDragInLayout,
-    drawGrid, findSelectObjRack,
+    drawGrid, findRackInGroup, findSelectObjRack,
     getLayoutOffset,
     getTargetRect,
     isRack,
@@ -94,7 +94,7 @@ const Editor = () => {
 
         // if selectedObj is a group of racks, make dragged rack the group of racks
         if(selectedObj.includes('group')){
-            const draggedRackGroup: Rack[] = localRoom.racks.filter((rack) => rack.groupInfo.groupId === selectedObj);
+            const draggedRackGroup: Rack[] = localRoom.rackGroups.find((group) => group.groupId === selectedObj).racks;
             const draggedCagesGroup: string[] = draggedRackGroup.flatMap((rack) => rack.cages.map(cage => cage.cageNum));
 
             // Create temp object of cage locations not in the dragged group
@@ -102,7 +102,7 @@ const Editor = () => {
                 const tempLocs: UnitLocations = {...unitLocs};
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[rack.type] = tempLocs[rack.type].filter((unit) => !draggedCagesGroup.includes(unit.num))
+                    tempLocs[rack.type.type] = tempLocs[rack.type.type].filter((unit) => !draggedCagesGroup.includes(unit.num))
                 })
 
                 return tempLocs;
@@ -118,7 +118,7 @@ const Editor = () => {
                 };
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[rack.type] = unitLocs[rack.type].filter((unit) => draggedCagesGroup.includes(unit.num))
+                    tempLocs[rack.type.type] = unitLocs[rack.type.type].filter((unit) => draggedCagesGroup.includes(unit.num))
                 })
 
                 return tempLocs;
@@ -145,8 +145,8 @@ const Editor = () => {
             });
             console.log("End connected testing", cagesNotInDragged, cagesInDragged);
         }else{
-            const draggedRack = localRoom.racks.find(rack => rack.itemId === selectedObj);
-            const draggedRackType = draggedRack.type;
+            const {rack: draggedRack} = findRackInGroup(selectedObj, localRoom.rackGroups);
+            const draggedRackType = draggedRack.type.type;
 
             if(!draggedRackType){
                 return;
@@ -164,14 +164,16 @@ const Editor = () => {
                 cageLocs.forEach((targetLoc) => {
                     if(draggedCage.cageNum === targetLoc.num || mergeAvail) return; // cant merge into itself
                     let inSameRack = false;
-                    //TODO fix this bug with checking if pens/cages/tempCages/playCages are in the same "rack"
-                    localRoom.racks.forEach(rack => {
-                        if(areCagesInSameRack(rack, targetLoc, draggedCageLoc)) {
-                            console.log("Same Rack: ", rack, targetLoc, draggedCageLoc);
-                            inSameRack = true;
-                            return;
-                        }
+                    localRoom.rackGroups.forEach((group) => {
+                        group.racks.forEach(rack => {
+                            if(areCagesInSameRack(rack, targetLoc, draggedCageLoc)) {
+                                console.log("Same Rack: ", rack, targetLoc, draggedCageLoc);
+                                inSameRack = true;
+                                return;
+                            }
+                        });
                     });
+
                     if(inSameRack) {
                         return;
                     }
@@ -191,17 +193,13 @@ const Editor = () => {
             const targetShape = layoutSvg.select(`[id^="${targetCageLoc.num}"]`);
             if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
             const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*=rack]');
-            const targetRack = localRoom.racks.find(rack => {
-                return rack.itemId === targetRackShape.getAttribute('id');
-            });
-            const targetCage = targetRack.cages.find((cage) => cage.cageNum === targetShape.attr('id') as CageNumber);
+            const {rack: targetRack, rackGroup: targetRackGroup} = findRackInGroup(targetRackShape.getAttribute('id'), localRoom.rackGroups);
+
 
             const draggedShape = layoutSvg.select(`[id^="${draggedCageLoc.num}"]`);
             const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*=rack]');
-            const draggedRack = localRoom.racks.find(rack => {
-                return rack.itemId === draggedRackShape.getAttribute('id');
-            });
-            const draggedCage = draggedRack.cages.find((cage) => cage.cageNum === draggedShape.attr('id') as CageNumber);
+
+            const {rack: draggedRack, rackGroup: draggedRackGroup} = findRackInGroup(draggedRackShape.getAttribute('id'), localRoom.rackGroups);
 
             const layoutDragProps: LayoutDragProps = {
                 MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
@@ -217,7 +215,7 @@ const Editor = () => {
                 setCtxMenuStyle: setCtxMenuStyle,
             }
 
-            mergeRacks(targetRack, draggedRack, doRackAction, layoutDragProps, cageActionProps, targetCage, draggedCage);
+            mergeRacks(targetRack, draggedRack, targetRackGroup, draggedRackGroup, doRackAction, layoutDragProps, cageActionProps);
         }
         setSelectedObj(null);
     }, [unitLocs]);
@@ -360,15 +358,15 @@ const Editor = () => {
                 }else if (draggedNodeId.includes('drain')) {
                     updateItemType = RoomObjectTypes.Drain;
                     itemType = 'roomObj';
-                }else if (draggedNodeId.includes('penConnector')) {
-                    updateItemType = RoomObjectTypes.Connector;
-                    itemType = 'cagingObj';
                 }
 
                 if(itemType === 'caging'){
                     // get new id for rack
-                    const tempId = localRoom.racks.reduce((max, obj) => {
-                        return parseRoomItemNum(obj.itemId) > max ?  parseRoomItemNum(obj.itemId) : max;
+                    const tempId = localRoom.rackGroups.reduce((max, group) => {
+                        const groupMax = group.racks.reduce((groupMax, rack) => {
+                            return parseRoomItemNum(rack.itemId) > groupMax ? parseRoomItemNum(rack.itemId) : groupMax;
+                        }, 0);
+                        return groupMax > max ? groupMax : max;
                     }, 0) + 1;
                     newId = `default-rack-${tempId}`;
                 }else{

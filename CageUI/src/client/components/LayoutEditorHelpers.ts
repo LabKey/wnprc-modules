@@ -18,7 +18,7 @@ import {
     LocationCoords,
     OffsetProps,
     Rack,
-    RackActions,
+    RackActions, RackGroup,
     RackTypes,
     RoomItem,
     RoomItemClass,
@@ -217,7 +217,7 @@ export function setupEditCageEvent(
     Even though cages can not be added/removed from racks in reality, for layout building purposes they can.
 
  */
-export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackAction, layoutDragProps: LayoutDragProps, cageActionProps: CageActionProps, targetCage: Cage, draggedCage: Cage) {
+export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRackGroup: RackGroup, dragRackGroup: RackGroup, doRackAction, layoutDragProps: LayoutDragProps, cageActionProps: CageActionProps) {
     if(!d3.select('.popup').empty()) return;
     const action: RackActions = await showConfirmationPopup();
     const {
@@ -229,11 +229,9 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
         itemClass
     } = layoutDragProps;
 
-    const draggedType = draggedCage.type;
-
     console.log("Performing Merge");
-    console.log("Racks: ", targetRack, draggedRack);
-    console.log("Cages: ", targetCage, draggedCage);
+    //console.log("Racks: ", targetRack, draggedRack);
+    //console.log("Cages: ", targetCage, draggedCage);
 
     // Start cage count at the first cage in the target shape
     // TODO fix this so that it matches correct types while maintaining their correct numbering system
@@ -324,7 +322,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
                 await showLayoutEditorError("Invalid Configuration: Please do not merge connected racks");
                 return;
             }
-            if(draggedCage.type.type !== targetCage.type.type){
+            if(draggedRack.type.type !== targetRack.type.type){
                 await showLayoutEditorError("Invalid Configuration: Please do not merge cages of different types, use connection instead");
                 return;
             }
@@ -354,10 +352,10 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
 
             // If connecting already connected groups these will be populated
             const connectedTargetGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
-                = layoutSvg.select(`#${targetRack.groupInfo.groupId}`);
+                = layoutSvg.select(`#${targetRackGroup.groupId}`);
 
             const connectedDragGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
-                = layoutSvg.select(`#${draggedRack.groupInfo.groupId}`);
+                = layoutSvg.select(`#${dragRackGroup.groupId}`);
 
             if(!connectedTargetGroupShape.empty()){
                 clonedTargetShape = connectedTargetGroupShape.node().cloneNode(true) as Element;
@@ -371,7 +369,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, doRackActi
 
             newGroup = layoutSvg.append('g')
                 .attr('class', 'draggable rack-group')
-                .attr('id', targetRack.groupInfo.groupId);
+                .attr('id', targetRackGroup.groupId);
 
             resetNodeTranslationsWithZoom(clonedTargetShape, clonedDraggedShape, layoutSvg);
 
@@ -586,9 +584,7 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
 }
 
 
-
-
-export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roomObjData) => {
+export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData) => {
     const newLocalRoom: RoomItem[] = [];
     let groupId: number = 1;
 
@@ -596,7 +592,7 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
     const generateRack = (rack: LayoutHistoryData): Rack => {
         // TODO query cages table and find the cages in rack.objectId
         const cagesInRack: EHRCage[] = testCagesInRoom.filter((cage) => cage.rack === rack.objectId);
-
+        /*
         const cageState: Cage[] = cagesInRack.map((cage) => ({
             id: cage.rackNum,
             cageNum: cage.cageNum,
@@ -606,11 +602,15 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
             type: cage.cagetype,
             adjCages: undefined, //TODO add adjCages here for cage modifications if required
             x: cage.x,
-            y: cage.y
+            y: cage.y,
+            length: cage.length,
+            width: cage.width,
+            height: cage.height,
+            sqft: cage.sqft
         }) as Cage);
-        console.log("Gen Layout Data Rack: ", rack, cageState);
-
-        const newRackState: Rack = {
+        console.log("Gen Layout Data Rack: ", rack, cageState);*/
+        let newRackState: Rack;
+        /*newRackState: Rack = {
             cages: cageState,
             itemId: rack.objectId, // TODO fix this so that it is correct id of rack, need list of rack ids managed by center or naming convention for them
             groupInfo: {
@@ -623,7 +623,7 @@ export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData, roo
             type: rack.objectType as RackTypes,
             x: rack.x,
             y: rack.y
-        }
+        }*/
         groupId++;
         return newRackState;
     }
@@ -686,3 +686,17 @@ export const findNextGroupId = (groups: GroupId[]): number => {
     // If no gaps were found, return the next number
     return groupNumbers[groupNumbers.length - 1] + 1;
 };
+
+export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: Rack, rackGroup: RackGroup} | undefined => {
+    let targetRack: Rack | undefined;
+    let targetGroup: RackGroup | undefined;
+
+    targetGroup = groups.find((group: RackGroup) =>
+        group.racks.some((rack: Rack) => rack.itemId === targetId)
+    );
+
+    if (targetGroup) {
+        targetRack = targetGroup.racks.find((rack: Rack) => rack.itemId === targetId);
+    }
+    return {rack: targetRack, rackGroup: targetGroup};
+}

@@ -6,7 +6,7 @@ import {
     CageSizeWithKey,
     CageState,
     CageType,
-    DefaultCageState, LocationCoords,
+    DefaultCageState, GroupId, LocationCoords,
     Modification,
     Modifications,
     ModTypes,
@@ -78,12 +78,30 @@ export const parseRoomItemType = (input: string): string => {
     return;
 }
 
-export const parseConnectedId = (input: string) => {
+export const getTypeClassFromElement = (element) => {
+    const classes: string[] = Array.from(element.classList);
+
+    // Define a regex to capture the part after "type-"
+    const regex = /^type-(\w+)/;
+
+    // Find the class that matches the regex and capture the relevant part
+    const typeClass = classes.find(cls => regex.test(cls));
+
+    if (typeClass) {
+        const match = typeClass.match(regex);
+        return match[1]; // Return only the captured part (after "type-")
+    }
+
+    return null;
+}
+
+
+export const parseGroupId = (input: GroupId) => {
     const regex = /\w+-\w+-(\d+)/; // matches "string-string-number"
 
     const match = input.match(regex);
     if (match) {
-        return parseInt(match[2]);
+        return parseInt(match[1]);
     }
     return;
 }

@@ -17,12 +17,15 @@ type PageViews = "Room" | "Rack" | "Cage";
 export type RackActions = 'merge' | 'connect' | 'cancel';
 export type GroupId = `rack-group-${number}`;
 
+// Classification of the objects, caging is for racks, roomObj is for things placed in the room not applied to caging, cagingObj are like roomObjs but can be connected to caging units
+export type RoomItemClass = 'caging' | 'roomObj' | 'cagingObj';
+
 
 
 export interface LayoutHistoryData {
     rowid: number;
     objectId: string;
-    objectType: RoomItemType;
+    objectType: RoomObjectTypes | RackTypes;
     startDate: string;
     endDate: string | null;
     x: number;
@@ -51,7 +54,8 @@ export interface OffsetProps {
 
 export interface PendingRoomUpdate {
     draggedShape: any;
-    itemType: RoomItemType;
+    itemTypeClass: RoomItemClass; // classification of the item
+    updateItemType: RackTypes | RoomObjectTypes;
     cellX: number;
     cellY: number;
     itemId: string;
@@ -61,14 +65,14 @@ export interface CageActionProps {
     setEditCageNum: React.Dispatch<React.SetStateAction<string>>;
     setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>;
 }
+
 export interface LayoutDragProps {
     gridSize: number;
-    gridRatio: number;
     MAX_SNAP_DISTANCE: number;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     delRack: (rackId: string) => void;
-    moveItem: (itemId: string, type: RoomItemType, x: number, y: number, k: number) => void;
-    itemType: RoomItemType;
+    moveItem: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
+    itemClass: RoomItemClass;
 }
 
 export interface StartDragProps {
@@ -190,12 +194,14 @@ export interface RoomObject {
 
 export type RoomItem = Rack | RoomObject;
 
-export type RoomItemType = RoomObjectTypes | RackTypes;
+//export type RoomItemType = RoomObjectTypes | RackTypes;
+
 
 export enum RoomObjectTypes {
     RoomDivider = "roomDivider",
     Drain = "drain",
-    Door = "door"
+    Door = "door",
+    Connector = 'penConnector'
 }
 
 // these string names are used to id divs in the svgs

@@ -19,7 +19,13 @@ import {
     RoomObjectTypes,
     UnitLocations
 } from './typings';
-import { convertCageNumToNum, getTranslation, removeCircularReferences } from './helpers';
+import {
+    convertCageNumToNum,
+    getTranslation,
+    parseRoomItemNum,
+    parseRoomItemType,
+    removeCircularReferences
+} from './helpers';
 import { testCagesInRoom, testLayoutHistory, testRoomObj } from '../layoutEditor/testData';
 import { buildNewLocalRoom, findNextGroupId, findSelectObjRack, isRack } from './LayoutEditorHelpers';
 
@@ -532,8 +538,9 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
     }
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
-        if(localRoom.racks.find(prevRacks => prevRacks.cages.find(
-            cage => convertCageNumToNum(cage.cageNum) === numAfter))){
+        const objType = parseRoomItemType(selectedObj);
+
+        if(unitLocs[objType].find(prevLoc => parseRoomItemNum(prevLoc.num) === numAfter)){
             console.log("Please add a different cage num that doesnt exist in the current room");
             return;
         }

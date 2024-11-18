@@ -403,7 +403,9 @@ const Editor = () => {
     // After state is done updating for cage id change. refresh svg text and ids
     useEffect(() => {
         if(cageNumChange){
-            let group = layoutSvg.select(`#${selectedObj}`).attr('id', `cage-${cageNumChange.after}`);
+            console.log("selected Obj change: ", selectedObj);
+            const objType = parseRoomItemType(selectedObj);
+            let group = layoutSvg.select(`#${selectedObj}`).attr('id', `${objType}-${cageNumChange.after}`);
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
             setCtxMenuStyle({ display: 'none', top: '0px', left: '0px' });
             setSelectedObj(null);
@@ -452,9 +454,6 @@ const Editor = () => {
     }
 
     useEffect(() => {
-       /* do {
-            setTimeout(() => {}, 1000);
-        }while (d3.select('#layout-svg').empty())*/
         setLayoutSvg(d3.select('#layout-svg'));
     }, []);
 

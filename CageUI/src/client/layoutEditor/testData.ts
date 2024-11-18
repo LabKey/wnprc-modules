@@ -1,10 +1,10 @@
 import {
+    CageType,
     EHRCage,
-    EHRCageType,
+    EHRRackType,
     EHRRoom,
     LayoutHistoryData,
     RackTypes,
-    RoomItem,
     RoomObjectTypes
 } from '../components/typings';
 
@@ -33,11 +33,11 @@ export const testRoom: EHRRoom = {
     maxCages: 26
 }
 
-export const testCageTypes1: EHRCageType = {
+export const testCageTypes1: EHRRackType = {
     rowid: 3,
-    cagetype: "cage-at-6.7",
-    type: "cage",
-    manufacturer: "allentown",
+    name: "cage-at-6.7",
+    type: RackTypes.Cage,
+    manufacturer: CageType.Allentown,
     length: 31.0,
     width: 31.25,
     height: 33.0,
@@ -47,11 +47,11 @@ export const testCageTypes1: EHRCageType = {
     description: "6.7 sq ft allentown cage"
 }
 
-export const testCageTypes2: EHRCageType = {
+export const testCageTypes2: EHRRackType = {
     rowid: 4,
-    cagetype: "pen-uk-44",
-    type: "pen",
-    manufacturer: "unknown",
+    name: "pen-uk-44",
+    type: RackTypes.Pen,
+    manufacturer: CageType.Unknown,
     length: 122.0,
     width: 52.0,
     height: 98.5,
@@ -139,10 +139,8 @@ export const testCagesInRoom = [testCage1, testCage2,testCage3,testCage4,testCag
 
 export const testRoomObj = {
     rowid: 1,
-    location: "ab140-rd",
-    type: "Room Divider",
-    abbreviation: "rd",
-    room: testRoom.room
+    type: "Door",
+    abbreviation: "d",
 }
 
 
@@ -166,7 +164,7 @@ export const testLayoutHistory: LayoutHistoryData[] = [
     },
     {
         rowid: 2,
-        objectId: testRoomObj.location,
+        objectId: `${testRoomObj.rowid}`,
         objectType: RoomObjectTypes.Door,
         startDate: "2024-10-22",
         endDate: null,

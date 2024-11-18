@@ -18,20 +18,20 @@ export type RackActions = 'merge' | 'connect' | 'cancel';
 export type GroupId = `rack-group-${number}`;
 
 // Classification of the objects, caging is for racks, roomObj is for things placed in the room not applied to caging, cagingObj are like roomObjs but can be connected to caging units
-export type RoomItemClass = 'caging' | 'roomObj' | 'cagingObj';
+export type RoomItemClass = 'caging' | 'roomObj';
 
 
 
 export interface LayoutHistoryData {
     rowid: number;
-    objectId: string;
+    objectId: string; // depending on object type this is either rack id or object row id
     objectType: RoomObjectTypes | RackTypes;
     startDate: string;
     endDate: string | null;
-    x: number;
-    y: number;
-    scale: number;
-    room: string
+    x: number; // x position of either room object or rack group
+    y: number; // y position of either room object or rack group
+    scale: number; // scale of either room object or rack group
+    room: string // Room that either rack or object resides in
 }
 
 export interface Page {
@@ -82,10 +82,13 @@ export interface StartDragProps {
 export interface Cage {
     id: number; // Id local to rack
     cageNum: CageNumber; // Id local to room
-    rack: string;
+    rack: string; // id of rack
     cageState: CageState;
     position: CagePosition;
-    type: EHRCageType;
+    length: number; //  actual length
+    width: number; // actual width
+    height: number; // actual height
+    sqft: number; //  actual sqft
     adjCages: AdjCages | undefined; //TODO adjCages is for modifications, no need to store the data in backend but make sure its needed when I start work on that part
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
@@ -93,20 +96,44 @@ export interface Cage {
 
 export interface Room {
     room: string;
-    racks: Rack[];
+    rackGroups: RackGroup[];
     objects: RoomObject[];
 }
 
+export interface RackGroup {
+    racks: Rack[];
+    groupId: GroupId;
+    x: number; // x coords relative to group of connected racks
+    y: number; // y coords relative to group of connected racks
+    scale: number // scale relative to group of connected racks
+}
 
-export interface EHRCageType {
+export interface Rack {
+    itemId: string; // rack id
+    type: EHRRackType;
+    cages: Cage[];
+    x: number; // x coordinate of rack relative to the rack group
+    y: number; // y coordinate of rack relative to the rack group
+    isActive: boolean;
+}
+
+export interface RoomObject {
+    itemId: string; // object id
+    type: RoomObjectTypes
+    x: number;
+    y: number;
+    scale: number;
+}
+
+export interface EHRRackType {
     rowid: number;
-    cagetype: string;
-    type: string;
-    manufacturer: string;
-    length: number;
-    width: number;
-    height: number;
-    sqft: number;
+    name: string;
+    type: RackTypes;
+    manufacturer: CageType;
+    length: number; // default length
+    width: number; // default width
+    height: number; // default height
+    sqft: number; // default sqft
     supportsTunnel: boolean;
     abbreviation: string;
     description: string;
@@ -126,12 +153,12 @@ export interface EHRCage {
     rowid: number; // unique row id
     location: string; // location of cage following format 'rack-rackNum'
     position: CagePosition; // position of cage in rack
-    cageNum: string; // number of cage in room for cagetype.type
+    cageNum: string; // number of cage in room
     rackNum: number; // number of cage in rack
     x: number; // x coordinate
     y: number; // y coordinate
     rack: string; // unique rack id
-    cagetype: EHRCageType; // Rack/Cage Type
+    cagetype: EHRRackType; // Rack/Cage Type
     room: string; // unique room name
 }
 
@@ -158,50 +185,13 @@ export interface CageState {
     extraMod: {modData: ExtraMod} | undefined;
 }
 
-/*
-   This describes details about groups of connected racks.
-   When a new rack is added this will be populated as a new group, and the x and y will be the starting position of that
-   group relative to the layout grid.
-   This object tells us that the rack is part of a group with that groupId.
-   It should be the same for all racks within that group. The reasoning for this is because
-   if we have two racks that become connected the rack x and y coords can be added to this group x and y coords to find
-   their layout grid positioning, similar to how cages behave in racks.
-*/
-export interface RackGroupInfo {
-    groupId: GroupId;
-    x: number;
-    y: number;
-}
-
-export interface Rack {
-    itemId: string; // rack id
-    groupInfo: RackGroupInfo;
-    type: RackTypes;
-    cages: Cage[];
-    x: number; // x coordinate of rack relative to the rack group
-    y: number; // y coordinate of rack relative to the rack group
-    scale: number; // k scaling vector in layout coordinate plane
-    isActive: boolean;
-}
-
-export interface RoomObject {
-    itemId: string; // object id
-    type: RoomObjectTypes
-    x: number;
-    y: number;
-    scale: number;
-}
-
 export type RoomItem = Rack | RoomObject;
-
-//export type RoomItemType = RoomObjectTypes | RackTypes;
 
 
 export enum RoomObjectTypes {
     RoomDivider = "roomDivider",
     Drain = "drain",
     Door = "door",
-    Connector = 'penConnector'
 }
 
 // these string names are used to id divs in the svgs
@@ -217,7 +207,7 @@ export enum CageType {
     Suburban = "suburban",
     Lenderking = "lenderking",
     Nursury = "nursury",
-    Pen = "pen",
+    Unknown = "unknown"
 }
 
 export enum ModTypes {
@@ -272,31 +262,31 @@ export interface ExtraMod {
     mod: Modification
 }
 
-export const DEFAULT_CAGE_TYPE: EHRCageType = {
+export const DEFAULT_CAGE_TYPE: EHRRackType = {
     rowid: 1,
     abbreviation: 'uk', // abbreviation of manufacturer
-    cagetype: 'cage-uk-0.0', // naming convention is 'type-abbreviation-sqft'
+    name: 'cage-uk-0.0', // naming convention is 'type-abbreviation-sqft'
     description: 'unknown default cage',
     height: 0.0,
     length: 0.0,
-    manufacturer: 'unknown',
+    manufacturer: CageType.Unknown,
     sqft: 0.0,
     supportsTunnel: false,
-    type: 'cage',
+    type: RackTypes.Cage,
     width: 0.0
 }
 
-export const DEFAULT_PEN_TYPE: EHRCageType = {
+export const DEFAULT_PEN_TYPE: EHRRackType = {
     rowid: 2,
     abbreviation: 'uk',
-    cagetype: 'pen-uk-0.0',
+    name: 'pen-uk-0.0',
     description: 'unknown default pen',
     height: 0.0,
     length: 0.0,
-    manufacturer: 'unknown',
+    manufacturer: CageType.Unknown,
     sqft: 0.0,
     supportsTunnel: false,
-    type: 'pen',
+    type: RackTypes.Pen,
     width: 0.0
 
 }

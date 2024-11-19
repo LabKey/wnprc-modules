@@ -23,7 +23,7 @@
                         </fk>
                     </column>
                     <column columnName="bloodPrevious">
-                        <columnTitle>Previous 30 Days (inclusive)</columnTitle>
+                        <columnTitle>Previous 30 Days (including today)</columnTitle>
                         <url>/query/executeQuery.view?schemaName=study&amp;
                             query.queryName=Blood Draws&amp;
                             query.viewName=Blood Summary&amp;                            
@@ -32,9 +32,10 @@
                             query.Date~dategte=${minDate}&amp;
                             query.sort=-Date&amp;
                         </url>
+                        <description>This shows the amount of blood draws taken in the past, including today.</description>
                     </column>                  
                     <column columnName="bloodFuture">
-                        <columnTitle>Next 30 Days (inclusive)</columnTitle>
+                        <columnTitle>Next 30 Days (excluding today)</columnTitle>
                         <url>/query/executeQuery.view?schemaName=study&amp;
                             query.queryName=Blood Draws&amp;
                             query.viewName=Blood Summary&amp;
@@ -42,6 +43,7 @@
                             query.Date~dategte=${Date}&amp;
                             query.sort=-Date&amp;
                         </url>
+                        <description>This shows the amount of blood draws scheduled in the next 30 days after the given date.</description>
                     </column>
                     <column columnName="mostRecentWeight">
                         <columnTitle>Latest Weight (kg)</columnTitle>
@@ -63,14 +65,16 @@
                     </column>
                     <column columnName="maxAllowableBlood">
                         <columnTitle>20% Volume By Weight</columnTitle>
+                        <description>This shows the maximum blood an animal can get drawn based on their weight.</description>
                     </column>
                     <column columnName="allowableBlood">
-                        <columnTitle>Volume Remaining After Draw (mL)</columnTitle>
-                        <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
+                        <columnTitle>Volume Available Today (mL)</columnTitle>
+                        <description>This shows the amount of blood remaining today. It includes blood draws that happened 30 days in the past up to today.</description>
                     </column>
-                    <column columnName="BloodAvailPlusThirty">
-                        <columnTitle>Volume Remaining Over Next 30 Days</columnTitle>
+                    <column columnName="allowableBloodIncludingFutureDraws">
+                        <columnTitle>Volume Remaining After All Draws (mL)</columnTitle>
                         <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
+                        <description>This column shows the amount of blood remaining for the animal while considering future draws. It includes approved blood draws 30 days into the future and past blood draws 30 days in the past.</description>
                     </column>
                 </columns>
             </table>

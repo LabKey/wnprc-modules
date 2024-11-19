@@ -17,11 +17,12 @@
         <column name="bloodFuture">
         </column>
         <column name="allowableBlood">
+        </column>
+        <column name="allowableBloodIncludingFutureDraws">
             <!--<properties>-->
             <!--<property name="columnTitle" value="Volume Remaining After Draw (mL)"/>-->
             <!--</properties>-->
         </column>
-        <column name="BloodAvailPlusThirty"/>
 
         <column name="maxAllowableBlood">
             <!--<properties>-->

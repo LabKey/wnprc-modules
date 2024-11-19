@@ -30,7 +30,7 @@ FROM (
   SELECT
     b.id,
     b.dateOnly,
-    GROUP_CONCAT(b.status,'') as status,
+    b.status,
     sum(b.quantity) as quantity
 
   FROM (
@@ -67,5 +67,5 @@ FROM (
 
   ) b
 
-  GROUP BY b.id, b.dateOnly
+  GROUP BY b.id, b.dateOnly, b.status
 ) b2

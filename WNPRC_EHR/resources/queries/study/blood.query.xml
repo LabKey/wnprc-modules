@@ -106,7 +106,7 @@
                         <isUnselectable>true</isUnselectable>
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
-                            <fkTable>currentBloodDraws</fkTable>
+                            <fkTable>bloodSummary</fkTable>
                             <fkColumnName>lsid</fkColumnName>
                         </fk>
                     </column>

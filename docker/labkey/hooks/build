@@ -14,7 +14,7 @@ LABKEY_TEAMCITY_BUILD=""
 
 LABKEY_SNAPSHOT="Beta-"
 LABKEY_DISTRIBUTION="wisc"
-LABKEY_FILE_NAME="UWisc-embedded.tar.gz"
+LABKEY_FILE_NAME="wisc.tar.gz"
 B=""
 
 if [[ $DOCKER_TAG =~ $DEVBRANCH_REGEX ]]
@@ -29,7 +29,7 @@ elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then    
     LK_VERSION=${BASH_REMATCH[1]}    
     GENERAL_LK_VERSION=${LK_VERSION//./}    
-    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
+    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME="snapshot"
     FB_NAME=""
     echo -e "LabKey Version: " ${LK_VERSION}
@@ -40,7 +40,7 @@ elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
     GENERAL_LK_VERSION=${LK_VERSION//./}   
-    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers2"
+    LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}_External_Wnprc_Installers2"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
     FB_NAME="_"${SHORT_BRANCH_NAME}

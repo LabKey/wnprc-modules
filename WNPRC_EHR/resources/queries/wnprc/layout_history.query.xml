@@ -4,7 +4,9 @@
             <table tableName="layout_history" tableDbType="TABLE">
                 <tableTitle>Layout History</tableTitle>
                 <columns>
-                    <column columnName="rowid"/>
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
                     <column columnName="room"/>
                     <column columnName="room_object"/>
                     <column columnName="rack_group"/>

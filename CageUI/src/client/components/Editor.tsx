@@ -70,7 +70,8 @@ const Editor = () => {
         selectedObj,
         setSelectedObj,
         delCage,
-        unitLocs
+        unitLocs,
+        saveRoom
     } = useLayoutContext();
 
     const handleClickRename = (event: React.MouseEvent<HTMLElement>) => {
@@ -482,10 +483,6 @@ const Editor = () => {
         setSelectedObj(null);
     };
 
-    const handleSave = () => {
-        console.log("Saving layout");
-    }
-
     const handleDefaultSave = () => {
         console.log("Saving to default layout");
     }
@@ -585,7 +582,7 @@ const Editor = () => {
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
-                    onClick={handleSave}
+                    onClick={saveRoom}
                 >Save
                 </button>
             </div>

@@ -1,3 +1,4 @@
+
 import {
     CageType,
     EHRCage,
@@ -5,7 +6,7 @@ import {
     EHRRoom,
     LayoutHistoryData,
     RackTypes,
-    RoomObjectTypes
+    RoomObjectTypes, testLayoutHistoryData
 } from '../components/typings';
 
 export const testCageModifications = [
@@ -142,15 +143,13 @@ export const testRoomObj = {
     type: "Door",
     abbreviation: "d",
 }
-
-
-
-/* If object type is caging then query the cages table for object id to get the cages in that rack,
+/*
+ If object type is caging then query the cages table for object id to get the cages in that rack,
     then add local coords to rack coords to get the correct coords of each cage.
    If object type is room then query the room objects table if needed. Since room objects don't use sub coords there is
    no need to do this if you are loading a layout. Just place the correct object at the location as it is in layout history
- */
-export const testLayoutHistory: LayoutHistoryData[] = [
+*/
+export const testLayoutHistory: testLayoutHistoryData[] = [
     {
         rowid: 1,
         objectId: testCage1.rack,

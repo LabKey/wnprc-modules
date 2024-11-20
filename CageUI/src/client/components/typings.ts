@@ -22,7 +22,7 @@ export type RoomItemClass = 'caging' | 'roomObj';
 
 
 
-export interface LayoutHistoryData {
+export interface testLayoutHistoryData {
     rowid: number;
     objectId: string; // depending on object type this is either rack id or object row id
     objectType: RoomObjectTypes | RackTypes;
@@ -32,6 +32,16 @@ export interface LayoutHistoryData {
     y: number; // y position of either room object or rack group
     scale: number; // scale of either room object or rack group
     room: string // Room that either rack or object resides in
+}
+
+export interface LayoutHistoryData {
+    room_object: RoomObjectTypes | null;
+    rack_group: string | null;
+    rack: string | null;
+    cage: string | null;
+    x_coord: number;
+    y_coord: number;
+    scale: number;
 }
 
 export interface Page {
@@ -82,7 +92,6 @@ export interface StartDragProps {
 export interface Cage {
     id: number; // Id local to rack
     cageNum: CageNumber; // Id local to room
-    rack: string; // id of rack
     cageState: CageState;
     position: CagePosition;
     length: number; //  actual length
@@ -98,6 +107,11 @@ export interface Room {
     room: string;
     rackGroups: RackGroup[];
     objects: RoomObject[];
+}
+
+export interface PrevRoom {
+    data: LayoutHistoryData[]
+    name: string | null;
 }
 
 export interface RackGroup {

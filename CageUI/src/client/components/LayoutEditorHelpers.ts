@@ -5,29 +5,30 @@ import {
     getTranslation, getTypeClassFromElement,
     isTextEditable,
     parseGroupId,
-    parseRack,
+    parseRack, parseRoomItemNum,
     parseRoomItemType
 } from './helpers';
 import {
     Cage,
-    CageActionProps,
+    CageActionProps, CageNumber, DEFAULT_CAGE_TYPE,
     EHRCage,
     GroupId,
     LayoutDragProps,
     LayoutHistoryData,
     LocationCoords,
-    OffsetProps,
+    OffsetProps, PrevRoom,
     Rack,
     RackActions, RackGroup,
-    RackTypes,
+    RackTypes, Room,
     RoomItem,
     RoomItemClass,
     RoomObject,
     RoomObjectTypes,
-    StartDragProps
+    StartDragProps, UnitLocations
 } from './typings';
 import * as React from 'react';
 import { testCagesInRoom } from '../layoutEditor/testData';
+import { zoomTransform } from 'd3';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -584,79 +585,14 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
 }
 
 
-export const buildNewLocalRoom = (layoutData: LayoutHistoryData[], rackData) => {
-    const newLocalRoom: RoomItem[] = [];
-    let groupId: number = 1;
 
-    // generates rack state from layout history data
-    const generateRack = (rack: LayoutHistoryData): Rack => {
-        // TODO query cages table and find the cages in rack.objectId
-        const cagesInRack: EHRCage[] = testCagesInRoom.filter((cage) => cage.rack === rack.objectId);
-        /*
-        const cageState: Cage[] = cagesInRack.map((cage) => ({
-            id: cage.rackNum,
-            cageNum: cage.cageNum,
-            rack: cage.rack,
-            cageState: undefined,
-            position: cage.position,
-            type: cage.cagetype,
-            adjCages: undefined, //TODO add adjCages here for cage modifications if required
-            x: cage.x,
-            y: cage.y,
-            length: cage.length,
-            width: cage.width,
-            height: cage.height,
-            sqft: cage.sqft
-        }) as Cage);
-        console.log("Gen Layout Data Rack: ", rack, cageState);*/
-        let newRackState: Rack;
-        /*newRackState: Rack = {
-            cages: cageState,
-            itemId: rack.objectId, // TODO fix this so that it is correct id of rack, need list of rack ids managed by center or naming convention for them
-            groupInfo: {
-                groupId: `rack-group-${groupId}` as GroupId,
-                x: rack.x,
-                y: rack.y
-            },
-            isActive: true,
-            scale: rack.scale,
-            type: rack.objectType as RackTypes,
-            x: rack.x,
-            y: rack.y
-        }*/
-        groupId++;
-        return newRackState;
-    }
 
-    // generates room object state for room objects from layout history data
-    const generateRoomObj = (roomObj: LayoutHistoryData): RoomObject => {
-
-        return({
-            itemId: roomObj.objectId,
-            type: roomObj.objectType as RoomObjectTypes,
-            x: roomObj.x,
-            y: roomObj.y,
-            scale: roomObj.scale
-        });
-
-    }
-    //TODO Fix this
-    // First parse through layout data to get rack and room object coords
-    /*layoutData.forEach((roomItem) => {
-        if(isRack(roomItem.objectType)){ // Room object is an enclosure for animals
-            newLocalRoom.push(generateRack(roomItem));
-        } else{ // Room object is something else in the room, ex. Door
-            newLocalRoom.push(generateRoomObj(roomItem))
-        }
-    })*/
-
-    return(newLocalRoom);
-}
-
+// TODO might not be needed
 export const isRack = (itemType: RackTypes | RoomObjectTypes): itemType is RackTypes => {
     return Object.values(RackTypes).includes(itemType as RackTypes);
 }
 
+// finds a cage by cageNum in group of racks if it exists
 export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
     return racks.find(rack => {
         return rack.cages.find((cage) => cage.cageNum === obj)
@@ -682,11 +618,11 @@ export const findNextGroupId = (groups: GroupId[]): number => {
             return i + 1; // Return the missing number
         }
     }
-
     // If no gaps were found, return the next number
     return groupNumbers[groupNumbers.length - 1] + 1;
 };
 
+// finds a rack in room/groups of racks if it exists and return the rack and rack group it is apart of
 export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: Rack, rackGroup: RackGroup} | undefined => {
     let targetRack: Rack | undefined;
     let targetGroup: RackGroup | undefined;
@@ -700,3 +636,188 @@ export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: R
     }
     return {rack: targetRack, rackGroup: targetGroup};
 }
+
+// FUNCTIONS FOR LOADING IN PREVIOUS DATA
+
+export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations => {
+    const newUnitLocs: UnitLocations = {
+        attachedPlayCage: [],
+        cage: [],
+        pen: [],
+        tempCage: []
+    }
+
+    prevRoomData.forEach(roomItem => {
+        if(roomItem.room_object) return; // ignore room objects here
+        // TODO find rack type for rack id
+
+        newUnitLocs.cage.push({
+            num: `cage-${roomItem.cage}` as CageNumber, // TODO num here should be RackType-roomItem.cage
+            cellX: roomItem.x_coord,
+            cellY: roomItem.y_coord
+        });
+    })
+
+    return newUnitLocs;
+}
+
+export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
+    const newLocalRoom: Room = {
+        room: prevRoom.name,
+        rackGroups: [],
+        objects: []
+    };
+    let roomObjNum = 1;
+
+    //check if a group exists for the groupId, if it does return, else create new group for the room
+    const findOrAddGroup = (rackItem: LayoutHistoryData): RackGroup => {
+        // groupId is a single number so check if the GroupId string contains it
+        let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => group.groupId.includes(rackItem.rack_group))
+        if (!rackGroup) {
+            //create new rack group if it doesn't exist
+            rackGroup = {
+                groupId: `rack-group-${rackItem.rack_group}` as GroupId,
+                scale: rackItem.scale,
+                x: rackItem.x_coord,
+                y: rackItem.y_coord,
+                racks: []
+            };
+            newLocalRoom.rackGroups.push(rackGroup);
+        }
+        return rackGroup;
+    }
+
+    //TODO isActive here tells us if the rack is currently active in the numbering system
+    //check if a rack exists for the rackId, if it does return, else create new rack for the group
+    const findOrAddRack = (rackGroup: RackGroup, rackItem: LayoutHistoryData): Rack => {
+        let rack: Rack = rackGroup.racks.find(r => r.itemId === rackItem.rack);
+        if (!rack) {
+            //create new rack if it doesn't exist
+            rack = {
+                cages: [],
+                isActive: true,
+                itemId: rackItem.rack,
+                type: DEFAULT_CAGE_TYPE, // TODO find the rack type in the database for rackId
+                x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
+                y: rackItem.y_coord - rackGroup.y
+            };
+            rackGroup.racks.push(rack);
+        }
+        return rack;
+    }
+
+    const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
+        const cage: Cage = {
+            adjCages: undefined,
+            cageNum: `${RackTypes.Cage}-${rackItem.cage}` as CageNumber, // TODO depending on rack type this will change
+            cageState: undefined,
+            height: 0, // TODO find height at time for cage in Cage History
+            id: rack.cages.length + 1, // TODO this might not work depending on order of cages in array, fix this
+            length: 0,// TODO find length at time for cage in Cage History
+            position: undefined, // TODO find this as well, probably some smart way depending on rack type and cage id number
+            sqft: 0,// TODO find height at time for cage in Cage History
+            width: 0,// TODO find height at time for cage in Cage History
+            x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
+            y: rackItem.y_coord - rack.y - group.y
+        }
+        rack.cages.push(cage);
+    }
+
+
+    const handleRackItem = (rackItem: LayoutHistoryData) => {
+        const rackGroup: RackGroup = findOrAddGroup(rackItem);
+        const rack: Rack = findOrAddRack(rackGroup, rackItem);
+        addCageToRack(rack, rackItem, rackGroup);
+    }
+
+    // generates room object state for room objects from layout history data
+    const generateRoomObj = (roomObjItem: LayoutHistoryData): RoomObject => {
+        return({
+            itemId: `${roomObjItem.room_object}-${roomObjNum++}`, // update room obj num after it is used to next num
+            type: roomObjItem.room_object,
+            x: roomObjItem.x_coord,
+            y: roomObjItem.y_coord,
+            scale: roomObjItem.scale
+        });
+    }
+
+    prevRoom.data.forEach((roomItem) => {
+        if(!roomItem.room_object){ // Room item is an enclosure for animals
+            handleRackItem(roomItem);
+        } else{ // Room item is something else in the room, ex. Door
+            newLocalRoom.objects.push(generateRoomObj(roomItem))
+        }
+    })
+
+    return(newLocalRoom);
+}
+
+export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>) => {
+    /*
+    TODO attach context menus, layout drags, and support for connected rack groups
+     */
+
+    room.rackGroups.forEach((group) => {
+        // single rack in group, don't add to svg group of class rack-group
+        if(group.racks.length === 1){
+            // new group here should have classes 'draggable rack type-{RackType}', id of rack, style and transform
+            const rack = group.racks[0];
+            // if only one rack in a group, the rack svg group x and y will use the groups coords because
+            // technically the rack x and y are local to that rack group
+            const rackSVGGroup = layoutSvg.append('g')
+                .attr('id', rack.itemId)
+                .attr('class', `draggable rack type-${rack.type.type}`)
+                .attr('transform', `translate(${group.x},${group.y}) scale(${group.scale})`)
+                .style('pointer-events', 'bounding-box');
+            rack.cages.forEach((cage) => {
+                // for each cage, create group with id = cageNum, transform of that cage,
+                // and add to it a RackType_template SVG as a child, the group in this template of id = RackType:
+                // add style for pointer events and attach context menu to that child
+                const cageGroup = rackSVGGroup.append('g')
+                    .attr('id', cage.cageNum)
+                    .attr('transform', `translate(${cage.x},${cage.y})`);
+                // caging unit svg selected from utils and its node deep cloned to avoid using the real one
+                const unitSvg: SVGElement = (d3.select(`[class=${rack.type.type}-template]`).select(':first-child') as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
+
+                // now that the node is cloned we can change it to fit our use case
+                const shape = d3.select(unitSvg);
+                shape.classed('draggable', false);
+                shape.style('pointer-events', 'none');
+
+                //TODO attach context menu to unit element
+
+                // now add style and context menu attachment to sub group for rack type
+                shape.select(`[id=${rack.type.type}]`).style('pointer-events', 'bounding-box');
+
+                // change tspan to reflect the cage number
+                (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+
+                cageGroup.append(() => shape.node());
+            });
+
+            // TODO might need to be replaced with group.scale instead of layoutSvg transform, then fix layoutSvg to fit that scale
+            placeAndScaleGroup(rackSVGGroup, group.x, group.y, zoomTransform(layoutSvg.node()));
+        }
+    })
+    room.objects.forEach((roomObj) => {
+        const roomObjGroup = layoutSvg.append('g')
+            .data([{x: roomObj.x, y: roomObj.y}])
+            .attr('id', roomObj.itemId)
+            .attr('class', 'draggable room-obj')
+            .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${roomObj.scale})`)
+            .style('pointer-events', 'bounding-box');
+
+        const objSvg: SVGElement = (d3.select(`[id=${roomObj.type}-util]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
+
+        const shape = d3.select(objSvg)
+            .classed('draggable', false)
+            .attr('pointer-events', 'none');
+
+        roomObjGroup.append(() => shape.node());
+
+        placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
+    })
+
+}
+
+// END FUNCTIONS FOR LOADING IN PREVIOUS DATA

@@ -164,7 +164,6 @@ export const lookupAnimalInfo = (id:string) => {
       .catch((data) => {
         reject(data);
       });
-
   });
 };
 

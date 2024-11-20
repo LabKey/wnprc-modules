@@ -1,0 +1,27 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="layout_history" tableDbType="TABLE">
+                <tableTitle>Layout History</tableTitle>
+                <columns>
+                    <column columnName="rowid"/>
+                    <column columnName="room"/>
+                    <column columnName="room_object"/>
+                    <column columnName="rack_group"/>
+                    <column columnName="rack"/>
+                    <column columnName="cage"/>
+                    <column columnName="start_date"/>
+                    <column columnName="end_date"/>
+                    <column columnName="x_coord"/>
+                    <column columnName="y_coord"/>
+                    <column columnName="scale"/>
+                    <column columnName="container"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modified"/>
+                    <column columnName="modifiedby"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

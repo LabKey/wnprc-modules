@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
 import {
     Cage,
     CageNumber,
@@ -8,7 +8,7 @@ import {
     GroupId,
     LayoutHistoryData,
     LocationCoords,
-    Page,
+    Page, PrevRoom,
     Rack,
     RackActions, RackGroup,
     RackTypes,
@@ -26,8 +26,22 @@ import {
     parseRoomItemType,
     removeCircularReferences
 } from './helpers';
+import * as d3 from 'd3';
 import { testCagesInRoom, testLayoutHistory, testRoomObj } from '../layoutEditor/testData';
-import { buildNewLocalRoom, findNextGroupId, findRackInGroup, findSelectObjRack, isRack } from './LayoutEditorHelpers';
+import {
+    addPrevRoomSvgs,
+    buildNewLocalRoom, buildNewLocs,
+    findNextGroupId,
+    findRackInGroup,
+    findSelectObjRack,
+    isRack
+} from './LayoutEditorHelpers';
+import { BaseType } from 'd3';
+
+interface LayoutContextProps {
+    children: ReactNode;
+    prevRoom: PrevRoom;
+}
 
 export interface RoomContextType {
     selectedPage: Page;
@@ -195,7 +209,7 @@ export const RoomContextProvider = ({children}) => {
     )
 }
 
-export const LayoutContextProvider = ({children, prevRoom}) => {
+export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoom}) => {
     const [room, setRoom] = useState<Room>({
         room: "new-layout",
         rackGroups: [],
@@ -233,7 +247,6 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
-            rack: "unknown",
             id: 1,
             cageNum: newCageNum,
             position: 'top',
@@ -617,19 +630,24 @@ export const LayoutContextProvider = ({children, prevRoom}) => {
         return maxCageNum + 1;
     };
 
-    // Loads a room into state if it is not null
+    // Loads a room into state if it is filled
+    // LayoutHistoryData type does not do a hard check against this object so make sure properties align to avoid errors
     useEffect(() => {
-        if(!prevRoom) return;
-        // Test data on pre created objects to determine a working backend
-        // TODO Query statement to fetch layout history data based on room
-        const layoutData: LayoutHistoryData[] = testLayoutHistory;
-        // TODO Query statement to fetch cage data based racks in room at the time
-        const rackData = testCagesInRoom;
+        if(!prevRoom.name) return;
 
-        const newLocalRoom: RoomItem[] = buildNewLocalRoom(layoutData, rackData);
+        const newLocalRoom: Room = buildNewLocalRoom(prevRoom);
+        const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.data);
+        const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>
+            = d3.select('[id^=layout-svg]');
 
-        console.log("Load Data: ", newLocalRoom);
+        console.log("Load Data: ", prevRoom);
+        console.log("New Room State: ", newLocalRoom);
+        console.log("layout: ", layoutSvg.node());
 
+        addPrevRoomSvgs(newLocalRoom, layoutSvg);
+        setUnitLocs(newUnitLocs);
+        setLocalRoom(newLocalRoom);
+        setRoom(newLocalRoom);
     }, [prevRoom]);
 
     return (

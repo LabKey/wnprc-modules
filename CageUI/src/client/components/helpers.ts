@@ -19,6 +19,8 @@ import {
 } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
+import { Query } from '@labkey/api';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 /*
 console.log(zeroPad(5, 2)); // "05"
@@ -26,6 +28,15 @@ console.log(zeroPad(5, 4)); // "0005"
 console.log(zeroPad(5, 6)); // "000005"
  */
 
+export function labkeyActionSelectWithPromise(
+    options: SelectRowsOptions
+): Promise<any> {
+    return new Promise((resolve, reject) => {
+        options.success = (data) => {resolve(data)};
+        options.failure = (data) => {reject(data)};
+        Query.selectRows(options);
+    });
+}
 
 export const getRackFromClass = (classString: string) => {
     let rackClass = classString.match(/rack-\d+/);

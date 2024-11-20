@@ -45,7 +45,7 @@ const Editor = () => {
     const LARGE_GRID_RATIO = 8;
     const GRID_SIZE = 30;
     const utilsRef = useRef(null);
-    const [showGrid, setShowGrid] = useState<boolean>(false);
+    const [showGrid, setShowGrid] = useState<boolean>(true);
     const [addingRoomItem, setAddingRoomItem] = useState<boolean>(false);
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
     const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
@@ -221,7 +221,6 @@ const Editor = () => {
     }, [unitLocs]);
 
     // This effect updates racks for adding to the room
-    //TODO change itemTypee to be rack types given the change in the two and need for separation
     useEffect(() => {
         if(!pendingRoomUpdate) return;
         const {draggedShape, cellX, cellY, itemId, updateItemType, itemTypeClass} = pendingRoomUpdate;
@@ -455,8 +454,15 @@ const Editor = () => {
         setLayoutSvg(d3.select('#layout-svg'));
     }, []);
 
+    // remove grid if desired
     useEffect(() => {
-        if(!layoutSvg) return;
+        if(showGrid) return;
+        layoutSvg.select(".grid").selectAll('.cell').remove();
+    }, [showGrid]);
+
+    // load grid at load in or after it was cleared
+    useEffect(() => {
+        if(!layoutSvg || !showGrid) return;
         const updateGridProps = {
             width: SVG_WIDTH,
             height: SVG_HEIGHT,
@@ -465,7 +471,7 @@ const Editor = () => {
         drawGrid(layoutSvg, updateGridProps);
         layoutSvg.call(zoom); // Enable zoom
         layoutSvg.select("g.grid").call(dragGrid);
-    }, [layoutSvg]);
+    }, [layoutSvg, showGrid]);
 
     const handleContextMenuClose = () => {
         setCtxMenuStyle({
@@ -497,19 +503,19 @@ const Editor = () => {
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Door"}>
-                        <svg className="draggable">
+                        <svg id='door-util' className="draggable">
                             <ReactSVG
                                 src={`${ActionURL.getContextPath()}/cageui/static/door.svg`}
-                                id={'door-util'}
+                                id={'wrapped-door-util'}
                                 wrapper={'svg'}
                             />
                         </svg>
                     </LayoutTooltip>
                     <LayoutTooltip text={"Drain"}>
-                        <svg className="draggable">
+                        <svg id={'drain-util'} className="draggable">
                             <ReactSVG
                                 src={`${ActionURL.getContextPath()}/cageui/static/drain.svg`}
-                                id={'drain-util'}
+                                id={'wrapped-drain-util'}
                                 wrapper={'svg'}
                             />
                         </svg>
@@ -518,12 +524,14 @@ const Editor = () => {
                 <div className={'cage-templates'}>
                     <LayoutTooltip text={"Single Cage"}>
                         <RackTemplate
+                            divClassName={'cage-template'}
                             fileName={"SingleCageRack"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Pen"}>
                         <RackTemplate
+                            divClassName={'pen-template'}
                             fileName={"Pen"}
                             className={"draggable"}
                         />

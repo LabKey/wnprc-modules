@@ -12,7 +12,7 @@ import {
     Cage,
     CageActionProps, CageNumber, DEFAULT_CAGE_TYPE,
     EHRCage,
-    GroupId,
+    GroupId, jsonDataType,
     LayoutDragProps,
     LayoutHistoryData,
     LocationCoords,
@@ -29,6 +29,8 @@ import {
 import * as React from 'react';
 import { testCagesInRoom } from '../layoutEditor/testData';
 import { zoomTransform } from 'd3';
+import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
+import { ActionURL, Query } from '@labkey/api';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -657,7 +659,6 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
             cellY: roomItem.y_coord
         });
     })
-
     return newUnitLocs;
 }
 
@@ -817,7 +818,18 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
 
         placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
     })
-
 }
 
 // END FUNCTIONS FOR LOADING IN PREVIOUS DATA
+
+export const saveRowsDirect = (jsonData: jsonDataType) => {
+    return new Promise((resolve, reject) => {
+        let options: SaveRowsOptions = {
+            commands: jsonData.commands,
+            containerPath: ActionURL.getContainer(),
+            success: (data) => {resolve(data)},
+            failure: (data) => {reject(data)},
+        };
+        Query.saveRows(options);
+    });
+};

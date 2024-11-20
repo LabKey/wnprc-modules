@@ -5,7 +5,7 @@ import {
     CageNumber,
     DEFAULT_CAGE_TYPE,
     DEFAULT_PEN_TYPE,
-    GroupId,
+    GroupId, jsonDataType,
     LayoutHistoryData,
     LocationCoords,
     Page, PrevRoom,
@@ -21,7 +21,7 @@ import {
 } from './typings';
 import {
     convertCageNumToNum,
-    getTranslation,
+    getTranslation, parseGroupId,
     parseRoomItemNum,
     parseRoomItemType,
     removeCircularReferences
@@ -34,9 +34,13 @@ import {
     findNextGroupId,
     findRackInGroup,
     findSelectObjRack,
-    isRack
+    isRack, saveRowsDirect
 } from './LayoutEditorHelpers';
 import { BaseType } from 'd3';
+import { Query } from '@labkey/api';
+import { SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
+import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
+import { RequestOptions } from '@labkey/api/dist/labkey/Ajax';
 
 interface LayoutContextProps {
     children: ReactNode;
@@ -76,6 +80,7 @@ export interface RoomContextType {
 export interface LayoutContextType {
     room: Room;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
+    saveRoom: () => void;
     unitLocs: UnitLocations;
     localRoom: Room;
     addRoomItem: (itemClass: RoomItemClass, itemType: RackTypes | RoomObjectTypes, itemId: string, x: number, y: number, scale: number) => void;
@@ -637,6 +642,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
         const newLocalRoom: Room = buildNewLocalRoom(prevRoom);
         const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.data);
+        const newGroupIds: GroupId[] = newLocalRoom.rackGroups.map((group) => group.groupId);
         const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>
             = d3.select('[id^=layout-svg]');
 
@@ -644,17 +650,132 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         console.log("New Room State: ", newLocalRoom);
         console.log("layout: ", layoutSvg.node());
 
+
+        setActiveGroups(newGroupIds);
         addPrevRoomSvgs(newLocalRoom, layoutSvg);
         setUnitLocs(newUnitLocs);
         setLocalRoom(newLocalRoom);
         setRoom(newLocalRoom);
     }, [prevRoom]);
 
+    const saveRoom = () => {
+        if(localRoom.room === 'new-layout'){
+            // prompt room popup to save?
+        }else{
+            console.log("Saving layout");
+            const dataToSave: LayoutHistoryData[] = [];
+            const roomName = localRoom.room;
+            const newEndDate = new Date();
+            const newStartDate = new Date();
+            // TODO fix defaults by prmpting users to fill them in
+            localRoom.rackGroups.forEach((group) => {
+                group.racks.forEach((rack) => {
+                    rack.cages.forEach((cage) => {
+                        const cageLocData = unitLocs[rack.type.type].find((loc) => loc.num === cage.cageNum);
+                        if(rack.itemId.includes('default')){ // TODO temp fix to assign group number as rack id
+                            rack.itemId = `${parseGroupId(group.groupId)}`;
+                        }
+                        const newCageData: LayoutHistoryData = {
+                            cage: `${parseRoomItemNum(cage.cageNum)}`,
+                            end_date: null,
+                            rack: rack.itemId,
+                            rack_group: `${parseGroupId(group.groupId)}`,
+                            room: roomName,
+                            room_object: null,
+                            scale: group.scale,
+                            start_date: newStartDate,
+                            x_coord: cageLocData.cellX,
+                            y_coord: cageLocData.cellY
+                        }
+                        dataToSave.push(newCageData);
+                    })
+                })
+            })
+
+            localRoom.objects.forEach((roomObj) => {
+                const newObjData: LayoutHistoryData = {
+                    cage: null,
+                    end_date: null,
+                    rack: null,
+                    rack_group: null,
+                    room: roomName,
+                    room_object: roomObj.type,
+                    scale: roomObj.scale,
+                    start_date: newStartDate,
+                    x_coord: roomObj.x,
+                    y_coord: roomObj.y
+                }
+                dataToSave.push(newObjData);
+            });
+
+
+            Query.insertRows({
+                failure(errorInfo: any, response: XMLHttpRequest): any {
+                    console.log("failed insert")
+                },
+                queryName: 'layout_history',
+                schemaName: 'wnprc',
+                rows: dataToSave,
+                success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
+                    console.log("success insert")
+                }
+            });
+
+
+            const rowsToUpdate = prevRoom.data.reduce((acc, row) => {
+                return [
+                    ...acc,
+                    {
+                        ...row,
+                        end_date: newEndDate
+                    }
+                ];
+            }, []);
+
+            Query.updateRows({
+                failure(errorInfo: any, response: XMLHttpRequest): any {
+                    console.log("Failed Update");
+                },
+                queryName: 'layout_history',
+                schemaName: 'wnprc',
+                rows: rowsToUpdate,
+                success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
+                    console.log("Success Update");
+
+                }
+            });
+
+
+            /*
+            const jsonData: jsonDataType = {
+                commands: [{
+                    command: 'insertWithKeys',
+                    schemaName: 'wnprc',
+                    queryName: 'layout_history',
+                    rows: dataToSave
+                },{
+                    command: 'update',
+                    schemaName: 'wnprc',
+                    queryName: 'layout_history',
+                    rows: dataToSave
+                }]
+            }
+
+            saveRowsDirect(jsonData).then((data) => {
+
+            }).catch((err) => {
+                console.log("Error Saving Rows");
+            })*/
+            //Query.saveRows()
+        }
+    }
+
     return (
         <LayoutContext.Provider value={{
             room,
             setRoom,
             localRoom,
+            saveRoom,
             addRoomItem,
             delRack,
             unitLocs,

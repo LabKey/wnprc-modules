@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import * as React from 'react';
+import { Command } from '@labkey/api/dist/labkey/query/Rows';
 
 type CageSize = {
     width: number;
@@ -42,6 +43,10 @@ export interface LayoutHistoryData {
     x_coord: number;
     y_coord: number;
     scale: number;
+    start_date?: Date;
+    end_date?: Date;
+    room?: string;
+    rowid?: number;
 }
 
 export interface Page {
@@ -518,4 +523,8 @@ export const DefaultCageState = {
             }
         },
     }
+}
+
+export interface jsonDataType {
+    commands: Array<Command>;
 }

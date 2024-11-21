@@ -524,7 +524,3 @@ export const DefaultCageState = {
         },
     }
 }
-
-export interface jsonDataType {
-    commands: Array<Command>;
-}

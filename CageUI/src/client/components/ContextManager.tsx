@@ -5,7 +5,7 @@ import {
     CageNumber,
     DEFAULT_CAGE_TYPE,
     DEFAULT_PEN_TYPE,
-    GroupId, jsonDataType,
+    GroupId,
     LayoutHistoryData,
     LocationCoords,
     Page, PrevRoom,
@@ -34,7 +34,7 @@ import {
     findNextGroupId,
     findRackInGroup,
     findSelectObjRack,
-    isRack, saveRowsDirect
+    isRack,
 } from './LayoutEditorHelpers';
 import { BaseType } from 'd3';
 import { Query } from '@labkey/api';
@@ -744,29 +744,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
                 }
             });
-
-
-            /*
-            const jsonData: jsonDataType = {
-                commands: [{
-                    command: 'insertWithKeys',
-                    schemaName: 'wnprc',
-                    queryName: 'layout_history',
-                    rows: dataToSave
-                },{
-                    command: 'update',
-                    schemaName: 'wnprc',
-                    queryName: 'layout_history',
-                    rows: dataToSave
-                }]
-            }
-
-            saveRowsDirect(jsonData).then((data) => {
-
-            }).catch((err) => {
-                console.log("Error Saving Rows");
-            })*/
-            //Query.saveRows()
         }
     }
 

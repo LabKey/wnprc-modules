@@ -1,36 +1,36 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import {
-    convertCageNumToNum,
-    getTranslation, getTypeClassFromElement,
+    getTranslation,
+    getTypeClassFromElement,
     isTextEditable,
     parseGroupId,
-    parseRack, parseRoomItemNum,
+    parseRack,
+    parseRoomItemNum,
     parseRoomItemType
 } from './helpers';
 import {
     Cage,
-    CageActionProps, CageNumber, DEFAULT_CAGE_TYPE,
-    EHRCage,
-    GroupId, jsonDataType,
+    CageActionProps,
+    CageNumber,
+    DEFAULT_CAGE_TYPE,
+    GroupId,
     LayoutDragProps,
     LayoutHistoryData,
     LocationCoords,
-    OffsetProps, PrevRoom,
+    OffsetProps,
+    PrevRoom,
     Rack,
-    RackActions, RackGroup,
-    RackTypes, Room,
-    RoomItem,
-    RoomItemClass,
+    RackActions,
+    RackGroup,
+    RackTypes,
+    Room,
     RoomObject,
     RoomObjectTypes,
     StartDragProps, UnitLocations
 } from './typings';
 import * as React from 'react';
-import { testCagesInRoom } from '../layoutEditor/testData';
 import { zoomTransform } from 'd3';
-import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
-import { ActionURL, Query } from '@labkey/api';
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     layoutSvg.append("g").attr("class", "grid");
@@ -153,35 +153,6 @@ function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
     draggedNode.setAttribute("transform", `translate(${distanceX}, ${distanceY})`);
 }
 
-function findNestedCageElement(parentId) {
-    // Find the parent element (in this case, the outermost <g> element)
-    const parentElement = document.getElementById(parentId);
-
-    if (!parentElement) {
-        console.error('Parent element not found');
-        return null;
-    }
-
-    // Use a recursive function to search through all nested elements
-    function searchNestedElements(element) {
-        // Check if the current element's ID starts with 'cage-'
-        if (element.id && element.id.startsWith('cage-')) {
-            return element;
-        }
-
-        // If not found, search through child elements
-        for (let child of element.children) {
-            const result = searchNestedElements(child);
-            if (result) return result;
-        }
-
-        return null;
-    }
-
-    // Start the search from the parent element
-    return searchNestedElements(parentElement);
-}
-
 export function setupEditCageEvent(
     element: SVGTextElement,
     setClickedCage: (cageId: string) => void,
@@ -233,12 +204,6 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
     } = layoutDragProps;
 
     console.log("Performing Merge");
-    //console.log("Racks: ", targetRack, draggedRack);
-    //console.log("Cages: ", targetCage, draggedCage);
-
-    // Start cage count at the first cage in the target shape
-    // TODO fix this so that it matches correct types while maintaining their correct numbering system
-    //let newCageNums = convertCageNumToNum(targetRack.cages.find(cage => cage.id === 1).cageNum);
 
     function isConnected(selectionNode){
         return !!selectionNode.closest(`[id*='group']`);
@@ -528,32 +493,6 @@ export function createEndDragInLayout(props: LayoutDragProps) {
 
                 console.log("#3: ", cellX, cellY, shape.node());
                 moveItem(shape.attr('id'), itemClass, cellX, cellY, transform.k);
-
-                // Set rack state correctly with move/updated coords
-
-
-                /*
-                //Update all shape placements
-                if(shape.selectChildren().size() > 1) {
-                    //group of groups
-                    shape.selectChildren().each(function (d, index) {
-                        const currChild = d3.select(this);
-                        const cageNum = parseCage(currChild.attr('id'));
-                        if(index === 0){ // When in a rack, only the cage at index 0 can snap to other cages
-                            setCurrCage(cageNum);
-                        }
-                        const currCoords = getTranslation(currChild.attr('transform'));
-                        const newX = currCoords.x + cellX;
-                        const newY = currCoords.y + cellY;
-                        moveCage(cageNum, newX, newY, transform.k);
-                    });
-                }else{
-                    // group of svg
-                    const currCage = shape.select( '[id*="cage-"]');
-                    const cageNum = parseCage(currCage.attr('id'));
-                    setCurrCage(cageNum);
-                    moveCage(cageNum, cellX, cellY, transform.k);
-                }*/
             } else {
                 // remove rack from room
                 /*console.log("deleting cage from room", getRackFromClass(shape.attr('class')));
@@ -821,15 +760,3 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
 }
 
 // END FUNCTIONS FOR LOADING IN PREVIOUS DATA
-
-export const saveRowsDirect = (jsonData: jsonDataType) => {
-    return new Promise((resolve, reject) => {
-        let options: SaveRowsOptions = {
-            commands: jsonData.commands,
-            containerPath: ActionURL.getContainer(),
-            success: (data) => {resolve(data)},
-            failure: (data) => {reject(data)},
-        };
-        Query.saveRows(options);
-    });
-};

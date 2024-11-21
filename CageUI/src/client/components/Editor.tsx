@@ -423,7 +423,7 @@ const Editor = () => {
         const transform = event.transform;
         layoutSvg.select("g.grid").attr("transform", transform);
         // Apply zoom/pan to each individual "room-object" group, preserving their relative positions
-        layoutSvg.selectAll(".room-obj").each(function(d: any) {
+        layoutSvg.selectAll(".draggable").each(function(d: any) {
             const group = d3.select(this);
             // Use type assertion to tell TypeScript that d has x and y properties
             const newX = transform.applyX((d as { x: number }).x);

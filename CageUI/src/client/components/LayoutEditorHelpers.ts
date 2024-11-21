@@ -309,11 +309,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
                 newGroup.attr('style', styleAttr);
             }
 
-            //Attach data from target to new shape
-            const targetData = targetRackShape.datum() as { x: number; y: number };
-            if(targetData) {
-                newGroup.data([{x: targetData.x, y: targetData.y}])
-            }
+
 
         }
         else{ // action = connect
@@ -356,6 +352,11 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             newGroup.attr('transform', transformAttr);
         }
 
+        //Attach data from target to new shape
+        const targetData = targetRackShape.datum() as { x: number; y: number };
+        if(targetData) {
+            newGroup.data([{x: targetData.x, y: targetData.y}])
+        }
 
         const addProps: LayoutDragProps = {
             gridSize: gridSize,

@@ -81,17 +81,16 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
 
         // Prints all tables.
         if (myBloodDrawNotificationObject.resultsByArea.isEmpty()) {
-            messageBody.append("There are no scheduled blood draws for this group today.");
+            messageBody.append("There are no scheduled blood draws today.");
         }
         else {
+            messageBody.append("<p><b>REMAINING INCOMPLETE TOTALS:</b><br>\n");
+            messageBody.append("Animal Care: " + myBloodDrawNotificationObject.numIncompleteAnimalCare + "</br>\n");
+            messageBody.append("Research Staff: " + myBloodDrawNotificationObject.numIncompleteResearchStaff + "</br>\n");
+            messageBody.append("SPI: " + myBloodDrawNotificationObject.numIncompleteSPI + "</br>\n");
+            messageBody.append("Vet Staff: " + myBloodDrawNotificationObject.numIncompleteVetStaff + "</p>");
             messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
         }
-
-//        // Creates table.
-//        String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
-//        NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawNotificationObject.myTableData);
-//        myTable.rowColors = myBloodDrawNotificationObject.myTableRowColors;
-//        messageBody.append(myTable.createBasicHTMLTable());
 
         return messageBody.toString();
     }
@@ -105,8 +104,11 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
         NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
 
         ArrayList<String[]> myTableData = new ArrayList<>();        // List of all blood draws as [[id, blood remaining, project assignment, completion status, assigned to]]
-        //        ArrayList<String> myTableRowColors = new ArrayList<>();     // List of all row colors (same length as myTableData).
         HashMap<String, HashMap<String, ArrayList<String[]>>> resultsByArea = new HashMap<>();  // Area(Room(List of draws))
+        Integer numIncompleteSPI = 0;
+        Integer numIncompleteAnimalCare = 0;
+        Integer numIncompleteVetStaff = 0;
+        Integer numIncompleteResearchStaff = 0;
 
 
         //Gets all info for the BloodDrawNotificationObject.
@@ -145,8 +147,10 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
 
                 // Updates id.
                 myCurrentRow[0] = result.get("id");
+
                 // Updates blood remaining.
                 myCurrentRow[1] = result.get("BloodRemaining/AvailBlood");
+
                 // Updates project status (this checks if animal is assigned to a project).
                 if (!result.get("qcstate/label").equals("Request: Denied") && !result.get("projectStatus").isEmpty()) {
                     myCurrentRow[2] = "UNASSIGNED";
@@ -154,6 +158,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 else {
                     myCurrentRow[2] = "";
                 }
+
                 // Updates completion status (this checks if blood draw has been completed).
                 if (!result.get("qcstate/label").equals("Completed")) {
                     myCurrentRow[3] = "INCOMPLETE";
@@ -161,8 +166,10 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 else {
                     myCurrentRow[3] = "";
                 }
+
                 // Updates the current group assigned to this animal.
                 myCurrentRow[4] = result.get("billedby/title");
+
                 // Updates the current area.
                 if (!result.get("Id/curLocation/area").isEmpty()) {
                     myCurrentRow[6] = result.get("Id/curLocation/area");
@@ -170,6 +177,7 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                 else {
                     myCurrentRow[6] = "Unknown Area";
                 }
+
                 // Updates the current room.
                 if (!result.get("Id/curLocation/room").isEmpty()) {
                     myCurrentRow[7] = result.get("Id/curLocation/room");
@@ -191,18 +199,6 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                         myCurrentRow[8] = "orange";
                     }
                 }
-//                String currentRowColor = "white";
-//                if (!result.get("BloodRemaining/AvailBlood").isEmpty()) {
-//                    Float availBlood = Float.parseFloat(result.get("BloodRemaining/AvailBlood"));
-//                    if (availBlood <= 0) {
-//                        // If blood draw is over limit, color it red.
-//                        currentRowColor = "red";
-//                    }
-//                    else if (availBlood <= bloodThreshold) {
-//                        // If blood draw is over threshold limit, color it orange.
-//                        currentRowColor = "orange";
-//                    }
-//                }
 
                 // Adds the current row to myTableData (based on group being queried).
                 if (assignmentGroup.equals("animalCare")) {
@@ -232,6 +228,24 @@ public class BloodDrawsTodayAll extends AbstractEHRNotification {
                     }
                     else {
                         myTableData.add(myCurrentRow);
+                    }
+                }
+
+                // Updates number of incomplete draws.
+                if (assignmentGroup.equals("all")) {
+                    if (myCurrentRow[3].equals("INCOMPLETE")) {
+                        if (result.get("billedby/title").equals("SPI")) {
+                            numIncompleteSPI++;
+                        }
+                        else if (result.get("billedby/title").equals("Animal Care")) {
+                            numIncompleteAnimalCare++;
+                        }
+                        else if (result.get("billedby/title").equals("Research Staff")) {
+                            numIncompleteResearchStaff++;
+                        }
+                        else if (result.get("billedby/title").equals("Vet Staff")) {
+                            numIncompleteVetStaff++;
+                        }
                     }
                 }
             }

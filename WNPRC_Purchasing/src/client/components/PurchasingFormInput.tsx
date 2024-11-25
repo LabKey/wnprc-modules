@@ -5,6 +5,7 @@ interface PurchasingFormInputProps {
     label: string;
     required?: boolean;
     colSize?: number;
+    children?: React.ReactNode;
 }
 export const PurchasingFormInput: FC<PurchasingFormInputProps> = memo(props => {
     const { label, children } = props;

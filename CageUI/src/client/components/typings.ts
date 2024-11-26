@@ -18,27 +18,21 @@ type PageViews = "Room" | "Rack" | "Cage";
 export type RackActions = 'merge' | 'connect' | 'cancel';
 export type GroupId = `rack-group-${number}`;
 
-// Classification of the objects, caging is for racks, roomObj is for things placed in the room not applied to caging, cagingObj are like roomObjs but can be connected to caging units
+export type RoomItemType = RackTypes | RoomObjectTypes;
+
+// Classification of the objects, caging is for racks, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
 
+// deletion actions for state management, cage = delete cage from rack, rack = delete rack from rack group, group = delete entire rack group
+export type DeleteActions = 'cage' | 'rack' | 'group';
 
 
-export interface testLayoutHistoryData {
-    rowid: number;
-    objectId: string; // depending on object type this is either rack id or object row id
-    objectType: RoomObjectTypes | RackTypes;
-    startDate: string;
-    endDate: string | null;
-    x: number; // x position of either room object or rack group
-    y: number; // y position of either room object or rack group
-    scale: number; // scale of either room object or rack group
-    room: string // Room that either rack or object resides in
-}
 
 export interface LayoutHistoryData {
     room_object: RoomObjectTypes | null;
-    rack_group: string | null;
-    rack: string | null;
+    rack_group: number | null;
+    rack: number | null;
+    default_rack: number | null;
     cage: string | null;
     x_coord: number;
     y_coord: number;
@@ -69,29 +63,24 @@ export interface OffsetProps {
 
 export interface PendingRoomUpdate {
     draggedShape: any;
-    itemTypeClass: RoomItemClass; // classification of the item
-    updateItemType: RackTypes | RoomObjectTypes;
+    updateItemType: RoomItemType;
     cellX: number;
     cellY: number;
     itemId: string;
 }
 
 export interface CageActionProps {
-    setEditCageNum: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
     setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>;
 }
 
 export interface LayoutDragProps {
     gridSize: number;
-    MAX_SNAP_DISTANCE: number;
-    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
-    delRack: (rackId: string) => void;
     moveItem: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
-    itemClass: RoomItemClass;
 }
 
 export interface StartDragProps {
-    setRoomItem: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface Cage {
@@ -218,14 +207,13 @@ export enum RackTypes {
     Cage = "cage",
     Pen = "pen",
     TempCage = "tempCage",
-    PlayCage = "attachedPlayCage"
+    PlayCage = "playCage"
 }
 
 export enum CageType {
     Allentown = "allentown",
     Suburban = "suburban",
     Lenderking = "lenderking",
-    Nursury = "nursury",
     Unknown = "unknown"
 }
 

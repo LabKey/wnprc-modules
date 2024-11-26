@@ -4,7 +4,7 @@ import {
     getTranslation,
     getTypeClassFromElement,
     isTextEditable,
-    parseGroupId,
+    parseLongId,
     parseRack,
     parseRoomItemNum,
     parseRoomItemType
@@ -24,7 +24,7 @@ import {
     RackActions,
     RackGroup,
     RackTypes,
-    Room,
+    Room, RoomItemClass, RoomItemType,
     RoomObject,
     RoomObjectTypes,
     StartDragProps, UnitLocations
@@ -32,7 +32,20 @@ import {
 import * as React from 'react';
 import { zoomTransform } from 'd3';
 
+
+export const parseWrapperId = (input: string): RoomItemType => {
+    const regex = /^[a-zA-Z]+/; // matches "x_template_wrapper"
+
+    const match = input.match(regex);
+    if (match) { // if a match return whatever x is (any string of chars)
+        return match[0] as RoomItemType;
+    }
+    return;
+}
+
+
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
+    layoutSvg.select('.grid').remove();
     layoutSvg.append("g").attr("class", "grid");
     updateGrid(d3.zoomIdentity, updateGridProps.width, updateGridProps.height, updateGridProps.gridSize); // Draw grid with the initial view
 }
@@ -100,6 +113,38 @@ function showConfirmationPopup(): Promise<RackActions> {
             .on('click', () => {
                 popup.remove();
                 resolve('cancel');
+            });
+    });
+}
+
+export function showLayoutEditorConfirmation(msg: string) {
+    return new Promise((resolve) => {
+        // Create a simple popup
+        const popup = d3.select('body').append('div')
+            .attr('class', 'popup')
+            .style('position', 'absolute')
+            .style('top', '50%')
+            .style('left', '50%')
+            .style('transform', 'translate(-50%, -50%)')
+            .style('background', 'white')
+            .style('padding', '20px')
+            .style('border', '1px solid black');
+
+        popup.append('p')
+            .text(msg);
+
+        popup.append('button')
+            .text('Yes')
+            .on('click', () => {
+                popup.remove();
+                resolve(true);
+            });
+
+        popup.append('button')
+            .text('No')
+            .on('click', () => {
+                popup.remove();
+                resolve(false);
             });
     });
 }
@@ -194,13 +239,10 @@ export function setupEditCageEvent(
 export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRackGroup: RackGroup, dragRackGroup: RackGroup, doRackAction, layoutDragProps: LayoutDragProps, cageActionProps: CageActionProps) {
     if(!d3.select('.popup').empty()) return;
     const action: RackActions = await showConfirmationPopup();
+    const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
     const {
-        layoutSvg,
         gridSize,
-        MAX_SNAP_DISTANCE,
-        delRack,
-        moveItem,
-        itemClass
+        moveItem
     } = layoutDragProps;
 
     console.log("Performing Merge");
@@ -216,7 +258,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             element.style = "";
         }
         const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
-        setupEditCageEvent(textEle, cageActionProps.setEditCageNum, cageActionProps.setCtxMenuStyle, shapeType as RackTypes);
+        setupEditCageEvent(textEle, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType as RackTypes);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -308,9 +350,6 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             if (styleAttr) {
                 newGroup.attr('style', styleAttr);
             }
-
-
-
         }
         else{ // action = connect
 
@@ -360,14 +399,10 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
 
         const addProps: LayoutDragProps = {
             gridSize: gridSize,
-            MAX_SNAP_DISTANCE: MAX_SNAP_DISTANCE,
-            layoutSvg: layoutSvg,
-            delRack: delRack,
-            moveItem: moveItem,
-            itemClass: itemClass
+            moveItem: moveItem
         };
-        newGroup.call(d3.drag().on('start', createStartDragInLayout({setRoomItem: cageActionProps.setEditCageNum}))
-            .on('drag', createDragInLayout({layoutSvg: layoutSvg}))
+        newGroup.call(d3.drag().on('start', createStartDragInLayout({setSelectedObj: cageActionProps.setSelectedObj}))
+            .on('drag', createDragInLayout())
             .on('end', createEndDragInLayout(addProps)));
 
         doRackAction(action,targetRackId, draggedRackId, newGroup);
@@ -435,23 +470,23 @@ export const getTargetRect =(x, y, gridSize, transform) => {
 export function createStartDragInLayout(startDragProps: StartDragProps) {
     return(
         function startDragInLayout(event) {
-            const {setRoomItem} = startDragProps;
+            const {setSelectedObj} = startDragProps;
             // Check if the parent <text> element is editable, return if not
             if (isTextEditable(event)) {
                 event.on('drag', null).on('end', null); // Detach drag and end events
                 return;
             }
-            setRoomItem(d3.select(this).attr('id'));
+            setSelectedObj(d3.select(this).attr('id'));
             console.log('Drag Layout #1', parseRack(d3.select(this).attr('id')));
             d3.select(this).raise().classed('active', true);
         }
     );
 }
 
-export function createDragInLayout(dragProps) {
+export function createDragInLayout() {
     return(
         function dragInLayout(event) {
-            const {layoutSvg} = dragProps;
+            const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
             console.log('Drag Layout #2', event.x, event.y);
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
@@ -470,19 +505,18 @@ export function createEndDragInLayout(props: LayoutDragProps) {
         function endDragInLayout(event) {
             const {
                 gridSize,
-                layoutSvg,
-                delRack,
-                moveItem,
-                itemClass
+                moveItem
             } = props;
             const shape = d3.select(this);
             shape.classed('active', false);
+            const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
+
             const transform = d3.zoomTransform(layoutSvg.node());
 
             const {x,y} = getLayoutOffset({
                 clientX: event.sourceEvent.clientX,
                 clientY: event.sourceEvent.clientY,
-                layoutSvg: layoutSvg})
+                layoutSvg: layoutSvg});
 
             const targetCell = getTargetRect(x, y, gridSize, transform);
 
@@ -490,16 +524,10 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 console.log('Drag Layout #3', shape, targetCell);
                 const cellX = targetCell.x;
                 const cellY = targetCell.y;
+                const shapeType: RoomItemClass = shape.classed('room-obj') ? 'roomObj' : 'caging';
                 placeAndScaleGroup(shape, cellX, cellY, transform);
-
                 console.log("#3: ", cellX, cellY, shape.node());
-                moveItem(shape.attr('id'), itemClass, cellX, cellY, transform.k);
-            } else {
-                // remove rack from room
-                /*console.log("deleting cage from room", getRackFromClass(shape.attr('class')));
-                const idToDel = parseInt(getRackFromClass(shape.attr('class')));
-                delRack(idToDel);
-                shape.remove();*/
+                moveItem(shape.attr('id'),shapeType, cellX, cellY, transform.k);
             }
         }
     );
@@ -526,11 +554,8 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
     return nums.includes(cage1.num) && nums.includes(cage2.num);
 }
 
-
-
-
 // TODO might not be needed
-export const isRack = (itemType: RackTypes | RoomObjectTypes): itemType is RackTypes => {
+export const isRack = (itemType: RoomItemType): itemType is RackTypes => {
     return Object.values(RackTypes).includes(itemType as RackTypes);
 }
 
@@ -544,7 +569,7 @@ export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
 // Finds the next avail group id number
 export const findNextGroupId = (groups: GroupId[]): number => {
     const groupNumbers = groups
-        .map(group => parseGroupId(group))
+        .map(group => parseLongId(group))
         .filter(num => num !== undefined)
         .sort((a, b) => a - b);
 
@@ -566,35 +591,43 @@ export const findNextGroupId = (groups: GroupId[]): number => {
 
 // finds a rack in room/groups of racks if it exists and return the rack and rack group it is apart of
 export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: Rack, rackGroup: RackGroup} | undefined => {
-    let targetRack: Rack | undefined;
-    let targetGroup: RackGroup | undefined;
-
-    targetGroup = groups.find((group: RackGroup) =>
-        group.racks.some((rack: Rack) => rack.itemId === targetId)
-    );
-
-    if (targetGroup) {
-        targetRack = targetGroup.racks.find((rack: Rack) => rack.itemId === targetId);
+    for (const group of groups) {
+        const targetRack = group.racks.find(rack => rack.itemId === targetId);
+        if (targetRack) {
+            return { rack: targetRack, rackGroup: group };
+        }
     }
-    return {rack: targetRack, rackGroup: targetGroup};
-}
+    return undefined;
+};
+
+
+// finds a cage in room/groups of racks if it exists and return the rack, rack group and cage state
+export const findCageInGroup = (targetId: CageNumber, groups: RackGroup[]): {cage: Cage, rack: Rack, rackGroup: RackGroup} | undefined => {
+    for (const group of groups) {
+        for (const rack of group.racks) {
+            const targetCage = rack.cages.find(cage => cage.cageNum === targetId);
+            if (targetCage) {
+                return { cage: targetCage, rack: rack, rackGroup: group };
+            }
+        }
+    }
+    return undefined;
+};
 
 // FUNCTIONS FOR LOADING IN PREVIOUS DATA
 
 export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations => {
-    const newUnitLocs: UnitLocations = {
-        attachedPlayCage: [],
-        cage: [],
-        pen: [],
-        tempCage: []
-    }
+    // Empty Unit locations object
+    const newUnitLocs: UnitLocations = Object.fromEntries(
+        Object.values(RackTypes).map(key => [key, [] as LocationCoords[]])
+    ) as UnitLocations;
 
     prevRoomData.forEach(roomItem => {
         if(roomItem.room_object) return; // ignore room objects here
         // TODO find rack type for rack id
 
         newUnitLocs.cage.push({
-            num: `cage-${roomItem.cage}` as CageNumber, // TODO num here should be RackType-roomItem.cage
+            num: `cage-${parseInt(roomItem.cage)}` as CageNumber, // TODO num here should be RackType-roomItem.cage
             cellX: roomItem.x_coord,
             cellY: roomItem.y_coord
         });
@@ -613,7 +646,7 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     //check if a group exists for the groupId, if it does return, else create new group for the room
     const findOrAddGroup = (rackItem: LayoutHistoryData): RackGroup => {
         // groupId is a single number so check if the GroupId string contains it
-        let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => group.groupId.includes(rackItem.rack_group))
+        let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => parseLongId(group.groupId) === rackItem.rack_group)
         if (!rackGroup) {
             //create new rack group if it doesn't exist
             rackGroup = {
@@ -631,13 +664,15 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     //TODO isActive here tells us if the rack is currently active in the numbering system
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = (rackGroup: RackGroup, rackItem: LayoutHistoryData): Rack => {
-        let rack: Rack = rackGroup.racks.find(r => r.itemId === rackItem.rack);
+        // if rack is a default aka 0, then use its default ID
+        const rackIdToFind = rackItem.rack === 0 ? rackItem.default_rack : rackItem.rack;
+        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackIdToFind);
         if (!rack) {
             //create new rack if it doesn't exist
             rack = {
                 cages: [],
                 isActive: true,
-                itemId: rackItem.rack,
+                itemId: rackItem.rack === 0 ? `default-rack-${rackItem.default_rack}` : `rack-${rackItem.rack}`,
                 type: DEFAULT_CAGE_TYPE, // TODO find the rack type in the database for rackId
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
                 y: rackItem.y_coord - rackGroup.y
@@ -650,7 +685,7 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
         const cage: Cage = {
             adjCages: undefined,
-            cageNum: `${RackTypes.Cage}-${rackItem.cage}` as CageNumber, // TODO depending on rack type this will change
+            cageNum: `${RackTypes.Cage}-${parseInt(rackItem.cage)}` as CageNumber, // TODO depending on rack type this will change
             cageState: undefined,
             height: 0, // TODO find height at time for cage in Cage History
             id: rack.cages.length + 1, // TODO this might not work depending on order of cages in array, fix this
@@ -663,7 +698,6 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
         }
         rack.cages.push(cage);
     }
-
 
     const handleRackItem = (rackItem: LayoutHistoryData) => {
         const rackGroup: RackGroup = findOrAddGroup(rackItem);

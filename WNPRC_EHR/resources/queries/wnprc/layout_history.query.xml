@@ -11,6 +11,7 @@
                     <column columnName="room_object"/>
                     <column columnName="rack_group"/>
                     <column columnName="rack"/>
+                    <column columnName="default_rack"/>
                     <column columnName="cage"/>
                     <column columnName="start_date"/>
                     <column columnName="end_date"/>

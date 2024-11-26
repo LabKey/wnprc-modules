@@ -1,7 +1,12 @@
 import * as React from 'react';
-import { FC, useState } from 'react';
+import { FC, ReactNode, useState } from 'react';
 
-export const LayoutTooltip: FC<any> = ({ text, children }) => {
+interface LayoutTooltipProps {
+    text: string;
+    children: ReactNode;
+}
+
+export const LayoutTooltip: FC<LayoutTooltipProps> = ({ text, children }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     return (

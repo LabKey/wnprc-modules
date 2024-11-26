@@ -146,7 +146,7 @@
 .popup-overlay {
   display: block; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 2; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -837,6 +837,8 @@ menu {
   background-color: white;
   font-weight: normal;
   white-space: nowrap;
+  min-width: max-content;
+  z-index: 1;
 }
 
 menu:hover {
@@ -848,12 +850,12 @@ menu:hover > menu {
   display: block;
 }
 
-menu > menu {
+menu .menu-item {
   display: none;
   position: relative;
   top: -20px;
   left: 100%;
-  width: 55px;
+  width: 100%;
 }
 
 menu[title]:before {

@@ -12,7 +12,6 @@ import {LayoutContextProvider } from '../components/ContextManager';
 import DragAndDropGrid from '../components/Editor';
 import { ActionURL } from '@labkey/api';
 import Editor from '../components/Editor';
-import { testRoom } from './testData';
 import { labkeyActionSelectWithPromise } from '../components/helpers';
 
 interface RoomProps {
@@ -32,7 +31,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
         const prevRoomConfig: SelectRowsOptions = {
             schemaName: 'wnprc',
             queryName: 'layout_history',
-            columns: ['room_object', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'scale', 'rowid'],
+            columns: ['room_object', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'scale', 'rowid', 'default_rack'],
             filterArray: [
                 Filter.create('room', roomName, Filter.Types.EQUALS),
                 Filter.create('end_date', null, Filter.Types.ISBLANK)

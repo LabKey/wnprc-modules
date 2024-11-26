@@ -4,7 +4,7 @@ import {
     Cage,
     CageNumber,
     DEFAULT_CAGE_TYPE,
-    DEFAULT_PEN_TYPE,
+    DEFAULT_PEN_TYPE, DeleteActions,
     GroupId,
     LayoutHistoryData,
     LocationCoords,
@@ -13,21 +13,20 @@ import {
     RackActions, RackGroup,
     RackTypes,
     Room,
-    RoomItem,
-    RoomItemClass,
+    RoomItem, RoomItemClass,
+    RoomItemType,
     RoomObject,
     RoomObjectTypes,
     UnitLocations
 } from './typings';
 import {
     convertCageNumToNum,
-    getTranslation, parseGroupId,
+    getTranslation, parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
-    removeCircularReferences
+    removeCircularReferences, zeroPadName
 } from './helpers';
 import * as d3 from 'd3';
-import { testCagesInRoom, testLayoutHistory, testRoomObj } from '../layoutEditor/testData';
 import {
     addPrevRoomSvgs,
     buildNewLocalRoom, buildNewLocs,
@@ -36,9 +35,7 @@ import {
     findSelectObjRack,
     isRack,
 } from './LayoutEditorHelpers';
-import { BaseType } from 'd3';
 import { Query } from '@labkey/api';
-import { SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
 import { RequestOptions } from '@labkey/api/dist/labkey/Ajax';
 
@@ -81,9 +78,11 @@ export interface LayoutContextType {
     room: Room;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
     saveRoom: () => void;
+    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
+    setLayoutSvg: React.Dispatch<React.SetStateAction<d3.Selection<SVGElement, {}, HTMLElement, any>>>;
     unitLocs: UnitLocations;
     localRoom: Room;
-    addRoomItem: (itemClass: RoomItemClass, itemType: RackTypes | RoomObjectTypes, itemId: string, x: number, y: number, scale: number) => void;
+    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => void;
     delRack: (rackId: string) => void;
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
@@ -92,7 +91,7 @@ export interface LayoutContextType {
     getNextCageNum: (rackType: RackTypes) => number;
     selectedObj: string;
     setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
-    delCage: () => void;
+    delCage: (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -237,7 +236,10 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         objects: []
     });
 
+    const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
+
     const [activeGroups, setActiveGroups] = useState<GroupId[]>([]); // Tracks currently active groups of racks
+    const [nextAvailGroup, setNextAvailGroup] = useState<GroupId>(`rack-group-1`); // Tracks currently active groups of racks
 
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
     const [selectedObj, setSelectedObj] = useState<string | null>(null);
@@ -246,9 +248,41 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     // instead of tying scale to each location, manage one scale for the whole layout
     const [scale, setScale] = useState<number>(1);
 
+    /*
+        Fixes the group ids of the rackGroups state in room and the svg ids for those state objects
+    */
+    const fixGroupIds = () => {
+
+        setLocalRoom((prevRoom) => {
+
+            const sortedGroups = prevRoom.rackGroups.sort((groupA, groupB) => {
+                const aId = parseLongId(groupA.groupId);
+                const bId = parseLongId(groupB.groupId);
+                return aId - bId;
+            });
+
+            const newGroups: RackGroup[] = sortedGroups.map((group, index) => {
+                const groupSvg = layoutSvg.select(`[id=${group.groupId}]`);
+                const newId = index + 1;
+                if(!groupSvg.empty()){ // if a group svg exists for the group, rename to new group
+                    groupSvg.attr('id', `rack-group-${newId}`);
+                }
+                return {
+                    ...group,
+                    groupId: `rack-group-${newId}` as GroupId
+                };
+            });
+            const lastId: number = parseLongId(newGroups[newGroups.length - 1].groupId);
+            setNextAvailGroup(`rack-group-${lastId + 1}` as GroupId);
+            return {
+                ...prevRoom,
+                rackGroups: newGroups
+            };
+        })
+    }
+
     const addRack = (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
         const newCageNum: CageNumber = `${rackType}-${getNextCageNum(rackType)}`;
-        const newGroupId: GroupId = `rack-group-${findNextGroupId(activeGroups)}`;
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
@@ -280,15 +314,17 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         };
 
         const newRackGroup: RackGroup = {
-            groupId: newGroupId,
+            groupId: nextAvailGroup,
             racks: [newRack],
             x: x,
             y: y,
             scale: newScale,
         }
 
-        setActiveGroups(prevState => [...prevState, newGroupId]);
-
+        setNextAvailGroup(prevState => {
+            const nextId = parseLongId(prevState) + 1;
+            return `rack-group-${nextId}` as GroupId
+        })
         setLocalRoom(prevRoom => ({
             ...prevRoom,
             rackGroups: [...prevRoom.rackGroups, newRackGroup]
@@ -354,9 +390,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                 }).concat(mergedRack)
             }
 
-            // When merging two racks we lose the dragged group
-            setActiveGroups(prevGroups => prevGroups.filter(group => group !== dragGroup.groupId));
-
             // Filter out the original racks and add the merged rack
             return ({
                 ...prevRoom,
@@ -406,9 +439,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             }).filter((group): group is RackGroup => group !== null); // filter out the drag group
 
 
-            // When connecting two racks we lose the dragged group
-            setActiveGroups(prevGroups => prevGroups.filter(group => group !== dragGroup.groupId));
-
             // Return the updated room
             return {
                 ...prevRoom,
@@ -423,10 +453,12 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         }else{ // action = connect
             connectLocalRacks(targetId, dragId, newGroup);
         }
+        // After merging / connecting fix the group ids so that they have no gaps
+        fixGroupIds();
     }
 
-    const addRoomItem = (itemClass: RoomItemClass, itemType: RackTypes | RoomObjectTypes, itemId: string, x: number, y: number, scale: number) => {
-        if(itemClass === 'caging'){
+    const addRoomItem = (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
+        if(isRack(itemType)){
             addRack(itemId, x, y, scale, itemType as RackTypes);
         }else{
             const newRoomObj: RoomObject = {
@@ -559,8 +591,48 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         }));*/
     }
 
-    const delCage = () => {
-        console.log("deleting: ", clickedCage)
+    //
+    const delCage = (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => {
+        console.log("deleting: ", selectedObj);
+
+        setLocalRoom((prevRoom) => {
+            let updatedRoom: Room;
+            if(action === 'cage'){ // remove cage from rack, keep rack
+                updatedRoom = {
+                    ...prevRoom,
+                    rackGroups: prevRoom.rackGroups.map((group) => ({
+                            ...group,
+                            racks: group.racks.map(r => ({
+                                ...r,
+                                cages: r.cages.filter(c => c.cageNum !== cage.cageNum)
+                            }))
+                        }
+                    ))
+                }
+            }else if(action === 'rack'){ // remove rack from rack group, keep rack group
+                updatedRoom = {
+                    ...prevRoom,
+                    rackGroups: prevRoom.rackGroups.map((group) => ({
+                            ...group,
+                            racks: group.racks.filter((r) => r.itemId !== rack.itemId)
+                        }
+                    ))
+                }
+            }else if (action === 'group'){ // remove rack group
+                updatedRoom = {
+                    ...prevRoom,
+                    rackGroups: prevRoom.rackGroups.filter((group) =>
+                        group.groupId !== rackGroup.groupId
+                    )
+                }
+            }
+            return updatedRoom;
+        });
+
+        setUnitLocs((prevLocs) => ({
+            ...prevLocs,
+            [rack.type.type]: prevLocs[rack.type.type].filter((loc) => loc.num !== cage.cageNum)
+        }));
     }
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
@@ -579,7 +651,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             prevRoom.rackGroups.forEach(group => {
                 if(currRack) return;
                 currRack = findSelectObjRack(group.racks, selectedObj)
-            })
+            });
 
             if (!currRack) return prevRoom; // If the clicked rack is not found, return the previous state
 
@@ -594,7 +666,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                                 ...rack,
                                 cages: rack.cages.map((cage: Cage): Cage =>
                                     cage.cageNum === selectedObj // Only update the cage with matching cageNum
-                                        ? { ...cage, cageNum: `${rack.type}-${numAfter}` } as Cage
+                                        ? { ...cage, cageNum: `${rack.type.type}-${numAfter}` } as Cage
                                         : cage
                                 )
                             }
@@ -643,8 +715,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         const newLocalRoom: Room = buildNewLocalRoom(prevRoom);
         const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.data);
         const newGroupIds: GroupId[] = newLocalRoom.rackGroups.map((group) => group.groupId);
-        const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>
-            = d3.select('[id^=layout-svg]');
 
         console.log("Load Data: ", prevRoom);
         console.log("New Room State: ", newLocalRoom);
@@ -669,17 +739,19 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             const newStartDate = new Date();
             // TODO fix defaults by prmpting users to fill them in
             localRoom.rackGroups.forEach((group) => {
+                const groupId = parseLongId(group.groupId);
                 group.racks.forEach((rack) => {
+                    // if rack is a default, assign rack id to 0(default id) and use the defaults id as id in default_rack
+                    const defaultId = rack.itemId.includes('default') ? parseLongId(rack.itemId) : null;
+                    const newRackId = defaultId ? 0 : parseRoomItemNum(rack.itemId);
                     rack.cages.forEach((cage) => {
                         const cageLocData = unitLocs[rack.type.type].find((loc) => loc.num === cage.cageNum);
-                        if(rack.itemId.includes('default')){ // TODO temp fix to assign group number as rack id
-                            rack.itemId = `${parseGroupId(group.groupId)}`;
-                        }
                         const newCageData: LayoutHistoryData = {
-                            cage: `${parseRoomItemNum(cage.cageNum)}`,
+                            cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
                             end_date: null,
-                            rack: rack.itemId,
-                            rack_group: `${parseGroupId(group.groupId)}`,
+                            rack: newRackId,
+                            rack_group: groupId,
+                            default_rack: defaultId,
                             room: roomName,
                             room_object: null,
                             scale: group.scale,
@@ -697,6 +769,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                     cage: null,
                     end_date: null,
                     rack: null,
+                    default_rack: null,
                     rack_group: null,
                     room: roomName,
                     room_object: roomObj.type,
@@ -751,6 +824,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         <LayoutContext.Provider value={{
             room,
             setRoom,
+            layoutSvg,
+            setLayoutSvg,
             localRoom,
             saveRoom,
             addRoomItem,

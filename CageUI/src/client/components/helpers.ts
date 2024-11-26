@@ -11,7 +11,7 @@ import {
     Modifications,
     ModTypes,
     Rack,
-    RackTypes,
+    RackTypes, RoomItemType,
     SeparatorMod,
     SeparatorPosition,
     Separators,
@@ -46,7 +46,7 @@ export const getRackFromClass = (classString: string) => {
         return rackId;
     }
 }
-export const zeroPadName = (num, places) => {return('#' + String(num).padStart(places, '0'))};
+export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 // Helper function to get the rack number
 export const parseRack = (input: string) => {
     const regex = /rack-(\d+)/;
@@ -68,6 +68,7 @@ export const parseCage = (input: string) => {
     }
     return;
 }
+
 
 export const parseRoomItemNum = (input: string): number => {
     const regex = /\w+-(\d+)/; // matches "string-number"
@@ -107,11 +108,11 @@ export const getTypeClassFromElement = (element) => {
 }
 
 
-export const parseGroupId = (input: GroupId) => {
+export const parseLongId = (input: string) => {
     const regex = /\w+-\w+-(\d+)/; // matches "string-string-number"
 
     const match = input.match(regex);
-    if (match) {
+    if (match) { // if a match return the number
         return parseInt(match[1]);
     }
     return;

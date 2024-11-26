@@ -10,25 +10,32 @@ interface EditorContextMenuProps {
         left: string;
     };
     onClickDelete: () => void;
-    onClickRename: (e: React.MouseEvent<HTMLElement>) => void;
+    onClickRename: () => void;
+    onClickChangeRack: () => void;
 }
 
 const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     const {
         ctxMenuStyle,
         onClickDelete,
-        onClickRename
+        onClickRename,
+        onClickChangeRack
     } = props;
     const menuRef = useRef<HTMLMenuElement>(null);
 
     const handleRenameClick = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        onClickRename(e);
+        onClickRename();
     };
 
     const handleDeleteClick = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         onClickDelete();
+    };
+
+    const handleChangeRack = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onClickChangeRack();
     };
 
     return (
@@ -39,13 +46,12 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                 display: ctxMenuStyle.display,
                 position: 'absolute',
                 left: ctxMenuStyle.left,
-                top: ctxMenuStyle.top,
-                zIndex: 100,
+                top: ctxMenuStyle.top
             }}
         >
-            <menu title="Rename" onClick={(e) => handleRenameClick(e)}>
-            </menu>
-            <menu title="Delete" onClick={handleDeleteClick}></menu>
+            <menu className={'menu-item'} title="Rename" onClick={handleRenameClick} />
+            <menu className={'menu-item'} title="Delete" onClick={handleDeleteClick} />
+            <menu className={'menu-item'} title="Change Rack" onClick={handleChangeRack} />
         </menu>
     );
 };

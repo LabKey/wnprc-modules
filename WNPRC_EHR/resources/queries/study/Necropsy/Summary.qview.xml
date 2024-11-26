@@ -1,20 +1,27 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
    <columns>
        <column name="Id" />
+       <column name="is_prenatal_necropsy" />
+       <column name="dam" />
+       <column name="perfusion_area" />
+       <column name="perfusion_soln1" />
+       <column name="perfusion_soln2" />
+       <column name="project" />
+       <column name="account" />
        <column name="date" />
+       <column name="location" />
+       <column name="shipping" />
+       <column name="shipping_comment" />
+       <column name="comments" />
+
        <column name="timeofdeath" />
        <column name="caseno" />
 
-       <column name="project" />
-       <column name="account" />
        <column name="performedby" />
        <column name="assistant" />
 
        <!--<column name="nhpbmd" />-->
-       <!--<column name="perfusion_area" />-->
-       <!--<column name="perfusion_soln1" />-->
        <!--<column name="perfusion_time1" />-->
-       <!--<column name="perfusion_soln2" />-->
        <!--<column name="perfusion_time2" />-->
        <column name="grossdescription" />
        <!--<column name="patho_notes" />-->

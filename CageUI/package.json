@@ -19,7 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@labkey/api": "1.29.0",
+    "@labkey/api": "1.35.6",
     "dayjs": "^1.11.8",
     "react": "~18.3.1",
     "react-bootstrap": "~2.10.4",
@@ -34,8 +34,8 @@
   },
   "devDependencies": {
     "@babel/core": "7.24.7",
-    "@labkey/build": "7.1.0",
-    "@labkey/components": "3.24.11",
+    "@labkey/build": "8.2.0",
+    "@labkey/components": "5.20.4",
     "@types/react": "~18.3.3",
     "@types/react-bootstrap": "~0.32.32",
     "@types/react-dom": "~18.3.0",

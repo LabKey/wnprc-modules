@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.Results;
-import org.labkey.study.xml.Lab;
 
 import javax.script.ScriptEngine;
 

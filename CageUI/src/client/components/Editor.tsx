@@ -88,7 +88,7 @@ const Editor = () => {
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
-        if(!selectedObj || cageNumChange) return;
+        if(!selectedObj) return;
         const objSvg = d3.select(`#${selectedObj}`);
         // return if selected object is not a rack group or rack
         if(!objSvg.classed('rack') && !objSvg.classed('rack-group')) return;

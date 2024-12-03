@@ -13,19 +13,8 @@ SELECT
   b.weight as MostRecentWeight,
   convert(BloodLast30, float) as BloodLast30,
   convert(BloodNext30, float) as BloodNext30,
-  convert(CASE
-    WHEN (b.species = 'Marmoset')
-      THEN (b.weight*0.15*60)
-    ELSE
-      (b.weight*0.2*60)
-    END, float) AS MaxBlood,
-
-  TRUNCATE(ROUND(CAST(case
-    when (b.species = 'Marmoset')
-      THEN ((b.weight*0.15*60) - b.BloodLast30)
-    else
-      ((b.weight*0.2*60) - b.BloodNext30)
-  end AS NUMERIC),2),2) as AvailBlood
+  convert((b.weight*(b.species.max_draw_pct)*(b.species.blood_per_kg)), float) AS MaxBlood,
+  TRUNCATE(ROUND(CAST(((b.weight*(b.species.max_draw_pct)*(b.species.blood_per_kg)) - b.BloodLast30) AS NUMERIC),2),2) as AvailBlood
 from (
 SELECT
   d.lsid,
@@ -54,7 +43,7 @@ SELECT
     FROM study."Blood Draws" bd
     WHERE bd.id=d.id AND
         --bd.date BETWEEN now() AND TIMESTAMPADD('SQL_TSI_DAY', 30, now())
-        (cast(bd.date as date) >= cast(curdate() as date) AND cast(bd.date as date) <= cast(TIMESTAMPADD('SQL_TSI_DAY', 30, now()) as date))
+        (cast(bd.date as date) > cast(curdate() as date) AND cast(bd.date as date) <= cast(TIMESTAMPADD('SQL_TSI_DAY', 30, now()) as date))
 
   ), 0) AS BloodNext30
 

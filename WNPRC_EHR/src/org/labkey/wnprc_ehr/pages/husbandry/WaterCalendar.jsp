@@ -661,15 +661,13 @@
                                                 description: 'Water for animal ' + row.Id
                                             };
 
-                                            if (row.assignedToCoalesced in husbandryAssignmentLookup) {
+                                            if (row.assignedToCoalesced in husbandryAssignmentLookup && row.actionRequired) {
                                                 eventObj.color = husbandryAssignmentLookup[row.assignedToCoalesced].color;
 
                                             }
                                             else {
-                                                eventObj.color = '#F78181';
+                                                eventObj.color = '#FFFFFF';
                                             }
-
-                                            console.log("event from waterSchedule");
                                             return eventObj;
                                         })
 
@@ -692,7 +690,6 @@
                             else{
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser, isAnimalCare, $animalId);
-                                console.log("fetching single animal schedule");
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
 
@@ -728,20 +725,21 @@
                                                     description: 'Water for animal ' + row.Id
                                                 };
 
-                                                if (row.assignedToCoalesced in husbandryAssignmentLookup) {
+                                                if (row.assignedToCoalesced in husbandryAssignmentLookup && row.actionRequired) {
                                                     eventObj.color = husbandryAssignmentLookup[row.assignedToCoalesced].color;
 
                                                 }
                                                 else {
-                                                    eventObj.color = '#F78181';
+                                                    eventObj.color = '#FFFFFF';
                                                 }
-                                                console.log("event from waterSchedule");
                                                 return eventObj;
 
                                             })
-                                    )
+                                    );
+                                    failureCallback((function(data){
+                                        console.log ("Error retriving waterScheduleWithWeight");
+                                    }));
                                 }).then(function (data){
-                                    debugger;
                                     if(!loadWaterTotalOnce){
                                         loadWaterTotal($animalId,calendarDates,calendar,currentTime);
                                         loadWaterTotalOnce=true;
@@ -788,7 +786,7 @@
                 //This updates all the fields that can be change in this form
                 //We also have to reset the dirty flag to track any change after the event is loaded into
                 //the form to be able to change.
-                if (info.event.source.id == "totalWater") {
+                if (info.event.source.id === "totalWater") {
                     $('#collapseOne').collapse('hide');
                     $('#collapseTwo').collapse('show');
                     WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
@@ -802,7 +800,12 @@
                 }else{
                     $('#collapseOne').collapse('show');
                     $('#collapseTwo').collapse('hide');
-                    WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
+                    if ( info.event.extendedProps.rawRowData.volume !== null){
+                        WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
+                    }else{
+                        WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.conditionAtTime.toString());
+                    }
+
                 }
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();
 
@@ -955,7 +958,8 @@
                 rawDate:                    ko.observable(),
                 mlsPerKg:                   ko.observable(),
                 conditionAtTime:            ko.observable(),
-                animalStatus:               ko.observable()
+                animalStatus:               ko.observable(),
+                actionRequired:             ko.observable()
             },
             form: {
                 lsidForm:                   ko.observable(),
@@ -1281,9 +1285,7 @@
 
         WebUtils.VM.taskDetails.conditionAtTimeValue = ko.pureComputed(function(){
             if (WebUtils.VM.taskDetails.calculatedStatusValue() === 'Alive' ){
-                debugger;
                 return WebUtils.VM.taskDetails.conditionAtTime();
-
             }
             else if(WebUtils.VM.taskDetails.calculatedStatusValue() === 'Dead' ){
                 return 'dead';
@@ -1700,6 +1702,7 @@
                                                 for(var i = 0; i < animalIdArray.length; i++){
                                                     if (animalIdArray[i] === row.Id){
                                                         animalInDay = true;
+                                                        break;
                                                     }
                                                 }
                                             }
@@ -1713,7 +1716,6 @@
                                                         parsedTotalWater = row.TotalWater;
                                                         eventTitle += " Total: ";
                                                     }
-
                                                 }
                                                 else {
                                                     row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
@@ -1750,13 +1752,12 @@
                                             else{
                                                 eventObj.color = '#EE2020'
                                             }
-                                            if (calendarDates.has(dateIndexWaterTotal) && calendarDates.get(dateIndexWaterTotal).includes(row.Id) ){
+                                            if (animalInDay){
                                                 eventObj.display = 'none';
-                                            }else{
+                                            }
+                                            else{
                                                 eventObj.display = 'auto';
                                             }
-                                            debugger;
-                                            console.log("event from waterTotal");
                                             return eventObj;
                                         })
                                 );
@@ -1791,8 +1792,8 @@
                                                     animalIdArray = calendarDates.get(dateIndexWaterTotal);
                                                     for(var i = 0; i < animalIdArray.length; i++){
                                                         if (animalIdArray[i] === row.Id){
-                                                            console.log(animalIdArray[i] + " animalId " + row.Id );
                                                             animalInDay = true;
+                                                            break;
                                                         }
                                                     }
                                                 }
@@ -1806,7 +1807,6 @@
                                                             parsedTotalWater = row.TotalWater;
                                                             eventTitle += " Total: ";
                                                         }
-
                                                     }
                                                     else {
                                                         row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
@@ -1847,7 +1847,6 @@
                                                 }else{
                                                     eventObj.display = 'auto';
                                                 }
-                                                console.log("event from waterTotal");
                                                 return eventObj;
 
 

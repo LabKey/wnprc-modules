@@ -1417,10 +1417,11 @@ public class TriggerScriptHelper {
             SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
             filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
             filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
-            //filter.addCondition(FieldKey.fromString("frequency"), frequency);
+            filter.addCondition(FieldKey.fromString("QCState"), EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Scheduled.getLabel()).getRowId(), CompareType.EQUAL);
+
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","Id", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","Id", "date", "qcstate","startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 

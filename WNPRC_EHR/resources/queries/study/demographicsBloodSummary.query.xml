@@ -44,17 +44,6 @@
                             </conditionalFormat>
                         </conditionalFormats>
                     </column>
-                    <column columnName="CurrentBlood">
-                        <columnTitle>Current Blood (mL)</columnTitle>
-                        <conditionalFormats>
-                            <conditionalFormat>
-                                <filters>
-                                    <filter operator="lte" value="0"/>
-                                </filters>
-                                <backgroundColor>FBEC5D</backgroundColor>
-                            </conditionalFormat>
-                        </conditionalFormats>
-                    </column>
                 </columns>
                 <titleColumn>AvailBlood</titleColumn>
             </table>

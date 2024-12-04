@@ -667,7 +667,7 @@ EHR.ext.AdvancedStore = Ext.extend(LABKEY.ext.Store, {
         // top-level request, rather than only per-blood.  in this instance only Blood Draws.js
         // is using the data, but weights are a good example of something that might be
         // globally useful.
-        if (this.queryName == 'Blood Draws'){
+        if (this.queryName == 'blood'){
             var bloodDrawMap = {};
             var allRecords = this.getAllRecords();
             for (var idx = 0; idx < allRecords.length; ++idx){

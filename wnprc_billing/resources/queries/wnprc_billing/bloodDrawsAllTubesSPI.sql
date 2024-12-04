@@ -5,7 +5,7 @@ SELECT
     coalesce(account, project.account.alias) as debitedAccount,
     coalesce(a.tier_rate.tierRate, project.account.tier_rate.tierRate) as otherRate,
     group_concat(objectid,';') as objectids,
-    ('Blood Draws ' || Id || ' x' || COUNT(*)) as comment,
+    ('Blood Draws ' || Id ) as comment,
     CAST(1 AS DOUBLE) AS quantity,
     group_concat(taskid, ';') as taskids,
     group_concat(performedby, ';') as performedby

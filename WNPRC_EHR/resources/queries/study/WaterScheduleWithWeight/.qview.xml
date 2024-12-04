@@ -20,6 +20,7 @@
         <column name="rawDate"/>
         <column name="mlsPerKg"/>
         <column name="conditionAtTime"/>
+        <column name="actionRequired"/>
         <column name="qcstate" />
         <column name="taskid" />
     </columns>

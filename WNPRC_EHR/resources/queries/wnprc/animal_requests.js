@@ -90,6 +90,24 @@ function onAfterInsert(helper,errors,row){
 function onAfterUpdate(helper,errors,row,oldRow){
     var rowid = row.rowId;
     var hostName = 'https://' + LABKEY.serverName;
-    console.log ("animal_requests.js: New request updated, rowid: "+ rowid);
+    console.log("animal_requests.js: New request updated, rowid: "+ rowid);
+
+    if ("QCStateLabel" in row) {
+        delete row.QCState;
+        row["qcstate"] = row["QCStateLabel"];
+        delete row.QCStateLabel;
+    }
+    if ("QCStateLabel" in oldRow) {
+        oldRow["qcstate"] = oldRow["QCStateLabel"];
+        delete oldRow.QCStateLabel;
+    }
+
+    if ("_publicData" in row) {
+        delete row._publicData;
+    }
+    if ("_publicData" in oldRow) {
+        delete oldRow._publicData;
+    }
+
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotificationUpdate(rowid, row, oldRow, hostName);
 }

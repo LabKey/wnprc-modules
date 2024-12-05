@@ -254,7 +254,7 @@ Ext4.define('EHR.window.SubmitForReviewWindowHusbandry', {
 
 
 EHR.DataEntryUtils.registerDataEntryFormButton('SUBMIT_WATER', {
-    text: 'Submit Water',
+    text: 'Submit Final',
     name: 'submit',
     requiredQC: 'Completed',
     targetQC: 'Completed',

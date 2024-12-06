@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.labkey.remoteapi.Command;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
@@ -1519,8 +1518,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void viewBillingQueries()
     {
-        String startDate="09%2F01%2F2011";
-        String endDate="09%2F30%2F2011";
+        String startDate="09-01-2011";
+        String endDate="09-30-2011";
 //        clickAndWait(Locator.bodyLinkContainingText("View Billing Queries"), WAIT_FOR_JAVASCRIPT); //firefox45 on teamcity does not load this page.
 
         goToEHRFolder();

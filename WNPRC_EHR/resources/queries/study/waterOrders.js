@@ -7,7 +7,8 @@ let allowUsersMap = {};
 function onInit(event, helper){
     helper.setScriptOptions({
         allowFutureDates: true,
-        allowDatesInDistantPast: true
+        allowDatesInDistantPast: true,
+        skipWaterRegulationCheck: false
     });
     LABKEY.Query.selectRows({
         requiredVersion: 9.1,
@@ -57,9 +58,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         if (!animalRestricted && !row.skipWaterRegulationCheck){
             EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or is already in ' + row.waterSource + ' condition.', 'ERROR');
         }
-
-
-
     }
 
 
@@ -84,20 +82,32 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
 
-    if (!row.frequency && row.waterSource == 'regulated'){
+    if (!row.frequency && row.waterSource === 'regulated'){
         EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering regulated water orders.', 'ERROR');
     }
-    if (!row.volume && row.waterSource == 'regulated'){
+    if (!row.volume && row.waterSource === 'regulated'){
         //console.log ("water vol "+ row.volume);
         EHR.Server.Utils.addError(scriptErrors, 'volume', 'Volume is required when entering regulated water orders.', 'ERROR');
     }
 
-    if (!row.assignedTo && row.waterSource == 'regulated'){
+    if (!row.assignedTo && row.waterSource === 'regulated'){
         EHR.Server.Utils.addError(scriptErrors, 'assignedTo', 'Assigned To is required when entering regulated water orders.', 'ERROR');
+    }
+
+    if (!row.provideFruit && row.waterSource === 'regulated'){
+        EHR.Server.Utils.addError(scriptErrors, 'provideFruit', 'Provide Fruit is required when entering regulated water orders.', 'INFO');
     }
 
     if (!row.waterSource){
         EHR.Server.Utils.addError(scriptErrors, 'waterSource', 'Water Source is required when entering new orders.', 'ERROR');
+    }
+
+    if (row.volume && row.waterSource === 'lixit'){
+        EHR.Server.Utils.addError(scriptErrors,"volume", "Volume should be blank when selecting Lixit/Ad Lib for Water Source", "ERROR");
+
+    }
+    if (row.frequency !== 4 && row.waterSource === 'lixit'){
+        EHR.Server.Utils.addError(scriptErrors,"frequency", "Frequency should be 'Daily - Any Time' when selecting Lixit/Ad Lib", "ERROR");
     }
 
     if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck && !row.closingRecord ) {
@@ -124,29 +134,12 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     //if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
     //TODO: by pass water regulation to change water order to lixit and also chnage the water regulated animals data
     console.log("value of "+ row.waterSource + " value of skip water "+row.skipWaterRegulationCheck);
+    console.log(row.project + " assignto "+ row.assignedTo)
+
     if ( row.waterSource === 'lixit'  && row.project  && row.assignedTo && !row.skipWaterRegulationCheck && !oldRow){
-
-        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,this.extraContext);
-        let jsonExtraContext = this.extraContext.extraContextArray;
-
-        if (jsonArray != null){
-            for (var i=0; i < jsonArray.length; i++){
-                let errorObject = jsonArray[i];
-                EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message, errorObject.severity);
-
-            }
-            if (jsonExtraContext != null){
-                for (var j = 0; j < jsonExtraContext.length; j++){
-                    let extraContextObject = jsonExtraContext[j];
-                    let date =  extraContextObject.date;
-                    let dateOnly = new Date(date.getTime());
-                    dateOnly = dateOnly.getFullYear()+ "-" +dateOnly.getMonth()+ "-" + dateOnly.getDate();
-                    let infoMessage = "Water Order for "+ row.Id + " started on " + dateOnly + " with frequency of " + extraContextObject.frequency + " and volume of " + extraContextObject.volume + "ml will close.";
-                    EHR.Server.Utils.addError(scriptErrors,"waterSource",infoMessage,"INFO");
-                }
-            }
-        }
+        changeWaterScheduled(row, scriptErrors);
     }
+
 }
 
 function onUpdate(helper, scriptErrors, row, oldRow){
@@ -223,8 +216,39 @@ function onUpdate(helper, scriptErrors, row, oldRow){
         }
 
     }
+    console.log("value of frequency " + row.frequency);
+
+    if ( row.waterSource === 'lixit'  && row.project  && row.assignedTo && !row.skipWaterRegulationCheck){
+        changeWaterScheduled(row, scriptErrors);
+    }
 }
 
 function addErrorMessage(key,scriptErrors){
     EHR.Server.Utils.addError(scriptErrors, key, 'User does not have permission to modify this field.', 'ERROR');
+}
+
+function changeWaterScheduled(row, scriptErrors){
+    if (row.waterSource === 'lixit' && !row.volume && row.frequency === 4){
+        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,this.extraContext);
+        let jsonExtraContext = this.extraContext.extraContextArray;
+
+        if (jsonArray != null){
+            for (var i=0; i < jsonArray.length; i++){
+                let errorObject = jsonArray[i];
+                EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message, errorObject.severity);
+            }
+            if (jsonExtraContext != null){
+                for (var j = 0; j < jsonExtraContext.length; j++){
+                    let extraContextObject = jsonExtraContext[j];
+                    let date =  extraContextObject.date;
+                    let dateOnly = new Date(date.getTime());
+                    dateOnly = dateOnly.getFullYear()+ "-" +dateOnly.getMonth()+ "-" + dateOnly.getDate();
+                    let infoMessage = "Water Order for "+ row.Id + " started on " + dateOnly + " with frequency of " + extraContextObject.frequency + " and volume of " + extraContextObject.volume + "ml will close.";
+                    EHR.Server.Utils.addError(scriptErrors,"waterSource",infoMessage,"INFO");
+                }
+            }
+        }
+    }else{
+        EHR.Server.Utils.addError(scriptErrors,"volume", "Volume should be blank when selecting Lixit/Ad Lib for Water Source", "ERROR");
+    }
 }

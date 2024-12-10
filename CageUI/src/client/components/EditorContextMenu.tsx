@@ -12,6 +12,7 @@ interface EditorContextMenuProps {
     onClickDelete: () => void;
     onClickRename: () => void;
     onClickChangeRack: () => void;
+    closeMenu: () => void;
 }
 
 const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
@@ -19,7 +20,8 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         ctxMenuStyle,
         onClickDelete,
         onClickRename,
-        onClickChangeRack
+        onClickChangeRack,
+        closeMenu
     } = props;
     const menuRef = useRef<HTMLMenuElement>(null);
 
@@ -37,6 +39,23 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         e.stopPropagation();
         onClickChangeRack();
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Check if the click was outside the menu
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                closeMenu(); // Close the menu if click is outside
+            }
+        };
+
+        // Add event listener to detect clicks
+        document.addEventListener('mousedown', handleClickOutside);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [menuRef]);
 
     return (
         <menu

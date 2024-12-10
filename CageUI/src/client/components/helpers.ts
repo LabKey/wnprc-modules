@@ -671,6 +671,15 @@ export const getTranslation = (transform) => {
     return { x: 0, y: 0 }; // Default to (0, 0) if no translation is found
 }
 
+export const getScaleFromTransform = (transform) => {
+    const scaleRegex = /scale\(([^)]+)\)/; // Regular expression to capture the number inside "scale()"
+    const match = transform.match(scaleRegex);
+    if (match) {
+        return parseFloat(match[1]);
+    }
+    return 1; // Default to 1 if no scale found
+}
+
 export const isTextEditable = (event) => {
     // Check if the parent <text> element is editable
     const textElement = event.sourceEvent.target.closest('text');

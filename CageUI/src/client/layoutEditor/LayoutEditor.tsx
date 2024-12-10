@@ -13,6 +13,7 @@ import DragAndDropGrid from '../components/Editor';
 import { ActionURL } from '@labkey/api';
 import Editor from '../components/Editor';
 import { labkeyActionSelectWithPromise } from '../components/helpers';
+import { RoomSizeSelector, SelectorOptions } from '../components/RoomSizeSelector';
 
 interface RoomProps {
     room: {
@@ -25,6 +26,8 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
     //const {room} = props;
     const roomName = ActionURL.getParameter("room");
     const [prevRoom, setPrevRoom] = useState<PrevRoom>({name: null, data: []});
+    const [selectedSize, setSelectedSize] = useState<SelectorOptions>(null);
+    const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
 
     useEffect(() => {
         if(!roomName) return;
@@ -56,7 +59,41 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                         name={roomName}
                     />
                     <div className={"divider"}/>
-                    <Editor/>
+                    {(roomName || !showSelectionPopup) &&
+                        <Editor roomSize={selectedSize}/>
+                    }
+                    {showSelectionPopup &&
+                        <RoomSizeSelector
+                            options={[
+                                {
+                                    id: 0,
+                                    scale: 1.4,
+                                    title: "Extra Small",
+                                    description: "Extra small room size fitting up to 10x5 cages"
+                                },
+                                {
+                                    id: 1,
+                                    scale: 1.0,
+                                    title: "Small",
+                                    description: "Small room size fitting up to 10x5 cages"
+                                },
+                                {
+                                    id: 2,
+                                    scale: 0.8,
+                                    title: "Medium",
+                                    description: "Medium room size fitting up to 10x5 cages"
+                                },
+                                {
+                                    id: 3,
+                                    scale: 0.6,
+                                    title: "Large",
+                                    description: "Large room size fitting up to 10x5 cages"
+                                }
+                            ]}
+                            onClose={() => setShowSelectionPopup(false)}
+                            onSelect={(selectedOption) => setSelectedSize(selectedOption)}
+                        />
+                    }
                 </div>
             }
         />

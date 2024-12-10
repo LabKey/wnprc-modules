@@ -866,3 +866,76 @@ menu:not([title]):before {
   content: "\2630";
 }
 // End Editor Context menu styles
+
+// Room Size Selector styles
+
+/* General popup styling */
+.room-size-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.room-size-selector-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.room-size-selector-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.room-size-selector-option-card {
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.room-size-selector-option-card:hover {
+  border-color: #007bff;
+}
+
+.room-size-selector-option-card.selected {
+  border-color: #007bff;
+  background-color: #e9f7fe;
+}
+
+.room-size-selector-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.room-size-selector-close-btn, .room-size-selector-select-btn {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.room-size-selector-close-btn {
+  background-color: #ccc;
+}
+
+.room-size-selector-select-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.room-size-selector-select-btn:disabled {
+  background-color: #007bff80;
+  cursor: not-allowed;
+}

@@ -1,6 +1,7 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import {
+    getScaleFromTransform,
     getTranslation,
     getTypeClassFromElement,
     isTextEditable,
@@ -30,7 +31,7 @@ import {
     StartDragProps, UnitLocations
 } from './typings';
 import * as React from 'react';
-import { zoomTransform } from 'd3';
+import { zoom, zoomTransform } from 'd3';
 
 
 export const parseWrapperId = (input: string): RoomItemType => {
@@ -70,7 +71,7 @@ export const updateGrid = (transform, width, height, gridSize) => {
                 .attr("width", gridSize)
                 .attr("height", gridSize)
                 .attr("fill", "none")
-                .attr("stroke", "lightgray");
+                .attr("stroke", "lightgray");//.style('pointer-events', 'bounding-box');
         }
     }
 }
@@ -236,14 +237,10 @@ export function setupEditCageEvent(
     Even though cages can not be added/removed from racks in reality, for layout building purposes they can.
 
  */
-export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRackGroup: RackGroup, dragRackGroup: RackGroup, doRackAction, layoutDragProps: LayoutDragProps, cageActionProps: CageActionProps) {
+export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRackGroup: RackGroup, dragRackGroup: RackGroup, doRackAction, layoutDrag: d3.DragBehavior<any, any, any>, cageActionProps: CageActionProps) {
     if(!d3.select('.popup').empty()) return;
     const action: RackActions = await showConfirmationPopup();
     const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
-    const {
-        gridSize,
-        moveItem
-    } = layoutDragProps;
 
     console.log("Performing Merge");
 
@@ -397,13 +394,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             newGroup.data([{x: targetData.x, y: targetData.y}])
         }
 
-        const addProps: LayoutDragProps = {
-            gridSize: gridSize,
-            moveItem: moveItem
-        };
-        newGroup.call(d3.drag().on('start', createStartDragInLayout({setSelectedObj: cageActionProps.setSelectedObj}))
-            .on('drag', createDragInLayout())
-            .on('end', createEndDragInLayout(addProps)));
+        newGroup.call(layoutDrag);
 
         doRackAction(action,targetRackId, draggedRackId, newGroup);
 
@@ -449,20 +440,18 @@ export const getLayoutOffset = (props: OffsetProps) => {
 }
 
 export const getTargetRect =(x, y, gridSize, transform) => {
-    // Adjust the grid size according to the current zoom level
-    const adjustedGridSize = gridSize;
 
     // Adjust the coordinates based on the current zoom and pan transform
     const adjustedX = transform.invertX(x);
     const adjustedY = transform.invertY(y);
 
     // Calculate the column and row index based on the adjusted grid size
-    const col = Math.floor(adjustedX / adjustedGridSize);
-    const row = Math.floor(adjustedY / adjustedGridSize);
+    const col = Math.floor(adjustedX / gridSize);
+    const row = Math.floor(adjustedY / gridSize);
     // Return the top-left corner coordinates of the rectangle
     return {
-        x: col * adjustedGridSize,
-        y: row * adjustedGridSize,
+        x: col * gridSize,
+        y: row * gridSize,
     };
 }
 
@@ -471,11 +460,6 @@ export function createStartDragInLayout(startDragProps: StartDragProps) {
     return(
         function startDragInLayout(event) {
             const {setSelectedObj} = startDragProps;
-            // Check if the parent <text> element is editable, return if not
-            if (isTextEditable(event)) {
-                event.on('drag', null).on('end', null); // Detach drag and end events
-                return;
-            }
             setSelectedObj(d3.select(this).attr('id'));
             console.log('Drag Layout #1', parseRack(d3.select(this).attr('id')));
             d3.select(this).raise().classed('active', true);
@@ -486,7 +470,7 @@ export function createStartDragInLayout(startDragProps: StartDragProps) {
 export function createDragInLayout() {
     return(
         function dragInLayout(event) {
-            const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
+            const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
             console.log('Drag Layout #2', event.x, event.y);
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
@@ -526,6 +510,10 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 const cellY = targetCell.y;
                 const shapeType: RoomItemClass = shape.classed('room-obj') ? 'roomObj' : 'caging';
                 placeAndScaleGroup(shape, cellX, cellY, transform);
+                // make sure border template is below all other shapes on the layout
+                if(shape.attr('id') === 'border-template'){
+                    shape.lower();
+                }
                 console.log("#3: ", cellX, cellY, shape.node());
                 moveItem(shape.attr('id'),shapeType, cellX, cellY, transform.k);
             }
@@ -793,5 +781,121 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
         placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
     })
 }
-
 // END FUNCTIONS FOR LOADING IN PREVIOUS DATA
+
+
+const createStartResizeDrag = () => {
+    return(
+        function startResizeDrag(event) {
+            event.sourceEvent.stopPropagation();
+            const borderRect = d3.select('#border-rect');
+            const doorSvg = d3.select('#border-door');
+            const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
+
+
+            this.startWidth = parseFloat(borderRect.attr('width'));
+            this.startHeight =  parseFloat(borderRect.attr('height'));
+
+            this.doorStartX = parseFloat(doorSvg.attr('x'));
+            this.doorStartY = parseFloat(doorSvg.attr('y'));
+            this.doorStartWidth = parseFloat(doorSvg.attr('width'));
+            this.doorStartHeight = parseFloat(doorSvg.attr('height'));
+
+            // start x and y with respect to the layout svg
+            const [x, y] = d3.pointer(event.sourceEvent, layoutSvg.node());
+            this.startX = x;
+            this.startY = y;
+        }
+    );
+}
+
+
+
+const createDragResizeDrag = (gridSize: number, borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
+    return(
+        function dragResizeDrag(event) {
+            const currentRect = d3.select('#border-rect');
+            const resizeHandler = borderGroup.selectAll('#resize-handle');
+            const doorGroup = borderGroup.selectAll('#border-door');
+
+            const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
+
+            // get x and y in relation to the layout svg
+            const [x, y] = d3.pointer(event.sourceEvent, layoutSvg.node());
+
+            // calculate delta x and y (change) with respect to grid size for snapping
+            const dx = Math.round((x - this.startX) / gridSize);
+            const dy = Math.round((y - this.startY) / gridSize);
+
+            // calculate new height and width using previous delta and grid size for snapping
+            const newLockedWidth = this.startWidth + (dx * gridSize);
+            const newLockedHeight = this.startHeight + (dy * gridSize);
+
+            const scaleX = newLockedWidth / this.startWidth;
+            const scaleY = newLockedHeight / this.startHeight;
+
+            function updateSvgBounds(newSvgWidth: number, newSvgHeight: number, svgId: string) {
+                // Calculate new dimensions if necessary
+                const resizeSvg = borderGroup.select(`#${svgId}`);
+
+                // Update the SVG's viewBox to accommodate the new size, + 1 to add a pixel of distance between the svg and everything inside
+                resizeSvg.attr("viewBox", `0 0 ${newSvgWidth + 1} ${newSvgHeight + 1}`);
+                resizeSvg.attr("width", newSvgWidth + 1);
+                resizeSvg.attr("height", newSvgHeight + 1);
+            }
+
+            // Update rect dimensions and position
+            currentRect
+                .attr('width', newLockedWidth)
+                .attr('height', newLockedHeight);
+
+            //update resize rect handler
+            resizeHandler.attr("x", newLockedWidth - 15)
+                .attr("y", newLockedHeight - 15);
+
+            doorGroup.attr('x', this.doorStartX * scaleX)
+                .attr('y', this.doorStartY * scaleY);
+
+            doorGroup.attr('width', this.doorStartWidth * scaleX)
+                .attr('height', this.doorStartHeight * scaleY);
+
+            updateSvgBounds(newLockedWidth, newLockedHeight, 'border_template');
+            updateSvgBounds(newLockedWidth, newLockedHeight, 'border_template_wrapper');
+
+        }
+    );
+}
+
+export const dragBorder = (closeMenuThenDrag, gridSize, borderGroup) => {
+    let targetId: string;
+    return d3.drag()
+        .on('start', function(event) {
+            // store target element to prevent switching
+            const targetElement = d3.select(event.sourceEvent.target);
+            // store target id, either resize handle id or room border group id
+            targetId = targetElement.attr('id');
+            // Drag group if group is selected, otherwise resize using the rect handlers
+            if (targetElement.node().tagName === 'g') {
+                closeMenuThenDrag.on('start').call(this,event);
+            } else if (targetElement.node().tagName === 'rect') {
+                createStartResizeDrag().call(this, event);
+            }
+        })
+        .on('drag', function(event) {
+            // Retrieve the stored target element
+            const targetElement = d3.select(`#${targetId}`) as  d3.Selection<any, unknown, null, undefined>;
+            if (targetElement.node().tagName === 'g') {
+                closeMenuThenDrag.on('drag').call(this,event);
+
+            } else if (targetElement.node().tagName === 'rect') {
+                createDragResizeDrag(gridSize, borderGroup).call(this, event);
+            }
+        })
+        .on('end', function(event) {
+            const targetElement = d3.select(`#${targetId}`) as  d3.Selection<any, unknown, null, undefined>;
+
+            if (targetElement.node().tagName === 'g') {
+                closeMenuThenDrag.on('end').call(this,event);
+            }
+        })
+}

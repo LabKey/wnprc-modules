@@ -238,12 +238,12 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
 
-    const [activeGroups, setActiveGroups] = useState<GroupId[]>([]); // Tracks currently active groups of racks
     const [nextAvailGroup, setNextAvailGroup] = useState<GroupId>(`rack-group-1`); // Tracks currently active groups of racks
 
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
+
+    // the id of the clicked on svg group for either dragging or context menu opening.
     const [selectedObj, setSelectedObj] = useState<string | null>(null);
-    const [clickedCage, setClickedCage] = useState<number | null>(null);
 
     // instead of tying scale to each location, manage one scale for the whole layout
     const [scale, setScale] = useState<number>(1);
@@ -712,16 +712,15 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     useEffect(() => {
         if(!prevRoom.name) return;
 
+        //TODO make sure rack-group ids are correct
         const newLocalRoom: Room = buildNewLocalRoom(prevRoom);
         const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.data);
-        const newGroupIds: GroupId[] = newLocalRoom.rackGroups.map((group) => group.groupId);
 
         console.log("Load Data: ", prevRoom);
         console.log("New Room State: ", newLocalRoom);
         console.log("layout: ", layoutSvg.node());
 
 
-        setActiveGroups(newGroupIds);
         addPrevRoomSvgs(newLocalRoom, layoutSvg);
         setUnitLocs(newUnitLocs);
         setLocalRoom(newLocalRoom);

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { BaseType, svg, zoomTransform } from 'd3';
+import { BaseType, zoomTransform } from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutContext } from './ContextManager';
@@ -27,7 +27,7 @@ import {
     checkAdjacent,
     createDragInLayout,
     createEndDragInLayout,
-    createStartDragInLayout,
+    createStartDragInLayout, dragBorder,
     drawGrid,
     findCageInGroup,
     findRackInGroup,
@@ -42,19 +42,25 @@ import {
 } from './LayoutEditorHelpers';
 import EditorContextMenu from './EditorContextMenu';
 import { parseLongId, parseRoomItemNum, parseRoomItemType } from './helpers';
+import { SelectorOptions } from './RoomSizeSelector';
 
-const Editor = () => {
+interface EditorProps {
+    roomSize?: SelectorOptions
+}
+
+const Editor: FC<EditorProps> = ({roomSize}) => {
     const SVG_WIDTH = 1290; // pixel width of the layout svg
     const SVG_HEIGHT = 810; // pixel height of the layout svg
     const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage
     const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
     const GRID_SIZE = 30; // number of pixels of a cell for length/width
     const utilsRef = useRef(null);
+    const borderRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(true);
     const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
     const [renameCage, setRenameCage] = useState<boolean>(false);
     const [changeRackType, setChangeRack] = useState<boolean>(false);
-
+    const [borderSetup, setBorderSetup] = useState<boolean>(false); // determines if the border svg has been loaded yet
     const [ctxMenuStyle, setCtxMenuStyle] = useState({
         display: 'none',
         left: '',
@@ -79,11 +85,30 @@ const Editor = () => {
         saveRoom
     } = useLayoutContext();
 
+    const dragInLayout = d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
+        .on('drag', createDragInLayout())
+        .on('end', createEndDragInLayout({gridSize: GRID_SIZE, moveItem: moveObjLocation}));
+
+    // combined drag in layout for objects in the layout to close menus when they are selected
+    const closeMenuThenDrag = d3.drag()
+        .on('start', function (event) {
+            console.log("layout Drag started xxx");
+            handleContextMenuClose(); // Close the menu when drag starts
+            dragInLayout.on('start').call(this, event);
+        })
+        .on('drag', function (event) {
+            dragInLayout.on('drag').call(this, event);
+        })
+        .on('end', function (event) {
+            dragInLayout.on('end').call(this, event);
+        });
+
 
     useEffect(() => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
         console.log("xxx Locs: ", unitLocs);
+        console.log("xxx RoomSize: ", roomSize);
     }, [room, localRoom, unitLocs]);
 
     // Effect checks for merging/connecting after a rack is moved
@@ -204,17 +229,12 @@ const Editor = () => {
 
             const {rack: draggedRack, rackGroup: draggedRackGroup} = findRackInGroup(draggedRackShape.getAttribute('id'), localRoom.rackGroups);
 
-            const layoutDragProps: LayoutDragProps = {
-                gridSize: GRID_SIZE,
-                moveItem: moveObjLocation
-            };
-
             const cageActionProps: CageActionProps = {
                 setSelectedObj: setSelectedObj,
                 setCtxMenuStyle: setCtxMenuStyle,
             }
 
-            mergeRacks(targetRack, draggedRack, targetRackGroup, draggedRackGroup, doRackAction, layoutDragProps, cageActionProps);
+            mergeRacks(targetRack, draggedRack, targetRackGroup, draggedRackGroup, doRackAction, closeMenuThenDrag, cageActionProps);
         }
         setSelectedObj(null);
     }, [unitLocs]);
@@ -255,14 +275,7 @@ const Editor = () => {
 
         addRoomItem(updateItemType, itemId, cellX, cellY, transform.k);
 
-        const addProps: LayoutDragProps = {
-            gridSize: GRID_SIZE,
-            moveItem: moveObjLocation
-        };
-        // Reattach drag listeners for interaction within layout
-        group.call(d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
-            .on('drag', createDragInLayout())
-            .on('end', createEndDragInLayout(addProps)));
+        group.call(closeMenuThenDrag);
 
         // attach click listener for context menu
         group.selectAll('text').each(function () {
@@ -378,18 +391,31 @@ const Editor = () => {
         }
     }, [cageNumChange]);
 
-    // Create a zoom behavior
+    const zoomToScale = (scale: number) => {
+        const newTransform = d3.zoomIdentity
+            .translate(0, 0)
+            .scale(scale);
+
+        // Apply scale to existing zoom handler
+        layoutSvg.call(zoom.transform, newTransform);
+    }
+
+
+    // Create a zoom behavior, prevent scale from changing
+    /*const zoom = d3.zoom()
+        .scaleExtent([roomSize.scale || 1, roomSize.scale || 1])
+        .on("zoom", handleZoom);*/
+
     const zoom = d3.zoom()
         .scaleExtent([0.6, 1])
         .on("zoom", handleZoom);
 
-    // Create drag behavior for moving the grid
-    const dragGrid = d3.drag()
-        .on("drag", handleDrag);
-    // Function to handle zoom for grid
+    // Function to handle zoom for grid, zoom also handles infinite grid generation and drag
     function handleZoom(event) {
+        handleContextMenuClose(); // close open context menu if one is open and the user drags the grid
         const transform = event.transform;
         layoutSvg.select("g.grid").attr("transform", transform);
+        console.log("Layout Zoom Fired: ", transform);
 
         // Apply zoom/pan to each individual "draggable" group, preserving their relative positions
         layoutSvg.selectAll(".draggable").each(function(d: any) {
@@ -407,18 +433,18 @@ const Editor = () => {
         updateGrid(transform, SVG_WIDTH, SVG_HEIGHT, GRID_SIZE);
     }
 
-    // Function to handle drag for grid movement
-    function handleDrag(event) {
-        const g = d3.select("g.grid");
-        const dx = event.dx;
-        const dy = event.dy;
-        const currentTransform = g.attr("transform") || "translate(0, 0)";
-        const newTransform = currentTransform.replace(/translate\(([^,]+),([^)]+)\)/, (match, x, y) => {
-            const newX = parseFloat(x) + dx;
-            const newY = parseFloat(y) + dy;
-            return `translate(${newX}, ${newY})`;
-        });
-        g.attr("transform", newTransform);
+    /* Function to be run after the svg border_template is injected into the dom from the ReactSVG component.
+       ReactSVG has an afterInjection prop but that causes a rerender on the svg removing changes caused
+       by d3 mutations.
+    */
+    function borderInject(svg) {
+        // Ensure resize handle can receive events
+        const resizeHandle = svg.querySelector('#resize-handle');
+        resizeHandle.setAttribute('pointer-events', 'bounding-box');
+
+        const rect = svg.querySelector('#border-rect');
+        rect.setAttribute('pointer-events', 'none');
+        setBorderSetup(true);
     }
 
     useEffect(() => {
@@ -431,6 +457,47 @@ const Editor = () => {
         layoutSvg.select(".grid").selectAll('.cell').remove();
     }, [showGrid]);
 
+    // Border setup state attaches the data to the svg and a call listener for drag behavior
+    useEffect(() => {
+        if(!borderSetup) return;
+        const borderGroup:  d3.Selection<SVGGElement, {}, HTMLElement, any> = d3.select('#border-template') as  d3.Selection<SVGGElement, {}, HTMLElement, any>;
+        placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
+        borderGroup.call(dragBorder(closeMenuThenDrag, GRID_SIZE, borderGroup));
+        // Set zoom after border is loaded in
+        if(roomSize){
+            zoomToScale(roomSize.scale);
+        }
+        setBorderSetup(false);
+    }, [borderSetup]);
+
+    // Effect attaches an observer to the border_template svg. after it is injected into the dom it will run
+    // the function borderInject to set the state for border setup
+    useEffect(() => {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    // Look for the SVG in the mutation target
+                    const svg = borderRef.current.reactWrapper.querySelector('#border_template');
+                    if (svg) {
+                        console.log('SVG has been injected via MutationObserver:', svg);
+                        borderInject(svg);
+                        observer.disconnect(); // Stop observing once SVG is found
+                    }
+                }
+            });
+        });
+
+        // Start observing the parent container for child changes
+        if (borderRef.current) {
+            observer.observe(borderRef.current.reactWrapper, { childList: true, subtree: true });
+        }
+
+        // Cleanup observer on unmount
+        return () => {
+            observer.disconnect();
+        };
+    }, [borderRef]);
+
     // load grid at load in, or after it was disabled and re-enabled
     useEffect(() => {
         if(!layoutSvg || !showGrid) return;
@@ -439,9 +506,9 @@ const Editor = () => {
             height: SVG_HEIGHT,
             gridSize: GRID_SIZE
         }
+
         drawGrid(layoutSvg, updateGridProps);
-        layoutSvg.call(zoom); // Enable zoom
-        layoutSvg.select("g.grid").call(dragGrid);
+        layoutSvg.call(zoom);
     }, [layoutSvg, showGrid]);
 
     // closes cage editor context menu
@@ -495,10 +562,7 @@ const Editor = () => {
                         gridSize: GRID_SIZE,
                         moveItem: moveObjLocation
                     };
-                    newSvgGroup.call(d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
-                        .on('drag', createDragInLayout())
-                        .on('end', createEndDragInLayout(addProps)));
-
+                    newSvgGroup.call(closeMenuThenDrag);
                     // attach click listener for context menu
                     newSvgGroup.selectAll('text').each(function () {
                         const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
@@ -572,8 +636,29 @@ const Editor = () => {
                 <svg
                     width={SVG_WIDTH}
                     height={SVG_HEIGHT}
+                    viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
                     id="layout-svg"
-                ></svg>
+                >
+                    <g className={'draggable room-obj'}
+                       id={'border-template'}
+                       pointerEvents={'bounding-box'}
+                       transform={'translate(0,0) scale(1)'}
+                    >
+                        <ReactSVG
+                            src={`${ActionURL.getContextPath()}/cageui/static/RoomBorder.svg`}
+                            id={`border_template_wrapper`}
+                            wrapper={'svg'}
+                            key={'border_template_key'}
+                            ref={borderRef}
+                            className={''}
+                            viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+                            height={SVG_HEIGHT}
+                            width={SVG_WIDTH}
+                            pointerEvents={'none'}
+                        />
+                    </g>
+
+                </svg>
             </div>
             <div id={"layout-toolbar"}>
                 <div className="checkbox-wrapper-8">
@@ -616,6 +701,7 @@ const Editor = () => {
                 onClickDelete={handleDelCage}
                 onClickRename={() => setRenameCage(true)}
                 onClickChangeRack={() => setChangeRack(true)}
+                closeMenu={handleContextMenuClose}
             />
         </div>
     );

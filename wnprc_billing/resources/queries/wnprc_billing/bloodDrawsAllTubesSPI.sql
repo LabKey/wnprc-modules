@@ -15,4 +15,5 @@ WHERE
     billedBy.value = 'c' AND
     qcstate.publicdata = true
 
+--group blood draws drawn on the same date with same project
 GROUP BY id, date, project, coalesce(account, project.account.alias), coalesce(a.tier_rate.tierRate, project.account.tier_rate.tierRate);

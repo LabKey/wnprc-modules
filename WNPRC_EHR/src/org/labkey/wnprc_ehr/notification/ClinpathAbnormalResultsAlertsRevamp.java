@@ -11,6 +11,7 @@ import org.labkey.api.security.User;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -68,13 +69,6 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
     // Message Creation
     @Override
     public String getMessageBodyHTML(Container c, User u) {
-
-
-
-
-
-
-
         // Creates variables & gets data.
         final StringBuilder messageBody = new StringBuilder();
 
@@ -85,26 +79,26 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
         messageBody.append(styleToolkit.endStyle());
 
         // Sets up variables.
-//        Date lastRunDate = new Date(NotificationService.get().getLastRun(this));
-//        Date lastRunMinusWeek = new Date();
-//        lastRunMinusWeek.setTime(lastRunDate.getTime() - 5);
-        Date testDateYesterday = dateToolkit.getDateXDaysFromNow(-401); // TODO: Remove test numbers here.
-        Date testDateLastWeek = dateToolkit.getDateXDaysFromNow(-407);  // TODO: Remove test numbers here.
-
         HashMap<String, HashMap<String, ArrayList<HashMap<String, String>>>> filteredResults = new HashMap<>(); // Areas > Rooms > Results List > Result
+        Date lastRunDate = new Date(NotificationService.get().getLastRun(this));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(lastRunDate);
+        cal.add(Calendar.DATE, -7);
+        Date lastRunMinusWeek = cal.getTime();
 
         // Creates filter.
-//        SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", "true", CompareType.EQUAL);
-//        myFilter.addCondition("taskid/datecompleted", testDateYesterday, CompareType.DATE_GTE);
-//        myFilter.addCondition("taskid/datecompleted", "", CompareType.NONBLANK);
-//        myFilter.addCondition("date", testDateLastWeek, CompareType.DATE_GTE);
-
-        SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getDateXDaysFromNow(-350), CompareType.DATE_GTE);
+        SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", true, CompareType.EQUAL);
+        myFilter.addCondition("taskid/datecompleted", lastRunDate, CompareType.DATE_GTE);
+        myFilter.addCondition("taskid/datecompleted", "", CompareType.NONBLANK);
+        myFilter.addCondition("date", lastRunMinusWeek, CompareType.DATE_GTE);
         // Creates columns to retrieve.
         String[] targetColumns = new String[]{"Id", "date", "Id/curLocation/area", "Id/curLocation/room", "Id/curLocation/cage", "alertStatus", "taskid/datecompleted", "testid", "result", "units", "status", "ref_range_min", "ref_range_max", "ageAtTime"};
         // Runs query.
         ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "ClinpathRefRange", myFilter, null, targetColumns);
+        // Creates URL.
+        String clinpathTasksUrlView = notificationToolkit.createQueryURL(c, "execute", "study", "ClinpathRefRange", myFilter);
 
+        // Organizes results into a list filtered by [Area > Room > Task].
         for (HashMap<String, String> result : returnArray) {
             // Verifies 'alert status' exists before adding results.
             if (!result.get("alertStatus").isEmpty()) {
@@ -144,14 +138,11 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
         }
 
         // Prints text.
-        messageBody.append("There have been " + returnArray.size() + " clinpath tasks completed since " + testDateYesterday + "<br>"); //TODO: Update this to lastRunDate after updating.
-
-        String clinpathTasksUrlView = notificationToolkit.createQueryURL(c, "execute", "study", "ClinpathRefRange", myFilter);
-
+        messageBody.append("There have been " + returnArray.size() + " clinpath tasks completed since " + lastRunDate + "<br>");
         messageBody.append(notificationToolkit.createHyperlink("Click here to view them", clinpathTasksUrlView) + "</a><p>\n");
-
         messageBody.append("<p>Listed below are the abnormal records.</p>\n");
 
+        // Prints table with all records.
         String[] tableColumns = new String[]{"Id", "Collect Date", "Date Completed", "Test ID", "Result", "Units", "Status", "Ref Range Min", "Ref Range Max", "Age At Time"};
         for (String currentArea : notificationToolkit.sortSetWithNulls(filteredResults.keySet())) {
             messageBody.append("<b>" + currentArea + ":</b><br>\n");
@@ -189,8 +180,6 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
                     if (currentTableData.size() > rowColorsList.size()) {
                         rowColorsList.add("white");
                     }
-
-
                 }
 
                 // Displays table.
@@ -200,11 +189,8 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
             }
         }
 
+        // Returns message.
         return messageBody.toString();
     }
-
-
-
-
 
 }

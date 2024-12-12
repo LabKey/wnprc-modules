@@ -67,12 +67,16 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
     public String getMessageBodyHTML(Container c, User u) {
         // Creates variables & retrieves data.
         final StringBuilder messageBody = new StringBuilder();
-//        ClinpathResultAlertsRevamp.ClinpathResultAlertsObject myClinpathResultAlertsObject = new ClinpathResultAlertsRevamp.ClinpathResultAlertsObject(c, u);
 
+        // Creates CSS.
+        messageBody.append(styleToolkit.beginStyle());
+        messageBody.append(styleToolkit.setBasicTableStyle());
+        messageBody.append(styleToolkit.setHeaderRowBackgroundColor("#d9d9d9"));
+        messageBody.append(styleToolkit.endStyle());
 
         // Creates filter.
-        SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", "true", CompareType.EQUAL);
-        myFilter.addCondition("taskid/datetcompleted", dateToolkit.getDateXDaysFromNow(-1), CompareType.DATE_GTE);
+        SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", true, CompareType.EQUAL);
+        myFilter.addCondition("taskid/datecompleted", dateToolkit.getDateXDaysFromNow(-1), CompareType.DATE_GTE);
         myFilter.addCondition("taskid/datecompleted", "", CompareType.NONBLANK);
         // Creates sort.
         Sort mySort = new Sort("Id,date");
@@ -87,11 +91,11 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
         HashMap<String, HashMap<String, ArrayList<HashMap<String, String>>>> filteredResults = new HashMap<>(); // Areas > Rooms > Results List > Result
 
         // Begins message info.
-        messageBody.append("This email contains clinpath results entered since: " + dateToolkit.getDateXDaysFromNow(-1));
+        messageBody.append("This email contains clinpath results entered since: " + dateToolkit.getDateXDaysFromNow(-1) + ".<p>");
 
         // Displays if there is no data.
         if (returnArray.isEmpty()) {
-            messageBody.append("No requests have been complteted.<br><hr>\n");
+            messageBody.append("No requests have been completed.<br><hr>\n");
         }
         // Displays if there IS data.
         else {
@@ -110,10 +114,12 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
                 if (result.get("Id/curLocation/room").isEmpty()) {
                     result.put("Id/curLocation/room", "No Room");
                 }
-//                // Updates requestid/description if not empty.  TODO: Check why this is called.
-//                if (!result.get("requestid/description").isEmpty()) {
-//                    result.put("requestid/description", s/\n/\<br\>/g);
-//                }
+                // Adds line separators when there are multiple values.
+                if (!result.get("requestid/description").isEmpty()) {
+                    String rawDescription = result.get("requestid/description");
+                    String parsedDescription = rawDescription.replace(",", ",<br>\n");
+                    result.put("requestid/description", parsedDescription);
+                }
 
                 // Adds to list if area does not exist yet.
                 if (!filteredResults.containsKey(result.get("Id/curLocation/area"))) {
@@ -179,23 +185,4 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
         return messageBody.toString();
     }
 
-//    public static class ClinpathResultAlertsObject {
-//        // Set up.
-//        Container c;
-//        User u;
-//        NotificationToolkit notificationToolkit = new NotificationToolkit();
-//        NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
-//
-//        // Constructor.
-//        public ClinpathResultAlertsObject(Container currentContainer, User currentUser) {
-//            // Sets variables.
-//            this.c = currentContainer;
-//            this.u = currentUser;
-//
-//
-//            // TODO
-//        }
-//
-//        //
-//    }
 }

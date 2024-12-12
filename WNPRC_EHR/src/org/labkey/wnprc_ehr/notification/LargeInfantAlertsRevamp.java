@@ -73,7 +73,7 @@ public class LargeInfantAlertsRevamp extends AbstractEHRNotification {
 
         if (!returnArray.isEmpty()) {
             // Begins message info.
-            messageBody.append("This email lists orphans assigned to cages that do not meet minimum size requirements as of: " + dateToolkit.getDateToday());
+            messageBody.append("This email lists orphans assigned to cages that do not meet minimum size requirements as of: " + dateToolkit.getDateToday() + ".<p>");
 
             // Prints number of results.
             if (returnArray.size() > 1) {

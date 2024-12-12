@@ -15,7 +15,6 @@ public class ClinpathAlertsRevamp extends AbstractEHRNotification {
     // Class Variables
     NotificationToolkit notificationToolkit = new NotificationToolkit();
     NotificationToolkit.DateToolkit dateToolkit = new NotificationToolkit.DateToolkit();
-    NotificationToolkit.StyleToolkit styleToolkit = new NotificationToolkit.StyleToolkit();
 
 
 
@@ -81,7 +80,7 @@ public class ClinpathAlertsRevamp extends AbstractEHRNotification {
         messageBody.append("<hr>\n");
 
         // Displays clinpath requests that have not been approved or denied yet.
-        messageBody.append("<b>Clinpath requests that ahve not been approved or denied yet:</b><br>\n");
+        messageBody.append("<b>Clinpath requests that have not been approved or denied yet:</b><br>\n");
         if (!myClinpathAlertsObject.recordsNotYetApproved.isEmpty()) {
             messageBody.append("WARNING: There are " + myClinpathAlertsObject.recordsNotYetApproved.size() + " requests that have not been approved or denied yet.<br>");
             messageBody.append("<p>" + notificationToolkit.createHyperlink("Click here to view them", myClinpathAlertsObject.recordsNotYetApprovedUrlView) + "<br>\n");
@@ -89,6 +88,7 @@ public class ClinpathAlertsRevamp extends AbstractEHRNotification {
         else {
             messageBody.append("There are no requests that have not been approved or denied yet.<br>");
         }
+        messageBody.append("<hr>\n");
 
         // Displays records not completed where the date requested is today.
         if (!myClinpathAlertsObject.incompleteRecordsRequestedToday.isEmpty()) {

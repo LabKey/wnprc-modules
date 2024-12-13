@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xmlns="http://labkey.org/data/xml/domainTemplate"
+           xmlns:dat="http://labkey.org/data/xml"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <template xsi:type="EHRLookupsTemplateType">
+        <table tableName="cage_type" tableDbType="TABLE">
+            <dat:tableTitle>Cage Type</dat:tableTitle>
+            <dat:columns>
+                <dat:column columnName="type">
+                    <dat:rangeURI>string</dat:rangeURI>
+                </dat:column>
+            </dat:columns>
+        </table>
+    </template>
+    <template xsi:type="EHRLookupsTemplateType">
+        <table tableName="rooms" tableDbType="TABLE">
+            <dat:tableTitle>Rooms</dat:tableTitle>
+            <dat:columns>
+                <dat:column columnName="layout_scale">
+                    <dat:rangeURI>double</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="border_width">
+                    <dat:rangeURI>int</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="border_height">
+                    <dat:rangeURI>int</dat:rangeURI>
+                </dat:column>
+            </dat:columns>
+        </table>
+    </template>
+
+</templates>

@@ -350,7 +350,6 @@
             <column columnName="room_object"/>
             <column columnName="rack_group"/>
             <column columnName="rack"/>
-            <column columnName="default_rack"/>
             <column columnName="cage">
                 <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
             </column>
@@ -358,7 +357,6 @@
             <column columnName="end_date"/>
             <column columnName="x_coord"/>
             <column columnName="y_coord"/>
-            <column columnName="scale"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>

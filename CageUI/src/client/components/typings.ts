@@ -98,13 +98,20 @@ export interface Cage {
 }
 
 export interface Room {
-    room: string;
+    name: string;
     rackGroups: RackGroup[];
     objects: RoomObject[];
 }
 
+export interface LayoutData {
+    scale: number;
+    borderWidth: number;
+    borderHeight: number;
+}
+
 export interface PrevRoom {
-    data: LayoutHistoryData[]
+    cagingData: LayoutHistoryData[];
+    layoutData: LayoutData;
     name: string | null;
 }
 

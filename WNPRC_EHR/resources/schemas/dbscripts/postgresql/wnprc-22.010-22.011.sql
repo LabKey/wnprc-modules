@@ -11,13 +11,11 @@ CREATE TABLE wnprc.layout_history
     room_object VARCHAR(50),
     rack_group INTEGER,
     rack INTEGER,
-    default_rack INTEGER,
     cage VARCHAR(50),
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP,
     x_coord INTEGER NOT NULL,
     y_coord INTEGER NOT NULL,
-    scale DOUBLE PRECISION NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -28,9 +26,6 @@ CREATE TABLE wnprc.layout_history
     CONSTRAINT CHECK_layout_history_not_null CHECK (
         (room_object IS NOT NULL) OR
         (rack_group IS NOT NULL AND rack IS NOT NULL AND cage IS NOT NULL)
-    ),
-    CONSTRAINT CHECK_layout_history_default_rack_not_null CHECK (
-        (rack != 0) OR (default_rack IS NOT NULL)
     )
 );
 

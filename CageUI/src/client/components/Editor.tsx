@@ -23,6 +23,7 @@ import {
 import { LayoutTooltip } from './LayoutTooltip';
 import { CageNumInput } from './CageNumInput';
 import {
+    addPrevRoomSvgs,
     areCagesInSameRack,
     checkAdjacent,
     createDragInLayout,
@@ -43,6 +44,8 @@ import {
 import EditorContextMenu from './EditorContextMenu';
 import { parseLongId, parseRoomItemNum, parseRoomItemType } from './helpers';
 import { SelectorOptions } from './RoomSizeSelector';
+import { ConfirmationPopup } from './ConfirmationPopup';
+import { RoomSelectorPopup } from './RoomSelectorPopup';
 
 interface EditorProps {
     roomSize?: SelectorOptions
@@ -66,6 +69,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         left: '',
         top: '',
     });
+    const [showSaveConfirm, setShowSaveConfirm] = useState<boolean>(false);
+    const [showRoomSelector, setShowRoomSelector] = useState<boolean>(false);
 
     const {
         localRoom,
@@ -73,6 +78,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         setLayoutSvg,
         addRoomItem,
         room,
+        setLocalRoom,
         changeCageNum,
         cageNumChange,
         moveObjLocation,
@@ -400,14 +406,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         layoutSvg.call(zoom.transform, newTransform);
     }
 
-
     // Create a zoom behavior, prevent scale from changing
-    /*const zoom = d3.zoom()
-        .scaleExtent([roomSize.scale || 1, roomSize.scale || 1])
-        .on("zoom", handleZoom);*/
-
     const zoom = d3.zoom()
-        .scaleExtent([0.6, 1])
+        .scaleExtent([roomSize?.scale || 1, roomSize?.scale || 1])
         .on("zoom", handleZoom);
 
     // Function to handle zoom for grid, zoom also handles infinite grid generation and drag
@@ -415,18 +416,24 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         handleContextMenuClose(); // close open context menu if one is open and the user drags the grid
         const transform = event.transform;
         layoutSvg.select("g.grid").attr("transform", transform);
-        console.log("Layout Zoom Fired: ", transform);
 
         // Apply zoom/pan to each individual "draggable" group, preserving their relative positions
         layoutSvg.selectAll(".draggable").each(function(d: any) {
             // d is the data object attached to anything that is placed in the grid at the highest group level for that object
             const group = d3.select(this);
+            let scale = transform.k
+            // For border template, put a cap on scale sizes to prevent it from growing too big/small
+            if(group.attr('id') === 'border-template'){
+                if(transform.k > 1){
+                    scale = 1;
+                }
+            }
             // Use type assertion to tell TypeScript that d has x and y properties
             const newX = transform.applyX((d as { x: number }).x);
             const newY = transform.applyY((d as { y: number }).y);
 
             // Apply the transformed position and zoom scale
-            group.attr("transform", `translate(${newX}, ${newY}) scale(${transform.k})`);
+            group.attr("transform", `translate(${newX}, ${newY}) scale(${scale})`);
         });
 
         // Dynamically regenerate the grid based on current transform (zoom level)
@@ -453,9 +460,19 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // remove grid if desired
     useEffect(() => {
-        if(showGrid) return;
-        layoutSvg.select(".grid").selectAll('.cell').remove();
-    }, [showGrid]);
+        if(!layoutSvg) return;
+        if(showGrid) {
+            const updateGridProps = {
+                width: SVG_WIDTH,
+                height: SVG_HEIGHT,
+                gridSize: GRID_SIZE
+            }
+            drawGrid(layoutSvg, updateGridProps);
+        }
+        else{
+            layoutSvg.select(".grid").selectAll('.cell').remove();
+        }
+    }, [showGrid, layoutSvg]);
 
     // Border setup state attaches the data to the svg and a call listener for drag behavior
     useEffect(() => {
@@ -500,16 +517,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // load grid at load in, or after it was disabled and re-enabled
     useEffect(() => {
-        if(!layoutSvg || !showGrid) return;
-        const updateGridProps = {
-            width: SVG_WIDTH,
-            height: SVG_HEIGHT,
-            gridSize: GRID_SIZE
+        if(layoutSvg){
+            if(room.name !== 'new-layout') {
+                addPrevRoomSvgs(room, layoutSvg, closeMenuThenDrag);
+            }
+            //layoutSvg.call(zoom);
         }
-
-        drawGrid(layoutSvg, updateGridProps);
-        layoutSvg.call(zoom);
-    }, [layoutSvg, showGrid]);
+    }, [layoutSvg, room]);
 
     // closes cage editor context menu
     const handleContextMenuClose = () => {
@@ -588,6 +602,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         console.log("Resetting to default layout");
     }
 
+    const handleSave = () => {
+        console.log("Saving: ", room);
+            //saveRoom();
+    }
+
     return (
         <div className={"layout-editor"} onClick={handleContextMenuClose}>
             <div ref={utilsRef} id="utils" className={"room-utils"}>
@@ -603,6 +622,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         <RoomItemTemplate
                             type={RoomObjectTypes.Drain}
                             fileName={"drain"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
+                    <LayoutTooltip text={"Divider"}>
+                        <RoomItemTemplate
+                            type={RoomObjectTypes.RoomDivider}
+                            fileName={"RoomDivider"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
@@ -641,7 +667,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 >
                     <g className={'draggable room-obj'}
                        id={'border-template'}
-                       pointerEvents={'bounding-box'}
+                       pointerEvents={'none'}
                        transform={'translate(0,0) scale(1)'}
                     >
                         <ReactSVG
@@ -692,10 +718,24 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
-                    onClick={saveRoom}
-                >Save
-                </button>
+                    onClick={room.name === 'new-layout' ? () => setShowRoomSelector(true) : () => setShowSaveConfirm(true)}
+                >{room.name === 'new-layout' ? 'Save Layout' : 'Update Layout'}
+                 </button>
             </div>
+            {showSaveConfirm &&
+                <ConfirmationPopup
+                        message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
+                        onConfirm={handleSave}
+                        onCancel={() => setShowSaveConfirm(false)}
+                />
+            }
+            {showRoomSelector &&
+                    <RoomSelectorPopup
+                            setRoom={setLocalRoom}
+                            onConfirm={() => setShowSaveConfirm(true)}
+                            onCancel={() => setShowRoomSelector(false)}
+                    />
+            }
             <EditorContextMenu
                 ctxMenuStyle={ctxMenuStyle}
                 onClickDelete={handleDelCage}

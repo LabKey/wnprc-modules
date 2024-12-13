@@ -156,7 +156,7 @@
   background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
-
+/*
 .popup-content {
   background-color: lightgrey;
   margin: auto;
@@ -212,7 +212,7 @@
 .popup-sub-content {
   margin: 10px
 }
-
+*/
 .divider {
   width: calc(100% - 20px); /* Adjust width as needed */
   height: 4px; /* Adjust height as needed */
@@ -284,7 +284,7 @@
 
 // Confirmation pop up
 .popup-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -310,6 +310,8 @@
 
 .popup-buttons button {
   padding: 10px 20px;
+  margin-left: 10px;
+  margin-right: 10px;
   border: none;
   border-radius: 4px;
   cursor: pointer;

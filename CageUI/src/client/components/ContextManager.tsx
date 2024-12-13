@@ -82,6 +82,7 @@ export interface LayoutContextType {
     setLayoutSvg: React.Dispatch<React.SetStateAction<d3.Selection<SVGElement, {}, HTMLElement, any>>>;
     unitLocs: UnitLocations;
     localRoom: Room;
+    setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
     addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => void;
     delRack: (rackId: string) => void;
     changeCageNum: (numBefore: number, numAfter: number) => void;
@@ -215,7 +216,7 @@ export const RoomContextProvider = ({children}) => {
 
 export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoom}) => {
     const [room, setRoom] = useState<Room>({
-        room: "new-layout",
+        name: "new-layout",
         rackGroups: [],
         objects: []
     });
@@ -231,7 +232,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         [RackTypes.TempCage]: [],
     });
     const [localRoom, setLocalRoom] = useState<Room>({
-        room:"new-layout",
+        name:"new-layout",
         rackGroups: [],
         objects: []
     });
@@ -711,29 +712,29 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     // LayoutHistoryData type does not do a hard check against this object so make sure properties align to avoid errors
     useEffect(() => {
         if(!prevRoom.name) return;
+        console.log("Load Data: ", prevRoom);
 
         //TODO make sure rack-group ids are correct
         const newLocalRoom: Room = buildNewLocalRoom(prevRoom);
-        const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.data);
+        const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.cagingData);
 
-        console.log("Load Data: ", prevRoom);
         console.log("New Room State: ", newLocalRoom);
         console.log("layout: ", layoutSvg.node());
 
 
-        addPrevRoomSvgs(newLocalRoom, layoutSvg);
+        //addPrevRoomSvgs(newLocalRoom, layoutSvg);
         setUnitLocs(newUnitLocs);
         setLocalRoom(newLocalRoom);
         setRoom(newLocalRoom);
     }, [prevRoom]);
 
     const saveRoom = () => {
-        if(localRoom.room === 'new-layout'){
+        if(localRoom.name === 'new-layout'){
             // prompt room popup to save?
         }else{
             console.log("Saving layout");
             const dataToSave: LayoutHistoryData[] = [];
-            const roomName = localRoom.room;
+            const roomName = localRoom.name;
             const newEndDate = new Date();
             const newStartDate = new Date();
             // TODO fix defaults by prmpting users to fill them in
@@ -794,7 +795,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             });
 
 
-            const rowsToUpdate = prevRoom.data.reduce((acc, row) => {
+            const rowsToUpdate = prevRoom.cagingData.reduce((acc, row) => {
                 return [
                     ...acc,
                     {
@@ -826,6 +827,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             layoutSvg,
             setLayoutSvg,
             localRoom,
+            setLocalRoom,
             saveRoom,
             addRoomItem,
             delRack,

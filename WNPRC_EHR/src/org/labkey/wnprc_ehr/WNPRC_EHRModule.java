@@ -393,7 +393,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new BloodOverdrawTriggerNotification(this),
                 new EmptyNotificationRevamp(this),
                 new AnimalRequestUpdateNotificationRevamp(this),
-                new TreatmentAlertsNotificationRevamp(this)
+                new TreatmentAlertsNotificationRevamp(this),
+                new ClinpathAbnormalResultsAlertsRevamp(this),
+                new ClinpathAlertsRevamp(this),
+                new ClinpathResultAlertsRevamp(this),
+                new LargeInfantAlertsRevamp(this)
                 );
 
         for (Notification notification : notifications)

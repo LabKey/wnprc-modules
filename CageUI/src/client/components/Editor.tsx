@@ -52,11 +52,16 @@ interface EditorProps {
 }
 
 const Editor: FC<EditorProps> = ({roomSize}) => {
-    const SVG_WIDTH = 1290; // pixel width of the layout svg
-    const SVG_HEIGHT = 810; // pixel height of the layout svg
+    const SVG_WIDTH = 1290; // starting pixel width of the layout svg
+    const SVG_HEIGHT = 810; // starting pixel height of the layout svg
     const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage
     const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
-    const GRID_SIZE = 30; // number of pixels of a cell for length/width
+    const CELL_SIZE = 30; // number of pixels of a cell for length/width
+
+    // number of cells in grid width/height, based off scale
+    const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
+    const gridHeight = Math.ceil(SVG_HEIGHT / roomSize.scale / CELL_SIZE);
+
     const utilsRef = useRef(null);
     const borderRef = useRef(null);
     const [showGrid, setShowGrid] = useState<boolean>(true);
@@ -93,7 +98,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     const dragInLayout = d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
         .on('drag', createDragInLayout())
-        .on('end', createEndDragInLayout({gridSize: GRID_SIZE, moveItem: moveObjLocation}));
+        .on('end', createEndDragInLayout({gridSize: CELL_SIZE, moveItem: moveObjLocation}));
 
     // combined drag in layout for objects in the layout to close menus when they are selected
     const closeMenuThenDrag = d3.drag()
@@ -168,7 +173,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
                         targetCageLocs.forEach((targetLoc) => {
                             if(mergeAvail) return;
-                            mergeAvail = checkAdjacent(targetLoc, dragLoc, GRID_SIZE, gridRatio);
+                            mergeAvail = checkAdjacent(targetLoc, dragLoc, CELL_SIZE, gridRatio);
                             if(mergeAvail){
                                 targetCageLoc = targetLoc;
                                 draggedCageLoc = dragLoc;
@@ -214,7 +219,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     const targetRackType = parseRoomItemType(targetLoc.num) as RackTypes;
                     const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
-                    mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, GRID_SIZE, gridRatio);
+                    mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, CELL_SIZE, gridRatio);
                     if(mergeAvail){
                         targetCageLoc = targetLoc;
                     }
@@ -348,7 +353,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             // Apply transforms for zoom on shape to scale to correct size when placed
             const transform = d3.zoomTransform(layoutSvg.node());
             // Discovers the grid cell to lock onto
-            const targetRect = getTargetRect(x, y, GRID_SIZE, transform);
+            const targetRect = getTargetRect(x, y, CELL_SIZE, transform);
             if (targetRect) {
                 const cellX = targetRect.x;
                 const cellY = targetRect.y;
@@ -422,12 +427,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             // d is the data object attached to anything that is placed in the grid at the highest group level for that object
             const group = d3.select(this);
             let scale = transform.k
-            // For border template, put a cap on scale sizes to prevent it from growing too big/small
-            if(group.attr('id') === 'border-template'){
-                if(transform.k > 1){
-                    scale = 1;
-                }
-            }
             // Use type assertion to tell TypeScript that d has x and y properties
             const newX = transform.applyX((d as { x: number }).x);
             const newY = transform.applyY((d as { y: number }).y);
@@ -437,7 +436,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         });
 
         // Dynamically regenerate the grid based on current transform (zoom level)
-        updateGrid(transform, SVG_WIDTH, SVG_HEIGHT, GRID_SIZE);
+        drawGrid(layoutSvg, {width: SVG_WIDTH, height: SVG_HEIGHT, gridSize: CELL_SIZE});
     }
 
     /* Function to be run after the svg border_template is injected into the dom from the ReactSVG component.
@@ -465,7 +464,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             const updateGridProps = {
                 width: SVG_WIDTH,
                 height: SVG_HEIGHT,
-                gridSize: GRID_SIZE
+                gridSize: CELL_SIZE
             }
             drawGrid(layoutSvg, updateGridProps);
         }
@@ -479,10 +478,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         if(!borderSetup) return;
         const borderGroup:  d3.Selection<SVGGElement, {}, HTMLElement, any> = d3.select('#border-template') as  d3.Selection<SVGGElement, {}, HTMLElement, any>;
         placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
-        borderGroup.call(dragBorder(closeMenuThenDrag, GRID_SIZE, borderGroup));
+        borderGroup.call(dragBorder(closeMenuThenDrag, CELL_SIZE, borderGroup));
         // Set zoom after border is loaded in
         if(roomSize){
             zoomToScale(roomSize.scale);
+
         }
         setBorderSetup(false);
     }, [borderSetup]);
@@ -573,7 +573,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 // reattach listeners if new svg group was created
                 if(newSvgGroup){
                     const addProps: LayoutDragProps = {
-                        gridSize: GRID_SIZE,
+                        gridSize: CELL_SIZE,
                         moveItem: moveObjLocation
                     };
                     newSvgGroup.call(closeMenuThenDrag);
@@ -650,7 +650,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     </LayoutTooltip>
                 </div>
             </div>
-            <div id={"layout-grid"} style={{width: SVG_WIDTH, height: SVG_HEIGHT}}>
+            <div id={"layout-grid"}>
                 {(renameCage) && // Opens menu for renaming cage
                         <CageNumInput
                                 onSubmit={(num) => {
@@ -659,16 +659,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                 onClose={() => setRenameCage(false)}
                         />
                 }
-                <svg
-                    width={SVG_WIDTH}
-                    height={SVG_HEIGHT}
-                    viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+                <svg // Ensure the width/height fit the grid, using (scaled cell size * number of cells in width/height)
+                    width={(roomSize.scale * CELL_SIZE) * gridWidth}
+                    height={(roomSize.scale * CELL_SIZE)* gridHeight}
+                    viewBox={`0 0 ${(roomSize.scale * CELL_SIZE) * gridWidth} ${(roomSize.scale * CELL_SIZE) * gridHeight}`}
                     id="layout-svg"
                 >
                     <g className={'draggable room-obj'}
                        id={'border-template'}
                        pointerEvents={'none'}
-                       transform={'translate(0,0) scale(1)'}
                     >
                         <ReactSVG
                             src={`${ActionURL.getContextPath()}/cageui/static/RoomBorder.svg`}

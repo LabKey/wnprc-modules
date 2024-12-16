@@ -46,9 +46,14 @@ export const parseWrapperId = (input: string): RoomItemType => {
 
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
+    const transform = zoomTransform(layoutSvg.node());
     layoutSvg.select('.grid').remove();
-    layoutSvg.append("g").attr("class", "grid");
-    updateGrid(d3.zoomIdentity, updateGridProps.width, updateGridProps.height, updateGridProps.gridSize); // Draw grid with the initial view
+    layoutSvg.append("g")
+        .attr("class", "grid")
+        .attr("width", updateGridProps.width)
+        .attr('height', updateGridProps.height)
+        .attr('transform', `translate(0,0) scale(${transform.k})`);
+    updateGrid(zoomTransform(layoutSvg.node()), updateGridProps.width, updateGridProps.height, updateGridProps.gridSize); // Draw grid with the initial view
 }
 
 export const updateGrid = (transform, width, height, gridSize) => {
@@ -62,8 +67,8 @@ export const updateGrid = (transform, width, height, gridSize) => {
     const yMax = Math.ceil((height - transform.y) / transform.k / gridSize) * gridSize;
 
     // Draw the grid within the current visible area
-    for (let x = xMin; x < xMax; x += gridSize) {
-        for (let y = yMin; y < yMax; y += gridSize) {
+    for (let x = xMin; x <= xMax; x += gridSize) {
+        for (let y = yMin; y <= yMax; y += gridSize) {
             g.append("rect")
                 .attr("x", x)
                 .attr("y", y)
@@ -71,7 +76,7 @@ export const updateGrid = (transform, width, height, gridSize) => {
                 .attr("width", gridSize)
                 .attr("height", gridSize)
                 .attr("fill", "none")
-                .attr("stroke", "lightgray");//.style('pointer-events', 'bounding-box');
+                .attr("stroke", "lightgray");
         }
     }
 }

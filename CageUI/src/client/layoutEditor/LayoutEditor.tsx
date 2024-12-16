@@ -47,7 +47,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
         },
         {
             id: 3,
-            scale: 0.6,
+            scale: 0.4,
             title: "Large",
             description: "Large room size fitting up to 17x8 cages"
         }
@@ -110,7 +110,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                         name={roomName}
                     />
                     <div className={"divider"}/>
-                    {(roomName || !showSelectionPopup) &&
+                    {selectedSize &&
                         <Editor roomSize={selectedSize}/>
                     }
                     {showSelectionPopup &&

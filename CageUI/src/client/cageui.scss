@@ -562,7 +562,8 @@
   grid-area: layout-grid;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
+  width: auto;
   background-color: white;
 }
 
@@ -572,6 +573,7 @@
   flex-direction: column;
   height: 100%;
 }
+
 #layout-grid svg {
   width: 100%;
   height: 100%;

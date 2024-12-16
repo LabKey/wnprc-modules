@@ -719,7 +719,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.cagingData);
 
         console.log("New Room State: ", newLocalRoom);
-        console.log("layout: ", layoutSvg.node());
 
 
         //addPrevRoomSvgs(newLocalRoom, layoutSvg);

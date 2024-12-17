@@ -2,15 +2,18 @@ SELECT
     Id,
     date,
     project,
-    coalesce(account, project.account.alias) AS debitedAccount,
+    coalesce(account, project.account.alias) as debitedAccount,
     coalesce(a.tier_rate.tierRate, project.account.tier_rate.tierRate) as otherRate,
-    objectid AS sourceRecord,
-    ('Blood Draws ' || Id) AS comment,
-    CAST(1 as DOUBLE) AS quantity,
-    taskId,
-    performedby
+    group_concat(objectid,';') as objectids,
+    ('Blood Draws ' || Id ) as comment,
+    CAST(1 AS DOUBLE) AS quantity,
+    group_concat(taskid, ';') as taskids,
+    group_concat(performedby, ';') as performedby
 FROM studyLinked.BloodSchedule bloodSch
     LEFT JOIN ehr_billing.aliases a ON bloodSch.account = a.alias
 WHERE
     billedBy.value = 'c' AND
     qcstate.publicdata = true
+
+--group blood draws drawn on the same date with same project
+GROUP BY id, date, project, coalesce(account, project.account.alias), coalesce(a.tier_rate.tierRate, project.account.tier_rate.tierRate);

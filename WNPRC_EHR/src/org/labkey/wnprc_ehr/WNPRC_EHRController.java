@@ -37,9 +37,11 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
@@ -76,11 +78,13 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
@@ -123,12 +127,15 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -2105,4 +2112,143 @@ public class WNPRC_EHRController extends SpringActionController
             return response;
         }
     }
+
+    public static class CompareBloodSchedulesForm
+    {
+        private List<Map<String,Object>> _records;
+        public List<Map<String,Object>> getRecords()
+        {
+            return _records;
+        }
+
+        public void setRecords(List<Map<String,Object>> records)
+        {
+            _records = records;
+        }
+    }
+
+    public static String convertSetToString(Set<?> set, String delimiter) {
+        StringBuilder sb = new StringBuilder();
+        Iterator<?> iterator = set.iterator();
+
+        while (iterator.hasNext()) {
+            Object element = iterator.next();
+            sb.append(element);
+            if (iterator.hasNext()) {
+                sb.append(delimiter + " ");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    @ActionNames("CompareBloodSchedules")
+    @RequiresNoPermission()
+    public class comparebloodSchedulesAction extends ReadOnlyApiAction<CompareBloodSchedulesForm>
+    {
+
+        @Override
+        public ApiResponse execute(CompareBloodSchedulesForm form, BindException errors) throws IOException, InvalidFormatException
+        {
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+
+            Map<String, List<Map<String, Object>>> groupedById = new HashMap<>();
+            for (Map<String,Object> mp : form.getRecords())
+            {
+                String id = (String) mp.get("Id");
+                groupedById.computeIfAbsent(id, k -> new ArrayList<>()).add(mp);
+            }
+
+            List<Map<String,Object>> messageList = new ArrayList<>();
+            //messages -> Map<String, String>
+
+            for (Map.Entry<String, List<Map<String, Object>>> entry : groupedById.entrySet())
+            {
+                Map<String, Object> theMessage = new HashMap<>();
+
+                Set<String> lsids = new HashSet<>();
+                List<Map<String, Object>> records = entry.getValue();
+
+                Set<java.time.LocalTime> uniqueTimes = new HashSet<>();
+                Set<String> uniqueRequestors = new HashSet<>();
+                Set<Integer> uniqueProjects = new HashSet<>();
+                Set<Integer>  uniqueCreatedBy = new HashSet<>();
+
+
+                // Create a Set to track unique dates
+                for (int i = 0; i < records.size() - 1; i++)
+                {
+                    Map<String, Object> record1 = records.get(i);
+                    String dateTimeString1 = (String) record1.get("date");
+
+                    lsids.add((String) record1.get("lsid"));
+
+                    for (int j = i + 1; j < records.size(); j++)
+                    {
+                        Map<String, Object> record2 = records.get(j);
+                        String dateTimeString2 = (String) record2.get("date");
+                        lsids.add((String) record1.get("lsid"));
+
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+                        LocalDateTime dateTime1 = LocalDateTime.parse(dateTimeString1, formatter);
+
+                        LocalDateTime dateTime2 = LocalDateTime.parse(dateTimeString2, formatter);
+
+                        java.time.LocalDate date1 = dateTime1.toLocalDate();
+                        java.time.LocalTime time1 = dateTime1.toLocalTime();
+
+                        java.time.LocalDate date2 = dateTime2.toLocalDate();
+                        java.time.LocalTime time2 = dateTime2.toLocalTime();
+
+                        if (date1.isEqual(date2) && !time1.equals(time2))
+                        {
+                            uniqueTimes.add(time1);
+                            uniqueTimes.add(time2);
+                        }
+                    }
+                }
+                if (uniqueTimes.size() > 0)
+                {
+                    //get requestor and project information
+
+                    SimpleFilter myFilter = new SimpleFilter(FieldKey.fromString("lsid"), String.join("; ", lsids), CompareType.CONTAINS_ONE_OF);
+                    //Runs query with updated info.
+                    TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("Blood Draws");
+                    TableSelector myTable = new TableSelector(ti, PageFlowUtil.set("lsid", "project", "Id", "requestor", "createdby"), myFilter, null);
+                    Map<String, Object>[] rows = myTable.getMapArray();
+                    for (Map<String, Object> row : rows)
+                    {
+                        uniqueRequestors.add((String) row.get("requestor"));
+                        uniqueProjects.add((Integer) row.get("project"));
+                        uniqueCreatedBy.add((Integer) row.get("createdBy"));
+                    }
+
+
+                    List<String> emails = new ArrayList<>();
+                    for (var userId : uniqueCreatedBy)
+                    {
+                        var user = UserManager.getUser(userId);
+
+                        if (user != null)
+                            emails.add(user.getEmail());
+                    }
+
+                    //pull out requestors email/userid
+                    theMessage.put("emails", String.join(",", emails));
+                    theMessage.put("projects", convertSetToString(uniqueProjects, ","));
+                    theMessage.put("message",entry.getKey() + " has "+ uniqueTimes.size() + " draws on the same day but at different times.");
+
+
+                    messageList.add(theMessage);
+                }
+            }
+            response.put("message", messageList);
+
+            return response;
+
+        }
+    }
+
 }

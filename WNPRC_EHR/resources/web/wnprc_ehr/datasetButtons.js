@@ -673,6 +673,26 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }
                 }
         },
+
+        getMoreItems: function(records) {
+
+            return new Promise((resolve, reject) => {
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL('WNPRC_EHR', 'CompareBloodSchedules'),
+                    jsonData: { records: records },
+                    callback: function (config, success, xhr) {
+                        if (success) {
+                            console.log(xhr);
+                            resolve(xhr.responseText);
+                        } else {
+                            reject('Couldn\'t compare blood schedule, internal error.');
+                        }
+                    }
+                })
+            });
+
+        },
+
         /**
          * This add a handler to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
          * It also captures values for 'billedBy' and 'instructions'.
@@ -710,14 +730,26 @@ WNPRC_EHR.DatasetButtons = new function(){
                     title: 'Change Request Status',
                     width: 430,
                     autoHeight: true,
+                    id: 'change-request-window',
                     items: [{
                         xtype: 'form',
+                        height: '100%',
                         ref: 'theForm',
+                        id: 'change-request-form',
+                        autoHeight: true,
                         bodyStyle: 'padding: 5px;',
                         defaults: {
                             border: false
                         },
-                        items: [{
+                        items: [
+
+                            {
+                                id:'bloodCompareResponseWrapper',
+                                height: '100%',
+                                html: '<div id="bloodCompareResponse"><i class="fa fa-spinner fa-pulse"></i> loading..</div>',
+                                tag: 'div'
+                            },
+                            {
                             html: 'Total Records: '+checked.length+'<br><br>',
                             tag: 'div'
                         },{
@@ -767,10 +799,11 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }],
                     buttons: [{
                         text:'Submit',
-                        disabled:false,
+                        disabled:true,
                         formBind: true,
                         ref: '../submit',
                         scope: this,
+                        id: 'submitButton',
                         handler: function(o){
                             var win = o.up('window');
                             var form = win.down('form');
@@ -848,7 +881,34 @@ WNPRC_EHR.DatasetButtons = new function(){
                         handler: function(o){
                             o.ownerCt.ownerCt.close();
                         }
-                    }]
+                    }],
+                    listeners: {
+                        afterrender: () => {
+                            this.getMoreItems(records).then(response => {
+                                let resp = document.getElementById('bloodCompareResponse');
+                                let rsp = JSON.parse(response).message;
+                                let txt = '';
+                                if (rsp) {
+                                    for (let item of rsp) {
+                                        txt += '<div>' + item.message + item.projects + item.emails + '</div>' + '<br>';
+                                    }
+                                }
+                                if (txt.length > 0){
+                                    resp.innerHTML = '<span style="background:#acac16"> Warning:</span> ' + txt;
+                                } else {
+                                    resp.innerHTML = '';
+                                }
+                                Ext4.getCmp('submitButton').enable()
+                                // Have to reset the height since the form has a set height after initial rendering,
+                                // but when text is dynamically added the height does not change.
+                                Ext4.getCmp('change-request-form').setHeight('100%')
+                            }).catch(error => {
+                                Ext4.getCmp('submitButton').enable()
+                                console.error(error);
+                                // Handle the error, e.g., display an error message in the window
+                            });
+                        }
+                    }
                 }).show();
             }
         },

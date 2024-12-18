@@ -614,10 +614,7 @@
                     {
                         events: function (fetchInfo, successCallback, failureCallback) {
                             console.log(" startStr " + fetchInfo.startStr);
-                            console.log(" startStr " + fetchInfo.endStr);
-
-                            //TODO:Knockout not working when animalId is sent
-                            //have to troubleshot error "in"when sending $animalId
+                            console.log(" endtStr " + fetchInfo.endStr);
 
                             if ($animalId === 'undefined' || $animalId === "null" || $animalId === ''){
                                 let queryConfig ={};
@@ -1674,8 +1671,9 @@
     function loadWaterTotal(animalId, calendarDates, calendar, currentTime){
         calendar.addEventSource(
                 {
-                    events:function (fetchInfo, successCallback, failureCallback) {
-                        if (animalId === 'undefined' || animalId === "null" || animalId === ''){
+                events:function (fetchInfo, successCallback, failureCallback) {
+
+                        if (animalId === 'undefined' || animalId === "null" || animalId === '') {
 
                             let momentStarDate = fetchInfo.start.format('Y-m-d');
                             let momentEndDate = fetchInfo.end.format('Y-m-d');
@@ -1683,7 +1681,7 @@
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                                 "date~gte": fetchInfo.start.format('Y-m-d'),
                                 "date~lte": fetchInfo.end.format('Y-m-d'),
-                                "parameters": {STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate}
+                                "parameters": { STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate }
 
                             }).then(function (data) {
                                 var events = data.rows;
@@ -1692,88 +1690,81 @@
                                         events.map(function (row) {
                                             let parsedTotalWater = 0;
                                             let eventTitle = row.Id;
-                                            row.animalStatus=row['Id/Demographics/calculated_status'];
+                                            row.animalStatus = row['Id/Demographics/calculated_status'];
                                             let dateIndexWaterTotal = new Date(row.date);
                                             dateIndexWaterTotal = dateIndexWaterTotal.getFullYear() + '-' + dateIndexWaterTotal.getMonth() + '-' + dateIndexWaterTotal.getDate();
                                             let animalInDay = false
-                                            if (calendarDates.has(dateIndexWaterTotal)){
+                                            if (calendarDates.has(dateIndexWaterTotal)) {
                                                 let animalIdArray = [];
                                                 animalIdArray = calendarDates.get(dateIndexWaterTotal);
-                                                for(var i = 0; i < animalIdArray.length; i++){
-                                                    if (animalIdArray[i] === row.Id){
+                                                for (var i = 0; i < animalIdArray.length; i++) {
+                                                    if (animalIdArray[i] === row.Id) {
                                                         animalInDay = true;
                                                         break;
                                                     }
                                                 }
                                             }
-                                            if( row.conditionAtTime === 'regulated' ) {
+                                            if (row.conditionAtTime === 'regulated') {
                                                 if (row['Id/Demographics/calculated_status'] === 'Alive') {
                                                     if (row.TotalWater === null && !animalInDay) {
                                                         row.TotalWater = ' none';
                                                         parsedTotalWater = row.TotalWater;
-                                                    }
-                                                    else if (row.TotalWater !== null) {
+                                                    } else if (row.TotalWater !== null) {
                                                         parsedTotalWater = row.TotalWater;
                                                         eventTitle += " Total: ";
                                                     }
-                                                }
-                                                else {
-                                                    row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
+                                                } else {
+                                                    row.TotalWater = ' ' + row['Id/Demographics/calculated_status'];
                                                     parsedTotalWater = row.TotalWater;
                                                 }
-                                            }
-                                            else {
+                                            } else {
                                                 if (row['Id/Demographics/calculated_status'] === 'Alive') {
                                                     row.TotalWater = ' on Lixit';
                                                     parsedTotalWater = row.TotalWater;
-                                                }
-                                                else {
-                                                    row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
+                                                } else {
+                                                    row.TotalWater = ' ' + row['Id/Demographics/calculated_status'];
                                                     parsedTotalWater = row.TotalWater;
                                                 }
                                             }
                                             eventTitle += parsedTotalWater;
 
                                             var eventObj = {
-                                                id : LABKEY.Utils.generateUUID(),
+                                                id: LABKEY.Utils.generateUUID(),
                                                 title: eventTitle,
                                                 start: new Date(row.date),
                                                 allDay: true,
-                                                groupId : row.Id,
+                                                groupId: row.Id,
                                                 textColor: '#000000',
                                                 rawRowData: row
                                             };
-                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
+                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit') {
                                                 eventObj.color = '#FFFFFF';
-                                            }
-                                            else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
+                                            } else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg) {
                                                 eventObj.color = '#FF7F50';
-                                            }
-                                            else{
+                                            } else {
                                                 eventObj.color = '#EE2020'
                                             }
-                                            if (animalInDay){
+                                            if (animalInDay) {
                                                 eventObj.display = 'none';
-                                            }
-                                            else{
+                                            } else {
                                                 eventObj.display = 'auto';
                                             }
                                             return eventObj;
                                         })
                                 );
-                                failureCallback((function (data){
+                                failureCallback((function (data) {
                                     console.log("error from waterTotalByDateWithWeight");
                                 }))
 
                             })
 
-                        }else{
+                        } else {
                             let momentStarDate = fetchInfo.start.format('Y-m-d');
                             let momentEndDate = fetchInfo.end.format('Y-m-d');
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                                 "date~gte": fetchInfo.start.format('Y-m-d'),
                                 "date~lte": fetchInfo.end.format('Y-m-d'),
-                                "parameters": {STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate},
+                                "parameters": { STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate },
                                 "Id~in": animalId
                             }).then(function (data) {
                                 var events = data.rows;
@@ -1781,78 +1772,74 @@
                                 successCallback(
                                         events.map(function (row) {
 
-                                                let parsedTotalWater = 0;
-                                                let eventTitle = row.Id;
-                                                row.animalStatus=row['Id/Demographics/calculated_status'];
-                                                let dateIndexWaterTotal = new Date(row.date);
-                                                dateIndexWaterTotal = dateIndexWaterTotal.getFullYear() + '-' + dateIndexWaterTotal.getMonth() + '-' + dateIndexWaterTotal.getDate();
-                                                let animalInDay = false
-                                                if (calendarDates.has(dateIndexWaterTotal)){
-                                                    let animalIdArray = [];
-                                                    animalIdArray = calendarDates.get(dateIndexWaterTotal);
-                                                    for(var i = 0; i < animalIdArray.length; i++){
-                                                        if (animalIdArray[i] === row.Id){
-                                                            animalInDay = true;
-                                                            break;
-                                                        }
+                                            let parsedTotalWater = 0;
+                                            let eventTitle = row.Id;
+                                            row.animalStatus = row['Id/Demographics/calculated_status'];
+                                            let dateIndexWaterTotal = new Date(row.date);
+                                            dateIndexWaterTotal = dateIndexWaterTotal.getFullYear() + '-' + dateIndexWaterTotal.getMonth() + '-' + dateIndexWaterTotal.getDate();
+                                            let animalInDay = false
+                                            if (calendarDates.has(dateIndexWaterTotal)) {
+                                                let animalIdArray = [];
+                                                animalIdArray = calendarDates.get(dateIndexWaterTotal);
+                                                for (var i = 0; i < animalIdArray.length; i++) {
+                                                    if (animalIdArray[i] === row.Id) {
+                                                        animalInDay = true;
+                                                        break;
                                                     }
                                                 }
-                                                if( row.conditionAtTime === 'regulated' ) {
-                                                    if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                        if (row.TotalWater === null && !animalInDay) {
-                                                            row.TotalWater = ' none';
-                                                            parsedTotalWater = row.TotalWater;
-                                                        }
-                                                        else if (row.TotalWater !== null) {
-                                                            parsedTotalWater = row.TotalWater;
-                                                            eventTitle += " Total: ";
-                                                        }
-                                                    }
-                                                    else {
-                                                        row.TotalWater = ' '+row['Id/Demographics/calculated_status'];
-                                                        parsedTotalWater += row.TotalWater;
-                                                    }
-                                                }
-                                                else {
-                                                    if (row['Id/Demographics/calculated_status'] === 'Alive') {
-                                                        row.TotalWater = ' on Lixit';
+                                            }
+                                            if (row.conditionAtTime === 'regulated') {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    if (row.TotalWater === null && !animalInDay) {
+                                                        row.TotalWater = ' none';
                                                         parsedTotalWater = row.TotalWater;
-                                                    }
-                                                    else {
-                                                        row.TotalWater = ' '+row['Id/Demographics/calculated_status'];;
+                                                    } else if (row.TotalWater !== null) {
                                                         parsedTotalWater = row.TotalWater;
+                                                        eventTitle += " Total: ";
                                                     }
+                                                } else {
+                                                    row.TotalWater = ' ' + row['Id/Demographics/calculated_status'];
+                                                    parsedTotalWater += row.TotalWater;
                                                 }
-                                                eventTitle += parsedTotalWater;
+                                            } else {
+                                                if (row['Id/Demographics/calculated_status'] === 'Alive') {
+                                                    row.TotalWater = ' on Lixit';
+                                                    parsedTotalWater = row.TotalWater;
+                                                } else {
+                                                    row.TotalWater = ' ' + row['Id/Demographics/calculated_status'];
+                                                    ;
+                                                    parsedTotalWater = row.TotalWater;
+                                                }
+                                            }
+                                            eventTitle += parsedTotalWater;
 
-                                                var eventObj = {
-                                                    id : LABKEY.Utils.generateUUID(),
-                                                    title: eventTitle,
-                                                    start: new Date(row.date),
-                                                    textColor: '#000000',
-                                                    allDay: true,
-                                                    groupId : row.Id,
-                                                    rawRowData: row
-                                                };
-                                                if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit'){
-                                                    eventObj.color = '#FFFFFF';
-                                                }else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg){
-                                                    eventObj.color = '#FF7F50';
-                                                }
-                                                else{
-                                                    eventObj.color = '#EE2020'
-                                                }
-                                                if (calendarDates.has(dateIndexWaterTotal) && calendarDates.get(dateIndexWaterTotal).includes(row.Id)){
-                                                    eventObj.display = 'none';
-                                                }else{
-                                                    eventObj.display = 'auto';
-                                                }
-                                                return eventObj;
+                                            var eventObj = {
+                                                id: LABKEY.Utils.generateUUID(),
+                                                title: eventTitle,
+                                                start: new Date(row.date),
+                                                textColor: '#000000',
+                                                allDay: true,
+                                                groupId: row.Id,
+                                                rawRowData: row
+                                            };
+                                            if (row.mlsPerKg >= row.InnerMlsPerKg || row.conditionAtTime === 'lixit') {
+                                                eventObj.color = '#FFFFFF';
+                                            } else if (row.mlsPerKg >= '10' && row.mlsPerKg < row.InnerMlsPerKg) {
+                                                eventObj.color = '#FF7F50';
+                                            } else {
+                                                eventObj.color = '#EE2020'
+                                            }
+                                            if (calendarDates.has(dateIndexWaterTotal) && calendarDates.get(dateIndexWaterTotal).includes(row.Id)) {
+                                                eventObj.display = 'none';
+                                            } else {
+                                                eventObj.display = 'auto';
+                                            }
+                                            return eventObj;
 
 
                                         })
                                 );
-                                failureCallback((function (data){
+                                failureCallback((function (data) {
                                     console.log("error from waterTotalByDateWithWeight");
                                 }))
                             })

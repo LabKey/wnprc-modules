@@ -36,6 +36,37 @@ function onInit(event, helper){
     });
 }
 
+function onInsert(helper, scriptErrors, row){
+    if (row.id && row.waterSource === 'regulated' && row.frequency && row.assignedTo && row.provideFruit && row.date){
+        let lixitOrderMap = WNPRC.Utils.getJavaHelper().checkWaterLixit(row.id, row.date);
+        let lixitStartDate;
+        let lixitOrderObjectid;
+        let latestWaterSource;
+        console.log("lixitOrderMap "+ lixitOrderMap);
+
+        if (lixitOrderMap != null){
+
+                console.log(lixitOrderMap.date);
+                lixitStartDate = new Date(lixitOrderMap.date);
+                console.log(lixitOrderMap.objectid);
+                lixitOrderObjectid = lixitOrderMap.objectid;
+                console.log(lixitOrderMap.waterSource);
+                latestWaterSource = lixitOrderMap.waterSource;
+
+        }
+        if(latestWaterSource === "lixit"){}
+        console.log("startdate "+lixitStartDate+" objectid "+lixitOrderObjectid + "date "+ lixitStartDate);
+            let jsonArray = WNPRC.Utils.getJavaHelper().closeWaterOrder(row.id, lixitStartDate, row.date, row.project, lixitOrderObjectid, true);
+            if (jsonArray != null){
+                for (var i = 0; i < jsonArray.length; i++) {
+                    var errorObject = jsonArray[i];
+                    EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
+                }
+            }
+
+    }
+}
+
 
 function onUpsert(helper, scriptErrors, row, oldRow){
 

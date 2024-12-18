@@ -2281,6 +2281,35 @@ public class TriggerScriptHelper {
         }
         return  returnCondition;
     }
+    public Map<String,Object> checkWaterLixit(String animalId, Date clientDate)
+    {
+        Map<String,Object> returnMap = new HashMap<>();
+
+        Calendar filterDate = Calendar.getInstance();
+        filterDate.setTime(clientDate);
+
+        TableInfo waterOrders = getTableInfo("study", "waterOrders");
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
+        filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_LT);
+
+        Sort sort = new Sort();
+        sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.DESC, true);
+
+        TableSelector ts = new TableSelector(waterOrders, PageFlowUtil.set("objectid", "date", "waterSource"),filter, sort);
+        ts.setMaxRows(1);
+        Map<String,Object>[] waterOrderFromServer = ts.getMapArray();
+
+        if (waterOrderFromServer.length>0){
+            for (Map<String, Object> openWaterOrder : waterOrderFromServer)
+            {
+                returnMap.put("objectid", ConvertHelper.convert(openWaterOrder.get("objectid"), String.class));
+                returnMap.put("date", ConvertHelper.convert(openWaterOrder.get("date"), Date.class));
+                returnMap.put("waterSource", ConvertHelper.convert(openWaterOrder.get("waterSource"), String.class));
+
+            }
+        }
+        return  returnMap;
+    }
 
 
     public static List<Object> filterBloodDraws(List<Object> bloodRecords, Integer limit)

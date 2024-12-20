@@ -18,7 +18,11 @@ type PageViews = "Room" | "Rack" | "Cage";
 export type RackActions = 'merge' | 'connect' | 'cancel';
 export type GroupId = `rack-group-${number}`;
 
-export type RoomItemType = RackTypes | RoomObjectTypes;
+export type RackStringType = (typeof RackTypesStrings)[RackTypes];
+export type RoomObjectStringType = (typeof RoomObjectTypesStrings)[RoomObjectTypes];
+
+export type RoomItemStringType = RackStringType | RoomObjectStringType;
+export type RoomItemType = RackTypes | RoomObjectTypes | DefaultRackTypes;
 
 // Classification of the objects, caging is for racks, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
@@ -26,17 +30,22 @@ export type RoomItemClass = 'caging' | 'roomObj';
 // deletion actions for state management, cage = delete cage from rack, rack = delete rack from rack group, group = delete entire rack group
 export type DeleteActions = 'cage' | 'rack' | 'group';
 
-
+export interface DoorResizeProps {
+    startX: number;
+    startY: number;
+    startWidth: number;
+    startHeight: number;
+    scaleX: number;
+    scaleY: number;
+}
 
 export interface LayoutHistoryData {
-    room_object: RoomObjectTypes | null;
+    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
     rack_group: number | null;
     rack: number | null;
-    default_rack: number | null;
     cage: string | null;
     x_coord: number;
     y_coord: number;
-    scale: number;
     start_date?: Date;
     end_date?: Date;
     room?: string;
@@ -101,6 +110,7 @@ export interface Room {
     name: string;
     rackGroups: RackGroup[];
     objects: RoomObject[];
+    layoutData: LayoutData;
 }
 
 export interface LayoutData {
@@ -152,6 +162,7 @@ export interface EHRRackType {
     supportsTunnel: boolean;
     abbreviation: string;
     description: string;
+    isDefault: boolean;
 }
 
 export interface EHRRoom {
@@ -177,16 +188,6 @@ export interface EHRCage {
     room: string; // unique room name
 }
 
-export interface LocationCoords {
-    num: CageNumber;
-    cellX: number;
-    cellY: number;
-}
-
-export type UnitLocations = {
-    [key in RackTypes]: LocationCoords[];
-};
-
 export interface AdjCages {
     leftCage: Cage | undefined;
     rightCage: Cage | undefined;
@@ -202,20 +203,63 @@ export interface CageState {
 
 export type RoomItem = Rack | RoomObject;
 
-
-export enum RoomObjectTypes {
-    RoomDivider = "roomDivider",
-    Drain = "drain",
-    Door = "door",
+// used in ehr to determine if the rack is default (doesn't have a rackid)
+export enum DefaultRackTypes {
+    DefaultCage = 0,
+    DefaultPen = 1,
+    DefaultTempCage = 2,
+    DefaultPlayCage = 3
 }
 
-// these string names are used to id divs in the svgs
+// RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types
+// Enum of rack types, map to string first, used to store types as integers in the db
 export enum RackTypes {
-    Cage = "cage",
-    Pen = "pen",
-    TempCage = "tempCage",
-    PlayCage = "playCage"
+    Cage = 4,
+    Pen = 5,
+    TempCage = 6,
+    PlayCage = 7
 }
+
+export const RackTypeToDefaultType: { [key in RackTypes]: DefaultRackTypes } = {
+    [RackTypes.Cage]: DefaultRackTypes.DefaultCage,
+    [RackTypes.Pen]: DefaultRackTypes.DefaultPen,
+    [RackTypes.TempCage]: DefaultRackTypes.DefaultTempCage,
+    [RackTypes.PlayCage]: DefaultRackTypes.DefaultPlayCage,
+};
+
+
+// Object mapping for string representation. These string names are used to id divs in the svgs
+export const RackTypesStrings: { [key in RackTypes]: string } = {
+    [RackTypes.Cage]: "cage",
+    [RackTypes.Pen]: "pen",
+    [RackTypes.TempCage]: "tempCage",
+    [RackTypes.PlayCage]: "playCage",
+};
+
+// Like rack types enum but for room objects, start at 100 to give buffer room for rack types
+export enum RoomObjectTypes {
+    RoomDivider = 100,
+    Drain = 101,
+    Door = 102
+}
+
+export const RoomObjectTypesStrings: { [key in RoomObjectTypes]: string } = {
+    [RoomObjectTypes.RoomDivider]: "roomDivider",
+    [RoomObjectTypes.Drain]: "drain",
+    [RoomObjectTypes.Door]: "door"
+};
+
+export interface LocationCoords {
+    num: CageNumber;
+    cellX: number;
+    cellY: number;
+}
+
+// keys here are the string for rack type,
+export type UnitLocations = {
+    [key in RackStringType]: LocationCoords[];
+};
+
 
 export enum CageType {
     Allentown = "allentown",
@@ -259,7 +303,7 @@ interface SchematicRoomProps {
     }
 }
 
-export type CageNumber = `${RackTypes}-${number}`
+export type CageNumber = `${RackStringType}-${number}`
 
 export type SeparatorType = "divider" | "floor";
 
@@ -287,7 +331,8 @@ export const DEFAULT_CAGE_TYPE: EHRRackType = {
     sqft: 0.0,
     supportsTunnel: false,
     type: RackTypes.Cage,
-    width: 0.0
+    width: 0.0,
+    isDefault: true
 }
 
 export const DEFAULT_PEN_TYPE: EHRRackType = {
@@ -301,7 +346,8 @@ export const DEFAULT_PEN_TYPE: EHRRackType = {
     sqft: 0.0,
     supportsTunnel: false,
     type: RackTypes.Pen,
-    width: 0.0
+    width: 0.0,
+    isDefault: true
 
 }
 

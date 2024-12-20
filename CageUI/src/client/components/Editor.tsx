@@ -10,14 +10,14 @@ import {
     Cage,
     CageActionProps,
     CageNumber,
-    DeleteActions,
+    DeleteActions, DoorResizeProps,
     LayoutDragProps,
     LocationCoords,
     PendingRoomUpdate,
-    Rack,
-    RackTypes,
-    RoomItemType,
-    RoomObjectTypes,
+    Rack, RackStringType,
+    RackTypes, RackTypesStrings,
+    RoomItemStringType, RoomItemType,
+    RoomObjectTypes, RoomObjectTypesStrings,
     UnitLocations
 } from './typings';
 import { LayoutTooltip } from './LayoutTooltip';
@@ -26,19 +26,19 @@ import {
     addPrevRoomSvgs,
     areCagesInSameRack,
     checkAdjacent,
-    createDragInLayout,
+    createDragInLayout, createEmptyUnitLoc,
     createEndDragInLayout,
     createStartDragInLayout, dragBorder,
     drawGrid,
     findCageInGroup,
     findRackInGroup,
-    getLayoutOffset,
+    getLayoutOffset, getRoomItemTypeFromString,
     getTargetRect,
-    isRack,
+    isRack, isRackEnum,
     mergeRacks, parseWrapperId,
     placeAndScaleGroup,
     setupEditCageEvent,
-    showLayoutEditorConfirmation,
+    showLayoutEditorConfirmation, updateBorderSize,
     updateGrid
 } from './LayoutEditorHelpers';
 import EditorContextMenu from './EditorContextMenu';
@@ -48,7 +48,7 @@ import { ConfirmationPopup } from './ConfirmationPopup';
 import { RoomSelectorPopup } from './RoomSelectorPopup';
 
 interface EditorProps {
-    roomSize?: SelectorOptions
+    roomSize: SelectorOptions
 }
 
 const Editor: FC<EditorProps> = ({roomSize}) => {
@@ -80,9 +80,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const {
         localRoom,
         layoutSvg,
+        room,
         setLayoutSvg,
         addRoomItem,
-        room,
         setLocalRoom,
         changeCageNum,
         cageNumChange,
@@ -152,9 +152,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             // Temp object of cages within the dragged group
             const cagesInDragged: UnitLocations = (() => {
                 // create empty unit locations object
-                const tempLocs: UnitLocations = Object.fromEntries(
-                        Object.values(RackTypes).map(key => [key, [] as LocationCoords[]])
-                ) as UnitLocations;
+                const tempLocs: UnitLocations = createEmptyUnitLoc();
 
                 draggedRackGroup.forEach((rack) => {
                     tempLocs[rack.type.type] = unitLocs[rack.type.type].filter((unit) => draggedCagesGroup.includes(unit.num))
@@ -170,7 +168,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(mergeAvail) return;
                     Object.entries(cagesNotInDragged).forEach(([targetRackType, targetCageLocs]) => {
                         if(targetCageLocs.length === 0 || mergeAvail) return;
-                        const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                        const gridRatio = (targetRackType === RackTypesStrings[RackTypes.Pen] || targetRackType === RackTypesStrings[RackTypes.PlayCage]) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
                         targetCageLocs.forEach((targetLoc) => {
                             if(mergeAvail) return;
                             mergeAvail = checkAdjacent(targetLoc, dragLoc, CELL_SIZE, gridRatio);
@@ -185,7 +183,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             console.log("End connected testing", cagesNotInDragged, cagesInDragged);
         }else{
             const {rack: draggedRack} = findRackInGroup(selectedObj, localRoom.rackGroups);
-            const draggedRackType = draggedRack.type.type;
+            const draggedRackType: RackStringType = RackTypesStrings[draggedRack.type.type];
 
             if(!draggedRackType){
                 return;
@@ -216,8 +214,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(inSameRack) {
                         return;
                     }
-                    const targetRackType = parseRoomItemType(targetLoc.num) as RackTypes;
-                    const gridRatio = (targetRackType === RackTypes.Pen || targetRackType === RackTypes.PlayCage) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                    const targetRackType: RackStringType = parseRoomItemType(targetLoc.num);
+                    const gridRatio = (targetRackType === RackTypesStrings[RackTypes.Pen] || targetRackType === RackTypesStrings[RackTypes.PlayCage]) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
                     mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, CELL_SIZE, gridRatio);
                     if(mergeAvail){
@@ -258,7 +256,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         draggedShape.classed('dragging', false);
         const transform = d3.zoomTransform(layoutSvg.node());
-        if (!isRack(updateItemType)) { // adding dragged room object
+        if (!isRackEnum(updateItemType)) { // adding dragged room object
             group = layoutSvg.append('g')
                 .data([{x: cellX, y: cellY}])
                 .attr('class', "draggable room-obj")
@@ -266,20 +264,20 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 .style('pointer-events', "bounding-box");
             group.append(() => draggedShape.node());
         } else { // adding dragged caging unit
-
+            const updateItemTypeString = RackTypesStrings[updateItemType];
             group = layoutSvg.append('g')
-                .attr('class', `draggable rack type-${updateItemType as RackTypes}`)
+                .attr('class', `draggable rack type-${updateItemTypeString}`)
                 .attr('id', `${itemId}`)
                 .style('pointer-events', 'bounding-box');
 
             const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = group.append('g')
-                .attr('id', `${updateItemType}-${getNextCageNum(updateItemType as RackTypes)}`)
+                .attr('id', `${updateItemTypeString}-${getNextCageNum(updateItemTypeString)}`)
                 .attr('transform', `translate(0,0)`)
                 .append(() => draggedShape.node());
 
             const cageIdText: SVGTSpanElement = cageGroup.select('tspan').node() as SVGTSpanElement;
 
-            cageIdText.textContent = `${getNextCageNum(updateItemType as RackTypes)}`;
+            cageIdText.textContent = `${getNextCageNum(updateItemTypeString)}`;
 
         }
         placeAndScaleGroup(group, cellX, cellY, transform);
@@ -288,13 +286,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         group.call(closeMenuThenDrag);
 
-        // attach click listener for context menu
+        // attach click listener for context menu, only for RackTypes that have a cage number text element
         group.selectAll('text').each(function () {
             const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
             textElement.setAttribute('contentEditable', 'true');
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-            setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, updateItemType as RackTypes);
+            setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, RackTypesStrings[updateItemType]);
         });
         setPendingRoomUpdate(null);
     }, [pendingRoomUpdate]);
@@ -323,6 +321,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             if(event.sourceEvent.target.nodeName === 'tspan'){
                 shape = (event.sourceEvent.target as SVGTSpanElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
             }else if(event.sourceEvent.target.nodeName === 'path'){
+                shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+            }else if(event.sourceEvent.target.nodeName === 'polygon'){
                 shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
             }else{
                 shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
@@ -355,14 +355,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             // Discovers the grid cell to lock onto
             const targetRect = getTargetRect(x, y, CELL_SIZE, transform);
             if (targetRect) {
-                const cellX = targetRect.x;
-                const cellY = targetRect.y;
+                const cellX = Math.max(0,targetRect.x);
+                const cellY = Math.max(0,targetRect.y);
+                console.log("Drag to: ", cellX, cellY);
                 const draggedNodeId = draggedShape.attr('id');
 
-                const updateItemType: RoomItemType = parseWrapperId(draggedNodeId);
+                const updateItemType: RoomItemType = getRoomItemTypeFromString(parseWrapperId(draggedNodeId));
                 let newId: string;
 
-                if(isRack(updateItemType)){
+                if(isRackEnum(updateItemType)){
                     // get new id for rack
                     const tempId = localRoom.rackGroups.reduce((max, group) => {
                         const groupMax = group.racks.reduce((groupMax, rack) => {
@@ -477,12 +478,41 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     useEffect(() => {
         if(!borderSetup) return;
         const borderGroup:  d3.Selection<SVGGElement, {}, HTMLElement, any> = d3.select('#border-template') as  d3.Selection<SVGGElement, {}, HTMLElement, any>;
-        placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
-        borderGroup.call(dragBorder(closeMenuThenDrag, CELL_SIZE, borderGroup));
-        // Set zoom after border is loaded in
-        if(roomSize){
-            zoomToScale(roomSize.scale);
+        const borderRect = d3.select('#border-rect');
+        const doorSvg = d3.select('#border-door');
 
+        if(!localRoom.layoutData){
+            setLocalRoom(prevState => ({
+                ...prevState,
+                layoutData: {
+                    scale: roomSize.scale,
+                    borderWidth: parseInt(borderRect.attr('width')),
+                    borderHeight: parseInt(borderRect.attr('height'))
+                }
+            }));
+        }else{
+            //update border width and height, maintaining aspect ratio between door and rectangle
+            const doorStartWidth = parseFloat(doorSvg.attr('width'));
+            const doorStartHeight = parseFloat(doorSvg.attr('height'));
+            const newDoorDims: DoorResizeProps = {
+                startX: parseFloat(doorSvg.attr('x')),
+                startY: parseFloat(doorSvg.attr('y')),
+                startWidth: doorStartWidth,
+                startHeight: doorStartHeight,
+                scaleX: localRoom.layoutData.borderWidth / doorStartWidth,
+                scaleY: localRoom.layoutData.borderHeight / doorStartHeight
+            }
+            updateBorderSize(borderGroup, newDoorDims, localRoom.layoutData.borderWidth, localRoom.layoutData.borderHeight);
+        }
+        // Attach x and y data to border group and drag call for resizing
+        placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
+        borderGroup.call(dragBorder(closeMenuThenDrag, CELL_SIZE, borderGroup, setLocalRoom));
+
+        // Set zoom after border is loaded in
+        zoomToScale(roomSize.scale);
+
+        if(localRoom.name !== 'new-layout'){
+            addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag);
         }
         setBorderSetup(false);
     }, [borderSetup]);
@@ -515,16 +545,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         };
     }, [borderRef]);
 
-    // load grid at load in, or after it was disabled and re-enabled
-    useEffect(() => {
-        if(layoutSvg){
-            if(room.name !== 'new-layout') {
-                addPrevRoomSvgs(room, layoutSvg, closeMenuThenDrag);
-            }
-            //layoutSvg.call(zoom);
-        }
-    }, [layoutSvg, room]);
-
     // closes cage editor context menu
     const handleContextMenuClose = () => {
         if(renameCage || changeRackType) return;
@@ -545,7 +565,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 let svgToRemove;
                 let deleteAction: DeleteActions;
                 let newSvgGroup;
-                let newRackType: RackTypes;
+                let newRackType: RackStringType;
                 if(localRack.cages.length === 1){// one cage in rack, delete rack element
                     if(localGroup.racks.length === 1){// not in a rack group element
                         svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
@@ -557,7 +577,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         const newY = rackToSave.y + localGroup.y;
                         svgToRemove = layoutSvg.select(`#${localGroup.groupId}`);
                         deleteAction = 'rack';
-                        newRackType = rackToSave.type.type;
+                        newRackType = RackTypesStrings[rackToSave.type.type];
                         newSvgGroup = layoutSvg.append(() => rackSvg.node())
                             .classed('draggable', true);
                         placeAndScaleGroup(newSvgGroup, newX, newY, zoomTransform(layoutSvg.node()));
@@ -603,8 +623,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }
 
     const handleSave = () => {
-        console.log("Saving: ", room);
-            //saveRoom();
+        saveRoom();
     }
 
     return (
@@ -613,21 +632,21 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Door"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypes.Door}
+                            type={RoomObjectTypesStrings[RoomObjectTypes.Door]}
                             fileName={"door"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Drain"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypes.Drain}
+                            type={RoomObjectTypesStrings[RoomObjectTypes.Drain]}
                             fileName={"drain"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Divider"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypes.RoomDivider}
+                            type={RoomObjectTypesStrings[RoomObjectTypes.RoomDivider]}
                             fileName={"RoomDivider"}
                             className={"draggable"}
                         />
@@ -636,14 +655,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <div className={'cage-templates'}>
                     <LayoutTooltip text={"Single Cage"}>
                         <RoomItemTemplate
-                            type={RackTypes.Cage}
+                            type={RackTypesStrings[RackTypes.Cage]}
                             fileName={"SingleCageRack"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Pen"}>
                         <RoomItemTemplate
-                            type={RackTypes.Pen}
+                            type={RackTypesStrings[RackTypes.Pen]}
                             fileName={"Pen"}
                             className={"draggable"}
                         />
@@ -717,8 +736,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
-                    onClick={room.name === 'new-layout' ? () => setShowRoomSelector(true) : () => setShowSaveConfirm(true)}
-                >{room.name === 'new-layout' ? 'Save Layout' : 'Update Layout'}
+                    onClick={localRoom.name === 'new-layout' ? () => setShowRoomSelector(true) : () => setShowSaveConfirm(true)}
+                >{localRoom.name === 'new-layout' ? 'Save Layout' : 'Update Layout'}
                  </button>
             </div>
             {showSaveConfirm &&

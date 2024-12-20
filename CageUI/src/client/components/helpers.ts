@@ -11,7 +11,7 @@ import {
     Modifications,
     ModTypes,
     Rack,
-    RackTypes, RoomItemType,
+    RackTypes, RoomItemStringType,
     SeparatorMod,
     SeparatorPosition,
     Separators,

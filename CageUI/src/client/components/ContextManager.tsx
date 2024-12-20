@@ -4,17 +4,17 @@ import {
     Cage,
     CageNumber,
     DEFAULT_CAGE_TYPE,
-    DEFAULT_PEN_TYPE, DeleteActions,
-    GroupId,
+    DEFAULT_PEN_TYPE, DefaultRackTypes, DeleteActions,
+    GroupId, LayoutData,
     LayoutHistoryData,
     LocationCoords,
     Page, PrevRoom,
     Rack,
-    RackActions, RackGroup,
-    RackTypes,
+    RackActions, RackGroup, RackStringType,
+    RackTypes, RackTypesStrings, RackTypeToDefaultType,
     Room,
     RoomItem, RoomItemClass,
-    RoomItemType,
+    RoomItemStringType, RoomItemType,
     RoomObject,
     RoomObjectTypes,
     UnitLocations
@@ -29,11 +29,11 @@ import {
 import * as d3 from 'd3';
 import {
     addPrevRoomSvgs,
-    buildNewLocalRoom, buildNewLocs,
+    buildNewLocalRoom, buildNewLocs, createEmptyUnitLoc,
     findNextGroupId,
     findRackInGroup,
     findSelectObjRack,
-    isRack,
+    isRack, isRackEnum,
 } from './LayoutEditorHelpers';
 import { Query } from '@labkey/api';
 import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
@@ -89,7 +89,7 @@ export interface LayoutContextType {
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
     doRackAction: (action: RackActions, targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
-    getNextCageNum: (rackType: RackTypes) => number;
+    getNextCageNum: (rackType: RackStringType) => number;
     selectedObj: string;
     setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
     delCage: (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => void;
@@ -218,23 +218,21 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     const [room, setRoom] = useState<Room>({
         name: "new-layout",
         rackGroups: [],
-        objects: []
+        objects: [],
+        layoutData: null
     });
     /* unit locations resembles each rack type and their respective locations in a room, since location is geospatial
         it does not need to remember anything other than x and y coords for that group of racks. The reason for having
         different objects for each rack type is to keep a separate numbering system for each type of rack. Additionally
         this state is tracked for detecting merging.
     */
-    const [unitLocs, setUnitLocs] = useState<UnitLocations>({
-        [RackTypes.Pen]: [],
-        [RackTypes.Cage]: [],
-        [RackTypes.PlayCage]: [],
-        [RackTypes.TempCage]: [],
-    });
+    const [unitLocs, setUnitLocs] = useState<UnitLocations>(createEmptyUnitLoc());
+
     const [localRoom, setLocalRoom] = useState<Room>({
         name:"new-layout",
         rackGroups: [],
-        objects: []
+        objects: [],
+        layoutData: null
     });
 
     const [layoutSvg, setLayoutSvg] = useState<d3.Selection<SVGElement, {}, HTMLElement, any>>(null);
@@ -282,7 +280,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         })
     }
 
-    const addRack = (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
+    const addRack = (id: string, x: number, y: number, newScale: number, rackType: RackStringType) => {
         const newCageNum: CageNumber = `${rackType}-${getNextCageNum(rackType)}`;
         const firstCage: Cage = {
             adjCages: undefined,
@@ -309,7 +307,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             cages: [firstCage],
             itemId: id,
             isActive: true,
-            type: rackType === RackTypes.Pen ? DEFAULT_PEN_TYPE : DEFAULT_CAGE_TYPE,
+            type: rackType === RackTypesStrings[RackTypes.Pen] ? DEFAULT_PEN_TYPE : DEFAULT_CAGE_TYPE,
             x: 0,
             y: 0
         };
@@ -331,6 +329,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             rackGroups: [...prevRoom.rackGroups, newRackGroup]
         }));
 
+        console.log("adding: ", rackType);
         setUnitLocs(prevState => ({
             ...prevState,
             [rackType]: [...prevState[rackType], newCageLoc] // Append the new location to the correct array
@@ -459,8 +458,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     }
 
     const addRoomItem = (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
-        if(isRack(itemType)){
-            addRack(itemId, x, y, scale, itemType as RackTypes);
+        if(isRackEnum(itemType)){
+            addRack(itemId, x, y, scale, RackTypesStrings[itemType]);
         }else{
             const newRoomObj: RoomObject = {
                 itemId: itemId,
@@ -511,7 +510,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                         ({
                             ...prevUnitLocations,
                             // Access the correct unit location array using rack type
-                            [movedRack.type.type]: prevUnitLocations[movedRack.type.type].map(cage => {
+                            [RackTypesStrings[movedRack.type.type]]: prevUnitLocations[RackTypesStrings[movedRack.type.type]].map(cage => {
                                 // Check if the cage belongs to the moved rack using cageNum
                                 const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
                                 return movedRackCage
@@ -552,7 +551,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                     setUnitLocs((prevUnitLocations) => {
                         const updatedUnitLocations = { ...prevUnitLocations };
                         movedRacks.forEach((movedRack) => {
-                            updatedUnitLocations[movedRack.type.type] = updatedUnitLocations[movedRack.type.type].map((cage) => {
+                            updatedUnitLocations[RackTypesStrings[movedRack.type.type]] = updatedUnitLocations[RackTypesStrings[movedRack.type.type]].map((cage) => {
                                 const movedRackCage = movedRack.cages.find((rackCage) => rackCage.cageNum === cage.num);
                                 if (movedRackCage) {
                                     return {
@@ -632,7 +631,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
         setUnitLocs((prevLocs) => ({
             ...prevLocs,
-            [rack.type.type]: prevLocs[rack.type.type].filter((loc) => loc.num !== cage.cageNum)
+            [RackTypesStrings[rack.type.type]]: prevLocs[RackTypesStrings[rack.type.type]].filter((loc) => loc.num !== cage.cageNum)
         }));
     }
 
@@ -682,8 +681,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             setUnitLocs(prevUnitLocations => ({
                 ...prevUnitLocations,
                 // Access the correct unit location array based on clickedRack's rackType
-                [currRack.type.type]: prevUnitLocations[currRack.type.type].map(cage =>
-                    convertCageNumToNum(cage.num) === numBefore ? { ...cage, num: `${currRack.type.type}-${numAfter}` } : cage
+                [RackTypesStrings[currRack.type.type]]: prevUnitLocations[RackTypesStrings[currRack.type.type]].map(cage =>
+                    convertCageNumToNum(cage.num) === numBefore ? { ...cage, num: `${RackTypesStrings[currRack.type.type]}-${numAfter}` } : cage
                 )
             }));
 
@@ -693,7 +692,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         setCageNumChange({before: numBefore, after: numAfter});
     }
 
-    const getNextCageNum = (rackType: RackTypes) => {
+    const getNextCageNum = (rackType: RackStringType) => {
         const cages = unitLocs[rackType];
 
         // If no cages exist for this rackType, return 1 as the first available cage number
@@ -715,8 +714,18 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         console.log("Load Data: ", prevRoom);
 
         //TODO make sure rack-group ids are correct
-        const newLocalRoom: Room = buildNewLocalRoom(prevRoom);
+        let newLocalRoom: Room = buildNewLocalRoom(prevRoom);
         const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.cagingData);
+
+        //set border width,height and scale for room
+        newLocalRoom = {
+            ...newLocalRoom,
+            layoutData: {
+                scale: prevRoom.layoutData.scale,
+                borderWidth: prevRoom.layoutData.borderWidth,
+                borderHeight: prevRoom.layoutData.borderHeight
+            }
+        }
 
         console.log("New Room State: ", newLocalRoom);
 
@@ -728,73 +737,54 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     }, [prevRoom]);
 
     const saveRoom = () => {
-        if(localRoom.name === 'new-layout'){
-            // prompt room popup to save?
-        }else{
-            console.log("Saving layout");
-            const dataToSave: LayoutHistoryData[] = [];
-            const roomName = localRoom.name;
-            const newEndDate = new Date();
-            const newStartDate = new Date();
-            // TODO fix defaults by prmpting users to fill them in
-            localRoom.rackGroups.forEach((group) => {
-                const groupId = parseLongId(group.groupId);
-                group.racks.forEach((rack) => {
-                    // if rack is a default, assign rack id to 0(default id) and use the defaults id as id in default_rack
-                    const defaultId = rack.itemId.includes('default') ? parseLongId(rack.itemId) : null;
-                    const newRackId = defaultId ? 0 : parseRoomItemNum(rack.itemId);
-                    rack.cages.forEach((cage) => {
-                        const cageLocData = unitLocs[rack.type.type].find((loc) => loc.num === cage.cageNum);
-                        const newCageData: LayoutHistoryData = {
-                            cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
-                            end_date: null,
-                            rack: newRackId,
-                            rack_group: groupId,
-                            default_rack: defaultId,
-                            room: roomName,
-                            room_object: null,
-                            scale: group.scale,
-                            start_date: newStartDate,
-                            x_coord: cageLocData.cellX,
-                            y_coord: cageLocData.cellY
-                        }
-                        dataToSave.push(newCageData);
-                    })
+
+        console.log("Saving layout");
+        const dataToSave: LayoutHistoryData[] = [];
+        const roomName = localRoom.name;
+        const newEndDate = new Date();
+        const newStartDate = new Date();
+        let rowsToUpdate;
+        // TODO fix defaults by prmpting users to fill them in
+        localRoom.rackGroups.forEach((group) => {
+            const groupId = parseLongId(group.groupId);
+            group.racks.forEach((rack) => {
+                // if rack is a default, assign rack id to 0(default id) and use the defaults id as id in default_rack
+                const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseInt(rack.itemId);
+                rack.cages.forEach((cage) => {
+                    const cageLocData = unitLocs[RackTypesStrings[rack.type.type]].find((loc) => loc.num === cage.cageNum);
+                    const newCageData: LayoutHistoryData = {
+                        cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
+                        end_date: null,
+                        rack: newRackId,
+                        object_type: rack.type.isDefault ? RackTypeToDefaultType[rack.type.type] : rack.type.type,
+                        rack_group: groupId,
+                        room: roomName,
+                        start_date: newStartDate,
+                        x_coord: cageLocData.cellX,
+                        y_coord: cageLocData.cellY
+                    }
+                    dataToSave.push(newCageData);
                 })
             })
+        })
 
-            localRoom.objects.forEach((roomObj) => {
-                const newObjData: LayoutHistoryData = {
-                    cage: null,
-                    end_date: null,
-                    rack: null,
-                    default_rack: null,
-                    rack_group: null,
-                    room: roomName,
-                    room_object: roomObj.type,
-                    scale: roomObj.scale,
-                    start_date: newStartDate,
-                    x_coord: roomObj.x,
-                    y_coord: roomObj.y
-                }
-                dataToSave.push(newObjData);
-            });
+        localRoom.objects.forEach((roomObj) => {
+            const newObjData: LayoutHistoryData = {
+                cage: null,
+                end_date: null,
+                rack: null,
+                object_type: roomObj.type,
+                rack_group: null,
+                room: roomName,
+                start_date: newStartDate,
+                x_coord: roomObj.x,
+                y_coord: roomObj.y
+            }
+            dataToSave.push(newObjData);
+        });
 
-
-            Query.insertRows({
-                failure(errorInfo: any, response: XMLHttpRequest): any {
-                    console.log("failed insert")
-                },
-                queryName: 'layout_history',
-                schemaName: 'wnprc',
-                rows: dataToSave,
-                success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
-                    console.log("success insert")
-                }
-            });
-
-
-            const rowsToUpdate = prevRoom.cagingData.reduce((acc, row) => {
+        if(prevRoom.name !== null){
+            rowsToUpdate = prevRoom.cagingData.reduce((acc, row) => {
                 return [
                     ...acc,
                     {
@@ -803,7 +793,53 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                     }
                 ];
             }, []);
+        }
 
+        console.log("Saving: ", dataToSave);
+
+        // insert rows to layout history for cages and room objects, no end date
+        Query.insertRows({
+            failure(errorInfo: any, response: XMLHttpRequest): any {
+                console.log("failed insert")
+            },
+            queryName: 'layout_history',
+            schemaName: 'wnprc',
+            rows: dataToSave,
+            success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
+                console.log("success insert")
+            }
+        });
+        const compareLayoutData = (obj1: LayoutData, obj2: LayoutData): boolean => {
+            return Object.keys(obj1).every((key) => obj1[key as keyof LayoutData] === obj2[key as keyof LayoutData]);
+        }
+
+        // if border width/scale has changed, send update to rooms table
+        if(!prevRoom.name || !compareLayoutData(prevRoom.layoutData, localRoom.layoutData)){
+            console.log("Saving border: ", localRoom.layoutData);
+            const roomToSave = [{
+                room: localRoom.name,
+                layout_scale: localRoom.layoutData.scale,
+                border_width: localRoom.layoutData.borderWidth,
+                border_height: localRoom.layoutData.borderHeight
+            }]
+
+            Query.updateRows({
+                failure(errorInfo: any, response: XMLHttpRequest): any {
+                    console.log("Failed Update for border");
+                },
+                queryName: 'rooms',
+                schemaName: 'ehr_lookups',
+                rows: roomToSave,
+                success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
+                    console.log("Success Update for border");
+
+                }
+            });
+        }
+
+        // update prevRoom rows to include end date marking end of layout for that time frame
+        if(rowsToUpdate){
+            console.log("Updating: ", rowsToUpdate);
             Query.updateRows({
                 failure(errorInfo: any, response: XMLHttpRequest): any {
                     console.log("Failed Update");

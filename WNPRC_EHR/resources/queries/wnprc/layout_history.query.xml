@@ -8,7 +8,7 @@
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="room"/>
-                    <column columnName="room_object"/>
+                    <column columnName="object_type"/>
                     <column columnName="rack_group"/>
                     <column columnName="rack"/>
                     <column columnName="cage"/>

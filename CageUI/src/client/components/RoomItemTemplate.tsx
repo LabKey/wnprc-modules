@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ActionURL } from '@labkey/api';
-import { Rack, RackTypes, RoomItemType } from './typings';
+import { Rack, RackTypes, RoomItemStringType } from './typings';
 import { ReactSVG } from 'react-svg';
 
 interface RoomItemTemplateProps {
     fileName: string,
     className?: string
-    type: RoomItemType;
+    type: RoomItemStringType;
 }
 export const RoomItemTemplate: FC<RoomItemTemplateProps> = (props) => {
     const {fileName, className, type} = props;

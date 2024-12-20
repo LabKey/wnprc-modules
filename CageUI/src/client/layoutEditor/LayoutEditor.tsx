@@ -58,7 +58,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
         const prevRoomConfig: SelectRowsOptions = {
             schemaName: 'wnprc',
             queryName: 'layout_history',
-            columns: ['room_object', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid'],
+            columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid'],
             filterArray: [
                 Filter.create('room', roomName, Filter.Types.EQUALS),
                 Filter.create('end_date', null, Filter.Types.ISBLANK)

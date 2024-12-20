@@ -1,10 +1,9 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
+import { zoomTransform } from 'd3';
 import {
-    getScaleFromTransform,
     getTranslation,
     getTypeClassFromElement,
-    isTextEditable,
     parseLongId,
     parseRack,
     parseRoomItemNum,
@@ -14,7 +13,7 @@ import {
     Cage,
     CageActionProps,
     CageNumber,
-    DEFAULT_CAGE_TYPE,
+    DEFAULT_CAGE_TYPE, DefaultRackTypes, DoorResizeProps,
     GroupId,
     LayoutDragProps,
     LayoutHistoryData,
@@ -24,22 +23,52 @@ import {
     Rack,
     RackActions,
     RackGroup,
+    RackStringType,
     RackTypes,
-    Room, RoomItemClass, RoomItemType,
-    RoomObject,
-    RoomObjectTypes,
-    StartDragProps, UnitLocations
+    RackTypesStrings,
+    Room,
+    RoomItemClass,
+    RoomItemStringType,
+    RoomItemType,
+    RoomObject, RoomObjectTypes,
+    RoomObjectTypesStrings,
+    StartDragProps,
+    UnitLocations
 } from './typings';
 import * as React from 'react';
-import { zoom, zoomTransform } from 'd3';
+
+export const createEmptyUnitLoc = (): UnitLocations => {
+    return (
+        Object.fromEntries(
+            Object.values(RackTypes)
+                .filter((value) => typeof value === "number") // Filter out the numeric values from enum
+                .map((rackType) => [
+                    RackTypesStrings[rackType],
+                    [] as LocationCoords[],
+                ])
+        ) as UnitLocations
+    );
+}
 
 
-export const parseWrapperId = (input: string): RoomItemType => {
+
+// Function to get RoomItemType num from string, not including DefaultRackTypes
+export const getRoomItemTypeFromString = (itemTypeString: string): RoomItemType | undefined => {
+    const RackTypeFromString: { [key: string]: RackTypes } = Object.fromEntries(
+        Object.entries(RackTypesStrings).map(([key, value]) => [value, Number(key) as RackTypes])
+    );
+    const RoomObjTypeFromString: { [key: string]: RoomObjectTypes } = Object.fromEntries(
+        Object.entries(RoomObjectTypesStrings).map(([key, value]) => [value, Number(key) as RoomObjectTypes])
+    );
+    return RackTypeFromString[itemTypeString] || RoomObjTypeFromString[itemTypeString];
+};
+
+export const parseWrapperId = (input: string): RoomItemStringType => {
     const regex = /^[a-zA-Z]+/; // matches "x_template_wrapper"
 
     const match = input.match(regex);
     if (match) { // if a match return whatever x is (any string of chars)
-        return match[0] as RoomItemType;
+        return match[0] as RoomItemStringType;
     }
     return;
 }
@@ -208,11 +237,11 @@ export function setupEditCageEvent(
     element: SVGTextElement,
     setClickedCage: (cageId: string) => void,
     setCtxMenuStyle:  React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
-    rackType: RackTypes
+    rackTypeString: RackStringType
 ): () => void {
     const handleContextMenu = function(this: SVGGElement, event: MouseEvent) {
         event.preventDefault();
-        const cageGroupElement = this.closest(`[id^=${rackType}-]`) as SVGGElement | null;
+        const cageGroupElement = this.closest(`[id^=${rackTypeString}-]`) as SVGGElement | null;
         console.log("Open Menu: ", cageGroupElement)
 
         setClickedCage(cageGroupElement.id);
@@ -225,8 +254,7 @@ export function setupEditCageEvent(
     }
 
     // Attach context menu to the lowest level group for that cage.
-    const cageGroupElement: SVGGElement = element.closest(`[id^=${rackType}]`) as SVGGElement;
-    console.log("Attach menu: ", cageGroupElement)
+    const cageGroupElement: SVGGElement = element.closest(`[id^=${rackTypeString}]`) as SVGGElement;
     d3.select(cageGroupElement).attr('style', 'pointer-events: bounding-box')
     cageGroupElement.addEventListener('contextmenu', handleContextMenu);
 
@@ -260,7 +288,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             element.style = "";
         }
         const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
-        setupEditCageEvent(textEle, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType as RackTypes);
+        setupEditCageEvent(textEle, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -270,7 +298,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
         const {x: startX, y: startY} = getTranslation(element.getAttribute('transform'))
         d3.select(element).selectAll(':scope > g').each(function () {
             const targetShape = d3.select(this);
-            let shapeType;
+            let shapeType: RackStringType;
             if(action === 'merge'){
                 shapeType = parseRoomItemType(targetShape.attr('id'));
             }else{
@@ -383,8 +411,6 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
 
             processShape(clonedTargetShape, action, newGroup);
             processShape(clonedDraggedShape,action, newGroup);
-
-            console.log("End Processing: ", newGroup);
         }
 
         // Copy the transform attribute from the targetShape to the merged group
@@ -412,8 +438,6 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
 // This checks the adjacency of two racks to determine if they can be merged
 export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationCoords, gridSize: number, gridRatio: number) {
 
-    console.log("Adj Cage ", targetCage, draggedCage)
-
     const boxWidth = gridSize * gridRatio;
 
     let horizontallyAdjacent = false;
@@ -422,16 +446,13 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
     // Check for horizontal adjacency
     if (Math.abs(targetCage.cellX - draggedCage.cellX) === boxWidth &&
         targetCage.cellY === draggedCage.cellY) {
-        console.log("Adj found: x");
         horizontallyAdjacent = true;
     }// Check for vertical adjacency
     else if (Math.abs(targetCage.cellY - draggedCage.cellY) === boxWidth &&
         targetCage.cellX === draggedCage.cellX)  {
-        console.log("Adj found: y");
         verticallyAdjacent = true;
     }
     const isAdjacent = horizontallyAdjacent || verticallyAdjacent;
-    console.log("Is adjacent:", isAdjacent);
     return isAdjacent;
 }
 
@@ -547,10 +568,15 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
     return nums.includes(cage1.num) && nums.includes(cage2.num);
 }
 
-// TODO might not be needed
-export const isRack = (itemType: RoomItemType): itemType is RackTypes => {
-    return Object.values(RackTypes).includes(itemType as RackTypes);
-}
+// input is a string for rack or room obj type
+export const isRack = (itemType: RoomItemStringType): itemType is RackStringType => {
+    return Object.values(RackTypesStrings).includes(itemType as string);
+};
+
+// input is the enum number for rack, default rack, or room obj type. Return true if it is in Rack or Default rack types
+export const isRackEnum = (itemType: RoomItemType): itemType is RackTypes | DefaultRackTypes => {
+    return itemType in RackTypes || itemType in DefaultRackTypes;
+};
 
 // finds a cage by cageNum in group of racks if it exists
 export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
@@ -611,16 +637,14 @@ export const findCageInGroup = (targetId: CageNumber, groups: RackGroup[]): {cag
 
 export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations => {
     // Empty Unit locations object
-    const newUnitLocs: UnitLocations = Object.fromEntries(
-        Object.values(RackTypes).map(key => [key, [] as LocationCoords[]])
-    ) as UnitLocations;
+    const newUnitLocs: UnitLocations = createEmptyUnitLoc();
 
     prevRoomData.forEach(roomItem => {
-        if(roomItem.room_object) return; // ignore room objects here
+        if(!isRackEnum(roomItem.object_type)) return; // ignore room objects here
         // TODO find rack type for rack id
 
         newUnitLocs.cage.push({
-            num: `cage-${parseInt(roomItem.cage)}` as CageNumber, // TODO num here should be RackType-roomItem.cage
+            num: `cage-${parseInt(roomItem.cage)}` as CageNumber, // TODO num here should be RackStringType-roomItem.cage
             cellX: roomItem.x_coord,
             cellY: roomItem.y_coord
         });
@@ -632,7 +656,8 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     const newLocalRoom: Room = {
         name: prevRoom.name,
         rackGroups: [],
-        objects: []
+        objects: [],
+        layoutData: null
     };
     let roomObjNum = 1;
 
@@ -700,8 +725,8 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     // generates room object state for room objects from layout history data
     const generateRoomObj = (roomObjItem: LayoutHistoryData): RoomObject => {
         return({
-            itemId: `${roomObjItem.room_object}-${roomObjNum++}`, // update room obj num after it is used to next num
-            type: roomObjItem.room_object,
+            itemId: `${RoomObjectTypesStrings[roomObjItem.object_type]}-${roomObjNum++}`, // update room obj num after it is used to next num
+            type: roomObjItem.object_type as RoomObjectTypes,
             x: roomObjItem.x_coord,
             y: roomObjItem.y_coord,
             scale: prevRoom.layoutData.scale
@@ -709,13 +734,12 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     }
 
     prevRoom.cagingData.forEach((roomItem) => {
-        if(!roomItem.room_object){ // Room item is an enclosure for animals
+        if(isRackEnum(roomItem.object_type)){ // Room item is an enclosure for animals
             handleRackItem(roomItem);
         } else{ // Room item is something else in the room, ex. Door
             newLocalRoom.objects.push(generateRoomObj(roomItem))
         }
     })
-
     return(newLocalRoom);
 }
 
@@ -724,10 +748,10 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
     TODO attach context menus, layout drags, and support for connected rack groups
      */
     const createRackGroup = (parentGroup, rack, groupScale, isSingleRack) => {
-        console.log("creating rack group: ", rack);
+        const rackTypeString: RackStringType = RackTypesStrings[rack.type.type];
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
-            .attr('class', `rack type-${rack.type.type}`)
+            .attr('class', `rack type-${rackTypeString}`)
             .attr('transform', `translate(${rack.x},${rack.y}) scale(${groupScale})`)
             .style('pointer-events', 'bounding-box');
 
@@ -736,7 +760,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
                 .attr('id', cage.cageNum)
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
-            const unitSvg: SVGElement = (d3.select(`[id=${rack.type.type}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
+            const unitSvg: SVGElement = (d3.select(`[id=${rackTypeString}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
                 .node().cloneNode(true) as SVGElement;
 
             const shape = d3.select(unitSvg);
@@ -744,7 +768,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             shape.style('pointer-events', 'none');
 
             // TODO attach context menu to unit element
-            shape.select(`[id=${rack.type.type}]`).style('pointer-events', 'bounding-box');
+            shape.select(`[id=${rackTypeString}]`).style('pointer-events', 'bounding-box');
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             cageGroup.append(() => shape.node());
@@ -758,7 +782,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
         const parentGroup = isSingleRack
             ? layoutSvg.append('g')
                 .attr('id', group.racks[0].itemId)
-                .attr('class', `draggable rack type-${group.racks[0].type.type}`)
+                .attr('class', `draggable rack type-${RackTypesStrings[group.racks[0].type.type]}`)
                 .attr('transform', `translate(${group.racks[0].x},${group.racks[0].y}) scale(${group.scale})`)
                 .style('pointer-events', 'bounding-box')
             : layoutSvg.append('g')
@@ -774,101 +798,11 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
         placeAndScaleGroup(parentGroup, group.x, group.y, zoomTransform(layoutSvg.node()));
         parentGroup.call(closeMenuThenDrag);
     };
+
     room.rackGroups.forEach((group) => {
-        /*
-        // single rack in group, don't add to svg group of class rack-group
-        if(group.racks.length === 1){
-            // new group here should have classes 'draggable rack type-{RackType}', id of rack, style and transform
-            const rack = group.racks[0];
-            // if only one rack in a group, the rack svg group x and y will use the groups coords because
-            // technically the rack x and y are local to that rack group
-            const rackSVGGroup = layoutSvg.append('g')
-                .attr('id', rack.itemId)
-                .attr('class', `draggable rack type-${rack.type.type}`)
-                .attr('transform', `translate(${group.x},${group.y}) scale(${group.scale})`)
-                .style('pointer-events', 'bounding-box');
-            rack.cages.forEach((cage) => {
-                // for each cage, create group with id = cageNum, transform of that cage,
-                // and add to it a RackType_template SVG as a child, the group in this template of id = RackType:
-                // add style for pointer events and attach context menu to that child
-                const cageGroup = rackSVGGroup.append('g')
-                    .attr('id', cage.cageNum)
-                    .attr('transform', `translate(${cage.x},${cage.y})`);
-                // caging unit svg selected from utils and its node deep cloned to avoid using the real one
-                const unitSvg: SVGElement = (d3.select(`[id=${rack.type.type}_template_wrapper]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
-
-                // now that the node is cloned we can change it to fit our use case
-                const shape = d3.select(unitSvg);
-                shape.classed('draggable', false);
-                shape.style('pointer-events', 'none');
-
-                //TODO attach context menu to unit element
-
-                // now add style and context menu attachment to sub group for rack type
-                shape.select(`[id=${rack.type.type}]`).style('pointer-events', 'bounding-box');
-
-                // change tspan to reflect the cage number
-                (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
-
-                cageGroup.append(() => shape.node());
-            });
-
-
-            // TODO might need to be replaced with group.scale instead of layoutSvg transform, then fix layoutSvg to fit that scale
-            placeAndScaleGroup(rackSVGGroup, group.x, group.y, zoomTransform(layoutSvg.node()));
-            rackSVGGroup.call(closeMenuThenDrag);
-        }else{ // more than one rack in a rack group, add to rack group svg
-            console.log("Adding Rack Group");
-            const rackGroupSVG = layoutSvg.append('g')
-                .attr('id', group.groupId)
-                .attr('class', `draggable rack-group`)
-                .attr('transform', `translate(${group.x},${group.y}) scale(${group.scale})`);
-
-            group.racks.forEach((rack) => {
-                const rackGroup = rackGroupSVG.append('g')
-                    .attr('id', rack.itemId)
-                    .attr('class', `draggable rack type-${rack.type.type}`)
-                    .attr('transform', `translate(${rack.x},${rack.y}) scale(${group.scale})`)
-                    .style('pointer-events', 'bounding-box');
-
-                rack.cages.forEach((cage) => {
-                    // for each cage, create group with id = cageNum, transform of that cage,
-                    // and add to it a RackType_template SVG as a child, the group in this template of id = RackType:
-                    // add style for pointer events and attach context menu to that child
-                    const cageGroup = rackGroupSVG.append('g')
-                        .attr('id', cage.cageNum)
-                        .attr('transform', `translate(${cage.x},${cage.y})`);
-                    // caging unit svg selected from utils and its node deep cloned to avoid using the real one
-                    const unitSvg: SVGElement = (d3.select(`[id=${rack.type.type}_template_wrapper]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
-
-                    // now that the node is cloned we can change it to fit our use case
-                    const shape = d3.select(unitSvg);
-                    shape.classed('draggable', false);
-                    shape.style('pointer-events', 'none');
-
-                    //TODO attach context menu to unit element
-
-                    // now add style and context menu attachment to sub group for rack type
-                    shape.select(`[id=${rack.type.type}]`).style('pointer-events', 'bounding-box');
-
-                    // change tspan to reflect the cage number
-                    (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
-
-                    cageGroup.append(() => shape.node());
-                });
-
-            });
-            placeAndScaleGroup(rackGroupSVG, group.x, group.y, zoomTransform(layoutSvg.node()));
-            rackGroupSVG.call(closeMenuThenDrag);
-
-
-        }*/
-
-
         createGroup(group);
-
-
     })
+
     room.objects.forEach((roomObj) => {
         const roomObjGroup = layoutSvg.append('g')
             .data([{x: roomObj.x, y: roomObj.y}])
@@ -877,7 +811,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${roomObj.scale})`)
             .style('pointer-events', 'bounding-box');
 
-        const objSvg: SVGElement = (d3.select(`[id=${roomObj.type}_template_wrapper]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
+        const objSvg: SVGElement = (d3.select(`[id=${RoomObjectTypesStrings[roomObj.type]}_template_wrapper]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
 
         const shape = d3.select(objSvg)
             .classed('draggable', false)
@@ -885,14 +819,44 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
 
         roomObjGroup.append(() => shape.node());
 
-
         placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
         roomObjGroup.call(closeMenuThenDrag);
     });
 
 }
 // END FUNCTIONS FOR LOADING IN PREVIOUS DATA
+export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, doorDims: DoorResizeProps, newWidth: number, newHeight: number ){
+    const currentRect = d3.select('#border-rect');
+    const resizeHandler = borderGroup.selectAll('#resize-handle');
+    const doorGroup = borderGroup.selectAll('#border-door');
 
+    function updateSvgBounds(newSvgWidth: number, newSvgHeight: number, svgId: string) {
+        // Calculate new dimensions if necessary
+        const resizeSvg = borderGroup.select(`#${svgId}`);
+
+        // Update the SVG's viewBox to accommodate the new size, + 1 to add a pixel of distance between the svg and everything inside
+        resizeSvg.attr("viewBox", `0 0 ${newSvgWidth + 1} ${newSvgHeight + 1}`);
+        resizeSvg.attr("width", newSvgWidth + 1);
+        resizeSvg.attr("height", newSvgHeight + 1);
+    }
+    // Update rect dimensions and position
+    currentRect
+        .attr('width', newWidth)
+        .attr('height', newHeight);
+
+    //update resize rect handler
+    resizeHandler.attr("x", newWidth - 15)
+        .attr("y", newHeight - 15);
+
+    doorGroup.attr('x', doorDims.startX * doorDims.scaleX)
+        .attr('y', doorDims.startY * doorDims.scaleY);
+
+    doorGroup.attr('width', doorDims.startWidth * doorDims.scaleX)
+        .attr('height', doorDims.startHeight * doorDims.scaleY);
+
+    updateSvgBounds(newWidth, newHeight, 'border_template');
+    updateSvgBounds(newWidth, newHeight, 'border_template_wrapper');
+}
 
 const createStartResizeDrag = () => {
     return(
@@ -938,45 +902,44 @@ const createDragResizeDrag = (gridSize: number, borderGroup: d3.Selection<SVGGEl
             const dy = Math.round((y - this.startY) / gridSize);
 
             // calculate new height and width using previous delta and grid size for snapping
-            const newLockedWidth = this.startWidth + (dx * gridSize);
-            const newLockedHeight = this.startHeight + (dy * gridSize);
+            const newLockedWidth: number = this.startWidth + (dx * gridSize);
+            const newLockedHeight: number = this.startHeight + (dy * gridSize);
 
             const scaleX = newLockedWidth / this.startWidth;
             const scaleY = newLockedHeight / this.startHeight;
 
-            function updateSvgBounds(newSvgWidth: number, newSvgHeight: number, svgId: string) {
-                // Calculate new dimensions if necessary
-                const resizeSvg = borderGroup.select(`#${svgId}`);
-
-                // Update the SVG's viewBox to accommodate the new size, + 1 to add a pixel of distance between the svg and everything inside
-                resizeSvg.attr("viewBox", `0 0 ${newSvgWidth + 1} ${newSvgHeight + 1}`);
-                resizeSvg.attr("width", newSvgWidth + 1);
-                resizeSvg.attr("height", newSvgHeight + 1);
+            const doorDims: DoorResizeProps = {
+                startX: this.doorStartX,
+                startY: this.doorStartY,
+                startWidth: this.doorStartWidth,
+                startHeight: this.doorStartHeight,
+                scaleX: scaleX,
+                scaleY: scaleY
             }
 
-            // Update rect dimensions and position
-            currentRect
-                .attr('width', newLockedWidth)
-                .attr('height', newLockedHeight);
-
-            //update resize rect handler
-            resizeHandler.attr("x", newLockedWidth - 15)
-                .attr("y", newLockedHeight - 15);
-
-            doorGroup.attr('x', this.doorStartX * scaleX)
-                .attr('y', this.doorStartY * scaleY);
-
-            doorGroup.attr('width', this.doorStartWidth * scaleX)
-                .attr('height', this.doorStartHeight * scaleY);
-
-            updateSvgBounds(newLockedWidth, newLockedHeight, 'border_template');
-            updateSvgBounds(newLockedWidth, newLockedHeight, 'border_template_wrapper');
+            updateBorderSize(borderGroup, doorDims, newLockedWidth, newLockedHeight)
 
         }
     );
 }
+const createEndResizeDrag = (setLocalRoom) => {
+    return(
+        function startResizeDrag(event) {
+            const currentRect = d3.select('#border-rect');
+            setLocalRoom(prevState => ({
+                ...prevState,
+                layoutData: {
+                    ...prevState.layoutData,
+                    borderWidth: parseInt(currentRect.attr('width')),
+                    borderHeight: parseInt(currentRect.attr('height'))
+                }
+            }))
+        }
+    );
+}
 
-export const dragBorder = (closeMenuThenDrag, gridSize, borderGroup) => {
+//TODO remove closeMenuThenDrag call if dragging rect across grid is not desired
+export const dragBorder = (closeMenuThenDrag, gridSize, borderGroup, setLocalRoom) => {
     let targetId: string;
     return d3.drag()
         .on('start', function(event) {
@@ -1006,6 +969,8 @@ export const dragBorder = (closeMenuThenDrag, gridSize, borderGroup) => {
 
             if (targetElement.node().tagName === 'g') {
                 //closeMenuThenDrag.on('end').call(this,event);
+            }else if (targetElement.node().tagName === 'rect') {
+                createEndResizeDrag(setLocalRoom).call(this, event);
             }
         })
 }

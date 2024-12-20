@@ -499,9 +499,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 startY: parseFloat(doorSvg.attr('y')),
                 startWidth: doorStartWidth,
                 startHeight: doorStartHeight,
-                scaleX: localRoom.layoutData.borderWidth / doorStartWidth,
-                scaleY: localRoom.layoutData.borderHeight / doorStartHeight
+                scaleX: localRoom.layoutData.borderWidth / parseFloat(borderRect.attr('width')),
+                scaleY: localRoom.layoutData.borderHeight / parseFloat(borderRect.attr('height'))
             }
+            console.log("new dims: ", newDoorDims);
             updateBorderSize(borderGroup, newDoorDims, localRoom.layoutData.borderWidth, localRoom.layoutData.borderHeight);
         }
         // Attach x and y data to border group and drag call for resizing

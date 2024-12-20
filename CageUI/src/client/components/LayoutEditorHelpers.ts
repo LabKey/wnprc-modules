@@ -13,7 +13,10 @@ import {
     Cage,
     CageActionProps,
     CageNumber,
-    DEFAULT_CAGE_TYPE, DefaultRackTypes, DoorResizeProps,
+    DEFAULT_CAGE_TYPE, DEFAULT_PEN_TYPE,
+    DefaultRackTypes,
+    DoorResizeProps,
+    EHRRackType,
     GroupId,
     LayoutDragProps,
     LayoutHistoryData,
@@ -30,7 +33,8 @@ import {
     RoomItemClass,
     RoomItemStringType,
     RoomItemType,
-    RoomObject, RoomObjectTypes,
+    RoomObject,
+    RoomObjectTypes,
     RoomObjectTypesStrings,
     StartDragProps,
     UnitLocations
@@ -50,6 +54,31 @@ export const createEmptyUnitLoc = (): UnitLocations => {
     );
 }
 
+const generateTypeMaps = () => {
+    const rackTypeToDefaultType: { [key in RackTypes]?: DefaultRackTypes } = {};
+    const defaultTypeToRackType: { [key in DefaultRackTypes]?: RackTypes } = {};
+
+    // Iterate through the enum keys and filter out numeric ones
+    Object.keys(RackTypes)
+        .filter((key) => isNaN(Number(key))) // Filters out numeric keys
+        .forEach((key) => {
+            const rackTypeKey = RackTypes[key as keyof typeof RackTypes];
+            const defaultRackTypeKey = `Default${key}` as keyof typeof DefaultRackTypes;
+
+            // Check if the corresponding DefaultRackType key exists
+            if (DefaultRackTypes[defaultRackTypeKey] !== undefined) {
+                const defaultRackType = DefaultRackTypes[defaultRackTypeKey];
+
+                // Assign mappings
+                rackTypeToDefaultType[rackTypeKey as RackTypes] = defaultRackType;
+                defaultTypeToRackType[defaultRackType] = rackTypeKey as RackTypes;
+            }
+        });
+
+    return { rackTypeToDefaultType, defaultTypeToRackType };
+}
+
+export const { rackTypeToDefaultType, defaultTypeToRackType } = generateTypeMaps();
 
 
 // Function to get RoomItemType num from string, not including DefaultRackTypes
@@ -578,6 +607,10 @@ export const isRackEnum = (itemType: RoomItemType): itemType is RackTypes | Defa
     return itemType in RackTypes || itemType in DefaultRackTypes;
 };
 
+export const isRackDefault = (itemType: RoomItemType): itemType is DefaultRackTypes => {
+    return itemType in DefaultRackTypes;
+};
+
 // finds a cage by cageNum in group of racks if it exists
 export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
     return racks.find(rack => {
@@ -686,11 +719,24 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
         let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackItem.rack);
         if (!rack) {
             //create new rack if it doesn't exist
+            console.log("New Rack: ", isRackDefault(rackItem.object_type));
+            let type: EHRRackType;
+            let rackPrefix = 'rack';
+            // TODO possibly extend to play/temp cages or any other rack type that has default
+            if(isRackDefault(rackItem.object_type)){
+                rackPrefix = 'default-rack';
+                if(rackItem.object_type as DefaultRackTypes === DefaultRackTypes.DefaultCage){
+                    type = DEFAULT_CAGE_TYPE;
+                }else if(rackItem.object_type as DefaultRackTypes === DefaultRackTypes.DefaultPen){
+                    type = DEFAULT_PEN_TYPE;
+                }
+            }
+
             rack = {
                 cages: [],
                 isActive: true,
-                itemId: `rack-${rackItem.rack}`,
-                type: DEFAULT_CAGE_TYPE, // TODO find the rack type in the database for rackId
+                itemId: `${rackPrefix}-${rackItem.rack}`,
+                type: type, // TODO find the rack type in the database for rackId
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
                 y: rackItem.y_coord - rackGroup.y
             };
@@ -700,9 +746,17 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     }
 
     const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
+        // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
+        let cageNumType: RackStringType;
+        if(isRackDefault(rackItem.object_type)){
+            cageNumType = RackTypesStrings[defaultTypeToRackType[rackItem.object_type]];
+        }else{
+            cageNumType = RackTypesStrings[rackItem.object_type];
+        }
+        console.log("cageNum: ", cageNumType);
         const cage: Cage = {
             adjCages: undefined,
-            cageNum: `${RackTypes.Cage}-${parseInt(rackItem.cage)}` as CageNumber, // TODO depending on rack type this will change
+            cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber, // TODO depending on rack type this will change
             cageState: undefined,
             height: 0, // TODO find height at time for cage in Cage History
             id: rack.cages.length + 1, // TODO this might not work depending on order of cages in array, fix this
@@ -874,7 +928,7 @@ const createStartResizeDrag = () => {
             this.doorStartY = parseFloat(doorSvg.attr('y'));
             this.doorStartWidth = parseFloat(doorSvg.attr('width'));
             this.doorStartHeight = parseFloat(doorSvg.attr('height'));
-
+    console.log("start Y: ", this.doorStartY);
             // start x and y with respect to the layout svg
             const [x, y] = d3.pointer(event.sourceEvent, layoutSvg.node());
             this.startX = x;

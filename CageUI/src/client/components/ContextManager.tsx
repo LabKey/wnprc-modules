@@ -11,7 +11,7 @@ import {
     Page, PrevRoom,
     Rack,
     RackActions, RackGroup, RackStringType,
-    RackTypes, RackTypesStrings, RackTypeToDefaultType,
+    RackTypes, RackTypesStrings,
     Room,
     RoomItem, RoomItemClass,
     RoomItemStringType, RoomItemType,
@@ -33,7 +33,7 @@ import {
     findNextGroupId,
     findRackInGroup,
     findSelectObjRack,
-    isRack, isRackEnum,
+    isRack, isRackEnum, rackTypeToDefaultType,
 } from './LayoutEditorHelpers';
 import { Query } from '@labkey/api';
 import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
@@ -323,7 +323,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         setNextAvailGroup(prevState => {
             const nextId = parseLongId(prevState) + 1;
             return `rack-group-${nextId}` as GroupId
-        })
+        });
         setLocalRoom(prevRoom => ({
             ...prevRoom,
             rackGroups: [...prevRoom.rackGroups, newRackGroup]
@@ -729,8 +729,10 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
         console.log("New Room State: ", newLocalRoom);
 
+        // TODO might not always be last index (length - 1) will need more testing
+        const lastGroup = newLocalRoom.rackGroups[newLocalRoom.rackGroups.length - 1].groupId;
 
-        //addPrevRoomSvgs(newLocalRoom, layoutSvg);
+        setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
         setUnitLocs(newUnitLocs);
         setLocalRoom(newLocalRoom);
         setRoom(newLocalRoom);
@@ -756,7 +758,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                         cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
                         end_date: null,
                         rack: newRackId,
-                        object_type: rack.type.isDefault ? RackTypeToDefaultType[rack.type.type] : rack.type.type,
+                        object_type: rack.type.isDefault ? rackTypeToDefaultType[rack.type.type] : rack.type.type,
                         rack_group: groupId,
                         room: roomName,
                         start_date: newStartDate,

@@ -220,14 +220,6 @@ export enum RackTypes {
     PlayCage = 7
 }
 
-export const RackTypeToDefaultType: { [key in RackTypes]: DefaultRackTypes } = {
-    [RackTypes.Cage]: DefaultRackTypes.DefaultCage,
-    [RackTypes.Pen]: DefaultRackTypes.DefaultPen,
-    [RackTypes.TempCage]: DefaultRackTypes.DefaultTempCage,
-    [RackTypes.PlayCage]: DefaultRackTypes.DefaultPlayCage,
-};
-
-
 // Object mapping for string representation. These string names are used to id divs in the svgs
 export const RackTypesStrings: { [key in RackTypes]: string } = {
     [RackTypes.Cage]: "cage",

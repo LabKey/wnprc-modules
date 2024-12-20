@@ -890,10 +890,11 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 let txt = '';
                                 if (rsp) {
                                     for (let item of rsp) {
-                                        txt += '<div>' + item.message + item.projects + item.emails + '</div>' + '<br>';
+                                        txt += '<li>' + item.message + ' (Project(s): ' + item.projects + '; Contacts: <a href="mailto:' + item.emails + '">' + item.emails + '</a>'  + ')</li>';
                                     }
                                 }
                                 if (txt.length > 0){
+                                    txt = '<ul>' + txt + '</ul>'
                                     resp.innerHTML = '<span style="background:#acac16"> Warning:</span> ' + txt;
                                 } else {
                                     resp.innerHTML = '';

@@ -126,12 +126,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2152,22 +2152,84 @@ public class WNPRC_EHRController extends SpringActionController
         {
 
             ApiSimpleResponse response = new ApiSimpleResponse();
-
             Map<String, List<Map<String, Object>>> groupedById = new HashMap<>();
+            Map<Timestamp, List<Map<String, Object>>> groupedByDate = new HashMap<>();
+            List<String> lsids = new ArrayList<>();
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            Date parsedDate;
+
             for (Map<String,Object> mp : form.getRecords())
             {
                 String id = (String) mp.get("Id");
-                groupedById.computeIfAbsent(id, k -> new ArrayList<>()).add(mp);
+                try
+                {
+                    //convert the date to Timestamp since this is what comes from the db later
+                    parsedDate = dateFormat.parse((String) mp.get("date"));
+                    Timestamp date = new Timestamp(parsedDate.getTime());
+                    mp.put("date", date);
+                    groupedById.computeIfAbsent(id, k -> new ArrayList<>()).add(mp);
+                    groupedByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(mp);
+                }
+                catch (ParseException e)
+                {
+                    throw new RuntimeException(e);
+                }
             }
 
+
+            Set<String> ids = groupedById.keySet();
+            Set<Timestamp> dates = groupedByDate.keySet();
+
+            //get min date to query DB later
+            java.time.LocalDate minDate= java.time.LocalDate.now().plusYears(100);
+            for (Timestamp dateTime  : dates)
+            {
+                java.time.LocalDate date1 = dateTime.toLocalDateTime().toLocalDate();
+                minDate = date1.isBefore(minDate) ? date1 : minDate;
+            }
+
+            //get max date to query DB later
+            java.time.LocalDate maxDate = java.time.LocalDate.now().minusYears(100);
+            for (Timestamp dateTime : dates)
+            {
+                java.time.LocalDate date1 = dateTime.toLocalDateTime().toLocalDate();
+                maxDate = date1.isAfter(maxDate) ? date1 : maxDate;
+            }
+
+            //get any blood draws that have potentially the same date & id
+            Set<Integer> qcStates = new HashSet<>();
+            qcStates.add(EHRService.get().getQCStates(getContainer()).get(EHRService.QCSTATES.RequestApproved.getLabel()).getRowId());
+            qcStates.add(EHRService.get().getQCStates(getContainer()).get(EHRService.QCSTATES.Scheduled.getLabel()).getRowId());
+
+            SimpleFilter bloodFilter = new SimpleFilter(FieldKey.fromString("lsid"), String.join("; ",ids), CompareType.CONTAINS_ONE_OF);
+            bloodFilter.addCondition(FieldKey.fromString("date"), minDate, CompareType.DATE_GTE);
+            bloodFilter.addCondition(FieldKey.fromString("date"), maxDate, CompareType.DATE_LTE);
+            bloodFilter.addCondition(FieldKey.fromString("qcstate"), qcStates, CompareType.IN);
+            //Runs query with updated info.
+            TableInfo bloodTi = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("Blood Draws");
+            TableSelector bloodTable = new TableSelector(bloodTi, PageFlowUtil.set("lsid", "date", "project", "Id", "requestor", "createdby"), bloodFilter, null);
+            Map<String, Object>[] bloodRows = bloodTable.getMapArray();
+
+            //add the records from the db to our groupedById array
+            for (Map<String, Object> row : bloodRows)
+            {
+                for (Map.Entry<String, List<Map<String, Object>>> entry: groupedById.entrySet())
+                {
+                    if (entry.getKey().equals(row.get("Id")))
+                    {
+                        entry.getValue().add(row);
+                    }
+                }
+            }
+
+
             List<Map<String,Object>> messageList = new ArrayList<>();
-            //messages -> Map<String, String>
 
             for (Map.Entry<String, List<Map<String, Object>>> entry : groupedById.entrySet())
             {
                 Map<String, Object> theMessage = new HashMap<>();
 
-                Set<String> lsids = new HashSet<>();
                 List<Map<String, Object>> records = entry.getValue();
 
                 Set<java.time.LocalTime> uniqueTimes = new HashSet<>();
@@ -2180,27 +2242,22 @@ public class WNPRC_EHRController extends SpringActionController
                 for (int i = 0; i < records.size() - 1; i++)
                 {
                     Map<String, Object> record1 = records.get(i);
-                    String dateTimeString1 = (String) record1.get("date");
+                    Timestamp dateTime1 = (Timestamp) record1.get("date");
 
                     lsids.add((String) record1.get("lsid"));
 
                     for (int j = i + 1; j < records.size(); j++)
                     {
                         Map<String, Object> record2 = records.get(j);
-                        String dateTimeString2 = (String) record2.get("date");
+                        Timestamp dateTime2 = (Timestamp) record2.get("date");
                         lsids.add((String) record1.get("lsid"));
 
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
-                        LocalDateTime dateTime1 = LocalDateTime.parse(dateTimeString1, formatter);
+                        java.time.LocalDate date1 = dateTime1.toLocalDateTime().toLocalDate();
+                        java.time.LocalTime time1 = dateTime1.toLocalDateTime().toLocalTime();
 
-                        LocalDateTime dateTime2 = LocalDateTime.parse(dateTimeString2, formatter);
-
-                        java.time.LocalDate date1 = dateTime1.toLocalDate();
-                        java.time.LocalTime time1 = dateTime1.toLocalTime();
-
-                        java.time.LocalDate date2 = dateTime2.toLocalDate();
-                        java.time.LocalTime time2 = dateTime2.toLocalTime();
+                        java.time.LocalDate date2 = dateTime2.toLocalDateTime().toLocalDate();
+                        java.time.LocalTime time2 = dateTime2.toLocalDateTime().toLocalTime();
 
                         if (date1.isEqual(date2) && !time1.equals(time2))
                         {
@@ -2225,7 +2282,6 @@ public class WNPRC_EHRController extends SpringActionController
                         uniqueCreatedBy.add((Integer) row.get("createdBy"));
                     }
 
-
                     List<String> emails = new ArrayList<>();
                     for (var userId : uniqueCreatedBy)
                     {
@@ -2239,7 +2295,6 @@ public class WNPRC_EHRController extends SpringActionController
                     theMessage.put("emails", String.join(",", emails));
                     theMessage.put("projects", convertSetToString(uniqueProjects, ","));
                     theMessage.put("message",entry.getKey() + " has "+ uniqueTimes.size() + " draws on the same day but at different times.");
-
 
                     messageList.add(theMessage);
                 }

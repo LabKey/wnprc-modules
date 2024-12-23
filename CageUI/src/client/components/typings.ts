@@ -30,6 +30,11 @@ export type RoomItemClass = 'caging' | 'roomObj';
 // deletion actions for state management, cage = delete cage from rack, rack = delete rack from rack group, group = delete entire rack group
 export type DeleteActions = 'cage' | 'rack' | 'group';
 
+export interface LayoutSaveResult {
+    status: string;
+    reason?: any;
+}
+
 export interface DoorResizeProps {
     startX: number;
     startY: number;

@@ -123,9 +123,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                     {errorPopup &&
                         <ConfirmationPopup
                                 message={errorPopup}
-                                onConfirm={() => setErrorPopup(null)}
                                 onCancel={() => setErrorPopup(null)}
-                                error={true}
                         />
                     }
                 </div>

@@ -928,7 +928,6 @@ const createStartResizeDrag = () => {
             this.doorStartY = parseFloat(doorSvg.attr('y'));
             this.doorStartWidth = parseFloat(doorSvg.attr('width'));
             this.doorStartHeight = parseFloat(doorSvg.attr('height'));
-    console.log("start Y: ", this.doorStartY);
             // start x and y with respect to the layout svg
             const [x, y] = d3.pointer(event.sourceEvent, layoutSvg.node());
             this.startX = x;

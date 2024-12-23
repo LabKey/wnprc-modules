@@ -11,12 +11,11 @@ import {
     CageActionProps,
     CageNumber,
     DeleteActions, DoorResizeProps,
-    LayoutDragProps,
-    LocationCoords,
+    LayoutDragProps, LayoutSaveResult,
     PendingRoomUpdate,
     Rack, RackStringType,
     RackTypes, RackTypesStrings,
-    RoomItemStringType, RoomItemType,
+    RoomItemType,
     RoomObjectTypes, RoomObjectTypesStrings,
     UnitLocations
 } from './typings';
@@ -34,12 +33,11 @@ import {
     findRackInGroup,
     getLayoutOffset, getRoomItemTypeFromString,
     getTargetRect,
-    isRack, isRackEnum,
+    isRackEnum,
     mergeRacks, parseWrapperId,
     placeAndScaleGroup,
     setupEditCageEvent,
     showLayoutEditorConfirmation, updateBorderSize,
-    updateGrid
 } from './LayoutEditorHelpers';
 import EditorContextMenu from './EditorContextMenu';
 import { parseLongId, parseRoomItemNum, parseRoomItemType } from './helpers';
@@ -76,6 +74,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     });
     const [showSaveConfirm, setShowSaveConfirm] = useState<boolean>(false);
     const [showRoomSelector, setShowRoomSelector] = useState<boolean>(false);
+    const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
 
     const {
         localRoom,
@@ -119,7 +118,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
         console.log("xxx Locs: ", unitLocs);
-        console.log("xxx RoomSize: ", roomSize);
     }, [room, localRoom, unitLocs]);
 
     // Effect checks for merging/connecting after a rack is moved
@@ -502,7 +500,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 scaleX: localRoom.layoutData.borderWidth / parseFloat(borderRect.attr('width')),
                 scaleY: localRoom.layoutData.borderHeight / parseFloat(borderRect.attr('height'))
             }
-            console.log("new dims: ", newDoorDims);
             updateBorderSize(borderGroup, newDoorDims, localRoom.layoutData.borderWidth, localRoom.layoutData.borderHeight);
         }
         // Attach x and y data to border group and drag call for resizing
@@ -623,9 +620,36 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         console.log("Resetting to default layout");
     }
 
-    const handleSave = () => {
-        saveRoom();
+    const handleSave = async () => {
+        const result = await saveRoom();
+        setShowSaveResult(result);
     }
+
+    const handleSaveClose = () => {
+        if(showSaveResult?.reason){ // don't switch windows if error occurred
+            setShowSaveResult(null);
+        }else{
+            setShowSaveResult(null);
+            window.location.href = ActionURL.buildURL(
+                ActionURL.getController(),
+                'cageui-editLayoutDev',
+                ActionURL.getContainer(),
+                {room: localRoom.name}
+            );
+        }
+    }
+
+    //Ensures if canceling the submit confirmation on an unselected room layout, it returns to default room.
+    const handleCancelConfirm = () => {
+        if(room.name !== localRoom.name){
+            setLocalRoom(prevRoom => ({
+                ...prevRoom,
+                name: room.name
+            }));
+        }
+        setShowSaveConfirm(false);
+    }
+
 
     return (
         <div className={"layout-editor"} onClick={handleContextMenuClose}>
@@ -723,17 +747,17 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <button
                     className={"layout-toolbar-btn"}
                     onClick={handleClear}
-                >Clear
+                >Clear (WIP)
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
                     onClick={handleReset}
-                >Reset To Default
+                >Reset To Default (WIP)
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
                     onClick={handleDefaultSave}
-                >Save As Default
+                >Save As Default (WIP)
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
@@ -745,7 +769,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <ConfirmationPopup
                         message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
                         onConfirm={handleSave}
-                        onCancel={() => setShowSaveConfirm(false)}
+                        onCancel={handleCancelConfirm}
                 />
             }
             {showRoomSelector &&
@@ -753,6 +777,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                             setRoom={setLocalRoom}
                             onConfirm={() => setShowSaveConfirm(true)}
                             onCancel={() => setShowRoomSelector(false)}
+                    />
+            }
+            {showSaveResult &&
+                    <ConfirmationPopup
+                            message={`${showSaveResult.status}\n${showSaveResult?.reason ? showSaveResult.reason : ''}`}
+                            onCancel={handleSaveClose}
                     />
             }
             <EditorContextMenu

@@ -21,6 +21,7 @@ import * as d3 from 'd3';
 import * as React from 'react';
 import { Query } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 /*
 console.log(zeroPad(5, 2)); // "05"
@@ -35,6 +36,26 @@ export function labkeyActionSelectWithPromise(
         options.success = (data) => {resolve(data)};
         options.failure = (data) => {reject(data)};
         Query.selectRows(options);
+    });
+}
+
+export function labkeyActionInsertWithPromise(
+    options: QueryRequestOptions
+): Promise<any> {
+    return new Promise((resolve, reject) => {
+        options.success = (data) => {resolve(data)};
+        options.failure = (data) => {reject(data)};
+        Query.insertRows(options);
+    });
+}
+
+export function labkeyActionUpdateWithPromise(
+    options: QueryRequestOptions
+): Promise<any> {
+    return new Promise((resolve, reject) => {
+        options.success = (data) => {resolve(data)};
+        options.failure = (data) => {reject(data)};
+        Query.updateRows(options);
     });
 }
 

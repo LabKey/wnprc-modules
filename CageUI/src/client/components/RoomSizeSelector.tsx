@@ -48,7 +48,6 @@ export const RoomSizeSelector: React.FC<PopupProps> = ({ options, onClose, onSel
                     ))}
                 </div>
                 <div className="room-size-selector-actions">
-                    <button onClick={onClose} className="room-size-selector-close-btn">Close</button>
                     <button onClick={handleSelectClick} className="room-size-selector-select-btn" disabled={!selectedOption}>
                         Select
                     </button>

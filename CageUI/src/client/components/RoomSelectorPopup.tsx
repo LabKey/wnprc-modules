@@ -45,6 +45,10 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
     }, []);
 
     const handleSaveRoom = () => {
+        if(selectedRoom === null){
+            onCancel();
+            return;
+        }
         setRoom(prevState => ({
             ...prevState,
             name: selectedRoom
@@ -61,7 +65,6 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
                     options={options}
                     placeholder={"Select a room"}
                     onChange={(option) => setSelectedRoom(option.label)}
-
                 />
                 <div className="popup-buttons">
                     <button onClick={handleSaveRoom}>Yes</button>

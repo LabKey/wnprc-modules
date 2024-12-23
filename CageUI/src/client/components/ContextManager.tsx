@@ -6,7 +6,7 @@ import {
     DEFAULT_CAGE_TYPE,
     DEFAULT_PEN_TYPE, DefaultRackTypes, DeleteActions,
     GroupId, LayoutData,
-    LayoutHistoryData,
+    LayoutHistoryData, LayoutSaveResult,
     LocationCoords,
     Page, PrevRoom,
     Rack,
@@ -21,7 +21,7 @@ import {
 } from './typings';
 import {
     convertCageNumToNum,
-    getTranslation, parseLongId,
+    getTranslation, labkeyActionInsertWithPromise, labkeyActionUpdateWithPromise, parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
     removeCircularReferences, zeroPadName
@@ -38,6 +38,7 @@ import {
 import { Query } from '@labkey/api';
 import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
 import { RequestOptions } from '@labkey/api/dist/labkey/Ajax';
+import { QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 interface LayoutContextProps {
     children: ReactNode;
@@ -77,7 +78,7 @@ export interface RoomContextType {
 export interface LayoutContextType {
     room: Room;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
-    saveRoom: () => void;
+    saveRoom: () => Promise<LayoutSaveResult>;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     setLayoutSvg: React.Dispatch<React.SetStateAction<d3.Selection<SVGElement, {}, HTMLElement, any>>>;
     unitLocs: UnitLocations;
@@ -215,6 +216,7 @@ export const RoomContextProvider = ({children}) => {
 }
 
 export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoom}) => {
+    // loaded in and unchanged since start of layout editing
     const [room, setRoom] = useState<Room>({
         name: "new-layout",
         rackGroups: [],
@@ -228,6 +230,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     */
     const [unitLocs, setUnitLocs] = useState<UnitLocations>(createEmptyUnitLoc());
 
+    // All changes made to room reflect here. Use room state to compare to the start of room editing vs the changes made here
     const [localRoom, setLocalRoom] = useState<Room>({
         name:"new-layout",
         rackGroups: [],
@@ -738,8 +741,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         setRoom(newLocalRoom);
     }, [prevRoom]);
 
-    const saveRoom = () => {
-
+    const saveRoom = async (): Promise<LayoutSaveResult> => {
+        const apiCalls = [];
         console.log("Saving layout");
         const dataToSave: LayoutHistoryData[] = [];
         const roomName = localRoom.name;
@@ -800,17 +803,14 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         console.log("Saving: ", dataToSave);
 
         // insert rows to layout history for cages and room objects, no end date
-        Query.insertRows({
-            failure(errorInfo: any, response: XMLHttpRequest): any {
-                console.log("failed insert")
-            },
+        const saveHistoryOpt: QueryRequestOptions = {
             queryName: 'layout_history',
             schemaName: 'wnprc',
-            rows: dataToSave,
-            success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
-                console.log("success insert")
-            }
-        });
+            rows: dataToSave
+        }
+
+        apiCalls.push(labkeyActionInsertWithPromise(saveHistoryOpt));
+
         const compareLayoutData = (obj1: LayoutData, obj2: LayoutData): boolean => {
             return Object.keys(obj1).every((key) => obj1[key as keyof LayoutData] === obj2[key as keyof LayoutData]);
         }
@@ -824,36 +824,39 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                 border_width: localRoom.layoutData.borderWidth,
                 border_height: localRoom.layoutData.borderHeight
             }]
-
-            Query.updateRows({
-                failure(errorInfo: any, response: XMLHttpRequest): any {
-                    console.log("Failed Update for border");
-                },
+            const updateBorderOpt: QueryRequestOptions = {
                 queryName: 'rooms',
                 schemaName: 'ehr_lookups',
-                rows: roomToSave,
-                success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
-                    console.log("Success Update for border");
-
-                }
-            });
+                rows: roomToSave
+            }
+            apiCalls.push(labkeyActionUpdateWithPromise(updateBorderOpt));
         }
 
         // update prevRoom rows to include end date marking end of layout for that time frame
         if(rowsToUpdate){
             console.log("Updating: ", rowsToUpdate);
-            Query.updateRows({
-                failure(errorInfo: any, response: XMLHttpRequest): any {
-                    console.log("Failed Update");
-                },
+            const updateHistoryOpt: QueryRequestOptions = {
                 queryName: 'layout_history',
                 schemaName: 'wnprc',
-                rows: rowsToUpdate,
-                success(data: any, request: ExtendedXMLHttpRequest, config: RequestOptions): any {
-                    console.log("Success Update");
+                rows: rowsToUpdate
+            }
+            apiCalls.push(labkeyActionUpdateWithPromise(updateHistoryOpt));
+        }
 
-                }
-            });
+        const results = await Promise.allSettled(apiCalls);
+
+        // Determine success or failure
+        const failures = results
+            .filter(result => result.status === 'rejected')
+            .map(result => result.reason.error);
+
+        if (failures.length > 0) {
+            return {
+                status: 'Failure',
+                reason: failures // Return an array of failure reasons
+            };
+        } else {
+            return { status: 'Success' };  // All promises are fulfilled
         }
     }
 

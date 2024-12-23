@@ -41,7 +41,7 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
                 <ConfirmationPopup
                     message="Are you sure you want to save the data?"
                     onConfirm={() => {saveMod();closeDetails();}}
-                    onCancel={() => setIsPopupOpen(false)}
+                    onClose={() => setIsPopupOpen(false)}
                 />
             )}
             <div className={'details-mod-header'}>

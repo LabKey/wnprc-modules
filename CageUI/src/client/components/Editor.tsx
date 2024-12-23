@@ -141,7 +141,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 const tempLocs: UnitLocations = {...unitLocs};
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[rack.type.type] = tempLocs[rack.type.type].filter((unit) => !draggedCagesGroup.includes(unit.num))
+                    tempLocs[RackTypesStrings[rack.type.type]] = tempLocs[RackTypesStrings[rack.type.type]].filter((unit) => !draggedCagesGroup.includes(unit.num))
                 })
 
                 return tempLocs;
@@ -153,7 +153,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 const tempLocs: UnitLocations = createEmptyUnitLoc();
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[rack.type.type] = unitLocs[rack.type.type].filter((unit) => draggedCagesGroup.includes(unit.num))
+                    tempLocs[RackTypesStrings[rack.type.type]] = unitLocs[RackTypesStrings[rack.type.type]].filter((unit) => draggedCagesGroup.includes(unit.num))
                 })
 
                 return tempLocs;
@@ -178,7 +178,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     })
                 })
             });
-            console.log("End connected testing", cagesNotInDragged, cagesInDragged);
         }else{
             const {rack: draggedRack} = findRackInGroup(selectedObj, localRoom.rackGroups);
             const draggedRackType: RackStringType = RackTypesStrings[draggedRack.type.type];
@@ -647,7 +646,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 name: room.name
             }));
         }
-        setShowSaveConfirm(false);
     }
 
 
@@ -770,6 +768,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
                         onConfirm={handleSave}
                         onCancel={handleCancelConfirm}
+                        onClose={() => setShowSaveConfirm(false)}
                 />
             }
             {showRoomSelector &&
@@ -782,7 +781,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             {showSaveResult &&
                     <ConfirmationPopup
                             message={`${showSaveResult.status}\n${showSaveResult?.reason ? showSaveResult.reason : ''}`}
-                            onCancel={handleSaveClose}
+                            onClose={handleSaveClose}
                     />
             }
             <EditorContextMenu

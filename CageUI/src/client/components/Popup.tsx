@@ -53,7 +53,7 @@ export const Popup: FC<PopupProps> = (props) => {
             {showSave && (<ConfirmationPopup
                 message="You have unsaved data, are you sure you want to exit?"
                 onConfirm={onClose}
-                onCancel={() => setShowSave(false)}
+                onClose={() => setShowSave(false)}
             />)}
             <div className={"popup-content"} ref={modalRef}>
                 <div className={'popup-header'}>

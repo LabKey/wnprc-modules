@@ -4,28 +4,34 @@ import "../cageui.scss";
 
 interface ConfirmationPopupProps {
     message: string;
-    onConfirm?: () => void;
-    onCancel: () => void;
+    onConfirm?: () => void; // if confirm exists, give popup confirmation with option to cancel
+    onCancel?: () => void; // if cancel exists, run function before closing popup Ex (resetting states)
+    onClose: () => void; // function to close popup, usually a boolean state going to false
 }
 export const ConfirmationPopup: FC<ConfirmationPopupProps> = (props) => {
-    const { message, onConfirm, onCancel } = props
+    const { message, onConfirm, onCancel, onClose } = props
     return (
         <div className="popup-overlay">
             <div className="popup">
                 <p dangerouslySetInnerHTML={{__html: message}}/>
                 {!onConfirm &&
                         <div className="popup-buttons">
-                            <button onClick={onCancel}>Close</button>
+                            <button onClick={onClose}>Close</button>
                         </div>
                 }
                 {onConfirm &&
                         <div className="popup-buttons">
                             <button onClick={() => {
                                 onConfirm();
-                                onCancel();
+                                onClose();
                             }}>Yes
                             </button>
-                            <button onClick={onCancel}>No</button>
+                            <button onClick={() => {
+                                if(onCancel) {
+                                    onCancel();
+                                }
+                                onClose();
+                            }}>No</button>
                         </div>
                 }
             </div>

@@ -675,9 +675,14 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
     prevRoomData.forEach(roomItem => {
         if(!isRackEnum(roomItem.object_type)) return; // ignore room objects here
         // TODO find rack type for rack id
-
-        newUnitLocs.cage.push({
-            num: `cage-${parseInt(roomItem.cage)}` as CageNumber, // TODO num here should be RackStringType-roomItem.cage
+        let rackType: RackStringType;
+        if(isRackDefault(roomItem.object_type)){
+            rackType = RackTypesStrings[defaultTypeToRackType[roomItem.object_type]]
+        }else{
+            rackType = RackTypesStrings[roomItem.object_type];
+        }
+        newUnitLocs[rackType].push({
+            num: `${rackType}-${parseInt(roomItem.cage)}` as CageNumber, // TODO num here should be RackStringType-roomItem.cage
             cellX: roomItem.x_coord,
             cellY: roomItem.y_coord
         });

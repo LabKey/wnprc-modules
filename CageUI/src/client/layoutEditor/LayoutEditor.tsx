@@ -77,25 +77,21 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
         const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
 
         Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(([prevRoomResult, borderResult]) => {
+            let borderObj: LayoutData;
             if(borderResult.rowCount === 0){
                 throw new Error(`No room found in EHR for ${roomName}`);
-            }
-            console.log("Prev ROom", borderResult);
-            if(prevRoomResult.rows.length !== 0){
-                /* if room doesn't have scale or border set, set to default size. (1289,809) (1)
-                   Will only be used if the room is loaded in without creating it first.
-                   Aka adding an uncreated room to the url to load in or creating data in history that
-                   doesn't have size set in ehr_lookups.rooms table.
-                */
-                const borderObj: LayoutData = {
+            }else{
+
+                 borderObj = {
                     scale: borderResult.rows[0].layout_scale || 1,
                     borderHeight: borderResult.rows[0].border_height || 809,
                     borderWidth: borderResult.rows[0].border_width || 1289,
                 };
-                setPrevRoom({name: roomName, cagingData: prevRoomResult.rows, layoutData: borderObj});
                 setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
                 setShowSelectionPopup(false);
             }
+            console.log("Prev ROom", prevRoomResult.rows);
+            setPrevRoom({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
         }).catch(err => {
             setErrorPopup(err.toString());
         });

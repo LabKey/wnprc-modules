@@ -263,7 +263,7 @@ function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
 }
 
 export function setupEditCageEvent(
-    element: SVGTextElement,
+    cageGroupElement: SVGGElement,
     setClickedCage: (cageId: string) => void,
     setCtxMenuStyle:  React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
     rackTypeString: RackStringType
@@ -283,7 +283,6 @@ export function setupEditCageEvent(
     }
 
     // Attach context menu to the lowest level group for that cage.
-    const cageGroupElement: SVGGElement = element.closest(`[id^=${rackTypeString}]`) as SVGGElement;
     d3.select(cageGroupElement).attr('style', 'pointer-events: bounding-box')
     cageGroupElement.addEventListener('contextmenu', handleContextMenu);
 
@@ -311,13 +310,12 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
     }
 
     // Make sure cages don't have the wrong styles, give merged cages a grouped class
-    function resetElementProperties(element, shapeType, action) {
+    function resetElementProperties(element: SVGGElement, shapeType, action) {
         if(action === 'merge'){
-            element.classList = `grouped-${shapeType}`;
-            element.style = "";
+            element.setAttribute('class',`grouped-${shapeType}`);
+            element.setAttribute('style', "");
         }
-        const textEle = d3.select(element).selectAll('text').node() as SVGTextElement;
-        setupEditCageEvent(textEle, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -343,10 +341,10 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             const mergedChildren = d3.select(this).selectAll(':scope > g');
             if(!mergedChildren.empty()){
                 mergedChildren.each(function () {
-                    resetElementProperties(this, shapeType, action);
+                    resetElementProperties(this as SVGGElement, shapeType, action);
                 })
             }else{
-                resetElementProperties(this, shapeType, action);
+                resetElementProperties(this as SVGGElement, shapeType, action);
             }
             mergedGroup.node().appendChild(this);
         });
@@ -361,7 +359,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             }else{// When connecting racks for the first time
                 // this iteration is for connecting a merged rack, have to reset each cage in the rack but add the rack shape not the cage shape
                 d3.select(shape).selectAll(':scope > g').each(function () {
-                    resetElementProperties(this, getTypeClassFromElement(shape), action);
+                    resetElementProperties(this as SVGGElement, getTypeClassFromElement(shape), action);
                 });
 
                 mergedGroup.node().appendChild(shape);
@@ -802,9 +800,9 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     return(newLocalRoom);
 }
 
-export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag) => {
+export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag,setSelectedObj,setCtxMenuStyle) => {
     /*
-    TODO attach context menus, layout drags, and support for connected rack groups
+    TODO attach context menus
      */
     const createRackGroup = (parentGroup, rack, groupScale, isSingleRack) => {
         const rackTypeString: RackStringType = RackTypesStrings[rack.type.type];
@@ -819,6 +817,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
                 .attr('id', cage.cageNum)
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
+
             const unitSvg: SVGElement = (d3.select(`[id=${rackTypeString}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
                 .node().cloneNode(true) as SVGElement;
 
@@ -826,11 +825,14 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             shape.classed('draggable', false);
             shape.style('pointer-events', 'none');
 
-            // TODO attach context menu to unit element
-            shape.select(`[id=${rackTypeString}]`).style('pointer-events', 'bounding-box');
+            const cageGroupContext = shape.node().closest((`[id*=${rackTypeString}]`)) as SVGGElement;
+            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, rackTypeString);
+
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             cageGroup.append(() => shape.node());
+            // TODO attach context menu to unit element
+
         });
 
         return rackGroup;

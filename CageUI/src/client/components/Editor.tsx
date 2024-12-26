@@ -289,7 +289,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             textElement.setAttribute('contentEditable', 'true');
             (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
             (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-            setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, RackTypesStrings[updateItemType]);
+            const cageGroupElement = textElement.closest(`[id^=${RackTypesStrings[updateItemType]}]`) as SVGGElement;
+            setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, RackTypesStrings[updateItemType]);
         });
         setPendingRoomUpdate(null);
     }, [pendingRoomUpdate]);
@@ -509,7 +510,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         zoomToScale(roomSize.scale);
 
         if(localRoom.name !== 'new-layout'){
-            addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag);
+            addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle);
         }
         setBorderSetup(false);
     }, [borderSetup]);
@@ -597,7 +598,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     // attach click listener for context menu
                     newSvgGroup.selectAll('text').each(function () {
                         const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
-                        setupEditCageEvent(textElement, setSelectedObj, setCtxMenuStyle, newRackType);
+                        const cageGroupElement = textElement.closest(`[id^=${newRackType}]`) as SVGGElement;
+
+                        setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, newRackType);
                     });
                 }
                 svgToRemove.remove();

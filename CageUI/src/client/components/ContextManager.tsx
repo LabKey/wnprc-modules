@@ -716,11 +716,21 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         if(!prevRoom.name) return;
         console.log("Load Data: ", prevRoom);
 
-        //TODO make sure rack-group ids are correct
-        let newLocalRoom: Room = buildNewLocalRoom(prevRoom);
-        const newUnitLocs: UnitLocations = buildNewLocs(prevRoom.cagingData);
+        let newLocalRoom: Room;
+        let newUnitLocs: UnitLocations;
+        let lastGroup: GroupId;
 
-        //set border width,height and scale for room
+        //TODO make sure rack-group ids are correct
+        if(prevRoom.cagingData.length !== 0){
+            newUnitLocs = buildNewLocs(prevRoom.cagingData);
+            newLocalRoom = buildNewLocalRoom(prevRoom);
+
+            // TODO might not always be last index (length - 1) will need more testing
+            lastGroup = newLocalRoom.rackGroups[newLocalRoom.rackGroups.length - 1].groupId;
+        }else{
+            newLocalRoom = {name: prevRoom.name, rackGroups: [], objects: [], layoutData: null}
+        }
+        //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
         newLocalRoom = {
             ...newLocalRoom,
             layoutData: {
@@ -730,13 +740,17 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             }
         }
 
-        console.log("New Room State: ", newLocalRoom);
+        if (lastGroup){
+            setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
+        }else{
+            setNextAvailGroup(`rack-group-1`);
+        }
+        if(newUnitLocs){
+            setUnitLocs(newUnitLocs);
+        }
+        if(newLocalRoom){
 
-        // TODO might not always be last index (length - 1) will need more testing
-        const lastGroup = newLocalRoom.rackGroups[newLocalRoom.rackGroups.length - 1].groupId;
-
-        setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
-        setUnitLocs(newUnitLocs);
+        }
         setLocalRoom(newLocalRoom);
         setRoom(newLocalRoom);
     }, [prevRoom]);
@@ -788,7 +802,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             dataToSave.push(newObjData);
         });
 
-        if(prevRoom.name !== null){
+        if(prevRoom.cagingData.length !== 0){
             rowsToUpdate = prevRoom.cagingData.reduce((acc, row) => {
                 return [
                     ...acc,
@@ -802,14 +816,17 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
         console.log("Saving: ", dataToSave);
 
-        // insert rows to layout history for cages and room objects, no end date
-        const saveHistoryOpt: QueryRequestOptions = {
-            queryName: 'layout_history',
-            schemaName: 'wnprc',
-            rows: dataToSave
-        }
+        if(dataToSave.length !== 0){
+            // insert rows to layout history for cages and room objects, no end date
+            const saveHistoryOpt: QueryRequestOptions = {
+                queryName: 'layout_history',
+                schemaName: 'wnprc',
+                rows: dataToSave
+            }
 
-        apiCalls.push(labkeyActionInsertWithPromise(saveHistoryOpt));
+            apiCalls.push(labkeyActionInsertWithPromise(saveHistoryOpt));
+
+        }
 
         const compareLayoutData = (obj1: LayoutData, obj2: LayoutData): boolean => {
             return Object.keys(obj1).every((key) => obj1[key as keyof LayoutData] === obj2[key as keyof LayoutData]);

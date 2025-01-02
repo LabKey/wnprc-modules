@@ -3701,6 +3701,68 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         */
 
     }
+
+    @Test
+    public void testBloodDrawDoubleScheduleWarning() throws Exception
+    {
+        goToProjectHome();
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        Integer numTubes = 1;
+        String tubeType = "EDTA";
+        Integer project = 640991;
+        String account = "acct102";
+        Double tubeVolOK = 1.0;
+        Double quantityOK = tubeVolOK * numTubes;
+        InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
+        Date dt = prepareDate(new Date(), 10, 0);
+        Integer requestPending = myReusableFunctions.getQCStateRowID("Request: Pending");
+
+
+        bloodCmd.addRow(new HashMap<String, Object>()
+        {
+            {
+                put("Id", TEST_SUBJECTS[0]);
+                put("date", dt);
+                put("project", project);
+                put("account", account);
+                put("tube_type", tubeType);
+                put("tube_vol", tubeVolOK);
+                put("num_tubes", numTubes);
+                put("quantity", quantityOK);
+                put("additionalServices", null);
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+                put("QCState", requestPending);
+
+            }
+        });
+        bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
+
+        SelectRowsCommand sr = new SelectRowsCommand("study","blood");
+        sr.addFilter("Id", TEST_SUBJECTS[0], Filter.Operator.EQUAL);
+        sr.addFilter("date", dt, Filter.Operator.EQUAL);
+        SelectRowsResponse resp2 = sr.execute(getApiHelper().getConnection(), EHR_FOLDER_PATH);
+        Assert.assertEquals(1, resp2.getRowCount());
+        Assert.assertEquals(requestPending, resp2.getRows().get(0).get("QCState"));
+
+
+        //approve some draws
+        goToEHRFolder();
+        waitAndClickAndWait(Locator.linkWithText("Enter Data"));
+        waitAndClick(Locator.linkWithText("Blood Draw Requests"));
+        //clickBootstrapTab("Blood Draw Requests");
+        waitForText(TEST_SUBJECTS[0]);
+        //need to find web part title name
+        DataRegionTable dr = DataRegionTable.findDataRegionWithinWebpart(this, "blood");
+
+
+        dr.checkCheckbox(0);
+
+    }
     protected String generateGUID()
     {
         return (String)executeScript("return LABKEY.Utils.generateUUID().toUpperCase()");

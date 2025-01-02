@@ -634,7 +634,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             setShowSaveResult(null);
             window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
-                'cageui-editLayoutDev',
+                'cageui-editLayout',
                 ActionURL.getContainer(),
                 {room: localRoom.name}
             );

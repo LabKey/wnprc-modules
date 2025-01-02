@@ -809,7 +809,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
             .attr('class', `rack type-${rackTypeString}`)
-            .attr('transform', `translate(${rack.x},${rack.y}) scale(${groupScale})`)
+            .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');
 
         rack.cages.forEach((cage) => {

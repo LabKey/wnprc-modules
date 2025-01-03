@@ -669,7 +669,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                                 ...rack,
                                 cages: rack.cages.map((cage: Cage): Cage =>
                                     cage.cageNum === selectedObj // Only update the cage with matching cageNum
-                                        ? { ...cage, cageNum: `${rack.type.type}-${numAfter}` } as Cage
+                                        ? { ...cage, cageNum: `${RackTypesStrings[rack.type.type]}-${numAfter}` } as Cage
                                         : cage
                                 )
                             }

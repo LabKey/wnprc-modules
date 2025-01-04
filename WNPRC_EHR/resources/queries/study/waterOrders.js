@@ -122,7 +122,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     if (rowDate.getTime() > endDate.getTime()){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
-
     if (!row.frequency && row.waterSource === 'regulated'){
         EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering regulated water orders.', 'ERROR');
     }
@@ -130,22 +129,20 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         //console.log ("water vol "+ row.volume);
         EHR.Server.Utils.addError(scriptErrors, 'volume', 'Volume is required when entering regulated water orders.', 'ERROR');
     }
-
     if (!row.assignedTo && row.waterSource === 'regulated'){
         EHR.Server.Utils.addError(scriptErrors, 'assignedTo', 'Assigned To is required when entering regulated water orders.', 'ERROR');
     }
-
     if (!row.provideFruit && row.waterSource === 'regulated'){
         EHR.Server.Utils.addError(scriptErrors, 'provideFruit', 'Provide Fruit is required when entering regulated water orders.', 'INFO');
     }
-
     if (!row.waterSource){
         EHR.Server.Utils.addError(scriptErrors, 'waterSource', 'Water Source is required when entering new orders.', 'ERROR');
     }
-
-    if (row.volume && row.waterSource === 'lixit'){
+    if (row.volume !== undefined && row.volume!== null && row.waterSource === 'lixit'){
         EHR.Server.Utils.addError(scriptErrors,"volume", "Volume should be blank when selecting Lixit/Ad Lib for Water Source", "ERROR");
-
+    }
+    if (row.frequency !== 4 && row.waterSource === 'lixit'){
+        EHR.Server.Utils.addError(scriptErrors,"frequency", "Frequency should be 'Daily - Any Time' when selecting Lixit/Ad Lib", "ERROR");
     }
 
 
@@ -256,7 +253,7 @@ function onUpdate(helper, scriptErrors, row, oldRow){
 
     }
 
-    if ( row.waterSource === 'lixit'  && row.project  && row.assignedTo && !row.skipWaterRegulationCheck){
+    if ( row.waterSource === 'lixit'  && row.project  && row.volume !== undefined && row.assignedTo && !row.skipWaterRegulationCheck){
         changeWaterScheduled(row, scriptErrors);
     }
 }
@@ -266,7 +263,7 @@ function addErrorMessage(key,scriptErrors){
 }
 
 function changeWaterScheduled(row, scriptErrors){
-    if (row.waterSource === 'lixit' && !row.volume && row.frequency === 4){
+    if (row.waterSource === 'lixit' && !row.volume && row.volume !== undefined && row.frequency === 4){
         let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,this.extraContext);
         let jsonExtraContext = this.extraContext.extraContextArray;
 

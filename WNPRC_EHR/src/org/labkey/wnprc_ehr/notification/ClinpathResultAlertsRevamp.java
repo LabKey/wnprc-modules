@@ -149,9 +149,9 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
             // Creates a table from the data.
             String[] tableColumns = new String[]{"Id", "Collect Date", "Service Requested", "Requestor", "Date Reviewed", "Reviewed By"};
             for (String currentArea : notificationToolkit.sortSetWithNulls(filteredResults.keySet())) {
-                messageBody.append("<b>" + currentArea + ":</b><br>\n");
+                messageBody.append("<br>\n<b>" + currentArea + ":</b><br>\n");
                 for (String currentRoom : notificationToolkit.sortSetWithNulls(filteredResults.get(currentArea).keySet())) {
-                    messageBody.append(currentRoom + ":<br>\n");
+                    messageBody.append("<br>\n" + currentRoom + ":\n");
                     // Reformats the hashmap into a String[] List (to be compatible with the table creation function).
                     ArrayList<String []> currentTableData = new ArrayList<>();
                     ArrayList<String> rowColorsList = new ArrayList<>();

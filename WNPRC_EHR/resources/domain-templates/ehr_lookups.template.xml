@@ -9,6 +9,24 @@
             <dat:columns>
                 <dat:column columnName="type">
                     <dat:rangeURI>string</dat:rangeURI>
+                    <dat:fk>
+                        <dat:fkDbSchema>ehr_lookups</dat:fkDbSchema>
+                        <dat:fkTable>cageui_item_types</dat:fkTable>
+                        <dat:fkColumnName>value</dat:fkColumnName>
+                        <dat:fkDisplayColumnName>title</dat:fkDisplayColumnName>
+                    </dat:fk>
+                </dat:column>
+                <dat:column columnName="manufacturer">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:fk>
+                        <dat:fkDbSchema>ehr_lookups</dat:fkDbSchema>
+                        <dat:fkTable>cageui_rack_manufacturers</dat:fkTable>
+                        <dat:fkColumnName>value</dat:fkColumnName>
+                        <dat:fkDisplayColumnName>title</dat:fkDisplayColumnName>
+                    </dat:fk>
+                </dat:column>
+                <dat:column columnName="isDefault">
+                    <dat:rangeURI>boolean</dat:rangeURI>
                 </dat:column>
             </dat:columns>
         </table>

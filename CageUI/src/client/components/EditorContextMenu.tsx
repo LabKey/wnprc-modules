@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {FC, useRef, useEffect} from 'react';
+import { FC, useRef, useEffect, Ref } from 'react';
 import '../cageui.scss';
 import { parseRack } from './helpers'; // Add your menu CSS here
 
@@ -13,6 +13,7 @@ interface EditorContextMenuProps {
     onClickRename: () => void;
     onClickChangeRack: () => void;
     closeMenu: () => void;
+    popupRef: React.MutableRefObject<any>;
 }
 
 const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
@@ -21,7 +22,8 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         onClickDelete,
         onClickRename,
         onClickChangeRack,
-        closeMenu
+        closeMenu,
+        popupRef
     } = props;
     const menuRef = useRef<HTMLMenuElement>(null);
 
@@ -43,7 +45,9 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             // Check if the click was outside the menu
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+            if (menuRef.current && !menuRef.current.contains(event.target) &&
+                (!popupRef.current || !popupRef.current.contains(event.target))) {
+                console.log("closing menu inside menu");
                 closeMenu(); // Close the menu if click is outside
             }
         };

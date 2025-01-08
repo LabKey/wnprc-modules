@@ -209,6 +209,7 @@ export interface CageState {
 export type RoomItem = Rack | RoomObject;
 
 // used in ehr to determine if the rack is default (doesn't have a rackid)
+
 export enum DefaultRackTypes {
     DefaultCage = 0,
     DefaultPen = 1,

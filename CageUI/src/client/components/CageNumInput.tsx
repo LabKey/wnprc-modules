@@ -5,9 +5,11 @@ import {FC, useState} from 'react';
 interface CageNumInputProps {
     onSubmit: (value: number) => void;
     onClose: () => void;
+    popupRef: React.MutableRefObject<any>;
+
 }
 export const CageNumInput: FC<CageNumInputProps> = (props) => {
-    const {onSubmit, onClose} = props;
+    const {onSubmit, onClose, popupRef} = props;
     const [inputValue, setInputValue] = useState<string>('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +28,7 @@ export const CageNumInput: FC<CageNumInputProps> = (props) => {
 
     return (
         <div className="popup-overlay">
-            <div className="popup-content">
+            <div className="popup-content" ref={popupRef}>
                 <input
                     type="text"
                     value={inputValue}

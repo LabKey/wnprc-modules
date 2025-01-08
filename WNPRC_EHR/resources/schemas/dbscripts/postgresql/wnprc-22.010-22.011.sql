@@ -86,3 +86,19 @@ select setname, container, 'wnprc' as value, 'WNPRC' as title from ehr_lookups.l
 
 insert into ehr_lookups.lookups (set_name,container,value, title)
 select setname, container, 'uk' as value, 'Unknown' as title from ehr_lookups.lookup_sets where setname='cageui_rack_manufacturers';
+
+-- TODO consider moving this table to ehr_lookups with labkey help
+DROP TABLE IF EXISTS wnprc.racks;
+CREATE TABLE wnprc.racks
+(
+    rowid SERIAL NOT NULL,
+    rackid INTEGER NOT NULL,
+    rack_type varchar(50) NOT NULL,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_racks PRIMARY KEY (rowid),
+    CONSTRAINT FK_racks_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);

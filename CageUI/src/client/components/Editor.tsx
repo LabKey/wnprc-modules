@@ -44,6 +44,7 @@ import { parseLongId, parseRoomItemNum, parseRoomItemType } from './helpers';
 import { SelectorOptions } from './RoomSizeSelector';
 import { ConfirmationPopup } from './ConfirmationPopup';
 import { RoomSelectorPopup } from './RoomSelectorPopup';
+import { ChangeRackTypePopup } from './ChangeRackTypePopup';
 
 interface EditorProps {
     roomSize: SelectorOptions
@@ -62,16 +63,18 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     const utilsRef = useRef(null);
     const borderRef = useRef(null);
+    const popupRef = useRef(null); // ref for context menu popup (popup is the input for what is clicked in the menu)
     const [showGrid, setShowGrid] = useState<boolean>(true);
     const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
     const [renameCage, setRenameCage] = useState<boolean>(false);
-    const [changeRackType, setChangeRack] = useState<boolean>(false);
+    const [changingRackType, setChangingRackType] = useState<boolean>(false);
     const [borderSetup, setBorderSetup] = useState<boolean>(false); // determines if the border svg has been loaded yet
     const [ctxMenuStyle, setCtxMenuStyle] = useState({
         display: 'none',
         left: '',
         top: '',
     });
+    const [closeContextMenu, setCloseContextMenu] = useState<boolean>(false);
     const [showSaveConfirm, setShowSaveConfirm] = useState<boolean>(false);
     const [showRoomSelector, setShowRoomSelector] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
@@ -92,7 +95,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         setSelectedObj,
         delCage,
         unitLocs,
-        saveRoom
+        saveRoom,
+        changeRackType
     } = useLayoutContext();
 
     const dragInLayout = d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
@@ -103,7 +107,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const closeMenuThenDrag = d3.drag()
         .on('start', function (event) {
             console.log("layout Drag started xxx");
-            handleContextMenuClose(); // Close the menu when drag starts
+            setCloseContextMenu(true); // Close the menu when drag starts
             dragInLayout.on('start').call(this, event);
         })
         .on('drag', function (event) {
@@ -118,11 +122,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
         console.log("xxx Locs: ", unitLocs);
-    }, [room, localRoom, unitLocs]);
+        console.log("xxx obj: ", selectedObj);
+    }, [room, localRoom, unitLocs, selectedObj]);
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
-        if(!selectedObj) return;
+        if(!selectedObj || changingRackType) return;
         const objSvg = d3.select(`#${selectedObj}`);
         // return if selected object is not a rack group or rack
         if(!objSvg.classed('rack') && !objSvg.classed('rack-group')) return;
@@ -242,6 +247,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
             mergeRacks(targetRack, draggedRack, targetRackGroup, draggedRackGroup, doRackAction, closeMenuThenDrag, cageActionProps);
         }
+
         setSelectedObj(null);
     }, [unitLocs]);
 
@@ -397,7 +403,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             const objType = parseRoomItemType(selectedObj);
             let group = layoutSvg.select(`#${selectedObj}`).attr('id', `${objType}-${cageNumChange.after}`);
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
-            handleContextMenuClose();
+            setCloseContextMenu(true);
         }
     }, [cageNumChange]);
 
@@ -417,7 +423,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // Function to handle zoom for grid, zoom also handles infinite grid generation and drag
     function handleZoom(event) {
-        handleContextMenuClose(); // close open context menu if one is open and the user drags the grid
+        setCloseContextMenu(true); // close open context menu if one is open and the user drags the grid
         const transform = event.transform;
         layoutSvg.select("g.grid").attr("transform", transform);
 
@@ -544,15 +550,29 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }, [borderRef]);
 
     // closes cage editor context menu
-    const handleContextMenuClose = () => {
-        if(renameCage || changeRackType) return;
-        setCtxMenuStyle({
-            display: 'none',
-            left: '',
-            top: '',
-        });
-        setSelectedObj(null);
-    };
+    useEffect(() => {
+        if(closeContextMenu){
+            console.log("beans")
+            console.log("closing menu: ", changingRackType)
+
+            setCtxMenuStyle({
+                display: 'none',
+                left: '',
+                top: '',
+            });
+            setSelectedObj(null);
+            // set popup states false here
+            if(changingRackType){
+                setChangingRackType(false);
+
+            }
+            else if(renameCage){
+                setRenameCage(false);
+            }
+            setCloseContextMenu(false);
+        }
+    }, [closeContextMenu]);
+
 
     const handleDelCage = () => {
         // state in local room of cage, rack, and group that cage is apart of
@@ -605,7 +625,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 }
                 svgToRemove.remove();
                 delCage(localCage, localRack, localGroup, deleteAction);
-                handleContextMenuClose();
+                setCloseContextMenu(true);
             }
         });
     }
@@ -653,7 +673,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
 
     return (
-        <div className={"layout-editor"} onClick={handleContextMenuClose}>
+        <div className={"layout-editor"}>
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Door"}>
@@ -696,14 +716,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 </div>
             </div>
             <div id={"layout-grid"}>
-                {(renameCage) && // Opens menu for renaming cage
-                        <CageNumInput
-                                onSubmit={(num) => {
-                                    changeCageNum(parseRoomItemNum(selectedObj), num);
-                                }}
-                                onClose={() => setRenameCage(false)}
-                        />
-                }
                 <svg // Ensure the width/height fit the grid, using (scaled cell size * number of cells in width/height)
                     width={(roomSize.scale * CELL_SIZE) * gridWidth}
                     height={(roomSize.scale * CELL_SIZE)* gridHeight}
@@ -727,8 +739,23 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                             pointerEvents={'none'}
                         />
                     </g>
-
                 </svg>
+                {(renameCage) && // Opens menu for renaming cage
+                            <CageNumInput
+                                    popupRef={popupRef}
+                                    onSubmit={(num) => {
+                                        changeCageNum(parseRoomItemNum(selectedObj), num);
+                                    }}
+                                    onClose={() => setRenameCage(false)}
+                            />
+                }
+                {((console.log('changingRackType:', changingRackType), changingRackType)) && // Opens menu for renaming cage
+                        <ChangeRackTypePopup
+                                popupRef={popupRef}
+                                onSubmit={changeRackType}
+                                onClose={() => {setChangingRackType(false); setCloseContextMenu(true); }}
+                        />
+                }
             </div>
             <div id={"layout-toolbar"}>
                 <div className="checkbox-wrapper-8">
@@ -789,10 +816,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
             <EditorContextMenu
                 ctxMenuStyle={ctxMenuStyle}
+                popupRef={popupRef}
                 onClickDelete={handleDelCage}
                 onClickRename={() => setRenameCage(true)}
-                onClickChangeRack={() => setChangeRack(true)}
-                closeMenu={handleContextMenuClose}
+                onClickChangeRack={() => setChangingRackType(true)}
+                closeMenu={() => setCloseContextMenu(true)}
             />
         </div>
     );

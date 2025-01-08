@@ -372,4 +372,22 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="racks" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="rackid"/>
+            <column columnName="rack_type">
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>cage_type</fkTable>
+                    <fkColumnName>cagetype</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

@@ -96,6 +96,7 @@ export interface LayoutContextType {
     delCage: (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
+    changeRackType: (newType: {value: number, label: string}) => void;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -638,6 +639,24 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         }));
     }
 
+    const changeRackType = (newType: {value: number, label: string}) => {
+        const {value: realRackId, label: rackType} = newType;
+        const [type, mfr, size] = rackType.split("-");
+        console.log("change type: ", type, mfr, size, selectedObj);
+        /*
+        setLocalRoom(prevRoom => {
+            let roomToUpdate = prevRoom;
+
+            roomToUpdate = {
+                layoutData: undefined, name: '', objects: [], rackGroups: []
+            }
+
+
+        })
+
+*/
+    }
+
     const changeCageNum = (numBefore: number, numAfter: number) => {
         const objType = parseRoomItemType(selectedObj);
 
@@ -898,7 +917,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             setSelectedObj,
             delCage,
             scale,
-            setScale
+            setScale,
+            changeRackType
         }}>
             {children}
         </LayoutContext.Provider>

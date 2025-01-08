@@ -682,7 +682,6 @@ WNPRC_EHR.DatasetButtons = new function(){
                     jsonData: { records: records },
                     callback: function (config, success, xhr) {
                         if (success) {
-                            console.log(xhr);
                             resolve(xhr.responseText);
                         } else {
                             reject('Couldn\'t compare blood schedule, internal error.');

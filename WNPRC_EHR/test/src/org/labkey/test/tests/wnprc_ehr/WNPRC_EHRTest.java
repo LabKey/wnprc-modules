@@ -3702,6 +3702,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
+    // Note: there is one flaw with this test below w.r.t the dates.
+    // the idea is to test two dates within the same day under a couple constraints,
+    // one is there can be no blood requests in the past, and another is it can only go up to 60 days into the future,
+    // so setting a date in the distant past or future is not possible, so we have to do a dynamic date using
+    // new Date() and offsetting the hours. If the first date happens to run within an hour before midnight, this test will fail.
     @Test
     public void testBloodDrawDoubleScheduleWarning() throws Exception
     {
@@ -3717,6 +3722,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         InsertRowsCommand bloodCmd = new InsertRowsCommand("study", "blood");
         Date dt = prepareDate(new Date(), 10, 0);
         Integer requestPending = myReusableFunctions.getQCStateRowID("Request: Pending");
+        Integer scheduled = myReusableFunctions.getQCStateRowID("Scheduled");
 
 
         bloodCmd.addRow(new HashMap<String, Object>()
@@ -3740,6 +3746,28 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
             }
         });
+        Date d2 = prepareDate(new Date(), 10, 1);
+        bloodCmd.addRow(new HashMap<String, Object>()
+        {
+            {
+                put("Id", TEST_SUBJECTS[0]);
+                put("date", d2);
+                put("project", project);
+                put("account", account);
+                put("tube_type", tubeType);
+                put("tube_vol", tubeVolOK);
+                put("num_tubes", numTubes);
+                put("quantity", quantityOK);
+                put("additionalServices", null);
+                put("restraint", "Chemical");
+                put("restraintDuration", "< 30 min");
+                put("instructions", "test special instruction");
+                put("remark", "test remark");
+                put("performedby", "autotest");
+                put("QCState", scheduled);
+
+            }
+        });
         bloodCmd.execute(getApiHelper().getConnection(), getContainerPath());
 
         SelectRowsCommand sr = new SelectRowsCommand("study","blood");
@@ -3756,12 +3784,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClick(Locator.linkWithText("Blood Draw Requests"));
         //clickBootstrapTab("Blood Draw Requests");
         waitForText(TEST_SUBJECTS[0]);
-        //need to find web part title name
-        DataRegionTable dr = DataRegionTable.findDataRegionWithinWebpart(this, "blood");
 
+        WebElement parentDiv = getDriver().findElement(By.cssSelector("div[id*='lk-gen'][class='tab-pane active']"));
 
-        dr.checkCheckbox(0);
+        // Locate the form element within the parent div
+        WebElement formElement = parentDiv.findElement(By.xpath(".//form[contains(@id, 'lk-region-')]"));
 
+        // Get the value of the "lk-region-form" attribute
+        String formAttribute = formElement.getAttribute("lk-region-form");
+        DataRegionTable dataRegionTable = new DataRegionTable.DataRegionFinder(getDriver()).withName(formAttribute).find();
+
+        dataRegionTable.checkCheckbox(0);
+
+        dataRegionTable.clickHeaderMenu("More Actions", false, "Change Request Status");
+        waitForText(TEST_SUBJECTS[0] + " has 2 draws on the same day but at different times");
+        assertTextPresent(TEST_SUBJECTS[0] + " has 2 draws on the same day but at different times");
     }
     protected String generateGUID()
     {

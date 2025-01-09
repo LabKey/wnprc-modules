@@ -906,7 +906,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 Ext4.getCmp('submitButton').enable()
                                 console.error(error);
                                 let resp = document.getElementById('bloodCompareResponse');
-                                resp.innerHTML = '<p>Error checking blood schedule, you are still able to submit. Please contact EHR admins with details: ' + JSON.parse(error) + '</p>'
+                                resp.innerHTML = '<p>Error checking blood schedule, you are still able to submit. Please contact EHR admins with details: ' + new Date() + ' ' + JSON.parse(error) + '</p>'
                             });
                         }
                     }

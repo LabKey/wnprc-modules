@@ -674,7 +674,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                 }
         },
 
-        getMoreItems: function(records) {
+        checkBloodSchedule: function(records) {
 
             return new Promise((resolve, reject) => {
                 LABKEY.Ajax.request({
@@ -883,7 +883,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }],
                     listeners: {
                         afterrender: () => {
-                            this.getMoreItems(records).then(response => {
+                            this.checkBloodSchedule(records).then(response => {
                                 let resp = document.getElementById('bloodCompareResponse');
                                 let rsp = JSON.parse(response).message;
                                 let txt = '';

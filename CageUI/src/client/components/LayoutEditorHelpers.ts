@@ -800,7 +800,7 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
     return(newLocalRoom);
 }
 
-export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag,setSelectedObj,setCtxMenuStyle) => {
+export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag,setSelectedObj,setShowCtxMenu) => {
     /*
     TODO attach context menus
      */
@@ -826,7 +826,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             shape.style('pointer-events', 'none');
 
             const cageGroupContext = shape.node().closest((`[id*=${rackTypeString}]`)) as SVGGElement;
-            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, rackTypeString);
+            setupEditCageEvent(cageGroupContext, setSelectedObj, setShowCtxMenu, rackTypeString);
 
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 

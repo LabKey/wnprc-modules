@@ -8,19 +8,15 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 interface ChangeRackTypePopupProps {
     onSubmit: (newType: {value: number, label: string}) => void;
-    onClose: () => void;
-    popupRef: React.MutableRefObject<any>;
 }
 
 export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
-    const {onSubmit, onClose, popupRef} = props;
+    const {onSubmit} = props;
 
     const [options, setOptions] = useState<{value: number, label: string}[]>(null);
 
     const handleChange = (newVal) => {
-        console.log("newVal: ", newVal);
         onSubmit(newVal);
-        onClose(); // Close the popup after submitting
     };
 
 
@@ -49,10 +45,12 @@ export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
     }, [options]);
 
     return (
-        <div className="popup-overlay" >
-            <div className="popup-content" ref={popupRef}>
+        <div className="context-menu-row">
+            <div className="context-menu-input">
                 <Select
                     options={options}
+                    className={"select-menu"}
+                    classNamePrefix={"select"}
                     onChange={handleChange}
                 />
             </div>

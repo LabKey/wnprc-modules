@@ -4,12 +4,10 @@ import {FC, useState} from 'react';
 
 interface CageNumInputProps {
     onSubmit: (value: number) => void;
-    onClose: () => void;
-    popupRef: React.MutableRefObject<any>;
 
 }
 export const CageNumInput: FC<CageNumInputProps> = (props) => {
-    const {onSubmit, onClose, popupRef} = props;
+    const {onSubmit} = props;
     const [inputValue, setInputValue] = useState<string>('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,14 +19,13 @@ export const CageNumInput: FC<CageNumInputProps> = (props) => {
             const numericValue = parseFloat(inputValue);
             if (!isNaN(numericValue)) {
                 onSubmit(numericValue);
-                onClose(); // Close the popup after submitting
             }
         }
     };
 
     return (
-        <div className="popup-overlay">
-            <div className="popup-content" ref={popupRef}>
+        <div className="context-menu-row">
+            <div className="context-menu-input">
                 <input
                     type="text"
                     value={inputValue}

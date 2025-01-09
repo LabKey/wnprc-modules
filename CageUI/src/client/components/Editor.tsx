@@ -66,15 +66,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const popupRef = useRef(null); // ref for context menu popup (popup is the input for what is clicked in the menu)
     const [showGrid, setShowGrid] = useState<boolean>(true);
     const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
-    const [renameCage, setRenameCage] = useState<boolean>(false);
-    const [changingRackType, setChangingRackType] = useState<boolean>(false);
     const [borderSetup, setBorderSetup] = useState<boolean>(false); // determines if the border svg has been loaded yet
     const [ctxMenuStyle, setCtxMenuStyle] = useState({
         display: 'none',
         left: '',
         top: '',
     });
-    const [closeContextMenu, setCloseContextMenu] = useState<boolean>(false);
+    const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
     const [showSaveConfirm, setShowSaveConfirm] = useState<boolean>(false);
     const [showRoomSelector, setShowRoomSelector] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
@@ -107,7 +105,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const closeMenuThenDrag = d3.drag()
         .on('start', function (event) {
             console.log("layout Drag started xxx");
-            setCloseContextMenu(true); // Close the menu when drag starts
+            setShowContextMenu(false); // Close the menu when drag starts
             dragInLayout.on('start').call(this, event);
         })
         .on('drag', function (event) {
@@ -127,7 +125,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
-        if(!selectedObj || changingRackType) return;
+        if(!selectedObj) return;
         const objSvg = d3.select(`#${selectedObj}`);
         // return if selected object is not a rack group or rack
         if(!objSvg.classed('rack') && !objSvg.classed('rack-group')) return;
@@ -403,7 +401,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             const objType = parseRoomItemType(selectedObj);
             let group = layoutSvg.select(`#${selectedObj}`).attr('id', `${objType}-${cageNumChange.after}`);
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
-            setCloseContextMenu(true);
+            setShowContextMenu(false);
         }
     }, [cageNumChange]);
 
@@ -423,7 +421,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // Function to handle zoom for grid, zoom also handles infinite grid generation and drag
     function handleZoom(event) {
-        setCloseContextMenu(true); // close open context menu if one is open and the user drags the grid
+        setShowContextMenu(false); // close open context menu if one is open and the user drags the grid
         const transform = event.transform;
         layoutSvg.select("g.grid").attr("transform", transform);
 
@@ -516,7 +514,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         zoomToScale(roomSize.scale);
 
         if(localRoom.name !== 'new-layout'){
-            addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle);
+            addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setShowContextMenu);
         }
         setBorderSetup(false);
     }, [borderSetup]);
@@ -551,27 +549,21 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // closes cage editor context menu
     useEffect(() => {
-        if(closeContextMenu){
-            console.log("beans")
-            console.log("closing menu: ", changingRackType)
-
+        if(!showContextMenu){
             setCtxMenuStyle({
                 display: 'none',
                 left: '',
                 top: '',
             });
             setSelectedObj(null);
-            // set popup states false here
-            if(changingRackType){
-                setChangingRackType(false);
-
-            }
-            else if(renameCage){
-                setRenameCage(false);
-            }
-            setCloseContextMenu(false);
         }
-    }, [closeContextMenu]);
+    }, [showContextMenu]);
+
+    useEffect(() => {
+        if(ctxMenuStyle.display !== 'none'){
+            setShowContextMenu(true);
+        }
+    }, [ctxMenuStyle]);
 
 
     const handleDelCage = () => {
@@ -625,7 +617,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 }
                 svgToRemove.remove();
                 delCage(localCage, localRack, localGroup, deleteAction);
-                setCloseContextMenu(true);
+                setShowContextMenu(false);
             }
         });
     }
@@ -740,22 +732,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         />
                     </g>
                 </svg>
-                {(renameCage) && // Opens menu for renaming cage
-                            <CageNumInput
-                                    popupRef={popupRef}
-                                    onSubmit={(num) => {
-                                        changeCageNum(parseRoomItemNum(selectedObj), num);
-                                    }}
-                                    onClose={() => setRenameCage(false)}
-                            />
-                }
-                {((console.log('changingRackType:', changingRackType), changingRackType)) && // Opens menu for renaming cage
-                        <ChangeRackTypePopup
-                                popupRef={popupRef}
-                                onSubmit={changeRackType}
-                                onClose={() => {setChangingRackType(false); setCloseContextMenu(true); }}
-                        />
-                }
             </div>
             <div id={"layout-toolbar"}>
                 <div className="checkbox-wrapper-8">
@@ -795,33 +771,36 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             </div>
             {showSaveConfirm &&
                 <ConfirmationPopup
-                        message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
-                        onConfirm={handleSave}
-                        onCancel={handleCancelConfirm}
-                        onClose={() => setShowSaveConfirm(false)}
+                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
+                    onConfirm={handleSave}
+                    onCancel={handleCancelConfirm}
+                    onClose={() => setShowSaveConfirm(false)}
                 />
             }
             {showRoomSelector &&
-                    <RoomSelectorPopup
-                            setRoom={setLocalRoom}
-                            onConfirm={() => setShowSaveConfirm(true)}
-                            onCancel={() => setShowRoomSelector(false)}
-                    />
+                <RoomSelectorPopup
+                    setRoom={setLocalRoom}
+                    onConfirm={() => setShowSaveConfirm(true)}
+                    onCancel={() => setShowRoomSelector(false)}
+                />
             }
             {showSaveResult &&
-                    <ConfirmationPopup
-                            message={`${showSaveResult.status}\n${showSaveResult?.reason ? showSaveResult.reason : ''}`}
-                            onClose={handleSaveClose}
-                    />
+                <ConfirmationPopup
+                    message={`${showSaveResult.status}\n${showSaveResult?.reason ? showSaveResult.reason : ''}`}
+                    onClose={handleSaveClose}
+                />
             }
-            <EditorContextMenu
-                ctxMenuStyle={ctxMenuStyle}
-                popupRef={popupRef}
-                onClickDelete={handleDelCage}
-                onClickRename={() => setRenameCage(true)}
-                onClickChangeRack={() => setChangingRackType(true)}
-                closeMenu={() => setCloseContextMenu(true)}
-            />
+            {showContextMenu &&
+                <EditorContextMenu
+                    ctxMenuStyle={ctxMenuStyle}
+                    onSubmitRename={(num) => {
+                        changeCageNum(parseRoomItemNum(selectedObj), num);
+                    }}
+                    onClickDelete={handleDelCage}
+                    closeMenu={() => setShowContextMenu(false)}
+                    onSubmitChangeRack={changeRackType}
+                />
+            }
         </div>
     );
 };

@@ -1,7 +1,10 @@
 import * as React from 'react';
-import { FC, useRef, useEffect, Ref } from 'react';
+import { FC, useRef, useEffect, Ref, useState } from 'react';
 import '../cageui.scss';
-import { parseRack } from './helpers'; // Add your menu CSS here
+import { parseRack, parseRoomItemNum } from './helpers';
+import { CageNumInput } from './CageNumInput';
+import { ChangeRackTypePopup } from './ChangeRackTypePopup';
+import { Button } from 'react-bootstrap'; // Add your menu CSS here
 
 interface EditorContextMenuProps {
     ctxMenuStyle: {
@@ -10,43 +13,31 @@ interface EditorContextMenuProps {
         left: string;
     };
     onClickDelete: () => void;
-    onClickRename: () => void;
-    onClickChangeRack: () => void;
     closeMenu: () => void;
-    popupRef: React.MutableRefObject<any>;
+    onSubmitRename: (num: number) => void;
+    onSubmitChangeRack: (newType: {value: number, label: string}) => void;
 }
 
 const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     const {
         ctxMenuStyle,
         onClickDelete,
-        onClickRename,
-        onClickChangeRack,
         closeMenu,
-        popupRef
+        onSubmitRename,
+        onSubmitChangeRack
     } = props;
-    const menuRef = useRef<HTMLMenuElement>(null);
 
-    const handleRenameClick = (e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        onClickRename();
-    };
+    const menuRef = useRef(null);
 
     const handleDeleteClick = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         onClickDelete();
     };
 
-    const handleChangeRack = (e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        onClickChangeRack();
-    };
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             // Check if the click was outside the menu
-            if (menuRef.current && !menuRef.current.contains(event.target) &&
-                (!popupRef.current || !popupRef.current.contains(event.target))) {
+            if (menuRef.current && !menuRef.current.contains(event.target)){
                 console.log("closing menu inside menu");
                 closeMenu(); // Close the menu if click is outside
             }
@@ -62,20 +53,41 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     }, [menuRef]);
 
     return (
-        <menu
-            ref={menuRef}
-            id="ctxMenu"
-            style={{
-                display: ctxMenuStyle.display,
-                position: 'absolute',
-                left: ctxMenuStyle.left,
-                top: ctxMenuStyle.top
-            }}
-        >
-            <menu className={'menu-item'} title="Rename" onClick={handleRenameClick} />
-            <menu className={'menu-item'} title="Delete" onClick={handleDeleteClick} />
-            <menu className={'menu-item'} title="Change Rack" onClick={handleChangeRack} />
-        </menu>
+        <div id="contextMenu" className="context-menu" ref={menuRef} style={{
+            display: ctxMenuStyle.display,
+            position: 'absolute',
+            left: ctxMenuStyle.left,
+            top: ctxMenuStyle.top,
+            width: 200,
+            height: 'auto'
+        }}>
+            <div className="menu-item">
+                <label>New ID</label>
+                <CageNumInput
+                    onSubmit={(num) => {
+                        onSubmitRename(num);
+                        closeMenu()
+                    }}
+                />
+            </div>
+            <div className="menu-item">
+                <label>Change Rack</label>
+                <ChangeRackTypePopup
+                    onSubmit={(newType) => {
+                        onSubmitChangeRack(newType);
+                        closeMenu()
+                    }}
+                />
+            </div>
+            <div className="menu-item">
+                <Button
+                    variant={'primary'}
+                    onClick={handleDeleteClick}
+                >
+                    Delete Cage
+                </Button>
+            </div>
+        </div>
     );
 };
 

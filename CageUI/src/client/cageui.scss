@@ -828,46 +828,59 @@ ul {
 }
 
 // Editor Context menu
-menu {
+
+
+/* Custom context menu styling */
+.context-menu {
   position: absolute;
-  display: block;
-  left: 0px;
-  top: 0px;
-  height: 20px;
-  width: 20px;
-  padding: 0;
-  margin: 0;
-  border: 1px solid;
-  background-color: white;
-  font-weight: normal;
-  white-space: nowrap;
-  min-width: max-content;
-  z-index: 1;
-}
-
-menu:hover {
-  background-color: #eef;
-  font-weight: bold;
-}
-
-menu:hover > menu {
-  display: block;
-}
-
-menu .menu-item {
   display: none;
-  position: relative;
-  top: -20px;
-  left: 100%;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000;
+  width: 200px; /* Set default width */
+  height: 150px; /* Set default height */
+  overflow: visible; /* Hide overflow during resizing */
+  resize: none; /* Disable the native resize */
+}
+
+/* Menu item styling */
+.menu-item {
+  margin-bottom: 8px;
+}
+
+.menu-item label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.menu-item input,
+.menu-item select {
   width: 100%;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-menu[title]:before {
-  content: attr(title);
+/* Default styles */
+.select-menu .select__option--is-selected {
+  background-color: white;
+  color: black;
 }
 
-menu:not([title]):before {
-  content: "\2630";
+/* Highlight selected option */
+.select-menu  .select__option:hover {
+  background-color: lightgray;
+  opacity: 0.8;
+}
+
+
+.context-menu-input {
+  overflow-y: visible;
 }
 // End Editor Context menu styles
 

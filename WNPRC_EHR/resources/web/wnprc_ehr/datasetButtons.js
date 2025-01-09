@@ -673,6 +673,25 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }
                 }
         },
+
+        checkBloodSchedule: function(records) {
+
+            return new Promise((resolve, reject) => {
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL('WNPRC_EHR', 'CompareBloodSchedules'),
+                    jsonData: { records: records },
+                    callback: function (config, success, xhr) {
+                        if (success) {
+                            resolve(xhr.responseText);
+                        } else {
+                            reject('Couldn\'t compare blood schedule, internal error.');
+                        }
+                    }
+                })
+            });
+
+        },
+
         /**
          * This add a handler to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
          * It also captures values for 'billedBy' and 'instructions'.
@@ -710,14 +729,26 @@ WNPRC_EHR.DatasetButtons = new function(){
                     title: 'Change Request Status',
                     width: 430,
                     autoHeight: true,
+                    id: 'change-request-window',
                     items: [{
                         xtype: 'form',
+                        height: '100%',
                         ref: 'theForm',
+                        id: 'change-request-form',
+                        autoHeight: true,
                         bodyStyle: 'padding: 5px;',
                         defaults: {
                             border: false
                         },
-                        items: [{
+                        items: [
+
+                            {
+                                id:'bloodCompareResponseWrapper',
+                                height: '100%',
+                                html: '<div id="bloodCompareResponse"><i class="fa fa-spinner fa-pulse"></i> loading..</div>',
+                                tag: 'div'
+                            },
+                            {
                             html: 'Total Records: '+checked.length+'<br><br>',
                             tag: 'div'
                         },{
@@ -767,10 +798,11 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }],
                     buttons: [{
                         text:'Submit',
-                        disabled:false,
+                        disabled:true,
                         formBind: true,
                         ref: '../submit',
                         scope: this,
+                        id: 'submitButton',
                         handler: function(o){
                             var win = o.up('window');
                             var form = win.down('form');
@@ -848,7 +880,37 @@ WNPRC_EHR.DatasetButtons = new function(){
                         handler: function(o){
                             o.ownerCt.ownerCt.close();
                         }
-                    }]
+                    }],
+                    listeners: {
+                        afterrender: () => {
+                            this.checkBloodSchedule(records).then(response => {
+                                let resp = document.getElementById('bloodCompareResponse');
+                                let rsp = JSON.parse(response).message;
+                                let txt = '';
+                                if (rsp) {
+                                    for (let item of rsp) {
+                                        txt += '<li>' + item.message + ' (Project(s): ' + item.projects + '; Contacts: <a href="mailto:' + item.emails + '">' + item.emails + '</a>'  + ')</li>';
+                                    }
+                                }
+                                if (txt.length > 0){
+                                    txt = '<ul>' + txt + '</ul>'
+                                    resp.innerHTML = '<span style="background:#acac16"> Warning:</span> ' + txt;
+                                } else {
+                                    resp.innerHTML = '';
+                                }
+                                Ext4.getCmp('submitButton').enable()
+                                // Have to reset the height since the form has a set height after initial rendering,
+                                // but when text is dynamically added the height does not change.
+                                Ext4.getCmp('change-request-form').setHeight('100%')
+                            }).catch(error => {
+                                Ext4.getCmp('submitButton').enable()
+                                console.error(error);
+                                let resp = document.getElementById('bloodCompareResponse');
+                                resp.innerHTML = '<p>Error checking blood schedule, you are still able to submit. Please contact EHR admins with details: ' + new Date() + ' ' + JSON.parse(error) + '</p>'
+                                Ext4.getCmp('change-request-form').setHeight('100%')
+                            });
+                        }
+                    }
                 }).show();
             }
         },

@@ -120,8 +120,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
         console.log("xxx Locs: ", unitLocs);
-        console.log("xxx obj: ", selectedObj);
-    }, [room, localRoom, unitLocs, selectedObj]);
+    }, [room, localRoom, unitLocs]);
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {

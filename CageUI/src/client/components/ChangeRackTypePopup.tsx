@@ -30,14 +30,11 @@ export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
             }
             labkeyActionSelectWithPromise(optConfig).then(d => {
                 if(d.rows.length > 0){
-                    console.log("DDD: ", d.rows);
                     const tmp = [];
 
                     for (const row of d.rows) {
-                        console.log("Row", row);
                         tmp.push({label: row.rack_type, value: row.rackid});
                     }
-                    console.log("Tmp", tmp);
                     setOptions(tmp);
                 }
             })

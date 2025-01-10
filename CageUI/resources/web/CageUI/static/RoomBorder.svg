@@ -7,7 +7,7 @@
                   style="fill:#010101; stroke-width:0px;"/>
         </g>
     </svg>
-    <rect id="resize-handle"  x="1275.25" y="795.49" width="15" height="15.01"
+    <rect id="resize-handle" x="1275.25" y="795.49" width="15" height="15.01"
           style="fill:none; stroke:#231f20; stroke-miterlimit:10;" class="resize-handle"/>
     <rect id="border-rect" x=".5" y=".5" width="1289" height="809"
           style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>

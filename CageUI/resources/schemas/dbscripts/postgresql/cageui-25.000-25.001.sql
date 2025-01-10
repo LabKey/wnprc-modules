@@ -1,10 +1,32 @@
+/*
+ * Copyright (c) 2025 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+-- Create schema, tables, indexes, and constraints used for CageUI module here
+-- All SQL VIEW definitions should be created in cageui-create.sql and dropped in cageui-drop.sql
+DROP SCHEMA IF EXISTS cageui;
+
+CREATE SCHEMA cageui;
+
 --TODO Tables for CageUI, change before actual commit to snapshot to reflect correct version
 
 -- Table for storing layout history data, either room object or (rack_group, rack, cage) must exist
 -- If rack = 0 than default_rack must not be null
 -- If end_date is null, that is the current layout for the room
-DROP TABLE IF EXISTS wnprc.layout_history;
-CREATE TABLE wnprc.layout_history
+DROP TABLE IF EXISTS cageui.layout_history;
+CREATE TABLE cageui.layout_history
 (
     rowid SERIAL NOT NULL,
     room VARCHAR(50) NOT NULL,
@@ -88,8 +110,8 @@ insert into ehr_lookups.lookups (set_name,container,value, title)
 select setname, container, 'uk' as value, 'Unknown' as title from ehr_lookups.lookup_sets where setname='cageui_rack_manufacturers';
 
 -- TODO consider moving this table to ehr_lookups with labkey help
-DROP TABLE IF EXISTS wnprc.racks;
-CREATE TABLE wnprc.racks
+DROP TABLE IF EXISTS cageui.racks;
+CREATE TABLE cageui.racks
 (
     rowid SERIAL NOT NULL,
     rackid INTEGER NOT NULL,

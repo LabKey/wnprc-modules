@@ -85,7 +85,7 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
         // 1. Shows all rooms lacking observations today.
         if (!myTreatmentAlertsObject.roomsLackingObservationsToday.isEmpty()) {
             messageBody.append("<b>WARNING: The following rooms do not have any obs for today as of: " + dateToolkit.getCurrentTime() + ".</b>");
-            messageBody.append("" + notificationToolkit.createHyperlink("Click here to view them.</a><p>\n", myTreatmentAlertsObject.roomsLackingObservationsTodayUrlView));
+            messageBody.append("" + notificationToolkit.createHyperlink("  Click here to view them.<p>\n", myTreatmentAlertsObject.roomsLackingObservationsTodayUrlView));
             for (HashMap<String, String> result : myTreatmentAlertsObject.roomsLackingObservationsToday) {
                 messageBody.append(result.get("room") + "<br>");
             }
@@ -94,7 +94,7 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
         // 2. Shows all treatments where the animal is not assigned to that project.
         if (!myTreatmentAlertsObject.treatmentsWithAnimalNotAssignedToProject.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myTreatmentAlertsObject.treatmentsWithAnimalNotAssignedToProject.size() + " scheduled treatments where the animal is not assigned to the project.</br><br>");
-            messageBody.append("" + notificationToolkit.createHyperlink("Click here to view them.</a><br>\n", myTreatmentAlertsObject.treatmentsWithAnimalNotAssignedToProjectUrlView));
+            messageBody.append("" + notificationToolkit.createHyperlink("  Click here to view them.<br>\n", myTreatmentAlertsObject.treatmentsWithAnimalNotAssignedToProjectUrlView));
             messageBody.append("<hr>\n");
         }
         // 3. Shows treatments for each time of day.
@@ -106,7 +106,7 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
             Integer totalTreatments = myTreatmentAlertsObject.incompleteTreatmentsForEachTimeOfDay.get(timeOfDay).size() + myTreatmentAlertsObject.completedTreatmentCountsForEachTimeOfDay.get(timeOfDay);
             if (totalTreatments > 0) {
                 messageBody.append("There are " + totalTreatments + " scheduled " + timeOfDay + " treatments.  " + myTreatmentAlertsObject.completedTreatmentCountsForEachTimeOfDay.get(timeOfDay) + " have been completed.  ");
-                messageBody.append("" + notificationToolkit.createHyperlink("Click here to view them.</a></p>\n", myTreatmentAlertsObject.treatmentsForEachTimeOfDayUrlView.get(timeOfDay)));
+                messageBody.append("" + notificationToolkit.createHyperlink("Click here to view them.<br>\n", myTreatmentAlertsObject.treatmentsForEachTimeOfDayUrlView.get(timeOfDay)));
 
                 // Creates the current timeOfDay results sorted by (area --> room --> result).
                 HashMap<String, HashMap<String, ArrayList<HashMap<String, String>>>> resultsByArea = new HashMap<>();
@@ -141,10 +141,10 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
 
                 // Iterates through each area (sorted alphabetically).
                 for (String currentArea : notificationToolkit.sortSetWithNulls(resultsByArea.keySet())) {
-                    messageBody.append("<b>" + currentArea + ":</b><br>\n");
+                    messageBody.append("<br>\n<b>" + currentArea + ":</b><br>\n");
                     // Iterates through each room (sorted alphabetically)
                     for (String currentRoom : notificationToolkit.sortSetWithNulls(resultsByArea.get(currentArea).keySet())) {
-                        messageBody.append(currentRoom + ": " + resultsByArea.get(currentArea).get(currentRoom).size() + "<br>\n");
+                        messageBody.append("<br>\n" + currentRoom + ": " + resultsByArea.get(currentArea).get(currentRoom).size() + "\n");
                         // Reformats the treatment hashmap into a String[] List (to be compatible with the table creation function).
                         ArrayList<String []> formattedResults = new ArrayList<>();
                         for (HashMap<String, String> currentTreatment : resultsByArea.get(currentArea).get(currentRoom)) {
@@ -188,13 +188,13 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
         // 5. Shows any treatments where the animal is not alive.
         if (!myTreatmentAlertsObject.treatmentsWhereAnimalIsNotAlive.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myTreatmentAlertsObject.treatmentsWhereAnimalIsNotAlive.size() + " active treatments for animals not currently at WNPRC.</b>");
-            messageBody.append("" + notificationToolkit.createHyperlink("Click here to view and update them.</a><br>\n", myTreatmentAlertsObject.treatmentsWhereAnimalIsNotAliveURLView));
+            messageBody.append("" + notificationToolkit.createHyperlink("  Click here to view and update them.<br>\n", myTreatmentAlertsObject.treatmentsWhereAnimalIsNotAliveURLView));
             messageBody.append("<hr>\n");
         }
         // 6. Find any problems where the animal is not alive.
         if (!myTreatmentAlertsObject.problemsWhereAnimalIsNotAlive.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myTreatmentAlertsObject.problemsWhereAnimalIsNotAlive.size() + " unresolved problems for animals not currently at WNPRC.</b>");
-            messageBody.append("" + notificationToolkit.createHyperlink("Click here to view and update them.</a><br>\n", myTreatmentAlertsObject.problemsWhereAnimalIsNotAliveUrlView));
+            messageBody.append("" + notificationToolkit.createHyperlink("  Click here to view and update them.<br>\n", myTreatmentAlertsObject.problemsWhereAnimalIsNotAliveUrlView));
             messageBody.append("<hr>\n");
         }
         // 7. Checks for missing In Rooms after 2:30pm, as specified in the SOP.

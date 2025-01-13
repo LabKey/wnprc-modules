@@ -88,9 +88,9 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
 
         // Creates filter.
         SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", true, CompareType.EQUAL);
-        myFilter.addCondition("taskid/datecompleted", lastRunDate, CompareType.DATE_GTE);
+        myFilter.addCondition("taskid/datecompleted", lastRunDate, CompareType.GTE);
         myFilter.addCondition("taskid/datecompleted", "", CompareType.NONBLANK);
-        myFilter.addCondition("date", lastRunMinusWeek, CompareType.DATE_GTE);
+        myFilter.addCondition("date", lastRunMinusWeek, CompareType.GTE);
         // Creates columns to retrieve.
         String[] targetColumns = new String[]{"Id", "date", "Id/curLocation/area", "Id/curLocation/room", "Id/curLocation/cage", "alertStatus", "taskid/datecompleted", "testid", "result", "units", "status", "ref_range_min", "ref_range_max", "ageAtTime"};
         // Runs query.
@@ -102,52 +102,54 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
         for (HashMap<String, String> result : returnArray) {
             // Verifies 'alert status' exists before adding results.
             if (!result.get("alertStatus").isEmpty()) {
-                // Updates current location.
-                if (result.get("Id/curLocation/area").isEmpty()) {
-                    result.put("Id/curLocation/area", "No Active Housing");
-                }
-                // Updates current room.
-                if (result.get("Id/curLocation/room").isEmpty()) {
-                    result.put("Id/curLocation/room", "No Room");
-                }
+                if (result.get("alertStatus").equals("t")) {
+                    // Updates current location.
+                    if (result.get("Id/curLocation/area").isEmpty()) {
+                        result.put("Id/curLocation/area", "No Active Housing");
+                    }
+                    // Updates current room.
+                    if (result.get("Id/curLocation/room").isEmpty()) {
+                        result.put("Id/curLocation/room", "No Room");
+                    }
 
-                // Adds to list if area does not exist yet.
-                if (!filteredResults.containsKey(result.get("Id/curLocation/area"))) {
-                    // Creates new room results list.
-                    ArrayList<HashMap<String, String>> newRoomList = new ArrayList<>();
-                    newRoomList.add(result);
-                    // Creates new room map.
-                    HashMap<String, ArrayList<HashMap<String, String>>> newRoom = new HashMap<>();
-                    newRoom.put(result.get("Id/curLocation/room"), newRoomList);
-                    // Creates new area map and adds to the filtered results.
-                    filteredResults.put(result.get("Id/curLocation/area"), newRoom);
-                }
-                // Adds to list if room does not exist yet.
-                else if (!filteredResults.get(result.get("Id/curLocation/area")).containsKey(result.get("Id/curLocation/room"))) {
-                    // Creates new room results list.
-                    ArrayList<HashMap<String, String>> newRoomList = new ArrayList<>();
-                    newRoomList.add(result);
-                    // Creates new room map and adds to the areas list.
-                    filteredResults.get(result.get("Id/curLocation/area")).put(result.get("Id/curLocation/room"), newRoomList);
-                }
-                // Adds to list if area and room exist already.
-                else {
-                    filteredResults.get(result.get("Id/curLocation/area")).get(result.get("Id/curLocation/room")).add(result);
+                    // Adds to list if area does not exist yet.
+                    if (!filteredResults.containsKey(result.get("Id/curLocation/area"))) {
+                        // Creates new room results list.
+                        ArrayList<HashMap<String, String>> newRoomList = new ArrayList<>();
+                        newRoomList.add(result);
+                        // Creates new room map.
+                        HashMap<String, ArrayList<HashMap<String, String>>> newRoom = new HashMap<>();
+                        newRoom.put(result.get("Id/curLocation/room"), newRoomList);
+                        // Creates new area map and adds to the filtered results.
+                        filteredResults.put(result.get("Id/curLocation/area"), newRoom);
+                    }
+                    // Adds to list if room does not exist yet.
+                    else if (!filteredResults.get(result.get("Id/curLocation/area")).containsKey(result.get("Id/curLocation/room"))) {
+                        // Creates new room results list.
+                        ArrayList<HashMap<String, String>> newRoomList = new ArrayList<>();
+                        newRoomList.add(result);
+                        // Creates new room map and adds to the areas list.
+                        filteredResults.get(result.get("Id/curLocation/area")).put(result.get("Id/curLocation/room"), newRoomList);
+                    }
+                    // Adds to list if area and room exist already.
+                    else {
+                        filteredResults.get(result.get("Id/curLocation/area")).get(result.get("Id/curLocation/room")).add(result);
+                    }
                 }
             }
         }
 
         // Prints text.
         messageBody.append("There have been " + returnArray.size() + " clinpath tasks completed since " + lastRunDate + "<br>");
-        messageBody.append(notificationToolkit.createHyperlink("Click here to view them", clinpathTasksUrlView) + "</a><p>\n");
-        messageBody.append("<p>Listed below are the abnormal records.</p>\n");
+        messageBody.append(notificationToolkit.createHyperlink("Click here to view them", clinpathTasksUrlView) + "<p>\n");
+        messageBody.append("<p>Listed below are the abnormal records.<br>\n");
 
         // Prints table with all records.
         String[] tableColumns = new String[]{"Id", "Collect Date", "Date Completed", "Test ID", "Result", "Units", "Status", "Ref Range Min", "Ref Range Max", "Age At Time"};
         for (String currentArea : notificationToolkit.sortSetWithNulls(filteredResults.keySet())) {
-            messageBody.append("<b>" + currentArea + ":</b><br>\n");
+            messageBody.append("<br>\n<b>" + currentArea + ":</b><br>\n");
             for (String currentRoom : notificationToolkit.sortSetWithNulls(filteredResults.get(currentArea).keySet())) {
-                messageBody.append(currentRoom + ":<br>\n");
+                messageBody.append("<br>\n" + currentRoom + ":\n");
                 // Reformats the hashmap into a String[] List (to be compatible with the table creation function).
                 ArrayList<String []> currentTableData = new ArrayList<>();
                 ArrayList<String> rowColorsList = new ArrayList<>();

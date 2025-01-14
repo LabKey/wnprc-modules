@@ -16,34 +16,83 @@
 
 package org.labkey.cageui;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.query.SimpleUserSchema;
+import org.labkey.api.security.User;
 
-public class CageUISchema
-{
-    private static final CageUISchema _instance = new CageUISchema();
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+
+public class CageUISchema extends SimpleUserSchema {
+
+    private static Logger _log = LogManager.getLogger(CageUISchema.class);
     public static final String NAME = "cageui";
+    public static String DESCRIPTION = "Schema for CageUI specific data.";
+    public Container _container;
 
-    public static CageUISchema getInstance()
-    {
-        return _instance;
+    /*
+     * This should reflect the list of tables.
+     */
+    public enum TABLE {
+        RACKS    ("racks"),
+        LAYOUT_HISTORY   ("layout_history")
+        ;
+
+        String tableName;
+
+        TABLE(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public String getTableName() {
+            return this.tableName;
+        }
     }
 
-    private CageUISchema()
-    {
-        // private constructor to prevent instantiation from
-        // outside this class: this singleton should only be
-        // accessed via org.labkey.cageui.CageUISchema.getInstance()
+    public CageUISchema(User user, Container container) {
+        super(NAME, DESCRIPTION, user, container, DbSchema.get(NAME, DbSchemaType.Module));
+        _container = container;
     }
+    @Override
+    public Set<String> getTableNames() {
+        // Grab the ones that are defined in SQL
+        Set<String> tables = new HashSet<>();
+
+        tables.addAll(super.getTableNames());
+        tables.addAll(getEnumTables().keySet());
+
+        return tables;
+    }
+
+    private Map<String, TableInfo> _enumTables = null;
+    protected Map<String, TableInfo> getEnumTables() {
+        if (_enumTables == null) {
+            _enumTables = new HashMap<>();
+        }
+
+        return _enumTables;
+    }
+
 
     public DbSchema getSchema()
     {
         return DbSchema.get(NAME, DbSchemaType.Module);
     }
 
-    public SqlDialect getSqlDialect()
-    {
-        return getSchema().getSqlDialect();
-    }
+
 }

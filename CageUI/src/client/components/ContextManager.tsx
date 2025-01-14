@@ -29,7 +29,7 @@ import {
 import * as d3 from 'd3';
 import {
     addPrevRoomSvgs,
-    buildNewLocalRoom, buildNewLocs, createEmptyUnitLoc,
+    buildNewLocalRoom, buildNewLocs, createEmptyUnitLoc, findCageInGroup,
     findNextGroupId,
     findRackInGroup,
     findSelectObjRack,
@@ -643,15 +643,28 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         const {value: realRackId, label: rackType} = newType;
         const [type, mfr, size] = rackType.split("-");
         console.log("change type: ", type, mfr, size, selectedObj);
-        /*
-        setLocalRoom(prevRoom => {
-            let roomToUpdate = prevRoom;
 
-            roomToUpdate = {
-                layoutData: undefined, name: '', objects: [], rackGroups: []
+        //TODO get rack type from rack id. set rack type here and change rack ID
+/*
+        setLocalRoom(prevRoom => {
+            const {rackGroup, rack, cage} = findCageInGroup(selectedObj as CageNumber, prevRoom.rackGroups);
+
+            const roomToUpdate: Room = {
+                ...prevRoom,
+                rackGroups: prevRoom.rackGroups.map(group =>
+                    group.groupId === rackGroup.groupId
+                        ? {
+                            ...group,
+                            racks: group.racks.map((r) => rack.itemId === rack.itemId ? {
+
+
+                            } : r)
+                        }
+                        : group
+                )
             }
 
-
+            return roomToUpdate;
         })
 
 */

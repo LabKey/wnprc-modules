@@ -58,9 +58,9 @@
             <column columnName="rackid"/>
             <column columnName="rack_type">
                 <fk>
-                    <fkDbSchema>ehr_lookups</fkDbSchema>
-                    <fkTable>cage_type</fkTable>
-                    <fkColumnName>cagetype</fkColumnName>
+                    <fkDbSchema>cageui</fkDbSchema>
+                    <fkTable>rack_types</fkTable>
+                    <fkColumnName>type</fkColumnName>
                 </fk>
             </column>
             <column columnName="container"/>

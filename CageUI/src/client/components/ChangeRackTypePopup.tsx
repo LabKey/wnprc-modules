@@ -25,7 +25,7 @@ export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
             setOptions(options)
         }else{
             const optConfig: SelectRowsOptions = {
-                schemaName: "wnprc",
+                schemaName: "cageui",
                 queryName: "racks"
             }
             labkeyActionSelectWithPromise(optConfig).then(d => {

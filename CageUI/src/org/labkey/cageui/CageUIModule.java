@@ -19,16 +19,18 @@ package org.labkey.cageui;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.module.DefaultModule;
-import org.labkey.api.module.ModuleContext;
+import org.labkey.api.ldk.ExtendedSimpleModule;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.module.Module;
+
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-public class CageUIModule extends DefaultModule
+public class CageUIModule extends ExtendedSimpleModule
 {
     public static final String NAME = "CageUI";
 
@@ -64,13 +66,6 @@ public class CageUIModule extends DefaultModule
     }
 
     @Override
-    public void doStartup(ModuleContext moduleContext)
-    {
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(new CageUIContainerListener());
-    }
-
-    @Override
     @NotNull
     public Collection<String> getSummary(Container c)
     {
@@ -83,4 +78,15 @@ public class CageUIModule extends DefaultModule
     {
         return Collections.singleton(CageUISchema.NAME);
     }
+
+    @Override
+    public void registerSchemas() {
+        DefaultSchema.registerProvider(CageUISchema.NAME, new DefaultSchema.SchemaProvider(this) {
+            @Override
+            public QuerySchema createSchema(final DefaultSchema schema, Module module) {
+                return new CageUISchema(schema.getUser(), schema.getContainer());
+            }
+        });
+    }
+
 }

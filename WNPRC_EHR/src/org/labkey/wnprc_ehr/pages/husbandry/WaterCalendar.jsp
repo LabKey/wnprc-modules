@@ -626,7 +626,6 @@
 
                                     successCallback(
                                         events.map(function (row) {
-                                        //if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
                                         //creating an array per day to store animalIds
                                         //there are cases where the water amount do not get completed on the day.
                                         //The calendar should display even if the water amount was not complete it.
@@ -695,7 +694,6 @@
                                                 var dateIndex = new Date(row.date);
                                                 dateIndex=dateIndex.getFullYear() +'-'+dateIndex.getMonth()+'-'+dateIndex.getDate();
                                                 if (!calendarDates.get(dateIndex)){
-                                                //if (moment(row.date).isSameOrAfter(currentTime) && !calendarDates.get(row.date)){
                                                     var animalIds = [];
                                                     animalIds.push(row.Id);
                                                     calendarDates.set(dateIndex, animalIds);

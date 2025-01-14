@@ -69,17 +69,13 @@ public class BloodDrawsTodayVetStaff extends AbstractEHRNotification {
 
         // Creates table.
         if (myBloodDrawNotificationObject.resultsByArea.isEmpty()) {
-            messageBody.append("There are no scheduled blood draws for this group today.");
+            notificationToolkit.sendEmptyNotificationRevamp(c, u, "Blood Draws Today (Vet Staff)");
+            return null;
         }
         else {
             messageBody.append(myBloodDrawNotificationObject.printTablesAsHTML());
+            return messageBody.toString();
         }
 
-//        String[] myTableColumns = new String[]{"Id", "Blood Remaining", "Project Assignment", "Completion Status", "Group", "Other Groups Drawing Blood Today"};
-//        NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, myBloodDrawNotificationObject.myTableData);
-//        myTable.rowColors = myBloodDrawNotificationObject.myTableRowColors;
-//        messageBody.append(myTable.createBasicHTMLTable());
-
-        return messageBody.toString();
     }
 }

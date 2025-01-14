@@ -131,7 +131,7 @@ public class ClinpathAlertsRevamp extends AbstractEHRNotification {
         private void getRecordsRequestedSinceLastEmail() {
             // Creates filter.
             SimpleFilter myFilter = new SimpleFilter("qcstate/label", "Request: Pending", CompareType.EQUAL);
-            myFilter.addCondition("created", dateLastRun, CompareType.DATE_GTE);
+            myFilter.addCondition("created", dateLastRun, CompareType.GTE);
             // Creates columns to retrieve.
             String[] targetColumns = new String[]{"created"};
             // Runs query.

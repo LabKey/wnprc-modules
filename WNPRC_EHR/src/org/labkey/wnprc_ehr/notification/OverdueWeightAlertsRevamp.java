@@ -45,11 +45,11 @@ public class OverdueWeightAlertsRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getScheduleDescription() {
-        return "Daily at 6:12am";
+        return "Daily at 9:15am";
     }
     @Override
     public String getCronString() {
-        return notificationToolkit.createCronString("12", "6", "*");
+        return notificationToolkit.createCronString("15", "9", "*");
     }
     @Override
     public String getCategory() {

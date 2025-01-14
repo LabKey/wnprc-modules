@@ -88,9 +88,9 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
 
         // Creates filter.
         SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", true, CompareType.EQUAL);
-        myFilter.addCondition("taskid/datecompleted", lastRunDate, CompareType.DATE_GTE);
+        myFilter.addCondition("taskid/datecompleted", lastRunDate, CompareType.GTE);
         myFilter.addCondition("taskid/datecompleted", "", CompareType.NONBLANK);
-        myFilter.addCondition("date", lastRunMinusWeek, CompareType.DATE_GTE);
+        myFilter.addCondition("date", lastRunMinusWeek, CompareType.GTE);
         // Creates columns to retrieve.
         String[] targetColumns = new String[]{"Id", "date", "Id/curLocation/area", "Id/curLocation/room", "Id/curLocation/cage", "alertStatus", "taskid/datecompleted", "testid", "result", "units", "status", "ref_range_min", "ref_range_max", "ageAtTime"};
         // Runs query.

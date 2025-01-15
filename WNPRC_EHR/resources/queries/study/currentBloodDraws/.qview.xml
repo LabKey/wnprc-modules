@@ -32,9 +32,9 @@
         <column name="mostRecentWeight" />
     </columns>
     <sorts>
-        <sort column="date" />
         <sort column="Id/curLocation/room"/>
         <sort column="Id/curLocation/cage"/>
+        <sort column="date" />
         <sort column="Id" />
     </sorts>
     <!--<filters>-->

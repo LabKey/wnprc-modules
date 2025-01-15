@@ -1,7 +1,7 @@
 <view xmlns="http://labkey.org/data/xml/view" frame="portal" title="PrimateID Administration">
-    <permissionClasses>
+    <requiresPermissions>
         <permissionClass name="org.labkey.api.security.permissions.AdminPermission"/>
-    </permissionClasses>
+    </requiresPermissions>
     <dependencies>
         <dependency path="https://cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"/>
         <dependency path="/internal/jQuery"/>

@@ -98,7 +98,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
             },
             provideFruit:{
                 defaultValue: 'none',
-                allowBlank: false,
+                allowBlank: true,
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_fruit',

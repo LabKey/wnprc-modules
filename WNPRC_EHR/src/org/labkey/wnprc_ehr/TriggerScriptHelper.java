@@ -4,10 +4,11 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.announcements.api.Announcement;
@@ -17,16 +18,16 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Results;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.Selector;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.ehr.security.EHRDataAdminPermission;
@@ -39,14 +40,15 @@ import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
+import org.labkey.api.study.security.SecurityEscalator;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -62,11 +64,12 @@ import org.labkey.wnprc_ehr.notification.DeathNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -84,7 +87,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -1421,11 +1423,11 @@ public class TriggerScriptHelper {
         JSONArray extraContextArray = new JSONArray();
 
         boolean existingOrder = false;
+       // boolean closingWaterRecord = closingRecord;
 
         Map<String, JSONObject> majorErrorMap = new HashMap<>();
         Map<String, JSONObject> errorMap = new HashMap<>();
 
-        //TODO: Check is the animal is at least one time in the WaterSchedule Table
         if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
             JSONObject returnErrors = new JSONObject();
             returnErrors.put("field", "Id");
@@ -1460,10 +1462,11 @@ public class TriggerScriptHelper {
             SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
             filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
             filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
-            //filter.addCondition(FieldKey.fromString("frequency"), frequency);
+            filter.addCondition(FieldKey.fromString("QCState"), EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Scheduled.getLabel()).getRowId(), CompareType.EQUAL);
+
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","Id", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","Id", "date", "qcstate","startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1500,10 +1503,10 @@ public class TriggerScriptHelper {
 
                         if (loopDate.compareTo(convertToLocalDateViaSqlDate(waterRecord.getDate()))==0){
 
-                            String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency", "wnprc" );
+                            String serverFrequencyMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency", "wnprc" );
 
                             //Check frequency compatibility with water orders in the server
-                            if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
+                            if (!checkFrequencyCompatibility(serverFrequencyMeaning, meaningFrequency))
                             {
 
                                 //Formatting the dates to return a legible date for error message
@@ -1556,7 +1559,7 @@ public class TriggerScriptHelper {
                                     //Adding dataSource, objetcId, severity and message to the exception in case of error
                                     returnErrors.put("dataSource", waterRecord.getDataSource());
                                     returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
-                                            " End Date: " + endFormattedDate +" Frequency: "+waterRecord.getFrequency() +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "' target=\"_blank\" rel=\"noopener noreferrer\"><b> EDIT</b></a>");
+                                            " End Date: " + endFormattedDate +" Frequency: "+serverFrequencyMeaning +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "' target=\"_blank\" rel=\"noopener noreferrer\"><b> EDIT</b></a>");
                                     returnErrors.put("objectId", waterRecord.getObjectId());
                                     returnErrors.put("severity", "ERROR");
 
@@ -1619,7 +1622,8 @@ public class TriggerScriptHelper {
                         }
                     }
                     if (!returnErrors.isEmpty() && checkIfAnimalInCondition(animalId,clientStartDate).size()>0){
-                        errorMap.put(waterRecord.getObjectId(), returnErrors);
+                        JSONObject returnErrorsExport = new JSONObject(returnErrors,JSONObject.getNames(returnErrors));
+                        errorMap.put(waterRecord.getObjectId(), returnErrorsExport);
                         extraContext.put("extraContextArray", extraContextArray);
                     }
                 }
@@ -1840,36 +1844,188 @@ public class TriggerScriptHelper {
 
     }
 
+    public JSONArray closeWaterOrder(String animalId, Date clientStartDate, Date clientEndDate, Integer project, String objectId,  boolean closingRecord){
+        JSONArray arrayOfErrors = new JSONArray();
+        Map<String, JSONObject> majorErrorMap = new HashMap<>();
+        Map<String, JSONObject> errorMap = new HashMap<>();
+
+        if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
+            JSONObject returnErrors = new JSONObject();
+            returnErrors.put("field", "Id");
+            returnErrors.put("severity","ERROR");
+            returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
+            majorErrorMap.put(objectId, returnErrors);
+
+        }
+
+        if (majorErrorMap.isEmpty()){
+            //Closing existing lixit order in the system and adding a record in the waterScheduleAnimals table
+            TableInfo waterOrders = getTableInfo("study","waterOrders");
+            SimpleFilter filterOrders = new SimpleFilter (FieldKey.fromString("objectid"), objectId);
+            filterOrders.addCondition(FieldKey.fromString("Id"), animalId, CompareType.EQUAL);
+
+            TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","frequency","enddate"),filterOrders,null);
+            Map <String,Object>[] waterOrderObject = waterOrderRecords.getMapArray();
+
+
+            if (waterOrderObject.length > 0){
+                List<Map<String, Object>> toUpdate = new ArrayList<>();
+                List<Map<String, Object>> oldKeys = new ArrayList<>();
+
+                for (Map<String,Object> waterOrderMap : waterOrderObject){
+                    String lsid = ConvertHelper.convert(waterOrderMap.get("lsid"), String.class);
+                    Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
+                    updateWaterOrder.put("lsid", lsid);
+                    updateWaterOrder.put("enddate",clientEndDate);
+                    updateWaterOrder.put("skipWaterRegulationCheck", true);
+                    toUpdate.add(updateWaterOrder);
+                    Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
+                    keyMap.put("lsid", lsid);
+                    oldKeys.add(keyMap);
+                }
+                try
+                {
+                    if (!toUpdate.isEmpty())
+                    {
+                        Container container = getContainer();
+                        User user = getUser();
+                        BatchValidationException errors = new BatchValidationException();
+                        List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, errors, null, null);
+                        if (updateRows.isEmpty() || errors.hasErrors())
+                        {
+                            JSONObject returnErrors = new JSONObject();
+                            returnErrors.put("field", "Id");
+                            returnErrors.put("severity", "ERROR");
+                            returnErrors.put("message", "Error closing water orders.");
+
+                            errorMap.put(objectId, returnErrors);
+                        }
+                    }
+                }
+                catch(Exception e){
+                    JSONObject returnErrors = new JSONObject();
+                    returnErrors.put("field", "project");
+                    returnErrors.put("severity", "ERROR");
+                    returnErrors.put("message", "Error closing water order.");
+
+                    errorMap.put(objectId, returnErrors);
+
+                }
+            }
+            errorMap.forEach((objectIdString, JSONObject)->{
+                arrayOfErrors.put(JSONObject);
+            });
+        }
+        majorErrorMap.forEach((objectIdString, JSONObject)->{
+            arrayOfErrors.put(JSONObject);
+        });
+
+        return arrayOfErrors;
+
+    }
+
     public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {
         return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
     }
 
-    public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord){
+    public boolean checkFrequencyCompatibility(String serverRecord, String clientRecord)
+    {
         boolean validation = true;
 
-        if (clientRecord.compareTo(serverRecord) == 0){
+        if (clientRecord.compareTo(serverRecord) == 0)
+        {
             validation = false;
             return validation;
-        } else if (clientRecord.compareTo("Daily - AM")==0){
-            if (serverRecord.compareTo("Daily - Anytime")==0){
-                validation = false;
-                return validation;
-            }else if (serverRecord.compareTo("Daily - AM/PM")==0){
-                validation = false;
-                return validation;
-            }
-        } else if (clientRecord.contains("PM")){
-            if (serverRecord.contains("PM")){
+        }
+        else if (clientRecord.compareTo("Daily - AM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - Anytime") == 0)
+            {
                 validation = false;
                 return validation;
             }
-        } else if (clientRecord.compareTo("Daily - Anytime")==0){
-            if (serverRecord.contains("PM") || serverRecord.contains("AM")){
+            else if (serverRecord.compareTo("Daily - AM/PM") == 0)
+            {
                 validation = false;
                 return validation;
             }
-        } else if (clientRecord.compareTo("Daily - AM/PM")==0){
-            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime")==0){
+        }
+        else if (clientRecord.compareTo("Daily - PM") == 0)
+        {
+            if (serverRecord.contains("PM"))
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Daily - Anytime") == 0)
+        {
+            if (serverRecord.contains("PM") || serverRecord.contains("AM"))
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Daily - AM/PM") == 0)
+        {
+            if (serverRecord.contains("PM") || serverRecord.contains("AM") || serverRecord.compareTo("Daily - Anytime") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Sunday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Monday - PM") == 0)
+        {
+                if (serverRecord.compareTo("Daily - PM") == 0)
+                {
+                    validation = false;
+                    return validation;
+                }
+        }
+        else if (clientRecord.compareTo("Tuesday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Wednesday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Thursday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Friday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
+                validation = false;
+                return validation;
+            }
+        }
+        else if (clientRecord.compareTo("Saturday - PM") == 0)
+        {
+            if (serverRecord.compareTo("Daily - PM") == 0)
+            {
                 validation = false;
                 return validation;
             }
@@ -2170,6 +2326,35 @@ public class TriggerScriptHelper {
         }
         return  returnCondition;
     }
+    public Map<String,Object> checkWaterLixit(String animalId, Date clientDate)
+    {
+        Map<String,Object> returnMap = new HashMap<>();
+
+        Calendar filterDate = Calendar.getInstance();
+        filterDate.setTime(clientDate);
+
+        TableInfo waterOrders = getTableInfo("study", "waterOrders");
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
+        filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_LT);
+
+        Sort sort = new Sort();
+        sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.DESC, true);
+
+        TableSelector ts = new TableSelector(waterOrders, PageFlowUtil.set("objectid", "date", "waterSource"),filter, sort);
+        ts.setMaxRows(1);
+        Map<String,Object>[] waterOrderFromServer = ts.getMapArray();
+
+        if (waterOrderFromServer.length>0){
+            for (Map<String, Object> openWaterOrder : waterOrderFromServer)
+            {
+                returnMap.put("objectid", ConvertHelper.convert(openWaterOrder.get("objectid"), String.class));
+                returnMap.put("date", ConvertHelper.convert(openWaterOrder.get("date"), Date.class));
+                returnMap.put("waterSource", ConvertHelper.convert(openWaterOrder.get("waterSource"), String.class));
+
+            }
+        }
+        return  returnMap;
+    }
 
 
     public static List<Object> filterBloodDraws(List<Object> bloodRecords, Integer limit)
@@ -2177,17 +2362,14 @@ public class TriggerScriptHelper {
         return null;
     }
     //This function will always have lixit as the waterSource
-    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, Map<String, Object> extraContext) throws Exception
+    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, @Nullable Map<String, Object> extraContext) throws Exception
     {
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();
         JSONObject returnErrors = new JSONObject();
-
-
-
         Map<String, JSONObject> errorMap = new HashMap<>();
 
-        if(checkIfAnimalInCondition(animalId,startDate).size()==0 || checkIfAnimalInCondition(animalId,startDate).get(animalId).equals("lixit")){
+        if(checkIfAnimalInCondition(animalId, startDate).isEmpty() || checkIfAnimalInCondition(animalId,startDate).get(animalId).equals("lixit")){
             returnErrors.put("field","waterSource");
             returnErrors.put("severity", "ERROR");
             returnErrors.put("message", "Error animal not in WaterScheduleAnimal table or is already in "+waterSource +" condition");
@@ -2199,12 +2381,14 @@ public class TriggerScriptHelper {
         TableInfo waterOrders = getTableInfo("study","waterOrders");
         SimpleFilter filter = new SimpleFilter (FieldKey.fromString("id"), animalId);
         filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
+        //filter.addCondition(FieldKey.fromString("date"),startDate,CompareType.DATE_LT);
         filter.addCondition(FieldKey.fromString("enddateCoalescedFuture"),startDate,CompareType.DATE_GT);
 
         TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "objectid","id", "date","volume","frequency","enddateCoalescedFuture"),filter,null);
         Map <String,Object>[] waterOrderObjects = waterOrderRecords.getMapArray();
         List<Map<String, Object>> toUpdate = new ArrayList<>();
         List<Map<String, Object>> oldKeys = new ArrayList<>();
+        List<Map<String, Object>> waterAmounts = new ArrayList<>();
 
         if (waterOrderObjects.length >0)
         {
@@ -2220,8 +2404,15 @@ public class TriggerScriptHelper {
                 updateWaterOrder.put("lsid", lsid);
                 //closing water order the day before, new lixit orders have to be completed the first time.
                 java.time.LocalDateTime newEndDate = java.time.LocalDateTime.ofInstant(startDate.toInstant(),ZoneId.systemDefault());
-                newEndDate.minusDays(1);
-                updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
+                newEndDate = newEndDate.minusDays(1);
+                if (ConvertHelper.convert(waterOrderMap.get("date"), Date.class).before(startDate)){
+                    updateWaterOrder.put("enddate", Date.from(newEndDate.atZone(ZoneId.systemDefault()).toInstant()));
+
+                }else if(ConvertHelper.convert(waterOrderMap.get("date"), Date.class).after(startDate)){
+                    updateWaterOrder.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
+                }
+
+
                 updateWaterOrder.put("skipWaterRegulationCheck", true);
                 toUpdate.add(updateWaterOrder);
 
@@ -2244,6 +2435,14 @@ public class TriggerScriptHelper {
             }
         }
 
+        Map<String,Object> keyMapAmount = new CaseInsensitiveHashMap<>();
+        keyMapAmount.put("animalId", animalId);
+        Timestamp timestamp = new Timestamp(startDate.getTime());
+        keyMapAmount.put("endDate", timestamp);
+        waterAmounts.add(keyMapAmount);
+
+        removeWaterAmounts(waterAmounts, arrayOfErrors);
+
         List<Map<String, Object>> rowToAdd = null;
 
         Map<String, Object> scheduledAnimalRecord = new HashMap<>();
@@ -2258,7 +2457,7 @@ public class TriggerScriptHelper {
         //service = ti.getUpdateService();
 
         //if(errorMap.get(animalId)!= null &&  !"ERROR".equals(errorMap.get(animalId).get("severity")))
-        if( arrayOfErrors.length() > 0 &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
+        if(!arrayOfErrors.isEmpty() &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
         {
             try
             {
@@ -2289,7 +2488,7 @@ public class TriggerScriptHelper {
 
             }
         }
-        if (extraContextArray.length()>0){
+        if (!extraContextArray.isEmpty()){
             extraContext.put("extraContextArray", extraContextArray);
         }
 
@@ -2620,5 +2819,73 @@ public class TriggerScriptHelper {
         }
 
         return StringUtils.join(errors, "<>");
+    }
+
+    public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException{
+        removeWaterAmounts(animalDateMap, null);
+    }
+
+    public void removeWaterAmounts ( List<Map<String, Object>> animalDateMap, @Nullable JSONArray errorArray) throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
+    {
+
+
+
+        if (animalDateMap != null){
+            for (Map<String, Object> record : animalDateMap){
+                String Id = (String)record.get("animalId");
+                Date animalDeath = (Timestamp)record.get("endDate");
+                //Date animalDeath = new Date(DateUtil.parseISODateTime((String)record.get("deathDate")));
+                if (!checkIfAnimalInCondition(Id, animalDeath).isEmpty()){
+                    Calendar filterDate = Calendar.getInstance();
+                    filterDate.setTime(animalDeath);
+
+                    TableInfo waterAmount= getTableInfo("study", "waterAmount");
+                    SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), Id);
+                    filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_GTE);
+                    filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
+
+                    Sort sort = new Sort();
+                    sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.ASC, false);
+
+                    TableSelector ts = new TableSelector(waterAmount, filter,sort);
+                    final List<Map<String, Object>> rowTobeUpdated = new ArrayList<>();
+                    final List<Map<String,Object>> oldKeys = new ArrayList<>();
+
+                    ts.forEach(new Selector.ForEachBlock<ResultSet>()
+                    {
+                        @Override
+                        public void exec(ResultSet rs) throws SQLException
+                        {
+                            JSONObject returnErrors = new JSONObject();
+                            returnErrors.put("field", "waterSource");
+                            returnErrors.put("severity", "INFO");
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                            LocalDateTime waterDate = LocalDateTime.parse(rs.getString("date"),formatter);
+                            DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            DateTimeFormatter formatterTime = DateTimeFormatter.ofPattern("HH:mm");
+                            returnErrors.put("message", "Water Amount for " + rs.getString("id") + " on " + waterDate.format(formatterDate) + " at " + waterDate.format(formatterTime) + " will be deleted.");
+                            if (errorArray != null){
+                                errorArray.put(returnErrors);
+                            }
+                            String objectid =rs.getString("objectId");
+                            Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
+                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
+                            toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
+                            toUpdate.put("objectid",objectid);
+                            rowTobeUpdated.add(toUpdate);
+
+                            keyMap.put("objectid", objectid);
+                            oldKeys.add(keyMap);
+
+                        }
+                    });
+                    //Table.update(getUser(),waterAmount,toUpdate, objectid);
+                    if (waterAmount.getUpdateService()!=null){
+                        BatchValidationException errors = new BatchValidationException();
+                        waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,oldKeys,errors,null,null);
+                    }
+                }
+            }
+        }
     }
 }

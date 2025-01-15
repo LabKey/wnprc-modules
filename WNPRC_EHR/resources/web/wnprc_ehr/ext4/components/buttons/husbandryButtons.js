@@ -251,3 +251,68 @@ Ext4.define('EHR.window.SubmitForReviewWindowHusbandry', {
         this.callParent(arguments);
     },
 });
+
+
+EHR.DataEntryUtils.registerDataEntryFormButton('SUBMIT_WATER', {
+    text: 'Submit Final',
+    name: 'submit',
+    requiredQC: 'Completed',
+    targetQC: 'Completed',
+    errorThreshold: 'WARN',
+    successURL: LABKEY.ActionURL.getParameter('srcURL') || LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view'),
+    disabled: true,
+    itemId: 'submitWtrBtn',
+    disableOn: 'WARN',
+    handler: function(btn){
+        //this.onSubmit(btn);
+        // let waterGiven = btn.up('gridpanel').store;
+        // if (store.getFields().get('waterSource')){
+        //
+        // }
+
+        let waterStore = this.storeCollection.getServerStoreForQuery("study", "waterGiven");
+
+        if (waterStore){
+            var animalIds = [];
+            for (var idx=0; idx<waterStore.count(); idx++){
+                var waterGivenRecord = waterStore.getAt(idx);
+                if (waterGivenRecord !== undefined && waterGivenRecord.get('waterSource')==='lixit'){
+                    animalIds.push(waterGivenRecord.get('Id'));
+                }
+            }
+            if(animalIds.length){
+                var animalString = '';
+                if (animalString.length >1){
+                    animalIds.forEach((animalId)=> animalString+=animalId+',');
+                }else{
+                    animalString = animalIds[0];
+                }
+
+                Ext4.MessageBox.show({
+                    title: 'Lixit Confirmation',
+                    msg: 'Is the water line connected for animal '+ animalString,
+                    width: '300',
+                    buttons: Ext4.MessageBox.YESNO,
+                    icon: Ext4.MessageBox.QUESTION,
+                    scope: this,
+                    fn: function proceed(resp){
+                        if (resp === 'yes'){
+                            this.onSubmit(btn);
+                        }else{
+                            Ext4.MessageBox.hide();
+                        }
+                    }
+                });
+            }else {
+                this.onSubmit(btn);
+            }
+        }
+
+
+
+        //var panel = btn.up('ehr-dataentrypanel');
+
+
+    }
+
+});

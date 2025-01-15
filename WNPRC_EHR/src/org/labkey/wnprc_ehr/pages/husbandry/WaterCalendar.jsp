@@ -1564,10 +1564,11 @@
         if (moment(today).isBetween(momentStartDate, momentEndDate)){
             numOfDate = moment(momentEndDate).diff(today, "days", false);
             startCalendarDate = today.format(LABKEY.extDefaultDateFormat)
-        }else if(moment(momentStartDate).isAfter(today)){
-            numOfDate = moment(momentEndDate).diff(momentStartDate,"days",false);
+        }else if(moment(momentStartDate).isBefore(today) || moment(momentEndDate).isAfter(today)) {
+            numOfDate = moment(momentEndDate).diff(momentStartDate, "days", false);
             startCalendarDate = fetchInfo.start.format(LABKEY.extDefaultDateFormat);
         }
+
         console.log("value of numofDate " + numOfDate)
         let configObject = {
             "parameters": {NumDays: numOfDate + 1, StartDate: startCalendarDate},

@@ -2317,7 +2317,7 @@ public class TriggerScriptHelper {
         return null;
     }
     //This function will always have lixit as the waterSource
-    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, Map<String, Object> extraContext) throws Exception
+    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, @Nullable Map<String, Object> extraContext) throws Exception
     {
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();

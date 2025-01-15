@@ -89,6 +89,7 @@ public class SiteErrorAlertsRevamp extends AbstractEHRNotification {
             return messageBody.toString();
         }
     }
+    
 }
 
 

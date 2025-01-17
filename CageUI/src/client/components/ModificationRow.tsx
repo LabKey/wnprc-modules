@@ -5,7 +5,7 @@ import Select from 'react-select';
 import { Modifications, ModTypes } from './typings';
 import { useRoomContext } from './ContextManager';
 
-
+/*
 interface ModificationRowProps {
     modKey: string;
     defaultMod: ModTypes;
@@ -108,4 +108,4 @@ export const ModificationRow: FC<ModificationRowProps> = (props) => {
             </td>
         </tr>
     );
-}
+}*/

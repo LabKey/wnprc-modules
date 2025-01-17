@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import {  getModOptions } from './helpers';
-import { ModificationRow } from './ModificationRow';
+//import { ModificationRow } from './ModificationRow';
 import { useRoomContext } from './ContextManager';
 import { ConfirmationPopup } from './ConfirmationPopup';
 
 interface CageDetailsModificationsProps {
     closeDetails: () => void;
 }
+/*
 export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (props) => {
     const {closeDetails} = props;
     const {saveMod, modRows, setModRows, cageDetails} = useRoomContext();
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
-    /*
+
     useEffect(() => {
         const newModRows = [];
         cageDetails.forEach((cage) => {
@@ -33,7 +34,7 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
         });
         setModRows(() => [...newModRows]);
 
-    }, [cageDetails]);*/
+    }, [cageDetails])
 
     return (
         <div className={"details-modifications"}>
@@ -64,4 +65,4 @@ export const CageDetailsModifications: FC<CageDetailsModificationsProps> = (prop
             </table>
         </div>
     );
-}
+}*/

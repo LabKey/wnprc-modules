@@ -453,7 +453,7 @@ const removeDuplicatesByPosition = (arr) => {
 
 /*
 Finds the separator modifications that should be mapped to the svg
-*/
+
 export const getRackSeparators = (rack: Rack): Separators => {
     const separators: Separators = [];
     for (const cage of rack.cages) {
@@ -499,7 +499,7 @@ export const getRackSeparators = (rack: Rack): Separators => {
         }
     }
     return(removeDuplicatesByPosition(separators));
-}
+}*/
 
 // Find the total number of cages in a room
 export const getTotalCagesInRoom = (room) => {
@@ -631,6 +631,7 @@ export const findDetails = (clickedCage, cageDetails, rack) => {
 const cleanString = (name: string) => {
     return name.toLowerCase().replace(/[\s-]/g, '');
 }
+/*
 export const getCageMod = (modId: string, rack: Rack) => {
     const rackPos = parseCageMod(modId);
     const cage = rack.cages[rackPos - 1];
@@ -644,7 +645,7 @@ export const getCageMod = (modId: string, rack: Rack) => {
     }
     return cageMod;
 }
-
+*/
 //Helper function to update cage id and names when a rack is removed for the rest of cages in a room
 export const updateCageIds = (updatedRacks) => {
     let currentCageId = 1;

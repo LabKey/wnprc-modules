@@ -65,7 +65,6 @@ export interface RoomContextType {
     setModRows: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>;
     cageDetails: Cage[] | null;
     setCageDetails: React.Dispatch<React.SetStateAction<Cage[] | null>> | null;
-    saveMod: () => void;
     isDirty: boolean;
     setIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
     isEditEnabled: boolean, // determines if the user has valid permissions to edi;
@@ -164,7 +163,7 @@ export const RoomContextProvider = ({children}) => {
     };
     /*
     End SVG context
-     */
+
     const saveMod = () => {
         setIsDirty(false);
         setRoom(prevRoom => {
@@ -184,7 +183,7 @@ export const RoomContextProvider = ({children}) => {
             }
             return updatedRoom;
         });
-    }
+    }*/
 
     return (
         <RoomContext.Provider value={{
@@ -200,7 +199,6 @@ export const RoomContextProvider = ({children}) => {
             setModRows,
             cageDetails,
             setCageDetails,
-            saveMod,
             isDirty,
             setIsDirty,
             isEditEnabled,
@@ -292,17 +290,10 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
         const newCageNum: CageNumber = `${RackTypesStrings[rackType]}-${getNextCageNum(RackTypesStrings[rackType])}`;
         const firstCage: Cage = {
-            adjCages: undefined,
-            cageState: undefined,
             id: 1,
             cageNum: newCageNum,
-            position: 'top',
             x: 0,
-            y: 0,
-            length: 0,
-            width: 0,
-            height: 0,
-            sqft: 0
+            y: 0
         };
 
         // First cage in rack is always at rack starting position as well
@@ -335,7 +326,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         const newRack: Rack = {
             cages: [firstCage],
             itemId: id,
-            isActive: true,
+            isActive: false, // Default racks are not active by default (since they technically don't exist)
             type: type,
             x: 0,
             y: 0
@@ -451,13 +442,13 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                             return {
                                 ...r,
                                 x: newRackCoords.x,
-                                y: newRackCoords.y,
-                                groupId: targetGroup.groupId
+                                y: newRackCoords.y
                             };
                         })
                     ];
                     return {
                         ...group,
+                        groupId: targetGroup.groupId,
                         racks: updatedRacks
                     };
                 }
@@ -666,8 +657,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
     const changeRack = async (newType: {value: string, label: number}) => {
         const {value: rackType, label: rackId} = newType;
-        const [type, mfr, size] = rackType.split("-");
-        console.log("change type: ", rackType, rackId);
 
         const optConfig: SelectRowsOptions = {
             schemaName: "cageui",
@@ -677,8 +666,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             ]
         }
         const rackTypeData = await labkeyActionSelectWithPromise(optConfig);
-        console.log("rackType return: ", rackTypeData);
-        //TODO get rack type from rack id. set rack type here and change rack ID
 
         if(rackTypeData.rowCount === 1){
             const newRackType = rackTypeData.rows[0];

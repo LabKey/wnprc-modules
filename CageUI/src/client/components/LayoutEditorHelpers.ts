@@ -723,7 +723,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackItem.rack);
         if (!rack) {
             //create new rack if it doesn't exist
-            console.log("New Rack: ", isRackDefault(rackItem.object_type));
             let type: UnitType;
             let typeName;
             const isDefault = isRackDefault(rackItem.object_type);
@@ -759,9 +758,9 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
             rack = {
                 cages: [],
-                isActive: true,
+                isActive: isDefault ? false : true,
                 itemId: `${rackPrefix}-${rackItem.rack}`,
-                type: type, // TODO find the rack type in the database for rackId
+                type: type,
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
                 y: rackItem.y_coord - rackGroup.y
             };
@@ -780,15 +779,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         }
         console.log("cageNum: ", cageNumType);
         const cage: Cage = {
-            adjCages: undefined,
-            cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber, // TODO depending on rack type this will change
-            cageState: undefined,
-            height: 0, // TODO find height at time for cage in Cage History
+            cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber,
             id: rack.cages.length + 1, // TODO this might not work depending on order of cages in array, fix this
-            length: 0,// TODO find length at time for cage in Cage History
-            position: undefined, // TODO find this as well, probably some smart way depending on rack type and cage id number
-            sqft: 0,// TODO find height at time for cage in Cage History
-            width: 0,// TODO find height at time for cage in Cage History
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y
         }

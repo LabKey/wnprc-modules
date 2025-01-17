@@ -100,13 +100,6 @@ export interface StartDragProps {
 export interface Cage {
     id: number; // Id local to rack
     cageNum: CageNumber; // Id local to room
-    cageState: CageState;
-    position: CagePosition;
-    length: number; //  actual length
-    width: number; // actual width
-    height: number; // actual height
-    sqft: number; //  actual sqft
-    adjCages: AdjCages | undefined; //TODO adjCages is for modifications, no need to store the data in backend but make sure its needed when I start work on that part
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
 }
@@ -144,7 +137,7 @@ export interface Rack {
     cages: Cage[];
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
-    isActive: boolean;
+    isActive: boolean; // Determines if rack is "in use or active" //TODO fix loading this in from prev data.
 }
 
 export interface RoomObject {

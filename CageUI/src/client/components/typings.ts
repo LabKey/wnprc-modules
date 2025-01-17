@@ -140,7 +140,7 @@ export interface RackGroup {
 
 export interface Rack {
     itemId: string; // rack id
-    type: EHRRackType;
+    type: UnitType;
     cages: Cage[];
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
@@ -155,42 +155,11 @@ export interface RoomObject {
     scale: number;
 }
 
-export interface EHRRackType {
+export interface UnitType {
     rowid: number;
-    name: string;
-    type: RackTypes;
-    manufacturer: CageType;
-    length: number; // default length
-    width: number; // default width
-    height: number; // default height
-    sqft: number; // default sqft
-    supportsTunnel: boolean;
-    abbreviation: string;
-    description: string;
+    name: string; // naming convention is 'type-manufacturer-sqft'
+    type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
-}
-
-export interface EHRRoom {
-    rowid: number;
-    room: string;
-    building: string;
-    area: string;
-    housingType: number | null;
-    housingCondition: number | null;
-    maxCages: number;
-}
-
-export interface EHRCage {
-    rowid: number; // unique row id
-    location: string; // location of cage following format 'rack-rackNum'
-    position: CagePosition; // position of cage in rack
-    cageNum: string; // number of cage in room
-    rackNum: number; // number of cage in rack
-    x: number; // x coordinate
-    y: number; // y coordinate
-    rack: string; // unique rack id
-    cagetype: EHRRackType; // Rack/Cage Type
-    room: string; // unique room name
 }
 
 export interface AdjCages {
@@ -260,10 +229,10 @@ export type UnitLocations = {
 
 
 export enum CageType {
-    Allentown = "allentown",
-    Suburban = "suburban",
-    Lenderking = "lenderking",
-    Unknown = "unknown"
+    Allentown = "at",
+    Suburban = "sb",
+    Lenderking = "lk",
+    Unknown = "uk"
 }
 
 export enum ModTypes {
@@ -317,38 +286,22 @@ export type Separators = SeparatorMod[];
 export interface ExtraMod {
     mod: Modification
 }
-
-export const DEFAULT_CAGE_TYPE: EHRRackType = {
+/*
+export const DEFAULT_CAGE_TYPE: UnitType = {
     rowid: 1,
-    abbreviation: 'uk', // abbreviation of manufacturer
     name: 'cage-uk-0.0', // naming convention is 'type-abbreviation-sqft'
-    description: 'unknown default cage',
-    height: 0.0,
-    length: 0.0,
-    manufacturer: CageType.Unknown,
-    sqft: 0.0,
-    supportsTunnel: false,
     type: RackTypes.Cage,
-    width: 0.0,
     isDefault: true
 }
 
-export const DEFAULT_PEN_TYPE: EHRRackType = {
+export const DEFAULT_PEN_TYPE: UnitType = {
     rowid: 2,
-    abbreviation: 'uk',
     name: 'pen-uk-0.0',
-    description: 'unknown default pen',
-    height: 0.0,
-    length: 0.0,
-    manufacturer: CageType.Unknown,
-    sqft: 0.0,
-    supportsTunnel: false,
     type: RackTypes.Pen,
-    width: 0.0,
     isDefault: true
 
 }
-
+*/
 export const CageSizes: Record<string, CageSizeWithKey> = {
     "8.0": {
         sizeKey: "8.0",

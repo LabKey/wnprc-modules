@@ -3,8 +3,7 @@ import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'r
 import {
     Cage,
     CageNumber,
-    DEFAULT_CAGE_TYPE,
-    DEFAULT_PEN_TYPE, DefaultRackTypes, DeleteActions,
+    DeleteActions,
     GroupId, LayoutData,
     LayoutHistoryData, LayoutSaveResult,
     LocationCoords,
@@ -17,28 +16,34 @@ import {
     RoomItemStringType, RoomItemType,
     RoomObject,
     RoomObjectTypes,
-    UnitLocations
+    UnitLocations, UnitType
 } from './typings';
 import {
     convertCageNumToNum,
-    getTranslation, labkeyActionInsertWithPromise, labkeyActionUpdateWithPromise, parseLongId,
+    getTranslation,
+    labkeyActionInsertWithPromise,
+    labkeyActionSelectWithPromise,
+    labkeyActionUpdateWithPromise,
+    parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
-    removeCircularReferences, zeroPadName
+    removeCircularReferences,
+    zeroPadName
 } from './helpers';
 import * as d3 from 'd3';
 import {
     addPrevRoomSvgs,
-    buildNewLocalRoom, buildNewLocs, createEmptyUnitLoc, findCageInGroup,
+    buildNewLocalRoom, buildNewLocs, createEmptyUnitLoc, defaultTypeToRackType, findCageInGroup,
     findNextGroupId,
     findRackInGroup,
     findSelectObjRack,
-    isRack, isRackEnum, rackTypeToDefaultType,
+    isRack, isRackDefault, isRackEnum, rackTypeToDefaultType,
 } from './LayoutEditorHelpers';
-import { Query } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
 import { RequestOptions } from '@labkey/api/dist/labkey/Ajax';
 import { QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 interface LayoutContextProps {
     children: ReactNode;
@@ -96,7 +101,7 @@ export interface LayoutContextType {
     delCage: (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
-    changeRackType: (newType: {value: number, label: string}) => void;
+    changeRack: (newType: {value: string, label: number}) => void;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -284,8 +289,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         })
     }
 
-    const addRack = (id: string, x: number, y: number, newScale: number, rackType: RackStringType) => {
-        const newCageNum: CageNumber = `${rackType}-${getNextCageNum(rackType)}`;
+    const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
+        const newCageNum: CageNumber = `${RackTypesStrings[rackType]}-${getNextCageNum(RackTypesStrings[rackType])}`;
         const firstCage: Cage = {
             adjCages: undefined,
             cageState: undefined,
@@ -307,11 +312,31 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             cellY: y
         };
 
+        let type: UnitType;
+
+        const optConfig: SelectRowsOptions = {
+            schemaName: "cageui",
+            queryName: "rack_types",
+            filterArray: [
+                Filter.create('type', rackTypeToDefaultType[rackType], Filter.Types.EQUAL)
+            ]
+        }
+        // grab and set first default of that type to same svg object
+        const rackTypeData = await labkeyActionSelectWithPromise(optConfig);
+
+        // make first rack type
+        type = {
+            rowid: rackTypeData.rows[0].rowid,
+            name: rackTypeData.rows[0].name,
+            type: rackType,
+            isDefault: true,
+        };
+
         const newRack: Rack = {
             cages: [firstCage],
             itemId: id,
             isActive: true,
-            type: rackType === RackTypesStrings[RackTypes.Pen] ? DEFAULT_PEN_TYPE : DEFAULT_CAGE_TYPE,
+            type: type,
             x: 0,
             y: 0
         };
@@ -336,7 +361,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         console.log("adding: ", rackType);
         setUnitLocs(prevState => ({
             ...prevState,
-            [rackType]: [...prevState[rackType], newCageLoc] // Append the new location to the correct array
+            [RackTypesStrings[rackType]]: [...prevState[RackTypesStrings[rackType]], newCageLoc] // Append the new location to the correct array
         }));
         setScale(newScale);
     };
@@ -463,7 +488,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
     const addRoomItem = (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
         if(isRackEnum(itemType)){
-            addRack(itemId, x, y, scale, RackTypesStrings[itemType]);
+            addRack(itemId, x, y, scale, itemType as RackTypes);
         }else{
             const newRoomObj: RoomObject = {
                 itemId: itemId,
@@ -639,35 +664,56 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         }));
     }
 
-    const changeRackType = (newType: {value: number, label: string}) => {
-        const {value: realRackId, label: rackType} = newType;
+    const changeRack = async (newType: {value: string, label: number}) => {
+        const {value: rackType, label: rackId} = newType;
         const [type, mfr, size] = rackType.split("-");
-        console.log("change type: ", type, mfr, size, selectedObj);
+        console.log("change type: ", rackType, rackId);
 
+        const optConfig: SelectRowsOptions = {
+            schemaName: "cageui",
+            queryName: "rack_types",
+            filterArray: [
+                Filter.create('name', rackType, Filter.Types.EQUAL)
+            ]
+        }
+        const rackTypeData = await labkeyActionSelectWithPromise(optConfig);
+        console.log("rackType return: ", rackTypeData);
         //TODO get rack type from rack id. set rack type here and change rack ID
-/*
-        setLocalRoom(prevRoom => {
-            const {rackGroup, rack, cage} = findCageInGroup(selectedObj as CageNumber, prevRoom.rackGroups);
 
-            const roomToUpdate: Room = {
-                ...prevRoom,
-                rackGroups: prevRoom.rackGroups.map(group =>
-                    group.groupId === rackGroup.groupId
-                        ? {
-                            ...group,
-                            racks: group.racks.map((r) => rack.itemId === rack.itemId ? {
-
-
-                            } : r)
-                        }
-                        : group
-                )
+        if(rackTypeData.rowCount === 1){
+            const newRackType = rackTypeData.rows[0];
+            const isDefault = isRackDefault(newRackType.type);
+            if(isDefault){
+                newRackType.type = defaultTypeToRackType[newRackType.type];
             }
-
-            return roomToUpdate;
-        })
-
-*/
+            setLocalRoom(prevRoom => {
+                const {rackGroup, rack, cage} = findCageInGroup(selectedObj as CageNumber, prevRoom.rackGroups);
+                const roomToUpdate: Room = {
+                    ...prevRoom,
+                    rackGroups: prevRoom.rackGroups.map(group =>
+                        group.groupId === rackGroup.groupId
+                            ? {
+                                ...group,
+                                racks: group.racks.map((r) => r.itemId === rack.itemId ? {
+                                    ...r,
+                                    itemId: `rack-${rackId.toString()}`,
+                                    type: {
+                                        ...r.type,
+                                        rowid: newRackType.rowid,
+                                        name: newRackType.name,
+                                        type: newRackType.type,
+                                        isDefault: isDefault // not stored in db
+                                    }
+                                } : r)
+                            }
+                            : group
+                    )
+                }
+                return roomToUpdate;
+            })
+        }else{
+            console.log("Error fetching rack type");
+        }
     }
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
@@ -749,13 +795,18 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         console.log("Load Data: ", prevRoom);
 
         let newLocalRoom: Room;
+
         let newUnitLocs: UnitLocations;
         let lastGroup: GroupId;
 
         //TODO make sure rack-group ids are correct
         if(prevRoom.cagingData.length !== 0){
             newUnitLocs = buildNewLocs(prevRoom.cagingData);
-            newLocalRoom = buildNewLocalRoom(prevRoom);
+            buildNewLocalRoom(prevRoom).then((d) => {
+              if(d){
+                  newLocalRoom = d;
+              }
+            });
 
             // TODO might not always be last index (length - 1) will need more testing
             lastGroup = newLocalRoom.rackGroups[newLocalRoom.rackGroups.length - 1].groupId;
@@ -931,7 +982,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             delCage,
             scale,
             setScale,
-            changeRackType
+            changeRack
         }}>
             {children}
         </LayoutContext.Provider>

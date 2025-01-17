@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import {
     getTranslation,
-    getTypeClassFromElement,
+    getTypeClassFromElement, labkeyActionSelectWithPromise,
     parseLongId,
     parseRack,
     parseRoomItemNum,
@@ -13,10 +13,9 @@ import {
     Cage,
     CageActionProps,
     CageNumber,
-    DEFAULT_CAGE_TYPE, DEFAULT_PEN_TYPE,
     DefaultRackTypes,
     DoorResizeProps,
-    EHRRackType,
+    UnitType,
     GroupId,
     LayoutDragProps,
     LayoutHistoryData,
@@ -40,6 +39,8 @@ import {
     UnitLocations
 } from './typings';
 import * as React from 'react';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { Filter } from '@labkey/api';
 
 export const createEmptyUnitLoc = (): UnitLocations => {
     return (
@@ -688,7 +689,7 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
     return newUnitLocs;
 }
 
-export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
+export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
     const newLocalRoom: Room = {
         name: prevRoom.name,
         rackGroups: [],
@@ -717,23 +718,44 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
 
     //TODO isActive here tells us if the rack is currently active in the numbering system
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
-    const findOrAddRack = (rackGroup: RackGroup, rackItem: LayoutHistoryData): Rack => {
+    const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
         // if rack is a default aka 0, then use its default ID
         let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackItem.rack);
         if (!rack) {
             //create new rack if it doesn't exist
             console.log("New Rack: ", isRackDefault(rackItem.object_type));
-            let type: EHRRackType;
-            let rackPrefix = 'rack';
-            // TODO possibly extend to play/temp cages or any other rack type that has default
-            if(isRackDefault(rackItem.object_type)){
-                rackPrefix = 'default-rack';
-                if(rackItem.object_type as DefaultRackTypes === DefaultRackTypes.DefaultCage){
-                    type = DEFAULT_CAGE_TYPE;
-                }else if(rackItem.object_type as DefaultRackTypes === DefaultRackTypes.DefaultPen){
-                    type = DEFAULT_PEN_TYPE;
-                }
+            let type: UnitType;
+            let typeName;
+            const isDefault = isRackDefault(rackItem.object_type);
+            const rackPrefix = isDefault ?  'default-rack' : 'rack';
+
+            let optConfig: SelectRowsOptions = {
+                schemaName: "cageui",
+                queryName: "racks",
+                filterArray: [
+                    Filter.create('rackid', rackItem.rack, Filter.Types.EQUALS)
+                ]
             }
+
+            const rackData = await labkeyActionSelectWithPromise(optConfig);
+            typeName = rackData.rows[0].rack_type;
+
+            optConfig = {
+                schemaName: "cageui",
+                queryName: "rack_types",
+                filterArray: [
+                    Filter.create('name', typeName, Filter.Types.EQUALS)
+                ]
+            }
+
+            const rackTypesData = await labkeyActionSelectWithPromise(optConfig);
+
+            type = {
+                rowid: rackTypesData.rows[0].rowid,
+                name: rackTypesData.rows[0].name,
+                type: isDefault ? defaultTypeToRackType[rackTypesData.rows[0].type] : rackTypesData.rows[0].type,
+                isDefault: isDefault,
+            };
 
             rack = {
                 cages: [],
@@ -773,9 +795,9 @@ export const buildNewLocalRoom = (prevRoom: PrevRoom): Room => {
         rack.cages.push(cage);
     }
 
-    const handleRackItem = (rackItem: LayoutHistoryData) => {
+    const handleRackItem = async (rackItem: LayoutHistoryData) => {
         const rackGroup: RackGroup = findOrAddGroup(rackItem);
-        const rack: Rack = findOrAddRack(rackGroup, rackItem);
+        const rack: Rack = await findOrAddRack(rackGroup, rackItem);
         addCageToRack(rack, rackItem, rackGroup);
     }
 

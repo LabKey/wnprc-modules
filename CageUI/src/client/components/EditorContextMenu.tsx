@@ -15,7 +15,7 @@ interface EditorContextMenuProps {
     onClickDelete: () => void;
     closeMenu: () => void;
     onSubmitRename: (num: number) => void;
-    onSubmitChangeRack: (newType: {value: number, label: string}) => void;
+    onSubmitChangeRack: (newType: {value: string, label: number}) => void;
 }
 
 const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {

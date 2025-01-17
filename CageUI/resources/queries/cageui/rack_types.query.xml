@@ -1,0 +1,40 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="rack_types" tableDbType="TABLE">
+                <tableTitle>Rack Types</tableTitle>
+                <columns>
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="name"/>
+                    <column columnName="type">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_item_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="category" operator="eq" value="Caging" />
+                                </filterGroup>
+                            </filters>
+                        </fk>
+                    </column>
+                    <column columnName="manufacturer"/>
+                    <column columnName="length"/>
+                    <column columnName="width"/>
+                    <column columnName="height"/>
+                    <column columnName="sqft"/>
+                    <column columnName="supportsTunnel"/>
+                    <column columnName="description"/>
+                    <column columnName="container"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modified"/>
+                    <column columnName="modifiedby"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

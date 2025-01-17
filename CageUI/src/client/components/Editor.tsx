@@ -94,7 +94,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         delCage,
         unitLocs,
         saveRoom,
-        changeRackType
+        changeRack
     } = useLayoutContext();
 
     const dragInLayout = d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
@@ -797,7 +797,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     }}
                     onClickDelete={handleDelCage}
                     closeMenu={() => setShowContextMenu(false)}
-                    onSubmitChangeRack={changeRackType}
+                    onSubmitChangeRack={changeRack}
                 />
             }
         </div>

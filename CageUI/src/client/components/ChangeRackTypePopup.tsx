@@ -7,13 +7,13 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 
 interface ChangeRackTypePopupProps {
-    onSubmit: (newType: {value: number, label: string}) => void;
+    onSubmit: (newType: {value: string, label: number}) => void;
 }
 
 export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
     const {onSubmit} = props;
 
-    const [options, setOptions] = useState<{value: number, label: string}[]>(null);
+    const [options, setOptions] = useState<{value: string, label: number}[]>(null);
 
     const handleChange = (newVal) => {
         onSubmit(newVal);
@@ -33,7 +33,7 @@ export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
                     const tmp = [];
 
                     for (const row of d.rows) {
-                        tmp.push({label: row.rack_type, value: row.rackid});
+                        tmp.push({label: row.rackid, value: row.rack_type});
                     }
                     setOptions(tmp);
                 }

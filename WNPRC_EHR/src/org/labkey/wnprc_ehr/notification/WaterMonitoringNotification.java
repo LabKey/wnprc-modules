@@ -135,8 +135,16 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
         final Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(waterTotalByDateWithWeightReport, colKeys);
 
+        LocalDate date = LocalDate.now();
+        LocalDate startDate = date.minusDays(1);
+        LocalDate endDate = LocalDate.now();
+        Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
+        parameters.put("STARTTARGET", startDate);
+        parameters.put("ENDTARGETDATE", endDate);
+
 
         TableSelector ts = new TableSelector(waterTotalByDateWithWeightReport, columns.values(), filter, null);
+        ts.setNamedParameters(parameters);
         //TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("Id","date","mlsPerKg","TotalWater","project","currentWaterCondition"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)

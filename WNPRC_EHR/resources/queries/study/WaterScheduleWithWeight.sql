@@ -20,6 +20,7 @@ SELECT
     frequencyMeaning AS frequencyMeaningCoalesced,
     timeofday AS timeofday,
     displaytimeofday AS displaytimeofday,
+    actionRequired AS actionRequired,
     qcstate AS qcstate,
 
     --(SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE WCO.objectid = wg.treatmentid AND WCO.dateOrdered = wg.dateordered ) AS waterStatus,

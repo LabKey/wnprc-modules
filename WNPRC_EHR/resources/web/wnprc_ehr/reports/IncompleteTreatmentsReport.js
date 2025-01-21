@@ -10,6 +10,8 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
         let reportStartDate = new Date();
         reportStartDate.setDate(reportStartDate.getDate()-40);
         reportStartDate = reportStartDate.format(LABKEY.extDefaultDateFormat)
+        var reportEndDate = new Date();
+        reportEndDate = reportEndDate.format(LABKEY.extDefaultDateFormat)
 
         let config = panel.getQWPConfig({
             title: 'Incomplete Water Treatments',
@@ -27,7 +29,7 @@ EHR.reports.IncompleteTreatmentsReport = function (panel, tab) {
             schemaName: 'study',
             queryName: 'waterTotalByDateWithWeight',
             viewName: 'tooLittleWater',
-            //parameters: {'NumDays': '180', 'StartDate': reportStartDate},
+            parameters: {'STARTTARGET': reportStartDate, 'ENDTARGETDATE': reportEndDate},
             filters: filterArray.nonRemovable,
             removeableFilters: filterArray.removable,
             frame: true

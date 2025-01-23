@@ -1561,6 +1561,5 @@ public class NotificationToolkit {
         }
     }
 
-
 }
 

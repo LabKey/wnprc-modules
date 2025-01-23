@@ -46,7 +46,6 @@ export const AccountInput: FC<InputProps> = memo(props => {
                     className={'account-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onValueChange}
-                    placeholder="Please provide the purpose for this purchasing request (Required)"
                     disabled={isReadOnly}
                 >
                     <option hidden value="">

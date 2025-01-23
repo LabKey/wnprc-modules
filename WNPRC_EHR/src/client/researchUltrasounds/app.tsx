@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as ReactDom from 'react-dom';
 
 // Main react component
 import  {GridPanelConfig}  from '../components/GridPanelConfig';
@@ -8,12 +7,14 @@ import {gridConfig} from './configProps';
 
 // Import stylesheets
 import '../wnprc_ehr.scss';
+import { createRoot } from 'react-dom/client';
 // Need to wait for container element to be available in labkey wrapper before render
 window.addEventListener('DOMContentLoaded', (event) => {
-    ReactDom.render(
+    const container = document.getElementById('app');
+    const root = createRoot(container);
+    root.render(
         <GridPanelConfig
             {...gridConfig}
-        />,
-        document.getElementById('app')
+        />
     );
 });

@@ -10,6 +10,7 @@ import { Room } from './typings';
 interface RoomSelectorPopup {
     onConfirm: () => void;
     onCancel: () => void;
+    template: boolean;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
 }
 
@@ -19,16 +20,17 @@ interface Option {
 }
 
 export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
-    const { onConfirm, onCancel, setRoom } = props;
+    const { onConfirm, onCancel, setRoom, template } = props;
     const [selectedRoom, setSelectedRoom] = useState<string>(null);
     const [options, setOptions] = useState<Option[]>(null);
 
     useEffect(() => {
+
         const roomsConfig: SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
             columns: ['room', 'rowid'],
-            filterArray: []
+            filterArray: template ? [Filter.create('room', 'template', Filter.Types.CONTAINS)] : []
         }
 
         labkeyActionSelectWithPromise(roomsConfig).then(result => {
@@ -67,8 +69,8 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
                     onChange={(option) => setSelectedRoom(option.label)}
                 />
                 <div className="popup-buttons">
-                    <button onClick={handleSaveRoom}>Yes</button>
-                    <button onClick={onCancel}>No</button>
+                    <button onClick={handleSaveRoom}>Confirm</button>
+                    <button onClick={onCancel}>Cancel</button>
                 </div>
             </div>
         </div>

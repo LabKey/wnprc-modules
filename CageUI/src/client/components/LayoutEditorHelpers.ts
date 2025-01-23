@@ -109,6 +109,7 @@ export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>,
     layoutSvg.select('.grid').remove();
     layoutSvg.append("g")
         .attr("class", "grid")
+        .attr("id", "layout-grid")
         .attr("width", updateGridProps.width)
         .attr('height', updateGridProps.height)
         .attr('transform', `translate(0,0) scale(${transform.k})`);
@@ -565,7 +566,7 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 const shapeType: RoomItemClass = shape.classed('room-obj') ? 'roomObj' : 'caging';
                 placeAndScaleGroup(shape, cellX, cellY, transform);
                 // make sure border template is below all other shapes on the layout
-                if(shape.attr('id') === 'border-template'){
+                if(shape.attr('id') === 'layout-border'){
                     shape.lower();
                 }
                 console.log("#3: ", cellX, cellY, shape.node());

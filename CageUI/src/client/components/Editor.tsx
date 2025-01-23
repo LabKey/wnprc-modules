@@ -75,7 +75,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
     const [showSaveConfirm, setShowSaveConfirm] = useState<boolean>(false);
     const [showRoomSelector, setShowRoomSelector] = useState<boolean>(false);
+    const [showRoomSelectorTemplateLoad, setShowRoomSelectorTemplateLoad] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
+    const [templateOptions, setTemplateOptions] = useState<boolean>(false);
 
     const {
         localRoom,
@@ -94,7 +96,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         delCage,
         unitLocs,
         saveRoom,
-        changeRack
+        changeRack,
+        clearGrid
     } = useLayoutContext();
 
     const dragInLayout = d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
@@ -478,7 +481,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     // Border setup state attaches the data to the svg and a call listener for drag behavior
     useEffect(() => {
         if(!borderSetup) return;
-        const borderGroup:  d3.Selection<SVGGElement, {}, HTMLElement, any> = d3.select('#border-template') as  d3.Selection<SVGGElement, {}, HTMLElement, any>;
+        const borderGroup:  d3.Selection<SVGGElement, {}, HTMLElement, any> = d3.select('#layout-border') as  d3.Selection<SVGGElement, {}, HTMLElement, any>;
         const borderRect = d3.select('#border-rect');
         const doorSvg = d3.select('#border-door');
 
@@ -621,16 +624,37 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         });
     }
 
-    const handleDefaultSave = () => {
-        console.log("Saving to default layout");
+    const handleLoadTemplate = () => {
+        console.log("Loading Template");
+        // Another way would be a non refresh option of loading, use this for now since its easy
+        window.location.href = ActionURL.buildURL(
+            ActionURL.getController(),
+            'cageui-editLayout',
+            ActionURL.getContainer(),
+            {room: localRoom.name}
+        );
+
     }
 
-    const handleReset = () => {
-        console.log("Resetting to default layout");
-    }
-
+    // deletes all cages/objects from grid
     const handleClear = () => {
         console.log("Resetting to default layout");
+
+        clearGrid();
+
+        d3.select('#layout-svg').selectAll(':scope > g').each(function(d, i) {
+            // 'this' refers to the current DOM element
+            const element = d3.select(this) as  d3.Selection<SVGGElement, {}, null, undefined>;
+            if(element.node().id.includes("layout")){
+                return;
+            }else{
+                element.remove();
+            }
+            // You can also apply any custom logic here
+            console.log('Element index:', i, 'Element:', element.node());
+
+        })
+
     }
 
     const handleSave = async () => {
@@ -714,7 +738,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     id="layout-svg"
                 >
                     <g className={'draggable room-obj'}
-                       id={'border-template'}
+                       id={'layout-border'}
                        pointerEvents={'none'}
                     >
                         <ReactSVG
@@ -750,17 +774,17 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <button
                     className={"layout-toolbar-btn"}
                     onClick={handleClear}
-                >Clear (WIP)
+                >Clear Layout
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
-                    onClick={handleReset}
-                >Reset To Default (WIP)
+                    onClick={() => {setTemplateOptions(true); setShowRoomSelectorTemplateLoad(true);}}
+                >Load Template
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
-                    onClick={handleDefaultSave}
-                >Save As Default (WIP)
+                    onClick={() => {setTemplateOptions(true); setShowRoomSelector(true);}}
+                >Save as Template
                 </button>
                 <button
                     className={"layout-toolbar-btn"}
@@ -779,8 +803,17 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             {showRoomSelector &&
                 <RoomSelectorPopup
                     setRoom={setLocalRoom}
+                    template={templateOptions}
                     onConfirm={() => setShowSaveConfirm(true)}
                     onCancel={() => setShowRoomSelector(false)}
+                />
+            }
+            {showRoomSelectorTemplateLoad &&
+                <RoomSelectorPopup
+                        setRoom={setLocalRoom}
+                        template={templateOptions}
+                        onConfirm={handleLoadTemplate}
+                        onCancel={() => setShowRoomSelectorTemplateLoad(false)}
                 />
             }
             {showSaveResult &&

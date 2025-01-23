@@ -82,7 +82,7 @@ export interface RoomContextType {
 export interface LayoutContextType {
     room: Room;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
-    saveRoom: () => Promise<LayoutSaveResult>;
+    saveRoom: (template?: boolean) => Promise<LayoutSaveResult>;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     setLayoutSvg: React.Dispatch<React.SetStateAction<d3.Selection<SVGElement, {}, HTMLElement, any>>>;
     unitLocs: UnitLocations;
@@ -101,6 +101,7 @@ export interface LayoutContextType {
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
     changeRack: (newType: {value: string, label: number}) => void;
+    clearGrid: () => void;
 }
 
 const RoomContext = createContext<RoomContextType | null>(null);
@@ -775,6 +776,16 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         return maxCageNum + 1;
     };
 
+    const clearGrid = () => {
+        setLocalRoom(prevState => {
+            return {
+                ...prevState,
+                rackGroups: [],
+                objects: []
+            }
+        });
+    }
+
     // Loads a room into state if it is filled
     // LayoutHistoryData type does not do a hard check against this object so make sure properties align to avoid errors
     useEffect(() => {
@@ -798,7 +809,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             // TODO might not always be last index (length - 1) will need more testing
             lastGroup = newLocalRoom.rackGroups[newLocalRoom.rackGroups.length - 1].groupId;
         }else{
-            newLocalRoom = {name: prevRoom.name, rackGroups: [], objects: [], layoutData: null}
+            newLocalRoom = {name: prevRoom.name.includes("template") ? 'new-layout' : prevRoom.name, rackGroups: [], objects: [], layoutData: null}
         }
         //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
         newLocalRoom = {
@@ -825,15 +836,15 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         setRoom(newLocalRoom);
     }, [prevRoom]);
 
-    const saveRoom = async (): Promise<LayoutSaveResult> => {
+    const saveRoom = async (template?: boolean): Promise<LayoutSaveResult> => {
         const apiCalls = [];
-        console.log("Saving layout");
+        console.log("Saving layout: Template = ", template);
         const dataToSave: LayoutHistoryData[] = [];
         const roomName = localRoom.name;
         const newEndDate = new Date();
         const newStartDate = new Date();
         let rowsToUpdate;
-        // TODO fix defaults by prmpting users to fill them in
+
         localRoom.rackGroups.forEach((group) => {
             const groupId = parseLongId(group.groupId);
             group.racks.forEach((rack) => {
@@ -969,7 +980,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             delCage,
             scale,
             setScale,
-            changeRack
+            changeRack,
+            clearGrid
         }}>
             {children}
         </LayoutContext.Provider>

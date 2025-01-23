@@ -145,3 +145,11 @@ CREATE TABLE cageui.rack_types
     CONSTRAINT PK_rack_types PRIMARY KEY (rowid),
     CONSTRAINT FK_rack_types_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
+/*
+INSERT INTO cageui.rack_types (name, type, manufacturer, description, container)
+select 'cage-uk-0.0' as name,
+       0 as type,
+       'uk' as manufacturer,
+       'Default Unknown Rack' as description,
+       container from cageui.racks );
+*/

@@ -598,6 +598,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         deleteAction = 'rack';
                     }
                 }else{ // multiple cages in rack, delete cage element
+                    console.log("confirm")
                     svgToRemove = layoutSvg.select(`#${localCage.cageNum}`);
                     deleteAction = 'cage';
                 }

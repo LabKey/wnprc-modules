@@ -374,7 +374,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             }
             console.log("Context merge: ", targetRack, dragRack);
             // different rack types can be connected but not merged
-            if(targetRack.type !== dragRack.type){
+            if(targetRack.type.rowid !== dragRack.type.rowid){
                 console.log("Impossible configuration detected, please only merge racks of the same type");
                 return prevRoom;
             }

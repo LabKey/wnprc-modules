@@ -143,8 +143,20 @@ export const updateGrid = (transform, width, height, gridSize) => {
 // Confirmation popup for merging two racks
 function showConfirmationPopup(): Promise<RackActions> {
     return new Promise((resolve) => {
+
+        const overlay = d3.select('body').append('div')
+            .attr('class', 'overlay')
+            .style('position', 'fixed')
+            .style('top', '0')
+            .style('left', '0')
+            .style('width', '100vw')
+            .style('height', '100vh')
+            .style('background', 'rgba(0, 0, 0, 0.5)')
+            .style('z-index', '999')  // Ensure it's above other content
+            .style('display', 'block'); // Initially hidden
+
         // Create a simple popup
-        const popup = d3.select('body').append('div')
+        const popup = overlay.append('div')
             .attr('class', 'popup')
             .style('position', 'absolute')
             .style('top', '50%')
@@ -161,7 +173,7 @@ function showConfirmationPopup(): Promise<RackActions> {
         popup.append('button')
             .text('Merge Cages')
             .on('click', () => {
-                popup.remove();
+                overlay.remove();
                 resolve('merge');
             });
 
@@ -169,7 +181,7 @@ function showConfirmationPopup(): Promise<RackActions> {
         popup.append('button')
             .text('Connect Racks')
             .on('click', () => {
-                popup.remove();
+                overlay.remove();
                 resolve('connect');
             });
 
@@ -177,7 +189,7 @@ function showConfirmationPopup(): Promise<RackActions> {
         popup.append('button')
             .text('Cancel')
             .on('click', () => {
-                popup.remove();
+                overlay.remove();
                 resolve('cancel');
             });
     });

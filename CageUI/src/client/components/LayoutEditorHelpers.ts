@@ -197,8 +197,20 @@ function showConfirmationPopup(): Promise<RackActions> {
 
 export function showLayoutEditorConfirmation(msg: string) {
     return new Promise((resolve) => {
+
+        const overlay = d3.select('body').append('div')
+            .attr('class', 'overlay')
+            .style('position', 'fixed')
+            .style('top', '0')
+            .style('left', '0')
+            .style('width', '100vw')
+            .style('height', '100vh')
+            .style('background', 'rgba(0, 0, 0, 0.5)')
+            .style('z-index', '999')  // Ensure it's above other content
+            .style('display', 'block'); // Initially hidden
+
         // Create a simple popup
-        const popup = d3.select('body').append('div')
+        const popup = overlay.append('div')
             .attr('class', 'popup')
             .style('position', 'absolute')
             .style('top', '50%')
@@ -214,14 +226,14 @@ export function showLayoutEditorConfirmation(msg: string) {
         popup.append('button')
             .text('Yes')
             .on('click', () => {
-                popup.remove();
+                overlay.remove();
                 resolve(true);
             });
 
         popup.append('button')
             .text('No')
             .on('click', () => {
-                popup.remove();
+                overlay.remove();
                 resolve(false);
             });
     });
@@ -231,7 +243,18 @@ export function showLayoutEditorConfirmation(msg: string) {
 export function showLayoutEditorError(errorMsg: string) {
     return new Promise((resolve) => {
         // Create a simple popup
-        const popup = d3.select('body').append('div')
+        const overlay = d3.select('body').append('div')
+            .attr('class', 'overlay')
+            .style('position', 'fixed')
+            .style('top', '0')
+            .style('left', '0')
+            .style('width', '100vw')
+            .style('height', '100vh')
+            .style('background', 'rgba(0, 0, 0, 0.5)')
+            .style('z-index', '999')  // Ensure it's above other content
+            .style('display', 'block'); // Initially hidden
+
+        const popup = overlay.append('div')
             .attr('class', 'popup')
             .style('position', 'absolute')
             .style('top', '50%')
@@ -248,7 +271,7 @@ export function showLayoutEditorError(errorMsg: string) {
         popup.append('button')
             .text('Ok')
             .on('click', () => {
-                popup.remove();
+                overlay.remove();
                 resolve(true);
             });
     });

@@ -568,11 +568,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }, [ctxMenuStyle]);
 
 
-    const handleDelCage = () => {
+    const handleDelCage = (type: string) => {
         // state in local room of cage, rack, and group that cage is apart of
         const {cage: localCage, rack: localRack, rackGroup: localGroup} = findCageInGroup(selectedObj as CageNumber, localRoom.rackGroups);
 
-        showLayoutEditorConfirmation(`Are you sure you want to delete ${localCage.cageNum}`).then((r) => {
+        const cagesToDelete: string = type === "rack" ? localRack.cages.map((cage) => cage.cageNum).join(", ") : localCage.cageNum;
+        showLayoutEditorConfirmation(`Are you sure you want to delete ${cagesToDelete}`).then((r) => {
             if(r){
                 let svgToRemove;
                 let deleteAction: DeleteActions;
@@ -581,8 +582,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 if(localRack.cages.length === 1){// one cage in rack, delete rack element
                     if(localGroup.racks.length === 1){// not in a rack group element
                         svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
-                        deleteAction = 'group';
-                    }else if (localGroup.racks.length === 2){ // in a rack group element, pull other rack out of group element into rack element
+                        deleteAction = 'group'; // this is group if one cage is in one rack in one group
+                    } else if (localGroup.racks.length === 2){ // in a rack group element, pull other rack out of group element into rack element
                         const rackToSave: Rack = localGroup.racks.find((rack) => rack.itemId !== localRack.itemId);
                         const rackSvg = layoutSvg.select(`#${rackToSave.itemId}`);
                         const newX = rackToSave.x + localGroup.x;
@@ -597,6 +598,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
                         deleteAction = 'rack';
                     }
+                }else if(type === 'rack') {
+                    svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
+                    deleteAction = 'rack';
                 }else{ // multiple cages in rack, delete cage element
                     console.log("confirm")
                     svgToRemove = layoutSvg.select(`#${localCage.cageNum}`);

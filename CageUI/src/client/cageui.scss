@@ -857,6 +857,14 @@ ul {
   margin-bottom: 4px;
 }
 
+.menu-item-group {
+  display: flex;               /* Aligns buttons in a row */
+  justify-content: center;      /* Centers the buttons horizontally */
+  gap: 5px;                    /* Space between buttons */
+  margin-top: 20px;
+  text-align: center;
+}
+
 .menu-item input,
 .menu-item select {
   width: 100%;

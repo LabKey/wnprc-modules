@@ -12,7 +12,7 @@ interface EditorContextMenuProps {
         top: string;
         left: string;
     };
-    onClickDelete: () => void;
+    onClickDelete: (type: string) => void;
     closeMenu: () => void;
     onSubmitRename: (num: number) => void;
     onSubmitChangeRack: (newType: {value: string, label: number}) => void;
@@ -29,9 +29,13 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
 
     const menuRef = useRef(null);
 
-    const handleDeleteClick = (e: React.MouseEvent<HTMLElement>) => {
+    const handleDeleteCage = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        onClickDelete();
+        onClickDelete("cage");
+    };
+    const handleDeleteRack = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onClickDelete("rack");
     };
 
     useEffect(() => {
@@ -80,12 +84,21 @@ const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                 />
             </div>
             <div className="menu-item">
-                <Button
-                    variant={'primary'}
-                    onClick={handleDeleteClick}
-                >
-                    Delete Cage
-                </Button>
+                <div className={"menu-item-group"}>
+                    <Button
+                        variant={'primary'}
+                        onClick={handleDeleteCage}
+                    >
+                        Delete Cage
+                    </Button>
+
+                    <Button
+                        variant={'primary'}
+                        onClick={handleDeleteRack}
+                    >
+                        Delete Rack
+                    </Button>
+                </div>
             </div>
         </div>
     );

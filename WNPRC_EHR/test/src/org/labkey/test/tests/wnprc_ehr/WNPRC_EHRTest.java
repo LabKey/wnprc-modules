@@ -597,11 +597,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         ReactAssayDesignerPage assayDesignerPage = chooseAssayTypePage.selectAssayType("General");
         assayDesignerPage.setName("MHC_SSP");
         DomainFormPanel domainFormPanel = assayDesignerPage.goToResultsFields();
+        domainFormPanel.addField("PrimerPair").setLookup(new FieldDefinition.IntLookup("lists", MHC_SSP_LIST));
         domainFormPanel.addField("SubjectId").setType(FieldDefinition.ColumnType.String);
         domainFormPanel.addField("Institution").setType(FieldDefinition.ColumnType.String);
         domainFormPanel.addField("Result").setType(FieldDefinition.ColumnType.String);
-        DomainFieldRow domainFieldRow = domainFormPanel.addField("PrimerPair");
-        domainFieldRow.setLookup(new FieldDefinition.IntLookup("lists", MHC_SSP_LIST));
         assayDesignerPage.clickFinish();
 
         beginAt(buildURL("project", getProjectName() + "/WNPRC_Units/Research_Services/Virology_Services/VL_DB", "begin"));

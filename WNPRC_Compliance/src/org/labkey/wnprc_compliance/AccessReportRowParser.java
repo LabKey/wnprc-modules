@@ -8,6 +8,7 @@ import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -23,20 +25,14 @@ import java.util.regex.Pattern;
  */
 public class AccessReportRowParser {
     enum ColumnName {
-        FIRST_NAME      (false, "FirstName"),
-        LAST_NAME       (false, "LastName"),
-        MIDDLE_NAME     (false, "MiddleName"),
-        DEPARTMENT      (false, "department"),
-        EMPLOYEE_NUMBER (false, "empNumber"),
-        CARD_NUMBER     (true,  "CardNumber"),
-        STATE           (false, "state"),
-        TIME_ENTERED    (false, "timeEntered", Date.class),
-        INFO2           (false, "info2"),
-        INFO3           (false, "info3"),
-        INFO5           (false, "info5"),
-        // This column only appears some times, but it appears to be the access schedule for the employee (what
-        // hours they're allowed to use the door).
-        SCHEDULE_PT     (false, "scheuld_pt")
+        FIRST_NAME      (false, "Name (Last, First, Middle)"),
+        LAST_NAME       (false, "Name (Last, First, Middle)"),
+        MIDDLE_NAME     (false, "Name (Last, First, Middle)"),
+        CARD_NUMBER     (true,  "Badge ID(Issue)"),
+        CARD_ISSUED     (false,  "Badge Active"),
+        CARD_EXPIRE     (false,  "Badge Deactive"),
+        BADGE_TYPE (false,  "Badge Type"),
+        CARD_ISSUE_CODE (false,  "Badge Id(Issue)"),
         ;
 
         boolean required;
@@ -91,13 +87,65 @@ public class AccessReportRowParser {
         }
     }
 
-    public Pair<CardInfo, AccessInfo> parseRow(String reportId, Row row, Container container) {
+    public Pair<CardInfo, AccessInfo> parseRow(String reportId, Row row, Container container) throws ParseException
+    {
         Map<ColumnName, Object> values = new HashMap<>();
 
+        //TODO maybe just grab the names directly instead of this loop
         for (ColumnName columnName : cellIndexLookup.keySet()) {
             Cell cell = row.getCell(cellIndexLookup.get(columnName));
+            if (cell != null ) {
+                //how do we detect an empty cell
+                if (columnName.headerText.equals(ColumnName.FIRST_NAME.headerText))
+                {
+                    if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty())
+                    {
+                        Matcher matcher = Pattern.compile("^(.*?),\\s+(\\w+)(?:\\s+(\\w+))?$").matcher(cell.getStringCellValue());
 
-            if (cell != null) {
+                        if (matcher.find())
+                        {
+                            values.put(ColumnName.FIRST_NAME, matcher.group(2));
+                            values.put(ColumnName.LAST_NAME, matcher.group(1));
+                            values.put(ColumnName.MIDDLE_NAME, matcher.group(3));
+                        }
+                    }
+
+                }
+
+                if (columnName.headerText.equals(ColumnName.CARD_ISSUED.headerText))
+                {
+                    if (!cell.toString().isEmpty())
+                    {
+                        DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+                        Date d = df.parse(cell.toString());
+                        values.put(ColumnName.CARD_ISSUED, d);
+
+                    }
+                }
+                if (columnName.headerText.equals(ColumnName.CARD_EXPIRE.headerText))
+                {
+                    if (!cell.toString().isEmpty())
+                    {
+                        DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+                        Date d = df.parse(cell.toString());
+                        values.put(ColumnName.CARD_EXPIRE, d);
+                    }
+                }
+
+                if (columnName.headerText.equals(ColumnName.CARD_NUMBER.headerText))
+                {
+
+                    if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty())
+                    {
+                        Matcher matcher = Pattern.compile("(\\d+)\\s*\\((\\d+)\\)").matcher(cell.getStringCellValue());
+                        if (matcher.find())
+                        {
+                            values.put(ColumnName.CARD_NUMBER, matcher.group(1));
+                            values.put(ColumnName.CARD_ISSUE_CODE, matcher.group(2));
+                        }
+                    }
+                }
+
                 if (columnName.type == Date.class) {
                     Date value;
                     if (cell.getCellType() == CellType.STRING) {
@@ -113,7 +161,8 @@ public class AccessReportRowParser {
                         throw new ApiUsageException("Unrecognized type in date column");
                     }
 
-                    values.put(columnName, value);
+                    if (!values.containsKey(columnName))
+                        values.put(columnName, value);
                 }
                 else {
                     //For whatever reason apache ROI library thinks some of these cells are numeric,
@@ -125,12 +174,13 @@ public class AccessReportRowParser {
                     else {
                         value = cell.getStringCellValue();
                     }
-                    values.put(columnName, value);
+                    if (!values.containsKey(columnName))
+                        values.put(columnName, value);
                 }
             }
         }
 
-        Pair<CardInfo, AccessInfo> pair = new Pair<>(new CardInfo(values), new AccessInfo(values));
+       Pair<CardInfo, AccessInfo> pair = new Pair<>(new CardInfo(values), new AccessInfo(values));
         return pair;
     }
 
@@ -153,29 +203,26 @@ public class AccessReportRowParser {
             return (String) this.values.get(ColumnName.LAST_NAME);
         }
 
-        public String getDepartment() {
-            return (String) this.values.get(ColumnName.DEPARTMENT);
-        }
-
         public String getCardNumber() {
             return (String) this.values.get(ColumnName.CARD_NUMBER);
         }
-
-        public String getEmployeeNumber() {
-            return (String) this.values.get(ColumnName.EMPLOYEE_NUMBER);
+        public Date getCardIssued() {
+            return (Date) this.values.get(ColumnName.CARD_ISSUED);
+        }
+        public Date getCardExpire() {
+            return (Date) this.values.get(ColumnName.CARD_EXPIRE);
+        }
+        public String getIssueCode() {
+            return (String) this.values.get(ColumnName.CARD_ISSUE_CODE);
+        }
+        public String getCardType() {
+            return (String) this.values.get(ColumnName.BADGE_TYPE);
         }
 
-        public String getInfo2() {
-            return (String) this.values.get(ColumnName.INFO2);
+        public Map<ColumnName, Object> getValues() {
+            return this.values;
         }
 
-        public String getInfo3() {
-            return (String) this.values.get(ColumnName.INFO3);
-        }
-
-        public String getInfo5() {
-            return (String) this.values.get(ColumnName.INFO5);
-        }
     }
 
     public static class AccessInfo {
@@ -185,26 +232,6 @@ public class AccessReportRowParser {
             this.values = values;
         }
 
-        public String getSchedule() {
-            return (String) this.values.get(ColumnName.SCHEDULE_PT);
-        }
-
-        public Date getLastEntered() {
-            return (Date) this.values.get(ColumnName.TIME_ENTERED);
-        }
-
-        public boolean isEnabled() {
-            String state = (String) this.values.get(ColumnName.STATE);
-            if (state.equalsIgnoreCase("Enabled") || state.equalsIgnoreCase("")) {
-                return true;
-            }
-            else if (state.equalsIgnoreCase("DISABLED")) {
-                return false;
-            }
-            else {
-                throw new ApiUsageException("Unrecognized value in 'state' column: " + state);
-            }
-        }
     }
 
     public static class MalformedReportException extends Exception {
@@ -214,7 +241,7 @@ public class AccessReportRowParser {
     }
 
     public static Date parseDate(String dateString) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ssa");
         SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
         Date date;

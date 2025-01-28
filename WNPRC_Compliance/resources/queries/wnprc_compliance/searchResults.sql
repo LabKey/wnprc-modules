@@ -33,7 +33,7 @@ FROM (
   SELECT
   card_id as id,
   first_name,
-  middle_name,
+  COALESCE(middle_name, ''),
   last_name,
   COALESCE(first_name, '') || ' ' || COALESCE(middle_name, '') || ' ' || COALESCE(last_name, '') || ' (' || card_id || ')' as display,
   COALESCE(department || ';', '') || COALESCE(info2 || ';', '') || COALESCE(info3 || ';', '') as notes,
@@ -48,7 +48,7 @@ FROM (
   SELECT
   personid as id,
   first_name,
-  middle_name,
+  COALESCE(middle_name, ''),
   last_name,
   COALESCE(first_name, '') || ' ' || COALESCE(middle_name, '') || ' ' || COALESCE(last_name, '') as display,
   notes,

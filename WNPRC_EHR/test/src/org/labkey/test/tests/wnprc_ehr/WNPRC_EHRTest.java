@@ -225,7 +225,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {
-        WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
+        WNPRC_EHRTest initTest = getCurrentTest();
 
         initTest.createProjectAndFolders("EHR");
         initTest.clickFolder(initTest.getProjectName());
@@ -238,6 +238,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("PrimateId", "/" +
                 initTest.getProjectName(), "PrimateIdPrefix", "Prefix (2 chars max)", "XX")));
+
+        initTest.goToSchemaBrowser(); // Visiting the schema browser so that all the schemas are cached.
 
         initTest.goToEHRFolder();
         initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");

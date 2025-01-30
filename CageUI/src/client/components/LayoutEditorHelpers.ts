@@ -760,26 +760,30 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
-            let typeName;
+            let typeName = rackItem;
             const isDefault = isRackDefault(rackItem.object_type);
             const rackPrefix = isDefault ?  'default-rack' : 'rack';
 
-            let optConfig: SelectRowsOptions = {
-                schemaName: "cageui",
-                queryName: "racks",
-                filterArray: [
-                    Filter.create('rackid', rackItem.rack, Filter.Types.EQUALS)
-                ]
+            if(!isDefault){
+                const optConfig: SelectRowsOptions = {
+                    schemaName: "cageui",
+                    queryName: "racks",
+                    filterArray: [
+                        Filter.create('rackid', rackItem.rack, Filter.Types.EQUALS)
+                    ]
+                }
+
+                const rackData = await labkeyActionSelectWithPromise(optConfig);
+                typeName = rackData.rows[0].rack_type;
             }
 
-            const rackData = await labkeyActionSelectWithPromise(optConfig);
-            typeName = rackData.rows[0].rack_type;
 
-            optConfig = {
+            // if default get base type, else get rack type from rack id
+            const optConfig = {
                 schemaName: "cageui",
                 queryName: "rack_types",
                 filterArray: [
-                    Filter.create('name', typeName, Filter.Types.EQUALS)
+                    Filter.create(isDefault ? 'type' : 'name', isDefault ? rackItem.object_type : typeName, Filter.Types.EQUALS)
                 ]
             }
 
@@ -794,7 +798,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
             rack = {
                 cages: [],
-                isActive: isDefault ? false : true,
+                isActive: !isDefault,
                 itemId: `${rackPrefix}-${rackItem.rack}`,
                 type: type,
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
@@ -808,7 +812,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
     const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
         let cageNumType: RackStringType;
-        if(isRackDefault(rackItem.object_type)){
+        if(rack.type.isDefault){
             cageNumType = RackTypesStrings[defaultTypeToRackType[rackItem.object_type]];
         }else{
             cageNumType = RackTypesStrings[rackItem.object_type];
@@ -840,13 +844,13 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         });
     }
 
-    prevRoom.cagingData.forEach((roomItem) => {
-        if(isRackEnum(roomItem.object_type)){ // Room item is an enclosure for animals
-            handleRackItem(roomItem);
-        } else{ // Room item is something else in the room, ex. Door
-            newLocalRoom.objects.push(generateRoomObj(roomItem))
+    for (const roomItem of prevRoom.cagingData) {
+        if (isRackEnum(roomItem.object_type)) { // Room item is an enclosure for animals
+            await handleRackItem(roomItem);
+        } else { // Room item is something else in the room, ex. Door
+            newLocalRoom.objects.push(generateRoomObj(roomItem));
         }
-    })
+    }
     return(newLocalRoom);
 }
 

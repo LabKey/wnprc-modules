@@ -47,7 +47,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 interface LayoutContextProps {
     children: ReactNode;
-    prevRoom: PrevRoom;
+    prevRoom: {room: Room, locs: UnitLocations, data: PrevRoom};
 }
 
 export interface RoomContextType {
@@ -248,6 +248,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     const [nextAvailGroup, setNextAvailGroup] = useState<GroupId>(`rack-group-1`); // Tracks currently active groups of racks
 
     const [cageNumChange, setCageNumChange] = useState<{before: number, after: number} | null>(null);
+
+    const [isLoading, setIsLoading] = useState<boolean>(prevRoom ? true : false);
 
     // the id of the clicked on svg group for either dragging or context menu opening.
     const [selectedObj, setSelectedObj] = useState<string | null>(null);
@@ -789,51 +791,24 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     // Loads a room into state if it is filled
     // LayoutHistoryData type does not do a hard check against this object so make sure properties align to avoid errors
     useEffect(() => {
-        if(!prevRoom.name) return;
-        console.log("Load Data: ", prevRoom);
-
-        let newLocalRoom: Room;
-
-        let newUnitLocs: UnitLocations;
-        let lastGroup: GroupId;
-
-        //TODO make sure rack-group ids are correct
-        if(prevRoom.cagingData.length !== 0){
-            newUnitLocs = buildNewLocs(prevRoom.cagingData);
-            buildNewLocalRoom(prevRoom).then((d) => {
-              if(d){
-                  newLocalRoom = d;
-              }
-            });
-
-            // TODO might not always be last index (length - 1) will need more testing
-            lastGroup = newLocalRoom.rackGroups[newLocalRoom.rackGroups.length - 1].groupId;
-        }else{
-            newLocalRoom = {name: prevRoom.name.includes("template") ? 'new-layout' : prevRoom.name, rackGroups: [], objects: [], layoutData: null}
+        if(!prevRoom) {
+            return;
         }
-        //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
-        newLocalRoom = {
-            ...newLocalRoom,
-            layoutData: {
-                scale: prevRoom.layoutData.scale,
-                borderWidth: prevRoom.layoutData.borderWidth,
-                borderHeight: prevRoom.layoutData.borderHeight
-            }
-        }
+        console.log("Load Data: ", prevRoom.room);
+
+        const lastGroup: GroupId = prevRoom.room.rackGroups[prevRoom.room.rackGroups.length - 1].groupId;
 
         if (lastGroup){
             setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
         }else{
             setNextAvailGroup(`rack-group-1`);
         }
-        if(newUnitLocs){
-            setUnitLocs(newUnitLocs);
+        if(prevRoom.locs) {
+            setUnitLocs(prevRoom.locs);
         }
-        if(newLocalRoom){
-
-        }
-        setLocalRoom(newLocalRoom);
-        setRoom(newLocalRoom);
+        setLocalRoom(prevRoom.room);
+        setRoom(prevRoom.room);
+        setIsLoading(false);
     }, [prevRoom]);
 
     const saveRoom = async (template?: boolean): Promise<LayoutSaveResult> => {
@@ -883,8 +858,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             dataToSave.push(newObjData);
         });
 
-        if(prevRoom.cagingData.length !== 0){
-            rowsToUpdate = prevRoom.cagingData.reduce((acc, row) => {
+        if(prevRoom.data.cagingData.length !== 0){
+            rowsToUpdate = prevRoom.data.cagingData.reduce((acc, row) => {
                 return [
                     ...acc,
                     {
@@ -901,7 +876,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             // insert rows to layout history for cages and room objects, no end date
             const saveHistoryOpt: QueryRequestOptions = {
                 queryName: 'layout_history',
-                schemaName: 'wnprc',
+                schemaName: 'cageui',
                 rows: dataToSave
             }
 
@@ -914,7 +889,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         }
 
         // if border width/scale has changed, send update to rooms table
-        if(!prevRoom.name || !compareLayoutData(prevRoom.layoutData, localRoom.layoutData)){
+        if(!prevRoom.room.name || !compareLayoutData(prevRoom.room.layoutData, localRoom.layoutData)){
             console.log("Saving border: ", localRoom.layoutData);
             const roomToSave = [{
                 room: localRoom.name,
@@ -935,7 +910,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             console.log("Updating: ", rowsToUpdate);
             const updateHistoryOpt: QueryRequestOptions = {
                 queryName: 'layout_history',
-                schemaName: 'wnprc',
+                schemaName: 'cageui',
                 rows: rowsToUpdate
             }
             apiCalls.push(labkeyActionUpdateWithPromise(updateHistoryOpt));
@@ -983,7 +958,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             changeRack,
             clearGrid
         }}>
-            {children}
+            {!isLoading ? children : null}
         </LayoutContext.Provider>
     );
 }

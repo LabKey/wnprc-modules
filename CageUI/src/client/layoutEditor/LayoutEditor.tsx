@@ -6,7 +6,7 @@ import { RoomDisplay } from '../components/RoomDisplay';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../cageui.scss';
 import {Filter} from '@labkey/api';
-import { Cage, LayoutData, PrevRoom, Rack } from '../components/typings';
+import { Cage, GroupId, LayoutData, PrevRoom, Rack, Room, UnitLocations } from '../components/typings';
 import { RoomToolbar } from '../components/RoomToolbar';
 import {LayoutContextProvider } from '../components/ContextManager';
 import DragAndDropGrid from '../components/Editor';
@@ -17,6 +17,7 @@ import { RoomSizeSelector, SelectorOptions } from '../components/RoomSizeSelecto
 import { Simulate } from 'react-dom/test-utils';
 import error = Simulate.error;
 import { ConfirmationPopup } from '../components/ConfirmationPopup';
+import { buildNewLocalRoom, buildNewLocs } from '../components/LayoutEditorHelpers';
 
 interface RoomProps {
     room: {
@@ -28,10 +29,12 @@ interface RoomProps {
 export const LayoutEditor: FC<RoomProps> = (props) => {
     //const {room} = props;
     const roomName = ActionURL.getParameter("room");
-    const [prevRoom, setPrevRoom] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null});
+    const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null});
+    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: PrevRoom}>(null);
     const [selectedSize, setSelectedSize] = useState<SelectorOptions>(null);
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const roomSizeOptions = [
         {
             id: 1,
@@ -54,9 +57,12 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
     ];
 
     useEffect(() => {
-        if(!roomName) return;
+        if(!roomName){
+            setIsLoading(false);
+            return;
+        }
         const prevRoomConfig: SelectRowsOptions = {
-            schemaName: 'wnprc',
+            schemaName: 'cageui',
             queryName: 'layout_history',
             columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid'],
             filterArray: [
@@ -91,39 +97,79 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                 setShowSelectionPopup(false);
             }
             console.log("Prev ROom", prevRoomResult.rows);
-            setPrevRoom({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
+            setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
         }).catch(err => {
             setErrorPopup(err.toString());
         });
     }, []);
 
-    return (
-        <LayoutContextProvider
-            prevRoom={prevRoom}
-            children={
-                <div className={"room-container"}>
-                    <RoomHeader
-                        name={roomName}
-                    />
-                    <div className={"divider"}/>
-                    {selectedSize &&
-                        <Editor roomSize={selectedSize}/>
+    useEffect(() => {
+        if(prevRoomData.name !== null){
+            let newLocalRoom: Room;
+
+            let newUnitLocs: UnitLocations;
+
+            if(prevRoomData.cagingData.length !== 0){
+                newUnitLocs = buildNewLocs(prevRoomData.cagingData);
+                buildNewLocalRoom(prevRoomData).then((d) => {
+                    if(d){
+                        newLocalRoom = d;
+                        newLocalRoom = {
+                            ...newLocalRoom,
+                            layoutData: {
+                                scale: prevRoomData.layoutData.scale,
+                                borderWidth: prevRoomData.layoutData.borderWidth,
+                                borderHeight: prevRoomData.layoutData.borderHeight
+                            }
+                        }
+                        setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData});
+                        setIsLoading(false);
                     }
-                    {showSelectionPopup &&
-                        <RoomSizeSelector
-                            options={roomSizeOptions}
-                            onClose={() => setShowSelectionPopup(false)}
-                            onSelect={(selectedOption) => setSelectedSize(selectedOption)}
-                        />
+                });
+            }else{
+                newLocalRoom = {name: prevRoomData.name.includes("template") ? 'new-layout' : prevRoomData.name, rackGroups: [], objects: [], layoutData: null}
+                //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
+                newLocalRoom = {
+                    ...newLocalRoom,
+                    layoutData: {
+                        scale: prevRoomData.layoutData.scale,
+                        borderWidth: prevRoomData.layoutData.borderWidth,
+                        borderHeight: prevRoomData.layoutData.borderHeight
                     }
-                    {errorPopup &&
-                        <ConfirmationPopup
-                                message={errorPopup}
-                                onClose={() => setErrorPopup(null)}
-                        />
-                    }
-                </div>
+                }
+                setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData});
+                setIsLoading(false);
             }
-        />
-    );
+        }
+    }, [prevRoomData]);
+
+    return !isLoading ? (
+            <LayoutContextProvider
+                prevRoom={prevRoom}
+                children={
+                    <div className={"room-container"}>
+                        <RoomHeader
+                            name={roomName}
+                        />
+                        <div className={"divider"}/>
+                        {selectedSize &&
+                            <Editor roomSize={selectedSize}/>
+                        }
+                        {showSelectionPopup &&
+                            <RoomSizeSelector
+                                options={roomSizeOptions}
+                                onClose={() => setShowSelectionPopup(false)}
+                                onSelect={(selectedOption) => setSelectedSize(selectedOption)}
+                            />
+                        }
+                        {errorPopup &&
+                            <ConfirmationPopup
+                                    message={errorPopup}
+                                    onClose={() => setErrorPopup(null)}
+                            />
+                        }
+                    </div>
+                }
+            />
+    ) : null;
 }

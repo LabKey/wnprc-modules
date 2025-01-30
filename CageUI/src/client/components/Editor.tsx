@@ -75,6 +75,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
     const [showSaveConfirm, setShowSaveConfirm] = useState<boolean>(false);
     const [showRoomSelector, setShowRoomSelector] = useState<boolean>(false);
+    const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
     const [showRoomSelectorTemplateLoad, setShowRoomSelectorTemplateLoad] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
@@ -518,6 +519,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         if(localRoom.name !== 'new-layout'){
             addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setShowContextMenu);
         }
+
         setBorderSetup(false);
     }, [borderSetup]);
 
@@ -567,6 +569,18 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
     }, [ctxMenuStyle]);
 
+    // Template load is in effect instead of function so that localRoom updates before it starts
+    useEffect(() => {
+        if(loadTemplate){
+            console.log("Loading Template: ", localRoom.name);
+            window.location.href = ActionURL.buildURL(
+                ActionURL.getController(),
+                'cageui-editLayout',
+                ActionURL.getContainer(),
+                {room: localRoom.name}
+            );
+        }
+    }, [loadTemplate]);
 
     const handleDelCage = (type: string) => {
         // state in local room of cage, rack, and group that cage is apart of
@@ -627,18 +641,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 setShowContextMenu(false);
             }
         });
-    }
-
-    const handleLoadTemplate = () => {
-        console.log("Loading Template");
-        // Another way would be a non refresh option of loading, use this for now since its easy
-        window.location.href = ActionURL.buildURL(
-            ActionURL.getController(),
-            'cageui-editLayout',
-            ActionURL.getContainer(),
-            {room: localRoom.name}
-        );
-
     }
 
     // deletes all cages/objects from grid
@@ -817,7 +819,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <RoomSelectorPopup
                         setRoom={setLocalRoom}
                         template={templateOptions}
-                        onConfirm={handleLoadTemplate}
+                        onConfirm={() => setLoadTemplate(true)}
                         onCancel={() => setShowRoomSelectorTemplateLoad(false)}
                 />
             }

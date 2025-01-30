@@ -7,9 +7,9 @@ id,
 first_name,
 middle_name,
 last_name,
-display,
+COALESCE(display, '') as display,
 LCASE(display) as displayLcase,
-notes,
+COALESCE(notes, '') as notes,
 "type"
 
 FROM (

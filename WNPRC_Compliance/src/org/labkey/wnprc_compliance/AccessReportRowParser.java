@@ -91,11 +91,11 @@ public class AccessReportRowParser {
     {
         Map<ColumnName, Object> values = new HashMap<>();
 
+
         //TODO maybe just grab the names directly instead of this loop
         for (ColumnName columnName : cellIndexLookup.keySet()) {
             Cell cell = row.getCell(cellIndexLookup.get(columnName));
             if (cell != null ) {
-                //how do we detect an empty cell
                 if (columnName.headerText.equals(ColumnName.FIRST_NAME.headerText))
                 {
                     if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty())

@@ -1,13 +1,14 @@
 import * as React from "react";
 import { createContext, useState } from "react";
 interface ContextProps {
-    accounts: Array<number>
-    setAccountsExternal: (accounts: Array<number>) => void
+    accounts?: Array<number>
+    setAccountsExternal?: (accounts: Array<number>) => void
+    children?: React.ReactNode;
 }
 
 const AppContext = createContext({} as ContextProps);
 
-const ContextProvider: React.FunctionComponent = ({ children }) => {
+const ContextProvider: React.FunctionComponent<ContextProps> = ({ children }) => {
     const [accounts, setAccounts] = useState<Array<number>>(null);
 
     const setAccountsExternal = (accounts: Array<number>) => {

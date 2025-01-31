@@ -146,37 +146,12 @@ public class AccessReportRowParser {
                     }
                 }
 
-                if (columnName.type == Date.class) {
-                    Date value;
-                    if (cell.getCellType() == CellType.STRING) {
-                        value = parseDate(cell.getStringCellValue());
-                    }
-                    else if (cell.getCellType() == CellType.NUMERIC) {
-                        value = cell.getDateCellValue();
-                    }
-                    else if (cell.getCellType() == CellType.BLANK) {
-                        value = null;
-                    }
-                    else {
-                        throw new ApiUsageException("Unrecognized type in date column");
-                    }
-
-                    if (!values.containsKey(columnName))
-                        values.put(columnName, value);
+                String value = "";
+                if (cell.getCellType() == CellType.STRING) {
+                    value = cell.getStringCellValue();
                 }
-                else {
-                    //For whatever reason apache ROI library thinks some of these cells are numeric,
-                    //Even though excel says they are text
-                    String value;
-                    if (cell.getCellType() == CellType.NUMERIC) {
-                        value = NumberToTextConverter.toText(cell.getNumericCellValue());
-                    }
-                    else {
-                        value = cell.getStringCellValue();
-                    }
-                    if (!values.containsKey(columnName))
-                        values.put(columnName, value);
-                }
+                if (!values.containsKey(columnName))
+                    values.put(columnName, value);
             }
         }
 

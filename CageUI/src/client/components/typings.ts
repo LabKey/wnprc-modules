@@ -35,15 +35,6 @@ export interface LayoutSaveResult {
     reason?: any;
 }
 
-export interface DoorResizeProps {
-    startX: number;
-    startY: number;
-    startWidth: number;
-    startHeight: number;
-    scaleX: number;
-    scaleY: number;
-}
-
 export interface LayoutHistoryData {
     object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
     rack_group: number | null;

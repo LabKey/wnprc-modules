@@ -23,7 +23,7 @@ import {
     getTranslation,
     labkeyActionInsertWithPromise,
     labkeyActionSelectWithPromise,
-    labkeyActionUpdateWithPromise,
+    labkeyActionUpdateWithPromise, labkeySaveRows,
     parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
@@ -42,12 +42,12 @@ import {
 import { Filter, Query } from '@labkey/api';
 import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
 import { RequestOptions } from '@labkey/api/dist/labkey/Ajax';
-import { QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
+import { Command, CommandType, QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 interface LayoutContextProps {
     children: ReactNode;
-    prevRoom: {room: Room, locs: UnitLocations, data: PrevRoom};
+    prevRoom: {room: Room, locs: UnitLocations, data: LayoutHistoryData[]};
 }
 
 export interface RoomContextType {
@@ -82,7 +82,7 @@ export interface RoomContextType {
 export interface LayoutContextType {
     room: Room;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
-    saveRoom: (template?: boolean) => Promise<LayoutSaveResult>;
+    saveRoom: (templateRename?: boolean) => Promise<LayoutSaveResult>;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     setLayoutSvg: React.Dispatch<React.SetStateAction<d3.Selection<SVGElement, {}, HTMLElement, any>>>;
     unitLocs: UnitLocations;
@@ -795,8 +795,10 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             return;
         }
         console.log("Load Data: ", prevRoom.room);
-
-        const lastGroup: GroupId = prevRoom.room.rackGroups[prevRoom.room.rackGroups.length - 1].groupId;
+        let lastGroup: GroupId;
+        if(prevRoom.room.rackGroups.length !== 0){
+            lastGroup = prevRoom.room.rackGroups[prevRoom.room.rackGroups.length - 1].groupId;
+        }
 
         if (lastGroup){
             setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
@@ -811,14 +813,34 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         setIsLoading(false);
     }, [prevRoom]);
 
-    const saveRoom = async (template?: boolean): Promise<LayoutSaveResult> => {
-        const apiCalls = [];
-        console.log("Saving layout: Template = ", template);
+    const saveRoom = async (templateRename?: boolean): Promise<LayoutSaveResult> => {
+        const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
-        const roomName = localRoom.name;
+        // if template parse room name, 1 is the new name, 0 is the old name
+        const roomName = templateRename ? JSON.parse(localRoom.name)[1] : localRoom.name;
+        const oldRoomName = templateRename ? JSON.parse(localRoom.name)[0] : localRoom.name;
         const newEndDate = new Date();
         const newStartDate = new Date();
         let rowsToUpdate;
+        let templateHistory: LayoutHistoryData[];
+
+        //check if template already had layout in history and needs to be updated
+        if(prevRoom.room.name !== roomName){
+            const prevRoomConfig: SelectRowsOptions = {
+                schemaName: 'cageui',
+                queryName: 'layout_history',
+                columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid'],
+                filterArray: [
+                    Filter.create('room', oldRoomName, Filter.Types.EQUALS),
+                    Filter.create('end_date', null, Filter.Types.ISBLANK)
+                ]
+            }
+            const prevTemplate = await labkeyActionSelectWithPromise(prevRoomConfig)
+
+            if(prevTemplate.rowCount > 0){
+                templateHistory = prevTemplate.rows;
+            }
+        }
 
         localRoom.rackGroups.forEach((group) => {
             const groupId = parseLongId(group.groupId);
@@ -858,8 +880,19 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             dataToSave.push(newObjData);
         });
 
-        if(prevRoom.data.cagingData.length !== 0){
-            rowsToUpdate = prevRoom.data.cagingData.reduce((acc, row) => {
+        // get data for updating layout history end dates
+        if(prevRoom.data.length !== 0){
+            rowsToUpdate = prevRoom.data.reduce((acc, row) => {
+                return [
+                    ...acc,
+                    {
+                        ...row,
+                        end_date: newEndDate
+                    }
+                ];
+            }, []);
+        }else if(templateHistory && templateHistory?.length !== 0) {// ensure template history exists and has data.
+            rowsToUpdate = templateHistory.reduce((acc, row) => {
                 return [
                     ...acc,
                     {
@@ -870,66 +903,65 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             }, []);
         }
 
-        console.log("Saving: ", dataToSave);
-
-        if(dataToSave.length !== 0){
-            // insert rows to layout history for cages and room objects, no end date
-            const saveHistoryOpt: QueryRequestOptions = {
-                queryName: 'layout_history',
-                schemaName: 'cageui',
-                rows: dataToSave
-            }
-
-            apiCalls.push(labkeyActionInsertWithPromise(saveHistoryOpt));
-
-        }
-
-        const compareLayoutData = (obj1: LayoutData, obj2: LayoutData): boolean => {
-            return Object.keys(obj1).every((key) => obj1[key as keyof LayoutData] === obj2[key as keyof LayoutData]);
-        }
-
-        // if border width/scale has changed, send update to rooms table
-        if(!prevRoom.room.name || !compareLayoutData(prevRoom.room.layoutData, localRoom.layoutData)){
-            console.log("Saving border: ", localRoom.layoutData);
-            const roomToSave = [{
-                room: localRoom.name,
-                layout_scale: localRoom.layoutData.scale,
-                border_width: localRoom.layoutData.borderWidth,
-                border_height: localRoom.layoutData.borderHeight
-            }]
-            const updateBorderOpt: QueryRequestOptions = {
-                queryName: 'rooms',
-                schemaName: 'ehr_lookups',
-                rows: roomToSave
-            }
-            apiCalls.push(labkeyActionUpdateWithPromise(updateBorderOpt));
+        // update template name
+        if(templateRename){
+            commands.push({
+                command: "updateChangingKeys" as CommandType,
+                schemaName: "ehr_lookups",
+                queryName: "rooms",
+                extraContext: {keyField: 'room'},
+                rows: [{
+                    oldKeys: {room: JSON.parse(localRoom.name)[0]},
+                    values: {room: roomName}
+                }]
+            });
         }
 
         // update prevRoom rows to include end date marking end of layout for that time frame
         if(rowsToUpdate){
             console.log("Updating: ", rowsToUpdate);
-            const updateHistoryOpt: QueryRequestOptions = {
-                queryName: 'layout_history',
-                schemaName: 'cageui',
+            commands.push({
+                command: "update",
+                schemaName: "cageui",
+                queryName: "layout_history",
                 rows: rowsToUpdate
-            }
-            apiCalls.push(labkeyActionUpdateWithPromise(updateHistoryOpt));
+            });
         }
 
-        const results = await Promise.allSettled(apiCalls);
+        // insert rows to layout history for cages and room objects, no end date
+        if(dataToSave.length !== 0){
+            commands.push({
+                command: "insert",
+                schemaName: "cageui",
+                queryName: "layout_history",
+                rows: dataToSave
+            });
 
+        }
+
+        // update room border and scale
+        const roomToSave = [{
+            room: roomName,
+            layout_scale: localRoom.layoutData.scale,
+            border_width: localRoom.layoutData.borderWidth,
+            border_height: localRoom.layoutData.borderHeight
+        }];
+        commands.push({
+            command: "update",
+            schemaName: "ehr_lookups",
+            queryName: "rooms",
+            rows: roomToSave
+        });
+
+        const result = await labkeySaveRows(commands);
         // Determine success or failure
-        const failures = results
-            .filter(result => result.status === 'rejected')
-            .map(result => result.reason.error);
-
-        if (failures.length > 0) {
+        if(result.errorCount === 0){
+            return { status: 'Success' };
+        }else{
             return {
                 status: 'Failure',
-                reason: failures // Return an array of failure reasons
+                reason: ["failures"] // Return an array of failure reasons
             };
-        } else {
-            return { status: 'Success' };  // All promises are fulfilled
         }
     }
 

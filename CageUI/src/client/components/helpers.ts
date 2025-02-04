@@ -19,9 +19,9 @@ import {
 } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
-import { Query } from '@labkey/api';
+import { ActionURL, Query } from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
+import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 
 /*
 console.log(zeroPad(5, 2)); // "05"
@@ -58,6 +58,19 @@ export function labkeyActionUpdateWithPromise(
         Query.updateRows(options);
     });
 }
+
+export const labkeySaveRows = (commands: Command[]):Promise<SaveRowsResponse> => {
+
+    return new Promise((resolve, reject) => {
+        let options: SaveRowsOptions = {
+            commands: commands,
+            containerPath: ActionURL.getContainer(),
+            success: (data) => {resolve(data)},
+            failure: (data) => {reject(data)},
+        };
+        Query.saveRows(options);
+    });
+};
 
 export const getRackFromClass = (classString: string) => {
     let rackClass = classString.match(/rack-\d+/);

@@ -10,8 +10,10 @@ import { Room } from './typings';
 interface RoomSelectorPopup {
     onConfirm: () => void;
     onCancel: () => void;
-    template: boolean;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
+    template: boolean;
+    templateLoad?: boolean;
+    setTemplateRename?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface Option {
@@ -20,9 +22,10 @@ interface Option {
 }
 
 export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
-    const { onConfirm, onCancel, setRoom, template } = props;
+    const { onConfirm, onCancel, setRoom, template, setTemplateRename,templateLoad } = props;
     const [selectedRoom, setSelectedRoom] = useState<string>(null);
     const [options, setOptions] = useState<Option[]>(null);
+    const [templateName, setTemplateName] = useState<string>(undefined);
 
     useEffect(() => {
 
@@ -51,27 +54,57 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
             onCancel();
             return;
         }
-        setRoom(prevState => ({
-            ...prevState,
-            name: selectedRoom
-        }));
+        let newName = selectedRoom;
+        let oldName;
+        if(templateName){
+            //return if new name doesn't have word template in it
+            if(!templateName.includes("template")){
+                onCancel();
+                return;
+            }
+            oldName = selectedRoom;
+            newName = templateName;
+            // if template, save old name and new name together to parse later in submission
+            setTemplateRename(true);
+            setRoom(prevState => ({
+                ...prevState,
+                name: JSON.stringify([oldName, newName])
+            }));
+        }else{
+            setRoom(prevState => ({
+                ...prevState,
+                name: selectedRoom
+            }));
+        }
         onConfirm();
-        onCancel();
     }
 
     return (
         <div className="popup-overlay">
             <div className="popup">
-
-                <Select
-                    options={options}
-                    placeholder={"Select a room"}
-                    onChange={(option) => setSelectedRoom(option.label)}
-                />
+                <div className={"popup-row"}>
+                    <Select
+                        options={options}
+                        placeholder={"Select a room"}
+                        onChange={(option) => setSelectedRoom(option.label)}
+                    />
+                </div>
+                {(template && !templateLoad) &&
+                    <div className={"popup-row"}>
+                        <label>
+                            Rename template? (Please include the word "template" in new name)
+                        </label>
+                        <input
+                            value={templateName}
+                            onChange={(e) => setTemplateName(e.target.value)}
+                        />
+                    </div>
+                }
                 <div className="popup-buttons">
                     <button onClick={handleSaveRoom}>Confirm</button>
                     <button onClick={onCancel}>Cancel</button>
                 </div>
+
             </div>
         </div>
     );

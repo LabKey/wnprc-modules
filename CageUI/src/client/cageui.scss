@@ -143,19 +143,6 @@
   pointer-events: none;
 }
 
-.popup-overlay {
-  display: block; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 2; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
 /*
 .popup-content {
   background-color: lightgrey;
@@ -293,6 +280,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
+  padding-top: 100px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 }
 
 .popup {
@@ -300,6 +292,23 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+}
+
+.popup-row {
+margin-bottom: 10px;
+}
+
+.popup-row input {
+  width: 100%; /* Make the input field take full width */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Ensures padding is included in the width */
+}
+
+.popup-row label {
+  display: block;  /* Make the label block-level so it appears above the input */
+  margin-bottom: 5px; /* Space between label and input */
 }
 
 .popup-buttons {

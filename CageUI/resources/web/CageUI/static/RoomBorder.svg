@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="border_template" xmlns="http://www.w3.org/2000/svg" width="1290" height="810" viewBox="0 0 1290 810">
-    <svg id="border-door" x="1" y="380" width="50" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid meet">
-        <g id="border-door-group">
-            <path d="M-.75,0.49h50.01v50.02H-.75V0.49Z" style="fill:none; stroke-width:0px;"/>
-            <path d="M-.75,50.51v-3.13h7.81v-46.89h34.38v46.89h7.81v3.13H-.75ZM38.32,3.62H10.19v43.77h28.13V3.62ZM33.63,20.81v12.5h-3.13v-12.5h3.13Z"
-                  style="fill:#010101; stroke-width:0px;"/>
-        </g>
-    </svg>
     <rect id="resize-handle" x="1275.25" y="795.49" width="15" height="15.01"
           style="fill:none; stroke:#231f20; stroke-miterlimit:10;" class="resize-handle"/>
     <rect id="border-rect" x=".5" y=".5" width="1289" height="809"

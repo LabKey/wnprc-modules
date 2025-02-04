@@ -10,7 +10,7 @@ import {
     Cage,
     CageActionProps,
     CageNumber,
-    DeleteActions, DoorResizeProps,
+    DeleteActions,
     LayoutDragProps, LayoutSaveResult,
     PendingRoomUpdate,
     Rack, RackStringType,
@@ -79,6 +79,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showRoomSelectorTemplateLoad, setShowRoomSelectorTemplateLoad] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
+    const [templateRename, setTemplateRename] = useState<boolean>(false);
 
     const {
         localRoom,
@@ -100,6 +101,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         changeRack,
         clearGrid
     } = useLayoutContext();
+
+    // Create a zoom behavior, prevent scale from changing
+    const zoom = d3.zoom()
+        .scaleExtent([roomSize?.scale || 1, roomSize?.scale || 1])
+        .on("zoom", handleZoom);
 
     const dragInLayout = d3.drag().on('start', createStartDragInLayout({setSelectedObj: setSelectedObj}))
         .on('drag', createDragInLayout())
@@ -417,10 +423,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         layoutSvg.call(zoom.transform, newTransform);
     }
 
-    // Create a zoom behavior, prevent scale from changing
-    const zoom = d3.zoom()
-        .scaleExtent([roomSize?.scale || 1, roomSize?.scale || 1])
-        .on("zoom", handleZoom);
+
 
     // Function to handle zoom for grid, zoom also handles infinite grid generation and drag
     function handleZoom(event) {
@@ -484,7 +487,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         if(!borderSetup) return;
         const borderGroup:  d3.Selection<SVGGElement, {}, HTMLElement, any> = d3.select('#layout-border') as  d3.Selection<SVGGElement, {}, HTMLElement, any>;
         const borderRect = d3.select('#border-rect');
-        const doorSvg = d3.select('#border-door');
 
         if(!localRoom.layoutData){
             setLocalRoom(prevState => ({
@@ -496,18 +498,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 }
             }));
         }else{
-            //update border width and height, maintaining aspect ratio between door and rectangle
-            const doorStartWidth = parseFloat(doorSvg.attr('width'));
-            const doorStartHeight = parseFloat(doorSvg.attr('height'));
-            const newDoorDims: DoorResizeProps = {
-                startX: parseFloat(doorSvg.attr('x')),
-                startY: parseFloat(doorSvg.attr('y')),
-                startWidth: doorStartWidth,
-                startHeight: doorStartHeight,
-                scaleX: localRoom.layoutData.borderWidth / parseFloat(borderRect.attr('width')),
-                scaleY: localRoom.layoutData.borderHeight / parseFloat(borderRect.attr('height'))
-            }
-            updateBorderSize(borderGroup, newDoorDims, localRoom.layoutData.borderWidth, localRoom.layoutData.borderHeight);
+            //update border width and height
+
+            updateBorderSize(borderGroup, localRoom.layoutData.borderWidth, localRoom.layoutData.borderHeight);
         }
         // Attach x and y data to border group and drag call for resizing
         placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
@@ -516,7 +509,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         // Set zoom after border is loaded in
         zoomToScale(roomSize.scale);
 
-        if(localRoom.name !== 'new-layout'){
+        if(localRoom.rackGroups.length > 0 || localRoom.objects.length > 0){
             addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setShowContextMenu);
         }
 
@@ -665,7 +658,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }
 
     const handleSave = async () => {
-        const result = await saveRoom();
+        const result = await saveRoom(templateRename);
         setShowSaveResult(result);
     }
 
@@ -690,6 +683,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 ...prevRoom,
                 name: room.name
             }));
+        }
+        if(templateRename){
+            setTemplateRename(false);
+        }
+        if(templateOptions){
+            setTemplateOptions(false);
         }
     }
 
@@ -716,6 +715,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         <RoomItemTemplate
                             type={RoomObjectTypesStrings[RoomObjectTypes.RoomDivider]}
                             fileName={"RoomDivider"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
+                    <LayoutTooltip text={"Room Gate"}>
+                        <RoomItemTemplate
+                            type={RoomObjectTypesStrings[RoomObjectTypes.RoomDivider]}
+                            fileName={"GateClosed"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
@@ -801,7 +807,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             </div>
             {showSaveConfirm &&
                 <ConfirmationPopup
-                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
+                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${templateRename ? JSON.parse(localRoom.name)[1] : localRoom.name}</strong> ?`}
                     onConfirm={handleSave}
                     onCancel={handleCancelConfirm}
                     onClose={() => setShowSaveConfirm(false)}
@@ -811,16 +817,18 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <RoomSelectorPopup
                     setRoom={setLocalRoom}
                     template={templateOptions}
-                    onConfirm={() => setShowSaveConfirm(true)}
-                    onCancel={() => setShowRoomSelector(false)}
+                    setTemplateRename={setTemplateRename}
+                    onConfirm={() => {setShowRoomSelector(false);setShowSaveConfirm(true);}}
+                    onCancel={() => {setTemplateOptions(false);setShowRoomSelector(false);}}
                 />
             }
             {showRoomSelectorTemplateLoad &&
                 <RoomSelectorPopup
                         setRoom={setLocalRoom}
                         template={templateOptions}
+                        templateLoad={true}
                         onConfirm={() => setLoadTemplate(true)}
-                        onCancel={() => setShowRoomSelectorTemplateLoad(false)}
+                        onCancel={() => {setShowRoomSelectorTemplateLoad(false); setTemplateOptions(false);}}
                 />
             }
             {showSaveResult &&

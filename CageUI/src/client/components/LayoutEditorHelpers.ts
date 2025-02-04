@@ -14,7 +14,6 @@ import {
     CageActionProps,
     CageNumber,
     DefaultRackTypes,
-    DoorResizeProps,
     UnitType,
     GroupId,
     LayoutDragProps,
@@ -538,6 +537,7 @@ export const getTargetRect =(x, y, gridSize, transform) => {
     // Calculate the column and row index based on the adjusted grid size
     const col = Math.floor(adjustedX / gridSize);
     const row = Math.floor(adjustedY / gridSize);
+    console.log("COL: ", col, row);
     // Return the top-left corner coordinates of the rectangle
     return {
         x: col * gridSize,
@@ -553,6 +553,7 @@ export function createStartDragInLayout(startDragProps: StartDragProps) {
             setSelectedObj(d3.select(this).attr('id'));
             console.log('Drag Layout #1', parseRack(d3.select(this).attr('id')));
             d3.select(this).raise().classed('active', true);
+
         }
     );
 }
@@ -565,11 +566,8 @@ export function createDragInLayout() {
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
             const scale = transform.k;
-            const {x,y} = getLayoutOffset({
-                clientX: event.sourceEvent.clientX,
-                clientY: event.sourceEvent.clientY,
-                layoutSvg: layoutSvg})
-            element.attr('transform', `translate(${x},${y}) scale(${scale})`);
+
+            element.attr('transform', `translate(${event.x},${event.y}) scale(${scale})`);
         }
     )
 }
@@ -586,14 +584,13 @@ export function createEndDragInLayout(props: LayoutDragProps) {
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
 
             const transform = d3.zoomTransform(layoutSvg.node());
-
+            const [pointerX,pointerY] = d3.pointer(event, layoutSvg.node()); // mouse position with respect to layout svg
             const {x,y} = getLayoutOffset({
-                clientX: event.sourceEvent.clientX,
-                clientY: event.sourceEvent.clientY,
+                clientX: pointerX,
+                clientY: pointerY,
                 layoutSvg: layoutSvg});
 
-            const targetCell = getTargetRect(x, y, gridSize, transform);
-
+            const targetCell = getTargetRect(pointerX, pointerY, gridSize, transform);
             if (targetCell) {
                 console.log('Drag Layout #3', shape, targetCell);
                 const cellX = targetCell.x;
@@ -940,10 +937,9 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
 
 }
 // END FUNCTIONS FOR LOADING IN PREVIOUS DATA
-export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, doorDims: DoorResizeProps, newWidth: number, newHeight: number ){
+export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, newWidth: number, newHeight: number ){
     const currentRect = d3.select('#border-rect');
     const resizeHandler = borderGroup.selectAll('#resize-handle');
-    const doorGroup = borderGroup.selectAll('#border-door');
 
     function updateSvgBounds(newSvgWidth: number, newSvgHeight: number, svgId: string) {
         // Calculate new dimensions if necessary
@@ -963,12 +959,6 @@ export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTML
     resizeHandler.attr("x", newWidth - 15)
         .attr("y", newHeight - 15);
 
-    doorGroup.attr('x', doorDims.startX * doorDims.scaleX)
-        .attr('y', doorDims.startY * doorDims.scaleY);
-
-    doorGroup.attr('width', doorDims.startWidth * doorDims.scaleX)
-        .attr('height', doorDims.startHeight * doorDims.scaleY);
-
     updateSvgBounds(newWidth, newHeight, 'border_template');
     updateSvgBounds(newWidth, newHeight, 'border_template_wrapper');
 }
@@ -978,17 +968,12 @@ const createStartResizeDrag = () => {
         function startResizeDrag(event) {
             event.sourceEvent.stopPropagation();
             const borderRect = d3.select('#border-rect');
-            const doorSvg = d3.select('#border-door');
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
 
 
             this.startWidth = parseFloat(borderRect.attr('width'));
             this.startHeight =  parseFloat(borderRect.attr('height'));
 
-            this.doorStartX = parseFloat(doorSvg.attr('x'));
-            this.doorStartY = parseFloat(doorSvg.attr('y'));
-            this.doorStartWidth = parseFloat(doorSvg.attr('width'));
-            this.doorStartHeight = parseFloat(doorSvg.attr('height'));
             // start x and y with respect to the layout svg
             const [x, y] = d3.pointer(event.sourceEvent, layoutSvg.node());
             this.startX = x;
@@ -1002,10 +987,6 @@ const createStartResizeDrag = () => {
 const createDragResizeDrag = (gridSize: number, borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
     return(
         function dragResizeDrag(event) {
-            const currentRect = d3.select('#border-rect');
-            const resizeHandler = borderGroup.selectAll('#resize-handle');
-            const doorGroup = borderGroup.selectAll('#border-door');
-
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
 
             // get x and y in relation to the layout svg
@@ -1019,19 +1000,8 @@ const createDragResizeDrag = (gridSize: number, borderGroup: d3.Selection<SVGGEl
             const newLockedWidth: number = this.startWidth + (dx * gridSize);
             const newLockedHeight: number = this.startHeight + (dy * gridSize);
 
-            const scaleX = newLockedWidth / this.startWidth;
-            const scaleY = newLockedHeight / this.startHeight;
 
-            const doorDims: DoorResizeProps = {
-                startX: this.doorStartX,
-                startY: this.doorStartY,
-                startWidth: this.doorStartWidth,
-                startHeight: this.doorStartHeight,
-                scaleX: scaleX,
-                scaleY: scaleY
-            }
-
-            updateBorderSize(borderGroup, doorDims, newLockedWidth, newLockedHeight)
+            updateBorderSize(borderGroup, newLockedWidth, newLockedHeight)
 
         }
     );

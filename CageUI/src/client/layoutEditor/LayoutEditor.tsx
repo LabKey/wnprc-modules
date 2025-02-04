@@ -6,7 +6,16 @@ import { RoomDisplay } from '../components/RoomDisplay';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../cageui.scss';
 import {Filter} from '@labkey/api';
-import { Cage, GroupId, LayoutData, PrevRoom, Rack, Room, UnitLocations } from '../components/typings';
+import {
+    Cage,
+    GroupId,
+    LayoutData,
+    LayoutHistoryData,
+    PrevRoom,
+    Rack,
+    Room,
+    UnitLocations
+} from '../components/typings';
 import { RoomToolbar } from '../components/RoomToolbar';
 import {LayoutContextProvider } from '../components/ContextManager';
 import DragAndDropGrid from '../components/Editor';
@@ -30,7 +39,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
     //const {room} = props;
     const roomName = ActionURL.getParameter("room");
     const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null});
-    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: PrevRoom}>(null);
+    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: LayoutHistoryData[]}>(null);
     const [selectedSize, setSelectedSize] = useState<SelectorOptions>(null);
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
@@ -68,7 +77,8 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
             filterArray: [
                 Filter.create('room', roomName, Filter.Types.EQUALS),
                 Filter.create('end_date', null, Filter.Types.ISBLANK)
-            ]
+            ],
+            sort: "-rack_group",
         }
 
         const prevRoomBorderConfig: SelectRowsOptions = {
@@ -96,7 +106,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                 setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
                 setShowSelectionPopup(false);
             }
-            console.log("Prev ROom", prevRoomResult.rows);
+            console.log("Prev ROom", prevRoomResult.rows, borderResult.rows);
             setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
         }).catch(err => {
             setErrorPopup(err.toString());
@@ -115,6 +125,11 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                     if(d){
                         newLocalRoom = d;
                         newLocalRoom = {
+                            ...d,
+                            name: d.name.includes("template") ? 'new-layout' : d.name
+                        }
+
+                        newLocalRoom = {
                             ...newLocalRoom,
                             layoutData: {
                                 scale: prevRoomData.layoutData.scale,
@@ -122,7 +137,8 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                                 borderHeight: prevRoomData.layoutData.borderHeight
                             }
                         }
-                        setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData});
+                        console.log(newLocalRoom);
+                        setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData});
                         setIsLoading(false);
                     }
                 });
@@ -137,7 +153,8 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                         borderHeight: prevRoomData.layoutData.borderHeight
                     }
                 }
-                setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData});
+                console.log(newLocalRoom);
+                setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData.cagingData});
                 setIsLoading(false);
             }
         }

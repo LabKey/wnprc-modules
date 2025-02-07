@@ -101,6 +101,7 @@ public class AnimalRequestUpdateNotificationRevamp extends AbstractEHRNotificati
     @Override
     public String getMessageBodyHTML(Container c, User u)
     {
+        Boolean hasData = true;
         // Assigns data if none exists.  This is used for testing with the 'Run Report in Browser' option.  This compares the two most recent rows.
         if ((this.newRow == null) || (this.oldRow == null)) {
             // Creates filters.  For testing, we retrieve the most recent entry for 1 animal, and the most recent entry for 2 animals.
@@ -127,59 +128,69 @@ public class AnimalRequestUpdateNotificationRevamp extends AbstractEHRNotificati
                     put("numberOfAnimals", returnArray2.get(0).get("numberofanimals"));
                 }};
             }
-        }
-
-        //Creates 'single request' URL.
-        Path singleRequestURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
-        String singleRequestUrlAsString = singleRequestURL.toString() + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + this.rowID;
-        //Creates 'all requests' URL.
-        Path allRequestsURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
-        String allRequestsUrlAsString = allRequestsURL.toString() + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
-
-        // Creates variables.
-        final StringBuilder msg = new StringBuilder();
-        String updaterName = "";
-        // Gets the name of the user updating this Animal Request.
-        if (u != null) {
-            if (!u.getFullName().isEmpty()) {
-                updaterName = u.getFullName();
-            }
-            else if (!u.getDisplayName(u).isEmpty()) {
-                updaterName = u.getDisplayName(u);
+            else {
+                hasData = false;
             }
         }
-        // Gets the row differences.
-        TableInfo rowDifferencesTable = QueryService.get().getUserSchema(u, c, "wnprc").getTable("animal_requests");
-        Map<String, ArrayList<String>> rowDifferences = TriggerScriptHelper.buildDifferencesMap(rowDifferencesTable, this.oldRow, this.newRow);
-        // Gets the table.
-        String[] myTableColumns = new String[]{"Field Changed", "Old Value", "New Value"};
-        List<String[]> myTableData = new ArrayList<>();
-        for (Map.Entry<String, ArrayList<String>> change : rowDifferences.entrySet()) {
-            String[] newTableRow = new String[] {
-                    change.getKey(),
-                    change.getValue().get(0),
-                    change.getValue().get(1)
-            };
-            myTableData.add(newTableRow);
+
+        if (hasData) {
+            //Creates 'single request' URL.
+            Path singleRequestURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
+            String singleRequestUrlAsString = singleRequestURL.toString() + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + this.rowID;
+            //Creates 'all requests' URL.
+            Path allRequestsURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
+            String allRequestsUrlAsString = allRequestsURL.toString() + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
+
+            // Creates variables.
+            final StringBuilder msg = new StringBuilder();
+            String updaterName = "";
+            // Gets the name of the user updating this Animal Request.
+            if (u != null) {
+                if (!u.getFullName().isEmpty()) {
+                    updaterName = u.getFullName();
+                }
+                else if (!u.getDisplayName(u).isEmpty()) {
+                    updaterName = u.getDisplayName(u);
+                }
+            }
+            // Gets the row differences.
+            TableInfo rowDifferencesTable = QueryService.get().getUserSchema(u, c, "wnprc").getTable("animal_requests");
+            Map<String, ArrayList<String>> rowDifferences = TriggerScriptHelper.buildDifferencesMap(rowDifferencesTable, this.oldRow, this.newRow);
+            // Gets the table.
+            String[] myTableColumns = new String[]{"Field Changed", "Old Value", "New Value"};
+            List<String[]> myTableData = new ArrayList<>();
+            for (Map.Entry<String, ArrayList<String>> change : rowDifferences.entrySet()) {
+                String[] newTableRow = new String[] {
+                        change.getKey(),
+                        change.getValue().get(0),
+                        change.getValue().get(1)
+                };
+                myTableData.add(newTableRow);
+            }
+            NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, (ArrayList<String[]>) myTableData);
+
+            // Creates CSS.
+            msg.append(styleToolkit.beginStyle());
+            msg.append(styleToolkit.setBasicTableStyle());
+            msg.append(styleToolkit.setHeaderRowBackgroundColor("#d9d9d9"));
+            msg.append(styleToolkit.endStyle());
+
+            // Begins message info.
+            msg.append("<p>" + updaterName + " updated an animal request entry on: " + dateToolkit.getDateXDaysFromNow(0) + ".</p>");
+            msg.append("<p> The following changes were made: <br><br>");
+            msg.append(myTable.createBasicHTMLTable());
+            msg.append("<p>Click " + notificationToolkit.createHyperlink("here", singleRequestUrlAsString) + " to review the request.</p>");
+            msg.append("<p>View all of the animal requests " + notificationToolkit.createHyperlink("here", allRequestsUrlAsString) + ".</p>");
+
+            //Returns string.
+            this.resetClass();
+            return msg.toString();
         }
-        NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(myTableColumns, (ArrayList<String[]>) myTableData);
-
-        // Creates CSS.
-        msg.append(styleToolkit.beginStyle());
-        msg.append(styleToolkit.setBasicTableStyle());
-        msg.append(styleToolkit.setHeaderRowBackgroundColor("#d9d9d9"));
-        msg.append(styleToolkit.endStyle());
-
-        // Begins message info.
-        msg.append("<p>" + updaterName + " updated an animal request entry on: " + dateToolkit.getDateXDaysFromNow(0) + ".</p>");
-        msg.append("<p> The following changes were made: <br><br>");
-        msg.append(myTable.createBasicHTMLTable());
-        msg.append("<p>Click " + notificationToolkit.createHyperlink("here", singleRequestUrlAsString) + " to review the request.</p>");
-        msg.append("<p>View all of the animal requests " + notificationToolkit.createHyperlink("here", allRequestsUrlAsString) + ".</p>");
-
-        //Returns string.
-        this.resetClass();
-        return msg.toString();
+        else {
+            //Returns nothing if there is no data.
+            this.resetClass();
+            return null;
+        }
     }
 
     public void resetClass() {

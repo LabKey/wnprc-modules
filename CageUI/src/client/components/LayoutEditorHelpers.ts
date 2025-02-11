@@ -592,7 +592,6 @@ export function createStartDragInLayout(startDragProps: StartDragProps) {
                 }
             }
 
-            console.log('Drag Layout #1', parseRack(d3.select(this).attr('id')));
             d3.select(this).raise().classed('active', true);
 
         }

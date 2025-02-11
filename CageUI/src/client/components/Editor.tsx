@@ -128,9 +128,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         .scaleExtent([roomSize?.scale || 1, roomSize?.scale || 1])
         .on("zoom", handleZoom);
 
-    const dragInLayout = d3.drag().on('start', () => {
-        createStartDragInLayout({setSelectedObj: setSelectedObj, localRoomRef: contextMenuRef})
-        })
+    const dragInLayout = d3.drag().on('start',
+        createStartDragInLayout({setSelectedObj: setSelectedObj, localRoomRef: contextMenuRef}))
         .on('drag', createDragInLayout())
         .on('end', createEndDragInLayout({gridSize: CELL_SIZE, moveItem: moveObjLocation}));
 
@@ -153,7 +152,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         console.log("xxx Room: ", room);
         console.log("xxx LocalRoom: ", localRoom);
         console.log("xxx Locs: ", unitLocs);
-    }, [room, localRoom, unitLocs]);
+        console.log("xxx selected: ", selectedObj);
+    }, [room, localRoom, unitLocs,selectedObj]);
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {

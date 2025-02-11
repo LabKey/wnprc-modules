@@ -15,7 +15,7 @@ import {
     RoomItem, RoomItemClass,
     RoomItemStringType, RoomItemType,
     RoomObject,
-    RoomObjectTypes,
+    RoomObjectTypes, SelectedObj,
     UnitLocations, UnitType
 } from './typings';
 import {
@@ -32,17 +32,18 @@ import {
 } from './helpers';
 import * as d3 from 'd3';
 import {
-    addPrevRoomSvgs,
-    buildNewLocalRoom, buildNewLocs, createEmptyUnitLoc, defaultTypeToRackType, findCageInGroup,
-    findNextGroupId,
+    createEmptyUnitLoc,
+    defaultTypeToRackType,
+    findCageInGroup,
     findRackInGroup,
     findSelectObjRack,
-    isRack, isRackDefault, isRackEnum, rackTypeToDefaultType,
+    isRackDefault,
+    isRackEnum,
+    rackTypeToDefaultType
 } from './LayoutEditorHelpers';
-import { Filter, Query } from '@labkey/api';
-import { ExtendedXMLHttpRequest } from '@labkey/api/dist/labkey/Utils';
-import { RequestOptions } from '@labkey/api/dist/labkey/Ajax';
-import { Command, CommandType, QueryRequestOptions } from '@labkey/api/dist/labkey/query/Rows';
+import { Filter } from '@labkey/api';
+
+import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 interface LayoutContextProps {
@@ -89,18 +90,18 @@ export interface LayoutContextType {
     localRoom: Room;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
     addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => void;
-    delRack: (rackId: string) => void;
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
     doRackAction: (action: RackActions, targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     getNextCageNum: (rackType: RackStringType) => number;
-    selectedObj: string;
-    setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
+    selectedObj: SelectedObj;
+    setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
     delCage: (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => void;
+    delObject: (objId: string) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
-    changeRack: (newType: {value: string, label: number}) => void;
+    changeRack: (newType: {value: string, label: string}) => void;
     clearGrid: () => void;
 }
 
@@ -252,7 +253,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     const [isLoading, setIsLoading] = useState<boolean>(prevRoom ? true : false);
 
     // the id of the clicked on svg group for either dragging or context menu opening.
-    const [selectedObj, setSelectedObj] = useState<string | null>(null);
+    const [selectedObj, setSelectedObj] = useState<SelectedObj | null>(null);
 
     // instead of tying scale to each location, manage one scale for the whole layout
     const [scale, setScale] = useState<number>(1);
@@ -293,6 +294,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
         const newCageNum: CageNumber = `${RackTypesStrings[rackType]}-${getNextCageNum(RackTypesStrings[rackType])}`;
         const firstCage: Cage = {
+            selectionType: 'cage',
             id: 1,
             cageNum: newCageNum,
             x: 0,
@@ -327,6 +329,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         };
 
         const newRack: Rack = {
+            selectionType: 'rack',
             cages: [firstCage],
             itemId: id,
             isActive: false, // Default racks are not active by default (since they technically don't exist)
@@ -336,6 +339,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         };
 
         const newRackGroup: RackGroup = {
+            selectionType: 'rackGroup',
             groupId: nextAvailGroup,
             racks: [newRack],
             x: x,
@@ -352,7 +356,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             rackGroups: [...prevRoom.rackGroups, newRackGroup]
         }));
 
-        console.log("adding: ", rackType);
         setUnitLocs(prevState => ({
             ...prevState,
             [RackTypesStrings[rackType]]: [...prevState[RackTypesStrings[rackType]], newCageLoc] // Append the new location to the correct array
@@ -363,7 +366,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
 
     const mergeLocalRacks = (targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
-        console.log("context merge: ", newGroup, targetId, dragId);
 
         setLocalRoom(prevRoom => {
 
@@ -396,6 +398,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             // Create new merged rack
             const mergedRack: Rack = {
                 itemId: targetRack.itemId, // Use the larger ID for the merged rack
+                selectionType: 'rack',
                 type: targetRack.type,
                 cages: updatedCages,
                 x: targetRack.x,
@@ -405,6 +408,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
 
             const mergedRackGroup: RackGroup = {
                 groupId: targetGroup.groupId,
+                selectionType: 'rackGroup',
                 x: targetGroup.x,
                 y: targetGroup.y,
                 scale: targetGroup.scale,
@@ -480,11 +484,13 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         fixGroupIds();
     }
 
+    // Adds item to the local room. return the new room for listeners.
     const addRoomItem = (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
         if(isRackEnum(itemType)){
             addRack(itemId, x, y, scale, itemType as RackTypes);
         }else{
             const newRoomObj: RoomObject = {
+                selectionType: 'obj',
                 itemId: itemId,
                 type: itemType as RoomObjectTypes,
                 x: x,
@@ -605,16 +611,16 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         });
     };
 
-    const delRack = (rackId: string) => {
-        /*setLocalRoom(prevRoom =>  ({
+    const delObject = (objectId: string) => {
+        setLocalRoom(prevRoom =>  ({
             ...prevRoom,
-            racks: prevRoom.racks.filter(roomItem => {
-                return roomItem.itemId !== rackId;
+            objects: prevRoom.objects.filter(obj => {
+                return obj.itemId !== objectId;
             })
-        }));*/
+        }));
     }
 
-    //
+
     const delCage = (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => {
         console.log("deleting: ", selectedObj);
 
@@ -658,8 +664,10 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         }));
     }
 
-    const changeRack = async (newType: {value: string, label: number}) => {
-        const {value: rackType, label: rackId} = newType;
+    const changeRack = async (newType: {value: string, label: string}) => {
+        let {value: oldRackType, label: oldRackId} = newType;
+        const rackId = parseInt(oldRackId);
+        const rackType = oldRackType.split(' - ')[1];
 
         const optConfig: SelectRowsOptions = {
             schemaName: "cageui",
@@ -677,7 +685,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                 newRackType.type = defaultTypeToRackType[newRackType.type];
             }
             setLocalRoom(prevRoom => {
-                const {rackGroup, rack, cage} = findCageInGroup(selectedObj as CageNumber, prevRoom.rackGroups);
+                const {rackGroup, rack, cage} = findCageInGroup((selectedObj as Cage).cageNum as CageNumber, prevRoom.rackGroups);
                 const roomToUpdate: Room = {
                     ...prevRoom,
                     rackGroups: prevRoom.rackGroups.map(group =>
@@ -707,7 +715,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
     }
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
-        const objType = parseRoomItemType(selectedObj);
+        const selectedCage = (selectedObj as Cage).cageNum;
+        const objType = parseRoomItemType(selectedCage);
 
         if(unitLocs[objType].find(prevLoc => parseRoomItemNum(prevLoc.num) === numAfter)){
             console.log("Please add a different cage num that doesnt exist in the current room");
@@ -721,7 +730,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             let currRack: Rack;
             prevRoom.rackGroups.forEach(group => {
                 if(currRack) return;
-                currRack = findSelectObjRack(group.racks, selectedObj)
+                currRack = findSelectObjRack(group.racks, selectedCage)
             });
 
             if (!currRack) return prevRoom; // If the clicked rack is not found, return the previous state
@@ -732,11 +741,11 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                 rackGroups: prevRoom.rackGroups.map((group: RackGroup): RackGroup => ({
                     ...group,
                     racks: group.racks.map((rack: Rack): Rack =>
-                        rack.cages.some((cage: Cage) => cage.cageNum === selectedObj) // Check if any cage matches selectedObj
+                        rack.cages.some((cage: Cage) => cage.cageNum === selectedCage) // Check if any cage matches selectedObj
                             ? {
                                 ...rack,
                                 cages: rack.cages.map((cage: Cage): Cage =>
-                                    cage.cageNum === selectedObj // Only update the cage with matching cageNum
+                                    cage.cageNum === selectedCage // Only update the cage with matching cageNum
                                         ? { ...cage, cageNum: `${RackTypesStrings[rack.type.type]}-${numAfter}` } as Cage
                                         : cage
                                 )
@@ -825,7 +834,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         let templateHistory: LayoutHistoryData[];
 
         //check if template already had layout in history and needs to be updated
-        if(prevRoom.room.name !== roomName){
+        if(prevRoom && prevRoom.room.name !== roomName){
             const prevRoomConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'layout_history',
@@ -852,6 +861,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                     const newCageData: LayoutHistoryData = {
                         cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
                         end_date: null,
+                        extra_context: cage.extraContext ? JSON.stringify(cage.extraContext) : null,
                         rack: newRackId,
                         object_type: rack.type.isDefault ? rackTypeToDefaultType[rack.type.type] : rack.type.type,
                         rack_group: groupId,
@@ -872,6 +882,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
                 rack: null,
                 object_type: roomObj.type,
                 rack_group: null,
+                extra_context: roomObj.extraContext ? JSON.stringify(roomObj.extraContext) : null, // TODO add gate context here
                 room: roomName,
                 start_date: newStartDate,
                 x_coord: roomObj.x,
@@ -881,7 +892,7 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
         });
 
         // get data for updating layout history end dates
-        if(prevRoom.data.length !== 0){
+        if(prevRoom && prevRoom.data.length !== 0){
             rowsToUpdate = prevRoom.data.reduce((acc, row) => {
                 return [
                     ...acc,
@@ -975,7 +986,6 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             setLocalRoom,
             saveRoom,
             addRoomItem,
-            delRack,
             unitLocs,
             changeCageNum,
             cageNumChange,
@@ -988,7 +998,8 @@ export const LayoutContextProvider: FC<LayoutContextProps> = ({children, prevRoo
             scale,
             setScale,
             changeRack,
-            clearGrid
+            clearGrid,
+            delObject,
         }}>
             {!isLoading ? children : null}
         </LayoutContext.Provider>

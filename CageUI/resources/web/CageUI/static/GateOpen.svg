@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 421.05 400">
+<svg id="gate_open" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 421.05 400">
     <path d="M31.58,184.21l63.16,5.26v-94.74L31.58,31.58v152.63ZM94.74,210.53l-63.16,5.26v152.63l63.16-63.16v-94.74ZM326.32,189.47l63.16-5.26V31.58l-63.16,63.16v94.74ZM389.47,215.79l-63.16-5.26v94.74l63.16,63.16v-152.63ZM421.05,0v400h-31.58l-63.16-63.16H94.74l-63.16,63.16H0V0h31.58l63.16,63.16h231.58L389.47,0h31.58ZM294.74,94.74H126.32v210.53h168.42V94.74Z"
           style="fill:#000; stroke-width:0px;"/>
 </svg>

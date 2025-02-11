@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import * as React from 'react';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
+import { MutableRefObject } from 'react';
 
 type CageSize = {
     width: number;
@@ -30,6 +31,10 @@ export type RoomItemClass = 'caging' | 'roomObj';
 // deletion actions for state management, cage = delete cage from rack, rack = delete rack from rack group, group = delete entire rack group
 export type DeleteActions = 'cage' | 'rack' | 'group';
 
+//client side to determine which object is currently selected
+export type SelectedObj = RoomItem | RackGroup | Cage;
+export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
+
 export interface LayoutSaveResult {
     status: string;
     reason?: any;
@@ -37,6 +42,7 @@ export interface LayoutSaveResult {
 
 export interface LayoutHistoryData {
     object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extra_context: string | null;
     rack_group: number | null;
     rack: number | null;
     cage: string | null;
@@ -75,7 +81,7 @@ export interface PendingRoomUpdate {
 }
 
 export interface CageActionProps {
-    setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
     setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>;
 }
 
@@ -84,15 +90,29 @@ export interface LayoutDragProps {
     moveItem: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
 }
 
+export interface MergeProps {
+    contextMenuRef: MutableRefObject<Room>;
+    targetRack: Rack;
+    draggedRack: Rack;
+    targetRackGroup: RackGroup;
+    dragRackGroup: RackGroup;
+    doRackAction: (action: RackActions, targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
+    layoutDrag: d3.DragBehavior<any, any, any>;
+    cageActionProps: CageActionProps;
+}
+
 export interface StartDragProps {
-    setSelectedObj: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
+    localRoomRef: MutableRefObject<Room>;
 }
 
 export interface Cage {
     id: number; // Id local to rack
+    selectionType: SelectionType;
     cageNum: CageNumber; // Id local to room
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
+    extraContext?: string; // extra context if needed for cage
 }
 
 export interface Room {
@@ -116,6 +136,7 @@ export interface PrevRoom {
 
 export interface RackGroup {
     racks: Rack[];
+    selectionType: SelectionType;
     groupId: GroupId;
     x: number; // x coords relative to group of connected racks
     y: number; // y coords relative to group of connected racks
@@ -124,6 +145,7 @@ export interface RackGroup {
 
 export interface Rack {
     itemId: string; // rack id
+    selectionType: SelectionType;
     type: UnitType;
     cages: Cage[];
     x: number; // x coordinate of rack relative to the rack group
@@ -131,12 +153,16 @@ export interface Rack {
     isActive: boolean; // Determines if rack is "in use or active" //TODO fix loading this in from prev data.
 }
 
+type GateContext = {room: string, roomId: number}; // extra context for Gate Object, describes target room
+
 export interface RoomObject {
     itemId: string; // object id
+    selectionType: SelectionType;
     type: RoomObjectTypes
     x: number;
     y: number;
     scale: number;
+    extraContext?: GateContext; // add any additional context def here
 }
 
 export interface UnitType {
@@ -191,13 +217,15 @@ export const RackTypesStrings: { [key in RackTypes]: string } = {
 export enum RoomObjectTypes {
     RoomDivider = 100,
     Drain = 101,
-    Door = 102
+    Door = 102,
+    Gate = 103,
 }
 
 export const RoomObjectTypesStrings: { [key in RoomObjectTypes]: string } = {
     [RoomObjectTypes.RoomDivider]: "roomDivider",
     [RoomObjectTypes.Drain]: "drain",
-    [RoomObjectTypes.Door]: "door"
+    [RoomObjectTypes.Door]: "door",
+    [RoomObjectTypes.Gate]: "gate",
 };
 
 export interface LocationCoords {

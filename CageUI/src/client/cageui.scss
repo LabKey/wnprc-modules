@@ -292,6 +292,7 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  z-index: 10001;
 }
 
 .popup-row {
@@ -848,7 +849,7 @@ ul {
   border-radius: 4px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 10px;
-  z-index: 1000;
+  z-index: 500;
   width: 200px; /* Set default width */
   height: 150px; /* Set default height */
   overflow: visible; /* Hide overflow during resizing */

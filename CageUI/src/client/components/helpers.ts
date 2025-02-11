@@ -118,7 +118,7 @@ export const parseRoomItemType = (input: string): string => {
     const regex = /^(\w+)-\d+$/; // matches "string-number"
 
     const match = input.match(regex);
-    if (match) { // if a match return the type
+    if (match) { // if a match return the type/string
         return match[1];
     }
     return;

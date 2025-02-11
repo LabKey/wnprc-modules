@@ -6,14 +6,14 @@ import { labkeyActionSelectWithPromise } from './helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 
-interface ChangeRackTypePopupProps {
-    onSubmit: (newType: {value: string, label: number}) => void;
+interface ChangeRackProps {
+    onSubmit: (newType: {value: string, label: string}) => void;
 }
 
-export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
+export const ChangeRack: FC<ChangeRackProps> = (props) => {
     const {onSubmit} = props;
 
-    const [options, setOptions] = useState<{value: string, label: number}[]>(null);
+    const [options, setOptions] = useState<{value: string, label: string}[]>(null);
 
     const handleChange = (newVal) => {
         onSubmit(newVal);
@@ -26,14 +26,15 @@ export const ChangeRackTypePopup: FC<ChangeRackTypePopupProps> = (props) => {
         }else{
             const optConfig: SelectRowsOptions = {
                 schemaName: "cageui",
-                queryName: "racks"
+                queryName: "racks",
+                columns: ['rackid', 'rack_type']
             }
             labkeyActionSelectWithPromise(optConfig).then(d => {
                 if(d.rows.length > 0){
                     const tmp = [];
 
                     for (const row of d.rows) {
-                        tmp.push({label: row.rackid, value: row.rack_type});
+                        tmp.push({label: `${row.rackid} - ${row.rack_type}`, value: `${row.rackid}`});
                     }
                     setOptions(tmp);
                 }

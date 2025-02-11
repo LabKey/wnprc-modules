@@ -73,7 +73,7 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
         const prevRoomConfig: SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'layout_history',
-            columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid'],
+            columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid', 'extra_context'],
             filterArray: [
                 Filter.create('room', roomName, Filter.Types.EQUALS),
                 Filter.create('end_date', null, Filter.Types.ISBLANK)
@@ -106,7 +106,6 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                 setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
                 setShowSelectionPopup(false);
             }
-            console.log("Prev ROom", prevRoomResult.rows, borderResult.rows);
             setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
         }).catch(err => {
             setErrorPopup(err.toString());
@@ -137,7 +136,6 @@ export const LayoutEditor: FC<RoomProps> = (props) => {
                                 borderHeight: prevRoomData.layoutData.borderHeight
                             }
                         }
-                        console.log(newLocalRoom);
                         setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData});
                         setIsLoading(false);
                     }

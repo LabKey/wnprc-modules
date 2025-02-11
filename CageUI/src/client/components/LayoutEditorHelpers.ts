@@ -35,11 +35,12 @@ import {
     RoomObjectTypes,
     RoomObjectTypesStrings,
     StartDragProps,
-    UnitLocations
+    UnitLocations, RoomItem, SelectedObj, MergeProps
 } from './typings';
 import * as React from 'react';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
+import { MutableRefObject, useRef } from 'react';
 
 export const createEmptyUnitLoc = (): UnitLocations => {
     return (
@@ -300,26 +301,42 @@ function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
 
 export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
-    setClickedCage: (cageId: string) => void,
-    setCtxMenuStyle:  React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
-    rackTypeString: RackStringType
+    setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
+    setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
+    rackTypeString: RackStringType | RoomObjectTypes,
+    localRoomRef: MutableRefObject<Room>
 ): () => void {
-    const handleContextMenu = function(this: SVGGElement, event: MouseEvent) {
+    const handleContextMenu = (event: MouseEvent)=> {
         event.preventDefault();
-        const cageGroupElement = this.closest(`[id^=${rackTypeString}-]`) as SVGGElement | null;
-        console.log("Open Menu: ", cageGroupElement)
+        const localRoom = localRoomRef.current;
+        let tempObj: SelectedObj;
+        const element = event.currentTarget as SVGGElement;
 
-        setClickedCage(cageGroupElement.id);
-
-        setCtxMenuStyle({
+        //set selected object to either room object or cage
+        if(d3.select(element).classed('room-obj')){
+            tempObj = localRoom.objects.find((obj) => obj.itemId === element.id);
+        }else{
+            const cageGroupElement = element.closest(`[id^=${rackTypeString}-]`) as SVGGElement | null;
+            localRoom.rackGroups.forEach((g) => {
+                g.racks.forEach((r) => {
+                    if(tempObj){
+                        return;
+                    }
+                    tempObj = r.cages.find(c => c.cageNum === cageGroupElement.id);
+                })
+            })
+        }
+        setSelectedObj(tempObj);
+        setCtxMenuStyle((prevState) => ({
+            ...prevState,
             display: 'block',
             left: `${event.pageX - 10}px`,
             top: `${event.pageY - 10}px`,
-        });
-    }
+        }));
+    };
 
-    // Attach context menu to the lowest level group for that cage.
-    d3.select(cageGroupElement).attr('style', 'pointer-events: bounding-box')
+    // Attach context menu to the lowest level group for that cFage.
+    cageGroupElement.style.pointerEvents = 'bounding-box';
     cageGroupElement.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
@@ -334,12 +351,20 @@ export function setupEditCageEvent(
     Even though cages can not be added/removed from racks in reality, for layout building purposes they can.
 
  */
-export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRackGroup: RackGroup, dragRackGroup: RackGroup, doRackAction, layoutDrag: d3.DragBehavior<any, any, any>, cageActionProps: CageActionProps) {
+export async function mergeRacks(props: MergeProps) {
+    const {
+        contextMenuRef,
+        targetRack,
+        draggedRack,
+        targetRackGroup,
+        dragRackGroup,
+        doRackAction,
+        layoutDrag,
+        cageActionProps
+    } = props;
     if(!d3.select('.popup').empty()) return;
     const action: RackActions = await showConfirmationPopup();
     const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
-
-    console.log("Performing Merge");
 
     function isConnected(selectionNode){
         return !!selectionNode.closest(`[id*='group']`);
@@ -351,7 +376,7 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             element.setAttribute('class',`grouped-${shapeType}`);
             element.setAttribute('style', "");
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType, contextMenuRef);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -410,8 +435,6 @@ export async function mergeRacks(targetRack: Rack, draggedRack: Rack, targetRack
             = layoutSvg.select(`[id^=${draggedRack.itemId}]`);
 
         let newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>;
-
-        console.log("Merge: ", targetRackShape.node(), draggedRackShape.node());
 
         // Clone the target and dragged shapes before using
         let clonedTargetShape = targetRackShape.node().cloneNode(true) as Element;
@@ -537,7 +560,6 @@ export const getTargetRect =(x, y, gridSize, transform) => {
     // Calculate the column and row index based on the adjusted grid size
     const col = Math.floor(adjustedX / gridSize);
     const row = Math.floor(adjustedY / gridSize);
-    console.log("COL: ", col, row);
     // Return the top-left corner coordinates of the rectangle
     return {
         x: col * gridSize,
@@ -549,8 +571,27 @@ export const getTargetRect =(x, y, gridSize, transform) => {
 export function createStartDragInLayout(startDragProps: StartDragProps) {
     return(
         function startDragInLayout(event) {
-            const {setSelectedObj} = startDragProps;
-            setSelectedObj(d3.select(this).attr('id'));
+            const {setSelectedObj, localRoomRef} = startDragProps;
+            const localRoom = localRoomRef.current;
+
+            const id = d3.select(this).attr('id');
+            let foundObj: SelectedObj = localRoom.objects.find(obj => obj.itemId === id);
+            if(foundObj){
+                setSelectedObj(foundObj);
+            }else{
+                localRoom.rackGroups.forEach((group) => {
+                    if(foundObj) return;
+                    if(group.groupId === id){
+                        foundObj = group;
+                        return;
+                    }
+                    foundObj = group.racks.find((rack) => rack.itemId === id)
+                })
+                if(foundObj){
+                    setSelectedObj(foundObj);
+                }
+            }
+
             console.log('Drag Layout #1', parseRack(d3.select(this).attr('id')));
             d3.select(this).raise().classed('active', true);
 
@@ -739,6 +780,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             //create new rack group if it doesn't exist
             rackGroup = {
                 groupId: `rack-group-${rackItem.rack_group}` as GroupId,
+                selectionType: 'rackGroup',
                 scale: prevRoom.layoutData.scale,
                 x: rackItem.x_coord,
                 y: rackItem.y_coord,
@@ -794,6 +836,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             };
 
             rack = {
+                selectionType: 'rack',
                 cages: [],
                 isActive: !isDefault,
                 itemId: `${rackPrefix}-${rackItem.rack}`,
@@ -814,9 +857,10 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         }else{
             cageNumType = RackTypesStrings[rackItem.object_type];
         }
-        console.log("cageNum: ", cageNumType);
         const cage: Cage = {
             cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber,
+            extraContext: rackItem.extra_context ? JSON.parse(rackItem.extra_context) : null,
+            selectionType: 'cage',
             id: rack.cages.length + 1, // TODO this might not work depending on order of cages in array, fix this
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y
@@ -832,12 +876,18 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
     // generates room object state for room objects from layout history data
     const generateRoomObj = (roomObjItem: LayoutHistoryData): RoomObject => {
+        let context;
+        if(roomObjItem.extra_context){
+            context = JSON.parse(roomObjItem.extra_context);
+        }
         return({
             itemId: `${RoomObjectTypesStrings[roomObjItem.object_type]}-${roomObjNum++}`, // update room obj num after it is used to next num
             type: roomObjItem.object_type as RoomObjectTypes,
+            selectionType: 'obj',
             x: roomObjItem.x_coord,
             y: roomObjItem.y_coord,
-            scale: prevRoom.layoutData.scale
+            scale: prevRoom.layoutData.scale,
+            extraContext: context
         });
     }
 
@@ -851,7 +901,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
     return(newLocalRoom);
 }
 
-export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag,setSelectedObj,setShowCtxMenu) => {
+export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag,setSelectedObj,setCtxMenuStyle, contextMenuRef: MutableRefObject<Room>) => {
     /*
     TODO attach context menus
      */
@@ -876,8 +926,8 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             shape.classed('draggable', false);
             shape.style('pointer-events', 'none');
 
-            const cageGroupContext = shape.node().closest((`[id*=${rackTypeString}]`)) as SVGGElement;
-            setupEditCageEvent(cageGroupContext, setSelectedObj, setShowCtxMenu, rackTypeString);
+            const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
+            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, rackTypeString, contextMenuRef);
 
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
@@ -929,9 +979,10 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             .classed('draggable', false)
             .attr('pointer-events', 'none');
 
-        roomObjGroup.append(() => shape.node());
 
+        roomObjGroup.append(() => shape.node());
         placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
+        setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, RoomObjectTypesStrings[roomObj.type], contextMenuRef);
         roomObjGroup.call(closeMenuThenDrag);
     });
 

@@ -31,6 +31,7 @@ CREATE TABLE cageui.layout_history
     rowid SERIAL NOT NULL,
     room VARCHAR(50) NOT NULL,
     object_type INTEGER,
+    extra_context VARCHAR,
     rack_group INTEGER,
     rack INTEGER,
     cage VARCHAR(50),
@@ -86,6 +87,9 @@ select setname, container, 101 as value, 'Room Object' as category, 'Drain' as t
 
 insert into ehr_lookups.lookups (set_name,container,value, category, title)
 select setname, container, 102 as value, 'Room Object' as category, 'Door' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+
+insert into ehr_lookups.lookups (set_name,container,value, category, title)
+select setname, container, 103 as value, 'Room Object' as category, 'Gate' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
 INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
 select 'cageui_rack_manufacturers' as setname,

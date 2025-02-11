@@ -2,11 +2,10 @@ import * as React from 'react';
 import {FC, useState} from 'react';
 
 
-interface CageNumInputProps {
-    onSubmit: (value: number) => void;
-
+interface TextInputProps {
+    onSubmit: (value: any) => void;
 }
-export const CageNumInput: FC<CageNumInputProps> = (props) => {
+export const TextInput: FC<TextInputProps> = (props) => {
     const {onSubmit} = props;
     const [inputValue, setInputValue] = useState<string>('');
 

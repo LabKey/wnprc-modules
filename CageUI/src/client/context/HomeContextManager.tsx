@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { createContext, useContext, useState } from 'react';
-import { Cage, Page, Rack, RoomItem } from '../types/typings';
+import { Cage, Rack, RoomItem } from '../types/typings';
 import { removeCircularReferences } from '../utils/homeHelpers';
 import { HomeContextType } from '../types/homeContextTypes';
+import {SubPage} from '../types/homeTypes';
 
 
 const HomeContext = createContext<HomeContextType | null>(null);
@@ -21,7 +22,7 @@ export const useHomeContext = () => {
 
 export const HomeContextProvider = ({children}) => {
     // New state management
-    const [selectedPage, setSelectedPage] = useState<Page>(null);
+    const [selectedPage, setSelectedPage] = useState<SubPage>(null);
 
     // End new state management
     const [room, setRoom] = useState<RoomItem[]>([]);

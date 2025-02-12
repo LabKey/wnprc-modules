@@ -2,19 +2,21 @@ import * as React from 'react';
 import { ReactNode } from 'react';
 import {
     Cage,
-    DeleteActions,
     LayoutHistoryData,
-    LayoutSaveResult,
     Rack,
-    RackActions,
     RackGroup,
     RackStringType,
     Room,
     RoomItemClass,
     RoomItemType,
-    SelectedObj,
     UnitLocations
 } from './typings';
+import {
+    DeleteActions,
+    LayoutSaveResult,
+    RackActions,
+    SelectedObj
+} from './layoutEditorTypes';
 import * as d3 from 'd3';
 
 export interface LayoutContextProps {

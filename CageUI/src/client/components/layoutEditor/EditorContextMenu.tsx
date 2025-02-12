@@ -2,18 +2,17 @@ import * as React from 'react';
 import { FC, ReactElement, useEffect, useRef } from 'react';
 import '../../cageui.scss';
 import { Button } from 'react-bootstrap';
-import { parseRoomItemType } from '../../utils/helpers';
-import { getRoomItemTypeFromString } from '../../utils/LayoutEditorHelpers';
+import { parseRoomItemType, stringToRoomItem } from '../../utils/helpers';
 import {
     Cage,
     DefaultRackTypes,
+    RackStringType,
     RackTypes,
     RoomItemType,
     RoomObject,
-    RoomObjectTypes,
-    SelectedObj
+    RoomObjectTypes
 } from '../../types/typings';
-
+import { SelectedObj } from '../../types/layoutEditorTypes';
 
 interface Option {
     label: string;
@@ -92,7 +91,7 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
             height: 'auto'
         }}>
             {menuItems && menuItems.map((item, index) => {
-                let selectedObjType = selectedObj.selectionType === 'obj' ? (selectedObj as RoomObject).type : getRoomItemTypeFromString(parseRoomItemType((selectedObj as Cage).cageNum));
+                let selectedObjType = selectedObj.selectionType === 'obj' ? (selectedObj as RoomObject).type : stringToRoomItem(parseRoomItemType((selectedObj as Cage).cageNum) as RackStringType);
                 if(item.types.length === 0){// if no types were given render, otherwise only render elements for that type
                     return(
                         <div className={'menu-item'} key={`context-menu-item-${index}`}>

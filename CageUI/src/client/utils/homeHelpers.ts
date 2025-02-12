@@ -1,5 +1,6 @@
-import {convertToTitleCase, zeroPadName} from './helpers';
-import {Modifications, ModTypes, Cage} from '../types/typings';
+import { convertToTitleCase, zeroPadName } from './helpers';
+import { Cage } from '../types/typings';
+import {Modifications, ModTypes} from '../types/homeTypes';
 
 
 export const getRackFromClass = (classString: string) => {

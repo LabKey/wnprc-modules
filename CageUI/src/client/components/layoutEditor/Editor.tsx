@@ -4,28 +4,28 @@ import * as d3 from 'd3';
 import { BaseType, zoomTransform } from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
-import { useLayoutContext } from '../../context/LayoutContextManager';
+import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { RoomItemTemplate } from './RoomItemTemplate';
 import {
     Cage,
-    CageActionProps,
     CageNumber,
-    DeleteActions,
-    LayoutDragProps,
-    LayoutSaveResult,
-    MergeProps,
-    PendingRoomUpdate,
     Rack,
     RackGroup,
     RackStringType,
     RackTypes,
-    RackTypesStrings,
     RoomItemType,
     RoomObject,
     RoomObjectTypes,
-    RoomObjectTypesStrings,
     UnitLocations
 } from '../../types/typings';
+import {
+    CageActionProps,
+    DeleteActions,
+    LayoutDragProps,
+    LayoutSaveResult,
+    MergeProps,
+    PendingRoomUpdate
+} from '../../types/layoutEditorTypes';
 import { LayoutTooltip } from './LayoutTooltip';
 import {
     addPrevRoomSvgs,
@@ -40,7 +40,6 @@ import {
     findCageInGroup,
     findRackInGroup,
     getLayoutOffset,
-    getRoomItemTypeFromString,
     getTargetRect,
     isRackEnum,
     mergeRacks,
@@ -50,7 +49,13 @@ import {
     showLayoutEditorConfirmation,
     updateBorderSize,
 } from '../../utils/LayoutEditorHelpers';
-import { parseLongId, parseRoomItemNum, parseRoomItemType } from '../../utils/helpers';
+import {
+    parseLongId,
+    parseRoomItemNum,
+    parseRoomItemType,
+    roomItemToString,
+    stringToRoomItem
+} from '../../utils/helpers';
 import { SelectorOptions } from './RoomSizeSelector';
 import { ConfirmationPopup } from '../ConfirmationPopup';
 import { RoomSelectorPopup } from './RoomSelectorPopup';
@@ -76,7 +81,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     const utilsRef = useRef(null);
     const borderRef = useRef(null);
-    const popupRef = useRef(null); // ref for context menu popup (popup is the input for what is clicked in the menu)
+
     const [showGrid, setShowGrid] = useState<boolean>(true);
     const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
     const [borderSetup, setBorderSetup] = useState<boolean>(false); // determines if the border svg has been loaded yet
@@ -116,7 +121,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         changeRack,
         clearGrid,
         delObject,
-    } = useLayoutContext();
+    } = useLayoutEditorContext();
 
 
     const contextMenuRef = useRef(localRoom);
@@ -145,14 +150,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         .on('end', function (event) {
             dragInLayout.on('end').call(this, event);
         });
-
-
-    useEffect(() => {
-        console.log("xxx Room: ", room);
-        console.log("xxx LocalRoom: ", localRoom);
-        console.log("xxx Locs: ", unitLocs);
-        console.log("xxx selected: ", selectedObj);
-    }, [room, localRoom, unitLocs,selectedObj]);
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
@@ -183,7 +180,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 const tempLocs: UnitLocations = {...unitLocs};
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[RackTypesStrings[rack.type.type]] = tempLocs[RackTypesStrings[rack.type.type]].filter((unit) => !draggedCagesGroup.includes(unit.num))
+                    tempLocs[roomItemToString(rack.type.type)] = tempLocs[roomItemToString(rack.type.type)].filter((unit) => !draggedCagesGroup.includes(unit.num))
                 })
 
                 return tempLocs;
@@ -195,7 +192,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 const tempLocs: UnitLocations = createEmptyUnitLoc();
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[RackTypesStrings[rack.type.type]] = unitLocs[RackTypesStrings[rack.type.type]].filter((unit) => draggedCagesGroup.includes(unit.num))
+                    tempLocs[roomItemToString(rack.type.type)] = unitLocs[roomItemToString(rack.type.type)].filter((unit) => draggedCagesGroup.includes(unit.num))
                 })
 
                 return tempLocs;
@@ -208,7 +205,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(mergeAvail) return;
                     Object.entries(cagesNotInDragged).forEach(([targetRackType, targetCageLocs]) => {
                         if(targetCageLocs.length === 0 || mergeAvail) return;
-                        const gridRatio = (targetRackType === RackTypesStrings[RackTypes.Pen] || targetRackType === RackTypesStrings[RackTypes.PlayCage]) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                        const gridRatio = (targetRackType === roomItemToString(RackTypes.Pen) || targetRackType === roomItemToString(RackTypes.PlayCage)) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
                         targetCageLocs.forEach((targetLoc) => {
                             if(mergeAvail) return;
                             mergeAvail = checkAdjacent(targetLoc, dragLoc, CELL_SIZE, gridRatio);
@@ -222,7 +219,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             });
         }else{
             const draggedRack: Rack = selectedObj as Rack;
-            const draggedRackType: RackStringType = RackTypesStrings[draggedRack.type.type];
+            const draggedRackType: RackStringType = roomItemToString(draggedRack.type.type) as RackStringType;
 
             if(!draggedRackType){
                 return;
@@ -250,8 +247,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(inSameRack) {
                         return;
                     }
-                    const targetRackType: RackStringType = parseRoomItemType(targetLoc.num);
-                    const gridRatio = (targetRackType === RackTypesStrings[RackTypes.Pen] || targetRackType === RackTypesStrings[RackTypes.PlayCage]) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
+                    const targetRackType: RackStringType = parseRoomItemType(targetLoc.num) as RackStringType;
+                    const gridRatio = (targetRackType === roomItemToString(RackTypes.Pen) || targetRackType === roomItemToString(RackTypes.PlayCage)) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
                     mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, CELL_SIZE, gridRatio);
                     if(mergeAvail){
@@ -310,7 +307,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             group.append(() => draggedShape.node());
 
         } else { // adding dragged caging unit
-            const updateItemTypeString = RackTypesStrings[updateItemType];
+            const updateItemTypeString: RackStringType = roomItemToString(updateItemType) as RackStringType;
             group = layoutSvg.append('g')
                 .attr('class', `draggable rack type-${updateItemTypeString}`)
                 .attr('id', `${itemId}`)
@@ -339,11 +336,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 textElement.setAttribute('contentEditable', 'true');
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-                const cageGroupElement = textElement.closest(`[id^=${RackTypesStrings[updateItemType]}]`) as SVGGElement;
-                setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, RackTypesStrings[updateItemType], contextMenuRef);
+                const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
+                setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, contextMenuRef, roomItemToString(updateItemType) as RackStringType);
             });
         }else{
-            setupEditCageEvent(group.node(), setSelectedObj, setCtxMenuStyle, RoomObjectTypes[updateItemType], contextMenuRef);
+            setupEditCageEvent(group.node(), setSelectedObj, setCtxMenuStyle, contextMenuRef);
         }
 
         setPendingRoomUpdate(null);
@@ -429,7 +426,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 const cellY = Math.max(0,targetRect.y);
                 const draggedNodeId = draggedShape.attr('id');
 
-                const updateItemType: RoomItemType = getRoomItemTypeFromString(parseWrapperId(draggedNodeId));
+                const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
                 let newId: string;
 
                 if(isRackEnum(updateItemType)){
@@ -665,7 +662,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         const newY = rackToSave.y + localGroup.y;
                         svgToRemove = layoutSvg.select(`#${localGroup.groupId}`);
                         deleteAction = 'rack';
-                        newRackType = RackTypesStrings[rackToSave.type.type];
+                        newRackType = roomItemToString(rackToSave.type.type) as RackStringType;
                         newSvgGroup = layoutSvg.append(() => rackSvg.node())
                             .classed('draggable', true);
                         placeAndScaleGroup(newSvgGroup, newX, newY, zoomTransform(layoutSvg.node()));
@@ -693,7 +690,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
                         const cageGroupElement = textElement.closest(`[id^=${newRackType}]`) as SVGGElement;
 
-                        setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, newRackType, contextMenuRef);
+                        setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, contextMenuRef, newRackType);
                     });
                 }
                 svgToRemove.remove();
@@ -774,28 +771,28 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Door"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypesStrings[RoomObjectTypes.Door]}
+                            type={roomItemToString(RoomObjectTypes.Door)}
                             fileName={"door"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Drain"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypesStrings[RoomObjectTypes.Drain]}
+                            type={roomItemToString(RoomObjectTypes.Drain)}
                             fileName={"drain"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Divider"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypesStrings[RoomObjectTypes.RoomDivider]}
+                            type={roomItemToString(RoomObjectTypes.RoomDivider)}
                             fileName={"RoomDivider"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Room Gate"}>
                         <RoomItemTemplate
-                            type={RoomObjectTypesStrings[RoomObjectTypes.Gate]}
+                            type={roomItemToString(RoomObjectTypes.Gate)}
                             fileName={"GateClosed"}
                             className={"draggable"}
                         />
@@ -804,14 +801,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <div className={'cage-templates'}>
                     <LayoutTooltip text={"Single Cage"}>
                         <RoomItemTemplate
-                            type={RackTypesStrings[RackTypes.Cage]}
+                            type={roomItemToString(RackTypes.Cage)}
                             fileName={"SingleCageRack"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Pen"}>
                         <RoomItemTemplate
-                            type={RackTypesStrings[RackTypes.Pen]}
+                            type={roomItemToString(RackTypes.Pen)}
                             fileName={"Pen"}
                             className={"draggable"}
                         />

@@ -1,9 +1,10 @@
-import { Cage, Page, Rack, RoomItem } from './typings';
+import { Cage, Rack, RoomItem } from './typings';
+import {SubPage} from './homeTypes';
 import * as React from 'react';
 
 export interface HomeContextType {
-    selectedPage: Page;
-    setSelectedPage: React.Dispatch<React.SetStateAction<Page | null>> | null;
+    selectedPage: SubPage;
+    setSelectedPage: React.Dispatch<React.SetStateAction<SubPage | null>> | null;
     room: RoomItem[];
     setRoom: React.Dispatch<React.SetStateAction<RoomItem[]>>;
     clickedCage: Cage | null;

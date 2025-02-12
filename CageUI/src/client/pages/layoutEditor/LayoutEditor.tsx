@@ -5,7 +5,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../../cageui.scss';
 import { ActionURL, Filter } from '@labkey/api';
 import { LayoutData, LayoutHistoryData, PrevRoom, Room, UnitLocations } from '../../types/typings';
-import { LayoutContextProvider } from '../../context/LayoutContextManager';
+import { LayoutEditorContextProvider } from '../../context/LayoutEditorContextManager';
 import Editor from '../../components/layoutEditor/Editor';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
@@ -132,7 +132,6 @@ export const LayoutEditor: FC<any> = () => {
                         borderHeight: prevRoomData.layoutData.borderHeight
                     }
                 }
-                console.log(newLocalRoom);
                 setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData.cagingData});
                 setIsLoading(false);
             }
@@ -140,7 +139,7 @@ export const LayoutEditor: FC<any> = () => {
     }, [prevRoomData]);
 
     return !isLoading ? (
-            <LayoutContextProvider
+            <LayoutEditorContextProvider
                 prevRoom={prevRoom}
                 children={
                     <div className={"room-container"}>

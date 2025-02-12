@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import Select from 'react-select';
-import { Room, RoomObject, RoomObjectTypes, SelectedObj } from '../../types/typings';
+import { Room, RoomObject, RoomObjectTypes } from '../../types/typings';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Option } from '@labkey/components';
+import { SelectedObj } from '../../types/layoutEditorTypes';
 
 interface GateChangeRoomProps {
     localRoom: Room;
@@ -42,7 +43,6 @@ export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
         }
     }, []);
     useEffect(() => {
-        console.log(selectedObj);
         const roomsConfig: SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'rooms',

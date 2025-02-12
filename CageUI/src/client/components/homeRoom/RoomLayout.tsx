@@ -7,7 +7,8 @@ import {
     changeStyleProperty,
     getCageMod,
     getRackSeparators,
-    parseEditRect, parseRoomItemType,
+    parseEditRect,
+    parseRoomItemType,
     parseSeparator,
     updateCageIds
 } from '../../utils/helpers';
@@ -15,7 +16,6 @@ import { useRoomContext } from '../../context/ContextManager';
 import { Popup } from './Popup';
 import { CageDetailsModifications } from './CageDetailsModifications';
 import { Rack } from '../../types/typings';
-import { isRack } from '../../utils/LayoutEditorHelpers';
 
 export const RoomLayout: FC = () => {
     const {room, cageDetails, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useRoomContext();
@@ -62,7 +62,6 @@ export const RoomLayout: FC = () => {
                 className={"room-svg"}
                 beforeInjection={(svg) => {
                     room.forEach((roomItem) => {
-                        if(!isRack(roomItem.type)) return;
                         roomItem = roomItem as Rack;
                         roomItem.cages.forEach((cage, idx) => {
                             // Construct the expected text element ID

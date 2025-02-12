@@ -2,6 +2,7 @@
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import {
+    defaultTypeToRackType,
     getTypeClassFromElement,
     parseLongId,
     parseRoomItemNum,
@@ -9,38 +10,39 @@ import {
 } from './helpers';
 import {
     Cage,
-    CageNumber,
+    CageNumber, DefaultRackStringType,
     DefaultRackTypes,
     GroupId,
-    LayoutDragProps,
     LayoutHistoryData,
     LocationCoords,
-    MergeProps,
-    OffsetProps,
     PrevRoom,
     Rack,
-    RackActions,
     RackGroup,
     RackStringType,
     RackTypes,
-    RackTypesStrings,
     Room,
     RoomItemClass,
     RoomItemStringType,
     RoomItemType,
-    RoomObject,
+    RoomObject, RoomObjectStringType,
     RoomObjectTypes,
-    RoomObjectTypesStrings,
-    SelectedObj,
-    StartDragProps,
     UnitLocations,
     UnitType
 } from '../types/typings';
-import {labkeyActionSelectWithPromise} from '../api/labkeyActions';
+import {
+    LayoutDragProps,
+    MergeProps,
+    OffsetProps,
+    RackActions,
+    SelectedObj,
+    StartDragProps
+} from '../types/layoutEditorTypes'
+import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
+import {stringToRoomItem, roomItemToString} from './helpers';
 
 export const getTranslation = (transform) => {
     // Regex to extract the translate(x, y) values
@@ -64,51 +66,12 @@ export const createEmptyUnitLoc = (): UnitLocations => {
             Object.values(RackTypes)
                 .filter((value) => typeof value === "number") // Filter out the numeric values from enum
                 .map((rackType) => [
-                    RackTypesStrings[rackType],
+                    roomItemToString(rackType as RackTypes),
                     [] as LocationCoords[],
                 ])
         ) as UnitLocations
     );
 }
-
-const generateTypeMaps = () => {
-    const rackTypeToDefaultType: { [key in RackTypes]?: DefaultRackTypes } = {};
-    const defaultTypeToRackType: { [key in DefaultRackTypes]?: RackTypes } = {};
-
-    // Iterate through the enum keys and filter out numeric ones
-    Object.keys(RackTypes)
-        .filter((key) => isNaN(Number(key))) // Filters out numeric keys
-        .forEach((key) => {
-            const rackTypeKey = RackTypes[key as keyof typeof RackTypes];
-            const defaultRackTypeKey = `Default${key}` as keyof typeof DefaultRackTypes;
-
-            // Check if the corresponding DefaultRackType key exists
-            if (DefaultRackTypes[defaultRackTypeKey] !== undefined) {
-                const defaultRackType = DefaultRackTypes[defaultRackTypeKey];
-
-                // Assign mappings
-                rackTypeToDefaultType[rackTypeKey as RackTypes] = defaultRackType;
-                defaultTypeToRackType[defaultRackType] = rackTypeKey as RackTypes;
-            }
-        });
-
-    return { rackTypeToDefaultType, defaultTypeToRackType };
-}
-
-// These two maps can be imported and used to convert between the string and number of the rack type enum
-export const { rackTypeToDefaultType, defaultTypeToRackType } = generateTypeMaps();
-
-
-// Function to get RoomItemType num from string, not including DefaultRackTypes
-export const getRoomItemTypeFromString = (itemTypeString: string): RoomItemType | undefined => {
-    const RackTypeFromString: { [key: string]: RackTypes } = Object.fromEntries(
-        Object.entries(RackTypesStrings).map(([key, value]) => [value, Number(key) as RackTypes])
-    );
-    const RoomObjTypeFromString: { [key: string]: RoomObjectTypes } = Object.fromEntries(
-        Object.entries(RoomObjectTypesStrings).map(([key, value]) => [value, Number(key) as RoomObjectTypes])
-    );
-    return RackTypeFromString[itemTypeString] || RoomObjTypeFromString[itemTypeString];
-};
 
 export const parseWrapperId = (input: string): RoomItemStringType => {
     const regex = /^[a-zA-Z]+/; // matches "x_template_wrapper"
@@ -321,8 +284,8 @@ export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
     setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
-    rackTypeString: RackStringType | RoomObjectTypes,
-    localRoomRef: MutableRefObject<Room>
+    localRoomRef: MutableRefObject<Room>,
+    rackTypeString?: RackStringType
 ): () => void {
     const handleContextMenu = (event: MouseEvent)=> {
         event.preventDefault();
@@ -394,7 +357,7 @@ export async function mergeRacks(props: MergeProps) {
             element.setAttribute('class',`grouped-${shapeType}`);
             element.setAttribute('style', "");
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, shapeType, contextMenuRef);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, contextMenuRef, shapeType);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -406,9 +369,9 @@ export async function mergeRacks(props: MergeProps) {
             const targetShape = d3.select(this);
             let shapeType: RackStringType;
             if(action === 'merge'){
-                shapeType = parseRoomItemType(targetShape.attr('id'));
+                shapeType = parseRoomItemType(targetShape.attr('id')) as RackStringType;
             }else{
-                shapeType = getTypeClassFromElement(targetShape.node());
+                shapeType = getTypeClassFromElement(targetShape.node()) as RackStringType;
             }
             const {x: localX, y: localY} = getTranslation(targetShape.attr('transform'));
             const newX = startX + localX;
@@ -620,7 +583,6 @@ export function createDragInLayout() {
     return(
         function dragInLayout(event) {
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
-            console.log('Drag Layout #2', event.x, event.y);
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
             const scale = transform.k;
@@ -650,7 +612,6 @@ export function createEndDragInLayout(props: LayoutDragProps) {
 
             const targetCell = getTargetRect(pointerX, pointerY, gridSize, transform);
             if (targetCell) {
-                console.log('Drag Layout #3', shape, targetCell);
                 const cellX = targetCell.x;
                 const cellY = targetCell.y;
                 const shapeType: RoomItemClass = shape.classed('room-obj') ? 'roomObj' : 'caging';
@@ -659,7 +620,6 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 if(shape.attr('id') === 'layout-border'){
                     shape.lower();
                 }
-                console.log("#3: ", cellX, cellY, shape.node());
                 moveItem(shape.attr('id'),shapeType, cellX, cellY, transform.k);
             }
         }
@@ -687,10 +647,6 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
     return nums.includes(cage1.num) && nums.includes(cage2.num);
 }
 
-// input is a string for rack or room obj type
-export const isRack = (itemType: RoomItemStringType): itemType is RackStringType => {
-    return Object.values(RackTypesStrings).includes(itemType as string);
-};
 
 // input is the enum number for rack, default rack, or room obj type. Return true if it is in Rack or Default rack types
 export const isRackEnum = (itemType: RoomItemType): itemType is RackTypes | DefaultRackTypes => {
@@ -741,11 +697,11 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
 
     prevRoomData.forEach(roomItem => {
         if(!isRackEnum(roomItem.object_type)) return; // ignore room objects here
-        let rackType: RackStringType;
+        let rackType: RoomItemStringType;
         if(isRackDefault(roomItem.object_type)){
-            rackType = RackTypesStrings[defaultTypeToRackType[roomItem.object_type]]
+            rackType = roomItemToString(defaultTypeToRackType(roomItem.object_type));
         }else{
-            rackType = RackTypesStrings[roomItem.object_type];
+            rackType = roomItemToString(roomItem.object_type);
         }
         newUnitLocs[rackType].push({
             num: `${rackType}-${parseInt(roomItem.cage)}` as CageNumber,
@@ -823,7 +779,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             type = {
                 rowid: rackTypesData.rows[0].rowid,
                 name: rackTypesData.rows[0].name,
-                type: isDefault ? defaultTypeToRackType[rackTypesData.rows[0].type] : rackTypesData.rows[0].type,
+                type: isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type,
                 isDefault: isDefault,
             };
 
@@ -843,11 +799,11 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
     const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
-        let cageNumType: RackStringType;
+        let cageNumType: RoomItemStringType;
         if(rack.type.isDefault){
-            cageNumType = RackTypesStrings[defaultTypeToRackType[rackItem.object_type]];
+            cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
         }else{
-            cageNumType = RackTypesStrings[rackItem.object_type];
+            cageNumType = roomItemToString(rackItem.object_type);
         }
         const cage: Cage = {
             cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber,
@@ -873,7 +829,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             context = JSON.parse(roomObjItem.extra_context);
         }
         return({
-            itemId: `${RoomObjectTypesStrings[roomObjItem.object_type]}-${roomObjNum++}`, // update room obj num after it is used to next num
+            itemId: `${roomItemToString(roomObjItem.object_type)}-${roomObjNum++}`, // update room obj num after it is used to next num
             type: roomObjItem.object_type as RoomObjectTypes,
             selectionType: 'obj',
             x: roomObjItem.x_coord,
@@ -896,7 +852,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag,setSelectedObj,setCtxMenuStyle, contextMenuRef: MutableRefObject<Room>) => {
 
     const createRackGroup = (parentGroup, rack, isSingleRack) => {
-        const rackTypeString: RackStringType = RackTypesStrings[rack.type.type];
+        const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
             .attr('class', `rack type-${rackTypeString}`)
@@ -917,7 +873,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             shape.style('pointer-events', 'none');
 
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
-            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, rackTypeString, contextMenuRef);
+            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, contextMenuRef, rackTypeString);
 
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
@@ -932,7 +888,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
         const parentGroup = isSingleRack
             ? layoutSvg.append('g')
                 .attr('id', group.racks[0].itemId)
-                .attr('class', `draggable rack type-${RackTypesStrings[group.racks[0].type.type]}`)
+                .attr('class', `draggable rack type-${roomItemToString(group.racks[0].type.type)}`)
                 .attr('transform', `translate(${group.racks[0].x},${group.racks[0].y}) scale(${group.scale})`)
                 .style('pointer-events', 'bounding-box')
             : layoutSvg.append('g')
@@ -961,7 +917,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
             .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${roomObj.scale})`)
             .style('pointer-events', 'bounding-box');
 
-        const objSvg: SVGElement = (d3.select(`[id=${RoomObjectTypesStrings[roomObj.type]}_template_wrapper]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
+        const objSvg: SVGElement = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as  d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
 
         const shape = d3.select(objSvg)
             .classed('draggable', false)
@@ -970,7 +926,7 @@ export const addPrevRoomSvgs = (room: Room, layoutSvg: d3.Selection<SVGElement, 
 
         roomObjGroup.append(() => shape.node());
         placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
-        setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, RoomObjectTypesStrings[roomObj.type], contextMenuRef);
+        setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, contextMenuRef);
         roomObjGroup.call(closeMenuThenDrag);
     });
 

@@ -109,19 +109,28 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
         return msg.toString();
     }
-    protected void findAnimalsWithEnoughWater(final Container c, final User u, final StringBuilder msg)
+    protected void findAnimalsWithEnoughWater(final Container c, final User u, final StringBuilder msg, final int threshold)
     {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
 
         TableInfo waterTotalByDateWithWeightReport = QueryService.get().getUserSchema(u,c,"study").getTable("waterTotalByDateWithWeight");
 
-
-        SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
-        orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"), 20, CompareType.LT).getClauses().get(0));
-        orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"),null, CompareType.ISBLANK).getClauses().get(0));
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
-        filter.addClause(orClause);
+
+        if (threshold == 10){
+            SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
+            orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"), threshold, CompareType.LT).getClauses().get(0));
+            orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"),null, CompareType.ISBLANK).getClauses().get(0));
+            filter.addClause(orClause);
+        }else if (threshold == 20){
+            filter.addCondition(FieldKey.fromString("mlsPerKg"), threshold, CompareType.LT);
+            filter.addCondition(FieldKey.fromString("mlsPerKg"), 10, CompareType.GTE);
+
+        }
+
+
+
         Set<FieldKey> colKeys = new HashSet<>();
         colKeys.add(FieldKey.fromString("Id"));
         colKeys.add(FieldKey.fromString("date"));
@@ -181,8 +190,13 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
                 }
             }
+            if (threshold == 10){
+                msg.append("<b>WARNING: There are ").append(animalsWaterMeaning).append(" animals that have no water or less than 10 mlsPerKg for today.</b><br>\n");
 
-            msg.append("<b>WARNING: There are " + animalsWaterMeaning + " animals that have remaining water for today.</b><br>\n");
+            }else {
+                msg.append("<b>WARNING: There are ").append(animalsWaterMeaning).append(" animals that have less than 20 mlsPerKg water for today.</b><br>\n");
+            }
+
 
             msg.append("<table border=1 style='border-collapse: collapse;'>");
             msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>" +
@@ -279,12 +293,12 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             }
             else
             {
-                msg.append("There are " + total + " animals in the system that have no records in water given dataset for " + date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
-                msg.append("Project   - AnimalID   -  Location <br>");
+                msg.append("<br>There are " + total + " animals in the system that have no records in water given dataset for " + date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
+                msg.append("Project &emsp;&emsp; -  &emsp; AnimalID &emsp;  - &emsp; Location <br>");
                 Map<String, Object>[] animalsWithOutEntries = ts.getMapArray();
                 for (Map<String, Object> mapItem : animalsWithOutEntries)
                 {
-                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + "  "  + ConvertHelper.convert(mapItem.get("location"), String.class)+ "<br>");
+                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + " &emsp; -  &emsp; "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + " &emsp; -  &emsp; "  + ConvertHelper.convert(mapItem.get("location"), String.class)+ "<br>");
 
                 }
                 msg.append("<br>");

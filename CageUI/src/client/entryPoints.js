@@ -4,12 +4,12 @@ module.exports = {
         name: "home",
         title: "Cage Display",
         permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
-        path: './src/client/home'
+        path: './src/client/pages/home'
     },
     {
         name: "editLayout",
         title: "Room Layout Editor",
         permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
-        path: './src/client/layoutEditor'
+        path: './src/client/pages/layoutEditor'
     }]
 };

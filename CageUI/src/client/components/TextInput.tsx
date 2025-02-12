@@ -1,10 +1,12 @@
 import * as React from 'react';
-import {FC, useState} from 'react';
+import { FC, useState } from 'react';
 
 
 interface TextInputProps {
     onSubmit: (value: any) => void;
 }
+
+// input is a text but only submits if it is a number
 export const TextInput: FC<TextInputProps> = (props) => {
     const {onSubmit} = props;
     const [inputValue, setInputValue] = useState<string>('');

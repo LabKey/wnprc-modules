@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {FC} from 'react';
-import "../cageui.scss";
+import { FC } from 'react';
+import '../cageui.scss';
 
 interface ConfirmationPopupProps {
     message: string;

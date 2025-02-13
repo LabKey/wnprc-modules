@@ -805,10 +805,11 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){
-            return { status: 'Success' };
+            return { status: 'Success', roomName: roomName};
         }else{
             return {
                 status: 'Failure',
+                roomName: roomName,
                 reason: ["failures"] // Return an array of failure reasons
             };
         }

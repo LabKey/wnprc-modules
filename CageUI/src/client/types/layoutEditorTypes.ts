@@ -17,6 +17,7 @@ export type SelectedObj = RoomItem | RackGroup | Cage;
 
 export interface LayoutSaveResult {
     status: string;
+    roomName: string // redirect room
     reason?: any;
 }
 

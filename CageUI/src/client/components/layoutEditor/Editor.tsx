@@ -734,7 +734,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         setShowSaveResult(result);
     }
 
-    const handleSaveClose = () => {
+    const handleSaveClose = (roomName: string) => {
         if(showSaveResult?.reason){ // don't switch windows if error occurred
             setShowSaveResult(null);
         }else{
@@ -743,8 +743,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 ActionURL.getController(),
                 'cageui-editLayout',
                 ActionURL.getContainer(),
-                {room: localRoom.name}
-            );
+                {room: roomName}
+            )
+
         }
     }
 
@@ -906,7 +907,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             {showSaveResult &&
                 <ConfirmationPopup
                     message={`${showSaveResult.status}\n${showSaveResult?.reason ? showSaveResult.reason : ''}`}
-                    onClose={handleSaveClose}
+                    onClose={() => handleSaveClose(showSaveResult.roomName)}
                 />
             }
             {showCageContextMenu &&

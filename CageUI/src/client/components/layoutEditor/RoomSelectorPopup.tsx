@@ -26,7 +26,7 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
     const { onConfirm, onCancel, setRoom, template, setTemplateRename,templateLoad } = props;
     const [selectedRoom, setSelectedRoom] = useState<string>(null);
     const [options, setOptions] = useState<Option[]>(null);
-    const [templateName, setTemplateName] = useState<string>(undefined);
+    const [templateName, setTemplateName] = useState<string>('');
 
     // Fetch room, if template only fetch template rooms, otherwise fill options with {label: row.room, value: row.rowid}
     useEffect(() => {
@@ -58,7 +58,7 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
         }
         let newName = selectedRoom;
         let oldName;
-        if(templateName){
+        if(templateName.length > 0){
             //return if new name doesn't have word template in it
             if(!templateName.includes("template")){
                 onCancel();

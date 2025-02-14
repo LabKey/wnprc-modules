@@ -88,7 +88,13 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends WaterMonito
         findAnimalsWithWaterEntries(c,u,msg,numDays);
 
         //Check animals with less than 20 mls per kilogram of water for today, it also displays the animals on Lixit at the end of the notification
-        findAnimalsWithEnoughWater(c,u,msg);
+        findAnimalsWithEnoughWater(c,u,msg, 10);
+
+        //Check animals with less than 20 mls per kilogram of water for today, it also displays the animals on Lixit at the end of the notification
+        findAnimalsWithEnoughWater(c,u,msg, 20);
+
+
+
 
 
 

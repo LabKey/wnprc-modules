@@ -312,11 +312,15 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             }
 
             waterObjects[Id].push(waterObject);
+            let volumeText = null;
+            if (row.getValue('volume') !== null){
+                volumeText = row.getValue('volume') + previousVolume
+            }
 
             var tempModel = this.targetStore.createModel({
                 Id:                 row.getValue('Id'),
                 date:               modelDate,
-                volume:             row.getValue('volume') + previousVolume,
+                volume:             volumeText,
                 project:            row.getValue('project'),
                 assignedto:         row.getValue('assignedTo'),
                 waterSource:        row.getValue('waterSource'),

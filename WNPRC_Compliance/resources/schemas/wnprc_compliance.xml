@@ -137,6 +137,18 @@
   <table tableName="access_report_data" tableDbType="TABLE">
     <columns>
       <column columnName="report_id"/>
+      <column columnName="access_level"/>
+      <column columnName="card_id"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="access_report_data_old" tableDbType="TABLE">
+    <columns>
+      <column columnName="report_id"/>
       <column columnName="area"/>
       <column columnName="card_id"/>
       <column columnName="schedule_pt"/>
@@ -156,6 +168,10 @@
       <column columnName="first_name"/>
       <column columnName="last_name"/>
       <column columnName="middle_name"/>
+      <column columnName="date_issued"/>
+      <column columnName="date_expire"/>
+      <column columnName="card_type"/>
+      <column columnName="issue_code"/>
       <column columnName="department"/>
       <column columnName="employee_number"/>
       <column columnName="info2"/>

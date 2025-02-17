@@ -4356,4 +4356,25 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
+    @Test
+    public void testCageUIExists() throws IOException, CommandException {
+        beginAt(buildURL("cageui", getContainerPath(), "editLayout"));
+
+        // Ensure room size options exist and click the first option.
+        WebElement sizeSelector = getDriver().findElement(By.className("room-size-selector-content"));
+        Assert.assertTrue(sizeSelector.isDisplayed());
+        List<WebElement> sizes = sizeSelector.findElements(By.className("room-size-selector-option-card"));
+        Assert.assertFalse(sizes.isEmpty());
+        sizes.get(0).click();
+        WebElement sizeEnter = getDriver().findElement(By.xpath("//*[@id=\"app\"]/div/div[3]/div/div[2]/button"));
+        sizeEnter.click();
+
+        //Ensures the layout exists
+        WebElement layoutSvg = waitForElement(Locator.id("layout-svg"), 20000);
+        Assert.assertTrue(layoutSvg.isDisplayed());
+
+
+    }
+
+
 }

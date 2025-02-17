@@ -1,15 +1,16 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 import { ContextProvider } from "./ContextProvider";
 import FeedingFormContainer from "./FeedingFormContainer";
+import { createRoot } from 'react-dom/client';
 
 const render = (): void => {
-    ReactDOM.render(
+    const container = document.getElementById('app');
+    const root = createRoot(container);
+    root.render(
         <ContextProvider>
             <FeedingFormContainer />
-        </ContextProvider>,
-        document.getElementById('app')
+        </ContextProvider>
     )
 };
 

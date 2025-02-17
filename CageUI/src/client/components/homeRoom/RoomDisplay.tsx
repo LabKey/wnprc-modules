@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { FC, useEffect } from 'react';
 import { Cage } from '../../types/typings';
-import { findDetails } from '../../utils/helpers';
+import { findDetails } from '../../utils/homeHelpers';
 import { RoomLayout } from './RoomLayout';
-import { useRoomContext } from '../../context/ContextManager';
+import { useHomeContext } from '../../context/HomeContextManager';
 
 interface DisplayProps {
     name: string; // room type
@@ -12,7 +12,7 @@ interface DisplayProps {
 // This is the old room home component 2nd to the app page.
 export const RoomDisplay: FC<DisplayProps> = (props) => {
     const {name} = props;
-    const {clickedCage, clickedRack, setCageDetails} = useRoomContext();
+    const {clickedCage, clickedRack, setCageDetails} = useHomeContext();
 
     // updates details if they change while popup is open
     useEffect(() => {

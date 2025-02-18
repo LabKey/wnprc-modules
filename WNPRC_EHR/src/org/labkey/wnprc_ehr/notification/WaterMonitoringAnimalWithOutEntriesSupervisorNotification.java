@@ -12,6 +12,7 @@ public class WaterMonitoringAnimalWithOutEntriesSupervisorNotification extends W
     {
         super(owner);
     }
+    @Override
     public String getName(){return "Water Monitoring Alert for Supervisors";}
 
     @Override
@@ -29,6 +30,7 @@ public class WaterMonitoringAnimalWithOutEntriesSupervisorNotification extends W
         return "every day at 1500 and 1900";
     }
 
+    @Override
     public String getDescription()
     {
         return "The report is designed to report total amount of water animal had gotten and report if they have not gotten the required 20 mls per kilogram.";

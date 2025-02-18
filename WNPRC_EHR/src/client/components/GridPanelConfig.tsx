@@ -4,7 +4,8 @@ import {
     SchemaQuery,
     ServerContextProvider,
     withAppUser,
-    AppContextProvider
+    AppContextProvider,
+    NotificationsContextProvider
 } from '@labkey/components';
 import { DefaultGridPanel } from "./DefaultGridPanel";
 import { configProps } from './grid_panel/configProps';
@@ -86,14 +87,16 @@ export const GridPanelConfig: FC<configProps> = ({
     return (
         <ServerContextProvider initialContext={serverContext}>
             <AppContextProvider>
-                <DefaultGridPanel
-                    queryConfigs={queryConfigs}
-                    input={input}
-                    autoLoad
-                    cellStyles={cellStyles}
-                    title={title}
-                    columnStyles={columnStyles}
-                />
+                <NotificationsContextProvider>
+                    <DefaultGridPanel
+                        queryConfigs={queryConfigs}
+                        input={input}
+                        autoLoad
+                        cellStyles={cellStyles}
+                        title={title}
+                        columnStyles={columnStyles}
+                    />
+                </NotificationsContextProvider>
             </AppContextProvider>
         </ServerContextProvider>
     );

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 // Main react component
 import  {GridPanelConfig}  from '../components/GridPanelConfig';
@@ -7,13 +6,17 @@ import  {GridPanelConfig}  from '../components/GridPanelConfig';
 import { gridConfig } from './configProps';
 // Import stylesheets
 import '../wnprc_ehr.scss';
+import { createRoot } from 'react-dom/client';
 
 
 const render = (): void => {
-    ReactDOM.render(
-        <GridPanelConfig {...gridConfig} />,
-        document.getElementById('app')
-    )
+    const container = document.getElementById('app');
+    const root = createRoot(container);
+    root.render(
+        <GridPanelConfig
+            {...gridConfig}
+        />
+    );
 };
 
 render();

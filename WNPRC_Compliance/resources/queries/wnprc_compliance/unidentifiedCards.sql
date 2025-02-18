@@ -3,11 +3,10 @@ cards.card_id,
 last_name,
 first_name,
 middle_name,
-department,
-employee_number,
-info2,
-info3,
-info5
+card_info.card_type,
+to_char(card_info.date_issued , 'yyyy-MM-dd') AS date_issued,
+to_char(card_info.date_expire, 'yyyy-MM-dd') AS date_expire,
+card_info.issue_code
 
 FROM (
   SELECT
@@ -18,12 +17,16 @@ FROM (
     SELECT
     unknown_cards.card_id,
     card_info.report_id,
-    card_info.report_id.date
+    card_info.report_id.date,
+    card_info.card_type,
+    card_info.date_issued,
+    card_info.date_expire,
+    card_info.issue_code
 
     FROM (
       SELECT
       cards.card_id,
-      persons_to_cards.personid
+      persons_to_cards.personid,
 
       FROM (
         SELECT card_id

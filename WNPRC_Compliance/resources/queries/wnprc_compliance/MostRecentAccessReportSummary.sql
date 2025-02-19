@@ -11,13 +11,8 @@ personsList.isArchived,
 card_info.first_name,
 card_info.last_name,
 card_info.middle_name,
-card_info.department,
-card_info.employee_number,
-card_info.info2,
-card_info.info3,
-card_info.info5,
 
-access_info.areas,
+access_info.access_levels,
 
 persons_to_cards.personid
 
@@ -25,19 +20,14 @@ FROM (
   SELECT
   report_id,
   card_id,
-  GROUP_CONCAT(display_area, ';') as areas
+  GROUP_CONCAT(access_level, ';') as access_levels
 
 
   FROM (
     SELECT
     reports.report_id,
     report_data.card_id,
-    report_data.enabled,
-    report_data.area,
-    CASE
-      WHEN report_data.enabled IS FALSE THEN CAST(COALESCE(report_data.area, '') || ' (disabled)' as VARCHAR)
-      ELSE report_data.area
-    END as display_area
+    report_data.access_level,
 
 
     FROM  wnprc_compliance.access_reports reports, wnprc_compliance.access_report_data report_data

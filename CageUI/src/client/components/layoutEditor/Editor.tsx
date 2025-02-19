@@ -858,21 +858,25 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         htmlFor="cb3-8"></label>
                 </div>
                 <button
+                    id={'clearBtn'}
                     className={"layout-toolbar-btn"}
                     onClick={handleClear}
                 >Clear Layout
                 </button>
                 <button
-                    className={"layout-toolbar-btn"}
-                    onClick={() => {setTemplateOptions(true); setShowRoomSelectorTemplateLoad(true);}}
-                >Load Template
-                </button>
-                <button
+                    id={'saveTemplateBtn'}
                     className={"layout-toolbar-btn"}
                     onClick={() => {setTemplateOptions(true); setShowRoomSelector(true);}}
                 >Save as Template
                 </button>
                 <button
+                    id={'loadTemplateBtn'}
+                    className={"layout-toolbar-btn"}
+                    onClick={() => {setTemplateOptions(true); setShowRoomSelectorTemplateLoad(true);}}
+                >Load Template
+                </button>
+                <button
+                    id={'saveLayoutBtn'}
                     className={"layout-toolbar-btn"}
                     onClick={localRoom.name === 'new-layout' ? () => setShowRoomSelector(true) : () => setShowSaveConfirm(true)}
                 >{localRoom.name === 'new-layout' ? 'Save Layout' : 'Update Layout'}

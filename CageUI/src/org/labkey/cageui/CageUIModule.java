@@ -22,8 +22,19 @@ import org.labkey.api.data.Container;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.module.Module;
+import org.labkey.cageui.query.CageUIUserSchema;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorCreatorPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutTemplateEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
+import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIUserPermission;
+import org.labkey.cageui.security.roles.CageUIAdminRole;
 
 
 import java.util.Collection;
@@ -49,7 +60,7 @@ public class CageUIModule extends ExtendedSimpleModule
     @Override
     public boolean hasScripts()
     {
-        return true;
+        return false;
     }
 
     @Override
@@ -63,7 +74,26 @@ public class CageUIModule extends ExtendedSimpleModule
     protected void init()
     {
         addController(CageUIController.NAME, CageUIController.class);
+        registerRoles();
+        registerPermissions();
     }
+
+    private void registerPermissions() {
+        RoleManager.registerPermission(new CageUILayoutEditorCreatorPermission());
+        RoleManager.registerPermission(new CageUILayoutEditorPermission());
+        RoleManager.registerPermission(new CageUILayoutTemplateEditorPermission());
+        RoleManager.registerPermission(new CageUIAnimalEditorPermission());
+        RoleManager.registerPermission(new CageUIAnimalReviewerPermission());
+        RoleManager.registerPermission(new CageUIModificationEditorPermission());
+        RoleManager.registerPermission(new CageUINotesEditorPermission());
+        RoleManager.registerPermission(new CageUIUserPermission());
+
+    }
+
+    public void registerRoles() {
+        RoleManager.registerRole(new CageUIAdminRole());
+    }
+
 
     @Override
     @NotNull
@@ -84,7 +114,7 @@ public class CageUIModule extends ExtendedSimpleModule
         DefaultSchema.registerProvider(CageUISchema.NAME, new DefaultSchema.SchemaProvider(this) {
             @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return new CageUISchema(schema.getUser(), schema.getContainer());
+                return new CageUIUserSchema(schema.getUser(), schema.getContainer(), CageUISchema.getInstance().getSchema());
             }
         });
     }

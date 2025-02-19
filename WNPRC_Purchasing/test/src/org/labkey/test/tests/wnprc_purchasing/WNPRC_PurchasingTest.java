@@ -352,7 +352,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     {
         goToRequesterPage();
         impersonate(REQUESTER_USER_1);
-        clickButton("Create Request");
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
         requestPage.setVendor("Other");
 
@@ -969,6 +969,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         else
         {
             DataRegionTable table = DataRegionTable.DataRegion(getDriver()).refindWhenNeeded();
+            sleep(500);
             return table.getDataAsText(table.getDataRowCount() - 1, "rowId");
         }
     }

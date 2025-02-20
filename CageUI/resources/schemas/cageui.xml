@@ -27,6 +27,7 @@
                     <fkColumnName>room</fkColumnName>
                 </fk>
             </column>
+            <column columnName="extra_context"/>
             <column columnName="object_type">
                 <datatype>integer</datatype>
                 <fk>

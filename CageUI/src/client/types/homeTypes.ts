@@ -5,9 +5,29 @@ type SubPageViews = "Room" | "Rack" | "Cage";
 
 export type CagePosition = "top" | "bottom" | "none";
 
+export type ExpandedRooms = {
+    [key: string]: boolean;
+}
+
 export interface SubPage {
     mainView: SubPageViews;
     subViewId: string;
+}
+
+export interface RoomCage {
+    id: number;
+    name: string;
+}
+
+export interface RoomRack {
+    id: number;
+    name: string;
+    cages: RoomCage[];
+}
+
+export interface Room {
+    name: string;
+    racks?: RoomRack[];
 }
 
 export interface AdjCages {

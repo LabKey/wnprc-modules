@@ -123,7 +123,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         delObject,
     } = useLayoutEditorContext();
 
-
+    useEffect(() => {
+        console.log(localRoom);
+    }, [localRoom]);
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
 
@@ -956,7 +958,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         <GateChangeRoom
                             key={`gate-${(selectedObj as RoomObject).itemId}`}
                             localRoom={localRoom}
-                            keys={`gate-${(selectedObj as RoomObject).itemId}`}
                             selectedObj={selectedObj}
                             setLocalRoom={setLocalRoom}
                         />,

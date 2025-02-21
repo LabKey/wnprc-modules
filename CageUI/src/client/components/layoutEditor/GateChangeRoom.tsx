@@ -10,7 +10,6 @@ import { SelectedObj } from '../../types/layoutEditorTypes';
 interface GateChangeRoomProps {
     localRoom: Room;
     selectedObj: SelectedObj;
-    keys: any;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
 }
 
@@ -19,7 +18,7 @@ interface GateChangeRoomProps {
     extraContext is {room: string, roomid: number} or GateContext
  */
 export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
-    const {setLocalRoom, selectedObj, localRoom, keys} = props;
+    const {setLocalRoom, selectedObj, localRoom} = props;
     const [selectedRoom, setSelectedRoom] = useState<Option<number>>(null);
     const [options, setOptions] = useState<Option<number>[]>(null);
     const [loading, setLoading] = useState<boolean>(true);

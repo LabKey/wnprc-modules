@@ -30,13 +30,14 @@ import {
     UnitType
 } from '../types/typings';
 import {
+    ExtraContext,
     LayoutDragProps,
     MergeProps,
     OffsetProps,
     RackActions,
     SelectedObj,
     StartDragProps
-} from '../types/layoutEditorTypes'
+} from '../types/layoutEditorTypes';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
@@ -750,7 +751,15 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             let typeName = rackItem;
             const isDefault = isRackDefault(rackItem.object_type);
             const rackPrefix = isDefault ?  'default-rack' : 'rack';
-
+            let extraContext: ExtraContext;
+            let rackId = rackItem?.rack;
+            console.log("Here")
+            if(rackItem.extra_context){
+                extraContext = JSON.parse(rackItem.extra_context);
+                if(extraContext?.rack?.rackId){
+                    rackId = extraContext.rack.rackId;
+                }
+            }
             if(!isDefault){
                 const optConfig: SelectRowsOptions = {
                     schemaName: "cageui",
@@ -787,10 +796,11 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 selectionType: 'rack',
                 cages: [],
                 isActive: !isDefault,
-                itemId: `${rackPrefix}-${rackItem.rack}`,
+                itemId: `${rackPrefix}-${rackId}`,
                 type: type,
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
-                y: rackItem.y_coord - rackGroup.y
+                y: rackItem.y_coord - rackGroup.y,
+                extraContext: extraContext?.rack
             };
             rackGroup.racks.push(rack);
         }
@@ -800,14 +810,18 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
     const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
         let cageNumType: RoomItemStringType;
+        let extraContext: ExtraContext;
         if(rack.type.isDefault){
             cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
         }else{
             cageNumType = roomItemToString(rackItem.object_type);
         }
+        if(rackItem.extra_context){
+            extraContext = JSON.parse(rackItem.extra_context);
+        }
         const cage: Cage = {
             cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber,
-            extraContext: rackItem.extra_context ? JSON.parse(rackItem.extra_context) : null,
+            extraContext: extraContext?.cage,
             selectionType: 'cage',
             id: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group

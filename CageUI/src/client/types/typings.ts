@@ -1,4 +1,4 @@
-import { GateContext } from './layoutEditorTypes';
+import { ExtraContext, GateContext } from './layoutEditorTypes';
 
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
@@ -24,7 +24,7 @@ export interface Cage {
     cageNum: CageNumber; // Id local to room
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
-    extraContext?: string; // extra context if needed for cage
+    extraContext?:  {[key: string]: any}; // extra context if needed for cage
 }
 
 export interface Room {
@@ -77,6 +77,7 @@ export interface Rack {
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
     isActive?: boolean; // Determines if rack is "in use or active"
+    extraContext?: {[key: string]: any};
 }
 
 export interface RoomObject {

@@ -14,6 +14,10 @@ export type DeleteActions = 'cage' | 'rack' | 'group';
 export type SelectedObj = RoomItem | RackGroup | Cage;
 
 
+export interface ExtraContext {
+    cage?: {[key: string]: any};
+    rack?: {[key: string]: any};
+}
 
 export interface LayoutSaveResult {
     status: string;

@@ -20,7 +20,7 @@ import {
     UnitType
 } from '../types/typings';
 import {
-    DeleteActions,
+    DeleteActions, ExtraContext,
     LayoutSaveResult,
     RackActions,
     SelectedObj
@@ -647,7 +647,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         if(prevRoom.room.rackGroups.length !== 0){
             lastGroup = prevRoom.room.rackGroups[prevRoom.room.rackGroups.length - 1].groupId;
         }
-
         if (lastGroup){
             setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
         }else{
@@ -658,6 +657,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
         setLocalRoom(prevRoom.room);
         setRoom(prevRoom.room);
+        console.log("Prev Room: ", prevRoom);
         setIsLoading(false);
     }, [prevRoom]);
 
@@ -693,15 +693,26 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         localRoom.rackGroups.forEach((group) => {
             const groupId = parseLongId(group.groupId);
             group.racks.forEach((rack) => {
-                // if rack is a default, assign rack id to 0(default id) and use the defaults id as id in default_rack
                 const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseInt(rack.itemId);
                 rack.cages.forEach((cage) => {
                     const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.num === cage.cageNum);
+                    let extraContext: ExtraContext = {};
+                    // set up cage extra context
+                    if(cage.extraContext){
+                        extraContext.cage = {};
+                        extraContext.cage.context = cage.extraContext;
+                    }
+                    // set up rack extra context
+                    if(rack.type.isDefault){
+                        extraContext.rack = {};
+                        extraContext.rack.rackId = newRackId; // room id is for rebuilding a layout for default racks
+                    }
+
                     const newCageData: LayoutHistoryData = {
                         cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
                         end_date: null,
-                        extra_context: cage.extraContext ? JSON.stringify(cage.extraContext) : null,
-                        rack: newRackId,
+                        extra_context: Object.keys(extraContext).length !== 0 ? JSON.stringify(extraContext) : null,
+                        rack: rack.type.isDefault ? null : newRackId,
                         object_type: rack.type.isDefault ? rackTypeToDefaultType(rack.type.type) : rack.type.type,
                         rack_group: groupId,
                         room: roomName,

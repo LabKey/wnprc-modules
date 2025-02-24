@@ -123,9 +123,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         delObject,
     } = useLayoutEditorContext();
 
-    useEffect(() => {
-        console.log(localRoom);
-    }, [localRoom]);
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
 

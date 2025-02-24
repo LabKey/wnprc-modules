@@ -753,7 +753,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             const rackPrefix = isDefault ?  'default-rack' : 'rack';
             let extraContext: ExtraContext;
             let rackId = rackItem?.rack;
-            console.log("Here")
             if(rackItem.extra_context){
                 extraContext = JSON.parse(rackItem.extra_context);
                 if(extraContext?.rack?.rackId){

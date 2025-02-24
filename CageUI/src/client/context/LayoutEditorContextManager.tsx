@@ -697,6 +697,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 rack.cages.forEach((cage) => {
                     const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.num === cage.cageNum);
                     let extraContext: ExtraContext = {};
+
                     // set up cage extra context
                     if(cage.extraContext){
                         extraContext.cage = {};

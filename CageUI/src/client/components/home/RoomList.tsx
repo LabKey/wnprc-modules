@@ -17,20 +17,17 @@ export const RoomList: FC = () => {
     const [allRooms, setAllRooms] = useState<Room[]>([]); // Stores all items fetched on load
     const [visibleRooms, setVisibleRooms] = useState<Room[]>([]); // Items currently visible
     const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 20; // Number of items to load per scroll
 
     const handleSearch = (e) => {
         setSearchQuery(e.target.value);
-        setPage(1);
     };
 
     useEffect(() => {
         console.log("Expanded Rooms: ", expandedRooms);
         console.log("Expanded Racks: ", expandedRacks);
-    }, [expandedRooms, expandedRacks]);
+        console.log("Visible Rooms: ", visibleRooms);
+    }, [expandedRooms, expandedRacks, visibleRooms]);
 
     // Filter items based on search query
     useEffect(() => {
@@ -38,28 +35,11 @@ export const RoomList: FC = () => {
             const filteredItems = allRooms.filter((item) =>
                 item.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
-            setVisibleRooms(filteredItems.slice(0, itemsPerPage * page)); // Reset visible items
-            setHasMore(filteredItems.length > itemsPerPage * page);
+            setVisibleRooms(filteredItems);
         } else {
-            setVisibleRooms(allRooms.slice(0, itemsPerPage * page));
-            setHasMore(allRooms.length > itemsPerPage * page);
+            setVisibleRooms(allRooms);
         }
-    }, [searchQuery, page, allRooms]);
-
-    const handleScroll = useCallback(
-        _.throttle(() => {
-            if (
-                window.innerHeight + document.documentElement.scrollTop !==
-                document.documentElement.offsetHeight ||
-                loading ||
-                !hasMore
-            ) {
-                return;
-            }
-            setPage((prevPage) => prevPage + 1);
-        }, 300),
-        [loading, hasMore]
-    );
+    }, [searchQuery, allRooms]);
 
     useEffect(() => {
         selectDistinctRows({schemaName: "ehr_lookups", queryName: "rooms", column: "room"}).then((d) => {
@@ -78,12 +58,6 @@ export const RoomList: FC = () => {
         });
     }, []);
 
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [handleScroll]);
-
-
     const toggleExpandRoom = async (roomId) => {
 
         // Check if room has been expanded yet, if not, fetch rack data for that room
@@ -95,11 +69,39 @@ export const RoomList: FC = () => {
                 filterArray: [
                     Filter.create('room', roomId, Filter.Types.EQUALS),
                     Filter.create('end_date', null, Filter.Types.ISBLANK),
-                    Filter.create('rack', null, Filter.Types.NONBLANK)]
+                    Filter.create('cage', null, Filter.Types.NONBLANK)]
             });
             console.log("Racks: ", racks);
             if(racks.rowCount > 0){
-                //TODO set racks into room state
+                setAllRooms((prevRooms) => prevRooms.map((room) => {
+                    // add racks to room state, only once when first clicked
+                    if(room.name === roomId){
+                        const tempRacks: RoomRack[] = [];
+                        racks.rows.forEach((row) => {
+                            const rackId = row.rack ? row.rack : JSON.parse(row.extra_context).rack.rackId;
+                            const rackIdx = tempRacks.findIndex((rack) => rack.id === rackId);
+                            // if rack was already added, just add cage, otherwise add rack and cage
+                            if(rackIdx !== -1){
+                                tempRacks[rackIdx] = {
+                                    ...tempRacks[rackIdx],
+                                    cages: [...tempRacks[rackIdx].cages, {
+                                        id: parseInt(row.cage),
+                                    }]
+                                }
+                            }else{
+                                tempRacks.push({
+                                    id: rackId,
+                                    cages: [{id: parseInt(row.cage)}],
+                                });
+                            }
+                        })
+                        return {
+                            ...room,
+                            racks: tempRacks,
+                        }
+                    }
+                    return room;
+                }))
             }
         }
 
@@ -120,21 +122,21 @@ export const RoomList: FC = () => {
 
     const handleRoomClick = (room: Room) => {
         console.log("Room: ", room, expandedRooms);
-        //setSelectedPage({mainView: "Room", subViewId: room.name});
-        toggleExpandRoom(room.name);
+        setSelectedPage({mainView: "Room", subViewId: room.name});
     }
 
 
 
     return (
-        <div>
+        <div className={'room-list'}>
             <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
+                className={'room-search'}
                 onChange={handleSearch}
             />
-            <ul>
+            <ul className={'room-list-items'}>
                 {visibleRooms.map((room, index) => (
                     <div key={room.name} className={"room-dir-room-obj"}>
                         <div
@@ -152,7 +154,7 @@ export const RoomList: FC = () => {
                                             onClick={() => setSelectedPage({mainView: "Rack", subViewId: `${room.name}_${rack.id}`})}
                                             className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
                                         >
-                                            Rack {rack.name}
+                                            Rack {rack.id}
                                             <span className="arrow" onClick={() => toggleExpandRack(room.name, rack.id)}></span>
                                         </div>
                                         {expandedRacks[`${room.name}_${rack.id}`] && (
@@ -163,7 +165,7 @@ export const RoomList: FC = () => {
                                                             onClick={() => setSelectedPage({mainView: "Cage", subViewId: `${room.name}_${rack.id}_${cage.id}`})}
                                                             className={"room-dir-cage-obj"}
                                                         >
-                                                            Cage {cage.name}
+                                                            Cage {cage.id}
                                                         </div>
                                                     </li>
                                                 ))}
@@ -177,7 +179,6 @@ export const RoomList: FC = () => {
                 ))}
             </ul>
             {loading && <p>Loading...</p>}
-            {!hasMore && <p>No more items</p>}
         </div>
     );
 }

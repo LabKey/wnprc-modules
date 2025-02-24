@@ -16,12 +16,10 @@ export interface SubPage {
 
 export interface RoomCage {
     id: number;
-    name: string;
 }
 
 export interface RoomRack {
     id: number;
-    name: string;
     cages: RoomCage[];
 }
 

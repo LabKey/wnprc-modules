@@ -2457,7 +2457,7 @@ public class TriggerScriptHelper {
         //service = ti.getUpdateService();
 
         //if(errorMap.get(animalId)!= null &&  !"ERROR".equals(errorMap.get(animalId).get("severity")))
-        if(!arrayOfErrors.isEmpty() &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
+        if(!rowToAdd.isEmpty() || (!arrayOfErrors.isEmpty() &&  !"ERROR".equals(returnHighestError(arrayOfErrors))))
         {
             try
             {

@@ -1595,6 +1595,27 @@
         return configObject;
     }
 
+    function queryConfigLoadFunc(fetchInfo, animalId){
+        let momentStarDate = fetchInfo.start.format('Y-m-d');
+        let momentEndDate = fetchInfo.end.format('Y-m-d');
+
+        let configObject = {
+            "date~gte": fetchInfo.start.format('Y-m-d'),
+            "date~lte": fetchInfo.end.format('Y-m-d'),
+            "parameters": { STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate },
+        };
+
+        if (animalId){
+            configObject["Id~in"]=animalId;
+        }
+
+        if (allowProjects !== ""){
+            configObject["project~in"]=allowProjects;
+        }
+
+        return configObject;
+    }
+
     function deleteWaterAmount(currentModel,event,clientObjectId,divId){
         if (!clientObjectId){
             clientObjectId = selectedEvent.extendedProps.rawRowData.objectIdCoalesced;
@@ -1676,15 +1697,10 @@
 
                         if (animalId === 'undefined' || animalId === "null" || animalId === '') {
 
-                            let momentStarDate = fetchInfo.start.format('Y-m-d');
-                            let momentEndDate = fetchInfo.end.format('Y-m-d');
+                            let queryConfigLoad = {};
+                            queryConfigLoad = queryConfigLoadFunc(fetchInfo, animalId);
 
-                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
-                                "date~gte": fetchInfo.start.format('Y-m-d'),
-                                "date~lte": fetchInfo.end.format('Y-m-d'),
-                                "parameters": { STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate }
-
-                            }).then(function (data) {
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", queryConfigLoad).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(
@@ -1760,14 +1776,11 @@
                             })
 
                         } else {
-                            let momentStarDate = fetchInfo.start.format('Y-m-d');
-                            let momentEndDate = fetchInfo.end.format('Y-m-d');
-                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
-                                "date~gte": fetchInfo.start.format('Y-m-d'),
-                                "date~lte": fetchInfo.end.format('Y-m-d'),
-                                "parameters": { STARTTARGET: momentStarDate, ENDTARGETDATE: momentEndDate },
-                                "Id~in": animalId
-                            }).then(function (data) {
+
+                            let queryConfigLoad = {};
+                            queryConfigLoad = queryConfigLoadFunc(fetchInfo, animalId);
+
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", queryConfigLoad).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(

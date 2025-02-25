@@ -7,16 +7,15 @@ import { ReactSVG } from 'react-svg';
 interface RoomItemTemplateProps {
     fileName: string,
     className?: string
-    type: RoomItemStringType;
 }
 export const RoomItemTemplate: FC<RoomItemTemplateProps> = (props) => {
-    const {fileName, className, type} = props;
+    const {fileName, className} = props;
 
     return (
-        <div id={`${type}-template`}>
+        <div id={`${fileName}-template`}>
             <ReactSVG
                 src={`${ActionURL.getContextPath()}/cageui/static/${fileName}.svg`}
-                id={`${type}_template_wrapper`}
+                id={`${fileName}_template_wrapper`}
                 wrapper={'svg'}
                 className={className}
                 width={'250'}

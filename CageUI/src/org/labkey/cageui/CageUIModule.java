@@ -58,12 +58,6 @@ public class CageUIModule extends ExtendedSimpleModule
     }
 
     @Override
-    public boolean hasScripts()
-    {
-        return false;
-    }
-
-    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {

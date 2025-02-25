@@ -119,7 +119,7 @@ export enum RoomObjectTypes {
     RoomDivider = 100,
     Drain = 101,
     Door = 102,
-    Gate = 103,
+    GateClosed = 103,
 }
 
 export interface LocationCoords {

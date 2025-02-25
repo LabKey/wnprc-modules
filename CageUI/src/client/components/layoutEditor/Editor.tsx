@@ -420,12 +420,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             const transform = d3.zoomTransform(layoutSvg.node());
             // Discovers the grid cell to lock onto
             const targetRect = getTargetRect(x, y, CELL_SIZE, transform);
+
+            const draggedNodeId = draggedShape.attr('id');
+            const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
+
             if (targetRect) {
                 const cellX = Math.max(0,targetRect.x);
                 const cellY = Math.max(0,targetRect.y);
-                const draggedNodeId = draggedShape.attr('id');
 
-                const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
                 let newId: string;
 
                 if(isRackEnum(updateItemType)){
@@ -442,7 +444,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     const tempId = localRoom.objects.reduce((max, obj) => {
                         return  parseRoomItemNum(obj.itemId)> max ? parseRoomItemNum(obj.itemId) : max;
                     }, 0) + 1;
-                    newId = `default-object-${tempId}`;
+                    newId = `${parseWrapperId(draggedNodeId)}-${tempId}`;
                 }
                 setPendingRoomUpdate({
                     draggedShape: draggedShape,
@@ -740,11 +742,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             setShowSaveResult(null);
             window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
-                'cageui-editLayout',
+                'editLayout',
                 ActionURL.getContainer(),
                 {room: roomName}
             )
-
         }
     }
 
@@ -771,29 +772,25 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Door"}>
                         <RoomItemTemplate
-                            type={roomItemToString(RoomObjectTypes.Door)}
                             fileName={"door"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Drain"}>
                         <RoomItemTemplate
-                            type={roomItemToString(RoomObjectTypes.Drain)}
                             fileName={"drain"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Divider"}>
                         <RoomItemTemplate
-                            type={roomItemToString(RoomObjectTypes.RoomDivider)}
-                            fileName={"RoomDivider"}
+                            fileName={"roomDivider"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Room Gate"}>
                         <RoomItemTemplate
-                            type={roomItemToString(RoomObjectTypes.Gate)}
-                            fileName={"GateClosed"}
+                            fileName={"gateClosed"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
@@ -801,15 +798,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <div className={'cage-templates'}>
                     <LayoutTooltip text={"Single Cage"}>
                         <RoomItemTemplate
-                            type={roomItemToString(RackTypes.Cage)}
-                            fileName={"SingleCageRack"}
+                            fileName={"cage"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
                     <LayoutTooltip text={"Pen"}>
                         <RoomItemTemplate
-                            type={roomItemToString(RackTypes.Pen)}
-                            fileName={"Pen"}
+                            fileName={"pen"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
@@ -958,7 +953,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                             selectedObj={selectedObj}
                             setLocalRoom={setLocalRoom}
                         />,
-                        types: [RoomObjectTypes.Gate],
+                        types: [RoomObjectTypes.GateClosed],
                      }]}
                 />
             }

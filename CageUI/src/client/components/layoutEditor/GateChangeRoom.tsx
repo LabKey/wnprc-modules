@@ -28,7 +28,7 @@ export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
             let initalRoom: Option<number>;
             let foundGate: RoomObject;
             localRoom.objects.forEach((obj) => {
-                if(obj.type === RoomObjectTypes.Gate && obj.itemId === (selectedObj as RoomObject).itemId){
+                if(obj.type === RoomObjectTypes.GateClosed && obj.itemId === (selectedObj as RoomObject).itemId){
                     foundGate = obj;
                 }
             })

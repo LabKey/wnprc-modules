@@ -4405,18 +4405,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertTrue(layoutSvg.isDisplayed());
 
         // Puts a cage on the layout and ensures it exists
-        getDriver().findElement(By.id("cage_template_wrapper-svg")).click();
-        WebElement cage = getDriver().findElement(By.id("default-rack-1"));
+        getDriver().findElement(By.id("cage_template_wrapper")).click();
+        WebElement cage = waitForElement(Locator.id("default-rack-1"), 10000);
         assertTrue(cage.isDisplayed());
 
         // Puts a door on the layout and ensures it exists
         getDriver().findElement(By.id("door_template_wrapper")).click();
-        WebElement door = getDriver().findElement(By.id("default-object-1"));
+        WebElement door = getDriver().findElement(By.id("door-1"));
         assertTrue(door.isDisplayed());
 
         // Click save and select room
         getDriver().findElement(By.id("saveLayoutBtn")).click();
-        getDriver().findElement(By.className("[class*='-control']")).click();
+        getDriver().findElement(By.xpath("//div[contains(@class, '-control')]")).click();
         getDriver().findElement(By.id("react-select-2-option-0")).click();
         // Click confirm button
         WebElement btnDiv = getDriver().findElement(By.className("popup-buttons"));
@@ -4428,19 +4428,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         btns.get(0).click();
 
         // Click close on success
-        btnDiv = waitForElement(Locator.byClass("popup-buttons"), 20000);
+        btnDiv = waitForElement(Locator.byClass("popup-buttons"), 10000);
         btns = btnDiv.findElements(By.tagName("button"));
         btns.get(0).click();
 
         // Wait for redirect and ensure page is loaded
-        layoutSvg = waitForElement(Locator.id("layout-svg"), 20000);
+        layoutSvg = waitForElement(Locator.id("layout-svg"), 10000);
         Assert.assertTrue(layoutSvg.isDisplayed());
 
         // Ensure cage and door loaded in correctly
-        cage = getDriver().findElement(By.id("default-rack-1"));
+        cage = waitForElement(Locator.id("default-rack-1"), 10000);
         assertTrue(cage.isDisplayed());
-        door = getDriver().findElement(By.id("default-object-1"));
+        door = getDriver().findElement(By.id("door-1"));
         assertTrue(door.isDisplayed());
-
     }
 }

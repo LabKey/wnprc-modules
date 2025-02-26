@@ -4,7 +4,7 @@ import '../../cageui.scss';
 import _ from 'lodash';
 import { selectDistinctRows, selectRows } from '@labkey/components';
 import { useHomeContext } from '../../context/HomeContextManager';
-import { ExpandedRooms, Room, RoomRack } from '../../types/homeTypes';
+import { ExpandedRooms, Room, RoomCage, RoomRack } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Filter } from '@labkey/api';
 
@@ -121,8 +121,27 @@ export const RoomList: FC = () => {
     };
 
     const handleRoomClick = (room: Room) => {
-        console.log("Room: ", room, expandedRooms);
-        setSelectedPage({mainView: "Room", subViewId: room.name});
+        setSelectedPage({
+            selected: "Room",
+            room: room.name
+        });
+    }
+
+    const handleRackClick = (room: Room, rack: RoomRack) => {
+        setSelectedPage({
+            selected: "Rack",
+            room: room.name,
+            rack: rack.id.toString(),
+        });
+    }
+
+    const handleCageClick = (room: Room, rack: RoomRack, cage: RoomCage) => {
+        setSelectedPage({
+            selected: "Cage",
+            room: room.name,
+            rack: rack.id.toString(),
+            cage: cage.id.toString()
+        });
     }
 
 
@@ -151,7 +170,7 @@ export const RoomList: FC = () => {
                                 {room?.racks?.map((rack) => (
                                     <li key={`${room.name}_${rack.id}`}>
                                         <div
-                                            onClick={() => setSelectedPage({mainView: "Rack", subViewId: `${room.name}_${rack.id}`})}
+                                            onClick={() => handleRackClick(room, rack)}
                                             className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
                                         >
                                             Rack {rack.id}
@@ -162,7 +181,7 @@ export const RoomList: FC = () => {
                                                 {rack.cages.map((cage) => (
                                                     <li key={`${room.name}_${rack.id}_${cage.id}`}>
                                                         <div
-                                                            onClick={() => setSelectedPage({mainView: "Cage", subViewId: `${room.name}_${rack.id}_${cage.id}`})}
+                                                            onClick={() => handleCageClick(room, rack, cage)}
                                                             className={"room-dir-cage-obj"}
                                                         >
                                                             Cage {cage.id}

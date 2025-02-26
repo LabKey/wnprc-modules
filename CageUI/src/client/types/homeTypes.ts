@@ -1,7 +1,7 @@
 import { Cage } from './typings';
 
 
-type SubPageViews = "Room" | "Rack" | "Cage";
+type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
 export type CagePosition = "top" | "bottom" | "none";
 
@@ -9,9 +9,11 @@ export type ExpandedRooms = {
     [key: string]: boolean;
 }
 
-export interface SubPage {
-    mainView: SubPageViews;
-    subViewId: string;
+export interface SelectedPage {
+    selected: SelectedViews
+    room?: string;
+    rack?: string;
+    cage?: string;
 }
 
 export interface RoomCage {

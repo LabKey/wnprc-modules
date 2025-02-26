@@ -742,24 +742,6 @@ margin-bottom: 10px;
   height: 100vh; /* Full viewport height */
   width: 100%; /* Full viewport width */
 }
-
-
-
-.page-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 90%; /* Adjust width as needed */
-}
-
-.page-map {
-  height: 5%; /* Adjust height as needed */
-  border: 1px solid black;
-}
-
-.page-content {
-  flex-grow: 1;
-  border: 1px solid black;
-}
 // Editor Context menu
 
 
@@ -900,9 +882,47 @@ margin-bottom: 10px;
 
 // Home Room Styles
 
+// START CSS FOR HOME
 
-// CSS for home view list of rooms
+.page-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 90%; /* Adjust width as needed */
+}
 
+.page-content {
+  flex-grow: 1;
+  border: 1px solid black;
+}
+
+.page-map {
+  height: 3vh; /* Adjust height as needed */
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.page-map-url {
+  text-align: center;
+  padding: 2px;
+  font-size: large;
+  display: flex;
+  flex-direction: row;
+}
+
+.page-map-link {
+  padding-right: 10px;
+  padding-left: 10px;
+  color: -webkit-link;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+// END CSS FOR HOME
+
+
+// START CSS FOR ROOM LIST
 .room-list {
   display: flex;
   flex-direction: column;
@@ -976,7 +996,7 @@ margin-bottom: 10px;
   width: 100%;
   border: 3px solid #9DBFAF;
   padding: 5px;
-  height: 30px;
+  height: 3vh;
   border-radius: 5px 0 0 5px;
   outline: none;
 }
@@ -984,3 +1004,4 @@ margin-bottom: 10px;
 .room-search:focus{
   border-color: #00B4CC;
 }
+// END CSS FOR ROOM LIST

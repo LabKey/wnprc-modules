@@ -311,7 +311,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         if (total == 0 && !includeFuture){
             msg.append("All " + timeofday + " water orders are completed");
         }else if(timeofday.equals("AM")){
-            msg.append("<p><b>INFO: It is too early for any incomplete water orders.</b><br>");
+            msg.append("<p><b>INFO: It is too early to notify about PM or anytime water orders.</b><br>");
         }else if(total > 0){
             if(includeFuture && timeofday.equals("PM")){
                 msg.append("<p><b>There are "+total+ " water orders that are scheduled for today and have not been completed</b><br>");

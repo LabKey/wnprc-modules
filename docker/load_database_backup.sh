@@ -259,7 +259,7 @@ fi
 # postgresql configuration rather than the 'restore' one
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
-  docker compose down -v
+  docker compose down -v --timeout 60
   unset PG_CONF_FILE
   docker compose up -d postgres
 fi

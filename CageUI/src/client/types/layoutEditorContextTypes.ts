@@ -18,10 +18,12 @@ import {
     SelectedObj
 } from './layoutEditorTypes';
 import * as d3 from 'd3';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 export interface LayoutContextProps {
     children: ReactNode;
     prevRoom: {room: Room, locs: UnitLocations, data: LayoutHistoryData[]};
+    user: GetUserPermissionsResponse;
 }
 
 export interface LayoutContextType {
@@ -47,4 +49,5 @@ export interface LayoutContextType {
     setScale: React.Dispatch<React.SetStateAction<number>>;
     changeRack: (newType: {value: string, label: string}) => void;
     clearGrid: () => void;
+    user: GetUserPermissionsResponse;
 }

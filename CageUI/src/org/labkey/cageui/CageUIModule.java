@@ -28,13 +28,16 @@ import org.labkey.api.module.Module;
 import org.labkey.cageui.query.CageUIUserSchema;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
-import org.labkey.cageui.security.permissions.CageUILayoutEditorCreatorPermission;
-import org.labkey.cageui.security.permissions.CageUILayoutEditorPermission;
-import org.labkey.cageui.security.permissions.CageUILayoutTemplateEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
+import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
+import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIUserPermission;
 import org.labkey.cageui.security.roles.CageUIAdminRole;
+import org.labkey.cageui.security.roles.CageUIModificationEditorRole;
+import org.labkey.cageui.security.roles.CageUIRoomCreatorRole;
+import org.labkey.cageui.security.roles.CageUIRoomModifierRole;
 
 
 import java.util.Collection;
@@ -73,9 +76,9 @@ public class CageUIModule extends ExtendedSimpleModule
     }
 
     private void registerPermissions() {
-        RoleManager.registerPermission(new CageUILayoutEditorCreatorPermission());
-        RoleManager.registerPermission(new CageUILayoutEditorPermission());
-        RoleManager.registerPermission(new CageUILayoutTemplateEditorPermission());
+        RoleManager.registerPermission(new CageUIRoomCreatorPermission());
+        RoleManager.registerPermission(new CageUIRoomModifierPermission());
+        RoleManager.registerPermission(new CageUITemplateCreatorPermission());
         RoleManager.registerPermission(new CageUIAnimalEditorPermission());
         RoleManager.registerPermission(new CageUIAnimalReviewerPermission());
         RoleManager.registerPermission(new CageUIModificationEditorPermission());
@@ -86,8 +89,10 @@ public class CageUIModule extends ExtendedSimpleModule
 
     public void registerRoles() {
         RoleManager.registerRole(new CageUIAdminRole());
+        RoleManager.registerRole(new CageUIRoomCreatorRole());
+        RoleManager.registerRole(new CageUIRoomModifierRole());
+        RoleManager.registerRole(new CageUIModificationEditorRole());
     }
-
 
     @Override
     @NotNull

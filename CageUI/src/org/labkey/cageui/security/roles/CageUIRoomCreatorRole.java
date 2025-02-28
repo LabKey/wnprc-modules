@@ -9,15 +9,13 @@ import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission
 import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
-import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
-public class CageUIAdminRole extends AbstractRole
+public class CageUIRoomCreatorRole extends AbstractRole
 {
 
-    public CageUIAdminRole(){
-        this("Cage UI Admin",
-                "Administrator role for Cage UI",
-                CageUITemplateCreatorPermission.class,
+    public CageUIRoomCreatorRole(){
+        this("Cage UI Room Creator",
+                "Room creator role for Cage UI",
                 CageUIRoomModifierPermission.class,
                 CageUIRoomCreatorPermission.class,
                 CageUIAnimalEditorPermission.class,
@@ -27,7 +25,7 @@ public class CageUIAdminRole extends AbstractRole
         );
     }
 
-    protected CageUIAdminRole(String name, String description, Class<? extends Permission>... perms) {
+    protected CageUIRoomCreatorRole(String name, String description, Class<? extends Permission>... perms) {
         super(name, description, CageUIModule.class, perms);
     }
 

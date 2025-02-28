@@ -3,14 +3,16 @@ import { FC, useEffect, useState } from 'react';
 import { RoomHeader } from '../../components/layoutEditor/RoomHeader';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../../cageui.scss';
-import { ActionURL, Filter } from '@labkey/api';
+import { ActionURL, Filter, UserWithPermissions } from '@labkey/api';
 import { LayoutData, LayoutHistoryData, PrevRoom, Room, UnitLocations } from '../../types/typings';
 import { LayoutEditorContextProvider } from '../../context/LayoutEditorContextManager';
 import Editor from '../../components/layoutEditor/Editor';
-import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
+import { labkeyActionSelectWithPromise, labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
 import { buildNewLocalRoom, buildNewLocs } from '../../utils/LayoutEditorHelpers';
+import {Security} from '@labkey/api';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 export const LayoutEditor: FC<any> = () => {
     const roomName = ActionURL.getParameter("room");
@@ -20,6 +22,8 @@ export const LayoutEditor: FC<any> = () => {
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [userProfile, setUserProfile] = useState<GetUserPermissionsResponse>(null);
+
 
     // These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
     const roomSizeOptions = [
@@ -42,6 +46,20 @@ export const LayoutEditor: FC<any> = () => {
             description: "Large room size fitting up to 17x8 cages"
         }
     ];
+
+    useEffect(() => {
+        const userProfile = labkeyGetUserPermissions();
+        userProfile.then((profile: GetUserPermissionsResponse) => {
+            if(profile.user){
+                setUserProfile(profile);
+                console.log("Test2: ", Security.hasEffectivePermission(profile.container.effectivePermissions,'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission'));
+                console.log("User profile", profile.user);
+                console.log("User container", profile.container);
+            }
+        }).catch((e) => {
+            console.error(e);
+        })
+    }, []);
 
     // Loads prev room into memory if it exists
     useEffect(() => {
@@ -138,9 +156,10 @@ export const LayoutEditor: FC<any> = () => {
         }
     }, [prevRoomData]);
 
-    return !isLoading ? (
+    return (!isLoading || !userProfile) ? (
             <LayoutEditorContextProvider
                 prevRoom={prevRoom}
+                user={userProfile}
                 children={
                     <div className={"room-container"}>
                         <RoomHeader

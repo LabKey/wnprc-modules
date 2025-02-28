@@ -41,7 +41,7 @@ import {
     findRackInGroup,
     getLayoutOffset,
     getTargetRect,
-    isRackEnum,
+    isRackEnum, isTemplateCreator,
     mergeRacks,
     parseWrapperId,
     placeAndScaleGroup,
@@ -121,6 +121,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         changeRack,
         clearGrid,
         delObject,
+        user
     } = useLayoutEditorContext();
 
     const contextMenuRef = useRef(localRoom);
@@ -857,12 +858,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     onClick={handleClear}
                 >Clear Layout
                 </button>
-                <button
-                    id={'saveTemplateBtn'}
-                    className={"layout-toolbar-btn"}
-                    onClick={() => {setTemplateOptions(true); setShowRoomSelector(true);}}
-                >Save as Template
-                </button>
+                { isTemplateCreator(user) &&
+                    <button
+                            id={'saveTemplateBtn'}
+                            className={"layout-toolbar-btn"}
+                            onClick={() => {setTemplateOptions(true); setShowRoomSelector(true);}}
+                    >Save as Template
+                    </button>
+                }
                 <button
                     id={'loadTemplateBtn'}
                     className={"layout-toolbar-btn"}

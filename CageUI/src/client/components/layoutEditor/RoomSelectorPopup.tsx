@@ -34,7 +34,7 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
             columns: ['room', 'rowid'],
-            filterArray: template ? [Filter.create('room', 'template', Filter.Types.CONTAINS)] : []
+            filterArray: template ? [Filter.create('room', 'template', Filter.Types.CONTAINS)] : [Filter.create('room', 'template', Filter.Types.DOES_NOT_CONTAIN)]
         }
 
         labkeyActionSelectWithPromise(roomsConfig).then(result => {

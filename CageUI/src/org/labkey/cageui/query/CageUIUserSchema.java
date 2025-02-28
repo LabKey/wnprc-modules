@@ -1,6 +1,5 @@
 package org.labkey.cageui.query;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -8,53 +7,86 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.DeletePermission;
-import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.cageui.CageUISchema;
-/*
-import org.labkey.ehr.query.EHRContainerScopedTable;
-import org.labkey.ehr.query.EHRCustomPermissionsTable;
-import org.labkey.ehr.query.EHRDataEntryTable;
-*/
+import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
+import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 public class CageUIUserSchema extends SimpleUserSchema
 {
+    public static final String NAME = "cageui";
+    public static final String LAYOUT_HISTORY_TABLE = "layout_history";
+    public static final String RACK_TYPES_TABLE = "rack_types";
+    public static final String RACKS_TABLE = "racks";
+
     public CageUIUserSchema(User user, Container container, DbSchema dbschema)
     {
         super(CageUISchema.NAME, "Cage UI Tables", user, container, dbschema);
     }
 
-//    @Override
-//    @Nullable
-//    protected TableInfo createWrappedTable(String name, @NotNull TableInfo schemaTable, ContainerFilter cf)
-//    {
-//        if (CageUISchema.TABLE_LAYOUT_HISTORY.equalsIgnoreCase(name))
-//            return getDataEntryTable(schemaTable, cf);
-//        return super.createWrappedTable(name, schemaTable, cf);
-//    }
-//
-//    private TableInfo getDataEntryTable(TableInfo schemaTable, ContainerFilter cf)
-//    {
-//        return new EHRDataEntryTable<>(this, schemaTable, cf).init();
-//    }
-//
-//    private TableInfo getCustomPermissionTable(TableInfo schemaTable, ContainerFilter cf, Class<? extends Permission> perm)
-//    {
-//        EHRCustomPermissionsTable<CageUIUserSchema> ret = new EHRCustomPermissionsTable<>(this, schemaTable, cf);
-//        ret.addPermissionMapping(InsertPermission.class, perm);
-//        ret.addPermissionMapping(UpdatePermission.class, perm);
-//        ret.addPermissionMapping(DeletePermission.class, perm);
-//        return ret.init();
-//    }
-//
-//    private TableInfo getContainerScopedTable(TableInfo schemaTable, ContainerFilter cf, String psuedoPk, Class<? extends Permission> perm)
-//    {
-//        EHRContainerScopedTable<CageUIUserSchema> ret = new EHRContainerScopedTable<>(this, schemaTable, cf, psuedoPk);
-//        ret.addPermissionMapping(InsertPermission.class, perm);
-//        ret.addPermissionMapping(UpdatePermission.class, perm);
-//        ret.addPermissionMapping(DeletePermission.class, perm);
-//        return ret.init();
-//    }
+    public enum TableType
+    {
+        layout_history
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        if (schema.getContainer().hasPermission(schema.getUser(), CageUITemplateCreatorPermission.class) ||
+                                schema.getContainer().hasPermission(schema.getUser(), CageUIRoomCreatorPermission.class))
+                        {
+                            return new LayoutHistoryTable(schema, CageUISchema.getInstance().getLayoutHistoryTable(), cf).init();
+                        }
+
+                        return null;
+                    }
+                },
+        rack_types
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        return new SimpleUserSchema.SimpleTable<>(schema, CageUISchema.getInstance().getRackTypesTable(), cf).init();
+                    }
+                },
+        racks
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        // Only make this table visible to anyone with CageUILayoutEditorUserPermission (this includes folder admins)
+                        if (schema.getContainer().hasPermission(schema.getUser(), CageUITemplateCreatorPermission.class) ||
+                                schema.getContainer().hasPermission(schema.getUser(), CageUIRoomCreatorPermission.class))
+                        {
+                            return new RacksTable(schema, CageUISchema.getInstance().getRacksTable(), cf).init();
+                        }
+
+                        return null;
+                    }
+                };
+
+        public abstract TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf);
+    }
+
+    @Override
+    @Nullable
+    public TableInfo createTable(String name, ContainerFilter cf)
+    {
+        if (name != null)
+        {
+            TableType tableType = null;
+            for (TableType t : TableType.values())
+            {
+                // Make the enum name lookup case insensitive
+                if (t.name().equalsIgnoreCase(name))
+                {
+                    tableType = t;
+                    break;
+                }
+            }
+            if (tableType != null)
+            {
+                return tableType.createTable(this, cf);
+            }
+        }
+        return super.createTable(name, cf);
+    }
 }

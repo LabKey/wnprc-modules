@@ -42,8 +42,23 @@ import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { Filter, Security } from '@labkey/api';
 import {stringToRoomItem, roomItemToString} from './helpers';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+
+
+export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
+}
+
+export const isRoomCreator = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
+}
+
+export const isRoomModifier = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
+}
+
 
 export const getTranslation = (transform) => {
     // Regex to extract the translate(x, y) values

@@ -1,6 +1,7 @@
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { ActionURL, Query } from '@labkey/api';
+import { ActionURL, Query, Security } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
+import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
 
 export function labkeyActionSelectWithPromise(
     options: SelectRowsOptions
@@ -44,3 +45,21 @@ export const labkeySaveRows = (commands: Command[]):Promise<SaveRowsResponse> =>
         Query.saveRows(options);
     });
 };
+
+export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => {
+    return new Promise((resolve, reject) => {
+        const options: GetUserPermissionsOptions = {
+            ...config,
+            success: (data) => {resolve(data)},
+            failure: (data) => {reject(data)},
+        }
+        const req = Security.getUserPermissions(options);
+        req.onload = () => {
+            if (req.status >= 200 && req.status < 300) {
+                resolve(JSON.parse(req.responseText)); // Parse JSON response
+            }else{
+                reject(new Error(`${req.status}`));
+            }
+        };
+    })
+}

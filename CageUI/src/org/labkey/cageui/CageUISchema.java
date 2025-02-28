@@ -20,6 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.TableInfo;
+import org.labkey.cageui.query.CageUIUserSchema;
 
 
 public class CageUISchema {
@@ -44,6 +46,21 @@ public class CageUISchema {
     public DbSchema getSchema()
     {
         return DbSchema.get(NAME, DbSchemaType.Module);
+    }
+
+    public TableInfo getLayoutHistoryTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.LAYOUT_HISTORY_TABLE);
+    }
+
+    public TableInfo getRackTypesTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.RACK_TYPES_TABLE);
+    }
+
+    public TableInfo getRacksTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.RACKS_TABLE);
     }
 
 

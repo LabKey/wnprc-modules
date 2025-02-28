@@ -64,7 +64,7 @@ export const useLayoutEditorContext = () => {
     return context;
 }
 
-export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, prevRoom}) => {
+export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, prevRoom, user}) => {
     // loaded in and unchanged since start of layout editing
     const [room, setRoom] = useState<Room>({
         name: "new-layout",
@@ -851,6 +851,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             changeRack,
             clearGrid,
             delObject,
+            user
         }}>
             {!isLoading ? children : null}
         </LayoutEditorContext.Provider>

@@ -103,7 +103,7 @@ fi
 #-------------------------------------------------------------------------------
 
 if [[ -z $dock ]]; then
-  docker compose -f production.yaml -f compose.yaml down -v
+  docker compose -f production.yaml -f compose.yaml down -v --timeout 60
   if [[ ! -e .env ]]; then
       cp default.env .env
   fi

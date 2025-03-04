@@ -41,7 +41,8 @@ import {
     findRackInGroup,
     getLayoutOffset,
     getTargetRect,
-    isRackEnum, isTemplateCreator,
+    isRackEnum,
+    isTemplateCreator,
     mergeRacks,
     parseWrapperId,
     placeAndScaleGroup,
@@ -63,6 +64,7 @@ import { ChangeRack } from './ChangeRack';
 import { EditorContextMenu } from './EditorContextMenu';
 import { GateChangeRoom } from './GateChangeRoom';
 import { TextInput } from '../TextInput';
+import { GateSwitch } from './GateSwitch';
 
 interface EditorProps {
     roomSize: SelectorOptions
@@ -150,6 +152,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         .on('end', function (event) {
             dragInLayout.on('end').call(this, event);
         });
+
+    useEffect(() => {
+        console.log("localRoom: ", localRoom);
+    }, [localRoom]);
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
@@ -642,7 +648,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
     }, [loadTemplate]);
 
-    const handleDel = (type: string) => {
+    // Deletes rack or cage from layout
+    const handleDel = (type: 'rack' | 'cage') => {
         // state in local room of cage, rack, and group that cage is apart of
         const {cage: localCage, rack: localRack, rackGroup: localGroup} = findCageInGroup((selectedObj as Cage).cageNum as CageNumber, localRoom.rackGroups);
 
@@ -789,9 +796,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                             className={"draggable"}
                         />
                     </LayoutTooltip>
-                    <LayoutTooltip text={"Room Gate"}>
+                    <LayoutTooltip text={"Room Gate (Closed)"}>
                         <RoomItemTemplate
                             fileName={"gateClosed"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
+                    <LayoutTooltip text={"Room Gate (Open)"}>
+                        <RoomItemTemplate
+                            fileName={"gateOpen"}
                             className={"draggable"}
                         />
                     </LayoutTooltip>
@@ -951,13 +964,23 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     closeMenu={() => setShowObjectContextMenu(false)}
                     menuItems = {[{element:
                         <GateChangeRoom
-                            key={`gate-${(selectedObj as RoomObject).itemId}`}
-                            localRoom={localRoom}
+                            key={`gate-change-${(selectedObj as RoomObject).itemId}`}
                             selectedObj={selectedObj}
                             setLocalRoom={setLocalRoom}
                         />,
-                        types: [RoomObjectTypes.GateClosed],
-                     }]}
+                        types: [RoomObjectTypes.GateClosed, RoomObjectTypes.GateOpen],
+                     },
+                        {element:
+                                <GateSwitch
+                                    key={`gate-switch-${(selectedObj as RoomObject).itemId}`}
+                                    layoutSvg={layoutSvg}
+                                    selectedObj={selectedObj as RoomObject}
+                                    setLocalRoom={setLocalRoom}
+                                    closeMenu={() => setShowObjectContextMenu(false)}
+                                />,
+                            types: [RoomObjectTypes.GateClosed, RoomObjectTypes.GateOpen],
+                        }
+                    ]}
                 />
             }
         </div>

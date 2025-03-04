@@ -4,7 +4,7 @@ import * as React from 'react';
 import { MutableRefObject } from 'react';
 import {RoomItemClass} from './typings';
 
-export type GateContext = {room: string, roomId: number}; // extra context for Gate Object, describes target room
+export type GateContext = {room: string, roomId: number}; // extra context for Gate Object, describes target room and status
 
 export type RackActions = 'merge' | 'connect' | 'cancel';
 

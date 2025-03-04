@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="gate_closed" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 336.84 400">
-    <path d="M336.84,400H0V0h336.84v400ZM294.74,42.11h-115.79v147.37h115.79V42.11ZM42.11,42.11v147.37h115.79V42.11H42.11ZM42.11,357.89h115.79v-147.37H42.11v147.37ZM294.74,357.89v-147.37h-115.79v147.37h115.79Z"
+<svg id="gate_closed" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 337.34 400.5">
+    <rect x="179.2" y="210.78" width="115.79" height="147.36" style="fill:#825; stroke-width:0px;"/>
+    <rect x="42.35" y="210.78" width="115.79" height="147.36" style="fill:#825; stroke-width:0px;"/>
+    <rect x="42.35" y="42.36" width="115.79" height="147.36" style="fill:#825; stroke-width:0px;"/>
+    <rect x="179.2" y="42.36" width="115.79" height="147.36" style="fill:#825; stroke-width:0px;"/>
+    <path d="M337.09.25v400H.25V.25h336.84ZM294.99,358.14v-147.36h-115.79v147.36h115.79ZM294.99,189.72V42.36h-115.79v147.36h115.79ZM158.14,358.14v-147.36H42.35v147.36h115.79ZM158.14,189.72V42.36H42.35v147.36h115.79Z"
           style="fill:#000; stroke-width:0px;"/>
 </svg>

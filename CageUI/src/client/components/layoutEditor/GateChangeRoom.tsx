@@ -8,7 +8,6 @@ import { Option } from '@labkey/components';
 import { SelectedObj } from '../../types/layoutEditorTypes';
 
 interface GateChangeRoomProps {
-    localRoom: Room;
     selectedObj: SelectedObj;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
 }
@@ -18,27 +17,19 @@ interface GateChangeRoomProps {
     extraContext is {room: string, roomid: number} or GateContext
  */
 export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
-    const {setLocalRoom, selectedObj, localRoom} = props;
+    const {setLocalRoom, selectedObj} = props;
     const [selectedRoom, setSelectedRoom] = useState<Option<number>>(null);
     const [options, setOptions] = useState<Option<number>[]>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        if(localRoom.objects.length > 0) {
-            let initalRoom: Option<number>;
-            let foundGate: RoomObject;
-            localRoom.objects.forEach((obj) => {
-                if(obj.type === RoomObjectTypes.GateClosed && obj.itemId === (selectedObj as RoomObject).itemId){
-                    foundGate = obj;
-                }
-            })
-            if(foundGate && foundGate?.extraContext?.room){
-                initalRoom = {label: foundGate.extraContext.room, value: foundGate.extraContext.roomId};
-                setSelectedRoom(initalRoom);
-                setLoading(false);
-            }else{
-                setLoading(false);
-            }
+        let initalRoom: Option<number>;
+        if(selectedObj && (selectedObj as RoomObject).extraContext?.room){
+            initalRoom = {label: (selectedObj as RoomObject).extraContext.room, value: (selectedObj as RoomObject).extraContext.roomId};
+            setSelectedRoom(initalRoom);
+            setLoading(false);
+        }else{
+            setLoading(false);
         }
     }, []);
     useEffect(() => {
@@ -67,7 +58,7 @@ export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
             ...prevState,
             objects: prevState.objects.map((obj, index) => {
                 if(obj.itemId === (selectedObj as RoomObject).itemId){
-                    return {...obj, extraContext: {room: selectedRoom.label, roomId: selectedRoom.value}};
+                    return {...obj, extraContext: {...obj.extraContext, room: selectedRoom.label, roomId: selectedRoom.value}};
                 }
                 return obj;
 

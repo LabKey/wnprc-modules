@@ -10,21 +10,23 @@ import {
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
+// matches "string-number", if a match return the number
 export const parseRoomItemNum = (input: string): number => {
-    const regex = /\w+-(\d+)/; // matches "string-number"
+    const regex = /\w+-(\d+)/;
 
     const match = input.match(regex);
-    if (match) { // if a match return the number
+    if (match) {
         return parseInt(match[1]);
     }
     return;
 }
 
+// matches "string-number", if a match return the type/string
 export const parseRoomItemType = (input: string): string => {
-    const regex = /^(\w+)-\d+$/; // matches "string-number"
+    const regex = /^(\w+)-\d+$/;
 
     const match = input.match(regex);
-    if (match) { // if a match return the type/string
+    if (match) {
         return match[1];
     }
     return;

@@ -1,5 +1,40 @@
 import { ExtraContext, GateContext } from './layoutEditorTypes';
 
+/*
+   **IMPORTANT**
+
+   DefaultRackTypes, RackTypes, and RoomObjectTypes must be defined in this file.
+   Type checking and enum looping is used throughout the cage UI project so it's important to have them written here.
+
+   RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types.
+ */
+
+// used in ehr to determine if the rack is default (doesn't have a rackid)
+export enum DefaultRackTypes {
+    DefaultCage = 0,
+    DefaultPen = 1,
+    DefaultTempCage = 2,
+    DefaultPlayCage = 3
+}
+
+
+// Enum of rack types, map to string first, used to store types as integers in the db
+export enum RackTypes {
+    Cage = 4,
+    Pen = 5,
+    TempCage = 6,
+    PlayCage = 7
+}
+
+// Like rack types enum but for room objects, start at 100 to give buffer room for rack types
+export enum RoomObjectTypes {
+    RoomDivider = 100,
+    Drain = 101,
+    Door = 102,
+    GateClosed = 103,
+    GateOpen = 104,
+}
+
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
 export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
@@ -95,31 +130,6 @@ export interface UnitType {
     name: string; // naming convention is 'type-manufacturer-sqft'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
-}
-
-// used in ehr to determine if the rack is default (doesn't have a rackid)
-export enum DefaultRackTypes {
-    DefaultCage = 0,
-    DefaultPen = 1,
-    DefaultTempCage = 2,
-    DefaultPlayCage = 3
-}
-
-// RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types
-// Enum of rack types, map to string first, used to store types as integers in the db
-export enum RackTypes {
-    Cage = 4,
-    Pen = 5,
-    TempCage = 6,
-    PlayCage = 7
-}
-
-// Like rack types enum but for room objects, start at 100 to give buffer room for rack types
-export enum RoomObjectTypes {
-    RoomDivider = 100,
-    Drain = 101,
-    Door = 102,
-    GateClosed = 103,
 }
 
 export interface LocationCoords {

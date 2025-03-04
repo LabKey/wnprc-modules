@@ -69,11 +69,6 @@ done
 set -- "${args[@]}"
 
 #-------------------------------------------------------------------------------
-# Take down the entire docker compose project, including the network and volumes
-# then build a new postgresql configuration using the specified one as a base.
-#-------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------
 # Determining location for temporary folder
 #-------------------------------------------------------------------------------
 if [[ -z $tmppath ]]; then
@@ -145,7 +140,7 @@ fi
 
 restorefile="$filepath/$filename"
 
-echo -n $restorefile
+echo -n " Restoring from $restorefile"
 
 
 #-------------------------------------------------------------------------------
@@ -168,9 +163,9 @@ fi
 #-------------------------------------------------------------------------------
 # Actually restore the database, using a background proc so we can track progress
 #-------------------------------------------------------------------------------
-echo -n "Restoring database from $filepath ...  0%"
+echo -n "Restoring database from $restorefile ...  0%"
 
-${pgpath}pg_restore -l $filepath > $tmpdir/pg_restore.list
+${pgpath}pg_restore -l $restorefile > $tmpdir/pg_restore.list
 
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT

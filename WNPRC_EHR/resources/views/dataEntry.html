@@ -335,7 +335,7 @@
         var makeExt4DataEntryURL = function(formName, params) {
             params = params || {};
             params.formType = formName;
-            params.returnURL = LABKEY.ActionURL.buildURL("wnprc_ehr", "dataEntry");
+            params.returnUrl = LABKEY.ActionURL.buildURL("wnprc_ehr", "dataEntry");
 
             return makeURL("dataEntryForm", params);
         };

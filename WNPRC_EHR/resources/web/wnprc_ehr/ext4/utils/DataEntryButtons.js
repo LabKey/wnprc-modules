@@ -3,7 +3,7 @@
  */
 (function() {
     var getReturnURL = function() {
-        return LABKEY.ActionURL.getParameter('srcURL') || LABKEY.ActionURL.getParameter('returnUrl') || LABKEY.ActionURL.getParameter('returnURL') || LABKEY.ActionURL.buildURL('project', 'start');
+        return LABKEY.ActionURL.getParameter('returnUrl') || LABKEY.ActionURL.buildURL('project', 'start');
     };
 
     var registerBtn = function(name, config) {

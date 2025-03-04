@@ -30,5 +30,6 @@ FROM(
 
     FROM study.waterScheduledAnimals wsaouter
     WHERE wsaouter.qcstate.publicdata = true AND wsaouter.condition IS NOT NULL
+    AND (Id.death.date IS NULL)
     GROUP BY wsaouter.id
         ) wsa

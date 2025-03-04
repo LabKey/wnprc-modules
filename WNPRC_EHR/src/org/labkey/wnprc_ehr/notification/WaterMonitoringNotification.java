@@ -23,20 +23,15 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ConvertHelper;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.query.BatchValidationException;
-
-import java.sql.ResultSet;
+import org.labkey.api.util.logging.LogHelper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -69,16 +64,17 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         return "Water Monitoring";
     }
 
+    @Override
     public String getCategory(){
         return "Husbandry";
     }
 
-    private static final Logger _log = LogManager.getLogger(WaterMonitoringNotification.class);
+    private static final Logger _log = LogHelper.getLogger(WaterMonitoringNotification.class, "Email Notification");
 
     @Override
     public String getEmailSubject(Container c)
     {
-        return "Daily Water Monitoring: " + AbstractEHRNotification._dateTimeFormat.format(new Date());
+        return "Based Water Notification: " + AbstractEHRNotification._dateTimeFormat.format(new Date());
     }
 
     @Override
@@ -104,24 +100,29 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         //Find today's date
         Date now = new Date();
         msg.append("This email contains a series of automatic alerts about the colony.  It was run on: " + AbstractEHRNotification._dateFormat.format(now) + " at " + AbstractEHRNotification._timeFormat.format(now) + ".<p>");
-
-
-
         return msg.toString();
     }
-    protected void findAnimalsWithEnoughWater(final Container c, final User u, final StringBuilder msg)
+    protected void findAnimalsWithEnoughWater(final Container c, final User u, final StringBuilder msg, final int threshold)
     {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
 
         TableInfo waterTotalByDateWithWeightReport = QueryService.get().getUserSchema(u,c,"study").getTable("waterTotalByDateWithWeight");
 
-
-        SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
-        orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"), 20, CompareType.LT).getClauses().get(0));
-        orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"),null, CompareType.ISBLANK).getClauses().get(0));
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
-        filter.addClause(orClause);
+        filter.addCondition(FieldKey.fromString("conditionAtTime"), "regulated", CompareType.EQUAL);
+
+        if (threshold == 10){
+            SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
+            orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"), threshold, CompareType.LT).getClauses().get(0));
+            orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"),null, CompareType.ISBLANK).getClauses().get(0));
+            filter.addClause(orClause);
+        }else if (threshold == 20){
+            filter.addCondition(FieldKey.fromString("mlsPerKg"), threshold, CompareType.LT);
+            filter.addCondition(FieldKey.fromString("mlsPerKg"), 10, CompareType.GTE);
+
+        }
+
         Set<FieldKey> colKeys = new HashSet<>();
         colKeys.add(FieldKey.fromString("Id"));
         colKeys.add(FieldKey.fromString("date"));
@@ -142,21 +143,16 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         parameters.put("STARTTARGET", startDate);
         parameters.put("ENDTARGETDATE", endDate);
 
-
         TableSelector ts = new TableSelector(waterTotalByDateWithWeightReport, columns.values(), filter, null);
         ts.setNamedParameters(parameters);
         //TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("Id","date","mlsPerKg","TotalWater","project","currentWaterCondition"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
-
-            Map<String,Object>[] totalWaterForDay = ts.getMapArray();
-
             //Organizing report by project
+            Map<String,Object>[] totalWaterForDay = ts.getMapArray();
             Map<Integer, List<Map<String,Object>>> projectMap = new HashMap<>();
             int animalsWaterMeaning = 0;
-            Map<Integer, List<Map<String,Object>>> lixitMap = new HashMap<>();
-            int animalsInLixit = 0;
             for(Map<String,Object> mapItem : totalWaterForDay){
                 int projectNum = ConvertHelper.convert(mapItem.get("project"),Integer.class);
                 List<Map<String,Object>> waterTotalsFromDb;
@@ -169,20 +165,14 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     }
                     waterTotalsFromDb.add(mapItem);
                     animalsWaterMeaning++;
-                }else{
-                    if (!lixitMap.containsKey(projectNum)){
-                        waterTotalsFromDb = new ArrayList<>();
-                        lixitMap.put(projectNum,waterTotalsFromDb);
-                    }else{
-                        waterTotalsFromDb = lixitMap.get(projectNum);
-                    }
-                    waterTotalsFromDb.add(mapItem);
-                    animalsInLixit++;
-
                 }
             }
+            if (threshold == 10){
+                msg.append("<b>WARNING: There are ").append(animalsWaterMeaning).append(" animals that have no water or less than 10 mlsPerKg for today.</b><br>\n");
 
-            msg.append("<b>WARNING: There are " + animalsWaterMeaning + " animals that have remaining water for today.</b><br>\n");
+            }else {
+                msg.append("<b>WARNING: There are ").append(animalsWaterMeaning).append(" animals that have less than 20 mlsPerKg water for today.</b><br>\n");
+            }
 
             msg.append("<table border=1 style='border-collapse: collapse;'>");
             msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>" +
@@ -213,41 +203,9 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
                 }
             }
-
-
-
-
             msg.append("</table>");
             msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "waterTotalByDateWithWeight", null) + "&query.date~dateeq=" + AbstractEHRNotification._dateFormat.format(cal.getTime()) +"&query.mlsPerKg~lt=20'>Click here to view them</a><br>\n\n");
             msg.append("<hr>\n\n");
-
-            msg.append("<b>INFO: There are " + animalsInLixit + " animals that are in Lixit condition.</b><br>\n");
-            msg.append("<table border=1 style='border-collapse: collapse;'>");
-            msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>" +
-                    "<td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
-                    "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
-                    "<td style='padding: 5px; text-align: center;'><strong>Location</strong></td>" +
-                    "<td style='padding: 5px; text-align: center;'><strong>Condition at Time</strong></td></tr>\n");
-
-            for (Map.Entry<Integer,List<Map<String,Object>>> entry : lixitMap.entrySet()){
-                List<Map<String,Object>> AnimalsInLixit = entry.getValue();
-                String condition;
-
-                for(Map<String,Object> mapItem : AnimalsInLixit){
-                    LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-                    condition = ConvertHelper.convert(mapItem.get("currentWaterCondition"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("currentWaterCondition"),String.class);
-
-                    msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("project"),Integer.class)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("Id"),String.class)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get(curLocationJdbcName),String.class)
-                            + "</td><td style='padding: 5px; text-align: center;'> " + condition
-                            +"</td></tr>" );
-                }
-            }
-            msg.append("</table>");
         }
     }
 
@@ -279,12 +237,12 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             }
             else
             {
-                msg.append("There are " + total + " animals in the system that have no records in water given dataset for " + date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
-                msg.append("Project   - AnimalID   -  Location <br>");
+                msg.append("<br>There are " + total + " animals in the system that have no records in water given dataset for " + date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
+                msg.append("Project &emsp;&emsp; -  &emsp; AnimalID &emsp;  - &emsp; Location <br>");
                 Map<String, Object>[] animalsWithOutEntries = ts.getMapArray();
                 for (Map<String, Object> mapItem : animalsWithOutEntries)
                 {
-                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + "  "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + "  "  + ConvertHelper.convert(mapItem.get("location"), String.class)+ "<br>");
+                    msg.append(ConvertHelper.convert(mapItem.get("project"), Integer.class) + " &emsp; -  &emsp; "  + ConvertHelper.convert(mapItem.get("Id"), String.class) + " &emsp; -  &emsp; "  + ConvertHelper.convert(mapItem.get("location"), String.class)+ "<br>");
 
                 }
                 msg.append("<br>");
@@ -337,10 +295,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("displaytimeofday"));
         columns.add(FieldKey.fromString("assignedTo"));
 
-
-
         final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
-
 
         TableSelector ts = new TableSelector(ti,colMap.values(), filter,null);
         ts.setNamedParameters(parameters);
@@ -393,15 +348,10 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     htmlTable = createTable(spiWaters, "SPI");
                     msg.append(htmlTable);
                 }
-
-
             }
             msg.append("<br><a href='" + getExecuteQueryUrl(c,"study","waterScheduleCoalesced","Scheduled")+"&query.param.StartDate="+roundedMax+"&query.param.NumDays=" + 1 +
                     "&query.dateOrdered~lte="+currentTime+ "&query.dateOrdered~dategte="+roundedMax+"'>Click here to view schedule waters</a></p>");
         }
-
-
-
     }
 
     protected void animalOnLixit(Container c,User u, StringBuilder msg){
@@ -411,6 +361,8 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
 
         Set<FieldKey> columns = new HashSet<>();
         columns.add(FieldKey.fromString("Id"));
+        columns.add(FieldKey.fromString("project"));
+        columns.add(FieldKey.fromString("location"));
         columns.add(FieldKey.fromString("MostRecentWaterConditionDate"));
         columns.add(FieldKey.fromString("MostRecentWaterCondition"));
 
@@ -420,30 +372,41 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         long total = ts.getRowCount();
 
         if(total > 0){
-            msg.append("<p><b>There are "+total+ " animal in water controlled protocol that are on Lixit/Ad lib</b><br>");
+            msg.append("<p><b>There are ")
+                    .append(total)
+                    .append(" animal in water controlled protocol that are on Lixit/Ad lib</b><br>");
         }
 
         Map<String,Object>[] animalsOnLixit= ts.getMapArray();
         StringBuilder animalsLixitTable = new StringBuilder();
         animalsLixitTable.append("<br><strong> Animals on Lixit /Ad lib</strong>");
         animalsLixitTable.append("<table border=1 style='border-collapse: collapse;'>");
-        animalsLixitTable.append("<tr><td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
+        animalsLixitTable.append("<tr><td style='padding: 5px; text-align: center;'><strong>Project</strong></td>"+
+                "<td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
                 "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
+                "<td style='padding: 5px; text-align: center;'><strong>Location</strong></td>" +
                 "<td style='padding: 5px; text-align: center;'><strong>Current Water Condition</strong></td></tr>\n");
 
         for (Map<String,Object> lixitRecord: animalsOnLixit){
             LocalDateTime objectDateTime = ConvertHelper.convert(lixitRecord.get("MostRecentWaterConditionDate"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            animalsLixitTable.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(lixitRecord.get("Id"),String.class)
-                    + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
-                    + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(lixitRecord.get("MostRecentWaterCondition"),String.class) +"</td></tr>" );
+            animalsLixitTable.append("<tr><td style='padding: 5px; text-align: center;'> ")
+                    .append(ConvertHelper.convert(lixitRecord.get("project"), String.class))
+                    .append("</td><td style='padding: 5px;'>")
+                    .append(ConvertHelper.convert(lixitRecord.get("Id"), String.class))
+                    .append("</td><td style='padding: 5px; text-align: center;'> ")
+                    .append(objectDateTime.format(formatter))
+                    .append("</td><td style='padding: 5px; text-align: center;'> ")
+                    .append(ConvertHelper.convert(lixitRecord.get("location"), String.class))
+                    .append("</td><td style='padding: 5px; text-align: center;'> ")
+                    .append(ConvertHelper.convert(lixitRecord.get("MostRecentWaterCondition"), String.class))
+                    .append("</td></tr>");
         }
         animalsLixitTable.append("</table>");
-
         msg.append(animalsLixitTable);
-
     }
+
     private StringBuilder createTable (List<Map<String,Object>> listOfDBObjects, String assignedTo){
         StringBuilder returnTable = new StringBuilder();
         returnTable.append("<br><strong>"+ assignedTo +"</strong>");
@@ -466,11 +429,6 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                     + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(dbObject.get("assignedTo"),String.class) +"</td></tr>" );
         }
         returnTable.append("</table>");
-
         return returnTable;
-
     }
-
-
 }
-

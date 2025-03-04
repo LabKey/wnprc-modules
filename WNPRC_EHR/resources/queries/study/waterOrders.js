@@ -185,7 +185,7 @@ function onUpdate(helper, scriptErrors, row, oldRow){
     }
     console.log ("value of triggerHelper admin "+ triggerHelper.isDataAdmin());
 
-    if (!triggerHelper.isDataAdmin()){
+    if (!triggerHelper.isDataAdmin() && !waterOrdersAdmin){
         let errorField = null;
         if(oldRow){
          

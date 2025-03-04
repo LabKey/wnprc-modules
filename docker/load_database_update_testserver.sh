@@ -73,6 +73,26 @@ set -- "${args[@]}"
 # then build a new postgresql configuration using the specified one as a base.
 #-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+# Determining location for temporary folder
+#-------------------------------------------------------------------------------
+if [[ -z $tmppath ]]; then
+    tmppath="/tmp/"
+fi
+
+#-------------------------------------------------------------------------------
+# Default database name to labkey, is dbname is not passed it will used
+# labkey as the target database to restore
+#-------------------------------------------------------------------------------
+if [[ -z $dbname ]]; then
+    dbname="labkey"
+fi
+
+#-------------------------------------------------------------------------------
+# Take down the entire docker compose project, including the network and volumes
+# then build a new postgresql configuration using the specified one as a base.
+#-------------------------------------------------------------------------------
+
 if [[ -z $dock ]]; then
   docker compose -f production.yaml -f compose.yaml down -v --timeout 60
   if [[ ! -e .env ]]; then

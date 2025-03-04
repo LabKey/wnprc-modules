@@ -148,7 +148,7 @@ else
     filename="labkey_$(date +'%Y%m%d')_$dbtime.pg"
 fi
 
-restorefile="$filepath/$filename"
+restorefile="$filepath$filename"
 
 echo -n " Restoring from $restorefile"
 

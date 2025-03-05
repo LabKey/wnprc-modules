@@ -915,10 +915,10 @@ public class NotificationToolkit {
         }
 
         //Creates URL to return.
-        Path returnURL = new Path(new ActionURL().getBaseServerURI(), queryURL.toString());
+        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), queryURL.toString());
 
         //Returns URL.
-        return returnURL.toString();
+        return returnUrl.toString();
     }
 
     public String createFormURL(Container c, String formType, String taskID) {
@@ -929,10 +929,10 @@ public class NotificationToolkit {
         formURL.addParameter("taskid", taskID);
 
         // Creates path.
-        Path returnURL = new Path(new ActionURL().getBaseServerURI(), formURL.toString());
+        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), formURL.toString());
 
         // Returns URL.
-        return returnURL.toString();
+        return returnUrl.toString();
     }
 
     public String createAnimalHistoryURL(Container c, String subject) {
@@ -947,10 +947,10 @@ public class NotificationToolkit {
 //        animalHistoryURL.addParameter("activeReport", "abstract");
 
         // Creates path.
-        Path returnURL = new Path(new ActionURL().getBaseServerURI(), animalHistoryURLWithID);
+        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), animalHistoryURLWithID);
 
         // Returns URL.
-        return returnURL.toString();
+        return returnUrl.toString();
     }
 
     // TODO: COMMENT!!!

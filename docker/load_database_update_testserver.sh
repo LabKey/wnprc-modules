@@ -137,6 +137,15 @@ if [[ -z $dock ]]; then
 fi
 
 #-------------------------------------------------------------------------------
+# Wait for the postgres instance to start accepting connections
+#-------------------------------------------------------------------------------
+if [[ -z $dock ]]; then
+  echo -n 'Waiting for postgres to start ... ${pgport}'
+  docker compose exec postgres /bin/bash -c 'count=0;while [ $count -lt 120 ]; do if psql -U postgres -c "\l" &>/dev/null; then sleep 3; break; fi; sleep 1; let count=count+1; done;' &>/dev/null
+  echo -e '\033[0;32mdone\033[0m'
+fi
+
+#-------------------------------------------------------------------------------
 # If the user did not provide a path to an existing dump file, secure copy the
 # latest daily from the EHR production server's backup folder
 #-------------------------------------------------------------------------------
@@ -231,5 +240,5 @@ fi
 if [[ -z $dock ]]; then
   docker compose down -v --timeout 60
   unset PG_CONF_FILE
-  docker compose up -d 
+  docker compose up -d postgres
 fi

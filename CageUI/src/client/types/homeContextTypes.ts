@@ -1,4 +1,4 @@
-import { Cage, Rack, RoomItem } from './typings';
+import { Cage, Rack, Room, RoomItem } from './typings';
 import {SelectedPage} from './homeTypes';
 import * as React from 'react';
 
@@ -23,8 +23,7 @@ export interface HomeContextType {
     setIsEditEnabled: React.Dispatch<React.SetStateAction<boolean>>;
     loading: boolean;
     error: string;
-    localRoom: RoomItem[];
-    saveChanges: () => void;
+    localRoom: Room;
     hasUnsavedChanges: boolean;
     isDraggingEnabled: boolean;
     setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;

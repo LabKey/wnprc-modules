@@ -12,8 +12,6 @@ export const RoomContent: FC = () => {
 
     useEffect(() => {
         console.log("Page: ", selectedPage);
-
-
     }, [selectedPage]);
 
     const renderContent = () => {
@@ -30,7 +28,7 @@ export const RoomContent: FC = () => {
     }
 
     return (
-        <div>
+        <div className={"view-content"}>
             {renderContent()}
         </div>
     );

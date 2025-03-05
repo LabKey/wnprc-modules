@@ -16,6 +16,10 @@
                 <dat:column columnName="border_height">
                     <dat:rangeURI>int</dat:rangeURI>
                 </dat:column>
+                <dat:column columnName="status">
+                    <dat:rangeURI>boolean</dat:rangeURI>
+                    <dat:description>Valid room layout status</dat:description>
+                </dat:column>
             </dat:columns>
         </table>
     </template>

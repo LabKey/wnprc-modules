@@ -1,22 +1,19 @@
 import * as React from 'react';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
-import _ from 'lodash';
-import { selectDistinctRows, selectRows } from '@labkey/components';
+import { selectDistinctRows } from '@labkey/components';
 import { useHomeContext } from '../../context/HomeContextManager';
 import { ExpandedRooms, Room, RoomCage, RoomRack } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Filter } from '@labkey/api';
 
 export const RoomList: FC = () => {
-    const [rooms, setRooms] = useState();
     const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
     const [expandedRacks, setExpandedRacks] = useState<RoomRack[]>([]);
     const {setSelectedPage} = useHomeContext();
 
     const [allRooms, setAllRooms] = useState<Room[]>([]); // Stores all items fetched on load
     const [visibleRooms, setVisibleRooms] = useState<Room[]>([]); // Items currently visible
-    const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearch = (e) => {
@@ -26,7 +23,6 @@ export const RoomList: FC = () => {
     useEffect(() => {
         console.log("Expanded Rooms: ", expandedRooms);
         console.log("Expanded Racks: ", expandedRacks);
-        console.log("Visible Rooms: ", visibleRooms);
     }, [expandedRooms, expandedRacks, visibleRooms]);
 
     // Filter items based on search query
@@ -62,7 +58,6 @@ export const RoomList: FC = () => {
 
         // Check if room has been expanded yet, if not, fetch rack data for that room
         if(!(roomId in expandedRooms)){
-            console.log("Not expanded yet, fetch: ", roomId);
             const racks = await labkeyActionSelectWithPromise({
                 schemaName: "cageui",
                 queryName: "layout_history",
@@ -71,7 +66,6 @@ export const RoomList: FC = () => {
                     Filter.create('end_date', null, Filter.Types.ISBLANK),
                     Filter.create('cage', null, Filter.Types.NONBLANK)]
             });
-            console.log("Racks: ", racks);
             if(racks.rowCount > 0){
                 setAllRooms((prevRooms) => prevRooms.map((room) => {
                     // add racks to room state, only once when first clicked
@@ -197,7 +191,6 @@ export const RoomList: FC = () => {
                     </div>
                 ))}
             </ul>
-            {loading && <p>Loading...</p>}
         </div>
     );
 }

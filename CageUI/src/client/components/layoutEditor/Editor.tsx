@@ -28,7 +28,6 @@ import {
 } from '../../types/layoutEditorTypes';
 import { LayoutTooltip } from './LayoutTooltip';
 import {
-    addPrevRoomSvgs,
     areCagesInSameRack,
     checkAdjacent,
     createDragInLayout,
@@ -51,6 +50,7 @@ import {
     updateBorderSize,
 } from '../../utils/LayoutEditorHelpers';
 import {
+    addPrevRoomSvgs,
     parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
@@ -580,7 +580,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         zoomToScale(roomSize.scale);
 
         if(localRoom.rackGroups.length > 0 || localRoom.objects.length > 0){
-            addPrevRoomSvgs(localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle, contextMenuRef);
+            addPrevRoomSvgs('edit', localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle, contextMenuRef);
         }
 
         setBorderSetup(false);

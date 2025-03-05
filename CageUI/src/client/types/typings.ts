@@ -73,6 +73,7 @@ export interface LayoutData {
     scale: number;
     borderWidth: number;
     borderHeight: number;
+    status?: boolean;
 }
 
 export interface LayoutHistoryData {

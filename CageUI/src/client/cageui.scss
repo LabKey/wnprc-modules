@@ -41,12 +41,6 @@
   //height: 100vh;
 }
 
-.room-layout {
-  //background-color: lightpink;
-  flex: 1; /* This will make the display take the remaining space */
-
-}
-
 .room-container {
   display: flex;
   flex-direction: column; /* Arrange children in a column */
@@ -887,17 +881,19 @@ margin-bottom: 10px;
 .page-content-wrapper {
   display: flex;
   flex-direction: column;
+  border: 1px solid lightgray;
   width: 90%; /* Adjust width as needed */
+  overflow-y: scroll;
 }
 
 .page-content {
   flex-grow: 1;
-  border: 1px solid black;
 }
 
 .page-map {
   height: 3vh; /* Adjust height as needed */
-  border: 1px solid black;
+  border-bottom: 1px solid lightgray;
+  border-top: 1px solid lightgray;
   display: flex;
   align-items: center;
   justify-content: left;
@@ -914,7 +910,7 @@ margin-bottom: 10px;
 .page-map-link {
   padding-right: 10px;
   padding-left: 10px;
-  color: -webkit-link;
+  color: #007bff;
   pointer-events: auto;
   cursor: pointer;
 }
@@ -926,6 +922,7 @@ margin-bottom: 10px;
 .room-list {
   display: flex;
   flex-direction: column;
+ // border-right: 1px solid black;
 }
 
 .room-title, .room-list-title {
@@ -1005,3 +1002,116 @@ margin-bottom: 10px;
   border-color: #00B4CC;
 }
 // END CSS FOR ROOM LIST
+
+.view-content {
+  display: block;
+  padding: 5px;
+  height: 100%;
+  width: 100%;
+}
+
+.room-view-container {
+  position: relative;
+  margin: 10px;
+}
+
+.room-view-title {
+  font-size: xx-large;
+  padding: 5px;
+}
+
+.room-view-title label {
+  margin-left: 10px;
+}
+
+.room-view-checkbox {
+  appearance: none; /* Hide default checkbox */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  border: none;
+  outline: none;
+  pointer-events: none;
+}
+
+/* Green checkmark when checked */
+.room-view-checkbox:checked::before {
+  content: "✔"; /* Checkmark symbol */
+  color: green;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Red X when unchecked */
+.room-view-checkbox:not(:checked)::before {
+  content: "✖";
+  color: red;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+
+
+.page-tab-container {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.tab-content {
+  flex: 1;
+  overflow-y: scroll;
+  width: fit-content;
+  height: fit-content;
+}
+.tab-buttons {
+  display: flex;
+  gap: 20px; /* Space between buttons */
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd; /* Light gray line under all buttons */
+
+}
+
+.tab-buttons button {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent; /* No background */
+  cursor: pointer;
+  font-size: large;
+  color: #333; /* Default text color */
+  position: relative; /* For the underline */
+  transition: color 0.3s;
+}
+
+/* Underline for each button */
+.tab-buttons button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px; /* Position the line below the button */
+  width: 100%;
+  height: 2px; /* Thickness of the line */
+  background-color: transparent; /* Default line color */
+  transition: background-color 0.3s;
+}
+
+/* Blue underline for the active button */
+.tab-buttons button.active::after {
+  background-color: #007bff; /* Blue color for active tab */
+}
+
+/* Hover effect for buttons */
+.tab-buttons button:hover {
+  color: #007bff; /* Blue text on hover */
+}
+
+/* Hover effect for the underline */
+.tab-buttons button:hover::after {
+  background-color: #007bff; /* Blue underline on hover */
+}

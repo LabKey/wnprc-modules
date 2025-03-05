@@ -25,7 +25,6 @@ export const RoomDisplay: FC<DisplayProps> = (props) => {
 
     return (
         <div className={"room-display"}>
-            <RoomLayout />
         </div>
     );
 }

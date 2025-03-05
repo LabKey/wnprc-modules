@@ -30,6 +30,7 @@ export interface Room {
     racks?: RoomRack[];
 }
 
+
 export interface AdjCages {
     leftCage: Cage | undefined;
     rightCage: Cage | undefined;

@@ -1,162 +1,73 @@
-// @ts-nocheck
 import * as React from 'react';
-import { FC, useState } from 'react';
+import * as d3 from 'd3';
+import { FC, useEffect, useRef } from 'react';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { ActionURL, Filter } from '@labkey/api';
+import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { ReactSVG } from 'react-svg';
-import { ActionURL } from '@labkey/api';
-import {
-    changeStyleProperty,
-    getCageMod,
-    getRackSeparators,
-    parseEditRect,
-    parseRoomItemType,
-    parseSeparator,
-    updateCageIds
-} from '../../utils/helpers';
-import { useRoomContext } from '../../context/ContextManager';
-import { Popup } from './Popup';
-import { CageDetailsModifications } from './CageDetailsModifications';
-import { Rack } from '../../types/typings';
+import { LayoutData } from '../../types/typings';
+import { useHomeContext } from '../../context/HomeContextManager';
+import { addPrevRoomSvgs } from '../../utils/helpers';
 
-export const RoomLayout: FC = () => {
-    const {room, cageDetails, setClickedCage, setClickedRack, setIsDirty, isEditingRoom, setRoom} = useRoomContext();
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+interface RoomLayoutProps {
+    roomName: string;
+    borderSize: LayoutData;
+}
 
-    const openDetails = () => {
-        setIsOpen(true);
-    }
-    const closeDetails = () => {
-        setIsOpen(false);
-        setIsDirty(false);
-    }
-    
-    const handleClick = (event) => {
-        const cage = event.target;
-        const rackId: string = (cage.id);
-        const cageId: number = (parseRoomItemType(cage.id));
-        const tempClickedRack: Rack = room.find(rack => rack.itemId === rackId) as Rack;
-        const clickedCage = tempClickedRack.cages[cageId - 1];
-        setClickedCage(clickedCage);
-        setClickedRack(tempClickedRack);
+export const RoomLayout: FC<RoomLayoutProps> = (props) => {
+    const SVG_WIDTH = 1290; // starting pixel width of the layout svg
+    const SVG_HEIGHT = 810; // starting pixel height of the layout svg
+    const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage
+    const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
+    const CELL_SIZE = 30; // number of pixels of a cell for length/width
+    const {roomName, borderSize} = props;
+    // number of cells in grid width/height, based off scale
+    const gridWidth = Math.ceil(SVG_WIDTH / borderSize.scale / CELL_SIZE);
+    const gridHeight = Math.ceil(SVG_HEIGHT / borderSize.scale / CELL_SIZE);
+    const borderRef = useRef(null);
+    const {localRoom} = useHomeContext();
 
-        openDetails();
-    };
 
-    const handleRackEdit = (event) => {
-        const rackId: string = parseInt(parseEditRect(event.target.id));
-        // TODO Fix this itemId === rackId
-        setRoom((prevRoom) => {
-            const updatedRacks = prevRoom.map((rack) =>
-                rack.itemId === rackId ? { ...rack, isActive: !(rack as Rack).isActive } : rack
-            );
-            const temp = updateCageIds(updatedRacks);
-            console.log(temp);
-            return temp;
-        });
-    }
+    useEffect(() => {
+        console.log("GRID: ", gridWidth, gridHeight);
+        console.log("Border: ", borderSize);
+    }, []);
+
+    useEffect(() => {
+        if(!roomName) return;
+        const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
+        addPrevRoomSvgs('view', localRoom, layoutSvg);
+    }, [roomName]);
 
     return (
         <div className={'room-layout'}>
-            <ReactSVG
-                src={`${ActionURL.getContextPath()}/cageui/static/AB140-167.svg`}
-                wrapper={"div"}
-                className={"room-svg"}
-                beforeInjection={(svg) => {
-                    room.forEach((roomItem) => {
-                        roomItem = roomItem as Rack;
-                        roomItem.cages.forEach((cage, idx) => {
-                            // Construct the expected text element ID
-                            const textId = `text-${idx + 1}-${roomItem.itemId}`;
-                            // Find the corresponding text element
-                            const textElement = svg.querySelector(`#${textId}`);
-                            const tempCage:SVGRectElement = svg.querySelector(`#rect-${idx + 1}-${roomItem.itemId}`);
-
-                            if (textElement) {
-                                // Get the tspan child and update its content
-                                const tspanElement = textElement.querySelector('tspan');
-                                if (tspanElement) {
-                                    if((roomItem as Rack).isActive){
-                                        tspanElement.textContent = cage.id.toString();
-                                        tempCage.onclick = (event) => handleClick(event);
-                                    }else{
-                                        tspanElement.textContent = "";
-                                    }
-                                }
-                            }
-                        });
-                    });
-                }}
-                afterInjection={(svg) => {
-                    // Parses seperators styling them correctly
-                    for (let i = 0; i < room.length; i++) {
-                        const currSeparators = getRackSeparators(room[i] as Rack);
-                        const separators = svg.querySelector(`#seperators-${i + 1}`);
-                        const children = [...separators.children];
-                        const mods = svg.querySelector(`#modifications-${i + 1}`);
-                        const editMode =  svg.querySelector(`#edit-${i + 1}`);
-
-                        // Determines if room is in editing mode and displays proper svg contents if so
-                        [...editMode.children].forEach((childNode: SVGElement) => {
-                            if(isEditingRoom) {
-                                if (childNode.id.includes("blur")) { // adds click event and styles to edit blur box
-                                    changeStyleProperty(childNode, "fill", "lightgray");
-                                    changeStyleProperty(childNode, "fill-opacity", "0.8");
-                                    childNode.style.pointerEvents = "auto";
-                                    childNode.onclick = (event) => handleRackEdit(event);
-                                } else {
-                                    //Determines which icon to display (add or remove rack (circle plus/minus))
-                                    if (((room[i] as Rack).isActive && childNode.id.includes("del")) || (!(room[i] as Rack).isActive && childNode.id.includes("add"))) {
-                                        changeStyleProperty(childNode, "fill", "black");
-                                    }
-                                }
-                            }else{
-                                if (childNode.id.includes("blur")) { // makes sure only one rect is clickable (blur vs cage details)
-                                    childNode.style.pointerEvents = "none";
-                                }
-                            }
-                        });
-                        //Update modification svg props
-                        [...mods.children].forEach((childNode) => {
-                            const cageMod = getCageMod(childNode.id, room[i] as Rack);
-                            const styles = cageMod?.styles
-                            if(parseSeparator(childNode.id) === "CTunnel"){ // CTunnels have multiple sub styles
-                                [...childNode.children].forEach((subChildNode) => {
-                                    styles?.forEach((style) => {
-                                        changeStyleProperty(subChildNode, style.property, style.value);
-                                    })
-                                })
-                            }else{
-                                styles?.forEach((style) => {
-                                    changeStyleProperty(childNode, style.property, style.value);
-                                })
-                            }
-                        })
-
-                        // Update separator svg props
-                        children.forEach((childNode) => {
-                            const styles = currSeparators.find(sep => sep.position === parseSeparator(childNode.id)).mod.styles;
-                            styles.forEach((style) => {
-                                changeStyleProperty(childNode, style.property, style.value);
-                            })
-                        })
-                    }
-                }}
-            />
-            {isOpen &&
-                <Popup
-                    isOpen={isOpen}
-                    onClose={closeDetails}
-                    header={`Cage ${cageDetails.map((cage) => cage.cageNum).join(", ")}`}
-                    subheader={["Total: 2", "Status: OK"]}
-                    mainContent={
-                        <>
-                            <CageDetailsModifications
-                                closeDetails={closeDetails}
-                            />
-                            <div className={"divider"}/>
-                        </>
-                    }
-                />
-            }
+            Room Layout {roomName}
+            <div id={"layout-grid"}>
+                <svg // Ensure the width/height fit the grid, using (scaled cell size * number of cells in width/height)
+                    width={borderSize.borderWidth}
+                    height={borderSize.borderHeight}
+                    viewBox={`0 0 ${(borderSize.scale * CELL_SIZE) * gridWidth} ${(borderSize.scale * CELL_SIZE) * gridHeight}`}
+                    id="layout-svg"
+                >
+                    <g className={'draggable room-obj'}
+                       id={'layout-border'}
+                       pointerEvents={'none'}
+                    >
+                        <ReactSVG
+                            src={`${ActionURL.getContextPath()}/cageui/static/RoomBorder.svg`}
+                            id={`border_template_wrapper`}
+                            wrapper={'svg'}
+                            key={'border_template_key'}
+                            ref={borderRef}
+                            className={''}
+                            viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+                            height={SVG_HEIGHT}
+                            width={SVG_WIDTH}
+                            pointerEvents={'none'}
+                        />
+                    </g>
+                </svg>
+            </div>
         </div>
     );
 }

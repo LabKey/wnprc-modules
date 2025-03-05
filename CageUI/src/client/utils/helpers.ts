@@ -2,11 +2,18 @@ import {
     DefaultRackStringType,
     DefaultRackTypes,
     RackStringType,
-    RackTypes, RoomItemStringType,
+    RackTypes,
+    Room,
+    RoomItemStringType,
     RoomItemType,
     RoomObjectStringType,
     RoomObjectTypes
 } from '../types/typings';
+import * as d3 from 'd3';
+import { zoomTransform } from 'd3';
+import { MutableRefObject } from 'react';
+import { ActionURL } from '@labkey/api';
+import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
@@ -141,3 +148,109 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
     return rackItem || defaultRackItem || objItem;
 }
 
+export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag?, setSelectedObj?, setCtxMenuStyle?, contextMenuRef?: MutableRefObject<Room>) => {
+
+    const createRackGroup = (parentGroup, rack, isSingleRack) => {
+        const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
+        const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
+            .attr('id', rack.itemId)
+            .attr('class', `rack type-${rackTypeString}`)
+            .attr('transform', `translate(${rack.x},${rack.y})`)
+            .style('pointer-events', 'bounding-box');
+
+        rack.cages.forEach(async (cage) => {
+            const cageGroup = rackGroup.append('g')
+                .attr('id', cage.cageNum)
+                .attr('transform', `translate(${cage.x},${cage.y})`);
+
+            let unitSvg: SVGElement;
+            if (mode === 'edit') {
+                unitSvg = (d3.select(`[id=${rackTypeString}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
+                    .node().cloneNode(true) as SVGElement;
+            } else if (mode === 'view') {
+                await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
+                    (cageGroup.node() as SVGElement).appendChild(d.documentElement);
+                });
+                return;
+            }
+
+            // Only needed for layout editor to attach context menus
+            const shape = d3.select(unitSvg);
+            shape.classed('draggable', false);
+            shape.style('pointer-events', 'none');
+
+            const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
+
+            if (mode === 'edit') {
+                setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, contextMenuRef, rackTypeString);
+            }
+
+            (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+
+            cageGroup.append(() => shape.node());
+        });
+
+        return rackGroup;
+    };
+
+    const createGroup = (group) => {
+        const isSingleRack = group.racks.length === 1;
+        const parentGroup = isSingleRack
+            ? layoutSvg.append('g')
+                .attr('id', group.racks[0].itemId)
+                .attr('class', `draggable rack type-${roomItemToString(group.racks[0].type.type)}`)
+                .attr('transform', `translate(${group.racks[0].x},${group.racks[0].y}) scale(${group.scale})`)
+                .style('pointer-events', 'bounding-box')
+            : layoutSvg.append('g')
+                .attr('id', group.groupId)
+                .attr('class', 'draggable rack-group');
+
+        parentGroup.attr('transform', `translate(${group.x},${group.y}) scale(${group.scale})`);
+
+        group.racks.forEach(rack => {
+            // Use parent group as rackGroup if only 1 rack, otherwise create a new rack group
+            const rackGroup = createRackGroup(parentGroup, rack, isSingleRack);
+        });
+        placeAndScaleGroup(parentGroup, group.x, group.y, zoomTransform(layoutSvg.node()));
+        if (mode === 'edit') {
+            parentGroup.call(closeMenuThenDrag);
+        }
+    };
+
+    room.rackGroups.forEach((group) => {
+        createGroup(group);
+    });
+
+    room.objects.forEach(async (roomObj) => {
+        const roomObjGroup = layoutSvg.append('g')
+            .data([{x: roomObj.x, y: roomObj.y}])
+            .attr('id', roomObj.itemId)
+            .attr('class', 'draggable room-obj')
+            .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${roomObj.scale})`)
+            .style('pointer-events', 'bounding-box');
+
+        let objSvg: SVGElement;
+
+        if (mode === 'edit') {
+            objSvg = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
+        } else if (mode === 'view') {
+            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
+                (roomObjGroup.node() as SVGElement).appendChild(d.documentElement);
+            });
+            return;
+        }
+
+        const shape = d3.select(objSvg)
+            .classed('draggable', false)
+            .attr('pointer-events', 'none');
+
+
+        roomObjGroup.append(() => shape.node());
+        placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
+        if (mode === 'edit') {
+            setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, contextMenuRef);
+            roomObjGroup.call(closeMenuThenDrag);
+        }
+    });
+
+};

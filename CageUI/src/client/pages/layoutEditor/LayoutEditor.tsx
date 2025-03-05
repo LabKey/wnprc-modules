@@ -156,7 +156,7 @@ export const LayoutEditor: FC<any> = () => {
         }
     }, [prevRoomData]);
 
-    return (!isLoading || !userProfile) ? (
+    return (!isLoading && userProfile) ? (
             <LayoutEditorContextProvider
                 prevRoom={prevRoom}
                 user={userProfile}

@@ -20,11 +20,6 @@ export const RoomList: FC = () => {
         setSearchQuery(e.target.value);
     };
 
-    useEffect(() => {
-        console.log("Expanded Rooms: ", expandedRooms);
-        console.log("Expanded Racks: ", expandedRacks);
-    }, [expandedRooms, expandedRacks, visibleRooms]);
-
     // Filter items based on search query
     useEffect(() => {
         if (searchQuery) {
@@ -39,7 +34,6 @@ export const RoomList: FC = () => {
 
     useEffect(() => {
         selectDistinctRows({schemaName: "ehr_lookups", queryName: "rooms", column: "room"}).then((d) => {
-            console.log(d);
             if(d.values.length > 0){
                 const tempRooms: Room[] = [];
                 for (let value of d.values) {

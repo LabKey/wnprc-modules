@@ -148,6 +148,7 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
     return rackItem || defaultRackItem || objItem;
 }
 
+// Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag?, setSelectedObj?, setCtxMenuStyle?, contextMenuRef?: MutableRefObject<Room>) => {
 
     const createRackGroup = (parentGroup, rack, isSingleRack) => {
@@ -155,7 +156,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
             .attr('class', `rack type-${rackTypeString}`)
-            .attr('transform', `translate(${rack.x},${rack.y})`)
+            .attr('transform', `translate(${rack.x},${rack.y}))`)
             .style('pointer-events', 'bounding-box');
 
         rack.cages.forEach(async (cage) => {
@@ -181,12 +182,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
 
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
 
-            if (mode === 'edit') {
-                setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, contextMenuRef, rackTypeString);
-            }
-
+            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, contextMenuRef, rackTypeString);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
-
             cageGroup.append(() => shape.node());
         });
 
@@ -199,17 +196,14 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
             ? layoutSvg.append('g')
                 .attr('id', group.racks[0].itemId)
                 .attr('class', `draggable rack type-${roomItemToString(group.racks[0].type.type)}`)
-                .attr('transform', `translate(${group.racks[0].x},${group.racks[0].y}) scale(${group.scale})`)
                 .style('pointer-events', 'bounding-box')
             : layoutSvg.append('g')
                 .attr('id', group.groupId)
                 .attr('class', 'draggable rack-group');
 
-        parentGroup.attr('transform', `translate(${group.x},${group.y}) scale(${group.scale})`);
-
-        group.racks.forEach(rack => {
+        group.racks.forEach(async rack => {
             // Use parent group as rackGroup if only 1 rack, otherwise create a new rack group
-            const rackGroup = createRackGroup(parentGroup, rack, isSingleRack);
+            await createRackGroup(parentGroup, rack, isSingleRack);
         });
         placeAndScaleGroup(parentGroup, group.x, group.y, zoomTransform(layoutSvg.node()));
         if (mode === 'edit') {
@@ -226,7 +220,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
             .data([{x: roomObj.x, y: roomObj.y}])
             .attr('id', roomObj.itemId)
             .attr('class', 'draggable room-obj')
-            .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${roomObj.scale})`)
+            .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === "edit" ? roomObj.scale : 1})`)
             .style('pointer-events', 'bounding-box');
 
         let objSvg: SVGElement;
@@ -247,10 +241,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
 
         roomObjGroup.append(() => shape.node());
         placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
-        if (mode === 'edit') {
-            setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, contextMenuRef);
-            roomObjGroup.call(closeMenuThenDrag);
-        }
+        setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, contextMenuRef);
+        roomObjGroup.call(closeMenuThenDrag);
     });
 
 };

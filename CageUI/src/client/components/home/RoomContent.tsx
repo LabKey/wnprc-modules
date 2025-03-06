@@ -10,10 +10,6 @@ import { HomeViewContent } from './HomeViewContent';
 export const RoomContent: FC = () => {
     const {selectedPage} = useHomeContext();
 
-    useEffect(() => {
-        console.log("Page: ", selectedPage);
-    }, [selectedPage]);
-
     const renderContent = () => {
         switch (selectedPage?.selected) {
             case 'Room':

@@ -8,6 +8,7 @@ import { ReactSVG } from 'react-svg';
 import { LayoutData } from '../../types/typings';
 import { useHomeContext } from '../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../utils/helpers';
+import { updateBorderSize } from '../../utils/LayoutEditorHelpers';
 
 interface RoomLayoutProps {
     roomName: string;
@@ -15,38 +16,32 @@ interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
+    const {localRoom} = useHomeContext();
     const SVG_WIDTH = 1290; // starting pixel width of the layout svg
     const SVG_HEIGHT = 810; // starting pixel height of the layout svg
     const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage
     const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
     const CELL_SIZE = 30; // number of pixels of a cell for length/width
-    const {roomName, borderSize} = props;
     // number of cells in grid width/height, based off scale
-    const gridWidth = Math.ceil(SVG_WIDTH / borderSize.scale / CELL_SIZE);
-    const gridHeight = Math.ceil(SVG_HEIGHT / borderSize.scale / CELL_SIZE);
+    const gridWidth = Math.ceil(SVG_WIDTH / localRoom.layoutData.scale / CELL_SIZE);
+    const gridHeight = Math.ceil(SVG_HEIGHT / localRoom.layoutData.scale / CELL_SIZE);
     const borderRef = useRef(null);
-    const {localRoom} = useHomeContext();
 
 
     useEffect(() => {
-        console.log("GRID: ", gridWidth, gridHeight);
-        console.log("Border: ", borderSize);
-    }, []);
-
-    useEffect(() => {
-        if(!roomName) return;
+        if(!localRoom.name) return;
+        d3.select("#layout-svg").selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
         addPrevRoomSvgs('view', localRoom, layoutSvg);
-    }, [roomName]);
+    }, [localRoom.name]);
 
     return (
         <div className={'room-layout'}>
-            Room Layout {roomName}
             <div id={"layout-grid"}>
-                <svg // Ensure the width/height fit the grid, using (scaled cell size * number of cells in width/height)
-                    width={borderSize.borderWidth}
-                    height={borderSize.borderHeight}
-                    viewBox={`0 0 ${(borderSize.scale * CELL_SIZE) * gridWidth} ${(borderSize.scale * CELL_SIZE) * gridHeight}`}
+                <svg // svg here is the size of the border (objects outside of border ignored), add 1 to viewbox to prevent visual cutting by a pixel
+                    width={localRoom.layoutData.borderWidth + 1}
+                    height={localRoom.layoutData.borderHeight + 1}
+                    viewBox={`0 0 ${localRoom.layoutData.borderWidth + 1} ${localRoom.layoutData.borderHeight + 1}`}
                     id="layout-svg"
                 >
                     <g className={'draggable room-obj'}
@@ -60,10 +55,14 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                             key={'border_template_key'}
                             ref={borderRef}
                             className={''}
-                            viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-                            height={SVG_HEIGHT}
-                            width={SVG_WIDTH}
+                            viewBox={`0 0 ${localRoom.layoutData.borderWidth} ${localRoom.layoutData.borderHeight}`}
+                            height={localRoom.layoutData.borderHeight}
+                            width={localRoom.layoutData.borderWidth}
                             pointerEvents={'none'}
+                            afterInjection={(svg) => {
+                                const borderGroup = d3.select('#layout-border') as d3.Selection<SVGGElement, {}, HTMLElement, any>;
+                                updateBorderSize(borderGroup, localRoom.layoutData.borderWidth, localRoom.layoutData.borderHeight)
+                            }}
                         />
                     </g>
                 </svg>

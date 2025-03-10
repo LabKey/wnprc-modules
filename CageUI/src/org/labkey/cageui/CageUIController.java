@@ -45,4 +45,5 @@ public class CageUIController extends SpringActionController
 
         public void addNavTrail(NavTree root) { }
     }
+
 }

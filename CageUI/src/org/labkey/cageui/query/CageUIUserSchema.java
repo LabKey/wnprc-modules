@@ -8,8 +8,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
 import org.labkey.cageui.CageUISchema;
-import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
-import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 
 public class CageUIUserSchema extends SimpleUserSchema
 {
@@ -30,8 +29,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUITemplateCreatorPermission.class) ||
-                                schema.getContainer().hasPermission(schema.getUser(), CageUIRoomCreatorPermission.class))
+                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
                         {
                             return new LayoutHistoryTable(schema, CageUISchema.getInstance().getLayoutHistoryTable(), cf).init();
                         }
@@ -44,7 +42,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        return new SimpleUserSchema.SimpleTable<>(schema, CageUISchema.getInstance().getRackTypesTable(), cf).init();
+                        return new RackTypesTable(schema, CageUISchema.getInstance().getRackTypesTable(), cf).init();
                     }
                 },
         racks
@@ -52,14 +50,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        // Only make this table visible to anyone with CageUILayoutEditorUserPermission (this includes folder admins)
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUITemplateCreatorPermission.class) ||
-                                schema.getContainer().hasPermission(schema.getUser(), CageUIRoomCreatorPermission.class))
-                        {
-                            return new RacksTable(schema, CageUISchema.getInstance().getRacksTable(), cf).init();
-                        }
-
-                        return null;
+                        return new RacksTable(schema, CageUISchema.getInstance().getRacksTable(), cf).init();
                     }
                 };
 
@@ -89,4 +80,6 @@ public class CageUIUserSchema extends SimpleUserSchema
         }
         return super.createTable(name, cf);
     }
+
+
 }

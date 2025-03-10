@@ -28,6 +28,7 @@ import org.labkey.api.module.Module;
 import org.labkey.cageui.query.CageUIUserSchema;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
@@ -78,6 +79,7 @@ public class CageUIModule extends ExtendedSimpleModule
     private void registerPermissions() {
         RoleManager.registerPermission(new CageUIRoomCreatorPermission());
         RoleManager.registerPermission(new CageUIRoomModifierPermission());
+        RoleManager.registerPermission(new CageUILayoutEditorAccessPermission());
         RoleManager.registerPermission(new CageUITemplateCreatorPermission());
         RoleManager.registerPermission(new CageUIAnimalEditorPermission());
         RoleManager.registerPermission(new CageUIAnimalReviewerPermission());

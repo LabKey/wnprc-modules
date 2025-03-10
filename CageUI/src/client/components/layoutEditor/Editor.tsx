@@ -40,7 +40,7 @@ import {
     findRackInGroup,
     getLayoutOffset,
     getTargetRect,
-    isRackEnum,
+    isRackEnum, isRoomCreator,
     isTemplateCreator,
     mergeRacks,
     parseWrapperId,
@@ -152,10 +152,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         .on('end', function (event) {
             dragInLayout.on('end').call(this, event);
         });
-
-    useEffect(() => {
-        console.log("localRoom: ", localRoom);
-    }, [localRoom]);
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
@@ -879,12 +875,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     >Save as Template
                     </button>
                 }
-                <button
-                    id={'loadTemplateBtn'}
-                    className={"layout-toolbar-btn"}
-                    onClick={() => {setTemplateOptions(true); setShowRoomSelectorTemplateLoad(true);}}
-                >Load Template
-                </button>
+                { (isRoomCreator(user) || isTemplateCreator(user)) &&
+                        <button
+                                id={'loadTemplateBtn'}
+                                className={"layout-toolbar-btn"}
+                                onClick={() => {setTemplateOptions(true); setShowRoomSelectorTemplateLoad(true);}}
+                        >Load Template
+                        </button>
+                }
+
                 <button
                     id={'saveLayoutBtn'}
                     className={"layout-toolbar-btn"}

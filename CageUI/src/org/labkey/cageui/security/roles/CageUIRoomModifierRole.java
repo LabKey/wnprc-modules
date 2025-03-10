@@ -4,6 +4,7 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.roles.AbstractRole;
 import org.labkey.cageui.CageUIModule;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
@@ -16,6 +17,7 @@ public class CageUIRoomModifierRole extends AbstractRole
                 CageUIRoomModifierPermission.class,
                 CageUIAnimalEditorPermission.class,
                 CageUIModificationEditorPermission.class,
+                CageUILayoutEditorAccessPermission.class,
                 CageUINotesEditorPermission.class
         );
     }

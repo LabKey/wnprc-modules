@@ -10,8 +10,8 @@ module.exports = {
         name: "editLayout",
         title: "Room Layout Editor",
         permissionClasses: [
-                'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission',
-                'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission',
+            'org.labkey.api.security.permissions.ReadPermission',
+            'org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission',
         ],
         path: './src/client/pages/layoutEditor'
     }]

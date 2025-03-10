@@ -10,7 +10,7 @@ import Editor from '../../components/layoutEditor/Editor';
 import { labkeyActionSelectWithPromise, labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { buildNewLocalRoom, buildNewLocs } from '../../utils/LayoutEditorHelpers';
+import { buildNewLocalRoom, buildNewLocs, isTemplateCreator } from '../../utils/LayoutEditorHelpers';
 import {Security} from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
@@ -23,6 +23,7 @@ export const LayoutEditor: FC<any> = () => {
     const [errorPopup, setErrorPopup] = useState<string>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [userProfile, setUserProfile] = useState<GetUserPermissionsResponse>(null);
+    const [access, setAccess] = useState<boolean>(false);
 
 
     // These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
@@ -52,9 +53,12 @@ export const LayoutEditor: FC<any> = () => {
         userProfile.then((profile: GetUserPermissionsResponse) => {
             if(profile.user){
                 setUserProfile(profile);
-                console.log("Test2: ", Security.hasEffectivePermission(profile.container.effectivePermissions,'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission'));
-                console.log("User profile", profile.user);
-                console.log("User container", profile.container);
+                // if the user is a template creator grant access
+               if(!(!roomName && !isTemplateCreator(profile))){
+                   setAccess(true);
+               }else if(roomName) {
+                   setAccess(true);
+               }
             }
         }).catch((e) => {
             console.error(e);
@@ -156,7 +160,7 @@ export const LayoutEditor: FC<any> = () => {
         }
     }, [prevRoomData]);
 
-    return (!isLoading && userProfile) ? (
+    return (!isLoading && userProfile && access) ? (
             <LayoutEditorContextProvider
                 prevRoom={prevRoom}
                 user={userProfile}
@@ -185,5 +189,5 @@ export const LayoutEditor: FC<any> = () => {
                     </div>
                 }
             />
-    ) : null;
+    ) : <div> You do not have the required permissions </div>;
 }

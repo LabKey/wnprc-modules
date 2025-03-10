@@ -1,17 +1,18 @@
 // React
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 // Components
 import EnterWeightFormContainer from "./containers/Forms/EnterWeightFormContainer";
 import {ContextProvider} from "./containers/App/ContextProvider";
+import { createRoot } from 'react-dom/client';
 
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    ReactDOM.render(
+    const container = document.getElementById('app');
+    const root = createRoot(container);
+    root.render(
         <ContextProvider>
             <EnterWeightFormContainer />
         </ContextProvider>,
-        document.getElementById('app')
     )
 });

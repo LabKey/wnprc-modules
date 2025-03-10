@@ -47,12 +47,11 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends WaterMonito
         super(owner);
     }
 
+    @Override
     public String getName()
     {
         return "Water Monitoring Animal For Vets and Lab";
     }
-
-
 
     @Override
     public String getEmailSubject(Container c)
@@ -69,6 +68,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends WaterMonito
         return "every day at 1500 and 1900";
     }
 
+    @Override
     public String getDescription()
     {
         return "The report is designed to report total amount of water animal had gotten and report if they have not gotten the required 20 mls per kilogram.";
@@ -84,13 +84,17 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends WaterMonito
         Date now = new Date();
         msg.append("This email contains a series of automatic alerts about the water monitoring system.  It was run on: " + AbstractEHRNotification._dateFormat.format(now) + " at " + AbstractEHRNotification._timeFormat.format(now) + ".<p>");
 
+        //Check animals with less than 20 mls per kilogram of water for today, it also displays the animals on Lixit at the end of the notification
+        findAnimalsWithEnoughWater(c,u,msg, 10);
+
+        //Check animals with less than 10 mls per kilogram of water for today, it also displays the animals on Lixit at the end of the notification
+        findAnimalsWithEnoughWater(c,u,msg, 20);
+
+        //Get animal on lixit
+        animalOnLixit(c,u,msg);
+
         //Check animals that did not get any water for today and the last five days.
         findAnimalsWithWaterEntries(c,u,msg,numDays);
-
-        //Check animals with less than 20 mls per kilogram of water for today, it also displays the animals on Lixit at the end of the notification
-        findAnimalsWithEnoughWater(c,u,msg);
-
-
 
         return msg.toString();
     }

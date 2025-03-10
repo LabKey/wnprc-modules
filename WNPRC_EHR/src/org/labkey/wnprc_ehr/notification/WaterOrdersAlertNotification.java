@@ -31,8 +31,10 @@ public class WaterOrdersAlertNotification extends WaterMonitoringNotification
     public WaterOrdersAlertNotification(Module owner){
         super(owner);
     }
+    @Override
     public String getName(){return "WNPRC Waters Orders Not Completed (ACT)";}
 
+    @Override
     public String getDescription(){
         return  "Send notification of any eater order not completed by the corresponding frequency.";
     }
@@ -49,6 +51,7 @@ public class WaterOrdersAlertNotification extends WaterMonitoringNotification
         return "0 0 10,13,15,17,19 * * ?";
     }
 
+    @Override
     public String getScheduleDescription()
     {
         return "daily at 1000, 1300, 1500, 1700, 1900";

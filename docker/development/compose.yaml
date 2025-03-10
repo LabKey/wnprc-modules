@@ -8,7 +8,7 @@ services:
     image: wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}    
     volumes:
       - "${LK_FILES_DIR}:/backups/new_files_dir"
-      - "${LK_LOG_DIR}:/usr/local/tomcat/logs"
+      - "${LK_LOG_DIR}:/labkey/logs"
       - "${LK_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LK_SESSION_DIR}:/usr/local/labkey/sessions"
     expose:

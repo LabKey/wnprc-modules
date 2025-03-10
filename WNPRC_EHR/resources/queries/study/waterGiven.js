@@ -85,36 +85,19 @@ function onInit(event, helper){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
-    /*if (row.volume == null){
-        EHR.Server.Utils.addError(scriptErrors, 'volume', 'This field is required', 'WARN');
-        console.log ("value of QCState "+ row.QCState)
-    }*/
-
     if (row.QCStateLabel == 'Scheduled'){
         EHR.Server.Validation.verifyDate(row, scriptErrors, helper);
     }
 
         if (row.Id && row.date)
         {
-            // volume is handled differently for requestsvs actual draws
             var errorQC = 'ERROR';
-            //if (EHR.Server.Security.getQCStateByLabel(row.QCStateLabel)['isRequest'] && !row.taskid)
-            //    errorQC = 'ERROR';
-            //else
-            //    errorQC = 'INFO';
 
             var map = helper.getProperty('waterInTransaction');
             var waters = [];
             if (map && map[row.Id])
             {
                 waters = map[row.Id];
-                /*for (var i=0;i<map.length; i++ ){
-                    console.log ('value of map '+ map[i]);
-                    waters.push (map[i]);
-                    console.log ("map in JS "+map[i].objectid + " " + map[i].volume);
-                }*/
-                //console.log("stablishing map "+ map);
-               // waters.push(map);
             }
             if (row.location=='laboratory'){
                 if (!row.restraint){
@@ -135,7 +118,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
 
             //TODO: Troubleshoot this function to determine if the animal has not gotten enough water for the last three days.
-            /*if (row.volume)
+           /* if (row.volume)
                 {
                     var msg = WNPRC.Utils.getJavaHelper().waterLastThreeDays(row.Id, row.date, waters);
                     if (msg != null){
@@ -164,8 +147,6 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                 }
 
             }
-
-
         }
         console.log ('parentid '+ row.parentid + ' lsid: '+row.lsid);
         if (row.id && row.date && row.performedby && row.parentid && !row.lsid){
@@ -195,10 +176,6 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
             }
         }
-
-
-        //EHR.Server.Validation.checkRestraint(row, scriptErrors);
-
 }
 function addWaterGivenDescription(row, waters){
     let clientDescription = '';

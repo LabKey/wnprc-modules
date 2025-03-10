@@ -3461,10 +3461,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testReactGridPanel() throws UnhandledAlertException {
         log("Starting testReactGridPanel.");
-        log("Testing grid panel renders for full webpage");
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "research_ultrasounds"));
+        log("Testing grid panel renders for breeding");
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "breeding"));
         WebElement reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
         Assert.assertTrue(reactComp.isDisplayed());
+
+        log("Testing grid panel renders for research ultrasounds");
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "research_ultrasounds"));
+        reactComp = getDriver().findElement(By.cssSelector(".grid-panel"));
+        Assert.assertTrue(reactComp.isDisplayed());
+
 
         log("Testing grid panel renders for web parts");
         goToEHRFolder();

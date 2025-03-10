@@ -392,7 +392,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }else if(event.sourceEvent.target.nodeName === 'path'){
                 shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
             }else if(event.sourceEvent.target.nodeName === 'polygon'){
-                shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+                shape = (event.sourceEvent.target as SVGPolygonElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+            }else if(event.sourceEvent.target.nodeName === 'line'){
+                shape = (event.sourceEvent.target as SVGLineElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+            }else if(event.sourceEvent.target.nodeName === 'rect'){
+                shape = (event.sourceEvent.target as SVGRectElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
             }else{
                 shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
             }
@@ -419,6 +423,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 clientX: event.sourceEvent.clientX,
             clientY: event.sourceEvent.clientY,
             layoutSvg: layoutSvg})
+
             // Apply transforms for zoom on shape to scale to correct size when placed
             const transform = d3.zoomTransform(layoutSvg.node());
             // Discovers the grid cell to lock onto

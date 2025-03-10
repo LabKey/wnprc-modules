@@ -18,8 +18,6 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
-import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 import java.sql.SQLException;
@@ -86,24 +84,13 @@ public class RackTypesTable extends SimpleUserSchema.SimpleTable<CageUIUserSchem
         }
 
         @Override
-        public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
+        public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
+                throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             if(hasPermission(user, CageUITemplateCreatorPermission.class)){
-                for (int i = 0; i < rows.size(); i++)
-                {
-                    try
-                    {
-                        result.add(i,super.deleteRow(user, container, rows.get(i)));
-                    }
-                    catch (InvalidKeyException e)
-                    {
-                        throw new RuntimeException(e);
-                    }
-                }
+                return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }
-            afterInsertUpdate(result.isEmpty() ? 0 : result.size(), errors);
-            return result;
+            return null;
         }
     }
 }

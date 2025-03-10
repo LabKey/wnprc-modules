@@ -8,16 +8,20 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.RuntimeValidationException;
 import org.labkey.api.query.SimpleQueryUpdateService;
 import org.labkey.api.query.SimpleUserSchema;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
@@ -66,7 +70,7 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUITemplateCreatorPermission.class) || hasPermission(user, CageUIRoomCreatorPermission.class)){
+            if(hasPermission(user, CageUITemplateCreatorPermission.class)){
                 result = super._insertRowsUsingDIB(user, container, rows, getDataIteratorContext(errors, InsertOption.INSERT, configParameters), extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -79,7 +83,7 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
                 throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUILayoutEditorAccessPermission.class)){
+            if(hasPermission(user, CageUITemplateCreatorPermission.class)){
                 result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -87,24 +91,13 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
         }
 
         @Override
-        public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
+        public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
+                throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             if(hasPermission(user, CageUITemplateCreatorPermission.class)){
-                for (int i = 0; i < rows.size(); i++)
-                {
-                    try
-                    {
-                        result.add(i,super.deleteRow(user, container, rows.get(i)));
-                    }
-                    catch (InvalidKeyException e)
-                    {
-                        throw new RuntimeException(e);
-                    }
-                }
+                return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }
-            afterInsertUpdate(result.isEmpty() ? 0 : result.size(), errors);
-            return result;
+            return null;
         }
     }
 }

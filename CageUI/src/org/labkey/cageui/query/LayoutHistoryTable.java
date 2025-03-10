@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
@@ -90,24 +89,13 @@ public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserS
         }
 
         @Override
-        public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
+        public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
+                throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             if(hasPermission(user, CageUITemplateCreatorPermission.class)){
-                for (int i = 0; i < rows.size(); i++)
-                {
-                    try
-                    {
-                        result.add(i,super.deleteRow(user, container, rows.get(i)));
-                    }
-                    catch (InvalidKeyException e)
-                    {
-                        throw new RuntimeException(e);
-                    }
-                }
+                return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }
-            afterInsertUpdate(result.isEmpty() ? 0 : result.size(), errors);
-            return result;
+            return null;
         }
     }
 }

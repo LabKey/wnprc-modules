@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin""
+
 #-------------------------------------------------------------------------------
 # Read the named arguments (e.g., -f, -p) from the command line and replace the
 # standard positional arguments with the non-named ones

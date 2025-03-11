@@ -14,11 +14,6 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
     const {selectedPage, localRoom} = useHomeContext();
     const roomName = selectedPage?.room;
 
-
-    useEffect(() => {
-        console.log("LocalRoom: ", localRoom);
-    }, [localRoom]);
-
     const handleLayoutEdit = () => {
         window.location.href = ActionURL.buildURL(ActionURL.getController(), "editLayout" , ActionURL.getContainer(), {
             room: roomName,

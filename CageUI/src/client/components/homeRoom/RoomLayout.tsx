@@ -17,14 +17,6 @@ interface RoomLayoutProps {
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {localRoom} = useHomeContext();
-    const SVG_WIDTH = 1290; // starting pixel width of the layout svg
-    const SVG_HEIGHT = 810; // starting pixel height of the layout svg
-    const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage
-    const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
-    const CELL_SIZE = 30; // number of pixels of a cell for length/width
-    // number of cells in grid width/height, based off scale
-    const gridWidth = Math.ceil(SVG_WIDTH / localRoom.layoutData.scale / CELL_SIZE);
-    const gridHeight = Math.ceil(SVG_HEIGHT / localRoom.layoutData.scale / CELL_SIZE);
     const borderRef = useRef(null);
 
 

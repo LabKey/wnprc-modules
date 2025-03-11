@@ -1,6 +1,6 @@
 import {
     DefaultRackStringType,
-    DefaultRackTypes,
+    DefaultRackTypes, Rack, RackGroup,
     RackStringType,
     RackTypes,
     Room,
@@ -151,7 +151,7 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag?, setSelectedObj?, setCtxMenuStyle?, contextMenuRef?: MutableRefObject<Room>) => {
 
-    const createRackGroup = (parentGroup, rack, isSingleRack) => {
+    const createRackGroup = (parentGroup, rack: Rack, isSingleRack) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
@@ -171,6 +171,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
             } else if (mode === 'view') {
                 await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
                     (cageGroup.node() as SVGElement).appendChild(d.documentElement);
+                    cageGroup.select('#name').selectChild().text(cage.id);
                 });
                 return;
             }
@@ -190,7 +191,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
         return rackGroup;
     };
 
-    const createGroup = (group) => {
+    const createGroup = (group: RackGroup) => {
         const isSingleRack = group.racks.length === 1;
         const parentGroup = isSingleRack
             ? layoutSvg.append('g')

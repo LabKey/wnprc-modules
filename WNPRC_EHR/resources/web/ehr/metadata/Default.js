@@ -2471,7 +2471,7 @@ EHR.Metadata.registerMetadata('Default', {
             }
             ,quantity: {
                 //xtype: 'displayfield',
-                shownInGrid: false,
+                shownInGrid: true,
                 allowBlank: false,
                 editorConfig: {
                     allowNegative: false,

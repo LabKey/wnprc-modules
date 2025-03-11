@@ -61,15 +61,6 @@ RUN chown -Rc labkey:labkey ${LABKEY_HOME}
 
 EXPOSE 8080
 
-#USER labkey
-#CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/replacingSecrets.sh && systemctl daemon-reload && systemctl start labkey_server ; }"]
-#CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ;}", "java", "-jar", "labkeyServer.jar"]
-#CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; java -jar /labkey/labkeyServer.jar;}"]
 ENTRYPOINT ["/etc/replacingSecrets.sh" ]
 
-#working 
-#CMD ["java", "-XX:MaxRAMPercentage=75.0", "-Dlabkey.home=$LABKEY_HOME" , "-Dlabkey.log.home=/labkey/logs", "-Dlogback.debug=true", "-jar", "/labkey/labkey/labkeyServer.jar"]
 CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:MaxRAMPercentage=75.0 -Dlabkey.home=$LABKEY_HOME -Dlabkey.log.home=$LABKEY_LOGS -Dlogback.debug=true -jar /labkey/labkey/labkeyServer.jar
-#ENTRYPOINT ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/replacingSecrets.sh; }" ]
-
-#CMD ["sudo","-u","labkey","java","-XX:MaxRAMPercentage=75.0", "-Dlabkey.home=$LABKEY_HOME" , "-Dlabkey.log.home=/labkey/logs", "-Dlogback.debug=true", "-jar", "/labkey/labkeyServer.jar"]

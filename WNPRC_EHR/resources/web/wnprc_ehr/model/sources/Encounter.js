@@ -51,7 +51,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
             waterSource:{
                 editable:       false,
                 allowBlank:     false,
-                shownInGrid:    false
+                shownInGrid:    true
 
             },
             remarks :{

@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
-import '../../cageui.scss';
+import '../../../cageui.scss';
 import { ActionURL } from '@labkey/api';
-import { useHomeContext } from '../../context/HomeContextManager';
-import { SubViewContent } from './SubViewContent';
-import { RoomDetailsSubView } from './RoomDetailsSubView';
-import { RoomLayout } from '../homeRoom/RoomLayout';
+import { useHomeContext } from '../../../context/HomeContextManager';
+import { SubViewContent } from '../SubViewContent';
+import { RoomDetails } from './RoomDetails';
+import { RoomLayout } from './RoomLayout';
 
 interface RoomViewContentProps {
 }
 
 export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
-    const {selectedPage, localRoom} = useHomeContext();
+    const {selectedPage, selectedRoom} = useHomeContext();
     const roomName = selectedPage?.room;
 
     const handleLayoutEdit = () => {
@@ -21,15 +21,16 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
         });
     };
 
+
     return (
-        localRoom &&
-            <div className={"room-view-container"} key={'layout-' + localRoom}>
+        selectedRoom &&
+            <div className={"room-view-container"} key={'layout-' + selectedRoom}>
                 <div className={'room-view-title'}>
                     <input
                         type="checkbox"
                         className="room-view-checkbox"
                         disabled={true}
-                        checked={localRoom?.layoutData.status ?? false}
+                        checked={selectedRoom?.layoutData.status ?? false}
                     />
                     <label>
                         {roomName}
@@ -39,13 +40,10 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
                     tabs={[{
                         name: 'Layout',
                         children:
-                            <RoomLayout
-                                roomName={roomName}
-                                borderSize={localRoom?.layoutData}
-                            />
+                            <RoomLayout />
                     },{
                         name: 'Details',
-                        children: <RoomDetailsSubView />
+                        children: <RoomDetails />
                     }
                     ]}
                 />

@@ -3,17 +3,21 @@ import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
 import { selectDistinctRows } from '@labkey/components';
 import { useHomeContext } from '../../context/HomeContextManager';
-import { ExpandedRooms, Room, RoomCage, RoomRack } from '../../types/homeTypes';
+import { ExpandedRooms, ListRoom, ListCage, ListRack } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Filter } from '@labkey/api';
+import { HomeContextType } from '../../types/homeContextTypes';
 
 export const RoomList: FC = () => {
-    const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
-    const [expandedRacks, setExpandedRacks] = useState<RoomRack[]>([]);
-    const {setSelectedPage} = useHomeContext();
+    const {setSelectedPage, loadedRooms } = useHomeContext();
 
-    const [allRooms, setAllRooms] = useState<Room[]>([]); // Stores all items fetched on load
-    const [visibleRooms, setVisibleRooms] = useState<Room[]>([]); // Items currently visible
+    // keeps track of which rooms have already been fetched from layout_history
+    const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
+    const [expandedRacks, setExpandedRacks] = useState<ListRack[]>([]);
+
+    const [allRooms, setAllRooms] = useState<ListRoom[]>([]); // Stores all items fetched on load
+    const [visibleRooms, setVisibleRooms] = useState<ListRoom[]>([]); // Items currently visible
+
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearch = (e) => {
@@ -32,21 +36,19 @@ export const RoomList: FC = () => {
         }
     }, [searchQuery, allRooms]);
 
+    // Runs once after loadedRooms is filled with the rooms, adds to a list for easier display
     useEffect(() => {
-        selectDistinctRows({schemaName: "ehr_lookups", queryName: "rooms", column: "room"}).then((d) => {
-            if(d.values.length > 0){
-                const tempRooms: Room[] = [];
-                for (let value of d.values) {
-                    tempRooms.push({name: value})
-                }
-                setAllRooms(tempRooms);
-            }else{
-                console.log("No Rooms Found.")
-            }
-        }).catch(e => {
-            console.log(e)
-        });
-    }, []);
+        if(allRooms.length !== 0) return;
+        const roomList: ListRoom[] = [];
+
+        for (const [key,value] of Object.entries(loadedRooms)){
+            roomList.push({
+                name: key,
+                racks: null
+            })
+        }
+        setAllRooms(roomList);
+    }, [loadedRooms]);
 
     const toggleExpandRoom = async (roomId) => {
 
@@ -58,13 +60,14 @@ export const RoomList: FC = () => {
                 filterArray: [
                     Filter.create('room', roomId, Filter.Types.EQUALS),
                     Filter.create('end_date', null, Filter.Types.ISBLANK),
-                    Filter.create('cage', null, Filter.Types.NONBLANK)]
+                    Filter.create('cage', null, Filter.Types.NONBLANK)],
+                sort: "rack_group"
             });
             if(racks.rowCount > 0){
                 setAllRooms((prevRooms) => prevRooms.map((room) => {
                     // add racks to room state, only once when first clicked
                     if(room.name === roomId){
-                        const tempRacks: RoomRack[] = [];
+                        const tempRacks: ListRack[] = [];
                         racks.rows.forEach((row) => {
                             const rackId = row.rack ? row.rack : JSON.parse(row.extra_context).rack.rackId;
                             const rackIdx = tempRacks.findIndex((rack) => rack.id === rackId);
@@ -92,7 +95,6 @@ export const RoomList: FC = () => {
                 }))
             }
         }
-
         setExpandedRooms((prevExpandedRooms) => ({
             ...prevExpandedRooms,
             [roomId]: !prevExpandedRooms[roomId],
@@ -108,14 +110,14 @@ export const RoomList: FC = () => {
         }));
     };
 
-    const handleRoomClick = (room: Room) => {
+    const handleRoomClick = (room: ListRoom) => {
         setSelectedPage({
             selected: "Room",
             room: room.name
         });
     }
 
-    const handleRackClick = (room: Room, rack: RoomRack) => {
+    const handleRackClick = (room: ListRoom, rack: ListRack) => {
         setSelectedPage({
             selected: "Rack",
             room: room.name,
@@ -123,7 +125,7 @@ export const RoomList: FC = () => {
         });
     }
 
-    const handleCageClick = (room: Room, rack: RoomRack, cage: RoomCage) => {
+    const handleCageClick = (room: ListRoom, rack: ListRack, cage: ListCage) => {
         setSelectedPage({
             selected: "Cage",
             room: room.name,
@@ -131,8 +133,6 @@ export const RoomList: FC = () => {
             cage: cage.id.toString()
         });
     }
-
-
 
     return (
         <div className={'room-list'}>

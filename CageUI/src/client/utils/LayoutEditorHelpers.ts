@@ -758,22 +758,23 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
-        // if rack is a default aka 0, then use its default ID
-        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackItem.rack);
+        let rackId = rackItem?.rack;
+        let extraContext: ExtraContext;
+        // if rack is default, use default rack id instead
+        if(!rackId && rackItem.extra_context){
+            extraContext = JSON.parse(rackItem.extra_context);
+            if(extraContext?.rack?.rackId){
+                rackId = extraContext.rack.rackId;
+            }
+        }
+        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackId);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
             let typeName = rackItem;
             const isDefault = isRackDefault(rackItem.object_type);
             const rackPrefix = isDefault ?  'default-rack' : 'rack';
-            let extraContext: ExtraContext;
-            let rackId = rackItem?.rack;
-            if(rackItem.extra_context){
-                extraContext = JSON.parse(rackItem.extra_context);
-                if(extraContext?.rack?.rackId){
-                    rackId = extraContext.rack.rackId;
-                }
-            }
+
             if(!isDefault){
                 const optConfig: SelectRowsOptions = {
                     schemaName: "cageui",

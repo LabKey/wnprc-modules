@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect } from 'react';
 import { Cage } from '../../types/typings';
 import { findDetails } from '../../utils/homeHelpers';
-import { RoomLayout } from './RoomLayout';
+import { RoomLayout } from '../home/roomView/RoomLayout';
 import { useHomeContext } from '../../context/HomeContextManager';
 
 interface DisplayProps {

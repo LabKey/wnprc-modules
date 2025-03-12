@@ -1,4 +1,4 @@
-import { Cage } from './typings';
+import { Cage, Rack, Room } from './typings';
 
 
 type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
@@ -9,6 +9,10 @@ export type ExpandedRooms = {
     [key: string]: boolean;
 }
 
+export type LoadedRooms = {
+    [key: string]: { loaded: boolean, room?: Room };
+}
+
 export interface SelectedPage {
     selected: SelectedViews
     room?: string;
@@ -16,18 +20,18 @@ export interface SelectedPage {
     cage?: string;
 }
 
-export interface RoomCage {
+export interface ListCage {
     id: number;
 }
 
-export interface RoomRack {
+export interface ListRack {
     id: number;
-    cages: RoomCage[];
+    cages: ListCage[];
 }
 
-export interface Room {
+export interface ListRoom {
     name: string;
-    racks?: RoomRack[];
+    racks?: ListRack[];
 }
 
 

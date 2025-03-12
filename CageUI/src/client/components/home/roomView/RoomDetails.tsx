@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { FC } from 'react';
-import '../../cageui.scss';
-import { useHomeContext } from '../../context/HomeContextManager';
+import '../../../cageui.scss';
+import { useHomeContext } from '../../../context/HomeContextManager';
 
-export const RoomDetailsSubView: FC = () => {
+export const RoomDetails: FC = () => {
     const {selectedPage} = useHomeContext();
 
     return (

@@ -1,10 +1,10 @@
 import { Cage, Rack, Room, RoomItem } from './typings';
-import {SelectedPage} from './homeTypes';
+import { LoadedRooms, SelectedPage } from './homeTypes';
 import * as React from 'react';
 
 export interface HomeContextType {
     selectedPage: SelectedPage;
-    setSelectedPage: React.Dispatch<React.SetStateAction<SelectedPage | null>> | null;
+    setSelectedPage: React.Dispatch<React.SetStateAction<SelectedPage>>;
     room: RoomItem[];
     setRoom: React.Dispatch<React.SetStateAction<RoomItem[]>>;
     clickedCage: Cage | null;
@@ -23,9 +23,12 @@ export interface HomeContextType {
     setIsEditEnabled: React.Dispatch<React.SetStateAction<boolean>>;
     loading: boolean;
     error: string;
-    localRoom: Room;
-    hasUnsavedChanges: boolean;
+    selectedRoom: Room;
     isDraggingEnabled: boolean;
     setIsDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
     cageCount: number;
+    loadedRooms: LoadedRooms,
+    setLoadedRooms: React.Dispatch<React.SetStateAction<LoadedRooms>>,
+    selectedRack: Rack,
+    setSelectedRack: React.Dispatch<React.SetStateAction<Rack>>,
 }

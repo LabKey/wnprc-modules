@@ -2,9 +2,9 @@ import * as React from 'react';
 import { FC, useEffect } from 'react';
 import '../../cageui.scss';
 import { useHomeContext } from '../../context/HomeContextManager';
-import { RoomViewContent } from './RoomViewContent';
-import { CageViewContent } from './CageViewContent';
-import { RackViewContent } from './RackViewContent';
+import { RoomViewContent } from './roomView/RoomViewContent';
+import { CageViewContent } from './cageView/CageViewContent';
+import { RackViewContent } from './rackView/RackViewContent';
 import { HomeViewContent } from './HomeViewContent';
 
 export const RoomContent: FC = () => {

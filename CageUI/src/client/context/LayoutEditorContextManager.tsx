@@ -655,6 +655,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         if(prevRoom.locs) {
             setUnitLocs(prevRoom.locs);
         }
+        console.log("prev ROom: ", prevRoom.room)
         setLocalRoom(prevRoom.room);
         setRoom(prevRoom.room);
         setIsLoading(false);

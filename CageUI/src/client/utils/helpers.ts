@@ -156,7 +156,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
             .attr('class', `rack type-${rackTypeString}`)
-            .attr('transform', `translate(${rack.x},${rack.y}))`)
+            .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');
 
         rack.cages.forEach(async (cage) => {
@@ -171,7 +171,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
             } else if (mode === 'view') {
                 await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
                     (cageGroup.node() as SVGElement).appendChild(d.documentElement);
-                    cageGroup.select('#name').selectChild().text(cage.id);
+                    console.log("Id: ", cage);
+                    cageGroup.select('#name').selectChild().text(parseRoomItemNum(cage.cageNum));
                 });
                 return;
             }

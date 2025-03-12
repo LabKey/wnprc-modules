@@ -3,13 +3,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Cage, PrevRoom, Rack, Room, RoomItem } from '../types/typings';
 import { removeCircularReferences } from '../utils/homeHelpers';
 import { HomeContextType } from '../types/homeContextTypes';
-import {SelectedPage} from '../types/homeTypes';
+import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
-import { buildNewLocalRoom } from '../utils/LayoutEditorHelpers';
+import { buildNewLocalRoom, findRackInGroup } from '../utils/LayoutEditorHelpers';
+import { selectDistinctRows } from '@labkey/components';
 
 
-const HomeContext = createContext<HomeContextType | null>(null);
+const HomeContext = createContext<HomeContextType>({} as HomeContextType);
 
 export const useHomeContext = () => {
     const context = useContext(HomeContext);
@@ -26,8 +27,14 @@ export const useHomeContext = () => {
 export const HomeContextProvider = ({children}) => {
     // New state management
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: "Home"});
-    const [localRoom, setLocalRoom] = useState<Room>(null);
+    const [selectedRoom, setSelectedRoom] = useState<Room>(null);
+    const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [abortController, setAbortController] = useState(null);
+
+    // map of loaded rooms, loaded means fetched from layout_history
+    const [loadedRooms, setLoadedRooms] = useState<LoadedRooms>({});
+
+
 
     // End new state management
 
@@ -48,19 +55,50 @@ export const HomeContextProvider = ({children}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    useEffect(() => {
+        const roomConfig = {
+            schemaName: "ehr_lookups",
+            queryName: "rooms",
+            columns: []
+        }
+        labkeyActionSelectWithPromise(roomConfig).then((d) => {
+            if(d.rowCount > 0){
+                const tempRooms: LoadedRooms = {};
+                for (let row of d.rows) {
+                    tempRooms[row.room] = {
+                        loaded: false,
+                        room: {
+                            name: row.room,
+                            objects: [],
+                            rackGroups: [],
+                            layoutData: {
+                                scale: row.layout_scale,
+                                borderWidth: row.border_width,
+                                borderHeight: row.border_height,
+                                status: row.status,
+                            }
+                        }
+                    }
+                }
+                setLoadedRooms(tempRooms);
+            }else{
+                console.log("No Rooms Found.")
+            }
+        }).catch(e => {
+            console.log(e)
+        });
+    }, []);
+
 
     // Gets room data for selected room, has abort controller in case the user switches rooms before return
     useEffect(() => {
         if(!selectedPage?.room) return;
+        if(loadedRooms[selectedPage.room].loaded) {
+            setSelectedRoom(loadedRooms[selectedPage.room].room);
+            return;
+        }
         if (abortController) {
             abortController.abort();
-        }
-
-        const borderConfig = {
-            schemaName: "ehr_lookups",
-            queryName: "rooms",
-            columns: ["status", 'layout_scale', 'border_width', 'border_height'],
-            filterArray: [Filter.create('room', selectedPage.room, Filter.Types.EQUAL)]
         }
 
         const layoutHistoryConfig = {
@@ -78,29 +116,12 @@ export const HomeContextProvider = ({children}) => {
         const newAbortController = new AbortController();
         setAbortController(newAbortController);
 
-        const layoutBorder = labkeyActionSelectWithPromise(borderConfig, newAbortController.signal);
-        const roomLayout = labkeyActionSelectWithPromise(layoutHistoryConfig, newAbortController.signal);
-
-        Promise.all([layoutBorder, roomLayout]).then(([borderResult, roomResult]) => {
-            let tempNewRoom: Room = {
-                name: selectedPage.room,
-                rackGroups: [],
-                objects: [],
-                layoutData: null
-            }
-
-            if(borderResult.rowCount > 0) {
-                tempNewRoom.layoutData = {
-                    scale: borderResult.rows[0].layout_scale,
-                        borderWidth: borderResult.rows[0].border_width,
-                        borderHeight: borderResult.rows[0].border_height,
-                        status: borderResult.rows[0].status,
-                }
-            }
-            if(roomResult.rowCount > 0) {
+        labkeyActionSelectWithPromise(layoutHistoryConfig, newAbortController.signal).then((d) => {
+            let tempNewRoom: Room = loadedRooms[selectedPage.room].room;
+            if(d.rowCount > 0) {
                 const prevRoom: PrevRoom = {
                     name: selectedPage.room,
-                    cagingData: roomResult.rows,
+                    cagingData: d.rows,
                     layoutData: tempNewRoom.layoutData,
                 }
                 buildNewLocalRoom(prevRoom).then((d) => {
@@ -109,17 +130,43 @@ export const HomeContextProvider = ({children}) => {
                             ...d,
                             layoutData: tempNewRoom.layoutData,
                         }
-                        setLocalRoom(tempNewRoom);
+                        setLoadedRooms((prevRooms) => ({
+                            ...prevRooms,
+                            [tempNewRoom.name]: {loaded: true, room: tempNewRoom}
+                        }))
+                        console.log(tempNewRoom)
+                        setSelectedRoom(tempNewRoom);
                     }
                 })
             }else{
-                setLocalRoom(tempNewRoom);
+                setSelectedRoom(tempNewRoom);
             }
 
         }).catch((err) => {
             console.error(err);
         })
-    }, [selectedPage.room])
+    }, [selectedPage.room]);
+
+    useEffect(() => {
+        if(!selectedPage?.rack) return;
+
+        selectedRoom.rackGroups.forEach((group) => {
+            group.racks.forEach(rack => {
+                if(rack.type.isDefault){
+                    if(rack.extraContext.rackId.toString() === selectedPage.rack){
+                        setSelectedRack(rack);
+                    }
+                }else{
+                    if(rack.itemId === selectedPage.rack){
+                        setSelectedRack(rack)
+                    }
+                }
+            })
+        })
+
+        console.log("Changing rack");
+
+    }, [selectedPage.rack]);
 
 
     /*
@@ -164,15 +211,18 @@ export const HomeContextProvider = ({children}) => {
             setIsDirty,
             isEditEnabled,
             setIsEditEnabled,
-            localRoom,
             loading,
             error,
-            hasUnsavedChanges: JSON.stringify(removeCircularReferences(room)) !== JSON.stringify(removeCircularReferences(localRoom)),
             isDraggingEnabled,
             setIsDraggingEnabled,
             selectedPage,
             setSelectedPage,
-            cageCount
+            cageCount,
+            selectedRoom,
+            loadedRooms,
+            setLoadedRooms,
+            selectedRack,
+            setSelectedRack
         }}>
             {children}
         </HomeContext.Provider>

@@ -17,6 +17,7 @@ package org.labkey.wnprc_ehr.table;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
@@ -1098,7 +1099,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             return super.getValue(ctx);
         }
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             String link;
             link = "<a href='" +
@@ -1124,7 +1125,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             return super.getValue(ctx);
         }
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             String link;
             link = "<a href='" +
@@ -1174,7 +1175,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
 
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             String link;
             link = "<a href='" +
@@ -1198,7 +1199,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
 
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             String link;
             link = "<a href='" +
@@ -1225,7 +1226,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
             {
                 String edit;
                 if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
@@ -1253,7 +1254,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             String edit;
             edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
@@ -1318,7 +1319,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             }
         }
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             HtmlStringBuilder emptyString = HtmlStringBuilder.of();
             if ("Request: Pending".equals(ctx.get("QCState$Label")))

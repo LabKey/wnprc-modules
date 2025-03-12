@@ -96,6 +96,7 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
             },
             location: {
                 xtype: 'combo',
+                allowBlank: false,
                 lookup: {
                     schemaName: 'wnprc',
                     queryName: 'necropsy_suite',
@@ -118,7 +119,7 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
             },
             performedby: {
                 xtype: 'combo',
-                allowBlank: false,
+                allowBlank: true,
                 hasOwnTpl: true,
                 hidden: false,
                 lookup: {

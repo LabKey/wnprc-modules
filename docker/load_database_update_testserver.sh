@@ -101,7 +101,10 @@ fi
 #-------------------------------------------------------------------------------
 
 if [[ -z $dock ]]; then
+
+  echo -n 'Taking down all containers ... '
   docker compose -f production.yaml -f compose.yaml down -v --timeout 60
+  
   if [[ ! -e .env ]]; then
       cp default.env .env
   fi
@@ -134,6 +137,8 @@ if [[ -z $dock ]]; then
       -e "s/^.*maintenance_work_mem *=.*$/maintenance_work_mem = 1GB/" \
       $conf > $tmpdir/pg_restore.conf
   export PG_CONF_FILE=$tmpdir/pg_restore.conf
+  
+  echo -n 'Bringing postgres up with special configuration ... '  
   docker compose up -d postgres
   pgport=$(docker compose port postgres 5432)
 fi
@@ -186,7 +191,7 @@ fi
 #-------------------------------------------------------------------------------
 echo -n "Restoring database from $restorefile ...  0%"
 
-${pgpath}pg_restore -l $restorefile > $tmpdir/pg_restore.list
+${pgpath}pg_restore -p "${pgport#*:}" -U postgres -l $restorefile > $tmpdir/pg_restore.list
 
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT

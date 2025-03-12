@@ -103,7 +103,7 @@ fi
 if [[ -z $dock ]]; then
 
   echo -n 'Taking down all containers ... '
-  docker compose -f production.yaml -f compose.yaml down -v --timeout 60
+  /usr/bin/docker compose -f production.yaml -f compose.yaml down -v --timeout 60
   
   if [[ ! -e .env ]]; then
       cp default.env .env
@@ -111,7 +111,7 @@ if [[ -z $dock ]]; then
   if [[ .env =~ "PG_CONF_FILE=(.*)" ]]; then
       conf="${BASH_REMATCH[1]}"
   else
-      conf="./postgres/postgresql.conf"
+      conf="/space/application/wnprc-modules/docker/postgres/postgresql.conf"
   fi
   sed -e "s/^.*fsync *=.*$/fsync = off/" \
       -e "s/^.*synchronous_commit *=.*$/synchronous_commit = off/" \

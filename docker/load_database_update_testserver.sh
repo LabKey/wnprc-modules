@@ -102,11 +102,12 @@ fi
 
 if [[ -z $dock ]]; then
 
-  echo -n 'Taking down all containers ... '
-  new_dir="/space/application/wnprc-modules/docker"
+  echo -n 'Taking down all containers ... \n'
+  new_dir="/space/application/wnprc-modules/docker/"
   cd "$new_dir"
+
   if [ $? -eq 0 ]; then
-    echo "Successfully changed directory to: $(pwd)"
+    echo "Successfully changed directory to: $(pwd) \n"
     /usr/bin/docker compose -f /space/application/wnprc-modules/docker/compose.yaml down -v --timeout 60
   else
     echo "Failed to change directory to: $new_dir"
@@ -261,7 +262,7 @@ fi
 # Wait for the postgres instance to start accepting connections
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
-  echo -n 'Waiting for postgres to start ... '
+  echo -n '\nWaiting for postgres to start ... '
   docker compose exec postgres /bin/bash -c 'count=0;while [ $count -lt 120 ]; do if psql -U postgres -c "\l" &>/dev/null; then sleep 3; break; fi; sleep 1; let count=count+1; done;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
@@ -271,5 +272,7 @@ fi
 # After waiting for postgres to start
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
+  echo -n '\nBring up all containers ... '
   docker compose up -d
+  echo -e '\033[0;32mdone\033[0m'
 fi

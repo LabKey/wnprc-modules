@@ -50,9 +50,11 @@ import org.labkey.api.study.StudyService;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
+import org.labkey.api.util.Link;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
@@ -161,7 +163,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             rowIdCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     Integer rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
                     String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
@@ -175,12 +177,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         }
                         url.addParameter("formtype", formType);
                         url.addParameter("taskid", taskId);
-                        StringBuilder urlString = new StringBuilder();
-                        urlString.append("<a href=\"" + PageFlowUtil.filter(url) + "\">");
-                        urlString.append(PageFlowUtil.filter(rowId));
-                        urlString.append("</a>");
 
-                        out.write(urlString.toString());
+                        out.write(new Link.LinkBuilder(HtmlString.of(rowId)).href(url).clearClasses());
                     } else {
                         super.renderGridCellContents(ctx, out);
                     }
@@ -199,7 +197,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 updateTitleCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
                 {
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                     {
                         String updateTitle = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "updateTitle"));
                         String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
@@ -214,12 +212,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             }
                             url.addParameter("formType", formType);
                             url.addParameter("taskid", taskId);
-                            StringBuilder urlString = new StringBuilder();
-                            urlString.append("<a href=\"" + PageFlowUtil.filter(url) + "\">");
-                            urlString.append(PageFlowUtil.filter(updateTitle));
-                            urlString.append("</a>");
 
-                            out.write(urlString.toString());
+                            out.write(new Link.LinkBuilder(updateTitle).href(url).clearClasses());
                         }
                         else
                         {
@@ -982,7 +976,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 sireid.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
                     {
                         ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
                         String joinedIds = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
@@ -1002,7 +996,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                                     urlString += ", ";
                                 }
                             }
-                            out.write(urlString);
+                            oldWriter.write(urlString);
                         }
                     }
 
@@ -1026,7 +1020,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 reason.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
                     {
                         ActionURL url = new ActionURL("query", "recordDetails.view", us.getContainer());
                         String joinedReasons = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
@@ -1063,7 +1057,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                                     urlString.append(", ");
                                 }
                             }
-                            out.write(urlString.toString());
+                            oldWriter.write(urlString.toString());
                         }
                     }
 
@@ -1143,14 +1137,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     public static class AnimalIdsToOfferColumnQCStateConditional extends DataColumn {
-        private User _currentUser;
+        private final User _currentUser;
         public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo, User currentUser) {
             super(colInfo);
             _currentUser = currentUser;
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
             if ("Request: Pending".equals(ctx.get("QCState$Label")))
             {

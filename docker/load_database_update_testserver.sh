@@ -247,6 +247,15 @@ if [[ -z $prod ]]; then
         delete from ehr.notificationrecipients;
 XXX
 fi
+#-------------------------------------------------------------------------------
+# Updating Docker image
+#
+#-------------------------------------------------------------------------------
+if [[ -z $dock ]]; then
+  echo -n '\nUpdating Docker images from Docker Hub'
+  docker pull wnprcehr/labkeysnapshot:24.11
+  echo -e '\033[0;32mdone\033[0m'
+fi
 
 #-------------------------------------------------------------------------------
 # Tear down and re-start the docker compose environment using the 'regular'

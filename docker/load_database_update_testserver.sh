@@ -103,7 +103,14 @@ fi
 if [[ -z $dock ]]; then
 
   echo -n 'Taking down all containers ... '
-  /usr/bin/docker compose -f production.yaml -f compose.yaml down -v --timeout 60
+  new_dir="/space/application/wnprc-modules/docker"
+  cd "$new_dir"
+  if [ $? -eq 0 ]; then
+    echo "Successfully changed directory to: $(pwd)"
+    /usr/bin/docker compose -f /space/application/wnprc-modules/docker/compose.yaml down -v --timeout 60
+  else
+    echo "Failed to change directory to: $new_dir"
+  fi
   
   if [[ ! -e .env ]]; then
       cp default.env .env

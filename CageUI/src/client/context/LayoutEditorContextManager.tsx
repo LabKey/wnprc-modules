@@ -37,7 +37,7 @@ import {
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
-    defaultTypeToRackType,
+    defaultTypeToRackType, getSvgSize,
     parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
@@ -141,7 +141,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             id: 1,
             cageNum: newCageNum,
             x: 0,
-            y: 0
+            y: 0,
+            size: getSvgSize(rackType),
         };
 
         // First cage in rack is always at rack starting position as well

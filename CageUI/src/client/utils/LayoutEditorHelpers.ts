@@ -2,7 +2,7 @@
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import {
-    defaultTypeToRackType,
+    defaultTypeToRackType, getSvgSize,
     getTypeClassFromElement,
     parseLongId,
     parseRoomItemNum,
@@ -840,7 +840,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             selectionType: 'cage',
             id: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
-            y: rackItem.y_coord - rack.y - group.y
+            y: rackItem.y_coord - rack.y - group.y,
+            size: getSvgSize(rack.type.type),
         }
         rack.cages.push(cage);
     }

@@ -1115,3 +1115,41 @@ margin-bottom: 10px;
 .tab-buttons button:hover::after {
   background-color: #007bff; /* Blue underline on hover */
 }
+
+// Mod table css
+.mod-table-container {
+  max-width: 3000px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.mod-table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%; /* Adjust as needed */
+}
+
+/* Style for each row */
+.mod-table-row {
+  display: flex;
+  justify-content: space-between; /* Distribute space evenly between columns */
+  align-items: center; /* Center items vertically */
+  padding: 10px; /* Adjust padding as needed */
+  border-bottom: 1px solid #ccc; /* Optional: Add a border between rows */
+}
+
+/* Style for header row */
+.mod-table-header {
+  font-weight: bold;
+  background-color: #f0f0f0; /* Optional: Add a background color for the header */
+}
+
+/* Style for each column */
+.mod-table-column {
+  flex: 1; /* Each column takes equal space */
+  text-align: center; /* Center text horizontally */
+  padding: 0 10px; /* Adjust padding as needed */
+}

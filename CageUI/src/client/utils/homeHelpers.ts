@@ -1,6 +1,92 @@
 import { convertToTitleCase, zeroPadName } from './helpers';
-import { Cage } from '../types/typings';
-import {Modifications, ModTypes} from '../types/homeTypes';
+import { Cage, Rack, RackGroup, RackTypes, UnitType } from '../types/typings';
+import { Direction, Modifications, ModTypes } from '../types/homeTypes';
+
+function getGlobalPosition(box: Cage, rack: Rack): { x: number; y: number } {
+    // Calculate the global position of the box
+    return {
+        x: rack.x + box.x,
+        y: rack.y + box.y,
+    };
+}
+
+function areAdjacent(box1: Cage, rack1: Rack, box2: Cage, rack2: Rack): Direction | null {
+
+    // Calculate global positions
+    const globalPos1 = getGlobalPosition(box1, rack1);
+    const globalPos2 = getGlobalPosition(box2, rack2);
+
+    const cellSize = 30; // Each cell is 30 pixels
+    const width1 = box1.size * cellSize; // Width of box1 in pixels
+    const width2 = box2.size * cellSize; // Width of box2 in pixels
+
+    // Calculate the right and bottom edges of both boxes
+    const right1 = globalPos1.x + width1;
+    const bottom1 = globalPos1.y + width1;
+    const right2 = globalPos2.x + width2;
+    const bottom2 = globalPos2.y + width2;
+
+    // Check for horizontal adjacency
+    if (globalPos1.x === right2 && !(bottom1 <= globalPos2.y || bottom2 <= globalPos1.y)) {
+        return "left"; // Box1 is to the left of Box2
+    }
+    if (globalPos2.x === right1 && !(bottom1 <= globalPos2.y || bottom2 <= globalPos1.y)) {
+        return "right"; // Box1 is to the right of Box2
+    }
+
+    // Check for vertical adjacency
+    if (globalPos1.y === bottom2 && !(right1 <= globalPos2.x || right2 <= globalPos1.x)) {
+        return "above"; // Box1 is above Box2
+    }
+    if (globalPos2.y === bottom1 && !(right1 <= globalPos2.x || right2 <= globalPos1.x)) {
+        return "below"; // Box1 is below Box2
+    }
+
+    // If not adjacent, return null
+    return null;
+}
+
+export const findConnectedCages = (rack: Rack) => {
+
+    const connections: [Cage, Direction, Cage][] = [];
+
+    for (let i = 0; i < rack.cages.length; i++) {
+        for (let j = i + 1; j < rack.cages.length; j++) {
+            const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack);
+            if (adj) {
+                connections.push([rack.cages[i], adj, rack.cages[j]]);
+            }
+        }
+    }
+    return connections;
+}
+
+export const findConnectedRacks = (group: Rack[]) => {
+    const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage //TODO Move to global var
+    const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
+    const CELL_SIZE = 30; // number of pixels of a cell for length/width
+    const connections: [[Rack, Cage], Direction, [Rack, Cage]][] = [];
+
+    const areRacksConnected = (rack1: Rack, rack2: Rack) => {
+        for (const cage1 of rack1.cages) {
+            for (const cage2 of rack2.cages) {
+                const adj = areAdjacent(cage1, rack1, cage2, rack2);
+                if(adj){
+                    connections.push([[rack1,cage1], adj, [rack2,cage2]]);
+                }
+            }
+        }
+    }
+
+
+    for (let i = 0; i < group.length; i++) {
+        for (let j = i + 1; j < group.length; j++) {
+            areRacksConnected(group[i], group[j]);
+        }
+    }
+    return connections;
+}
+
 
 
 export const getRackFromClass = (classString: string) => {

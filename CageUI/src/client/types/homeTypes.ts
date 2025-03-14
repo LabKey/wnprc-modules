@@ -5,12 +5,21 @@ type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
 export type CagePosition = "top" | "bottom" | "none";
 
+export type Direction = "above" | "below" | "right" | "left";
+
 export type ExpandedRooms = {
     [key: string]: boolean;
 }
 
 export type LoadedRooms = {
     [key: string]: { loaded: boolean, room?: Room };
+}
+
+export interface ExtendedCage extends Partial<Cage> {
+    top: Cage,
+    bot: Cage,
+    right: Cage,
+    left: Cage
 }
 
 export interface SelectedPage {

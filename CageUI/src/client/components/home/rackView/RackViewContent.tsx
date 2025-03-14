@@ -11,12 +11,6 @@ import { RackDetails } from './RackDetails';
 export const RackViewContent: FC = () => {
     const {selectedPage, selectedRoom, selectedRack} = useHomeContext();
 
-    useEffect(() => {
-        console.log("Page: ", selectedPage);
-        console.log("Room: ", selectedRoom);
-        console.log("Rack: ", selectedRack);
-    }, [selectedPage, selectedRack]);
-
     return (
         selectedRack &&
         <div className={"room-view-container"} key={'layout-' + selectedRoom + '-rack-' + selectedRack}>
@@ -27,7 +21,7 @@ export const RackViewContent: FC = () => {
             </div>
             <SubViewContent
                     tabs={[{
-                        name: 'Rack Modifications',
+                        name: 'Modifications',
                         children:
                             <RackModifications />
                     },{

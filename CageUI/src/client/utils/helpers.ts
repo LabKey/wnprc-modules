@@ -1,13 +1,16 @@
 import {
     DefaultRackStringType,
-    DefaultRackTypes, Rack, RackGroup,
+    DefaultRackTypes,
+    Rack,
+    RackGroup,
     RackStringType,
     RackTypes,
     Room,
     RoomItemStringType,
     RoomItemType,
     RoomObjectStringType,
-    RoomObjectTypes
+    RoomObjectTypes,
+    UnitType
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
@@ -16,6 +19,17 @@ import { ActionURL } from '@labkey/api';
 import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
+
+export const getSvgSize = (type: RackTypes) => {
+    // SMALL_GRID_RATIO
+    if(type === RackTypes.Cage || type === RackTypes.TempCage) {
+        return 4
+    }
+    // LARGE_GRID_RATIO
+    if(type === RackTypes.Pen || type === RackTypes.PlayCage) {
+        return 8;
+    }
+}
 
 // matches "string-number", if a match return the number
 export const parseRoomItemNum = (input: string): number => {

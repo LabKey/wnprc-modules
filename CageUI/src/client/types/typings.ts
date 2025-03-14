@@ -59,6 +59,7 @@ export interface Cage {
     cageNum: CageNumber; // Id local to room
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
+    size: number; // length in cells of cage square of svg image
     extraContext?:  {[key: string]: any}; // extra context if needed for cage
 }
 

@@ -59,7 +59,7 @@ export const HomeContextProvider = ({children}) => {
         const roomConfig = {
             schemaName: "ehr_lookups",
             queryName: "rooms",
-            columns: []
+            columns: ["layout_scale", "border_width", "border_height", "status", "room"]
         }
         labkeyActionSelectWithPromise(roomConfig).then((d) => {
             if(d.rowCount > 0){

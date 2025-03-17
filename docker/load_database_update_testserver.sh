@@ -202,7 +202,7 @@ fi
 #-------------------------------------------------------------------------------
 # Actually restore the database, using a background proc so we can track progress
 #-------------------------------------------------------------------------------
-echo -n "Restoring database from $filaname ...  0%"
+echo -n "Restoring database from $filename ...  0%"
 
 ${pgpath}pg_restore -p "${pgport#*:}" -U postgres -l $restorefile > $tmpdir/pg_restore.list
 

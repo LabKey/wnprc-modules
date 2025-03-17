@@ -1146,18 +1146,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         @Override
         public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
-            if ("Request: Pending".equals(ctx.get("QCState$Label")))
-            {
-                out.write("");
-            }
-            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
-            {
+            if (!"Request: Pending".equals(ctx.get("QCState$Label")) && _currentUser.getUserId() == (Integer) ctx.get("createdBy"))
                 super.renderGridCellContents(ctx, out);
-            }
-            else
-            {
-                out.write("");
-            }
         }
     }
     public static class InternalThreadRowIdQCStateConditional extends DataColumn {

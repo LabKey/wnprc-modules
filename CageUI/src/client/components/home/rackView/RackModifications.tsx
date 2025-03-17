@@ -34,7 +34,7 @@ export const RackModifications: FC = () => {
 
     useEffect(() => {
         if(!rackGroup) return;
-        setConnectedRacks(findConnectedRacks(rackGroup.racks));
+        setConnectedRacks(findConnectedRacks(rackGroup, selectedRack));
     }, [rackGroup, selectedRack]);
 
     return (

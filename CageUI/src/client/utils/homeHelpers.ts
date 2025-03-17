@@ -2,23 +2,32 @@ import { convertToTitleCase, zeroPadName } from './helpers';
 import { Cage, Rack, RackGroup, RackTypes, UnitType } from '../types/typings';
 import { Direction, Modifications, ModTypes } from '../types/homeTypes';
 
-function getGlobalPosition(box: Cage, rack: Rack): { x: number; y: number } {
+function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: number; y: number } {
     // Calculate the global position of the box
+    let x;
+    let y;
+    if(group){
+        x = group.x + rack.x + box.x;
+        y = group.y + rack.y + box.y;
+    }else{
+        x = rack.x + box.x;
+        y = rack.y + box.y;
+    }
     return {
-        x: rack.x + box.x,
-        y: rack.y + box.y,
+        x: x,
+        y: y,
     };
 }
 
-function areAdjacent(box1: Cage, rack1: Rack, box2: Cage, rack2: Rack): Direction | null {
+function areAdjacent(cage1: Cage, rack1: Rack, cage2: Cage, rack2: Rack, group?: RackGroup): Direction | null {
 
     // Calculate global positions
-    const globalPos1 = getGlobalPosition(box1, rack1);
-    const globalPos2 = getGlobalPosition(box2, rack2);
+    const globalPos1 = getGlobalPosition(cage1, rack1, group);
+    const globalPos2 = getGlobalPosition(cage2, rack2, group);
 
     const cellSize = 30; // Each cell is 30 pixels
-    const width1 = box1.size * cellSize; // Width of box1 in pixels
-    const width2 = box2.size * cellSize; // Width of box2 in pixels
+    const width1 = cage1.size * cellSize; // Width of box1 in pixels
+    const width2 = cage2.size * cellSize; // Width of box2 in pixels
 
     // Calculate the right and bottom edges of both boxes
     const right1 = globalPos1.x + width1;
@@ -61,16 +70,17 @@ export const findConnectedCages = (rack: Rack) => {
     return connections;
 }
 
-export const findConnectedRacks = (group: Rack[]) => {
-    const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage //TODO Move to global var
-    const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
-    const CELL_SIZE = 30; // number of pixels of a cell for length/width
+// This can be done by "guessing" the what other cage coords would be if they were adjacent, if they dont exist then they are not
+export const findConnectedRacks = (group: RackGroup, currRack: Rack) => {
     const connections: [[Rack, Cage], Direction, [Rack, Cage]][] = [];
 
     const areRacksConnected = (rack1: Rack, rack2: Rack) => {
         for (const cage1 of rack1.cages) {
             for (const cage2 of rack2.cages) {
-                const adj = areAdjacent(cage1, rack1, cage2, rack2);
+                const adj = areAdjacent(cage1, rack1, cage2, rack2, group);
+                if(rack1.itemId !== currRack.itemId && rack2.itemId !== currRack.itemId){
+                    continue;
+                }
                 if(adj){
                     connections.push([[rack1,cage1], adj, [rack2,cage2]]);
                 }
@@ -78,12 +88,12 @@ export const findConnectedRacks = (group: Rack[]) => {
         }
     }
 
-
-    for (let i = 0; i < group.length; i++) {
-        for (let j = i + 1; j < group.length; j++) {
-            areRacksConnected(group[i], group[j]);
+    for (let i = 0; i < group.racks.length; i++) {
+        for (let j = i + 1; j < group.racks.length; j++) {
+            areRacksConnected(group.racks[i], group.racks[j]);
         }
     }
+
     return connections;
 }
 

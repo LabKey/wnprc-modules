@@ -43,6 +43,11 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        -j|--jobs)     ## time that the database backup was created in format HHMM (ex: 1543)
+            jobs=4
+            shift
+            shift
+            ;;
         --port)       ## port that postgresql is running on
             pgport="$2"
             shift
@@ -102,12 +107,12 @@ fi
 
 if [[ -z $dock ]]; then
 
-  echo -n 'Taking down all containers ... \n'
+  echo -n 'Taking down all containers ... '
   new_dir="/space/application/wnprc-modules/docker/"
   cd "$new_dir"
 
   if [ $? -eq 0 ]; then
-    echo "Successfully changed directory to: $(pwd) \n"
+    echo "Successfully changed directory to: $(pwd) "
     /usr/bin/docker compose -f /space/application/wnprc-modules/docker/compose.yaml down -v --timeout 60
   else
     echo "Failed to change directory to: $new_dir"
@@ -146,7 +151,7 @@ if [[ -z $dock ]]; then
       $conf > $tmpdir/pg_restore.conf
   export PG_CONF_FILE=$tmpdir/pg_restore.conf
   
-  echo -n 'Bringing postgres up with special configuration ... '  
+  echo 'Bringing postgres up with special configuration ... '  
   docker compose up -d postgres
   pgport=$(docker compose port postgres 5432)
 fi
@@ -197,13 +202,13 @@ fi
 #-------------------------------------------------------------------------------
 # Actually restore the database, using a background proc so we can track progress
 #-------------------------------------------------------------------------------
-echo -n "Restoring database from $restorefile ...  0%"
+echo -n "Restoring database from $filaname ...  0%"
 
 ${pgpath}pg_restore -p "${pgport#*:}" -U postgres -l $restorefile > $tmpdir/pg_restore.list
 
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
-${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 4 -L $tmpdir/pg_restore.list --verbose $restorefile &>$tmpdir/pg_restore.log &
+${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j $jobs -L $tmpdir/pg_restore.list --verbose $restorefile &>$tmpdir/pg_restore.log &
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
     if [[ $total -ne 0 ]]; then
@@ -252,7 +257,7 @@ fi
 #
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
-  echo -n '\nUpdating Docker images from Docker Hub'
+  echo -n 'Updating Docker images from Docker Hub'
   docker pull wnprcehr/labkeysnapshot:24.11
   echo -e '\033[0;32mdone\033[0m'
 fi
@@ -271,7 +276,7 @@ fi
 # Wait for the postgres instance to start accepting connections
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
-  echo -n '\nWaiting for postgres to start ... '
+  echo -n 'Waiting for postgres to start ... '
   docker compose exec postgres /bin/bash -c 'count=0;while [ $count -lt 120 ]; do if psql -U postgres -c "\l" &>/dev/null; then sleep 3; break; fi; sleep 1; let count=count+1; done;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
@@ -281,7 +286,7 @@ fi
 # After waiting for postgres to start
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
-  echo -n '\nBring up all containers ... '
+  echo -n 'Bring up all containers ... '
   docker compose up -d
   echo -e '\033[0;32mdone\033[0m'
 fi

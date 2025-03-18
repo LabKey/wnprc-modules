@@ -3795,8 +3795,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // Locate the form element within the parent div
         WebElement formElement = parentDiv.findElement(By.xpath(".//form[contains(@id, 'lk-region-')]"));
 
-        // Get the value of the "lk-region-form" attribute
-        String formAttribute = formElement.getAttribute("lk-region-form");
+        // Get the value of the "data-region-form" attribute
+        String formAttribute = formElement.getAttribute("data-region-form");
         DataRegionTable dataRegionTable = new DataRegionTable.DataRegionFinder(getDriver()).withName(formAttribute).find();
 
         dataRegionTable.checkCheckbox(0);

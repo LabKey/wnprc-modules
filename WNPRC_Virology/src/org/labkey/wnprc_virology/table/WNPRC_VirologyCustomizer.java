@@ -9,6 +9,7 @@ import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
+import org.labkey.api.writer.HtmlWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -29,8 +30,6 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
             }
         }
     }
-
-
 
     private void customizeViralLoadFilteredTable(AbstractTableInfo table)
     {
@@ -64,7 +63,7 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
         {
 
             StringBuilder htmlString = new StringBuilder();
@@ -78,12 +77,12 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
                 htmlString.append(firstPart);
                 htmlString.append("</strong>");
                 htmlString.append(lastPart);
-                out.write(htmlString.toString());
+                oldWriter.write(htmlString.toString());
             }
             else
             {
                 htmlString.append(llodCol);
-                out.write(htmlString.toString());
+                oldWriter.write(htmlString.toString());
             }
         }
     }

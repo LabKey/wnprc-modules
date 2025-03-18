@@ -1,5 +1,6 @@
 package org.labkey.wnprc_purchasing.table;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -39,7 +40,7 @@ public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
         }
 
         @Override
-        public HtmlString getFormattedHtml(RenderContext ctx)
+        public @NotNull HtmlString getFormattedHtml(RenderContext ctx)
         {
             String subFolder = String.valueOf(getValue(ctx));
             WebdavResolver resolver = WebdavResolverImpl.get();

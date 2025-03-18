@@ -1429,13 +1429,24 @@ public class NotificationToolkit {
 
     }
 
+    /**
+     * This is the table generator for HTML notifications.
+     * This table can be used as follows:
+     *  1. Call constructor, providing the column titles and the row data.
+     *  2. (Optional) Create a list containing the color of each row.
+     *  3. Call createBasicHTMLTable() to return the code for inserting this table into an HTML notification.
+     */
     static class NotificationRevampTable
     {
-        //        Integer borderSize;                         //The size of the table border.
         String[] tableColumns;                      //The names of the columns.
         ArrayList<String[]> tableData;              //A 3D array of the table data. (ArrayList of rows, each containing a string array of column data.)
-        ArrayList<String> rowColors;         //An optional list of colors for each row.  Must be the same size as 'tableData'.
+        ArrayList<String> rowColors;                //An optional list of colors for each row.  Must be the same size as 'tableData'.
 
+        /**
+         * This is the constructor for this object.
+         * @param TableColumns                      //The names of the columns.
+         * @param TableData                         //A 3D array of the table data. (ArrayList of rows, each containing a string array of column data.)
+         */
         NotificationRevampTable(String[] TableColumns, ArrayList<String[]> TableData)
         {
             this.tableColumns = TableColumns;
@@ -1443,6 +1454,11 @@ public class NotificationToolkit {
             this.rowColors = null;
         }
 
+        /**
+         * This creates an HTML version of the table from the passed-in parameters.  Calling this inside an HTML document will insert the table.
+         * NOTE: This can also be used with styleToolkit().  Start with the setBasicTableStyle() function, then customize more if needed.
+         * @return
+         */
         public String createBasicHTMLTable()
         {
             //Begin table.

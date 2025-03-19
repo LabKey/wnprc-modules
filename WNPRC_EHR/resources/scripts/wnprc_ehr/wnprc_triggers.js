@@ -630,7 +630,9 @@ exports.init = function (EHR) {
             WNPRC.Utils.getJavaHelper().sendBloodDrawReviewNotification(row.Id, row.project, row.date, row.requestor);
         }
         // Triggers wnprc_triggers.js to send BloodOverdrawTriggerNotification.java.
-        WNPRC.Utils.getJavaHelper().sendBloodOverdrawTriggerNotification(row.Id, row.date);
+        if (row.QCStateLabel === 'Completed') {
+            WNPRC.Utils.getJavaHelper().sendBloodOverdrawTriggerNotification(row.Id, row.date);
+        }
     })
 
     function getHousingSQL(row) {

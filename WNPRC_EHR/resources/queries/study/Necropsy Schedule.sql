@@ -22,10 +22,15 @@ SELECT lsid
       ,shipping_comment                                     AS delivery_comment
       ,animalid.Demographics.necropsyAbstractNotes.remark   AS remark
       ,CASE
-       WHEN hasTissuesForAvrl IS NULL
+      WHEN hasTissuesForAvrl IS NULL
          THEN FALSE
          ELSE TRUE
        END                                                  AS has_tissues_for_avrl
+      ,CASE
+       WHEN hasTissuesForWimr IS NULL
+         THEN FALSE
+         ELSE TRUE
+       END                                                  AS has_tissues_for_wimr
       ,state
  FROM (SELECT taskid           AS lsid
              ,taskid.rowid     AS taskid
@@ -54,3 +59,10 @@ SELECT lsid
              WHERE ship_to = javaConstant('org.labkey.wnprc_ehr.schemas.SqlQueryReferencePoints.COURIER_TO_AVRL') -- 'COURIER_AVRL'
              GROUP BY taskid) avrl_tissues
    ON necropsy.lsid = avrl_tissues.taskid
+/* Flag necropsies that have tissues that need to be couriered to WIMR. */
+ LEFT JOIN (SELECT taskid
+                  ,TRUE AS hasTissuesForWimr
+              FROM tissue_samples
+             WHERE ship_to = javaConstant('org.labkey.wnprc_ehr.schemas.SqlQueryReferencePoints.COURIER_TO_WIMR') -- 'COURIER_WIMR'
+             GROUP BY taskid) wimr_tissues
+   ON necropsy.lsid = wimr_tissues.taskid

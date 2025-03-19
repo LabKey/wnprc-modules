@@ -90,6 +90,12 @@
                     This animal has tissue samples that need to be couried to AVRL.
                 </div>
                 <!-- /ko -->
+                <!-- ko if: has_tissues_for_wimr -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to WIMR.
+                </div>
+                <!-- /ko -->
 
 
                 <!-- ko ifnot: taskid() != '' -->
@@ -431,6 +437,7 @@
                 who_delivers:         ko.observable(),
                 delivery_comment:     ko.observable(),
                 has_tissues_for_avrl: ko.observable(),
+                has_tissues_for_wimr: ko.observable(),
                 project:              ko.observable(),
                 protocol:             ko.observable(),
                 sex:                  ko.observable(),

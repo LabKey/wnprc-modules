@@ -25,4 +25,6 @@ public class SqlQueryReferencePoints {
      */
     @Queryable
     public static final String COURIER_TO_AVRL = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_AVRL.name();
+    @Queryable
+    public static final String COURIER_TO_WIMR = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_WIMR.name();
 }

@@ -18,6 +18,7 @@ import { MutableRefObject } from 'react';
 import { ActionURL } from '@labkey/api';
 import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
 
+
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
 export const getSvgSize = (type: RackTypes) => {

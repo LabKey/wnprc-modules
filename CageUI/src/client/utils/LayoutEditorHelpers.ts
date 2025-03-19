@@ -519,23 +519,54 @@ export async function mergeRacks(props: MergeProps) {
 }
 
 // This checks the adjacency of two racks to determine if they can be merged
-export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationCoords, gridSize: number, gridRatio: number) {
+export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationCoords, draggedSize: number, targetSize: number, cellSize: number) {
 
-    const boxWidth = gridSize * gridRatio;
+    const targetX = targetCage.cellX;
+    const targetY = targetCage.cellY;
+    const draggedX  = draggedCage.cellX;
+    const draggedY = draggedCage.cellY;
+    let isAdjacent = false;
 
-    let horizontallyAdjacent = false;
-    let verticallyAdjacent = false;
+    // Calculate widths and heights in pixels
+    const draggedWidth = draggedSize * cellSize;
+    const draggedHeight = draggedSize * cellSize;
+    const targetWidth = targetSize * cellSize;
+    const targetHeight = targetSize * cellSize;
 
-    // Check for horizontal adjacency
-    if (Math.abs(targetCage.cellX - draggedCage.cellX) === boxWidth &&
-        targetCage.cellY === draggedCage.cellY) {
-        horizontallyAdjacent = true;
-    }// Check for vertical adjacency
-    else if (Math.abs(targetCage.cellY - draggedCage.cellY) === boxWidth &&
-        targetCage.cellX === draggedCage.cellX)  {
-        verticallyAdjacent = true;
+    // Calculate corners of the dragged square
+    const draggedCorners = [
+        { x: draggedX, y: draggedY }, // Top-left
+        { x: draggedX + draggedWidth, y: draggedY }, // Top-right
+        { x: draggedX, y: draggedY + draggedHeight }, // Bottom-left
+        { x: draggedX + draggedWidth, y: draggedY + draggedHeight }, // Bottom-right
+    ];
+
+    // Calculate corners of the target square
+    const targetCorners = [
+        { x: targetX, y: targetY }, // Top-left
+        { x: targetX + targetWidth, y: targetY }, // Top-right
+        { x: targetX, y: targetY + targetHeight }, // Bottom-left
+        { x: targetX + targetWidth, y: targetY + targetHeight }, // Bottom-right
+    ];
+
+    // Check if any corner of the dragged square matches any corner of the target square
+    for (const draggedCorner of draggedCorners) {
+        for (const targetCorner of targetCorners) {
+            if (draggedCorner.x === targetCorner.x && draggedCorner.y === targetCorner.y) {
+                // Determine the direction of adjacency based on the matching corner
+                if (draggedCorner.x === draggedX && draggedCorner.y === draggedY) {
+                    isAdjacent = true;
+                } else if (draggedCorner.x === draggedX + draggedWidth && draggedCorner.y === draggedY) {
+                    isAdjacent = true;
+                } else if (draggedCorner.x === draggedX && draggedCorner.y === draggedY + draggedHeight) {
+                    isAdjacent = true;
+                } else if (draggedCorner.x === draggedX + draggedWidth && draggedCorner.y === draggedY + draggedHeight) {
+                    isAdjacent = true;
+                }
+            }
+        }
     }
-    const isAdjacent = horizontallyAdjacent || verticallyAdjacent;
+
     return isAdjacent;
 }
 
@@ -841,7 +872,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             id: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
-            size: getSvgSize(rack.type.type),
+            size: getSvgSize(rack.type.type     ),
         }
         rack.cages.push(cage);
     }

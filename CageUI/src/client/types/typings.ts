@@ -9,6 +9,8 @@ import { ExtraContext, GateContext } from './layoutEditorTypes';
    RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types.
  */
 
+export const CELL_SIZE = 30; // number of pixels of a cell for length/width
+
 // used in ehr to determine if the rack is default (doesn't have a rackid)
 export enum DefaultRackTypes {
     DefaultCage = 0,

@@ -883,9 +883,7 @@ margin-bottom: 10px;
   flex-direction: column;
   border: 1px solid lightgray;
   width: 90%; /* Adjust width as needed */
-  overflow-y: scroll;
 }
-
 .page-content {
   flex-grow: 1;
 }
@@ -1013,6 +1011,8 @@ margin-bottom: 10px;
 .room-view-container {
   position: relative;
   margin: 10px;
+  width: 100%;
+  height: 100%;
 }
 
 .room-view-title {
@@ -1061,12 +1061,13 @@ margin-bottom: 10px;
 
 .page-tab-container {
   font-family: Arial, sans-serif;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 .tab-content {
   flex: 1;
-  overflow-y: scroll;
   width: fit-content;
   height: fit-content;
 }
@@ -1123,21 +1124,22 @@ margin-bottom: 10px;
   margin-right: auto;
   padding-left: 10px;
   padding-right: 10px;
+  overflow: visible;
 }
 
 .mod-table {
   list-style: none;
   padding: 0;
   margin: 0;
-  width: 100%; /* Adjust as needed */
+  width: 100%; /* Full width */
+  display: table; /* Use table layout */
+  table-layout: auto; /* Allow columns to expand based on content */
 }
 
 /* Style for each row */
 .mod-table-row {
-  display: flex;
-  justify-content: space-between; /* Distribute space evenly between columns */
-  align-items: center; /* Center items vertically */
-  padding: 10px; /* Adjust padding as needed */
+  display: table-row; /* Use table-row layout */
+  width: 100%;
   border-bottom: 1px solid #ccc; /* Optional: Add a border between rows */
 }
 
@@ -1149,7 +1151,9 @@ margin-bottom: 10px;
 
 /* Style for each column */
 .mod-table-column {
-  flex: 1; /* Each column takes equal space */
+  display: table-cell; /* Use table-cell layout */
+  padding: 10px; /* Adjust padding as needed */
+  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 100px; /* Set a minimum width for columns */
   text-align: center; /* Center text horizontally */
-  padding: 0 10px; /* Adjust padding as needed */
 }

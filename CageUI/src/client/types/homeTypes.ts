@@ -3,6 +3,14 @@ import { Cage, Rack, Room } from './typings';
 
 type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
+type SelectedMod = {
+    rack: Rack,
+    cage: Cage,
+    mod: string
+}
+
+export type SelectedMods = SelectedMod[];
+
 export type CagePosition = "top" | "bottom" | "none";
 
 export type Direction = "above" | "below" | "right" | "left";
@@ -14,6 +22,8 @@ export type ExpandedRooms = {
 export type LoadedRooms = {
     [key: string]: { loaded: boolean, room?: Room };
 }
+
+
 
 export interface ExtendedCage extends Partial<Cage> {
     top: Cage,
@@ -208,11 +218,6 @@ export const Modifications = {
             value: "none"
         }]
     },
-    noMod: {
-        name: "No Modification",
-        mod: ModTypes.NoMod,
-        styles: []
-    },
     cTunnel: {
         name: "C-Tunnel",
         mod: ModTypes.CTunnel,
@@ -253,48 +258,4 @@ export const Modifications = {
             value: "#6D88C4"
         }]
     },
-}
-
-// This is based off the Cage State interface.
-export const DefaultCageState = {
-    rackTwoOfTwo: {
-        posA: {
-            rightDivider: {
-                modData: {type: "divider", mod: Modifications.solidDivider, position: "T1"} as SeparatorMod,
-            },
-            floor: {
-                modData: {type: "floor", mod: Modifications.standardFloor, position: "F1"} as SeparatorMod
-            },
-            extraMod: {
-                modData: {mod: Modifications.noMod}
-            }
-        },
-        posB: {
-            leftDivider: {
-                modData: {type: "divider", mod: Modifications.solidDivider, position: "T1"} as SeparatorMod
-            },
-            floor: {
-                modData: {type: "floor", mod: Modifications.standardFloor, position: "F2"} as SeparatorMod
-            },
-            extraMod: {
-                modData: {mod: Modifications.noMod}
-            }
-        },
-        posC: {
-            rightDivider: {
-                modData: {type: "divider", mod: Modifications.solidDivider, position: "B1"} as SeparatorMod
-            },
-            extraMod: {
-                modData: {mod: Modifications.noMod}
-            }
-        },
-        posD: {
-            leftDivider: {
-                modData: {type: "divider", mod: Modifications.solidDivider, position: "B1"} as SeparatorMod
-            },
-            extraMod: {
-                modData: {mod: Modifications.noMod}
-            }
-        },
-    }
 }

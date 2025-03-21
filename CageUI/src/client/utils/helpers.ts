@@ -133,6 +133,9 @@ export const defaultTypeToRackType = (type: DefaultRackTypes) => {
     return defaultTypeToRackTypeMap[type];
 }
 
+/*
+   parse a room iteam to a string
+ */
 export const roomItemToString = (item: RoomItemType): RoomItemStringType => {
     let itemString: RoomItemStringType;
     // Uppercase the first letter of the string
@@ -151,6 +154,9 @@ export const roomItemToString = (item: RoomItemType): RoomItemStringType => {
     return itemString;
 }
 
+/*
+ Extract the item type from a string
+ */
 export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemType => {
     // Uppercase the first letter of the string
     const itemKey = formattedString.charAt(0).toUpperCase() + formattedString.slice(1);

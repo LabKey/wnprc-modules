@@ -6,6 +6,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Room } from '../../types/typings';
+import { Option } from '@labkey/components';
 
 interface RoomSelectorPopup {
     onConfirm: () => void;
@@ -16,16 +17,11 @@ interface RoomSelectorPopup {
     setTemplateRename?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-interface Option {
-    label: string;
-    value: number;
-}
-
 // For saving and loading in the layout editor, this is a room selector component
 export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
     const { onConfirm, onCancel, setRoom, template, setTemplateRename,templateLoad } = props;
     const [selectedRoom, setSelectedRoom] = useState<string>(null);
-    const [options, setOptions] = useState<Option[]>(null);
+    const [options, setOptions] = useState<Option<number>[]>(null);
     const [templateName, setTemplateName] = useState<string>('');
 
     // Fetch room, if template only fetch template rooms, otherwise fill options with {label: row.room, value: row.rowid}
@@ -39,7 +35,7 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
 
         labkeyActionSelectWithPromise(roomsConfig).then(result => {
             if(result.rows.length !== 0){
-                const rowOptions: Option[] = [];
+                const rowOptions: Option<number>[] = [];
                 result.rows.forEach(row => {
                     rowOptions.push({label: row.room, value: row.rowid});
                 })

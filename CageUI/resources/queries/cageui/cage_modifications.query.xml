@@ -1,0 +1,31 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="cage_modifications" tableDbType="TABLE">
+                <tableTitle>Cage Modifications</tableTitle>
+                <columns>
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="room"/>
+                    <column columnName="rack">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>racks</fkTable>
+                            <fkColumnName>rackid</fkColumnName>
+                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cage"/>
+                    <column columnName="modification" />
+                    <column columnName="startDate"/>
+                    <column columnName="endDate"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modified"/>
+                    <column columnName="modifiedby"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

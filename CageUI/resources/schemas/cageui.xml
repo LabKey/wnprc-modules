@@ -114,4 +114,31 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="cage_modifications" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="room"/>
+            <column columnName="rack"/>
+            <column columnName="cage"/>
+            <column columnName="modification">
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>cageui_cage_modifications</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                    <fkDisplayColumnName>title</fkDisplayColumnName>
+                    <filters>
+                        <filterGroup>
+                            <filter column="category" value="Caging" operator="eq"/>
+                        </filterGroup>
+                    </filters>
+                </fk>
+            </column>
+            <column columnName="startDate"/>
+            <column columnName="endDate"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

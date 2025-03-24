@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { BaseType, zoomTransform } from 'd3';
 import { ActionURL } from '@labkey/api';
@@ -83,9 +83,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     const utilsRef = useRef(null);
     const borderRef = useRef(null);
+    const dragLockRef = useRef(false); // ref that helps ensure very fast drag actions don't crash
 
     const [showGrid, setShowGrid] = useState<boolean>(true);
-    const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
+    //const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
     const [borderSetup, setBorderSetup] = useState<boolean>(false); // determines if the border svg has been loaded yet
 
     const [ctxMenuStyle, setCtxMenuStyle] = useState({
@@ -102,6 +103,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
     const [templateRename, setTemplateRename] = useState<boolean>(false);
+    const [defaultRackCounter, setDefaultRackCounter] = useState<number>(1);
 
     const {
         localRoom,
@@ -152,6 +154,203 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         .on('end', function (event) {
             dragInLayout.on('end').call(this, event);
         });
+
+
+    // This function makes changes to the rect svg and adding the new object to the layout, It also calls addRoomItem to add the item to state
+    const addToLayout = async (update: PendingRoomUpdate) => {
+        const {draggedShape, cellX, cellY, itemId, updateItemType} = update;
+        let group;
+
+        draggedShape.classed('dragging', false);
+        const transform = d3.zoomTransform(layoutSvg.node());
+        if (!isRackEnum(updateItemType)) { // adding dragged room object
+            group = layoutSvg.append('g')
+                .data([{x: cellX, y: cellY}])
+                .attr('class', "draggable room-obj")
+                .attr('id', `${itemId}`)
+                .style('pointer-events', "bounding-box");
+            group.append(() => draggedShape.node());
+
+        } else { // adding dragged caging unit
+            const updateItemTypeString: RackStringType = roomItemToString(updateItemType) as RackStringType;
+            group = layoutSvg.append('g')
+                .attr('class', `draggable rack type-${updateItemTypeString}`)
+                .attr('id', `${itemId}`)
+                .style('pointer-events', 'bounding-box');
+
+            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = group.append('g')
+                .attr('id', `${updateItemTypeString}-${getNextCageNum(updateItemTypeString)}`)
+                .attr('transform', `translate(0,0)`)
+                .append(() => draggedShape.node());
+
+            const cageIdText: SVGTSpanElement = cageGroup.select('tspan').node() as SVGTSpanElement;
+
+            cageIdText.textContent = `${getNextCageNum(updateItemTypeString)}`;
+
+        }
+        placeAndScaleGroup(group, cellX, cellY, transform);
+
+        await addRoomItem(updateItemType, itemId, cellX, cellY, transform.k);
+
+        group.call(closeMenuThenDrag);
+
+        // attach click listener for context menu
+        if(isRackEnum(updateItemType)){
+            group.selectAll('text').each(function () {
+                const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
+                textElement.setAttribute('contentEditable', 'true');
+                (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
+                (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
+                const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
+                setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, contextMenuRef, roomItemToString(updateItemType) as RackStringType);
+            });
+        }else{
+            setupEditCageEvent(group.node(), setSelectedObj, setCtxMenuStyle, contextMenuRef);
+        }
+
+        dragLockRef.current = false;
+    };
+
+    // Drag start for dragging from the utilities to the layout
+    const dragStarted = useCallback((event: d3.D3DragEvent<SVGElement, any, any>)=>  {
+        if(dragLockRef.current){
+            event.sourceEvent.stopImmediatePropagation();
+            return;
+        }else{
+            dragLockRef.current = true;
+        }
+        let shape: SVGElement;
+        if(showCageContextMenu || showObjectContextMenu){
+            setShowCageContextMenu(false);
+            setShowObjectContextMenu(false);
+        }
+        /*
+           Selections can be picky depending on where the user clicks to drag the object,
+           make sure it always assigns the shape to the top level SVG element for the object
+         */
+        if(event.sourceEvent.target.nodeName === 'tspan'){
+            shape = (event.sourceEvent.target as SVGTSpanElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+        }else if(event.sourceEvent.target.nodeName === 'path'){
+            shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+        }else if(event.sourceEvent.target.nodeName === 'polygon'){
+            shape = (event.sourceEvent.target as SVGPolygonElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+        }else if(event.sourceEvent.target.nodeName === 'line'){
+            shape = (event.sourceEvent.target as SVGLineElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+        }else if(event.sourceEvent.target.nodeName === 'rect'){
+            shape = (event.sourceEvent.target as SVGRectElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
+        }else{
+            shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
+        }
+
+        d3.select(shape)
+            .style('pointer-events', 'none')
+            .attr('class', 'dragging');
+        d3.select(document.body).append(() => shape);
+
+        d3.select(shape)
+            .attr('transform', `translate(${event.x}, ${event.y})`);
+    }, [layoutSvg, localRoom, dragLockRef.current]);
+
+    // Drag move for dragging from the utilities to the layout
+    const dragging = useCallback((event)=> {
+        d3.select('.dragging')
+            .attr('transform', `translate(${event.x}, ${event.y})`);
+    },[layoutSvg, localRoom]);
+
+    // Drag end for dragging from the utilities to the layout
+    const dragEnded = useCallback(async (event) => {
+        const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging');
+        if(!draggedShape) {
+            dragLockRef.current = false;
+            return;
+        }
+        // sync x and y to the layout svg
+        const {x,y} = getLayoutOffset({
+            clientX: event.sourceEvent.clientX,
+            clientY: event.sourceEvent.clientY,
+            layoutSvg: layoutSvg})
+
+        // Apply transforms for zoom on shape to scale to correct size when placed
+        const transform = d3.zoomTransform(layoutSvg.node());
+        // Discovers the grid cell to lock onto
+        const targetRect = getTargetRect(x, y, CELL_SIZE, transform);
+
+        const draggedNodeId = draggedShape.attr('id');
+        const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
+
+        if (targetRect) {
+            const cellX = Math.max(0,targetRect.x);
+            const cellY = Math.max(0,targetRect.y);
+
+            let newId: string;
+
+            if(isRackEnum(updateItemType)){
+                newId = `default-rack-${defaultRackCounter}`;
+                setDefaultRackCounter(prevState => prevState + 1);
+            }else{
+                // get new id for room object
+                const tempId = localRoom.objects.reduce((max, obj) => {
+                    return  parseRoomItemNum(obj.itemId)> max ? parseRoomItemNum(obj.itemId) : max;
+                }, 0) + 1;
+                newId = `${parseWrapperId(draggedNodeId)}-${tempId}`;
+            }
+            await addToLayout({
+                draggedShape: draggedShape,
+                cellX: cellX,
+                cellY: cellY,
+                itemId: newId,
+                updateItemType: updateItemType
+            });
+        } else {
+            draggedShape.remove();
+        }
+    },[layoutSvg, localRoom]);
+
+
+    const zoomToScale = (scale: number) => {
+        const newTransform = d3.zoomIdentity
+            .translate(0, 0)
+            .scale(scale);
+
+        // Apply scale to existing zoom handler
+        layoutSvg.call(zoom.transform, newTransform);
+    }
+
+    // Function to handle zoom level for grid
+    function handleZoom(event) {
+        setShowCageContextMenu(false); // close open context menu if one is open and the user drags the grid
+        const transform = event.transform;
+        layoutSvg.select("g.grid").attr("transform", transform);
+
+        layoutSvg.selectAll(".draggable").each(function(d: any) {
+            // d is the data object attached to anything that is placed in the grid at the highest group level for that object
+            const group = d3.select(this);
+            let scale = transform.k
+            // Use type assertion to tell TypeScript that d has x and y properties
+            const newX = transform.applyX((d as { x: number }).x);
+            const newY = transform.applyY((d as { y: number }).y);
+
+            // Apply the transformed position and zoom scale
+            group.attr("transform", `translate(${newX}, ${newY}) scale(${scale})`);
+        });
+
+        // Dynamically regenerate the grid based on current transform (zoom level)
+        drawGrid(layoutSvg, {width: SVG_WIDTH, height: SVG_HEIGHT, gridSize: CELL_SIZE});
+    }
+
+    /* Function to be run after the svg border_template is injected into the dom from the ReactSVG component.
+       ReactSVG has an afterInjection prop but that causes a rerender on the svg removing changes caused
+       by d3 mutations.
+    */
+    function borderInject(svg) {
+        // Ensure resize handle can receive events
+        const resizeHandle = svg.querySelector('#resize-handle');
+        resizeHandle.setAttribute('pointer-events', 'bounding-box');
+
+        const rect = svg.querySelector('#border-rect');
+        rect.setAttribute('pointer-events', 'none');
+        setBorderSetup(true);
+    }
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
@@ -296,61 +495,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         setSelectedObj(null);
     }, [unitLocs]);
 
-    // This effect updates racks for adding to the room
-    useEffect(() => {
-        if(!pendingRoomUpdate) return;
-        const {draggedShape, cellX, cellY, itemId, updateItemType} = pendingRoomUpdate;
-        let group;
 
-        draggedShape.classed('dragging', false);
-        const transform = d3.zoomTransform(layoutSvg.node());
-        if (!isRackEnum(updateItemType)) { // adding dragged room object
-            group = layoutSvg.append('g')
-                .data([{x: cellX, y: cellY}])
-                .attr('class', "draggable room-obj")
-                .attr('id', `${itemId}`)
-                .style('pointer-events', "bounding-box");
-            group.append(() => draggedShape.node());
-
-        } else { // adding dragged caging unit
-            const updateItemTypeString: RackStringType = roomItemToString(updateItemType) as RackStringType;
-            group = layoutSvg.append('g')
-                .attr('class', `draggable rack type-${updateItemTypeString}`)
-                .attr('id', `${itemId}`)
-                .style('pointer-events', 'bounding-box');
-
-            const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = group.append('g')
-                .attr('id', `${updateItemTypeString}-${getNextCageNum(updateItemTypeString)}`)
-                .attr('transform', `translate(0,0)`)
-                .append(() => draggedShape.node());
-
-            const cageIdText: SVGTSpanElement = cageGroup.select('tspan').node() as SVGTSpanElement;
-
-            cageIdText.textContent = `${getNextCageNum(updateItemTypeString)}`;
-
-        }
-        placeAndScaleGroup(group, cellX, cellY, transform);
-
-        addRoomItem(updateItemType, itemId, cellX, cellY, transform.k);
-
-        group.call(closeMenuThenDrag);
-
-        // attach click listener for context menu
-        if(isRackEnum(updateItemType)){
-            group.selectAll('text').each(function () {
-                const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
-                textElement.setAttribute('contentEditable', 'true');
-                (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
-                (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-                const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
-                setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, contextMenuRef, roomItemToString(updateItemType) as RackStringType);
-            });
-        }else{
-            setupEditCageEvent(group.node(), setSelectedObj, setCtxMenuStyle, contextMenuRef);
-        }
-
-        setPendingRoomUpdate(null);
-    }, [pendingRoomUpdate]);
 
     // Effect for handling the grid layout and drag effects on the layout and from the utils
     useEffect(() => {
@@ -380,96 +525,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         d3.select(utilsRef.current).selectAll('.draggable')
             .call(closeMenuThenDragToLayout);
 
-        // Drag start for dragging from the utilities to the layout
-        function dragStarted(event: d3.D3DragEvent<SVGElement, any, any>) {
-            let shape: SVGElement;
-            if(showCageContextMenu || showObjectContextMenu){
-                setShowCageContextMenu(false);
-                setShowObjectContextMenu(false);
-            }
-            /*
-               Selections can be picky depending on where the user clicks to drag the object,
-               make sure it always assigns the shape to the top level SVG element for the object
-             */
-            if(event.sourceEvent.target.nodeName === 'tspan'){
-                shape = (event.sourceEvent.target as SVGTSpanElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
-            }else if(event.sourceEvent.target.nodeName === 'path'){
-                shape = (event.sourceEvent.target as SVGPathElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
-            }else if(event.sourceEvent.target.nodeName === 'polygon'){
-                shape = (event.sourceEvent.target as SVGPolygonElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
-            }else if(event.sourceEvent.target.nodeName === 'line'){
-                shape = (event.sourceEvent.target as SVGLineElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
-            }else if(event.sourceEvent.target.nodeName === 'rect'){
-                shape = (event.sourceEvent.target as SVGRectElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
-            }else{
-                shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
-            }
-
-            d3.select(shape)
-                .style('pointer-events', 'none')
-                .attr('class', 'dragging');
-            d3.select(document.body).append(() => shape);
-
-            d3.select(shape)
-                .attr('transform', `translate(${event.x}, ${event.y})`);
-        }
-        // Drag move for dragging from the utilities to the layout
-
-        function dragging(event) {
-            d3.select('.dragging')
-                .attr('transform', `translate(${event.x}, ${event.y})`);
-        }
-        // Drag end for dragging from the utilities to the layout
-        function dragEnded(event) {
-            const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging');
-            // sync x and y to the layout svg
-            const {x,y} = getLayoutOffset({
-                clientX: event.sourceEvent.clientX,
-            clientY: event.sourceEvent.clientY,
-            layoutSvg: layoutSvg})
-
-            // Apply transforms for zoom on shape to scale to correct size when placed
-            const transform = d3.zoomTransform(layoutSvg.node());
-            // Discovers the grid cell to lock onto
-            const targetRect = getTargetRect(x, y, CELL_SIZE, transform);
-
-            const draggedNodeId = draggedShape.attr('id');
-            const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
-
-            if (targetRect) {
-                const cellX = Math.max(0,targetRect.x);
-                const cellY = Math.max(0,targetRect.y);
-
-                let newId: string;
-
-                if(isRackEnum(updateItemType)){
-                    // get new id for rack
-                    const tempId = localRoom.rackGroups.reduce((max, group) => {
-                        const groupMax = group.racks.reduce((groupMax, rack) => {
-                            return parseLongId(rack.itemId) > groupMax ? parseLongId(rack.itemId) : groupMax;
-                        }, 0);
-                        return groupMax > max ? groupMax : max;
-                    }, 0) + 1;
-                    newId = `default-rack-${tempId}`;
-                }else{
-                    // get new id for room object
-                    const tempId = localRoom.objects.reduce((max, obj) => {
-                        return  parseRoomItemNum(obj.itemId)> max ? parseRoomItemNum(obj.itemId) : max;
-                    }, 0) + 1;
-                    newId = `${parseWrapperId(draggedNodeId)}-${tempId}`;
-                }
-                setPendingRoomUpdate({
-                    draggedShape: draggedShape,
-                    cellX: cellX,
-                    cellY: cellY,
-                    itemId: newId,
-                    updateItemType: updateItemType
-                });
-            } else {
-                draggedShape.remove();
-            }
-        }
-    }, [ localRoom, layoutSvg]);
+    }, [localRoom, layoutSvg]);
 
     // After state is done updating for cage id change. refresh svg text and ids
     useEffect(() => {
@@ -481,54 +537,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             setShowCageContextMenu(false);
         }
     }, [cageNumChange]);
-
-    const zoomToScale = (scale: number) => {
-        const newTransform = d3.zoomIdentity
-            .translate(0, 0)
-            .scale(scale);
-
-        // Apply scale to existing zoom handler
-        layoutSvg.call(zoom.transform, newTransform);
-    }
-
-
-
-    // Function to handle zoom for grid, zoom also handles infinite grid generation and drag
-    function handleZoom(event) {
-        setShowCageContextMenu(false); // close open context menu if one is open and the user drags the grid
-        const transform = event.transform;
-        layoutSvg.select("g.grid").attr("transform", transform);
-
-        // Apply zoom/pan to each individual "draggable" group, preserving their relative positions
-        layoutSvg.selectAll(".draggable").each(function(d: any) {
-            // d is the data object attached to anything that is placed in the grid at the highest group level for that object
-            const group = d3.select(this);
-            let scale = transform.k
-            // Use type assertion to tell TypeScript that d has x and y properties
-            const newX = transform.applyX((d as { x: number }).x);
-            const newY = transform.applyY((d as { y: number }).y);
-
-            // Apply the transformed position and zoom scale
-            group.attr("transform", `translate(${newX}, ${newY}) scale(${scale})`);
-        });
-
-        // Dynamically regenerate the grid based on current transform (zoom level)
-        drawGrid(layoutSvg, {width: SVG_WIDTH, height: SVG_HEIGHT, gridSize: CELL_SIZE});
-    }
-
-    /* Function to be run after the svg border_template is injected into the dom from the ReactSVG component.
-       ReactSVG has an afterInjection prop but that causes a rerender on the svg removing changes caused
-       by d3 mutations.
-    */
-    function borderInject(svg) {
-        // Ensure resize handle can receive events
-        const resizeHandle = svg.querySelector('#resize-handle');
-        resizeHandle.setAttribute('pointer-events', 'bounding-box');
-
-        const rect = svg.querySelector('#border-rect');
-        rect.setAttribute('pointer-events', 'none');
-        setBorderSetup(true);
-    }
 
     useEffect(() => {
         setLayoutSvg(d3.select('#layout-svg') as d3.Selection<SVGElement, {}, HTMLElement, any>);
@@ -708,11 +716,25 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     });
                 }
                 svgToRemove.remove();
+                if(localRack.type.isDefault && deleteAction === 'rack'){
+                    setDefaultRackCounter(prevState => prevState - 1);
+                }else if(deleteAction === 'group'){
+                    let tempRacksNum = defaultRackCounter;
+                    for (const rack of localGroup.racks) {
+                        if(rack.type.isDefault){
+                            tempRacksNum--;
+                        }
+                    }
+                    if(tempRacksNum !== defaultRackCounter){
+                        setDefaultRackCounter(tempRacksNum)
+                    }
+                }
                 delCage(localCage, localRack, localGroup, deleteAction);
                 setShowCageContextMenu(false);
             }
         });
     }
+
 
     const handleDelObject = () => {
         const selectionToDel = layoutSvg.select(`#${(selectedObj as RoomObject).itemId}`);
@@ -740,7 +762,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 element.remove();
             }
         })
-
+        setDefaultRackCounter(1);
     }
 
     const handleSave = async () => {
@@ -778,6 +800,19 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
     }
 
+    // Handles changing racks in the layout editor
+    const handleRackChange = async (newType) => {
+        const result: string = await changeRack(newType);
+        const {rack: currRack} = findCageInGroup((selectedObj as Cage).cageNum, localRoom.rackGroups);
+        const idToChange = currRack.itemId;
+        if(result && currRack.type.isDefault){
+            setDefaultRackCounter(prevState => prevState - 1);
+        }
+        if(result){
+            layoutSvg.select(`#${idToChange}`).attr("id", result);
+        }
+        setShowCageContextMenu(false);
+    }
 
     return (
         <div className={"layout-editor"}>
@@ -943,12 +978,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         {
                             element:
                                 <ChangeRack
-                                    onSubmit={(newType) => {
-                                        changeRack(newType);
-                                        setShowCageContextMenu(false);
-                                    }}
+                                    onSubmit={handleRackChange}
                                 />,
-                            types: []
+                            types: [],
+                            title: "Change Rack"
                         },
                         {
                             element:
@@ -958,7 +991,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                         setShowCageContextMenu(false);
                                     }}
                                 />,
-                            types: []
+                            types: [],
+                            title: "Change Cage Number"
                         }
                     ]}
                 />
@@ -977,6 +1011,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                             setLocalRoom={setLocalRoom}
                         />,
                         types: [RoomObjectTypes.GateClosed, RoomObjectTypes.GateOpen],
+                        title: "Change Connected Room"
                      },
                         {element:
                                 <GateSwitch
@@ -987,6 +1022,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                     closeMenu={() => setShowObjectContextMenu(false)}
                                 />,
                             types: [RoomObjectTypes.GateClosed, RoomObjectTypes.GateOpen],
+                            title: "Switch Gate Status"
                         }
                     ]}
                 />

@@ -40,6 +40,8 @@ export enum RoomObjectTypes {
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
 export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
+export type DefaultRackId = `default-rack-${number}`;
+export type RealRackId = `rack-${number}`;
 
 export type GroupId = `rack-group-${number}`
 export type CageNumber = `${RackStringType}-${number}`
@@ -109,7 +111,7 @@ export interface RackGroup {
 }
 
 export interface Rack {
-    itemId: string; // rack id
+    itemId: DefaultRackId | RealRackId; // rack id
     selectionType: SelectionType;
     type: UnitType;
     cages: Cage[];

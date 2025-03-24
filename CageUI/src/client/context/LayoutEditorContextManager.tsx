@@ -3,14 +3,14 @@ import { createContext, FC, useContext, useEffect, useState } from 'react';
 import { LayoutContextProps, LayoutContextType } from '../types/layoutEditorContextTypes';
 import {
     Cage,
-    CageNumber,
+    CageNumber, DefaultRackId,
     GroupId,
     LayoutHistoryData,
     LocationCoords,
     Rack,
     RackGroup,
     RackStringType,
-    RackTypes,
+    RackTypes, RealRackId,
     Room,
     RoomItemClass,
     RoomItemType,
@@ -134,6 +134,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         })
     }
 
+    // This only adds default racks/cages to the layout, it is not used in loading in previous layouts
     const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
         const newCageNum: CageNumber = `${roomItemToString(rackType) as RackStringType}-${getNextCageNum(roomItemToString(rackType) as RackStringType)}`;
         const firstCage: Cage = {
@@ -175,7 +176,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         const newRack: Rack = {
             selectionType: 'rack',
             cages: [firstCage],
-            itemId: id,
+            itemId: id as DefaultRackId,
             isActive: false, // Default racks are not active by default (since they technically don't exist)
             type: type,
             x: 0,
@@ -327,9 +328,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     // Adds item to the local room. return the new room for listeners.
-    const addRoomItem = (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
+    const addRoomItem = async (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
         if(isRackEnum(itemType)){
-            addRack(itemId, x, y, scale, itemType as RackTypes);
+            await addRack(itemId, x, y, scale, itemType as RackTypes);
         }else{
             const newRoomObj: RoomObject = {
                 selectionType: 'obj',
@@ -505,11 +506,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }));
     }
 
-    const changeRack = async (newType: {value: string, label: string}) => {
-        let {value: oldRackType, label: oldRackId} = newType;
+    const changeRack = async (newType: {value: string, label: string}): Promise<string | null> => {
+        let {value: oldRackId, label: oldRackType} = newType;
         const rackId = parseInt(oldRackId);
         const rackType = oldRackType.split(' - ')[1];
-
         const optConfig: SelectRowsOptions = {
             schemaName: "cageui",
             queryName: "rack_types",
@@ -535,7 +535,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                                 ...group,
                                 racks: group.racks.map((r) => r.itemId === rack.itemId ? {
                                     ...r,
-                                    itemId: `rack-${rackId.toString()}`,
+                                    itemId: `rack-${rackId.toString()}` as RealRackId,
                                     type: {
                                         ...r.type,
                                         rowid: newRackType.rowid,
@@ -550,8 +550,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 }
                 return roomToUpdate;
             })
+            return `rack-${rackId}`;
         }else{
             console.log("Error fetching rack type");
+            return null;
         }
     }
 
@@ -656,7 +658,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         if(prevRoom.locs) {
             setUnitLocs(prevRoom.locs);
         }
-        console.log("prev ROom: ", prevRoom.room)
         setLocalRoom(prevRoom.room);
         setRoom(prevRoom.room);
         setIsLoading(false);
@@ -694,7 +695,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         localRoom.rackGroups.forEach((group) => {
             const groupId = parseLongId(group.groupId);
             group.racks.forEach((rack) => {
-                const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseInt(rack.itemId);
+                const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseRoomItemNum(rack.itemId);
                 rack.cages.forEach((cage) => {
                     const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.num === cage.cageNum);
                     let extraContext: ExtraContext = {};

@@ -29,7 +29,7 @@ interface EditorContextMenuProps {
     onClickDelete: (type?: string) => void;
     selectedObj: SelectedObj;
     closeMenu: () => void;
-    menuItems?: {element: ReactElement, types: RoomItemType[]}[]; // for types, an array of types to render this element for. If empty it will render the component for all types.
+    menuItems?: {element: ReactElement, types: RoomItemType[], title: string}[]; // for types, an array of types to render this element for. If empty it will render the component for all types.
 }
 
 /*
@@ -95,6 +95,7 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                 if(item.types.length === 0){// if no types were given render, otherwise only render elements for that type
                     return(
                         <div className={'menu-item'} key={`context-menu-item-${index}`}>
+                            <label>{item.title}</label>
                             {item.element}
                         </div>
                     );
@@ -102,6 +103,7 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                 if(item.types.includes(selectedObjType as RackTypes | RoomObjectTypes | DefaultRackTypes)){
                     return(
                         <div className={'menu-item'} key={`context-menu-item-${index}`}>
+                            <label>{item.title}</label>
                             {item.element}
                         </div>
                     );

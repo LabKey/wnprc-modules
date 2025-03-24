@@ -11,7 +11,7 @@ import {
 } from './helpers';
 import {
     Cage,
-    CageNumber,
+    CageNumber, DefaultRackId,
     DefaultRackTypes,
     GroupId,
     LayoutHistoryData,
@@ -20,7 +20,7 @@ import {
     Rack,
     RackGroup,
     RackStringType,
-    RackTypes,
+    RackTypes, RealRackId,
     Room,
     RoomItemClass,
     RoomItemStringType,
@@ -789,19 +789,20 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
-        let rackId = rackItem?.rack;
+        let rackIdNum = rackItem?.rack;
         let extraContext: ExtraContext;
         // if rack is default, use default rack id instead
-        if(!rackId && rackItem.extra_context){
+        if(!rackIdNum && rackItem.extra_context){
             extraContext = JSON.parse(rackItem.extra_context);
             if(extraContext?.rack?.rackId){
-                rackId = extraContext.rack.rackId;
+                rackIdNum = extraContext.rack.rackId;
             }
         }
-        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackId);
+        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackIdNum);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
+            let rackId: DefaultRackId | RealRackId;
             let typeName = rackItem;
             const isDefault = isRackDefault(rackItem.object_type);
             const rackPrefix = isDefault ?  'default-rack' : 'rack';
@@ -817,6 +818,9 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
                 const rackData = await labkeyActionSelectWithPromise(optConfig);
                 typeName = rackData.rows[0].rack_type;
+                rackId = `${rackPrefix}-${rackIdNum}` as RealRackId;
+            }else{
+                rackId = `${rackPrefix}-${rackIdNum}` as DefaultRackId;
             }
 
 
@@ -842,7 +846,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 selectionType: 'rack',
                 cages: [],
                 isActive: !isDefault,
-                itemId: `${rackPrefix}-${rackId}`,
+                itemId: rackId,
                 type: type,
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
                 y: rackItem.y_coord - rackGroup.y,

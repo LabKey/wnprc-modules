@@ -189,5 +189,12 @@ export const LayoutEditor: FC<any> = () => {
                     </div>
                 }
             />
-    ) : <div> You do not have the required permissions </div>;
+    ) : <div>
+        <h3>Error loading page. This could be due to a number of issues</h3>
+        <ul>
+            <li>Insufficient permissions</li>
+            <li>Slow load times</li>
+            <li>New bugs on our end. If you believe this might be the issue please submit a ticket.</li>
+        </ul>
+    </div>;
 }

@@ -354,7 +354,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // Effect checks for merging/connecting after a rack is moved
     useEffect(() => {
-
         if(!selectedObj) return;
         let objSvg;
         if(selectedObj.selectionType === 'rackGroup'){
@@ -362,8 +361,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }else {
             objSvg = d3.select(`#${(selectedObj as Rack).itemId}`);
         }
-        // return if selected object is not a rack group or rack
+        // return if objSvg is not found or not a rack/rackgroup able to merge
+        if(objSvg.empty()) return;
         if(!objSvg.classed('rack') && !objSvg.classed('rack-group')) return;
+
 
         let mergeAvail: boolean = false;
         let targetCageLoc;
@@ -491,7 +492,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             };
             mergeRacks(mergeProps);
         }
-
         setSelectedObj(null);
     }, [unitLocs]);
 

@@ -11,15 +11,12 @@ import org.labkey.webutils.api.JspPage;
 
 import java.util.Map;
 
-public class WaterCalendarWebPartFactory extends BaseWebPartFactory{
-
-
-
-    private Portal.WebPart _webPart;
-
+public class WaterCalendarWebPartFactory extends BaseWebPartFactory
+{
     public WaterCalendarWebPartFactory(){super ("Water Calendar");}
 
-    public WebPartView getWebPartView (@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webpart){
+    @Override
+    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webpart){
 
         Map<String, String> props = webpart.getPropertyMap();
 

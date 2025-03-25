@@ -549,18 +549,51 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
         { x: targetX + targetWidth, y: targetY + targetHeight }, // Bottom-right
     ];
 
-    // Check if any corner of the dragged square matches any corner of the target square
-    for (const draggedCorner of draggedCorners) {
-        for (const targetCorner of targetCorners) {
-            if (draggedCorner.x === targetCorner.x && draggedCorner.y === targetCorner.y) {
+    /* True if valid bounds exist. In short this fixes the issue with the corner checking where corners
+       themselves count as adjacent with no sides touching.
+
+     */
+    const checkBounds = (corner) => {
+        let valid = true;
+
+        if(corner === 0){ // top left corner match of drag cage
+            if(draggedCorners[corner].x === targetCorners[3].x && draggedCorners[corner].y === targetCorners[3].y){
+                valid = false;
+            }
+
+        }else if(corner === 1){ // top right corner match of drag cage
+            if(draggedCorners[corner].x === targetCorners[2].x && draggedCorners[corner].y === targetCorners[2].y){
+                valid = false;
+            }
+        }else if(corner === 2){ // bottom left corner match of drag cage
+            if(draggedCorners[corner].x === targetCorners[1].x && draggedCorners[corner].y === targetCorners[1].y){
+                valid = false;
+            }
+        }else if(corner === 3){ // bottom right corner match of drag cage
+            if(draggedCorners[corner].x === targetCorners[0].x && draggedCorners[corner].y === targetCorners[0].y){
+                valid = false;
+            }
+        }
+
+        return valid;
+    }
+    // Check if any corner of the dragged square matches any corner of the target square with a matching side.
+    for (let i = 0; i < draggedCorners.length; i++) {
+        if(isAdjacent === true) continue;
+        for (let j = 0; j < targetCorners.length; j++) {
+            if(isAdjacent === true) continue;
+            if (draggedCorners[i].x === targetCorners[j].x && draggedCorners[i].y === targetCorners[j].y) {
+                if(!checkBounds(i)){
+                    continue;
+                }
                 // Determine the direction of adjacency based on the matching corner
-                if (draggedCorner.x === draggedX && draggedCorner.y === draggedY) {
+                if (draggedCorners[i].x === draggedX && draggedCorners[i].y === draggedY) {
                     isAdjacent = true;
-                } else if (draggedCorner.x === draggedX + draggedWidth && draggedCorner.y === draggedY) {
+                } else if (draggedCorners[i].x === draggedX + draggedWidth && draggedCorners[i].y === draggedY) {
                     isAdjacent = true;
-                } else if (draggedCorner.x === draggedX && draggedCorner.y === draggedY + draggedHeight) {
+                } else if (draggedCorners[i].x === draggedX && draggedCorners[i].y === draggedY + draggedHeight) {
                     isAdjacent = true;
-                } else if (draggedCorner.x === draggedX + draggedWidth && draggedCorner.y === draggedY + draggedHeight) {
+                } else if (draggedCorners[i].x === draggedX + draggedWidth && draggedCorners[i].y === draggedY + draggedHeight) {
                     isAdjacent = true;
                 }
             }

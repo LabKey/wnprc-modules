@@ -71,6 +71,7 @@ interface EditorProps {
     roomSize: SelectorOptions
 }
 
+//TODO move grid ratios to cage object size
 const Editor: FC<EditorProps> = ({roomSize}) => {
     const SVG_WIDTH = 1290; // starting pixel width of the layout svg
     const SVG_HEIGHT = 810; // starting pixel height of the layout svg
@@ -86,7 +87,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const dragLockRef = useRef(false); // ref that helps ensure very fast drag actions don't crash
 
     const [showGrid, setShowGrid] = useState<boolean>(true);
-    //const [pendingRoomUpdate, setPendingRoomUpdate] = useState<PendingRoomUpdate>(null);
     const [borderSetup, setBorderSetup] = useState<boolean>(false); // determines if the border svg has been loaded yet
 
     const [ctxMenuStyle, setCtxMenuStyle] = useState({
@@ -154,7 +154,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         .on('end', function (event) {
             dragInLayout.on('end').call(this, event);
         });
-
 
     // This function makes changes to the rect svg and adding the new object to the layout, It also calls addRoomItem to add the item to state
     const addToLayout = async (update: PendingRoomUpdate) => {
@@ -260,7 +259,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     // Drag end for dragging from the utilities to the layout
     const dragEnded = useCallback(async (event) => {
         const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging');
-        if(!draggedShape) {
+        if(draggedShape.empty()) {
             dragLockRef.current = false;
             return;
         }

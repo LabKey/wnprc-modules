@@ -139,11 +139,11 @@ public class RecordListener extends DefaultRecordListener {
     }
 
     private void insertAuditMessageForRecord(OpType opType, Record record) {
-        QueryUpdateAuditProvider.QueryUpdateAuditEvent event = new QueryUpdateAuditProvider.QueryUpdateAuditEvent(container.getId(), opType.getMessage());
+        QueryUpdateAuditProvider.QueryUpdateAuditEvent event = new QueryUpdateAuditProvider.QueryUpdateAuditEvent(container, opType.getMessage());
 
-        if (record instanceof TableRecord) {
-            String schemaName = ((TableRecord) record).getTable().getSchema().getName();
-            String queryName  = ((TableRecord) record).getTable().getName();
+        if (record instanceof TableRecord<?> tableRecord) {
+            String schemaName = tableRecord.getTable().getSchema().getName();
+            String queryName  = tableRecord.getTable().getName();
 
             event.setSchemaName(schemaName);
             event.setQueryName(queryName);

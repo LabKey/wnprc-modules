@@ -47,7 +47,7 @@ import {
     parseWrapperId,
     placeAndScaleGroup,
     setupEditCageEvent,
-    showLayoutEditorConfirmation,
+    showLayoutEditorConfirmation, showLayoutEditorError,
     updateBorderSize,
 } from '../../utils/LayoutEditorHelpers';
 import {
@@ -75,8 +75,6 @@ interface EditorProps {
 const Editor: FC<EditorProps> = ({roomSize}) => {
     const SVG_WIDTH = 1290; // starting pixel width of the layout svg
     const SVG_HEIGHT = 810; // starting pixel height of the layout svg
-    const SMALL_GRID_RATIO = 4; // number of cells for length/width of a small cage
-    const LARGE_GRID_RATIO = 8; // number of cells for length/width of a large cage
 
     // number of cells in grid width/height, based off scale
     const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
@@ -162,6 +160,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         draggedShape.classed('dragging', false);
         const transform = d3.zoomTransform(layoutSvg.node());
+        const res = await addRoomItem(updateItemType, itemId, cellX, cellY, transform.k);
+        if(!res){
+            await showLayoutEditorError("Error adding item to layout");
+            dragLockRef.current = false;
+            return;
+        }
+
         if (!isRackEnum(updateItemType)) { // adding dragged room object
             group = layoutSvg.append('g')
                 .data([{x: cellX, y: cellY}])
@@ -189,7 +194,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
         placeAndScaleGroup(group, cellX, cellY, transform);
 
-        await addRoomItem(updateItemType, itemId, cellX, cellY, transform.k);
 
         group.call(closeMenuThenDrag);
 
@@ -406,11 +410,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(mergeAvail) return;
                     Object.entries(cagesNotInDragged).forEach(([targetRackType, targetCageLocs]) => {
                         if(targetCageLocs.length === 0 || mergeAvail) return;
-                        const gridRatio = (targetRackType === roomItemToString(RackTypes.Pen) || targetRackType === roomItemToString(RackTypes.PlayCage)) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
                         targetCageLocs.forEach((targetLoc) => {
                             if(mergeAvail) return;
                             const {cage: draggedCage} = findCageInGroup(dragLoc.num, localRoom.rackGroups);
                             const {cage: targetCage} = findCageInGroup(dragLoc.num, localRoom.rackGroups);
+
                             mergeAvail = checkAdjacent(targetLoc, dragLoc, draggedCage.size, targetCage.size, CELL_SIZE);
                             if(mergeAvail){
                                 targetCageLoc = targetLoc;
@@ -452,8 +456,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(inSameRack) {
                         return;
                     }
-                    const targetRackType: RackStringType = parseRoomItemType(targetLoc.num) as RackStringType;
-                    const gridRatio = (targetRackType === roomItemToString(RackTypes.Pen) || targetRackType === roomItemToString(RackTypes.PlayCage)) ? LARGE_GRID_RATIO : SMALL_GRID_RATIO;
 
                     mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, draggedCage.size,targetCage.size, CELL_SIZE);
                     if(mergeAvail){

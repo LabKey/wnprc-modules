@@ -890,7 +890,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         return rack;
     }
 
-    const addCageToRack = (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
+    const addCageToRack = async (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
         let cageNumType: RoomItemStringType;
         let extraContext: ExtraContext;
@@ -902,6 +902,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         if(rackItem.extra_context){
             extraContext = JSON.parse(rackItem.extra_context);
         }
+        const svgSize = await getSvgSize(rack.type.type);
         const cage: Cage = {
             cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber,
             extraContext: extraContext?.cage,
@@ -909,7 +910,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             id: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
-            size: getSvgSize(rack.type.type     ),
+            size: svgSize,
         }
         rack.cages.push(cage);
     }
@@ -917,7 +918,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
     const handleRackItem = async (rackItem: LayoutHistoryData) => {
         const rackGroup: RackGroup = findOrAddGroup(rackItem);
         const rack: Rack = await findOrAddRack(rackGroup, rackItem);
-        addCageToRack(rack, rackItem, rackGroup);
+        await addCageToRack(rack, rackItem, rackGroup);
     }
 
     // generates room object state for room objects from layout history data

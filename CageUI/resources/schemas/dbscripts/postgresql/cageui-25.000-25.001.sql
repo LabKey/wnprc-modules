@@ -55,29 +55,29 @@ select 'cageui_item_types' as setname,
        'value' as keyField,
        container from ehr_lookups.lookup_sets where setname='ancestry';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 0 as value, 'Caging' as category, 'Default Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 0 as value, 'Caging' as category, '4' as description, 'Default Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 1 as value, 'Caging' as category, 'Default Pen' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 1 as value, 'Caging' as category, '8' as description, 'Default Pen' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 2 as value, 'Caging' as category, 'Default Temp Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 2 as value, 'Caging' as category, '4' as description, 'Default Temp Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 3 as value, 'Caging' as category, 'Default Play Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 3 as value, 'Caging' as category, '8' as description, 'Default Play Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 4 as value, 'Caging' as category, 'Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 4 as value, 'Caging' as category, '4' as description, 'Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 5 as value, 'Caging' as category, 'Pen' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 5 as value, 'Caging' as category, '8' as description, 'Pen' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 6 as value, 'Caging' as category, 'Temp Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 6 as value, 'Caging' as category, '4' as description, 'Temp Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 7 as value, 'Caging' as category, 'Play Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
+insert into ehr_lookups.lookups (set_name,container,value, category, description, title)
+select setname, container, 7 as value, 'Caging' as category, '8' as description, 'Play Cage' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
 insert into ehr_lookups.lookups (set_name,container,value, category, title)
 select setname, container, 100 as value, 'Room Object' as category, 'Room Divider' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';

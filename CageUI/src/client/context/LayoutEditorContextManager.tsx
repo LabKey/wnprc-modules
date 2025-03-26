@@ -3,14 +3,16 @@ import { createContext, FC, useContext, useEffect, useState } from 'react';
 import { LayoutContextProps, LayoutContextType } from '../types/layoutEditorContextTypes';
 import {
     Cage,
-    CageNumber, DefaultRackId,
+    CageNumber,
+    DefaultRackId,
     GroupId,
     LayoutHistoryData,
     LocationCoords,
     Rack,
     RackGroup,
     RackStringType,
-    RackTypes, RealRackId,
+    RackTypes,
+    RealRackId,
     Room,
     RoomItemClass,
     RoomItemType,
@@ -19,12 +21,7 @@ import {
     UnitLocations,
     UnitType
 } from '../types/typings';
-import {
-    DeleteActions, ExtraContext,
-    LayoutSaveResult,
-    RackActions,
-    SelectedObj
-} from '../types/layoutEditorTypes';
+import { DeleteActions, ExtraContext, LayoutSaveResult, RackActions, SelectedObj } from '../types/layoutEditorTypes';
 import {
     convertCageNumToNum,
     createEmptyUnitLoc,
@@ -34,10 +31,12 @@ import {
     getTranslation,
     isRackDefault,
     isRackEnum,
+    showLayoutEditorError,
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
-    defaultTypeToRackType, getSvgSize,
+    defaultTypeToRackType,
+    getSvgSize,
     parseLongId,
     parseRoomItemNum,
     parseRoomItemType,
@@ -137,13 +136,20 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     // This only adds default racks/cages to the layout, it is not used in loading in previous layouts
     const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
         const newCageNum: CageNumber = `${roomItemToString(rackType) as RackStringType}-${getNextCageNum(roomItemToString(rackType) as RackStringType)}`;
+
+        const svgSize = await getSvgSize(rackType);
+        if(!svgSize){
+            await showLayoutEditorError("No size found for cage");
+            return false;
+        }
+
         const firstCage: Cage = {
             selectionType: 'cage',
             id: 1,
             cageNum: newCageNum,
             x: 0,
             y: 0,
-            size: getSvgSize(rackType),
+            size: svgSize,
         };
 
         // First cage in rack is always at rack starting position as well
@@ -164,6 +170,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
         // grab and set first default of that type to same svg object
         const rackTypeData = await labkeyActionSelectWithPromise(optConfig);
+        if(rackTypeData.rows.length === 0){
+            await showLayoutEditorError("Unable to find rack type data");
+            return false;
+        }
 
         // make first rack type
         type = {
@@ -206,6 +216,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             [roomItemToString(rackType)]: [...prevState[roomItemToString(rackType)], newCageLoc] // Append the new location to the correct array
         }));
         setScale(newScale);
+        return true;
     };
 
 
@@ -328,9 +339,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     // Adds item to the local room. return the new room for listeners.
-    const addRoomItem = async (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => {
+    const addRoomItem = async (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number): Promise<boolean> => {
         if(isRackEnum(itemType)){
-            await addRack(itemId, x, y, scale, itemType as RackTypes);
+            return await addRack(itemId, x, y, scale, itemType as RackTypes);
         }else{
             const newRoomObj: RoomObject = {
                 selectionType: 'obj',
@@ -344,6 +355,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 ...prevRoom,
                 objects: [...prevRoom.objects, newRoomObj]
             }));
+            return true;
         }
     }
 

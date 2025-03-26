@@ -15,21 +15,33 @@ import {
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
-import { ActionURL } from '@labkey/api';
+import { ActionURL, Filter } from '@labkey/api';
 import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
+import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
+import { selectDistinctRows } from '@labkey/components';
 
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
-export const getSvgSize = (type: RackTypes) => {
+//TODO link with cage size table in labkey instead of hardcoding
+export const getSvgSize = async (type: RackTypes) => {
+    const config: SelectDistinctOptions = {
+        schemaName: "ehr_lookups",
+        queryName: "cageui_item_types",
+        column: 'description',
+        filterArray: [ Filter.create('value', type, Filter.Types.EQUAL)]
+    }
+
+    const res = await selectDistinctRows(config);
+
+    console.log("res: ", res.values);
+
     // SMALL_GRID_RATIO
-    if(type === RackTypes.Cage || type === RackTypes.TempCage) {
-        return 4
+    if(res.values.length === 1){
+        return res.values[0];
     }
-    // LARGE_GRID_RATIO
-    if(type === RackTypes.Pen || type === RackTypes.PlayCage) {
-        return 8;
-    }
+
+    return;
 }
 
 // matches "string-number", if a match return the number

@@ -35,7 +35,7 @@ export interface LayoutContextType {
     unitLocs: UnitLocations;
     localRoom: Room;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
-    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => Promise<void>;
+    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => Promise<boolean>;
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;

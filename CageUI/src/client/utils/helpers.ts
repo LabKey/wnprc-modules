@@ -34,9 +34,6 @@ export const getSvgSize = async (type: RackTypes) => {
 
     const res = await selectDistinctRows(config);
 
-    console.log("res: ", res.values);
-
-    // SMALL_GRID_RATIO
     if(res.values.length === 1){
         return res.values[0];
     }

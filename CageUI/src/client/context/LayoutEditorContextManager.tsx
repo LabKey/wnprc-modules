@@ -477,7 +477,11 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
 
     const delCage = (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => {
-
+        console.log("Deleting");
+        console.log("Cage: ", cage);
+        console.log("Rack: ", rack);
+        console.log("rackGroup: ", rackGroup);
+        console.log("action: ", action);
         setLocalRoom((prevRoom) => {
             let updatedRoom: Room;
             if(action === 'cage'){ // remove cage from rack, keep rack
@@ -492,6 +496,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         }
                     ))
                 }
+                setUnitLocs((prevLocs) => ({
+                    ...prevLocs,
+                    [roomItemToString(rack.type.type)]: prevLocs[roomItemToString(rack.type.type)].filter((loc) => loc.num !== cage.cageNum)
+                }));
             }else if(action === 'rack'){ // remove rack from rack group, keep rack group
                 updatedRoom = {
                     ...prevRoom,
@@ -501,6 +509,16 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         }
                     ))
                 }
+                // Remove all cages in rack from locations
+                setUnitLocs((prevLocs) => {
+                    const cageIds = new Set(rack.cages.map(cage => cage.cageNum));
+                    const filteredLocs: UnitLocations[] = prevLocs[roomItemToString(rack.type.type)].filter((loc: LocationCoords) => !cageIds.has(loc.num));
+
+                    return {
+                        ...prevLocs,
+                        [roomItemToString(rack.type.type)]: filteredLocs
+                    }
+                });
             }else if (action === 'group'){ // remove rack group
                 updatedRoom = {
                     ...prevRoom,
@@ -508,14 +526,25 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         group.groupId !== rackGroup.groupId
                     )
                 }
+                // remove all cages in group
+                setUnitLocs((prevLocs) => {
+                    const cageIds = new Set<CageNumber>();
+                    rackGroup.racks.forEach((r) => {
+                        r.cages.forEach((c) => {
+                            cageIds.add(c.cageNum);
+                        })
+                    })
+                    const filteredLocs: UnitLocations = {};
+                    Object.keys(prevLocs).forEach(key => {
+                        filteredLocs[key] = prevLocs[key].filter((loc: LocationCoords) => !cageIds.has(loc.num));
+                    })
+                    return filteredLocs;
+                });
             }
             return updatedRoom;
         });
 
-        setUnitLocs((prevLocs) => ({
-            ...prevLocs,
-            [roomItemToString(rack.type.type)]: prevLocs[roomItemToString(rack.type.type)].filter((loc) => loc.num !== cage.cageNum)
-        }));
+
     }
 
     const changeRack = async (newType: {value: string, label: string}): Promise<string | null> => {

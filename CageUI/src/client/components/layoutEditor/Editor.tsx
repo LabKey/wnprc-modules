@@ -71,7 +71,6 @@ interface EditorProps {
     roomSize: SelectorOptions
 }
 
-//TODO move grid ratios to cage object size
 const Editor: FC<EditorProps> = ({roomSize}) => {
     const SVG_WIDTH = 1290; // starting pixel width of the layout svg
     const SVG_HEIGHT = 810; // starting pixel height of the layout svg
@@ -128,6 +127,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
+
+    useEffect(() => {
+        console.log("Room: ", localRoom);
+        console.log("Locs: ", unitLocs);
+    }, [unitLocs, localRoom]);
 
     // Create a zoom behavior, prevent scale from changing
     const zoom = d3.zoom()
@@ -413,7 +417,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         targetCageLocs.forEach((targetLoc) => {
                             if(mergeAvail) return;
                             const {cage: draggedCage} = findCageInGroup(dragLoc.num, localRoom.rackGroups);
-                            const {cage: targetCage} = findCageInGroup(dragLoc.num, localRoom.rackGroups);
+                            const {cage: targetCage} = findCageInGroup(targetLoc.num, localRoom.rackGroups);
 
                             mergeAvail = checkAdjacent(targetLoc, dragLoc, draggedCage.size, targetCage.size, CELL_SIZE);
                             if(mergeAvail){
@@ -677,7 +681,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 if(localRack.cages.length === 1){// one cage in rack, delete rack element
                     if(localGroup.racks.length === 1){// not in a rack group element
                         svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
-                        deleteAction = 'group'; // this is group if one cage is in one rack in one group
+                        deleteAction = 'group'; // this is group, if one cage, is in one rack, in one group
                     } else if (localGroup.racks.length === 2){ // in a rack group element, pull other rack out of group element into rack element
                         const rackToSave: Rack = localGroup.racks.find((rack) => rack.itemId !== localRack.itemId);
                         const rackSvg = layoutSvg.select(`#${rackToSave.itemId}`);
@@ -695,7 +699,11 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     }
                 }else if(type === 'rack') {
                     svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
-                    deleteAction = 'rack';
+                    if(localGroup.racks.length === 1){
+                        deleteAction = 'group';
+                    }else{
+                        deleteAction = 'rack';
+                    }
                 }else{ // multiple cages in rack, delete cage element
                     svgToRemove = layoutSvg.select(`#${localCage.cageNum}`);
                     deleteAction = 'cage';

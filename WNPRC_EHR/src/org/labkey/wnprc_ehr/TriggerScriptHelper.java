@@ -81,11 +81,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -99,6 +101,7 @@ public class TriggerScriptHelper {
     protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
     public static JSONArray _aliasRow;
+    public static Map<String, Map<String, Object>> bloodSpeciesTable;
 
     private TriggerScriptHelper(int userId, String containerId) {
         user = UserManager.getUser(userId);
@@ -2887,5 +2890,385 @@ public class TriggerScriptHelper {
                 }
             }
         }
+    }
+    private Double extractWeightForId(String id, List<Map<String, Object>> weightsInTransaction)
+    {
+        if (weightsInTransaction == null)
+            return null;
+
+        Double weight = null;
+        Date lastDate = null;
+
+        for (Map<String, Object> origMap : weightsInTransaction)
+        {
+            Map<String, Object> map = new CaseInsensitiveHashMap<>(origMap);
+            if (!map.containsKey("date"))
+            {
+                _log.warn("TriggerScriptHelper.extractWeightForId was passed a previous record lacking a date");
+                continue;
+            }
+
+            try
+            {
+                Date d = ConvertHelper.convert(map.get("date"), Date.class);
+                if (d == null)
+                    continue;
+
+                if (lastDate == null || d.after(lastDate))
+                {
+                    Double w = ConvertHelper.convert(map.get("weight"), Double.class);
+                    if (w != null)
+                    {
+                        lastDate = d;
+                        weight = w;
+                    }
+                }
+            }
+            catch (ConversionException e)
+            {
+                _log.error("TriggerScriptHelper.extractWeightForId was unable to parse date", e);
+                continue;
+            }
+        }
+
+        return weight;
+    }
+
+    public static class BloodInfo implements Comparable<BloodInfo>
+    {
+        private String _objectId;
+        private Date _date;
+        private double _quantity;
+        // this will track whether the current blood record is in the current transaction,
+        // since some come from the DB strictly, and we won't want to report that for bloods nearing overages
+        private boolean _inTransaction;
+
+        public BloodInfo() {}
+
+        public BloodInfo(String objectId, Date date, Double quantity, boolean isInTransaction)
+        {
+            _objectId = objectId;
+            setDate(date);
+            _quantity = quantity;
+            _inTransaction = isInTransaction;
+        }
+
+        @Override
+        public int compareTo(@NotNull BloodInfo o)
+        {
+            return getDate().compareTo(o.getDate());
+        }
+
+        public Date getDate()
+        {
+            return _date;
+        }
+
+        public String getObjectId()
+        {
+            return _objectId;
+        }
+
+        public double getQuantity()
+        {
+            return _quantity;
+        }
+
+        public void setObjectId(String objectId)
+        {
+            _objectId = objectId;
+        }
+
+        public void setDate(Date date)
+        {
+            //NOTE: consider whole-days only for blood volume calculations
+            _date = date == null ? null : DateUtils.truncate(date, Calendar.DATE);
+        }
+
+        public void setQuantity(double quantity)
+        {
+            _quantity = quantity;
+        }
+
+
+        private boolean getInTransaction()
+        {
+            return _inTransaction;
+        }
+
+        final long MILLIS_PER_DAY = 24 * 3600 * 1000;
+
+        public boolean countsAgainstInterval(BloodInfo blood2, int intervalInDays)
+        {
+            Date date2 = blood2.getDate();
+            if (date2 == null)
+            {
+                return false;
+            }
+
+            //NOTE: we expect BloodInfo to truncate these to nearest DATE
+            long msDiff = getDate().getTime() - date2.getTime();
+            long daysDiff = Math.round(msDiff / ((double) MILLIS_PER_DAY));
+
+            return blood2.getQuantity() > 0 &&
+                    getDate().compareTo(date2) >= 0 && daysDiff >= 0 && //must be before or same day as this draw
+                    daysDiff < intervalInDays;  // and within the selected interval.  note: draws drop doff on the nth day, so use LT, not LTE
+        }
+    }
+
+    private Map<String, Object> getBloodForSpecies(String species)
+    {
+        Map<String, Map<String, Object>> ret = bloodSpeciesTable;
+        if (ret == null)
+        {
+            _log.info("caching blood by species in TriggerScriptHelper");
+            TableInfo ti = getTableInfo("ehr_lookups", "species");
+            TableSelector ts = new TableSelector(ti);
+            ret = new HashMap<>();
+            for (Map<String, Object> row : ts.getMapArray())
+            {
+                ret.put((String)row.get("common"), row);
+            }
+
+            ret = Collections.unmodifiableMap(ret);
+            bloodSpeciesTable = ret;
+        }
+
+        return ret.get(species);
+    }
+
+    /**
+     * Gets the center specific threshold from ehr_lookups.species table
+     * e.g., if the max allowable blood drawn vol is 60.0, a threshold of 4.0 will warn users if blood vol is greater than 56.0 ml
+     * this should be turned on in a JS trigger script via helper.setCenterCustomProps(), for example:
+     * helper.setCenterCustomProps({
+     *  doWarnForBloodNearOverages: true,
+     * })
+     *
+     * @return      the threshold value of the limit
+     */
+    public double getBloodNearingOveragesThreshold(String id)
+    {
+        AnimalRecord ar = EHRDemographicsService.get().getAnimal(getContainer(), id);
+        Map<String, Object> bloodBySpecies = getBloodForSpecies(ar.getSpecies());
+        Double theWarningThresh = (Double)bloodBySpecies.get("blood_threshold_warning");
+        if (theWarningThresh == null)
+        {
+            throw new RuntimeException("TriggerScriptHelper.getBloodNearingOveragesThreshold no value found for the blood warning threshold. Please set one in ehr_lookup.species blood_threshold_warning column.");
+        }
+
+        return theWarningThresh;
+
+    }
+    private String checkOtherDrawsQuantity(String id, Date date, String rowObjectId, double rowQuantity, int interval, double maxAllowable, double weight, List<Map<String, Object>> recordsInTransaction)
+    {
+        // If provided, we inspect the other records in this transaction and add their values
+        // First determine which other records from this transaction should be considered
+        Set<String> ignoredObjectIds = new HashSet<>();
+
+        // All of the bloods that we need to consider
+        List<BloodInfo> allBloods = new ArrayList<>();
+
+        //NOTE: we expect this will not contain the current row, but check for it anyway
+        boolean foundRow = false;
+        if (recordsInTransaction != null)
+        {
+            for (Map<String, Object> origMap : recordsInTransaction)
+            {
+                Map<String, Object> map = new CaseInsensitiveHashMap<>(origMap);
+                if (!map.containsKey("date"))
+                {
+                    _log.warn("TriggerScriptHelper.verifyBloodVolume was passed a previous record lacking a date");
+                    continue;
+                }
+
+                try
+                {
+                    String objectId = ConvertHelper.convert(map.get("objectid"), String.class);
+                    if (objectId != null)
+                    {
+                        ignoredObjectIds.add(objectId);
+
+                        if (objectId.equalsIgnoreCase(rowObjectId))
+                        {
+                            foundRow = true;
+                        }
+                    }
+                    BloodInfo bloodsIntransc = new BloodInfo(objectId, ConvertHelper.convert(map.get("date"), Date.class), ConvertHelper.convert(map.get("quantity"), Double.class), true);
+                    allBloods.add(bloodsIntransc);
+                }
+                catch (ConversionException e)
+                {
+                    _log.error("TriggerScriptHelper.verifyBloodVolume was unable to parse date", e);
+                }
+            }
+        }
+
+        if (!foundRow)
+        {
+            ignoredObjectIds.add(rowObjectId);
+
+            //TODO: this needs to include the current volume
+        }
+
+        // Look forward and backward one interval for existing database records
+        Calendar intervalStart = Calendar.getInstance();
+        intervalStart.setTime(date);
+        intervalStart.add(Calendar.DATE, (-1 * interval));  //draws drop off on the morning of the nth date
+        intervalStart = DateUtils.truncate(intervalStart, Calendar.DATE);
+
+        Calendar intervalStop = Calendar.getInstance();
+        intervalStop.setTime(date);
+        intervalStop.add(Calendar.DATE, interval);
+        intervalStop = DateUtils.truncate(intervalStop, Calendar.DATE);
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), id);
+        filter.addCondition(FieldKey.fromString("date"), intervalStart, CompareType.DATE_GTE);
+        filter.addCondition(FieldKey.fromString("date"), intervalStop, CompareType.DATE_LTE);
+        filter.addCondition(FieldKey.fromString("quantity"), null, CompareType.NONBLANK);
+        filter.addCondition(FieldKey.fromString("countsAgainstVolume"), true);
+
+        // Don't pull database records that may be old versions of records that are changing in this transaction
+        if (ignoredObjectIds.size() > 0)
+        {
+            filter.addCondition(FieldKey.fromString("objectid"), ignoredObjectIds, CompareType.NOT_IN);
+        }
+
+        TableInfo ti = getTableInfo("study", "Blood Draws");
+
+        // Get records from the database in our date range that aren't part of the current transaction
+        TableSelector  bloodQuery = new TableSelector(ti, PageFlowUtil.set("objectid", "date", "quantity"), filter, null);
+        //get the db object
+        bloodQuery.forEach( rs -> {
+                    BloodInfo bi = new BloodInfo(rs.getString("objectid"), rs.getDate("date"), rs.getDouble("quantity"), false);
+                    allBloods.add(bi);
+                }
+        );
+
+        // Iterate over all of the blood records
+        TreeSet<Double> overages = new TreeSet<>();
+        TreeSet<Double> closeToThreshold = new TreeSet<>();
+        double bloodThreshold = 0;
+        for (BloodInfo blood1 : allBloods)
+        {
+            double bloodNextInterval = 0;
+            // only report overages that occur in the current transaction
+            boolean atLeastOneInTransaction = false;
+
+            // Find all of the other records within 30 days (looking forward only)
+            for (BloodInfo blood2 : allBloods)
+            {
+                if (blood1.getObjectId().equals(blood2.getObjectId()))
+                {
+                    // Be sure to count the record itself
+                    bloodNextInterval += blood1.getQuantity();
+                }
+                else
+                {
+                    if (blood1.countsAgainstInterval(blood2, interval))
+                    {
+                        bloodNextInterval += blood2.getQuantity();
+                    }
+                }
+            }
+
+            if (bloodNextInterval > maxAllowable)
+            {
+                overages.add(bloodNextInterval);
+            }
+            else
+            {
+                //only report about problematic bloods nearing the limit in the current transaction
+                //because allBloods contains everything and we want to distinguish them
+                if (blood1.getInTransaction())
+                {
+                    bloodThreshold =  getBloodNearingOveragesThreshold(id);
+                    double maxAllowableThreshold = maxAllowable - bloodThreshold;
+                    if (bloodNextInterval > maxAllowableThreshold)
+                    {
+                        closeToThreshold.add(bloodNextInterval);
+                    }
+                }
+            }
+        }
+
+        if (!overages.isEmpty() || !closeToThreshold.isEmpty())
+        {
+            StringBuilder errorMsgBuilder = new StringBuilder();
+
+            //always report the most severe overage
+            if (!overages.isEmpty())
+            {
+                errorMsgBuilder.append("Blood volume of ")
+                        .append(rowQuantity)
+                        .append(" (")
+                        .append(overages.descendingSet().iterator().next())
+                        .append(" over ")
+                        .append(interval)
+                        .append(" days) exceeds the allowable volume of ")
+                        .append(maxAllowable)
+                        .append(" mL (weight: ")
+                        .append(weight)
+                        .append(" kg).\n");
+            }
+
+            if (!closeToThreshold.isEmpty())
+            {
+                errorMsgBuilder.append("Limit notice! Blood volume of ")
+                        .append(rowQuantity)
+                        .append(" (")
+                        .append(closeToThreshold.descendingSet().iterator().next())
+                        .append(" over ")
+                        .append(interval)
+                        .append(" days) is within ")
+                        .append(bloodThreshold)
+                        .append(" mL of the max allowable limit of ")
+                        .append(maxAllowable)
+                        .append(" mL (weight: ")
+                        .append(weight)
+                        .append(" kg).\n");
+            }
+
+            return errorMsgBuilder.toString();
+        }
+        else
+        {
+            return null; // No errors
+        }
+    }
+
+    public String verifyBloodVolume(String id, Date date, List<Map<String, Object>> recordsInTransaction, List<Map<String, Object>> weightsInTransaction, String objectId, Double quantity)
+    {
+        if (id == null || date == null || quantity == null)
+            return null;
+
+        AnimalRecord ar = EHRDemographicsService.get().getAnimal(getContainer(), id);
+        if (ar == null)
+            return null;
+
+        String species = ar.getSpecies();
+        if (species == null)
+            return "Unknown species, unable to calculate allowable blood volume";
+
+        Double weight = extractWeightForId(id, weightsInTransaction);
+        if (weight == null)
+            weight = ar.getMostRecentWeight();
+
+        if (weight == null)
+            return "Unknown weight, unable to calculate allowable blood volume";
+
+        Map<String, Object> bloodBySpecies = getBloodForSpecies(species);
+        if (bloodBySpecies == null)
+            return "Unable to calculate allowable blood volume";
+
+        Double bloodPerKg = (Double)bloodBySpecies.get("blood_per_kg");
+        Number interval = (Number)bloodBySpecies.get("blood_draw_interval");
+        Double maxDrawPct = (Double)bloodBySpecies.get("max_draw_pct");
+        if (bloodPerKg == null || interval == null || maxDrawPct == null)
+            return "Unable to calculate allowable blood volume";
+
+        double maxAllowable = Math.round((weight * bloodPerKg * maxDrawPct) * 100) / 100.0;
+
+        return checkOtherDrawsQuantity(id, date, objectId, quantity, interval.intValue(), maxAllowable, weight.doubleValue(), recordsInTransaction);
     }
 }

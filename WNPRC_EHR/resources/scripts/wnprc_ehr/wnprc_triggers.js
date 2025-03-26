@@ -720,10 +720,6 @@ exports.init = function (EHR) {
     });*/
 
     EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'blood', function (event, helper) {
-        helper.setCenterCustomProps({
-            doWarnForBloodNearOverages: true,
-        })
-
         helper.setScriptOptions({
             defaultAllowedDaysForFutureRequest: 60,
         })
@@ -823,7 +819,7 @@ exports.init = function (EHR) {
 
                     if (row.objectid) {
                         try {
-                            var msg = helper.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
+                            var msg = WNPRCUtils.getJavaHelper().verifyBloodVolume(row.id, row.date, draws, weights, row.objectid || null, row.quantity);
                             if (msg != null) {
                                 if (msg.toLowerCase().indexOf('unknown weight') > -1) {
                                     volumeErrorSeverity = helper.getErrorSeverityForBloodDrawsWithoutWeight();

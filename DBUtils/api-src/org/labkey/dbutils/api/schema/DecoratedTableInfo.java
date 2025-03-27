@@ -90,7 +90,7 @@ public class DecoratedTableInfo implements TableInfo {
 
     @Nullable
     @Override
-    public String getMetaDataName() {
+    public DatabaseIdentifier getMetaDataName() {
         return _tableInfo.getMetaDataName();
     }
 

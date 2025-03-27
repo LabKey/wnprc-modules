@@ -235,30 +235,28 @@ echo
 echo -n "Preparing database for deployment ... "
 ${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d $dbname &>/dev/null <<- XXX
     update prop.properties p set value = 'https://$(hostname -f)' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
+    update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';
+    update prop.properties p set value = 'Nigthly-EHRServer' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemShortName';
+    update prop.properties p set value = 'EHR Development Server' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemDescription';
+    update prop.properties p set value = 'Harvest' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'themeName';
+    update prop.properties p set value = 'UA-12818769-2' where (select s.category from prop.propertysets s where s.set = p.set) = 'analytics' and p.name = 'accountId';
+    update prop.properties p set value = replace(Value, 'saimiri', 'colony-test') where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'jdbcUrl';
+    update prop.properties p set value = 0 where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'runIntervalInMinutes';
+    update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
+    update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
+    update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ehr.geneticcalculations' and p.name = 'enabled';
+    update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'ldk.ldapConfig' and p.name = 'enabled';
+    update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ldk.notifications.config' and p.name = 'serviceEnabled';
+    delete from prop.properties p where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ldk.notifications.status';
+    update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';
+    update exp.propertydescriptor set scale = 64 where name in ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
+    update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
+    delete from googledrive.service_accounts where id = '8c4a933c-2f8e-4094-9f43-46e80f14e163';
+    delete from ehr.notificationrecipients;
 XXX
-if [[ -z $prod ]]; then
-    ${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d $dbname &>/dev/null <<- XXX
-        update prop.properties p set value = 'http://localhost:8080' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
-        update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';
-        update prop.properties p set value = 'Nigthly-EHRServer' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemShortName';
-        update prop.properties p set value = 'EHR Development Server' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemDescription';
-        update prop.properties p set value = 'Harvest' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'themeName';
-        update prop.properties p set value = 'UA-12818769-2' where (select s.category from prop.propertysets s where s.set = p.set) = 'analytics' and p.name = 'accountId';
-        update prop.properties p set value = replace(Value, 'saimiri', 'colony-test') where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'jdbcUrl';
-        update prop.properties p set value = 0 where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'runIntervalInMinutes';
-        update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
-        update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
-        update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ehr.geneticcalculations' and p.name = 'enabled';
-        update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'ldk.ldapConfig' and p.name = 'enabled';
-        update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ldk.notifications.config' and p.name = 'serviceEnabled';
-        delete from prop.properties p where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ldk.notifications.status';
-        update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';
-        update exp.propertydescriptor set scale = 64 where name in ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
-        update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
-        delete from googledrive.service_accounts where id = '8c4a933c-2f8e-4094-9f43-46e80f14e163';
-        delete from ehr.notificationrecipients;
-XXX
-fi
+echo -e -n "\b\b\b\b\033[0;32mdone\033[0m"
+echo
+
 #-------------------------------------------------------------------------------
 # Updating Docker image
 #

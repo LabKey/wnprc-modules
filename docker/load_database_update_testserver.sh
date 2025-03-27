@@ -259,11 +259,14 @@ echo
 
 #-------------------------------------------------------------------------------
 # Updating Docker image
-#
+# Removing unused images in the system
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
   echo -n 'Updating Docker images from Docker Hub'
   docker pull wnprcehr/labkeysnapshot:24.11
+  echo -e '\033[0;32mdone\033[0m'
+  echo -n 'Removing unused images from the OS'
+  docker image prune -a -f
   echo -e '\033[0;32mdone\033[0m'
 fi
 

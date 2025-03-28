@@ -339,7 +339,8 @@
                             var eventObj = {
                                 title: row.animalid,
                                 start: row.date,
-                                rawRowData: row
+                                rawRowData: row,
+                                display: 'block'
                             };
 
                             if (row.location in necropsySuiteLookup) {

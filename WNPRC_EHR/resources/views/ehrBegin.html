@@ -123,7 +123,8 @@ function createNavMenu()
                 {name: 'Run SQL Directly', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/ehr-executeSql.view'},
                 {name: 'Search WNPRC SNOMED Codes', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr_lookups&query.queryName=snomed'},
                 {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/query-executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'},
-                {name: 'Gestational Day Calculator', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-gestation_calculator.view'}
+                {name: 'Gestational Day Calculator', url: '<%=contextPath%>' + ctx['EHRStudyContainer'] + '/wnprc_ehr-gestation_calculator.view'},
+                {name: 'Nightly-EHRTestServer', url:ctx['NightlyTestServer']}
             ]},
             {header: 'Data Entry',
             items: [

@@ -351,7 +351,7 @@
                     })
                 }}],
                 eventClick: function(calEvent, jsEvent, view) {
-                    jQuery.each(calEvent.event.extendedProps.rawRowDat, function(key, value) {
+                    jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {
                             if (key == "date") {
                                 value = displayDate(value);

@@ -12,8 +12,16 @@
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("fullcalendar");
+    }
+%>
 <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.css' />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.min.js'></script>
@@ -303,18 +311,27 @@
         var necropsySuiteLookup = <%=necropsySuiteLookup%>;
         WebUtils.VM.necropsySuiteLookup = necropsySuiteLookup;
 
+        debugger;
         var $calendar = $('#calendar');
         $(document).ready(function() {
-            $calendar.fullCalendar({
-                header: {
-                    left: 'prev,next today',
+            let calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                themeSystem: 'bootstrap',
+                height: 800,
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next,today',
                     center: 'title',
-                    right: 'month,agendaWeek'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                events: function(startMoment, endMoment, timezone, callback) {
+                eventSources: [{
+                events:  function (fetchInfo, callback) {
+                    console.log(" startStr " + fetchInfo.startStr);
+                    console.log(" endtStr " + moment(fetchInfo.startStr).format( "YYYY-MM-DD"));
+
                     WebUtils.API.selectRows("study", "Necropsy Schedule", {
-                        "date~gte": startMoment.format('Y-MM-DD'),
-                        "date~lte": endMoment.format('Y-MM-DD')
+                        "date~gte":  moment(fetchInfo.startStr).format( "YYYY-MM-DD"),
+                        "date~lte": moment(fetchInfo.endStr).format( "YYYY-MM-DD")
                     }).then(function(data) {
                         var events = data.rows;
 
@@ -332,9 +349,9 @@
                             return eventObj;
                         }))
                     })
-                },
+                }}],
                 eventClick: function(calEvent, jsEvent, view) {
-                    jQuery.each(calEvent.rawRowData, function(key, value) {
+                    jQuery.each(calEvent.event.extendedProps.rawRowDat, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {
                             if (key == "date") {
                                 value = displayDate(value);
@@ -343,7 +360,8 @@
                         }
                     });
                 }
-            })
+        },);
+            calendar.render()
         });
 
 

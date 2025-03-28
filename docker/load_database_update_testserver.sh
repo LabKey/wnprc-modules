@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+export $(grep -v '^#' .env | xargs)
 
 #-------------------------------------------------------------------------------
 # Read the named arguments (e.g., -f, -p) from the command line and replace the
@@ -263,7 +264,7 @@ echo
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then
   echo -n 'Updating Docker images from Docker Hub'
-  docker pull wnprcehr/labkeysnapshot:24.11
+  docker pull wnprcehr/labkeysnapshot:$LK_VERSION
   echo -e '\033[0;32mdone\033[0m'
 
 fi

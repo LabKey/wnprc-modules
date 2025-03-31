@@ -71,7 +71,8 @@
             });
         }
 
-        function calculateGestationDays() {
+        function calculateGestationDays(e) {
+            e.preventDefault();
             let species = document.getElementById("species_input").value;
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',

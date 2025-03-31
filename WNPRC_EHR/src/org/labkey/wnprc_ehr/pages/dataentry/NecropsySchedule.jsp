@@ -311,8 +311,6 @@
         var necropsySuiteLookup = <%=necropsySuiteLookup%>;
         WebUtils.VM.necropsySuiteLookup = necropsySuiteLookup;
 
-        debugger;
-        var $calendar = $('#calendar');
         $(document).ready(function() {
             let calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
@@ -661,6 +659,7 @@
                     rowsToUpdate[0] = rowsToUpdate[0].map(function(row) {
                         row.performedby = pathologistLookup[form.pathologist];
                         row.assistant   = pathologistLookup[form.assistant];
+                        row.location = form.location;
 
                         return row;
                     });

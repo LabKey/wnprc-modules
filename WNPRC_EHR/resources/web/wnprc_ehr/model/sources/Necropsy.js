@@ -366,7 +366,14 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
                     header: "#",
                     width: 45
                 }
-            }
+            },
+            stain: {
+                defaultValue: null,
+                editorConfig: {
+                    plugins: ['ldk-usereditablecombo']
+                },
+                shownInGrid: false
+            },
         },
         'study.histology': {
             Id: {

@@ -280,6 +280,22 @@ if [[ -z $dock ]]; then
 fi
 
 #-------------------------------------------------------------------------------
+# rsync the files folder from PrimateFS
+#
+#-------------------------------------------------------------------------------
+
+echo "$(date) files folder rsync started" >> /space/backups/scripts/rsync_status.log
+/usr/bin/rsync -avP --log-file=/space/backups/scripts/rsync_files.log --delete --max-delete=20 /mnt/IT-Backups/backups/ehr-prod/files/ /space/files/ && files_job=$?
+
+if [ "$files_job" != "0" ] ;
+then
+  echo "$(date) files folder rsync exit code "$files_job >> /space/backups/scripts/rsync_status.log
+else
+  echo "$(date) files folder rsync exit code "$files_job >> /space/backups/scripts/rsync_status.log
+  touch /space/backups/scripts/.files_backup
+fi
+
+#-------------------------------------------------------------------------------
 # Wait for the postgres instance to start accepting connections
 #-------------------------------------------------------------------------------
 if [[ -z $dock ]]; then

@@ -31,6 +31,21 @@ SELECT lsid
          THEN FALSE
          ELSE TRUE
        END                                                  AS has_tissues_for_wimr
+      ,CASE
+       WHEN hasTissuesForCcourt IS NULL
+         THEN FALSE
+         ELSE TRUE
+       END                                                  AS has_tissues_for_ccourt
+      ,CASE
+       WHEN hasTissuesForBmq IS NULL
+         THEN FALSE
+         ELSE TRUE
+       END                                                  AS has_tissues_for_bmq
+      ,CASE
+       WHEN hasTissuesForElements IS NULL
+         THEN FALSE
+         ELSE TRUE
+       END                                                  AS has_tissues_for_elements
       ,state
  FROM (SELECT taskid           AS lsid
              ,taskid.rowid     AS taskid
@@ -66,3 +81,21 @@ SELECT lsid
              WHERE ship_to = javaConstant('org.labkey.wnprc_ehr.schemas.SqlQueryReferencePoints.COURIER_TO_WIMR') -- 'COURIER_WIMR'
              GROUP BY taskid) wimr_tissues
    ON necropsy.lsid = wimr_tissues.taskid
+ LEFT JOIN (SELECT taskid
+                  ,TRUE AS hasTissuesForCcourt
+              FROM tissue_samples
+             WHERE ship_to = javaConstant('org.labkey.wnprc_ehr.schemas.SqlQueryReferencePoints.COURIER_TO_CCOURT') -- 'COURIER_WIMR'
+             GROUP BY taskid) ccourt_tissues
+   ON necropsy.lsid = ccourt_tissues.taskid
+ LEFT JOIN (SELECT taskid
+                  ,TRUE AS hasTissuesForBmq
+              FROM tissue_samples
+             WHERE ship_to = javaConstant('org.labkey.wnprc_ehr.schemas.SqlQueryReferencePoints.COURIER_TO_BMQ') -- 'COURIER_WIMR'
+             GROUP BY taskid) bmq_tissues
+   ON necropsy.lsid = bmq_tissues.taskid
+ LEFT JOIN (SELECT taskid
+                  ,TRUE AS hasTissuesForElements
+              FROM tissue_samples
+             WHERE ship_to = javaConstant('org.labkey.wnprc_ehr.schemas.SqlQueryReferencePoints.COURIER_TO_ELEMENTS') -- 'COURIER_WIMR'
+             GROUP BY taskid) elements_tissues
+   ON necropsy.lsid = elements_tissues.taskid

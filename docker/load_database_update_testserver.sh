@@ -285,7 +285,7 @@ fi
 #-------------------------------------------------------------------------------
 
 echo "$(date) files folder rsync started" >> /space/backups/scripts/rsync_status.log
-/usr/bin/rsync -avP --log-file=/space/backups/scripts/rsync_files.log --delete --max-delete=20 /mnt/IT-Backups/backups/ehr-prod/files/ /space/files/ && files_job=$?
+/usr/bin/rsync -avP --log-file=/space/backups/scripts/rsync_files.log --delete /mnt/IT-Backups/backups/ehr-prod/files/ $LK_FILES_DIR && files_job=$?
 
 if [ "$files_job" != "0" ] ;
 then

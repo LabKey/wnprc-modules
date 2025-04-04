@@ -2,9 +2,9 @@ ARG R_VERSION=4.4.1
 FROM eclipse-temurin:17-jre-jammy
 
 # Set noninteractive mode for apt-get
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV LANG en_US.utf8
+ENV LANG=en_US.utf8
 
 # Adding various application to download packages to install Postgres 15 and CRAN-R
 RUN apt-get update \

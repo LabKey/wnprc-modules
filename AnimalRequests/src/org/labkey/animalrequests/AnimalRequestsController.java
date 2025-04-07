@@ -1,12 +1,6 @@
 package org.labkey.animalrequests;
 
-import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.security.RequiresLogin;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
-import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
 
 public class AnimalRequestsController extends SpringActionController
 {
@@ -17,20 +11,4 @@ public class AnimalRequestsController extends SpringActionController
     {
         setActionResolver(_actionResolver);
     }
-
-    @RequiresLogin
-    public class BeginAction extends SimpleViewAction
-    {
-        @Override
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            return new JspView<>("/org/labkey/animalrequests/view/begin.jsp");
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-        }
-    }
-
 }

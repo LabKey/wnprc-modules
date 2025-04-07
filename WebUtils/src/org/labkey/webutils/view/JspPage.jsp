@@ -12,7 +12,7 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspPage view = (JspPage) HttpView.currentView();
+    JspPage view = HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
     Integer numberOfRenders = view.getNumberOfRenders();
     JSONArray unBindComponents = view.getUnbindComponents();

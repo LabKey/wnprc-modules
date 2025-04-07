@@ -65,6 +65,9 @@ echo -e "TEAMCTY_URL "${Z}
 echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
+# Defining new docker driver to use arm64
+docker buildx create --name=container  
+
 if [[ -z $IMAGE_NAME ]]
 then  
   IMAGE_NAME=${GRADLE_IMAGE}

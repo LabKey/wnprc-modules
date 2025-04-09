@@ -91,8 +91,8 @@ public class DecoratedTableInfo implements TableInfo {
 
     @Nullable
     @Override
-    public DatabaseIdentifier getMetaDataName() {
-        return _tableInfo.getMetaDataName();
+    public DatabaseIdentifier getMetaDataIdentifier() {
+        return _tableInfo.getMetaDataIdentifier();
     }
 
     @NotNull

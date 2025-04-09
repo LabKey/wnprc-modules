@@ -672,7 +672,7 @@
                     ]);
                 }).then(function() {
                     // Refresh the calendar view.
-                    $calendar.fullCalendar('refetchEvents');
+                    calendar.refetchEvents();
 
                     WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
 

@@ -50,7 +50,7 @@ import org.labkey.api.study.StudyService;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
-import org.labkey.api.util.Link;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -178,7 +178,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         url.addParameter("formtype", formType);
                         url.addParameter("taskid", taskId);
 
-                        out.write(new Link.LinkBuilder(HtmlString.of(rowId)).href(url).clearClasses());
+                        out.write(new LinkBuilder(HtmlString.of(rowId)).href(url).clearClasses());
                     } else {
                         super.renderGridCellContents(ctx, out);
                     }
@@ -213,7 +213,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             url.addParameter("formType", formType);
                             url.addParameter("taskid", taskId);
 
-                            out.write(new Link.LinkBuilder(updateTitle).href(url).clearClasses());
+                            out.write(new LinkBuilder(updateTitle).href(url).clearClasses());
                         }
                         else
                         {

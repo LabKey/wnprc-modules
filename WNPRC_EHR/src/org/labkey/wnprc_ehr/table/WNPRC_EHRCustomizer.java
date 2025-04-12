@@ -213,7 +213,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             url.addParameter("formType", formType);
                             url.addParameter("taskid", taskId);
 
-                            out.write(new LinkBuilder(updateTitle).href(url).clearClasses());
+                            out.write(LinkBuilder.simpleLink(updateTitle, url));
                         }
                         else
                         {

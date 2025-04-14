@@ -3,6 +3,7 @@
 
 # whitelist the following files:
 !install.r
+!download.r
 !netrc
 !pipelineConfig.xml
 !setenv.sh

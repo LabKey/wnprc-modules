@@ -6,6 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ENV LANG=en_US.utf8
 
+ARG BUILDARCH
+
 # Adding various application to download packages to install Postgres 15 and CRAN-R
 RUN apt-get update \
     && apt-get -qq install --download-only -y   lsb-release \
@@ -35,7 +37,8 @@ RUN apt-get update \
 # https://phoenixnap.com/kb/install-r-ubuntu
 #RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 #RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-arm64-latest.tar.gz | tar xz -C /usr/local
+RUN ["sh", "-c", "echo  hello architecture  ${BUILDARCH}"] 
+RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-${BUILDARCH}-latest.tar.gz | tar xz -C /usr/local
 
 RUN rig add 4.4.1
 RUN rig default 4.4.1
@@ -54,6 +57,7 @@ ARG R_VERSION=4.4.1
 
 FROM eclipse-temurin:17-jre-jammy
 
+ARG BUILDARCH
 COPY --from=download /var/cache/apt/archives /var/cache/apt/archives
 
 COPY --from=download /tmp/rdownload/ /tmp/rdownload/
@@ -102,7 +106,7 @@ RUN apt update
 # https://phoenixnap.com/kb/install-r-ubuntu
 #RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 #RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-arm64-latest.tar.gz | tar xz -C /usr/local
+RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-${BUILDARCH}-latest.tar.gz | tar xz -C /usr/local
 
 RUN rig add 4.4.1
 RUN rig default 4.4.1

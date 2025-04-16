@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
 import {
-    Cage,
-    LayoutHistoryData,
+    Cage, CageNumber, DefaultRackId,
+    LayoutHistoryData, LocationCoords,
     Rack,
     RackGroup,
-    RackStringType,
+    RackStringType, RealRackId,
     Room,
     RoomItemClass,
     RoomItemType,
@@ -19,6 +19,7 @@ import {
 } from './layoutEditorTypes';
 import * as d3 from 'd3';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { Direction } from './homeTypes';
 
 export interface LayoutContextProps {
     children: ReactNode;
@@ -39,7 +40,7 @@ export interface LayoutContextType {
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
-    doRackAction: (action: RackActions, targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
+    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageNumber, dragCageNum: CageNumber, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     getNextCageNum: (rackType: RackStringType) => number;
     selectedObj: SelectedObj;
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
@@ -50,4 +51,7 @@ export interface LayoutContextType {
     changeRack: (newType: {value: string, label: string}) => Promise<string>;
     clearGrid: () => void;
     user: GetUserPermissionsResponse;
+    getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];
+    reloadRoom: Room,
+    setReloadRoom: React.Dispatch<React.SetStateAction<Room>>,
 }

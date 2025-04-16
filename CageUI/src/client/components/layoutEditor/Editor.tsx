@@ -9,11 +9,9 @@ import { RoomItemTemplate } from './RoomItemTemplate';
 import {
     Cage,
     CageNumber,
-    CELL_SIZE,
     Rack,
     RackGroup,
     RackStringType,
-    RackTypes,
     RoomItemType,
     RoomObject,
     RoomObjectTypes,
@@ -22,7 +20,6 @@ import {
 import {
     CageActionProps,
     DeleteActions,
-    LayoutDragProps,
     LayoutSaveResult,
     MergeProps,
     PendingRoomUpdate
@@ -51,8 +48,7 @@ import {
     updateBorderSize,
 } from '../../utils/LayoutEditorHelpers';
 import {
-    addPrevRoomSvgs,
-    parseLongId,
+    addPrevRoomSvgs, getNextDefaultRackId,
     parseRoomItemNum,
     parseRoomItemType,
     roomItemToString,
@@ -66,19 +62,14 @@ import { EditorContextMenu } from './EditorContextMenu';
 import { GateChangeRoom } from './GateChangeRoom';
 import { TextInput } from '../TextInput';
 import { GateSwitch } from './GateSwitch';
+import { CELL_SIZE, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
+import { Direction } from '../../types/homeTypes';
 
 interface EditorProps {
     roomSize: SelectorOptions
 }
 
 const Editor: FC<EditorProps> = ({roomSize}) => {
-    const SVG_WIDTH = 1290; // starting pixel width of the layout svg
-    const SVG_HEIGHT = 810; // starting pixel height of the layout svg
-
-    // number of cells in grid width/height, based off scale
-    const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
-    const gridHeight = Math.ceil(SVG_HEIGHT / roomSize.scale / CELL_SIZE);
-
     const utilsRef = useRef(null);
     const borderRef = useRef(null);
     const dragLockRef = useRef(false); // ref that helps ensure very fast drag actions don't crash
@@ -100,7 +91,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
     const [templateRename, setTemplateRename] = useState<boolean>(false);
-    const [defaultRackCounter, setDefaultRackCounter] = useState<number>(1);
+
+    // number of cells in grid width/height, based off scale
+    const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
+    const gridHeight = Math.ceil(SVG_HEIGHT / roomSize.scale / CELL_SIZE);
 
     const {
         localRoom,
@@ -122,16 +116,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         changeRack,
         clearGrid,
         delObject,
-        user
+        user,
+        reloadRoom,
+        setReloadRoom
     } = useLayoutEditorContext();
 
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
-
-    useEffect(() => {
-        console.log("Room: ", localRoom);
-        console.log("Locs: ", unitLocs);
-    }, [unitLocs, localRoom]);
 
     // Create a zoom behavior, prevent scale from changing
     const zoom = d3.zoom()
@@ -292,8 +283,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             let newId: string;
 
             if(isRackEnum(updateItemType)){
-                newId = `default-rack-${defaultRackCounter}`;
-                setDefaultRackCounter(prevState => prevState + 1);
+                newId = getNextDefaultRackId(localRoom.rackGroups);
             }else{
                 // get new id for room object
                 const tempId = localRoom.objects.reduce((max, obj) => {
@@ -374,6 +364,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
 
         let mergeAvail: boolean = false;
+        let direction: Direction;
         let targetCageLoc;
         let draggedCageLoc;
 
@@ -419,7 +410,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                             const {cage: draggedCage} = findCageInGroup(dragLoc.num, localRoom.rackGroups);
                             const {cage: targetCage} = findCageInGroup(targetLoc.num, localRoom.rackGroups);
 
-                            mergeAvail = checkAdjacent(targetLoc, dragLoc, draggedCage.size, targetCage.size, CELL_SIZE);
+                            const adj = checkAdjacent(targetLoc, dragLoc, draggedCage.size,targetCage.size);
+                            mergeAvail = adj.isAdjacent
+                            direction = adj.direction as Direction;
+
                             if(mergeAvail){
                                 targetCageLoc = targetLoc;
                                 draggedCageLoc = dragLoc;
@@ -460,8 +454,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     if(inSameRack) {
                         return;
                     }
-
-                    mergeAvail = checkAdjacent(targetLoc, draggedCageLoc, draggedCage.size,targetCage.size, CELL_SIZE);
+                    const adj = checkAdjacent(targetLoc, draggedCageLoc, draggedCage.size,targetCage.size);
+                    mergeAvail = adj.isAdjacent
+                    direction = adj.direction as Direction;
                     if(mergeAvail){
                         targetCageLoc = targetLoc;
                     }
@@ -485,17 +480,20 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 setSelectedObj: setSelectedObj,
                 setCtxMenuStyle: setCtxMenuStyle,
             }
+
             const mergeProps: MergeProps = {
                 contextMenuRef: contextMenuRef,
                 targetRack,
+                targetCageNum: targetCageLoc.num,
                 draggedRack,
+                dragCageNum: draggedCageLoc.num,
                 targetRackGroup,
                 dragRackGroup: draggedRackGroup,
                 doRackAction,
                 layoutDrag: closeMenuThenDrag,
                 cageActionProps
             };
-            mergeRacks(mergeProps);
+            mergeRacks(mergeProps)
         }
         setSelectedObj(null);
     }, [unitLocs]);
@@ -598,11 +596,30 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         zoomToScale(roomSize.scale);
 
         if(localRoom.rackGroups.length > 0 || localRoom.objects.length > 0){
-            addPrevRoomSvgs('edit', localRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle, contextMenuRef);
+            setReloadRoom(localRoom);
         }
 
         setBorderSetup(false);
     }, [borderSetup]);
+
+
+    // reloads room svgs with updated state.
+    useEffect(() => {
+        if(!reloadRoom) return;
+        // clears grid
+        d3.select('#layout-svg').selectAll(':scope > g').each(function(d, i) {
+            // 'this' refers to the current DOM element
+            const element = d3.select(this) as  d3.Selection<SVGGElement, {}, null, undefined>;
+            if(element.node().id.includes("layout")){
+                return;
+            }else{
+                element.remove();
+            }
+        })
+        // loads grid with new room
+        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle, contextMenuRef);
+        setReloadRoom(null);
+    }, [reloadRoom]);
 
     // Effect attaches an observer to the border_template svg. after it is injected into the dom it will run
     // the function borderInject to set the state for border setup
@@ -674,69 +691,23 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         const cagesToDelete: string = type === "rack" ? localRack.cages.map((cage) => cage.cageNum).join(", ") : localCage.cageNum;
         showLayoutEditorConfirmation(`Are you sure you want to delete ${cagesToDelete}`).then((r) => {
             if(r){
-                let svgToRemove;
                 let deleteAction: DeleteActions;
-                let newSvgGroup;
-                let newRackType: RackStringType;
                 if(localRack.cages.length === 1){// one cage in rack, delete rack element
                     if(localGroup.racks.length === 1){// not in a rack group element
-                        svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
                         deleteAction = 'group'; // this is group, if one cage, is in one rack, in one group
                     } else if (localGroup.racks.length === 2){ // in a rack group element, pull other rack out of group element into rack element
-                        const rackToSave: Rack = localGroup.racks.find((rack) => rack.itemId !== localRack.itemId);
-                        const rackSvg = layoutSvg.select(`#${rackToSave.itemId}`);
-                        const newX = rackToSave.x + localGroup.x;
-                        const newY = rackToSave.y + localGroup.y;
-                        svgToRemove = layoutSvg.select(`#${localGroup.groupId}`);
                         deleteAction = 'rack';
-                        newRackType = roomItemToString(rackToSave.type.type) as RackStringType;
-                        newSvgGroup = layoutSvg.append(() => rackSvg.node())
-                            .classed('draggable', true);
-                        placeAndScaleGroup(newSvgGroup, newX, newY, zoomTransform(layoutSvg.node()));
                     }else{ // in a rack group element, no need to pull out other racks since there is still enough to make a group
-                        svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
                         deleteAction = 'rack';
                     }
                 }else if(type === 'rack') {
-                    svgToRemove = layoutSvg.select(`#${localRack.itemId}`);
                     if(localGroup.racks.length === 1){
                         deleteAction = 'group';
                     }else{
                         deleteAction = 'rack';
                     }
                 }else{ // multiple cages in rack, delete cage element
-                    svgToRemove = layoutSvg.select(`#${localCage.cageNum}`);
                     deleteAction = 'cage';
-                }
-
-                // reattach listeners if new svg group was created
-                if(newSvgGroup){
-                    const addProps: LayoutDragProps = {
-                        gridSize: CELL_SIZE,
-                        moveItem: moveObjLocation
-                    };
-                    newSvgGroup.call(closeMenuThenDrag);
-                    // attach click listener for context menu
-                    newSvgGroup.selectAll('text').each(function () {
-                        const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
-                        const cageGroupElement = textElement.closest(`[id^=${newRackType}]`) as SVGGElement;
-
-                        setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, contextMenuRef, newRackType);
-                    });
-                }
-                svgToRemove.remove();
-                if(localRack.type.isDefault && deleteAction === 'rack'){
-                    setDefaultRackCounter(prevState => prevState - 1);
-                }else if(deleteAction === 'group'){
-                    let tempRacksNum = defaultRackCounter;
-                    for (const rack of localGroup.racks) {
-                        if(rack.type.isDefault){
-                            tempRacksNum--;
-                        }
-                    }
-                    if(tempRacksNum !== defaultRackCounter){
-                        setDefaultRackCounter(tempRacksNum)
-                    }
                 }
                 delCage(localCage, localRack, localGroup, deleteAction);
                 setShowCageContextMenu(false);
@@ -771,7 +742,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 element.remove();
             }
         })
-        setDefaultRackCounter(1);
     }
 
     const handleSave = async () => {
@@ -814,9 +784,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         const result: string = await changeRack(newType);
         const {rack: currRack} = findCageInGroup((selectedObj as Cage).cageNum, localRoom.rackGroups);
         const idToChange = currRack.itemId;
-        if(result && currRack.type.isDefault){
-            setDefaultRackCounter(prevState => prevState - 1);
-        }
         if(result){
             layoutSvg.select(`#${idToChange}`).attr("id", result);
         }

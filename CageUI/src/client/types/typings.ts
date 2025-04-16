@@ -9,7 +9,6 @@ import { ExtraContext, GateContext } from './layoutEditorTypes';
    RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types.
  */
 
-export const CELL_SIZE = 30; // number of pixels of a cell for length/width
 
 // used in ehr to determine if the rack is default (doesn't have a rackid)
 export enum DefaultRackTypes {
@@ -64,7 +63,16 @@ export interface Cage {
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
     size: number; // length in cells of cage square of svg image
+//    adjCages: AdjCages;
     extraContext?:  {[key: string]: any}; // extra context if needed for cage
+}
+
+// with respect to the "front" of the cage
+export interface AdjCages {
+    leftCage: Cage[];
+    rightCage: Cage[];
+    floorCage: Cage[];
+    ceilingCage: Cage[];
 }
 
 export interface Room {

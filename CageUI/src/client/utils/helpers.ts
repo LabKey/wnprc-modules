@@ -91,12 +91,40 @@ export const parseLongId = (input: string) => {
     return;
 }
 
+export const parseLongDefaultId = (id: string): number => {
+    if (!id.startsWith("default-rack-")) return 0; // Skip non-default IDs
+    const numberPart = id.split('-')[2]; // Extract the number part
+    return parseInt(numberPart, 10) || 0; // Fallback to 0 if invalid
+}
+
 export const parseSeparator = (input: string): string | null => {
     const match = input.match(/^([^-]+)/); // matches and returns out the first word before a "-"
     return match ? match[0] : null;
 }
 
+export const getNextDefaultRackId = (groups: RackGroup[]): string => {
+    // Extract & parse only "default-rack-*" IDs
+    const allRackNumbers = groups
+        .flatMap(group =>
+            group.racks
+                .map(rack => parseLongDefaultId(rack.itemId))
+                .filter(num => num > 0) // Only keep valid default-rack numbers
+        )
+        .sort((a, b) => a - b); // Sort ascending
 
+    // Find the first missing number (starting from 1)
+    let expectedNumber = 1;
+    for (const num of allRackNumbers) {
+        if (num > expectedNumber) {
+            // Gap found! Use the missing number
+            return `default-rack-${expectedNumber}`;
+        }
+        expectedNumber = num + 1;
+    }
+
+    // No gaps? Use the next number after the max
+    return `default-rack-${expectedNumber}`;
+}
 export const convertToTitleCase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }

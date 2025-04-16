@@ -45,6 +45,8 @@ import { MutableRefObject } from 'react';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter, Security } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { Direction } from '../types/homeTypes';
+import { CELL_SIZE } from './constants';
 
 
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
@@ -357,9 +359,11 @@ export async function mergeRacks(props: MergeProps) {
         dragRackGroup,
         doRackAction,
         layoutDrag,
-        cageActionProps
+        cageActionProps,
+        dragCageNum,
+        targetCageNum
     } = props;
-    if(!d3.select('.popup').empty()) return;
+    if(!d3.select('.popup').empty()) return false;
     const action: RackActions = await showConfirmationPopup();
     const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
 
@@ -510,28 +514,63 @@ export async function mergeRacks(props: MergeProps) {
 
         newGroup.call(layoutDrag);
 
-        doRackAction(action,targetRackId, draggedRackId, newGroup);
+        doRackAction(action,targetRackId, draggedRackId, targetCageNum, dragCageNum, newGroup);
 
         // Remove the original shapes from the DOM
         targetRackShape.remove();
         draggedRackShape.remove();
+
+        return true;
+    }else{
+        return false;
+    }
+}
+
+
+export const getAdjDirection = (
+    draggedX,
+    draggedY,
+    targetX,
+    targetY,
+    draggedWidth,
+    draggedHeight,
+    targetWidth,
+    targetHeight): Direction => {
+
+    // Check right side of A to left side of B
+    if (draggedX + draggedWidth === targetX) {
+        return "right";
+    }
+
+    // Check left side of A to right side of B
+    if (draggedX === targetX + targetWidth) {
+        return "left";
+    }
+
+    // Check bottom side of A to top side of B
+    if (draggedY + draggedHeight === targetY) {
+        return "below";
+    }
+
+    // Check top side of A to bottom side of B
+    if (draggedY === targetY + targetHeight) {
+        return "above";
     }
 }
 
 // This checks the adjacency of two racks to determine if they can be merged
-export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationCoords, draggedSize: number, targetSize: number, cellSize: number) {
+export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationCoords, draggedSize: number, targetSize: number) {
 
     const targetX = targetCage.cellX;
     const targetY = targetCage.cellY;
     const draggedX  = draggedCage.cellX;
     const draggedY = draggedCage.cellY;
-    let isAdjacent = false;
 
     // Calculate widths and heights in pixels
-    const draggedWidth = draggedSize * cellSize;
-    const draggedHeight = draggedSize * cellSize;
-    const targetWidth = targetSize * cellSize;
-    const targetHeight = targetSize * cellSize;
+    const draggedWidth = draggedSize * CELL_SIZE;
+    const draggedHeight = draggedSize * CELL_SIZE;
+    const targetWidth = targetSize * CELL_SIZE;
+    const targetHeight = targetSize * CELL_SIZE;
 
     // Calculate corners of the dragged square
     const draggedCorners = [
@@ -554,53 +593,54 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
 
      */
     const checkBounds = (corner) => {
-        let valid = true;
+        let valid = false;
 
         if(corner === 0){ // top left corner match of drag cage
             if(draggedCorners[corner].x === targetCorners[3].x && draggedCorners[corner].y === targetCorners[3].y){
-                valid = false;
+                valid = true;
             }
 
         }else if(corner === 1){ // top right corner match of drag cage
             if(draggedCorners[corner].x === targetCorners[2].x && draggedCorners[corner].y === targetCorners[2].y){
-                valid = false;
+                valid = true;
             }
         }else if(corner === 2){ // bottom left corner match of drag cage
             if(draggedCorners[corner].x === targetCorners[1].x && draggedCorners[corner].y === targetCorners[1].y){
-                valid = false;
+                valid = true;
             }
         }else if(corner === 3){ // bottom right corner match of drag cage
             if(draggedCorners[corner].x === targetCorners[0].x && draggedCorners[corner].y === targetCorners[0].y){
-                valid = false;
+                valid = true;
             }
         }
 
         return valid;
     }
+
     // Check if any corner of the dragged square matches any corner of the target square with a matching side.
     for (let i = 0; i < draggedCorners.length; i++) {
-        if(isAdjacent === true) continue;
         for (let j = 0; j < targetCorners.length; j++) {
-            if(isAdjacent === true) continue;
             if (draggedCorners[i].x === targetCorners[j].x && draggedCorners[i].y === targetCorners[j].y) {
-                if(!checkBounds(i)){
+                if(checkBounds(i)){
                     continue;
                 }
+                const direction = getAdjDirection(draggedX, draggedY, targetX, targetY, draggedWidth, draggedHeight, targetWidth, targetHeight);
+
                 // Determine the direction of adjacency based on the matching corner
                 if (draggedCorners[i].x === draggedX && draggedCorners[i].y === draggedY) {
-                    isAdjacent = true;
+                    return {isAdjacent: true, direction: direction};
                 } else if (draggedCorners[i].x === draggedX + draggedWidth && draggedCorners[i].y === draggedY) {
-                    isAdjacent = true;
+                    return {isAdjacent: true, direction: direction};
                 } else if (draggedCorners[i].x === draggedX && draggedCorners[i].y === draggedY + draggedHeight) {
-                    isAdjacent = true;
+                    return {isAdjacent: true, direction: direction};
                 } else if (draggedCorners[i].x === draggedX + draggedWidth && draggedCorners[i].y === draggedY + draggedHeight) {
-                    isAdjacent = true;
+                    return {isAdjacent: true, direction: direction};
                 }
             }
         }
     }
 
-    return isAdjacent;
+    return {isAdjacent: false, direction: "0"};
 }
 
 //Offset for the top left corner of the layout, without doing this objects will randomly jump when dragging and placing
@@ -910,7 +950,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             id: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
-            size: svgSize,
+            size: svgSize
         }
         rack.cages.push(cage);
     }

@@ -23,15 +23,6 @@ export type LoadedRooms = {
     [key: string]: { loaded: boolean, room?: Room };
 }
 
-
-
-export interface ExtendedCage extends Partial<Cage> {
-    top: Cage,
-    bot: Cage,
-    right: Cage,
-    left: Cage
-}
-
 export interface SelectedPage {
     selected: SelectedViews
     room?: string;
@@ -54,12 +45,7 @@ export interface ListRoom {
 }
 
 
-export interface AdjCages {
-    leftCage: Cage | undefined;
-    rightCage: Cage | undefined;
-    floorCage: Cage | undefined;
-    ceilingCage: Cage | undefined;
-}
+
 
 export interface CageState {
     leftDivider: {modData: SeparatorMod} | undefined;

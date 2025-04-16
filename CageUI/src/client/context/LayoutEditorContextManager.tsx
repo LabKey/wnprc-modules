@@ -58,7 +58,6 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import { labkeyActionSelectWithPromise, labkeySaveRows, } from '../api/labkeyActions';
-import { Direction } from '../types/homeTypes';
 import { CELL_SIZE } from '../utils/constants';
 
 const LayoutEditorContext = createContext<LayoutContextType | null>(null);
@@ -354,65 +353,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         };
         return true;
     };
-    /*
-    const setCageDirection = (dragNum: CageNumber, targetNum: CageNumber, direction: Direction) => {
-        // find the key for the direction on both cages
-        let dragKey;
-        let targetKey;
-        switch (direction) {
-            case 'above':
-                dragKey = "ceilingCage";
-                targetKey = "floorCage";
-                break;
-            case 'below':
-                dragKey = "floorCage";
-                targetKey = "ceilingCage";
-                break;
-            case 'right':
-                dragKey = "rightCage";
-                targetKey = "leftCage";
-                break;
-            case 'left':
-                dragKey = "leftCage";
-                targetKey =
-                    "rightCage";
-                break;
-        }
-        setLocalRoom(prevRoom => {
-            return {
-                ...prevRoom,
-                rackGroups: prevRoom.rackGroups.map((group) => ({
-                    ...group,
-                    racks: group.racks.map((rack) => ({
-                        ...rack,
-                        cages: rack.cages.map((cage) => {
-                            console.log(cage.adjCages[dragKey]);
-                            console.log(cage.adjCages[targetKey]);
-                            if(cage.cageNum === dragNum) {
-                                return {
-                                    ...cage,
-                                    adjCages:{
-                                        ...cage.adjCages,
-                                        [dragKey]: [...cage.adjCages[dragKey], findCageInGroup(targetNum, localRoom.rackGroups).cage]
-                                    }
-                                }
-                            }else if(cage.cageNum === targetNum){
-                                return {
-                                    ...cage,
-                                    adjCages: {
-                                        ...cage.adjCages,
-                                        [targetKey]: [...cage.adjCages[targetKey], findCageInGroup(dragNum, localRoom.rackGroups).cage]
-                                    }                                 }
-                            }else{
-                                return cage;
-                            }
-                        })
-                    }))
-                }))
-            }
-        })
-    }
-*/
+
     const mergeLocalRacks = (newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, targetCageNum, dragCageNum) => {
 
         setLocalRoom(prevRoom => {
@@ -906,7 +847,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                 // Case 1: Cages from multiple racks → split racks
                 if (componentRacks.length > 1) {
-                    console.log("Case 1");
                     newRacks.push(...componentRacks.map(r => ({
                         ...r,
                         x: (affectedGroup.x + r.x) - minX,
@@ -921,7 +861,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 }
                 // Case 2: Multiple cages in same rack → split into new racks
                 else if (componentRacks[0].cages.length > 1) {
-                    console.log("Case 2")
                     const newCages: Cage[] = [];
                     for (let j = 0; j < absoluteCagePositions.length; j++) {
                         newCages.push({
@@ -941,7 +880,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 }
                 // Case 3: Single cage → keep as is
                 else {
-                    console.log("Case 3");
                     newRacks.push({
                         ...componentRacks[0],
                         x: (affectedGroup.x + componentRacks[0].x) - minX,
@@ -1322,6 +1260,29 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             };
         }
     }
+
+    useEffect(() => {
+        if(!prevRoom) {
+            return;
+        }
+
+        let lastGroup: GroupId;
+
+        if(prevRoom.room.rackGroups.length !== 0){
+            lastGroup = prevRoom.room.rackGroups[prevRoom.room.rackGroups.length - 1].groupId;
+        }
+        if (lastGroup){
+            setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
+        }else{
+            setNextAvailGroup(`rack-group-1`);
+        }
+        if(prevRoom.locs) {
+            setUnitLocs(prevRoom.locs);
+        }
+        setLocalRoom(prevRoom.room);
+        setRoom(prevRoom.room);
+        setIsLoading(false);
+    }, [prevRoom]);
 
     return (
         <LayoutEditorContext.Provider value={{

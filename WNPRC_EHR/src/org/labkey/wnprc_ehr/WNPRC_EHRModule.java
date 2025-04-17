@@ -391,6 +391,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new ColonyManagementNotificationRevamp(this),
                 new ColonyAlertsLiteNotificationRevamp(this),
                 new BloodOverdrawTriggerNotification(this),
+                new NecropsyEditRequestNotification(this),
                 new EmptyNotificationRevamp(this),
                 new AnimalRequestUpdateNotificationRevamp(this),
                 new TreatmentAlertsNotificationRevamp(this),

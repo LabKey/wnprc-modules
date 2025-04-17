@@ -114,6 +114,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
+import org.labkey.wnprc_ehr.notification.NecropsyEditRequestNotification;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
@@ -2313,6 +2314,67 @@ public class WNPRC_EHRController extends SpringActionController
 
             return response;
 
+        }
+    }
+
+    public static class NecropsyEditRequestNotificationForm
+    {
+        private String _message;
+        private String _animalId;
+        private String _requestId;
+
+        public String getMessage()
+        {
+            return _message;
+        }
+
+        public void setMessage(String message)
+        {
+            _message = message;
+        }
+
+        public String getAnimalId()
+        {
+            return _animalId;
+        }
+
+        public void setAnimalId(String animalId)
+        {
+            _animalId = animalId;
+        }
+
+        public String getRequestId()
+        {
+            return _requestId;
+        }
+
+        public void setRequestId(String requestId)
+        {
+            _requestId = requestId;
+        }
+    }
+
+
+    @ActionNames("SendNecropsyEditRequestNotification")
+    @RequiresNoPermission()
+    @RequiresLogin
+    public static class SendNecropsyEditRequestNotificationAction extends MutatingApiAction<NecropsyEditRequestNotificationForm>
+    {
+
+        @Override
+        public Object execute(NecropsyEditRequestNotificationForm form, BindException errors) throws Exception
+        {
+
+            String message = form.getMessage();
+            String animalId = form.getAnimalId();
+            String requestId = form.getRequestId();
+
+            Module WNPRC_EHRModule = ModuleLoader.getInstance().getModule("WNPRC_EHR");
+            NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId);
+            editRequestNotification.sendManually(getContainer(),getUser());
+
+
+            return null;
         }
     }
 

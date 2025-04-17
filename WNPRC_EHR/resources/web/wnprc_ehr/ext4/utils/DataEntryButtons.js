@@ -534,6 +534,103 @@
             return true;
         }
     });
+    registerBtn('SEND_BACK_TO_REQUESTOR', {
+        text:           'Request changes from requester',
+        requiredQC:     'In Progress',
+        targetQC:       'Request: On Hold',
+        errorThreshold: 'INFO',
+        successURL:     false,
+        disabled:       false,
+        //disabled:       this.storeCollection.getServerStoreForQuery("study", "Necropsy").getAt(0).getData().requestid == '',
+        disableOn:      'ERROR',
+        tooltip:        "This starts the task and inserts into or updates either the Prenatal Deaths or the regular Deaths table with information from the necropsy.  The insertion will cause any assigned treatments, housing, etc. to be closed, and will send a Death Notification email out.",
+        handler: function(btn) {
+            //var taskDataEntryPanel
+            var storeCollection = this.storeCollection;
+            var necropsyStore = storeCollection.getServerStoreForQuery("study", "Necropsy");
+            var necropsyRecord = necropsyStore.getAt(0).getData();
+            var requestId = necropsyRecord.requestid;
+            var animalId = necropsyRecord.id;
+            this.saveRecords(btn).then(function() {
+                //window.location.reload();
+                new Ext4.Window({
+                    title: 'Send email to requester',
+                    closeAction: 'destroy',
+                    width: 400,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        ref: 'theForm',
+                        bodyStyle: 'padding: 5px;',
+                        items: [{
+                            xtype: 'textarea',
+                            fieldLabel: 'Message',
+                            id: 'message-field',
+                            width: 350,
+                            autoHeight: true,
+                            ref: 'message'
+                        },
+                            {xtype: 'combo',
+                                allowBlank: false,
+                                lookup: {
+                                    schemaName: 'core',
+                                    queryName: 'PrincipalsWithoutAdmin',
+                                    columns: 'UserId,DisplayName',
+                                    sort: 'Type,DisplayName',
+                                    displayColumn: 'DisplayName',
+                                }
+                },
+
+
+                        ]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
+                            var message = form.getForm().findField('message-field').getValue();
+                           // var necropsyStore = taskDataEntryPanel.storeCollection.getServerStoreForQuery('study', 'necropsy');
+                            //var necropsyRecord = _.isDefined(necropsyStore) ? necropsyStore.getAt(0) : undefined;
+                            var Id;
+
+                            debugger;
+                            //var id = form.getForm().findField('Id').getValue();
+                            if(!message){
+                                alert('Must enter a message');
+                                return;
+                            } else {
+                                LABKEY.Ajax.request({
+                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'SendNecropsyEditRequestNotification', null),
+                                    method: 'POST',
+                                    jsonData: {
+                                        message: message,
+                                        animalId: animalId,
+                                        requestId: requestId,
+                                    },
+                                    success: function(data){
+                                        window.location =  LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view');
+                                    },
+                                    failure: LDK.Utils.getErrorCallback()
+                                });
+                            }
+
+
+                        }
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
+                        }
+                    }]
+                }).show();
+            })['catch'](cancelErrorHandler);
+        },
+    });
 
     registerBtn('UPDATE_DEATH', {
         text:           'Update Death',

@@ -54,6 +54,9 @@ public class NecropsySampleDeliveryDestination extends AbstractSimpleStaticTable
         PICK_UP      ("Pick Up",         "", null),
         COURIER_AVRL ("Courier to AVRL", "", null),
         COURIER_WIMR ("Courier to WIMR", "", null),
+        COURIER_CCOURT ("Courier to CCourt", "", null),
+        COURIER_BMQ ("Courier to BMQ", "", null),
+        COURIER_ELEMENTS ("Courier to Elements", "", null),
         FEDEX        ("FedEx",           "", null),
         UPS          ("UPS",             "", null),
         OTHER        ("Other",           "", null);

@@ -90,6 +90,30 @@
                     This animal has tissue samples that need to be couried to AVRL.
                 </div>
                 <!-- /ko -->
+                <!-- ko if: has_tissues_for_wimr -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to WIMR.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_ccourt -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to Capitol Court.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_bmq -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to BMQ.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_elements -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to Elements.
+                </div>
+                <!-- /ko -->
 
 
                 <!-- ko ifnot: taskid() != '' -->
@@ -431,6 +455,10 @@
                 who_delivers:         ko.observable(),
                 delivery_comment:     ko.observable(),
                 has_tissues_for_avrl: ko.observable(),
+                has_tissues_for_wimr: ko.observable(),
+                has_tissues_for_ccourt: ko.observable(),
+                has_tissues_for_bmq: ko.observable(),
+                has_tissues_for_elements: ko.observable(),
                 project:              ko.observable(),
                 protocol:             ko.observable(),
                 sex:                  ko.observable(),

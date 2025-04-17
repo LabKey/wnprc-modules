@@ -2,6 +2,7 @@
 *
 
 # whitelist the following files:
+!download_r.sh
 !install.r
 !download.r
 !netrc

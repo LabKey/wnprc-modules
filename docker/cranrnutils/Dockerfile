@@ -37,8 +37,18 @@ RUN apt-get update \
 # https://phoenixnap.com/kb/install-r-ubuntu
 #RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 #RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN ["sh", "-c", "echo  hello architecture  ${BUILDARCH}"] 
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-${BUILDARCH}-latest.tar.gz | tar xz -C /usr/local
+RUN ["sh", "-c", "echo  hello architecture  ${BUILDARCH}"]
+COPY download_r.sh /tmp/download_r.sh
+RUN chmod +x /tmp/download_r.sh
+RUN ["sh", "-c", "/tmp/download_r.sh --buildarch ${BUILDARCH}" ]
+
+#RUN if ["${BUILDARCH}" = "arm64"]; then  \
+#curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-arm64-latest.tar.gz | tar xz -C /usr/local; \
+#fi 
+#RUN if ["${BUILDARCH}" = "amd64"]; then  \
+#curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | tar xz -C /usr/local; \
+#fi 
+#RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-${BUILDARCH}-latest.tar.gz | tar xz -C /usr/local
 
 RUN rig add 4.4.1
 RUN rig default 4.4.1
@@ -106,7 +116,10 @@ RUN apt update
 # https://phoenixnap.com/kb/install-r-ubuntu
 #RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 #RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-${BUILDARCH}-latest.tar.gz | tar xz -C /usr/local
+RUN ["sh", "-c", "echo  hello architecture  ${BUILDARCH}"]
+COPY download_r.sh /tmp/download_r.sh
+RUN chmod +x /tmp/download_r.sh
+RUN ["sh", "-c", "/tmp/download_r.sh --buildarch ${BUILDARCH}" ]
 
 RUN rig add 4.4.1
 RUN rig default 4.4.1

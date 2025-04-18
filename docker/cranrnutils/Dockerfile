@@ -1,12 +1,12 @@
 ARG R_VERSION=4.4.1
-FROM --platform=$BUILDPLATFORM eclipse-temurin:17-jre-jammy AS download
+FROM --platform=$TARGETPLATFORM eclipse-temurin:17-jre-jammy AS download
 
 # Set noninteractive mode for apt-get
 ENV DEBIAN_FRONTEND=noninteractive
 
 ENV LANG=en_US.utf8
 
-ARG BUILDARCH
+ARG TARGETARCH
 
 # Adding various application to download packages to install Postgres 15 and CRAN-R
 RUN apt-get update \
@@ -37,10 +37,10 @@ RUN apt-get update \
 # https://phoenixnap.com/kb/install-r-ubuntu
 #RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 #RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN ["sh", "-c", "echo  hello architecture  ${BUILDARCH}"]
+RUN ["sh", "-c", "echo  hello architecture  ${TARGETARCH}"]
 COPY download_r.sh /tmp/download_r.sh
 RUN chmod +x /tmp/download_r.sh
-RUN ["sh", "-c", "/tmp/download_r.sh --buildarch ${BUILDARCH}" ]
+RUN ["sh", "-c", "/tmp/download_r.sh --buildarch ${TARGETARCH}" ]
 
 #RUN if ["${BUILDARCH}" = "arm64"]; then  \
 #curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-arm64-latest.tar.gz | tar xz -C /usr/local; \
@@ -67,7 +67,7 @@ ARG R_VERSION=4.4.1
 
 FROM eclipse-temurin:17-jre-jammy
 
-ARG BUILDARCH
+ARG TARGETARCH
 COPY --from=download /var/cache/apt/archives /var/cache/apt/archives
 
 COPY --from=download /tmp/rdownload/ /tmp/rdownload/
@@ -116,10 +116,10 @@ RUN apt update
 # https://phoenixnap.com/kb/install-r-ubuntu
 #RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 #RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN ["sh", "-c", "echo  hello architecture  ${BUILDARCH}"]
+RUN ["sh", "-c", "echo  hello architecture  ${TARGETARCH}"]
 COPY download_r.sh /tmp/download_r.sh
 RUN chmod +x /tmp/download_r.sh
-RUN ["sh", "-c", "/tmp/download_r.sh --buildarch ${BUILDARCH}" ]
+RUN ["sh", "-c", "/tmp/download_r.sh --buildarch ${TARGETARCH}" ]
 
 RUN rig add 4.4.1
 RUN rig default 4.4.1

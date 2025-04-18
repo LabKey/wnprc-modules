@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Defining new docker builder for arm64
+docker buildx create --name=container  
+
+docker build --builder container --platform linux/arm64,linux/amd64 -t $IMAGE_NAME --push .

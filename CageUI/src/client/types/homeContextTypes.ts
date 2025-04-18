@@ -1,5 +1,5 @@
 import { Cage, Rack, Room, RoomItem } from './typings';
-import { LoadedRooms, SelectedPage } from './homeTypes';
+import { LoadedRooms, SelectedMods, SelectedPage } from './homeTypes';
 import * as React from 'react';
 
 export interface HomeContextType {
@@ -31,4 +31,7 @@ export interface HomeContextType {
     setLoadedRooms: React.Dispatch<React.SetStateAction<LoadedRooms>>,
     selectedRack: Rack,
     setSelectedRack: React.Dispatch<React.SetStateAction<Rack>>,
+    selectedRackMods: SelectedMods,
+    setSelectedRackMods: React.Dispatch<React.SetStateAction<SelectedMods>>,
+
 }

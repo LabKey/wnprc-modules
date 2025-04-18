@@ -6,7 +6,7 @@ type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 type SelectedMod = {
     rack: Rack,
     cage: Cage,
-    mod: string
+    mod: { label: string, value: string }
 }
 
 export type SelectedMods = SelectedMod[];
@@ -69,7 +69,6 @@ export enum ModTypes {
     CTunnel,
     Extension,
     PlayCage,
-    NoMod
 }
 
 export interface Modification {

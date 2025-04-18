@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Cage, PrevRoom, Rack, Room, RoomItem } from '../types/typings';
 import { removeCircularReferences } from '../utils/homeHelpers';
 import { HomeContextType } from '../types/homeContextTypes';
-import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, SelectedPage } from '../types/homeTypes';
+import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, SelectedMods, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import { buildNewLocalRoom, findRackInGroup } from '../utils/LayoutEditorHelpers';
@@ -30,6 +30,7 @@ export const HomeContextProvider = ({children}) => {
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [abortController, setAbortController] = useState(null);
+    const [selectedRackMods, setSelectedRackMods] = useState<SelectedMods>([]);
 
     // map of loaded rooms, loaded means fetched from layout_history
     const [loadedRooms, setLoadedRooms] = useState<LoadedRooms>({});
@@ -149,20 +150,23 @@ export const HomeContextProvider = ({children}) => {
 
     useEffect(() => {
         if(!selectedPage?.rack) return;
+        //TODO Fetch mods for rack here as well and then set the rack and rack mods
 
         selectedRoom.rackGroups.forEach((group) => {
             group.racks.forEach(rack => {
                 if(rack.type.isDefault){
                     if(rack.extraContext.rackId.toString() === selectedPage.rack){
                         setSelectedRack(rack);
+                        setSelectedRackMods([]);//TODO FIX
                     }
                 }else{
                     if(rack.itemId === selectedPage.rack){
-                        setSelectedRack(rack)
+                        setSelectedRack(rack);
+                        setSelectedRackMods([]);//TODO FIX
                     }
                 }
             })
-        })
+        });
 
         console.log("Changing rack");
 
@@ -222,7 +226,9 @@ export const HomeContextProvider = ({children}) => {
             loadedRooms,
             setLoadedRooms,
             selectedRack,
-            setSelectedRack
+            setSelectedRack,
+            selectedRackMods,
+            setSelectedRackMods
         }}>
             {children}
         </HomeContext.Provider>

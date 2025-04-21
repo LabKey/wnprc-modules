@@ -25,4 +25,12 @@ public class SqlQueryReferencePoints {
      */
     @Queryable
     public static final String COURIER_TO_AVRL = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_AVRL.name();
+    @Queryable
+    public static final String COURIER_TO_WIMR = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_WIMR.name();
+    @Queryable
+    public static final String COURIER_TO_CCOURT = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_CCOURT.name();
+    @Queryable
+    public static final String COURIER_TO_BMQ = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_BMQ.name();
+    @Queryable
+    public static final String COURIER_TO_ELEMENTS = NecropsySampleDeliveryDestination.SampleDeliveryDestination.COURIER_ELEMENTS.name();
 }

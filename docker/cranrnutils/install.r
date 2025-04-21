@@ -1,14 +1,7 @@
-install.packages('devtools', repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('quadprog', repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('pedigree', repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('Matrix',   repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('RCurl',    repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('kinship2', repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('getopt',   repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('rjson',    repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('dplyr',    repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('remotes',  repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
-install.packages('Rlabkey',  repos='http://cran.us.r-project.org', destdir = '/tmp/rdownload/')
+n <- max(parallel::detectCores() - 2L, 1L)
+options(Ncpus=n)
+
+install.packages(c('devtools','quadprog','pedigree','Matrix', 'RCurl','kinship2','getopt', 'rjson','dplyr','remotes','Rlabkey'), repos='http://cran.us.r-project.org')
 
 require('remotes')
 install_github("luansheng/visPedigree")

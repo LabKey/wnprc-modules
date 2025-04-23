@@ -89,7 +89,7 @@
                     <column columnName="allowableBloodIncludingFutureDraws">
                         <columnTitle>Volume Available Including Next 30 days</columnTitle>
                         <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
-                        <description>This column shows the amount of blood remaining for future blood draws only.</description>
+                        <description>This column shows the amount of blood remaining for future blood draws and also 30 days into the past.</description>
                     </column>
                 </columns>
             </table>

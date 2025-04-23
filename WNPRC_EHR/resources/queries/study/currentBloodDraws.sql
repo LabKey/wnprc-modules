@@ -36,7 +36,7 @@ SELECT
     ROUND(CAST((t.allowableBlood - t.bloodPrevious) AS double),1)  as allowableBlood,
     CASE
         WHEN t.date < CURDATE() THEN NULL
-        ELSE ROUND(CAST((t.allowableBlood - t.bloodFuture) AS double),1)
+        ELSE ROUND(CAST((t.allowableBlood - t.bloodFuture - t.bloodPrevious) AS double),1)
     END AS allowableBloodIncludingFutureDraws,
     t.minDate,
     t.maxDate

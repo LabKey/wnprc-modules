@@ -1,6 +1,34 @@
 #!/bin/bash
+args=()
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        -t|--tag)     ## the path to the dump file on the local machine
+            LOCAL_TAG="$2"
+            shift
+            shift
+            ;;
+        -i|--image)     ## the path to the dump file on the local machine
+            IMAGE_NAME="$2"
+            shift
+            shift
+            ;;
+        *) ## positional arguments
+            args+=("$1")
+            shift
+            ;;
+    esac
+done
+set -- "${args[@]}"
 
-# Defining new docker builder for arm64
-docker buildx create --name=container  
 
-docker build --builder container --platform linux/arm64,linux/amd64 -t $IMAGE_NAME --push .
+if [[ -z $IMAGE_NAME ]]
+then  
+    IMAGE_NAME=${LOCAL_TAG}
+    docker build --builder container --platform linux/arm64,linux/amd64 -t $IMAGE_NAME --load ../
+else
+    # Defining new docker builder for arm64
+    #platform=linux/arm64
+    docker buildx create --name=container  
+    docker build --builder container --platform $platform -t $IMAGE_NAME --load ../
+fi

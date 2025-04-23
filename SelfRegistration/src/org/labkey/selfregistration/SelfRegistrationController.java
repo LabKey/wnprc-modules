@@ -39,6 +39,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.roles.SiteAdminRole;
 import org.labkey.api.security.roles.SubmitterRole;
 import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.PageFlowUtil;
@@ -318,8 +319,9 @@ public class SelfRegistrationController extends SpringActionController
             // teamcity doesn't know about this user since it's an ephemeral DB, need to create an admin user and assign admin role.
             SecurityManager.NewUserStatus newUserStatus = SecurityManager.addUser(new ValidEmail(adminUser), null);
             User adminUser = newUserStatus.getUser();
-            Group adminGroup = GroupManager.getGroup(rootContainer, "Administrators", GroupEnumType.SITE);
-            SecurityManager.addMember(adminGroup, adminUser);
+            MutableSecurityPolicy rootPolicy = new MutableSecurityPolicy(SecurityPolicyManager.getPolicy(rootContainer));
+            rootPolicy.addRoleAssignment(adminUser, SiteAdminRole.class);
+            SecurityPolicyManager.savePolicy(rootPolicy, TestContext.get().getUser());
 
             // create issue tracker
             int issueDefId = IssuesListDefService.get().createIssueListDef(container, adminUser,"IssueDefinition","User Registrations", null,null);
@@ -377,7 +379,7 @@ public class SelfRegistrationController extends SpringActionController
             //remove the container, not really needed in TeamCity, but good for local testing
             User adminuser = UserManager.getUser(new ValidEmail(adminUser));
             Container container = ContainerManager.getForPath(containerPath);
-            ContainerManager.delete(container,UserManager.getUser(new ValidEmail(adminUser)));
+            ContainerManager.delete(container, UserManager.getUser(new ValidEmail(adminUser)));
 
             //also delete the admin user
             UserManager.deleteUser(adminuser.getUserId());

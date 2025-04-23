@@ -30,5 +30,5 @@ else
     # Defining new docker builder for arm64
     #platform=linux/arm64
     docker buildx create --name=container  
-    docker build --builder container --platform $platform -t $IMAGE_NAME --load ../
+    docker build --builder container --platform $platform -t $IMAGE_NAME --load .
 fi

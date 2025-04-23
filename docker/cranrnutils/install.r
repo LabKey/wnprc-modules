@@ -8,6 +8,7 @@ print(n)
 install.packages(c('devtools','quadprog','pedigree','Matrix', 'RCurl','kinship2','getopt', 'rjson','dplyr','Rlabkey'), 
                   quiet = FALSE, 
                   verbose = TRUE, 
+                  Ncpus=n,
                   repos='http://cran.us.r-project.org')
 #require('remotes')
 #install_github("luansheng/visPedigree")

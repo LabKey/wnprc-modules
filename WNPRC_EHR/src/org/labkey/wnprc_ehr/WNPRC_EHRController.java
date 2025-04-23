@@ -2322,6 +2322,8 @@ public class WNPRC_EHRController extends SpringActionController
         private String _message;
         private String _animalId;
         private String _requestId;
+        private Integer _assignedTo;
+        private String _taskId;
 
         public String getMessage()
         {
@@ -2352,6 +2354,25 @@ public class WNPRC_EHRController extends SpringActionController
         {
             _requestId = requestId;
         }
+
+        public void setAssignedTo(Integer assignedTo)
+        {
+            _assignedTo = assignedTo;
+        }
+
+        public Integer getAssignedTo()
+        {
+            return _assignedTo;
+        }
+
+        public void setTaskId(String taskId)
+        {
+            _taskId = taskId;
+        }
+        public String getTaskId()
+        {
+            return _taskId;
+        }
     }
 
 
@@ -2368,9 +2389,26 @@ public class WNPRC_EHRController extends SpringActionController
             String message = form.getMessage();
             String animalId = form.getAnimalId();
             String requestId = form.getRequestId();
+            Integer assignedTo = form.getAssignedTo();
+            String taskId = form.getTaskId();
+            TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+            QueryUpdateService service = ti.getUpdateService();
+            List<Map<String,Object>> keys = new ArrayList<>();
+            Map<String, Object> row = new HashMap<>();
+            row.put("taskid", taskId);
+            keys.add(row);
+            List<Map<String,Object>> rows = service.getRows(getUser(), getContainer(),keys);
+
+            rows.get(0).put("assignedTo", assignedTo);
+
+            List<Map<String, Object>> updatedRows = service.updateRows(getUser(),getContainer(),rows,null,null,null);
+
+
+            User u = UserManager.getUser(assignedTo);
+            String email = u.getEmail();
 
             Module WNPRC_EHRModule = ModuleLoader.getInstance().getModule("WNPRC_EHR");
-            NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId);
+            NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId, email);
             editRequestNotification.sendManually(getContainer(),getUser());
 
 

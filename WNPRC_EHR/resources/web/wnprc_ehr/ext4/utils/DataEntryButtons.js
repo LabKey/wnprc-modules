@@ -551,9 +551,12 @@
             var necropsyRecord = necropsyStore.getAt(0).getData();
             var requestId = necropsyRecord.requestid;
             var animalId = necropsyRecord.id;
+            var taskStore = storeCollection.getServerStoreForQuery("ehr", "tasks").getAt(0).getData();
+            var assignedTo = taskStore.assignedto;
+            var taskId = taskStore.taskid;
             this.saveRecords(btn).then(function() {
                 //window.location.reload();
-                new Ext4.Window({
+                new Ext.Window({
                     title: 'Send email to requester',
                     closeAction: 'destroy',
                     width: 400,
@@ -565,23 +568,30 @@
                         items: [{
                             xtype: 'textarea',
                             fieldLabel: 'Message',
-                            id: 'message-field',
+                            id: 'messageField',
                             width: 350,
                             autoHeight: true,
-                            ref: 'message'
-                        },
-                            {xtype: 'combo',
-                                allowBlank: false,
-                                lookup: {
-                                    schemaName: 'core',
-                                    queryName: 'PrincipalsWithoutAdmin',
-                                    columns: 'UserId,DisplayName',
-                                    sort: 'Type,DisplayName',
-                                    displayColumn: 'DisplayName',
-                                }
-                },
-
-
+                            ref: 'messageField'
+                        }, {
+                            xtype: 'combo',
+                            fieldLabel: 'Assigned To',
+                            width: 200,
+                            value: assignedTo,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            store: new LABKEY.ext.Store({
+                                xtype: 'labkey-store',
+                                schemaName: 'core',
+                                queryName: 'PrincipalsWithoutAdmin',
+                                columns: 'UserId,DisplayName',
+                                sort: 'Type,DisplayName',
+                                autoLoad: true
+                            }),
+                            displayField: 'DisplayName',
+                            valueField: 'UserId',
+                            ref: 'assignedTo',
+                            id: 'assignedTo',
+                        }
                         ]
                     }],
                     buttons: [{
@@ -591,15 +601,9 @@
                         ref: '../submit',
                         scope: this,
                         handler: function(o){
-                            var win = o.up('window');
-                            var form = win.down('form');
-                            var message = form.getForm().findField('message-field').getValue();
-                           // var necropsyStore = taskDataEntryPanel.storeCollection.getServerStoreForQuery('study', 'necropsy');
-                            //var necropsyRecord = _.isDefined(necropsyStore) ? necropsyStore.getAt(0) : undefined;
-                            var Id;
+                            var message = o.ownerCt.ownerCt.theForm.messageField.getValue();
+                            var assignedTo = o.ownerCt.ownerCt.theForm.assignedTo.getValue();
 
-                            debugger;
-                            //var id = form.getForm().findField('Id').getValue();
                             if(!message){
                                 alert('Must enter a message');
                                 return;
@@ -611,6 +615,8 @@
                                         message: message,
                                         animalId: animalId,
                                         requestId: requestId,
+                                        assignedTo: assignedTo,
+                                        taskId: taskId,
                                     },
                                     success: function(data){
                                         window.location =  LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view');

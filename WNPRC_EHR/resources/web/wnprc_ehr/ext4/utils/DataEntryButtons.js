@@ -550,7 +550,7 @@
             var necropsyStore = storeCollection.getServerStoreForQuery("study", "Necropsy");
             var necropsyRecord = necropsyStore.getAt(0).getData();
             var requestId = necropsyRecord.requestid;
-            var animalId = necropsyRecord.id;
+            var animalId = necropsyRecord.Id;
             var taskStore = storeCollection.getServerStoreForQuery("ehr", "tasks").getAt(0).getData();
             var assignedTo = taskStore.assignedto;
             var taskId = taskStore.taskid;

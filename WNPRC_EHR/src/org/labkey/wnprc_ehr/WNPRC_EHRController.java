@@ -72,10 +72,12 @@ import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.Group;
 import org.labkey.api.security.GroupManager;
+import org.labkey.api.security.MemberType;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
@@ -2405,10 +2407,23 @@ public class WNPRC_EHRController extends SpringActionController
 
 
             User u = UserManager.getUser(assignedTo);
-            String email = u.getEmail();
+
+            ArrayList<String> emails = new ArrayList<>();
+            if (u == null)
+            {
+                Group g = SecurityManager.getGroup(assignedTo);
+                Set<User> users = SecurityManager.getAllGroupMembers(g, MemberType.ACTIVE_USERS);
+                for (User user : users)
+                {
+                    emails.add(user.getEmail());
+                }
+            } else
+            {
+                emails.add(u.getEmail());
+            }
 
             Module WNPRC_EHRModule = ModuleLoader.getInstance().getModule("WNPRC_EHR");
-            NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId, email);
+            NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId, emails);
             editRequestNotification.sendManually(getContainer(),getUser());
 
 

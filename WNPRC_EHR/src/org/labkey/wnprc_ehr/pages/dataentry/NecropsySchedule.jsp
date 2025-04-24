@@ -12,11 +12,17 @@
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("fullcalendar");
+    }
+%>
 <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.css' />
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.min.js'></script>
 <%--<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.js'></script>--%>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <%--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css">--%>
@@ -88,6 +94,30 @@
                 <div class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-alert"></span>
                     This animal has tissue samples that need to be couried to AVRL.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_wimr -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to WIMR.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_ccourt -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to Capitol Court.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_bmq -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to BMQ.
+                </div>
+                <!-- /ko -->
+                <!-- ko if: has_tissues_for_elements -->
+                <div class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-alert"></span>
+                    This animal has tissue samples that need to be couried to Elements.
                 </div>
                 <!-- /ko -->
 
@@ -303,18 +333,25 @@
         var necropsySuiteLookup = <%=necropsySuiteLookup%>;
         WebUtils.VM.necropsySuiteLookup = necropsySuiteLookup;
 
-        var $calendar = $('#calendar');
         $(document).ready(function() {
-            $calendar.fullCalendar({
-                header: {
-                    left: 'prev,next today',
+            let calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                themeSystem: 'bootstrap',
+                height: 800,
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next,today',
                     center: 'title',
-                    right: 'month,agendaWeek'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                events: function(startMoment, endMoment, timezone, callback) {
+                eventSources: [{
+                events:  function (fetchInfo, callback) {
+                    console.log(" startStr " + fetchInfo.startStr);
+                    console.log(" endtStr " + moment(fetchInfo.startStr).format( "YYYY-MM-DD"));
+
                     WebUtils.API.selectRows("study", "Necropsy Schedule", {
-                        "date~gte": startMoment.format('Y-MM-DD'),
-                        "date~lte": endMoment.format('Y-MM-DD')
+                        "date~gte":  moment(fetchInfo.startStr).format( "YYYY-MM-DD"),
+                        "date~lte": moment(fetchInfo.endStr).format( "YYYY-MM-DD")
                     }).then(function(data) {
                         var events = data.rows;
 
@@ -322,7 +359,8 @@
                             var eventObj = {
                                 title: row.animalid,
                                 start: row.date,
-                                rawRowData: row
+                                rawRowData: row,
+                                display: 'block'
                             };
 
                             if (row.location in necropsySuiteLookup) {
@@ -332,9 +370,9 @@
                             return eventObj;
                         }))
                     })
-                },
+                }}],
                 eventClick: function(calEvent, jsEvent, view) {
-                    jQuery.each(calEvent.rawRowData, function(key, value) {
+                    jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {
                             if (key == "date") {
                                 value = displayDate(value);
@@ -343,7 +381,8 @@
                         }
                     });
                 }
-            })
+        },);
+            calendar.render()
         });
 
 
@@ -431,6 +470,10 @@
                 who_delivers:         ko.observable(),
                 delivery_comment:     ko.observable(),
                 has_tissues_for_avrl: ko.observable(),
+                has_tissues_for_wimr: ko.observable(),
+                has_tissues_for_ccourt: ko.observable(),
+                has_tissues_for_bmq: ko.observable(),
+                has_tissues_for_elements: ko.observable(),
                 project:              ko.observable(),
                 protocol:             ko.observable(),
                 sex:                  ko.observable(),
@@ -642,6 +685,7 @@
                     rowsToUpdate[0] = rowsToUpdate[0].map(function(row) {
                         row.performedby = pathologistLookup[form.pathologist];
                         row.assistant   = pathologistLookup[form.assistant];
+                        row.location = form.location;
 
                         return row;
                     });
@@ -654,7 +698,7 @@
                     ]);
                 }).then(function() {
                     // Refresh the calendar view.
-                    $calendar.fullCalendar('refetchEvents');
+                    calendar.refetchEvents();
 
                     WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
 

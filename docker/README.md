@@ -112,7 +112,20 @@ docker build --no-cache -t wnprcehr/tomcat:tomcat9_<XX.YY_fb_name> tomcat
 
 
 ## Deploying the Docker Compose Services
-Docker images including LabKey version number and branch are control by variables defined in the .env file. The compose (i.e. `compose.yaml`) file has the following string for the LabKey service `wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}`. LK_PROD has to be empty except for the production environment which gets replace with **SNAPSHOT**. LK_VERSION gets replace with the version of LabKey that is going to be used (i.e. 22.11) and LK_FB get the name of the branch to test, in production this variable is blank. In production this string gets converted to `wnprcehr/labkeysnapshot:22.11` which match the tag in Docker Hub for the [labkeysnapshot repository](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/tags?page=1&ordering=last_updated). For feature branches the string gets converted to `wnprcehr/labkey:22.11_<feature_branch_name>` with the corresponding fb name coming from GitHub, these images are hosted in the [labkey repository](https://hub.docker.com/repository/docker/wnprcehr/labkey/tags?page=1&ordering=last_updated) with their corresponding tags.
+There are several services controlled by the compose.yaml and production.yaml files. These services are:
+||Service|Functionality|YAML File|Repository|
+|---|---|---|---|---|
+|1|postgres|database|compose.yaml||
+|2|labkey|Application|compose.yaml||
+|3|cadvisor|Monitor resources|compose.yaml||
+|4|mailcatcher|Applicaton to record emails sent|compose.yaml||
+|5|mailserver|Postfix server|compose.yaml||
+|6| ngnix|Web server|compose.yaml||
+|7| perlscripts|Manage cron jobs|production.yaml||
+
+
+
+Docker images including LabKey version number and branch are control by variables defined in the .env file. The compose (i.e. `compose.yaml`) file has the following string for the LabKey service `wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}`. LK_PROD has to be empty except for the production environment which gets replace with **SNAPSHOT**. LK_VERSION gets replace with the version of LabKey that is going to be used (i.e. 24.11) and LK_FB get the name of the branch to test, in production LK_FB is blank. In production this string gets converted to `wnprcehr/labkeysnapshot:22.11` which match the tag in Docker Hub for the [labkeysnapshot repository](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/tags?page=1&ordering=last_updated). For feature branches the string gets converted to `wnprcehr/labkey:22.11_<feature_branch_name>` with the corresponding fb name coming from GitHub, these images are hosted in the [labkey repository](https://hub.docker.com/repository/docker/wnprcehr/labkey/tags?page=1&ordering=last_updated) with their corresponding tags.
 
 To deploy the services, you again either use Gradle or use Docker Compose directly. To use Gradle, execute the following build tasks:
 ```
@@ -128,17 +141,20 @@ To use Docker Compose, you can execute commands like the following (*from this d
 docker compose up -d
 
 # for tearing down all the services*
-docker compose down
+docker compose down --timeout 60
 
 # for spinning up just one of the services (e.g., postgres)
 docker compose up -d postgres
 
 # for taking down just one of the services (e.g., postgres)
-docker compose stop postgres
+docker compose stop postgres --timeout 60
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
-*Note that sometimes the postgres container closes before the database itself is completely shut down. Be sure to disconnect your pgAdmin and IntelliJ database connections, if any, stop labkey, and then do a shutdown. Otherwise the next time postgres starts it will go into an automatic recovery mode and take a long time to start back up.
+## Setup in production EHR
+
+
+*Note that sometimes the postgres container closes before the database itself is completely shut down. Be sure to disconnect your pgAdmin and IntelliJ database connections, if any, stop labkey, and then do a shutdown. Otherwise the next time postgres starts it will go into an automatic recovery mode and take a long time to start back up. By adding a timeout of 60 seconds it allows the database to close gracefully and avoid the recovery process. 
 
 ## Running multiple instances of LabKey in same Server
 

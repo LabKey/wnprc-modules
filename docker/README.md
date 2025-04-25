@@ -115,13 +115,13 @@ docker build --no-cache -t wnprcehr/tomcat:tomcat9_<XX.YY_fb_name> tomcat
 There are several services controlled by the compose.yaml and production.yaml files. These services are:
 ||Service|Functionality|YAML File|Repository|
 |---|---|---|---|---|
-|1|postgres|database|compose.yaml||
-|2|labkey|Application|compose.yaml||
-|3|cadvisor|Monitor resources|compose.yaml||
+|1|postgres|database|compose.yaml|[postgres](https://hub.docker.com/_/postgres)|
+|2|labkey|Application|compose.yaml|[labkeysnapshot](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/general)|
+|3|cadvisor|Monitor machine resources|compose.yaml||
 |4|mailcatcher|Applicaton to record emails sent|compose.yaml||
-|5|mailserver|Postfix server|compose.yaml||
+|5|mailserver|Postfix mail erver|compose.yaml||
 |6| ngnix|Web server|compose.yaml||
-|7| perlscripts|Manage cron jobs|production.yaml||
+|7| perlscripts|Manage cron jobs|production.yaml|[ehrcronprod](https://hub.docker.com/repository/docker/wnprcehr/ehrcronprod/general)|
 
 
 

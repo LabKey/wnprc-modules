@@ -2388,46 +2388,68 @@ public class WNPRC_EHRController extends SpringActionController
         public Object execute(NecropsyEditRequestNotificationForm form, BindException errors) throws Exception
         {
 
-            String message = form.getMessage();
-            String animalId = form.getAnimalId();
-            String requestId = form.getRequestId();
-            Integer assignedTo = form.getAssignedTo();
-            String taskId = form.getTaskId();
-            TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-            QueryUpdateService service = ti.getUpdateService();
-            List<Map<String,Object>> keys = new ArrayList<>();
-            Map<String, Object> row = new HashMap<>();
-            row.put("taskid", taskId);
-            keys.add(row);
-            List<Map<String,Object>> rows = service.getRows(getUser(), getContainer(),keys);
-
-            rows.get(0).put("assignedTo", assignedTo);
-
-            List<Map<String, Object>> updatedRows = service.updateRows(getUser(),getContainer(),rows,null,null,null);
-
-
-            User u = UserManager.getUser(assignedTo);
-
-            ArrayList<String> emails = new ArrayList<>();
-            if (u == null)
+            try
             {
-                Group g = SecurityManager.getGroup(assignedTo);
-                Set<User> users = SecurityManager.getAllGroupMembers(g, MemberType.ACTIVE_USERS);
-                for (User user : users)
+                String message = form.getMessage();
+                String animalId = form.getAnimalId();
+                String requestId = form.getRequestId();
+                Integer assignedTo = form.getAssignedTo();
+                String taskId = form.getTaskId();
+                User u = UserManager.getUser(assignedTo);
+
+                ArrayList<String> emails = new ArrayList<>();
+                if (u == null)
                 {
-                    emails.add(user.getEmail());
+                    Group g = SecurityManager.getGroup(assignedTo);
+                    Set<User> users = SecurityManager.getAllGroupMembers(g, MemberType.ACTIVE_USERS);
+                    for (User user : users)
+                    {
+                        emails.add(user.getEmail());
+                    }
+                    if (emails.isEmpty())
+                    {
+                        JSONObject response = new JSONObject();
+                        response.put("success",false);
+                        response.put("message", "There are no members in the group " + g.getName());
+                        return response;
+                    }
                 }
-            } else
+                else
+                {
+                    emails.add(u.getEmail());
+                }
+
+
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+                QueryUpdateService service = ti.getUpdateService();
+                List<Map<String, Object>> keys = new ArrayList<>();
+                Map<String, Object> row = new HashMap<>();
+                row.put("taskid", taskId);
+                keys.add(row);
+                List<Map<String, Object>> rows = service.getRows(getUser(), getContainer(), keys);
+
+                rows.get(0).put("assignedTo", assignedTo);
+                rows.get(0).put("aspurasignedTo", assignedTo);
+
+                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rows, null, null, null);
+
+
+                Module WNPRC_EHRModule = ModuleLoader.getInstance().getModule("WNPRC_EHR");
+                NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId, emails);
+                editRequestNotification.sendManually(getContainer(), getUser());
+                JSONObject response = new JSONObject();
+                response.put("success",true);
+                return response;
+            }
+            catch (Exception e)
             {
-                emails.add(u.getEmail());
+                JSONObject response = new JSONObject();
+                response.put("success",false);
+                response.put("message",new Date().toInstant().toString() + e.getMessage());
+                return response;
             }
 
-            Module WNPRC_EHRModule = ModuleLoader.getInstance().getModule("WNPRC_EHR");
-            NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId, emails);
-            editRequestNotification.sendManually(getContainer(),getUser());
 
-
-            return null;
         }
     }
 

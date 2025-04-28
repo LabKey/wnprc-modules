@@ -546,14 +546,14 @@
         tooltip:        "This starts the task and inserts into or updates either the Prenatal Deaths or the regular Deaths table with information from the necropsy.  The insertion will cause any assigned treatments, housing, etc. to be closed, and will send a Death Notification email out.",
         handler: function(btn) {
             //var taskDataEntryPanel
-            var storeCollection = this.storeCollection;
-            var necropsyStore = storeCollection.getServerStoreForQuery("study", "Necropsy");
-            var necropsyRecord = necropsyStore.getAt(0).getData();
-            var requestId = necropsyRecord.requestid;
-            var animalId = necropsyRecord.Id;
-            var taskStore = storeCollection.getServerStoreForQuery("ehr", "tasks").getAt(0).getData();
-            var assignedTo = taskStore.assignedto;
-            var taskId = taskStore.taskid;
+            const storeCollection = this.storeCollection;
+            const necropsyStore = storeCollection.getServerStoreForQuery("study", "Necropsy");
+            const necropsyRecord = necropsyStore.getAt(0).getData();
+            const requestId = necropsyRecord.requestid;
+            const animalId = necropsyRecord.Id;
+            const taskStore = storeCollection.getServerStoreForQuery("ehr", "tasks").getAt(0).getData();
+            const assignedTo = taskStore.assignedto;
+            const taskId = taskStore.taskid;
             this.saveRecords(btn).then(function() {
                 //window.location.reload();
                 new Ext.Window({
@@ -619,7 +619,12 @@
                                         taskId: taskId,
                                     },
                                     success: function(data){
-                                        window.location =  LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view');
+                                        let resp = JSON.parse(data.response);
+                                        if (resp.success) {
+                                            window.location =  LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view');
+                                        } else {
+                                            alert(resp.message);
+                                        }
                                     },
                                     failure: LDK.Utils.getErrorCallback()
                                 });

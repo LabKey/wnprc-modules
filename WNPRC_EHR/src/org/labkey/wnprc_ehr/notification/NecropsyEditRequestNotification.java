@@ -43,7 +43,7 @@ public class NecropsyEditRequestNotification extends AbstractEHRNotification {
     //Notification Details
     @Override
     public String getName() {
-        return "Your Necropsy Requires Modification";
+        return "Your Necropsy Request Requires Modification";
     }
     @Override
     public String getDescription() {
@@ -83,12 +83,12 @@ public class NecropsyEditRequestNotification extends AbstractEHRNotification {
         // Verifies blood is an overdraw.
         if (this.message!= null) {
             // message info.
-            messageBody.append("<p>Animal ID: " + this.animalId + "</p>");
+            messageBody.append("<p>The pathology group is requesting changes for " + this.animalId + "</p>");
             DetailsURL details = DetailsURL.fromString("ehr-dataEntryForm.view?formType=NecropsyRequest&requestid=" + this.requestId, c);
-            ActionURL a = details.getActionURL();
-            String editNecropsyRequestUrl = (new Path(new ActionURL().getBaseServerURI(), details.getActionURL().toString())).toString();
-            messageBody.append("<p>" + notificationToolkit.createHyperlink("Edit", editNecropsyRequestUrl) + "</p>");
+            messageBody.append("<p>The following changes are requested:</p>");
             messageBody.append("<p>" + this.message+ "</p>");
+            String editNecropsyRequestUrl = (new Path(new ActionURL().getBaseServerURI(), details.getActionURL().toString())).toString();
+            messageBody.append("<p>You can edit the necropsy request " + notificationToolkit.createHyperlink("here", editNecropsyRequestUrl) + ".</p>");
 
             // Returns message info.
             this.resetClass();

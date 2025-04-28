@@ -19,14 +19,3 @@ MAIL_SERVER=mailserver
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command
 #---------------------------------------------------------------------------------------
-0      10       *     *       *         root   $ALERT_DIR/adminAlerts.pl > /dev/null
-5      7-17     *     *       *         root   $ALERT_DIR/clinpathAbnormalResultAlerts.pl > /dev/null
-0      11,13,16 *     *       *         root   $ALERT_DIR/clinpathAlerts.pl > /dev/null
-00     10       *     *       *         root   $ALERT_DIR/clinpathResultAlerts.pl > /dev/null
-12     6        *     *       *         root   $ALERT_DIR/largeInfantAlerts.pl > /dev/null
-15     9        *     *       *         root   $ALERT_DIR/overdueWeightAlerts.pl > /dev/null
-25     7-17     *     *       *         root   $ALERT_DIR/siteErrorAlerts.pl > /dev/null
-0      6,10,13  *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
-0      15,17,19 *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
-30     13,20    *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
-10     15       *     *       *         root   $ALERT_DIR/weightAlerts.pl > /dev/null

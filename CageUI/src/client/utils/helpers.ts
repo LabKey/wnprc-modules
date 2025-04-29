@@ -1,6 +1,7 @@
 import {
+    Cage,
     DefaultRackStringType,
-    DefaultRackTypes,
+    DefaultRackTypes, GroupId,
     Rack,
     RackGroup,
     RackStringType,
@@ -62,6 +63,9 @@ export const parseRoomItemType = (input: string): string => {
     }
     return;
 }
+export const extractNumbers = (input: string): number => {
+    return parseInt(input.replace(/\D/g, ''));
+}
 
 export const getTypeClassFromElement = (element) => {
     const classes: string[] = Array.from(element.classList);
@@ -97,10 +101,29 @@ export const parseLongDefaultId = (id: string): number => {
     return parseInt(numberPart, 10) || 0; // Fallback to 0 if invalid
 }
 
-export const parseSeparator = (input: string): string | null => {
-    const match = input.match(/^([^-]+)/); // matches and returns out the first word before a "-"
-    return match ? match[0] : null;
+export const formatRackId= (str: string) => {
+    // Split the string by hyphens
+    try {// if the rack is default split and correctly display it
+        const parts = str.split('-');
+        // Process each part
+        const formattedParts = parts.map(part => {
+            // Capitalize first letter and lowercase the rest (if it's a word)
+            if (part.length > 0) {
+                return convertToTitleCase(part);
+            }
+            return part;
+        });
+        // Join with spaces
+        return formattedParts.join(' ');
+    }
+    catch {// if the rack is real display it like so
+        return `Rack ${str}`;
+    }
+
+
+
 }
+
 
 export const getNextDefaultRackId = (groups: RackGroup[]): string => {
     // Extract & parse only "default-rack-*" IDs
@@ -207,10 +230,45 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
 }
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
-export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, closeMenuThenDrag?, setSelectedObj?, setCtxMenuStyle?, contextMenuRef?: MutableRefObject<Room>) => {
+export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+    let renderType: 'room' | 'group' | 'rack' | 'cage';
+    let minX;
+    let minY;
+    if((unitsToRender as Room)?.rackGroups){
+        renderType = 'room';
+    } else if((unitsToRender as RackGroup)?.racks){ // we are rendering a single rack group
+        console.log("Rendering Rack Group")
+        renderType = 'group';
+        let tempX = (unitsToRender as RackGroup).x;
+        let tempY = (unitsToRender as RackGroup).y;
+        (unitsToRender as RackGroup).racks.forEach(r => {
+            if(tempX + r.x < tempX){
+                tempX = tempX + r.x;
+            }
+            if(tempY + r.y < tempY){
+                tempY = tempY + r.y;
+            }
+            r.cages.forEach(c => {
+                if(tempX + c.x < tempX){
+                    tempX = tempX + c.x
+                }
+                if(tempY + c.y < tempY){
+                    tempY = tempY + c.y;
+                }
+            })
+        })
+        minX = tempX;
+        minY = tempY;
+    }else if((unitsToRender as Rack)?.cages){ // we are rendering a single rack
+        renderType = 'rack';
+
+    }else{ // we are rendering a single cage
+        renderType = 'cage';
+    }
 
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
+
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.itemId)
             .attr('class', `rack type-${rackTypeString}`)
@@ -228,11 +286,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
                     .node().cloneNode(true) as SVGElement;
             } else if (mode === 'view') {
                 await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
-                    (cageGroup.node() as SVGElement).appendChild(d.documentElement);
-                    console.log("Id: ", cage);
-                    cageGroup.select('#name').selectChild().text(parseRoomItemNum(cage.cageNum));
+                    unitSvg = d.querySelector(`svg[id*=template]`);
                 });
-                return;
             }
 
             // Only needed for layout editor to attach context menus
@@ -241,10 +296,10 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
             shape.style('pointer-events', 'none');
 
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
-
-            setupEditCageEvent(cageGroupContext, setSelectedObj, setCtxMenuStyle, contextMenuRef, rackTypeString);
+            setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,setCtxMenuStyle, rackTypeString);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
             cageGroup.append(() => shape.node());
+
         });
 
         return rackGroup;
@@ -252,6 +307,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
 
     const createGroup = (group: RackGroup) => {
         const isSingleRack = group.racks.length === 1;
+        console.log("Create group")
         const parentGroup = isSingleRack
             ? layoutSvg.append('g')
                 .attr('id', group.racks[0].itemId)
@@ -265,44 +321,72 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', room: Room, layoutSvg: d3
             // Use parent group as rackGroup if only 1 rack, otherwise create a new rack group
             await createRackGroup(parentGroup, rack, isSingleRack);
         });
-        placeAndScaleGroup(parentGroup, group.x, group.y, zoomTransform(layoutSvg.node()));
+        let groupX = renderType === 'room' ? group.x : group.racks[0].x;
+        let groupY = renderType === 'room' ? group.y : group.racks[0].y;
+        placeAndScaleGroup(parentGroup, groupX, groupY, zoomTransform(layoutSvg.node()));
         if (mode === 'edit') {
             parentGroup.call(closeMenuThenDrag);
         }
     };
 
-    room.rackGroups.forEach((group) => {
-        createGroup(group);
-    });
+    // We are loading an entire room into the svg
+    if(renderType === 'room'){
+        (unitsToRender as Room).rackGroups.forEach((group) => {
+            createGroup(group);
+        });
 
-    room.objects.forEach(async (roomObj) => {
-        const roomObjGroup = layoutSvg.append('g')
-            .data([{x: roomObj.x, y: roomObj.y}])
-            .attr('id', roomObj.itemId)
-            .attr('class', 'draggable room-obj')
-            .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === "edit" ? roomObj.scale : 1})`)
-            .style('pointer-events', 'bounding-box');
+        (unitsToRender as Room).objects.forEach(async (roomObj) => {
+            const roomObjGroup = layoutSvg.append('g')
+                .data([{x: roomObj.x, y: roomObj.y}])
+                .attr('id', roomObj.itemId)
+                .attr('class', 'draggable room-obj')
+                .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === "edit" ? roomObj.scale : 1})`)
+                .style('pointer-events', 'bounding-box');
 
-        let objSvg: SVGElement;
+            let objSvg: SVGElement;
 
-        if (mode === 'edit') {
-            objSvg = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
-        } else if (mode === 'view') {
-            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
-                (roomObjGroup.node() as SVGElement).appendChild(d.documentElement);
-            });
-            return;
-        }
+            if (mode === 'edit') {
+                objSvg = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
+            } else if (mode === 'view') {
+                await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
+                    (roomObjGroup.node() as SVGElement).appendChild(d.documentElement);
+                });
+                return;
+            }
 
-        const shape = d3.select(objSvg)
-            .classed('draggable', false)
-            .attr('pointer-events', 'none');
+            const shape = d3.select(objSvg)
+                .classed('draggable', false)
+                .attr('pointer-events', 'none');
 
 
-        roomObjGroup.append(() => shape.node());
-        placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
-        setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, setCtxMenuStyle, contextMenuRef);
-        roomObjGroup.call(closeMenuThenDrag);
-    });
+            roomObjGroup.append(() => shape.node());
+            placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
+            setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            roomObjGroup.call(closeMenuThenDrag);
+        });
+    } else if(renderType === 'group'){ // we are rendering a single rack group
+        console.log("Rendering Rack Group")
+        createGroup(unitsToRender as RackGroup);
+
+    }else if(renderType === 'rack'){ // we are rendering a single rack
+        console.log("Rack Render");
+    }else{ // we are rendering a single cage
+        console.log("Cage Render");
+
+        const cageGroup = layoutSvg.append('g')
+            .attr('id', (unitsToRender as Cage).cageNum)
+            .attr('transform', `translate(0,0)`);
+
+        let unitSvg: SVGElement;
+        d3.svg(`${ActionURL.getContextPath()}/cageui/static/${parseRoomItemType((unitsToRender as Cage).cageNum)}.svg`).then((d) => {
+            unitSvg = d.querySelector(`svg[id*=template]`);
+            const shape = d3.select(unitSvg);
+            (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum((unitsToRender as Cage).cageNum)}`;
+            cageGroup.append(() => shape.node());
+            console.log("Ran Render for Cage");
+        });
+
+
+    }
 
 };

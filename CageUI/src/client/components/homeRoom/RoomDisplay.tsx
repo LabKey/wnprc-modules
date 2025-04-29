@@ -12,16 +12,6 @@ interface DisplayProps {
 // This is the old room home component 2nd to the app page.
 export const RoomDisplay: FC<DisplayProps> = (props) => {
     const {name} = props;
-    const {clickedCage, clickedRack, setCageDetails} = useHomeContext();
-
-    // updates details if they change while popup is open
-    useEffect(() => {
-        if(!clickedCage || !clickedRack) return;
-        const newCageDetails: Cage[] = [clickedCage];
-
-        findDetails(clickedCage, newCageDetails, clickedRack);
-        setCageDetails(newCageDetails);
-    }, [clickedRack, clickedCage]);
 
     return (
         <div className={"room-display"}>

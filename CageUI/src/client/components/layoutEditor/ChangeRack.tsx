@@ -3,6 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { Filter } from '@labkey/api';
 
 
 interface ChangeRackProps {
@@ -28,12 +29,22 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
                 queryName: "racks",
                 columns: ['rackid', 'rack_type']
             }
-            labkeyActionSelectWithPromise(optConfig).then(d => {
-                if(d.rows.length > 0){
+            const rackTypesConfig: SelectRowsOptions = {
+                schemaName: "cageui",
+                queryName: "rack_types",
+                columns: ['name', 'rowid']
+            }
+            const rackPromise = labkeyActionSelectWithPromise(optConfig);
+            const rackTypesPromise = labkeyActionSelectWithPromise(rackTypesConfig);
+
+            Promise.all([rackPromise, rackTypesPromise]).then(([rackResult, rackTypesResult]) => {
+
+                if(rackResult.rows.length > 0){
                     const tmp = [];
 
-                    for (const row of d.rows) {
-                        tmp.push({label: `${row.rackid} - ${row.rack_type}`, value: `${row.rackid}`});
+                    for (const row of rackResult.rows) {
+                        const rackTypeName = rackTypesResult.rows.find(r => r.rowid === parseInt(row.rack_type)).name;
+                        tmp.push({label: `${row.rackid} - ${rackTypeName}`, value: `${row.rackid}`});
                     }
                     setOptions(tmp);
                 }

@@ -10,12 +10,12 @@ import {
     roomItemToString
 } from './helpers';
 import {
-    Cage,
-    CageNumber, DefaultRackId,
+    Cage, CageModification, CageModifications,
+    CageNumber, CageWithMods, DefaultRackId,
     DefaultRackTypes,
     GroupId,
     LayoutHistoryData,
-    LocationCoords,
+    LocationCoords, ModLocations,
     PrevRoom,
     Rack,
     RackGroup,
@@ -46,7 +46,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter, Security } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { Direction } from '../types/homeTypes';
-import { CELL_SIZE } from './constants';
+import { CELL_SIZE, Modifications } from './constants';
 
 
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
@@ -301,8 +301,8 @@ function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
 export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
-    setCtxMenuStyle: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
     localRoomRef: MutableRefObject<Room>,
+    setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
     rackTypeString?: RackStringType
 ): () => void {
     const handleContextMenu = (event: MouseEvent)=> {
@@ -326,12 +326,15 @@ export function setupEditCageEvent(
             })
         }
         setSelectedObj(tempObj);
-        setCtxMenuStyle((prevState) => ({
-            ...prevState,
-            display: 'block',
-            left: `${event.pageX - 10}px`,
-            top: `${event.pageY - 10}px`,
-        }));
+        if(setCtxMenuStyle){
+            setCtxMenuStyle((prevState) => ({
+                ...prevState,
+                display: 'block',
+                left: `${event.pageX - 10}px`,
+                top: `${event.pageY - 10}px`,
+            }));
+        }
+
     };
 
     // Attach context menu to the lowest level group for that cFage.
@@ -377,7 +380,7 @@ export async function mergeRacks(props: MergeProps) {
             element.setAttribute('class',`grouped-${shapeType}`);
             element.setAttribute('style', "");
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, cageActionProps.setCtxMenuStyle, contextMenuRef, shapeType);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, cageActionProps.setCtxMenuStyle, shapeType);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -840,7 +843,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         layoutData: null
     };
     let roomObjNum = 1;
-
+    const loadMods: boolean = !!prevRoom.modData;
     //check if a group exists for the groupId, if it does return, else create new group for the room
     const findOrAddGroup = (rackItem: LayoutHistoryData): RackGroup => {
         // groupId is a single number so check if the GroupId string contains it
@@ -862,35 +865,41 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
-        let rackIdNum = rackItem?.rack;
+        const isDefault = isRackDefault(rackItem.object_type);
+        let rackIdNum;
         let extraContext: ExtraContext;
+        let rackData;
         // if rack is default, use default rack id instead
-        if(!rackIdNum && rackItem.extra_context){
+        if(rackItem.extra_context){
             extraContext = JSON.parse(rackItem.extra_context);
             if(extraContext?.rack?.rackId){
                 rackIdNum = extraContext.rack.rackId;
             }
+        }
+        if(!isDefault){
+            const optConfig: SelectRowsOptions = {
+                schemaName: "cageui",
+                queryName: "racks",
+                filterArray: [
+                    Filter.create('rowid', rackItem.rack, Filter.Types.EQUALS)
+                ]
+            }
+            rackData = await labkeyActionSelectWithPromise(optConfig);
+            if(rackData.rowCount > 0){
+                rackIdNum = rackData.rows[0].rackid;
+            }
+
         }
         let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackIdNum);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
             let rackId: DefaultRackId | RealRackId;
-            let typeName = rackItem;
-            const isDefault = isRackDefault(rackItem.object_type);
+            let typeRowId;
             const rackPrefix = isDefault ?  'default-rack' : 'rack';
 
             if(!isDefault){
-                const optConfig: SelectRowsOptions = {
-                    schemaName: "cageui",
-                    queryName: "racks",
-                    filterArray: [
-                        Filter.create('rackid', rackItem.rack, Filter.Types.EQUALS)
-                    ]
-                }
-
-                const rackData = await labkeyActionSelectWithPromise(optConfig);
-                typeName = rackData.rows[0].rack_type;
+                typeRowId = rackData.rows[0].rack_type;
                 rackId = `${rackPrefix}-${rackIdNum}` as RealRackId;
             }else{
                 rackId = `${rackPrefix}-${rackIdNum}` as DefaultRackId;
@@ -902,14 +911,14 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 schemaName: "cageui",
                 queryName: "rack_types",
                 filterArray: [
-                    Filter.create(isDefault ? 'type' : 'name', isDefault ? rackItem.object_type : typeName, Filter.Types.EQUALS)
+                    Filter.create(isDefault ? 'type' : 'rowid', isDefault ? rackItem.object_type : typeRowId, Filter.Types.EQUALS)
                 ]
             }
 
             const rackTypesData = await labkeyActionSelectWithPromise(optConfig);
 
             type = {
-                rowid: rackTypesData.rows[0].rowid,
+                rowid: typeRowId,
                 name: rackTypesData.rows[0].name,
                 type: isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type,
                 isDefault: isDefault,
@@ -934,6 +943,16 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
         let cageNumType: RoomItemStringType;
         let extraContext: ExtraContext;
+        let cageNum = parseInt(rackItem.cage);
+        let cageMods: CageModifications = {
+            mods: {
+                [ModLocations.Top]: [],
+                [ModLocations.Bottom]: [],
+                [ModLocations.Left]: [],
+                [ModLocations.Right]: [],
+                [ModLocations.Direct]: []
+            }
+        }
         if(rack.type.isDefault){
             cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
         }else{
@@ -943,14 +962,27 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             extraContext = JSON.parse(rackItem.extra_context);
         }
         const svgSize = await getSvgSize(rack.type.type);
-        const cage: Cage = {
-            cageNum: `${cageNumType}-${parseInt(rackItem.cage)}` as CageNumber,
+        //TODO Add mods if needed here
+        if(loadMods && !rack.type.isDefault){
+            console.log("Prev Mods: ", prevRoom.modData);
+            prevRoom.modData.forEach((mod) => {
+                if(rack.itemId === mod.rack && cageNum === mod.cage){
+                    (cageMods.mods[mod.location] as CageModification[]).push({
+                        id: mod.locationId,
+                        mod: mod.modification
+                    })
+                }
+            })
+        }
+        const cage: CageWithMods = {
+            cageNum: `${cageNumType}-${cageNum}` as CageNumber,
             extraContext: extraContext?.cage,
             selectionType: 'cage',
             id: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
-            size: svgSize
+            size: svgSize,
+            mods: cageMods.mods
         }
         rack.cages.push(cage);
     }
@@ -1101,4 +1133,23 @@ export const dragBorder = (closeMenu, gridSize, borderGroup, setLocalRoom) => {
                 createEndResizeDrag(setLocalRoom).call(this, event);
             }
         })
+}
+
+export const getNextGroupId = (groups: RackGroup[]): GroupId => {
+    // Extract all numbers from existing groupIds
+    const existingNumbers = groups
+        .map(obj => {
+            const match = obj.groupId.match(/^rack-group-(\d+)$/);
+            return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(num => !isNaN(num) && num > 0); // Filter out invalid numbers
+
+    // If no valid groupIds found, start with 1
+    if (existingNumbers.length === 0) {
+        return 'rack-group-1';
+    }
+
+    // Find the highest number and add 1
+    const maxNumber = Math.max(...existingNumbers);
+    return `rack-group-${maxNumber + 1}`;
 }

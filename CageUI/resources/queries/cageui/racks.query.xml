@@ -8,7 +8,14 @@
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="rackid"/>
-                    <column columnName="rack_type"/>
+                    <column columnName="rack_type">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>rack_types</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

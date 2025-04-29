@@ -9,6 +9,7 @@ import { Direction, SelectedMods } from '../../../types/homeTypes';
 import { ModificationSelect } from './ModificationSelect';
 import { parseRoomItemType, stringToRoomItem } from '../../../utils/helpers';
 import { Button } from 'react-bootstrap';
+import { CurrentRackLayout } from './CurrentRackLayout';
 
 export const RackModifications: FC = () => {
     const {selectedPage, selectedRoom, selectedRack, selectedRackMods} = useHomeContext();
@@ -64,132 +65,142 @@ export const RackModifications: FC = () => {
 
     return (
         <div className={"mod-container"}>
-            <div className={"mod-table-container"}>
-                <h2>Unconnected cages</h2>
-                <ul className={"mod-table"}>
-                    <li className={"mod-table-row mod-table-header"}>
-                        <div className={"mod-table-column"}>Cage</div>
-                        <div className={"mod-table-column"}>Modification</div>
-                    </li>
-                    {aloneCages && aloneCages.map((cage, idx) => {
-                        return (
-                            <li className={"mod-table-row"} key={`alone-row-${idx}`} >
-                                <div className={"mod-table-column"} key={`alone-${cage.cageNum}-${idx}`}>
-                                    {cage.cageNum}
-                                </div>
-                                <div className={"mod-table-column"} key={`alone-mod-${idx}`}>
-                                    <ModificationSelect
-                                        type={stringToRoomItem(parseRoomItemType(cage.cageNum) as RackStringType) as RackTypes}
-                                        cage={cage}
-                                        rack={selectedRack}
-                                    />
-                                </div>
+            <div className={"mod-container-columns"}>
+                <div className={"mod-container-column"}>
+                    <div className={"mod-table-container"}>
+                        <h2>Unconnected cages</h2>
+                        <ul className={"mod-table"}>
+                            <li className={"mod-table-row mod-table-header"}>
+                                <div className={"mod-table-column"}>Cage</div>
+                                <div className={"mod-table-column"}>Modification</div>
                             </li>
-                        );
-                    })}
-                </ul>
+                            {aloneCages && aloneCages.map((cage, idx) => {
+                                return (
+                                    <li className={"mod-table-row"} key={`alone-row-${idx}`} >
+                                        <div className={"mod-table-column"} key={`alone-${cage.cageNum}-${idx}`}>
+                                            {cage.cageNum}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`alone-mod-${idx}`}>
+                                            <ModificationSelect
+                                                type={stringToRoomItem(parseRoomItemType(cage.cageNum) as RackStringType) as RackTypes}
+                                                cage={cage}
+                                                rack={selectedRack}
+                                            />
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
 
-                <h2>Adjacent cages inside current rack</h2>
-                <ul className={"mod-table"}>
-                    <li className={"mod-table-row mod-table-header"}>
-                        <div className={"mod-table-column"}>Cage</div>
-                        <div className={"mod-table-column"}>Modification</div>
-                        <div className={"mod-table-column"}>Direction</div>
-                        <div className={"mod-table-column"}>Cage</div>
-                        <div className={"mod-table-column"}>Modification</div>
-                    </li>
-                    {connectedCages && connectedCages.map((cages, idx) => {
-                        return (
-                            <li className={"mod-table-row"} key={`adj-inside-row-${idx}`} >
-                                <div className={"mod-table-column"} key={`adj-inside-${cages[2].cageNum}-${idx}`}>
-                                    {cages[2].cageNum}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-inside-mod-left-${idx}`}>
-                                    <ModificationSelect
-                                        type={stringToRoomItem(parseRoomItemType(cages[2].cageNum) as RackStringType) as RackTypes}
-                                        direction={cages[1]}
-                                        cage={cages[2]}
-                                        rack={selectedRack}
-                                    />
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-inside-dir-${idx}`}>
-                                    {cages[1] === "left" || cages[1] === "right" ? `${cages[1]} of` : cages[1]}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-inside-${cages[0].cageNum}-${idx}`}>
-                                    {cages[0].cageNum}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-inside-mod-right-${idx}`}>
-                                    <ModificationSelect
-                                        type={stringToRoomItem(parseRoomItemType(cages[0].cageNum) as RackStringType) as RackTypes}
-                                        direction={cages[1]}
-                                        cage={cages[0]}
-                                        rack={selectedRack}
-                                    />
-                                </div>
+                        <h2>Adjacent cages inside current rack</h2>
+                        <ul className={"mod-table"}>
+                            <li className={"mod-table-row mod-table-header"}>
+                                <div className={"mod-table-column"}>Cage</div>
+                                <div className={"mod-table-column"}>Modification</div>
+                                <div className={"mod-table-column"}>Direction</div>
+                                <div className={"mod-table-column"}>Cage</div>
+                                <div className={"mod-table-column"}>Modification</div>
                             </li>
-                        );
-                    })}
-                </ul>
+                            {connectedCages && connectedCages.map((cages, idx) => {
+                                return (
+                                    <li className={"mod-table-row"} key={`adj-inside-row-${idx}`} >
+                                        <div className={"mod-table-column"} key={`adj-inside-${cages[2].cageNum}-${idx}`}>
+                                            {cages[2].cageNum}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-inside-mod-left-${idx}`}>
+                                            <ModificationSelect
+                                                type={stringToRoomItem(parseRoomItemType(cages[2].cageNum) as RackStringType) as RackTypes}
+                                                direction={cages[1]}
+                                                cage={cages[2]}
+                                                rack={selectedRack}
+                                            />
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-inside-dir-${idx}`}>
+                                            {cages[1] === "left" || cages[1] === "right" ? `${cages[1]} of` : cages[1]}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-inside-${cages[0].cageNum}-${idx}`}>
+                                            {cages[0].cageNum}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-inside-mod-right-${idx}`}>
+                                            <ModificationSelect
+                                                type={stringToRoomItem(parseRoomItemType(cages[0].cageNum) as RackStringType) as RackTypes}
+                                                direction={cages[1]}
+                                                cage={cages[0]}
+                                                rack={selectedRack}
+                                            />
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
 
-                <h2>
-                    Adjacent cages outside current rack
-                </h2>
-                <ul className={"mod-table"}>
-                    <li className={"mod-table-row mod-table-header"}>
-                        <div className={"mod-table-column"}>Rack</div>
-                        <div className={"mod-table-column"}>Cage</div>
-                        <div className={"mod-table-column"}>Modification</div>
-                        <div className={"mod-table-column"}>Direction</div>
-                        <div className={"mod-table-column"}>Rack</div>
-                        <div className={"mod-table-column"}>Cage</div>
-                        <div className={"mod-table-column"}>Modification</div>
-                    </li>
-                    {connectedRacks && connectedRacks.map((pairs, idx) => {
-                        return (
-                            <li className={"mod-table-row"} key={`adj-outside-row-${idx}`} >
-                                <div className={"mod-table-column"} key={`adj-outside-rack-left-${pairs[2][0].itemId} - ${idx}`}>
-                                    {pairs[2][0].itemId}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-outside-cage-left-${pairs[2][1].cageNum}-${idx}`}>
-                                    {pairs[2][1].cageNum}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-outside-mod-left-${idx}`}>
-                                    <ModificationSelect
-                                        type={pairs[2][0].type.type}
-                                        direction={pairs[1]}
-                                        cage={pairs[2][1]}
-                                        rack={pairs[2][0]}
-                                    />
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-outside-dir-${idx}`}>
-                                    {pairs[1] === "left" || pairs[1] === "right" ? `${pairs[1]} of` : pairs[1]}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-outside-rack-right${pairs[0][0].itemId} - ${idx}`}>
-                                    {pairs[0][0].itemId}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-outside-cage-right${pairs[0][1].cageNum} - ${idx}`}>
-                                    {pairs[0][1].cageNum}
-                                </div>
-                                <div className={"mod-table-column"} key={`adj-outside-mod-right-${idx}`}>
-                                    <ModificationSelect
-                                        type={pairs[0][0].type.type}
-                                        direction={pairs[1]}
-                                        cage={pairs[0][1]}
-                                        rack={pairs[0][0]}
-                                    />
-                                </div>
+                        <h2>
+                            Adjacent cages outside current rack
+                        </h2>
+                        <ul className={"mod-table"}>
+                            <li className={"mod-table-row mod-table-header"}>
+                                <div className={"mod-table-column"}>Rack</div>
+                                <div className={"mod-table-column"}>Cage</div>
+                                <div className={"mod-table-column"}>Modification</div>
+                                <div className={"mod-table-column"}>Direction</div>
+                                <div className={"mod-table-column"}>Rack</div>
+                                <div className={"mod-table-column"}>Cage</div>
+                                <div className={"mod-table-column"}>Modification</div>
                             </li>
-                        );
-                    })}
-                </ul>
+                            {connectedRacks && connectedRacks.map((pairs, idx) => {
+                                return (
+                                    <li className={"mod-table-row"} key={`adj-outside-row-${idx}`} >
+                                        <div className={"mod-table-column"} key={`adj-outside-rack-left-${pairs[2][0].itemId} - ${idx}`}>
+                                            {pairs[2][0].itemId}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-outside-cage-left-${pairs[2][1].cageNum}-${idx}`}>
+                                            {pairs[2][1].cageNum}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-outside-mod-left-${idx}`}>
+                                            <ModificationSelect
+                                                type={pairs[2][0].type.type}
+                                                direction={pairs[1]}
+                                                cage={pairs[2][1]}
+                                                rack={pairs[2][0]}
+                                            />
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-outside-dir-${idx}`}>
+                                            {pairs[1] === "left" || pairs[1] === "right" ? `${pairs[1]} of` : pairs[1]}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-outside-rack-right${pairs[0][0].itemId} - ${idx}`}>
+                                            {pairs[0][0].itemId}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-outside-cage-right${pairs[0][1].cageNum} - ${idx}`}>
+                                            {pairs[0][1].cageNum}
+                                        </div>
+                                        <div className={"mod-table-column"} key={`adj-outside-mod-right-${idx}`}>
+                                            <ModificationSelect
+                                                type={pairs[0][0].type.type}
+                                                direction={pairs[1]}
+                                                cage={pairs[0][1]}
+                                                rack={pairs[0][0]}
+                                            />
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                </div>
+                <div className={"mod-container-column"}>
+                    <CurrentRackLayout />
+                </div>
             </div>
-            <Button
-                as={"input"}
-                type={"button"}
-                value={"Save"}
-                disabled={false}
-                onClick={handleModSave}
-            />
+
+            <div className={"mod-container-row"}>
+                <Button
+                    as={"input"}
+                    type={"button"}
+                    value={"Save"}
+                    disabled={false}
+                    onClick={handleModSave}
+                />
+            </div>
         </div>
     );
 }

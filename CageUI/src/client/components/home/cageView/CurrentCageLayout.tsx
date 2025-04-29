@@ -1,0 +1,35 @@
+import * as React from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
+import '../../../cageui.scss';
+import { useHomeContext } from '../../../context/HomeContextManager';
+import { addPrevRoomSvgs } from '../../../utils/helpers';
+import * as d3 from 'd3';
+import { Cage, DefaultRackTypes, RackTypes, RoomItemType } from '../../../types/typings';
+import { CELL_SIZE } from '../../../utils/constants';
+
+interface CurrentCageLayoutProps {
+    cage: Cage;
+}
+
+export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
+    const {cage} = props;
+    const {selectedPage, selectedRoom, selectedRack, selectedRackGroup, selectedCage} = useHomeContext();
+    const cageRef = useRef<SVGSVGElement>(null);
+
+    useEffect(() => {
+        if(!cageRef.current) return;
+        const cageSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select(cageRef.current);
+        addPrevRoomSvgs('view', cage, cageSvg);
+    }, [cage]);
+
+    return (
+        <div className={'cage-layout'}>
+            <svg id={'cage-svg'}
+                 ref={cageRef}
+                 width={cage.size * CELL_SIZE}
+                 height={cage.size * CELL_SIZE}
+                 viewBox={`0 0 ${cage.size * CELL_SIZE} ${cage.size * CELL_SIZE}`}
+            />
+        </div>
+    );
+}

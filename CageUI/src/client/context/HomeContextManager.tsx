@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Cage, PrevRoom, Rack, Room, RoomItem } from '../types/typings';
+import { Cage, CageNumber, CageWithMods, ModData, PrevRoom, Rack, RackGroup, Room, RoomItem } from '../types/typings';
 import { removeCircularReferences } from '../utils/homeHelpers';
 import { HomeContextType } from '../types/homeContextTypes';
 import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, SelectedMods, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
-import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
-import { buildNewLocalRoom, findRackInGroup } from '../utils/LayoutEditorHelpers';
+import { labkeyActionSelectDistinctWithPromise, labkeyActionSelectWithPromise } from '../api/labkeyActions';
+import { buildNewLocalRoom, findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { selectDistinctRows } from '@labkey/components';
+import { extractNumbers, parseRoomItemNum } from '../utils/helpers';
 
 
 const HomeContext = createContext<HomeContextType>({} as HomeContextType);
@@ -28,33 +29,24 @@ export const HomeContextProvider = ({children}) => {
     // New state management
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: "Home"});
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
+    const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
+    const [selectedCage, setSelectedCage] = useState<CageWithMods>(null);
     const [abortController, setAbortController] = useState(null);
     const [selectedRackMods, setSelectedRackMods] = useState<SelectedMods>([]);
 
     // map of loaded rooms, loaded means fetched from layout_history
     const [loadedRooms, setLoadedRooms] = useState<LoadedRooms>({});
 
-
-
-    // End new state management
-
-    const [room, setRoom] = useState<RoomItem[]>([]);
-    const [clickedCage, setClickedCage] = useState<Cage>();
-    const [cageDetails, setCageDetails] = useState<Cage[]>([]);
-    const [clickedRack, setClickedRack] = useState<Rack>();
-    const [isEditingRoom, setIsEditingRoom] = useState<boolean>(false);
-    const [isEditEnabled, setIsEditEnabled] = useState<boolean>(true);
-    const [isDirty, setIsDirty] = useState<boolean>(false);
-    const [modRows, setModRows] = useState<React.JSX.Element[]>([]);
-    const [isDraggingEnabled, setIsDraggingEnabled] = useState<boolean>(false);
-    const [cageCount, setCageCount] = useState<number>(0);
-
     /*
     Context for room svg
      */
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        console.log("Page: ", selectedPage)
+    }, [selectedPage]);
 
     useEffect(() => {
         const roomConfig = {
@@ -112,18 +104,58 @@ export const HomeContextProvider = ({children}) => {
             ],
             sort: "-rack_group",
         }
-
+        const modHistoryConfig = {
+            schemaName: 'cageui',
+            queryName: 'cage_modifications',
+            columns: [],
+            filterArray: [
+                Filter.create('room', selectedPage.room, Filter.Types.EQUALS),
+                Filter.create('end_date', null, Filter.Types.ISBLANK),
+            ]
+        }
         // Ensures request is canceled if user clicks on a new room before return
         const newAbortController = new AbortController();
         setAbortController(newAbortController);
+        const modReturnPromise = labkeyActionSelectWithPromise(modHistoryConfig, newAbortController.signal);
+        const layoutReturnPromise = labkeyActionSelectWithPromise(layoutHistoryConfig, newAbortController.signal);
 
-        labkeyActionSelectWithPromise(layoutHistoryConfig, newAbortController.signal).then((d) => {
+        Promise.all([modReturnPromise, layoutReturnPromise]).then(([modResult, historyResult]) => {
             let tempNewRoom: Room = loadedRooms[selectedPage.room].room;
-            if(d.rowCount > 0) {
+            if(historyResult.rowCount > 0) {
+                const tempModData: ModData[] = [];
+                if(modResult.rowCount > 0){
+                    modResult.rows.forEach((row) => {
+                        const cageConfig = {
+                            schemaName: 'ehr_lookups',
+                            queryName: 'cage',
+                            column: 'cage',
+                            filterArray: [
+                                Filter.create('rowid', row.cage, Filter.Types.EQUALS),
+                            ]
+                        }
+                        labkeyActionSelectDistinctWithPromise(cageConfig, newAbortController.signal).then((cageResult) => {
+                            if(cageResult.values.length === 1){
+                                const newRow: ModData = {
+                                    cage: extractNumbers(cageResult.values[0]),
+                                    location: row.location,
+                                    locationId: row.locationid,
+                                    modification: row.modification,
+                                    rack: typeof row.rack === 'string' ? row.rack : `rack-${row.rack}`,
+                                    room: row.room,
+                                    rowid: row.rowid
+                                };
+                                tempModData.push(newRow);
+                            }
+                        });
+                    })
+                }
+
+
                 const prevRoom: PrevRoom = {
                     name: selectedPage.room,
-                    cagingData: d.rows,
+                    cagingData: historyResult.rows,
                     layoutData: tempNewRoom.layoutData,
+                    modData: modResult.rowCount > 0 ? tempModData : undefined,
                 }
                 buildNewLocalRoom(prevRoom).then((d) => {
                     if(d){
@@ -142,7 +174,6 @@ export const HomeContextProvider = ({children}) => {
             }else{
                 setSelectedRoom(tempNewRoom);
             }
-
         }).catch((err) => {
             console.error(err);
         })
@@ -151,26 +182,23 @@ export const HomeContextProvider = ({children}) => {
     useEffect(() => {
         if(!selectedPage?.rack) return;
         //TODO Fetch mods for rack here as well and then set the rack and rack mods
+        const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
+        setSelectedRack(currRack);
+        setSelectedRackGroup(currGroup);
+        setSelectedRackMods([]);//TODO FIX
+    }, [selectedPage.rack]);
 
-        selectedRoom.rackGroups.forEach((group) => {
-            group.racks.forEach(rack => {
-                if(rack.type.isDefault){
-                    if(rack.extraContext.rackId.toString() === selectedPage.rack){
-                        setSelectedRack(rack);
-                        setSelectedRackMods([]);//TODO FIX
-                    }
-                }else{
-                    if(rack.itemId === selectedPage.rack){
-                        setSelectedRack(rack);
-                        setSelectedRackMods([]);//TODO FIX
-                    }
-                }
-            })
-        });
+    useEffect(() => {
+        if(!selectedPage?.cage) return;
+
+        const {cage: currCage, rack: currRack, rackGroup: currGroup} = findCageInGroup(selectedPage.cage as CageNumber, selectedRoom.rackGroups);
+        setSelectedRackGroup(currGroup)
+        setSelectedRack(currRack)
+        setSelectedCage(currCage)
 
         console.log("Changing rack");
 
-    }, [selectedPage.rack]);
+    }, [selectedPage.cage]);
 
 
     /*
@@ -199,34 +227,16 @@ export const HomeContextProvider = ({children}) => {
 
     return (
         <HomeContext.Provider value={{
-            room,
-            setRoom,
-            clickedCage,
-            setClickedCage,
-            clickedRack,
-            setClickedRack,
-            isEditingRoom,
-            setIsEditingRoom,
-            modRows,
-            setModRows,
-            cageDetails,
-            setCageDetails,
-            isDirty,
-            setIsDirty,
-            isEditEnabled,
-            setIsEditEnabled,
-            loading,
-            error,
-            isDraggingEnabled,
-            setIsDraggingEnabled,
             selectedPage,
             setSelectedPage,
-            cageCount,
+            loading,
+            error,
             selectedRoom,
             loadedRooms,
             setLoadedRooms,
+            selectedRackGroup,
             selectedRack,
-            setSelectedRack,
+            selectedCage,
             selectedRackMods,
             setSelectedRackMods
         }}>

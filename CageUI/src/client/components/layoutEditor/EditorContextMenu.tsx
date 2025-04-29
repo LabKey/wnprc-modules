@@ -26,9 +26,9 @@ interface EditorContextMenuProps {
         left: string;
     };
     type: "object" | 'caging'; // context menu for caging or room objects
-    onClickDelete: (type?: string) => void;
     selectedObj: SelectedObj;
     closeMenu: () => void;
+    onClickDelete?: (type?: string) => void;
     menuItems?: {element: ReactElement, types: RoomItemType[], title: string}[]; // for types, an array of types to render this element for. If empty it will render the component for all types.
 }
 

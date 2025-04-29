@@ -1,6 +1,6 @@
 import { convertToTitleCase, zeroPadName } from './helpers';
-import { Cage, Rack, RackGroup, RackTypes, UnitType } from '../types/typings';
-import { Direction, Modifications, ModTypes } from '../types/homeTypes';
+import { Cage, ModTypes, Rack, RackGroup, RackTypes, UnitType } from '../types/typings';
+import { Direction } from '../types/homeTypes';
 
 function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: number; y: number } {
     // Calculate the global position of the box
@@ -291,27 +291,27 @@ export const convertLocationName = (keyName: string) => {
     const convertedWords = words.map((word) => convertToTitleCase(word));
     return convertedWords.join(' ');
 }
-
-// Helper function to get the correct mods for the dropdowns in cage details
-export const getModOptions = (key) => {
-    const dividerOptions= [];
-
-    const floorOptions = [];
-
-    const extraOptions = [];
-
-    Object.keys(Modifications).forEach((mod, idx) => {
-        if(mod.includes("Divider")){
-            dividerOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
-        }else if(mod.includes("Floor")) {
-            floorOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
-        }else {
-            extraOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
-        }
-    });
-
-    return key.toLowerCase().includes("divider") ? dividerOptions : key.toLowerCase().includes("floor") ? floorOptions : extraOptions;
-}
+//
+// // Helper function to get the correct mods for the dropdowns in cage details
+// export const getModOptions = (key) => {
+//     const dividerOptions= [];
+//
+//     const floorOptions = [];
+//
+//     const extraOptions = [];
+//
+//     Object.keys(Modifications).forEach((mod, idx) => {
+//         if(mod.includes("Divider")){
+//             dividerOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
+//         }else if(mod.includes("Floor")) {
+//             floorOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
+//         }else {
+//             extraOptions.push({value: Modifications[mod].mod, label: Modifications[mod].name});
+//         }
+//     });
+//
+//     return key.toLowerCase().includes("divider") ? dividerOptions : key.toLowerCase().includes("floor") ? floorOptions : extraOptions;
+// }
 
 // Helper function to find the cage divider positioning for the svg
 const getCageDividers = (totalCages, position, cageId, direction) => {
@@ -493,65 +493,65 @@ export const findAffCages = (mod: string, cage: Cage) => {
     }
     return affCageName;
 }*/
-
-export const changeCageModArray = (updateId: number, setClickedCagePartners, modKey: string, event) => {
-    setClickedCagePartners(prevState => {
-        return prevState.map(cage =>
-            cage.id === updateId ? {
-                ...cage,
-                cageState: {
-                    ...cage.cageState,
-                    [modKey]: {
-                        ...cage.cageState[modKey],
-                        modData: {
-                            ...cage.cageState[modKey].modData,
-                            mod: Object.values(Modifications).find(mod => mod.mod === event.value)
-                        }
-                    }
-                }
-            } : cage
-        );
-    });
-}
-
-export const changeCageMod = (setClickedCage, modKey: string, event?) => {
-    setClickedCage(prevState => ({
-        ...prevState,
-        cageState: {
-            ...prevState.cageState,
-            [modKey]: {
-                ...prevState.cageState[modKey],
-                modData: {
-                    ...prevState.cageState[modKey].modData,
-                    mod: Object.values(Modifications).find((mod) => mod.mod === event.value)
-                }
-            }
-        }
-    }));
-}
-
-export const updateClickedRack = (setClickedRack, modKey: string, cageId: number, event) => {
-    setClickedRack(prevState => ({
-        ...prevState,
-        cages: prevState.cages.map(cage =>
-            cage.id === cageId
-                ? {
-                    ...cage,
-                    cageState: {
-                        ...cage.cageState,
-                        [modKey]: {
-                            ...cage.cageState?.[modKey],
-                            modData: {
-                                ...cage.cageState?.[modKey]?.modData,
-                                mod: Object.values(Modifications).find(mod => mod.mod === event.value)
-                            }
-                        }
-                    }
-                }
-                : cage
-        )
-    }));
-}
+//
+// export const changeCageModArray = (updateId: number, setClickedCagePartners, modKey: string, event) => {
+//     setClickedCagePartners(prevState => {
+//         return prevState.map(cage =>
+//             cage.id === updateId ? {
+//                 ...cage,
+//                 cageState: {
+//                     ...cage.cageState,
+//                     [modKey]: {
+//                         ...cage.cageState[modKey],
+//                         modData: {
+//                             ...cage.cageState[modKey].modData,
+//                             mod: Object.values(Modifications).find(mod => mod.mod === event.value)
+//                         }
+//                     }
+//                 }
+//             } : cage
+//         );
+//     });
+// }
+//
+// export const changeCageMod = (setClickedCage, modKey: string, event?) => {
+//     setClickedCage(prevState => ({
+//         ...prevState,
+//         cageState: {
+//             ...prevState.cageState,
+//             [modKey]: {
+//                 ...prevState.cageState[modKey],
+//                 modData: {
+//                     ...prevState.cageState[modKey].modData,
+//                     mod: Object.values(Modifications).find((mod) => mod.mod === event.value)
+//                 }
+//             }
+//         }
+//     }));
+// }
+//
+// export const updateClickedRack = (setClickedRack, modKey: string, cageId: number, event) => {
+//     setClickedRack(prevState => ({
+//         ...prevState,
+//         cages: prevState.cages.map(cage =>
+//             cage.id === cageId
+//                 ? {
+//                     ...cage,
+//                     cageState: {
+//                         ...cage.cageState,
+//                         [modKey]: {
+//                             ...cage.cageState?.[modKey],
+//                             modData: {
+//                                 ...cage.cageState?.[modKey]?.modData,
+//                                 mod: Object.values(Modifications).find(mod => mod.mod === event.value)
+//                             }
+//                         }
+//                     }
+//                 }
+//                 : cage
+//         )
+//     }));
+// }
 
 /*
 Recursive helper function to find all the modifications attached to a cage.

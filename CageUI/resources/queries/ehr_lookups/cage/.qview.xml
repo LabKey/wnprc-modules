@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="rowid"/>
+        <column name="location"/>
+        <column name="room"/>
+        <column name="cage" />
+        <column name="cage_type"/>
+        <column name="divider"/>
+        <column name="length"/>
+        <column name="width"/>
+        <column name="height"/>
+        <column name="hasTunnel"/>
+        <column name="joinToCage"/>
+        <column name="status"/>
+    </columns>
+</customView>

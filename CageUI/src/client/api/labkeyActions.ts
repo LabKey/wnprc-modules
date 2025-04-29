@@ -2,6 +2,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { ActionURL, Query, Security } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
+import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 
 export function labkeyActionSelectWithPromise(
     options: SelectRowsOptions,
@@ -11,6 +12,27 @@ export function labkeyActionSelectWithPromise(
         options.success = (data) => {resolve(data)};
         options.failure = (data) => {reject(data)};
         Query.selectRows(options);
+        if(signal){
+            if (signal.aborted) {
+                reject(new DOMException('Aborted', 'AbortError'));
+            }
+
+            // Listen for the abort event
+            signal.addEventListener('abort', () => {
+                reject(new DOMException('Aborted', 'AbortError'));
+            });
+        }
+    });
+}
+
+export function labkeyActionSelectDistinctWithPromise(
+    options: SelectDistinctOptions,
+    signal?: any
+): Promise<any> {
+    return new Promise((resolve, reject) => {
+        options.success = (data) => {resolve(data)};
+        options.failure = (data) => {reject(data)};
+        Query.selectDistinctRows(options);
         if(signal){
             if (signal.aborted) {
                 reject(new DOMException('Aborted', 'AbortError'));

@@ -1117,6 +1117,32 @@ margin-bottom: 10px;
   background-color: #007bff; /* Blue underline on hover */
 }
 
+
+.mod-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.mod-container-columns {
+  display: flex;
+  gap: 20px; /* space between columns */
+  margin-bottom: 20px; /* space between columns and full row */
+}
+
+.mod-container-column {
+  flex: 1;
+  padding: 20px;
+  background: #f0f0f0;
+  box-sizing: border-box;
+}
+
+.mod-container-row {
+  width: 100%;
+  padding: 20px;
+  background: #e0e0e0; /* for visualization */
+  box-sizing: border-box;
+}
+
 // Mod table css
 .mod-table-container {
   max-width: 3000px;
@@ -1156,4 +1182,135 @@ margin-bottom: 10px;
   white-space: nowrap; /* Prevent text wrapping */
   min-width: 100px; /* Set a minimum width for columns */
   text-align: center; /* Center text horizontally */
+}
+
+.small-svg {
+  margin-inside: 10px;
+}
+
+.small-svg svg {
+  overflow: scroll;
+}
+.small-svg g {
+  overflow: scroll;
+}
+
+.cage-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.cage-layout svg {
+  display: block;
+  margin: auto;
+}
+
+
+.modification-editor-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  width: auto;
+  max-width: 400px;
+  min-width: 300px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modification-editor-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.modification-editor-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modification-editor-popup-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modification-editor-popup-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
+.modification-editor-popup-close:hover {
+  color: #333;
+}
+
+.modification-editor-popup-content {
+  margin-bottom: 20px;
+}
+
+.modification-editor-popup-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.modification-editor-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modification-editor-popup-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.modification-editor-popup-save {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.modification-editor-popup-save:hover {
+  background-color: #45a049;
+}
+
+.modification-editor-popup-cancel {
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.modification-editor-popup-cancel:hover {
+  background-color: #e7e7e7;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }

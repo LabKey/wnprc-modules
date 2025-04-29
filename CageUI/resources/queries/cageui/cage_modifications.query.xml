@@ -7,17 +7,47 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="room"/>
+                    <column columnName="room">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                            <fkDisplayColumnName>room</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="rack">
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>racks</fkTable>
-                            <fkColumnName>rackid</fkColumnName>
-                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>rack_type</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="cage"/>
-                    <column columnName="modification" />
+                    <column columnName="cage">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cage</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>location</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="modification">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_modifications</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="locationid" />
+                    <column columnName="location">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_modification_locations</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="startDate"/>
                     <column columnName="endDate"/>
                     <column columnName="createdby"/>

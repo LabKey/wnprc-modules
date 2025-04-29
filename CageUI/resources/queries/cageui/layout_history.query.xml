@@ -7,11 +7,35 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="room"/>
-                    <column columnName="object_type"/>
+                    <column columnName="room">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="extra_context"/>
+                    <column columnName="object_type">
+                        <datatype>integer</datatype>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_item_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="rack_group"/>
-                    <column columnName="rack"/>
-                    <column columnName="cage"/>
+                    <column columnName="rack">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>racks</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cage">
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                    </column>
                     <column columnName="start_date"/>
                     <column columnName="end_date"/>
                     <column columnName="x_coord"/>

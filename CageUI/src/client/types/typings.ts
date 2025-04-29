@@ -36,6 +36,31 @@ export enum RoomObjectTypes {
     GateOpen = 104,
 }
 
+// value in the cage modifications table in EHR
+export enum ModTypes {
+    StandardFloor='sf',
+    MeshFloor='mf',
+    MeshFloorX2='dmf',
+    NoFloor='nf',
+    SolidDivider='sd',
+    PCDivider='pcd', // protected contact
+    VCDivider='vcd', // visual contact
+    PrivacyDivider='pd',
+    NoDivider='nd',
+    CTunnel='ct',
+    Extension='ex',
+    PlayCage='pc',
+}
+
+export enum ModLocations {
+    Left,
+    Right,
+    Top,
+    Bottom,
+    Direct
+}
+
+
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
 export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
@@ -56,6 +81,21 @@ export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
 // Classification of the objects, caging is for racks/cages/rack groups, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
 
+export type Modification = {
+    name: string;
+    styles: {
+        property: string;
+        value: string;
+    }[]
+}
+
+export type ModRecord = Record<ModTypes, Modification>;
+
+export type CageModification = {
+    id: number; // id for duplicate mods in the same location, imagine 2 cages on one side of a pen
+    mod: ModTypes; // Use mod in the Modifications constant to get styles for mod
+}
+
 export interface Cage {
     id: number; // Id local to rack
     selectionType: SelectionType;
@@ -63,16 +103,19 @@ export interface Cage {
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
     size: number; // length in cells of cage square of svg image
-//    adjCages: AdjCages;
     extraContext?:  {[key: string]: any}; // extra context if needed for cage
 }
 
-// with respect to the "front" of the cage
-export interface AdjCages {
-    leftCage: Cage[];
-    rightCage: Cage[];
-    floorCage: Cage[];
-    ceilingCage: Cage[];
+export type CageWithMods = Cage & Partial<CageModifications>;
+
+export interface CageModifications {
+    mods: {
+        [ModLocations.Top]: CageModification[]
+        [ModLocations.Bottom]: CageModification[];
+        [ModLocations.Left]: CageModification[];
+        [ModLocations.Right]: CageModification[];
+        [ModLocations.Direct]: CageModification[];
+    };
 }
 
 export interface Room {
@@ -106,7 +149,18 @@ export interface LayoutHistoryData {
 export interface PrevRoom {
     cagingData: LayoutHistoryData[];
     layoutData: LayoutData;
+    modData?: ModData[];
     name: string | null;
+}
+
+export interface ModData {
+    rowid: number;
+    room: string;
+    rack: string;
+    cage: number;
+    location: ModLocations;
+    locationId: number;
+    modification: ModTypes;
 }
 
 export interface RackGroup {
@@ -122,7 +176,7 @@ export interface Rack {
     itemId: DefaultRackId | RealRackId; // rack id
     selectionType: SelectionType;
     type: UnitType;
-    cages: Cage[];
+    cages: CageWithMods[];
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
     isActive?: boolean; // Determines if rack is "in use or active"

@@ -1,14 +1,19 @@
 import * as React from 'react';
 import * as d3 from 'd3';
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { ActionURL, Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
 import { ReactSVG } from 'react-svg';
-import { LayoutData } from '../../../types/typings';
+import { Cage, LayoutData, RoomItem, RoomItemType } from '../../../types/typings';
 import { useHomeContext } from '../../../context/HomeContextManager';
-import { addPrevRoomSvgs } from '../../../utils/helpers';
+import { addPrevRoomSvgs, parseRoomItemNum } from '../../../utils/helpers';
 import { updateBorderSize } from '../../../utils/LayoutEditorHelpers';
+import { SelectedObj } from '../../../types/layoutEditorTypes';
+import { ChangeRack } from '../../layoutEditor/ChangeRack';
+import { TextInput } from '../../TextInput';
+import { EditorContextMenu } from '../../layoutEditor/EditorContextMenu';
+import { ModificationEditor } from './ModificationEditor';
 
 interface RoomLayoutProps {
 
@@ -16,18 +21,36 @@ interface RoomLayoutProps {
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {selectedRoom} = useHomeContext();
+    const [selectedObj, setSelectedObj] = useState<SelectedObj>(null);
+    const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const borderRef = useRef(null);
+    const contextRef = useRef(selectedRoom);
 
     useEffect(() => {
         console.log("SR: ", selectedRoom);
     }, [selectedRoom]);
 
+    // Loads room into the svg
     useEffect(() => {
         if(!selectedRoom.name) return;
         d3.select("#layout-svg").selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg);
+        contextRef.current = selectedRoom;
+        addPrevRoomSvgs('view', selectedRoom, layoutSvg, setSelectedObj, contextRef);
     }, [selectedRoom.name]);
+
+    // Effect watches for right clicks to open the modification editor
+    useEffect(() => {
+        if(selectedObj){
+            setShowCageContextMenu(true);
+        }
+    }, [selectedObj]);
+
+    // Cleans up selected object after modification editor is closed
+    useEffect(() => {
+        if(showCageContextMenu) return;
+        setSelectedObj(null);
+    }, [showCageContextMenu]);
 
     return (
         <div className={'room-layout'}>
@@ -61,6 +84,11 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                     </g>
                 </svg>
             </div>
+            <ModificationEditor
+                showEditor={showCageContextMenu}
+                selectedObj={selectedObj}
+                closeMenu={() => setShowCageContextMenu(false)}
+            />
         </div>
     );
 }

@@ -4,8 +4,10 @@ CREATE TABLE cageui.cage_modifications
     rowid SERIAL NOT NULL,
     room VARCHAR(50) NOT NULL,
     rack INTEGER,
-    cage VARCHAR,
+    cage INTEGER,
     modification varchar,
+    locationid INTEGER,
+    location INTEGER,
     startDate TIMESTAMP NOT NULL,
     endDate TIMESTAMP,
     container         entityid NOT NULL,
@@ -61,3 +63,27 @@ select setname, container, 'ct' as value, 'vertical' as category, 'C-Tunnel' as 
 
 insert into ehr_lookups.lookups (set_name,container,value, category, title)
 select setname, container, 'ex' as value, 'direct' as category, 'Extension' as title from ehr_lookups.lookup_sets where setname='cageui_modifications';
+
+
+INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
+select 'cageui_modification_locations' as setname,
+       'Modification Location Field Values' as label,
+       'Locations that a mod can be placed at' as description,
+       'value' as keyField,
+       container from ehr_lookups.lookup_sets where setname='ancestry';
+
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 0 as value, 'Left' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 1 as value, 'Right' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 2 as value, 'Top' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 3 as value, 'Bottom' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';

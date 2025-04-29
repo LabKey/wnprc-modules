@@ -11,7 +11,7 @@ RUN apt-get update \
     && apt-get clean
 
 
-    # Download and add siging key for Postgres 15
+# Download and add siging key for Postgres 15
 # https://www.linuxtechi.com/how-to-install-postgresql-on-ubuntu/
 # https://askubuntu.com/a/1456015    
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list 

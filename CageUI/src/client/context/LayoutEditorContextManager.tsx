@@ -10,7 +10,7 @@ import {
     DefaultRackId,
     GroupId,
     LayoutHistoryData,
-    LocationCoords,
+    LocationCoords, ModData,
     Rack,
     RackGroup,
     RackStringType,
@@ -37,7 +37,7 @@ import {
     createEmptyUnitLoc,
     findCageInGroup,
     findRackInGroup,
-    findSelectObjRack,
+    findSelectObjRack, getNextGroupId,
     getTranslation,
     isRackDefault,
     isRackEnum,
@@ -57,7 +57,11 @@ import {
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
-import { labkeyActionSelectWithPromise, labkeySaveRows, } from '../api/labkeyActions';
+import {
+    labkeyActionSelectDistinctWithPromise,
+    labkeyActionSelectWithPromise,
+    labkeySaveRows,
+} from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
 
 const LayoutEditorContext = createContext<LayoutContextType | null>(null);
@@ -1093,7 +1097,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         });
     }
 
-
+//TODO
+// before submitting the rack, use type and id to find its row id and submit that to layout_history.
+// Then when loading, use the rowid and load the rack id.
 
     const saveRoom = async (templateRename?: boolean): Promise<LayoutSaveResult> => {
         const commands: Command[] = [];
@@ -1124,21 +1130,38 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             }
         }
 
-        localRoom.rackGroups.forEach((group) => {
+        await Promise.all(localRoom.rackGroups.map(async (group) => {
             const groupId = parseLongId(group.groupId);
-            group.racks.forEach((rack) => {
+            await Promise.all(group.racks.map(async (rack) => {
                 const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseRoomItemNum(rack.itemId);
+                let rackRowId;
+                if (!rack.type.isDefault) {
+                    const rackConfig = {
+                        schemaName: 'cageui',
+                        queryName: 'racks',
+                        column: 'rowid',
+                        filterArray: [
+                            Filter.create('rackid', newRackId, Filter.Types.EQUALS),
+                            Filter.create('rack_type', rack.type.rowid, Filter.Types.EQUALS),
+                        ]
+                    };
+                    const rackResult = await labkeyActionSelectDistinctWithPromise(rackConfig);
+                    console.log('result: ', rackResult);
+                    if (rackResult.values.length === 1) {
+                        rackRowId = rackResult.values[0];
+                    }
+                }
                 rack.cages.forEach((cage) => {
                     const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.num === cage.cageNum);
                     let extraContext: ExtraContext = {};
 
                     // set up cage extra context
-                    if(cage.extraContext){
+                    if (cage.extraContext) {
                         extraContext.cage = {};
                         extraContext.cage.context = cage.extraContext;
                     }
                     // set up rack extra context
-                    if(rack.type.isDefault){
+                    if (rack.type.isDefault) {
                         extraContext.rack = {};
                         extraContext.rack.rackId = newRackId; // room id is for rebuilding a layout for default racks
                     }
@@ -1147,18 +1170,18 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
                         end_date: null,
                         extra_context: Object.keys(extraContext).length !== 0 ? JSON.stringify(extraContext) : null,
-                        rack: rack.type.isDefault ? null : newRackId,
+                        rack: rack.type.isDefault ? null : rackRowId,
                         object_type: rack.type.isDefault ? rackTypeToDefaultType(rack.type.type) : rack.type.type,
                         rack_group: groupId,
                         room: roomName,
                         start_date: newStartDate,
                         x_coord: cageLocData.cellX,
                         y_coord: cageLocData.cellY
-                    }
+                    };
                     dataToSave.push(newCageData);
-                })
-            })
-        });
+                });
+            }));
+        }));
 
         localRoom.objects.forEach((roomObj) => {
             const newObjData: LayoutHistoryData = {
@@ -1266,16 +1289,11 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             return;
         }
 
-        let lastGroup: GroupId;
 
         if(prevRoom.room.rackGroups.length !== 0){
-            lastGroup = prevRoom.room.rackGroups[prevRoom.room.rackGroups.length - 1].groupId;
+            setNextAvailGroup(getNextGroupId(prevRoom.room.rackGroups));
         }
-        if (lastGroup){
-            setNextAvailGroup(`rack-group-${parseLongId(lastGroup) + 1}`);
-        }else{
-            setNextAvailGroup(`rack-group-1`);
-        }
+
         if(prevRoom.locs) {
             setUnitLocs(prevRoom.locs);
         }

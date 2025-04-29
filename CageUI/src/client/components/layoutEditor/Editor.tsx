@@ -121,6 +121,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         setReloadRoom
     } = useLayoutEditorContext();
 
+    useEffect(() => {
+        console.log(localRoom)
+    }, [localRoom]);
+
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
 
@@ -200,10 +204,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
                 const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
-                setupEditCageEvent(cageGroupElement, setSelectedObj, setCtxMenuStyle, contextMenuRef, roomItemToString(updateItemType) as RackStringType);
+                setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,setCtxMenuStyle, roomItemToString(updateItemType) as RackStringType);
             });
         }else{
-            setupEditCageEvent(group.node(), setSelectedObj, setCtxMenuStyle, contextMenuRef);
+            setupEditCageEvent(group.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
         }
 
         dragLockRef.current = false;
@@ -617,7 +621,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
         })
         // loads grid with new room
-        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, closeMenuThenDrag, setSelectedObj, setCtxMenuStyle, contextMenuRef);
+        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
         setReloadRoom(null);
     }, [reloadRoom]);
 

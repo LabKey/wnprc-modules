@@ -13,6 +13,7 @@ import { ConfirmationPopup } from '../../components/ConfirmationPopup';
 import { buildNewLocalRoom, buildNewLocs, isTemplateCreator } from '../../utils/LayoutEditorHelpers';
 import {Security} from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
 
 export const LayoutEditor: FC<any> = () => {
     const roomName = ActionURL.getParameter("room");
@@ -101,12 +102,13 @@ export const LayoutEditor: FC<any> = () => {
 
                  borderObj = {
                     scale: borderResult.rows[0].layout_scale || 1,
-                    borderHeight: borderResult.rows[0].border_height || 809,
-                    borderWidth: borderResult.rows[0].border_width || 1289,
+                    borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
+                    borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
                 };
                 setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
                 setShowSelectionPopup(false);
             }
+            console.log("Prev  Room: ", prevRoomResult.rows)
             setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
         }).catch(err => {
             setErrorPopup(err.toString());

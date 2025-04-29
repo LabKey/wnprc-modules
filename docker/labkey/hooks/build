@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "build ver 1.9"
+echo "build ver 2.0"
 echo "docker_tag text " $DOCKER_TAG
 
 # FB_REGEX will match if the docker tag looks like a feature branch, while
@@ -74,5 +74,6 @@ then
   echo "value of IMAGE_NAME " ${IMAGE_NAME}
   docker build --builder container --platform linux/arm64,linux/amd64 --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME ../
 else
+  echo "running inside Docker Hub for $platform" 
   docker build --builder container --platform $platform --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME .
 fi

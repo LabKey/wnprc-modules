@@ -72,7 +72,7 @@ if [[ -z $IMAGE_NAME ]]
 then  
   IMAGE_NAME=${GRADLE_IMAGE}
   echo "value of IMAGE_NAME " ${IMAGE_NAME}
-  docker buildx build --builder container --platform linux/arm64,linux/amd64 --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME ../
+  docker build --builder container --platform linux/arm64,linux/amd64 --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME ../
 else
-  docker buildx build --builder container --platform linux/arm64,linux/amd64 --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME .
+  docker build --builder container --platform $platform --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME .
 fi

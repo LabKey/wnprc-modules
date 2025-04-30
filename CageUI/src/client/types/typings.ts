@@ -83,6 +83,9 @@ export type RoomItemClass = 'caging' | 'roomObj';
 
 export type Modification = {
     name: string;
+    svgIds: {
+        [key in ModLocations]?: string
+    };
     styles: {
         property: string;
         value: string;
@@ -156,7 +159,7 @@ export interface PrevRoom {
 export interface ModData {
     rowid: number;
     room: string;
-    rack: string;
+    rack: number; // rowid of rack
     cage: number;
     location: ModLocations;
     locationId: number;
@@ -174,6 +177,7 @@ export interface RackGroup {
 
 export interface Rack {
     itemId: DefaultRackId | RealRackId; // rack id
+    rowid?: number; // if real rack this will have a rowid
     selectionType: SelectionType;
     type: UnitType;
     cages: CageWithMods[];

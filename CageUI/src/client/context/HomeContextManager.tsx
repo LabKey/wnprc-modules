@@ -140,7 +140,7 @@ export const HomeContextProvider = ({children}) => {
                                     location: row.location,
                                     locationId: row.locationid,
                                     modification: row.modification,
-                                    rack: typeof row.rack === 'string' ? row.rack : `rack-${row.rack}`,
+                                    rack: row.rack,
                                     room: row.room,
                                     rowid: row.rowid
                                 };

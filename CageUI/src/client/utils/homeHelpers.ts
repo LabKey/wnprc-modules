@@ -254,12 +254,13 @@ export const loadRoom = (name: string): Rack[] => {
 
 // Changes stroke color of svg element nodes keeping the other styles.
 export const changeStyleProperty  = (element: Element, property: string, newValue: string): void => {
+    console.log("Element: ", element)
     const styleAttr = element.getAttribute('style');
     if (styleAttr) {
-        const styles = styleAttr.split(';').map(style => style.trim());
+        const styles = styleAttr.split(';').map(style => style.trim()).filter(style => style !== "");
         let updated = false;
         const updatedStyles = styles.map(style => {
-            const [prop, value] = style.split(':').map(prop => prop.trim());
+            const [prop, value] = style.split(':').map(prop => prop.trim()).filter(prop => prop !== "");
             if (prop.toLowerCase() === property.toLowerCase()) {
                 updated = true;
                 return `${property}: ${newValue}`;

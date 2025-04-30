@@ -1,7 +1,8 @@
 import {
     Cage,
     DefaultRackStringType,
-    DefaultRackTypes, GroupId,
+    DefaultRackTypes,
+    ModLocations,
     Rack,
     RackGroup,
     RackStringType,
@@ -10,8 +11,7 @@ import {
     RoomItemStringType,
     RoomItemType,
     RoomObjectStringType,
-    RoomObjectTypes,
-    UnitType
+    RoomObjectTypes
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
@@ -20,6 +20,8 @@ import { ActionURL, Filter } from '@labkey/api';
 import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { selectDistinctRows } from '@labkey/components';
+import { Modifications } from './constants';
+import { changeStyleProperty } from './homeHelpers';
 
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
@@ -290,6 +292,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                 });
             }
 
+
             // Only needed for layout editor to attach context menus
             const shape = d3.select(unitSvg);
             shape.classed('draggable', false);
@@ -298,6 +301,25 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
             setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,setCtxMenuStyle, rackTypeString);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+            //TODO for each location, parse each mod, parse each style in mod, and apply it to id of location
+            if(mode ==='view'){
+                console.log("Mod cage: ", cage.mods)
+                Object.entries(cage.mods).forEach(([loc,modList]) => {
+                    const modLoc = parseInt(loc) as ModLocations;
+                    console.log("Mod: ", modLoc, modList)
+                    modList.forEach((mod) => {
+                        const modObj = Modifications[mod.mod];
+                        // Id is svgId given from location in Modifications object paired with location id in mod
+                        const modId = `${modObj.svgIds[modLoc]}-${mod.id}`;
+                        console.log("Before: ", modId, shape.select(`#${modId}`).node());
+
+                        modObj.styles.forEach((style) => {
+                            changeStyleProperty(shape.select(`#${modId}`).node() as SVGRectElement | SVGPathElement, style.property, style.value)
+                        })
+                    })
+                })
+            }
+
             cageGroup.append(() => shape.node());
 
         });

@@ -1,4 +1,4 @@
-import { Modification, ModRecord, ModTypes } from '../types/typings';
+import { Modification, ModLocations, ModRecord, ModTypes } from '../types/typings';
 
 export const CELL_SIZE = 30; // number of pixels of a cell for length/width
 export const SVG_WIDTH = 1290; // width of the layout svg
@@ -8,6 +8,10 @@ export const SVG_HEIGHT = 810; // height of the layout svg
 export const Modifications: ModRecord = {
     [ModTypes.StandardFloor]: {
         name: "Standard Floor",
+        svgIds: {
+            [ModLocations.Bottom]: 'floor',
+            [ModLocations.Top]: 'ceiling'
+        },
         styles: [{
             property: "stroke",
             value: "black"
@@ -15,6 +19,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.MeshFloor]: {
         name: "Mesh Floor",
+        svgIds: {
+            [ModLocations.Bottom]: 'floor',
+            [ModLocations.Top]: 'ceiling'
+        },
         styles: [
             {
                 property: "stroke",
@@ -28,6 +36,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.MeshFloorX2]: {
         name: "Mesh Floor x2",
+        svgIds: {
+            [ModLocations.Bottom]: 'floor',
+            [ModLocations.Top]: 'ceiling'
+        },
         styles: [
             {
                 property: "stroke",
@@ -44,6 +56,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.NoFloor]: {
         name: "No Floor",
+        svgIds: {
+            [ModLocations.Bottom]: 'floor',
+            [ModLocations.Top]: 'ceiling'
+        },
         styles: [
             {
                 property: "stroke",
@@ -53,6 +69,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.SolidDivider]: {
         name: "Solid Divider",
+        svgIds: {
+            [ModLocations.Left]: 'left',
+            [ModLocations.Right]: 'right'
+        },
         styles: [{
             property: "stroke",
             value: "black"
@@ -60,6 +80,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.PCDivider]: {
         name: "Protected Contact Divider",
+        svgIds: {
+            [ModLocations.Left]: 'left',
+            [ModLocations.Right]: 'right'
+        },
         styles: [{
             property: "stroke",
             value: "black"
@@ -73,6 +97,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.VCDivider]: {
         name: "Visual Contact Divider",
+        svgIds: {
+            [ModLocations.Left]: 'left',
+            [ModLocations.Right]: 'right'
+        },
         styles: [{
             property: "stroke",
             value: "black"
@@ -86,6 +114,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.PrivacyDivider]: {
         name: "Privacy Divider",
+        svgIds: {
+            [ModLocations.Left]: 'left',
+            [ModLocations.Right]: 'right'
+        },
         styles: [{
             property: "stroke",
             value: "black"
@@ -99,6 +131,10 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.NoDivider]: {
         name: "No Divider",
+        svgIds: {
+            [ModLocations.Left]: 'left',
+            [ModLocations.Right]: 'right'
+        },
         styles: [{
             property: "stroke",
             value: "none"
@@ -106,6 +142,9 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.CTunnel]: {
         name: "C-Tunnel",
+        svgIds: {
+            [ModLocations.Direct]: 'cTunnel',
+        },
         styles: [{
             property: "stroke",
             value: "black",
@@ -117,6 +156,9 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.Extension]: {
         name: "Extension",
+        svgIds: {
+            [ModLocations.Direct]: 'extension',
+        },
         styles: [{
             property: "stroke",
             value: "black"
@@ -130,6 +172,9 @@ export const Modifications: ModRecord = {
     },
     [ModTypes.PlayCage]: {
         name: "Play Cage",
+        svgIds: {
+            [ModLocations.Direct]: 'playCage',
+        },
         styles: [{
             property: "stroke",
             value: "black"

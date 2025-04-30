@@ -867,6 +867,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
         const isDefault = isRackDefault(rackItem.object_type);
         let rackIdNum;
+        let rowId;
         let extraContext: ExtraContext;
         let rackData;
         // if rack is default, use default rack id instead
@@ -887,6 +888,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             rackData = await labkeyActionSelectWithPromise(optConfig);
             if(rackData.rowCount > 0){
                 rackIdNum = rackData.rows[0].rackid;
+                rowId = rackData.rows[0].rowid;
             }
 
         }
@@ -925,6 +927,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             };
 
             rack = {
+                rowid: rowId,
                 selectionType: 'rack',
                 cages: [],
                 isActive: !isDefault,
@@ -966,7 +969,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         if(loadMods && !rack.type.isDefault){
             console.log("Prev Mods: ", prevRoom.modData);
             prevRoom.modData.forEach((mod) => {
-                if(rack.itemId === mod.rack && cageNum === mod.cage){
+                if(rack.rowid === mod.rack && cageNum === mod.cage){
                     (cageMods.mods[mod.location] as CageModification[]).push({
                         id: mod.locationId,
                         mod: mod.modification
@@ -974,6 +977,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 }
             })
         }
+
         const cage: CageWithMods = {
             cageNum: `${cageNumType}-${cageNum}` as CageNumber,
             extraContext: extraContext?.cage,

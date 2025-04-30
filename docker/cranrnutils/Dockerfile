@@ -1,26 +1,15 @@
-ARG R_VERSION=4.4.1
 FROM eclipse-temurin:17-jre-jammy
 
 # Set noninteractive mode for apt-get
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV LANG en_US.utf8
+ENV LANG=en_US.utf8
 
-# Adding various application to download packages to install Postgres 15 and CRAN-R
 RUN apt-get update \
-    && apt-get -qq install -y   lsb-release \
-                                texinfo           \
-                                tzdata           \
-                                gettext          \
-                                make             \
-                                openssl          \
-                                #Linux packages needed for installing CRAN-R
+    && apt-get -qq install -y   lsb-release             \
                                 software-properties-common \
-                                dirmngr \
-                                #Linux packages needed for RlabKey
-                                libcurl4-openssl-dev \
-                                libssl-dev \
     && apt-get clean
+
 
 # Download and add siging key for Postgres 15
 # https://www.linuxtechi.com/how-to-install-postgresql-on-ubuntu/
@@ -34,10 +23,21 @@ RUN wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | tee /etc/apt/
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null 2>&1
 RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
 
-RUN apt-get update      \
-    &&  apt-get -qq install -y  postgresql-client-15 \    
-                                r-base \
-                                r-base-dev\
+# Adding various application to download packages to install Postgres 15 and CRAN-R
+RUN apt-get update \
+    && apt-get -qq install -y   texinfo                 \
+                                tzdata                  \
+                                gettext                 \
+                                make                    \
+                                openssl                 \
+                                #Linux packages needed for installing CRAN-R
+                                dirmngr                 \
+                                #Linux packages needed for RlabKey
+                                libcurl4-openssl-dev    \
+                                libssl-dev              \
+                                postgresql-client-15    \
+                                r-base                  \
+                                r-base-dev              \
     && apt-get clean
 
 # install the necessary R packages

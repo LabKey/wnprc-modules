@@ -242,7 +242,9 @@ public class WNPRC_PurchasingController extends SpringActionController
                 columns.add(FieldKey.fromString("qcState/Label"));
                 final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(tableInfo, columns);
                 TableSelector tableSelector = new TableSelector(tableInfo, colMap.values(), filter, null);
-                oldStatusVal = String.valueOf(tableSelector.getMap().get(colMap.get(FieldKey.fromString("qcState/Label")).getAlias()));
+                var m = tableSelector.getMap();
+                var label = colMap.get(FieldKey.fromString("qcState/Label"));
+                oldStatusVal = String.valueOf(label.getValue(m));
             }
 
             List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);

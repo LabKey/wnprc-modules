@@ -7,6 +7,7 @@ import org.labkey.api.data.ButtonBarConfig;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DatabaseIdentifier;
 import org.labkey.api.data.DatabaseTableType;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.MethodInfo;
@@ -90,8 +91,8 @@ public class DecoratedTableInfo implements TableInfo {
 
     @Nullable
     @Override
-    public String getMetaDataName() {
-        return _tableInfo.getMetaDataName();
+    public DatabaseIdentifier getMetaDataIdentifier() {
+        return _tableInfo.getMetaDataIdentifier();
     }
 
     @NotNull

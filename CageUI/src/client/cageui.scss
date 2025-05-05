@@ -1197,12 +1197,17 @@ margin-bottom: 10px;
 
 .cage-layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .cage-layout svg {
   display: block;
   margin: auto;
+}
+
+.cage-mod-table {
+  flex: 1;
+  padding-left: 10px;
 }
 
 

@@ -1,5 +1,5 @@
 import {
-    Cage,
+    Cage, CageWithMods,
     DefaultRackStringType,
     DefaultRackTypes,
     ModLocations,
@@ -268,6 +268,21 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         renderType = 'cage';
     }
 
+    const loadCageMods = (cageToLoad: CageWithMods, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
+        Object.entries(cageToLoad.mods).forEach(([loc,modList]) => {
+            const modLoc = parseInt(loc) as ModLocations;
+            modList.forEach((mod) => {
+                const modObj = Modifications[mod.mod];
+                // Id is svgId given from location in Modifications object paired with location id in mod
+                const modId = `${modObj.svgIds[modLoc]}-${mod.id}`;
+                modObj.styles.forEach((style) => {
+                    changeStyleProperty(shape.select(`#${modId}`).node() as SVGRectElement | SVGPathElement, style.property, style.value)
+                })
+            })
+        })
+
+    }
+
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
 
@@ -301,23 +316,9 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
             setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,setCtxMenuStyle, rackTypeString);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
-            //TODO for each location, parse each mod, parse each style in mod, and apply it to id of location
-            if(mode ==='view'){
-                console.log("Mod cage: ", cage.mods)
-                Object.entries(cage.mods).forEach(([loc,modList]) => {
-                    const modLoc = parseInt(loc) as ModLocations;
-                    console.log("Mod: ", modLoc, modList)
-                    modList.forEach((mod) => {
-                        const modObj = Modifications[mod.mod];
-                        // Id is svgId given from location in Modifications object paired with location id in mod
-                        const modId = `${modObj.svgIds[modLoc]}-${mod.id}`;
-                        console.log("Before: ", modId, shape.select(`#${modId}`).node());
 
-                        modObj.styles.forEach((style) => {
-                            changeStyleProperty(shape.select(`#${modId}`).node() as SVGRectElement | SVGPathElement, style.property, style.value)
-                        })
-                    })
-                })
+            if(mode ==='view'){
+                loadCageMods(cage, shape);
             }
 
             cageGroup.append(() => shape.node());
@@ -329,7 +330,6 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
     const createGroup = (group: RackGroup) => {
         const isSingleRack = group.racks.length === 1;
-        console.log("Create group")
         const parentGroup = isSingleRack
             ? layoutSvg.append('g')
                 .attr('id', group.racks[0].itemId)
@@ -393,22 +393,21 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     }else if(renderType === 'rack'){ // we are rendering a single rack
         console.log("Rack Render");
     }else{ // we are rendering a single cage
-        console.log("Cage Render");
-
+        const cage: CageWithMods = unitsToRender as Cage;
         const cageGroup = layoutSvg.append('g')
-            .attr('id', (unitsToRender as Cage).cageNum)
+            .attr('id', cage.cageNum)
             .attr('transform', `translate(0,0)`);
-
         let unitSvg: SVGElement;
+
         d3.svg(`${ActionURL.getContextPath()}/cageui/static/${parseRoomItemType((unitsToRender as Cage).cageNum)}.svg`).then((d) => {
             unitSvg = d.querySelector(`svg[id*=template]`);
             const shape = d3.select(unitSvg);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum((unitsToRender as Cage).cageNum)}`;
+
+            if(mode ==='view'){
+                loadCageMods(cage, shape);
+            }
             cageGroup.append(() => shape.node());
-            console.log("Ran Render for Cage");
         });
-
-
     }
-
 };

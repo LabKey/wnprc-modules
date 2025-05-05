@@ -138,7 +138,6 @@ CREATE TABLE cageui.rack_types
     length INTEGER,
     width INTEGER,
     height INTEGER,
-    sqft INTEGER,
     supportsTunnel BOOLEAN,
     description VARCHAR(100),
     container         entityid NOT NULL,

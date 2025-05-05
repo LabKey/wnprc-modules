@@ -73,7 +73,6 @@ export const RoomList: FC = () => {
             });
 
             if(racks.rowCount > 0){
-                console.log("Racks: ", racks)
                 setAllRooms((prevRooms) => prevRooms.map((room) => {
                     // add racks to room state, only once when first clicked
                     if(room.name === roomId){

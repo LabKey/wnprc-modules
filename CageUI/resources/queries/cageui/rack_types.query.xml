@@ -2,6 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="rack_types" tableDbType="TABLE">
+                <javaCustomizer class="org.labkey.cageui.table.CageUICustomizer" />
                 <tableTitle>Rack Types</tableTitle>
                 <columns>
                     <column columnName="rowid">
@@ -16,12 +17,19 @@
                             <fkDisplayColumnName>title</fkDisplayColumnName>
                             <filters>
                                 <filterGroup>
-                                    <filter column="category" operator="eq" value="Caging" />
+                                    <filter column="category" value="Caging" operator="eq"/>
                                 </filterGroup>
                             </filters>
                         </fk>
                     </column>
-                    <column columnName="manufacturer"/>
+                    <column columnName="manufacturer">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_rack_manufacturers</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="length"/>
                     <column columnName="width"/>
                     <column columnName="height"/>

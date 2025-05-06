@@ -81,10 +81,18 @@ export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
 // Classification of the objects, caging is for racks/cages/rack groups, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
 
+/* svgIds is an array of ids to apply the style to.
+    Each id is a string to the following these rules to match the id in the svg file.
+    1. The first string before an optional '-' is always the first id or only id to find. The location id always follows this first string.
+    2. ids following each "-" is the id of the next child to grab of the previous svg id.
+    Examples:
+        ["extension"]: This will find the id with the name "extension" in the svg file with the appropriate location id. (extension-locationId)
+        ["cTunnel-left", "cTunnel-circle"]: For each string, first find the id (cTunnel-locationId) then find the id "left" or "circle".
+ */
 export type Modification = {
     name: string;
     svgIds: {
-        [key in ModLocations]?: string
+        [key in ModLocations]?: string[];
     };
     styles: {
         property: string;

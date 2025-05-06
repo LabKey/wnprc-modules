@@ -273,10 +273,17 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             const modLoc = parseInt(loc) as ModLocations;
             modList.forEach((mod) => {
                 const modObj = Modifications[mod.mod];
-                // Id is svgId given from location in Modifications object paired with location id in mod
-                const modId = `${modObj.svgIds[modLoc]}-${mod.id}`;
-                modObj.styles.forEach((style) => {
-                    changeStyleProperty(shape.select(`#${modId}`).node() as SVGRectElement | SVGPathElement, style.property, style.value)
+                modObj.svgIds[modLoc].forEach((svgId, idx) => {
+                    const idParts = svgId.split('-');
+                    let modId = `${idParts[0]}-${mod.id}`;
+                    let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`#${modId}`);
+                    for (let i = 1; i < idParts.length; i++) {
+                        if (currentSelection.empty()) return null;
+                        currentSelection = currentSelection.select(`#${idParts[i]}`);
+                    }
+                    modObj.styles.forEach((style) => {
+                        changeStyleProperty(currentSelection.node() as SVGElement, style.property, style.value)
+                    })
                 })
             })
         })

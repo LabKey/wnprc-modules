@@ -101,18 +101,33 @@ docker build \
 
 The LabKey image depends on the Tomcat image, which can be dowload from Docker Hub or build locally. This image takes a long time to build from scratch, it is best to download it from Docker Hub. Here are the commands to download or build this image.
 ```
-./gradlew downloadTomcat -PdockerString=<XX.YY_fb_name>
-./gradlew downloadTomcatPlug -PdockerString=<XX.YY_fb_name>
+./gradlew downloadTomcat -PbranchName=<XX.YY_fb_name>
+./gradlew downloadTomcatPlug -PbranchName=<XX.YY_fb_name>
 
-./gradlew buildTomcat -PdockerString=<XX.YY_fb_name>
-./gradlew buildTomcatPlug -PdockerString=<XX.YY_fb_name>
+./gradlew buildTomcat -PbranchName=<XX.YY_fb_name>
+./gradlew buildTomcatPlug -PbranchName=<XX.YY_fb_name>
 
 docker build --no-cache -t wnprcehr/tomcat:tomcat9_<XX.YY_fb_name> tomcat
 ```
 
 
 ## Deploying the Docker Compose Services
-Docker images including LabKey version number and branch are control by variables defined in the .env file. The compose (i.e. `compose.yaml`) file has the following string for the LabKey service `wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}`. LK_PROD has to be empty except for the production environment which gets replace with **SNAPSHOT**. LK_VERSION gets replace with the version of LabKey that is going to be used (i.e. 22.11) and LK_FB get the name of the branch to test, in production this variable is blank. In production this string gets converted to `wnprcehr/labkeysnapshot:22.11` which match the tag in Docker Hub for the [labkeysnapshot repository](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/tags?page=1&ordering=last_updated). For feature branches the string gets converted to `wnprcehr/labkey:22.11_<feature_branch_name>` with the corresponding fb name coming from GitHub, these images are hosted in the [labkey repository](https://hub.docker.com/repository/docker/wnprcehr/labkey/tags?page=1&ordering=last_updated) with their corresponding tags.
+There are several services controlled by the compose.yaml and production.yaml files. Spliting the Docker services in these two files allows to use the same GitHub repository in two different server without having to make changes locally except for changes in the `.env` file. 
+
+The Docker services are production EHR, nightly-ehr and test servers ran are the follwoing:
+||Service|Functionality|YAML File|Repository|
+|---|---|---|---|---|
+|1|postgres|database|compose.yaml|[postgres](https://hub.docker.com/_/postgres)|
+|2|labkey|Application|compose.yaml|[labkeysnapshot](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/general)|
+|3|cadvisor|Monitor server resources|compose.yaml|[Google cadvisor](https://github.com/google/cadvisor/releases)|
+|4|mailcatcher|Applicaton to record emails sent by server|compose.yaml||
+|5|mailserver|Postfix mail erver|compose.yaml||
+|6| ngnix|Web server|compose.yaml||
+|7| perlscripts|Manage cron jobs for backups and delete records|production.yaml|[ehrcronprod](https://hub.docker.com/repository/docker/wnprcehr/ehrcronprod/general), [ehrcron](https://hub.docker.com/repository/docker/wnprcehr/ehrcron/general)|
+
+
+
+Docker images including LabKey version number and branch are control by variables defined in the `.env` file. The compose (i.e. `compose.yaml`) file has the following string for the LabKey service `wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}`. LK_PROD has to be empty except for the production environment which gets replace with **SNAPSHOT**. LK_VERSION gets replace with the version of LabKey that is going to be used (i.e. 24.11) and LK_FB get the name of the feature branch to test, in production LK_FB is blank. In production this string gets converted to `wnprcehr/labkeysnapshot:22.11` which match the tag in Docker Hub for the [labkeysnapshot repository](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/tags?page=1&ordering=last_updated). For feature branches the string gets converted to `wnprcehr/labkey:22.11_<feature_branch_name>` with the corresponding fb name coming from GitHub, these images are hosted in the [labkey repository](https://hub.docker.com/repository/docker/wnprcehr/labkey/tags?page=1&ordering=last_updated) with their corresponding tags.
 
 To deploy the services, you again either use Gradle or use Docker Compose directly. To use Gradle, execute the following build tasks:
 ```
@@ -122,23 +137,42 @@ To deploy the services, you again either use Gradle or use Docker Compose direct
 # for tearing down all the services
 ./gradlew :docker:down
 ```
-To use Docker Compose, you can execute commands like the following (*from this directory*, where your `.env` file is located):
+To use Docker Compose, you can execute commands like the following (*from this directory*, where your `.env` file is located), this commands will work on production server as well as other servers:
+```
+# for spinning up all the services in production server
+docker compose -f compose.yaml -f production.yaml up -d
+
+# for tearing down all the services in production server*
+docker compose -f compose.yaml -f production.yaml down --timeout 60
+```
+
+Add `-f compose.yaml -f production.yaml` to make changes in the production server. If this is not added the system will provide a warning that there is an orphan services running.
 ```
 # for spinning up all the services
 docker compose up -d
 
 # for tearing down all the services*
-docker compose down
+docker compose down --timeout 60
 
 # for spinning up just one of the services (e.g., postgres)
 docker compose up -d postgres
 
 # for taking down just one of the services (e.g., postgres)
-docker compose stop postgres
+docker compose stop postgres --timeout 60
+
+# for accesing running services to inspect changes use the following commands (e.g., labkey or postgres)
+docker compose exec labkey /bin/bash
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
-*Note that sometimes the postgres container closes before the database itself is completely shut down. Be sure to disconnect your pgAdmin and IntelliJ database connections, if any, stop labkey, and then do a shutdown. Otherwise the next time postgres starts it will go into an automatic recovery mode and take a long time to start back up.
+*Note that sometimes the postgres container closes before the database itself is completely shut down. Be sure to disconnect your pgAdmin and IntelliJ database connections, if any, stop labkey, and then do a shutdown. Otherwise the next time postgres starts it will go into an automatic recovery mode and take a long time to start back up. By adding a timeout of 60 seconds it allows the database to close gracefully and avoid the recovery process. 
+
+## Docker setup in production EHR
+Running EHR in the production mode, requires  different images for ehrcron and the **SNAPSHOT** version of LabKey. The verison of LabKey is controlled by the following variables stored in `.env` file: `LK_PROD`, `LK_VERSION` and `LK_FB`. These varaibles get replace in the following string `wnprcehr/labkey${LK_PROD}:$LK_VERSION${LK_FB}` during runtime. The string becomes `wnprcehr/labkeysnapshot:24.11` which are the tags in this [repo](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/tags). The version of ehrcron image is also controlled by the `.env` file. The variables `PERL_PROD`, `LK_VERSION` and `LK_FB` are used to modify the name of the image defined in the `production.yaml` file from `wnprcehr/ehrcron$PERL_PROD:$LK_VERSION${LK_FB}` to `wnprcehr/ehrcronprod:24.11`. These are the tags defined in this [repo](https://hub.docker.com/repository/docker/wnprcehr/ehrcronprod/general). The ehrcronprod image has the following scheduled jobs:
+1. Email notifications - deprecated April, 2025
+1. Delete records with QCStatus of ` Delete Requested` from all study datasets
+1. Backup script which rans overnight
+
 
 ## Running multiple instances of LabKey in same Server
 

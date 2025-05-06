@@ -9,8 +9,8 @@ export const Modifications: ModRecord = {
     [ModTypes.StandardFloor]: {
         name: "Standard Floor",
         svgIds: {
-            [ModLocations.Bottom]: 'floor',
-            [ModLocations.Top]: 'ceiling'
+            [ModLocations.Bottom]: ['floor'],
+            [ModLocations.Top]: ['ceiling']
         },
         styles: [{
             property: "stroke",
@@ -20,8 +20,8 @@ export const Modifications: ModRecord = {
     [ModTypes.MeshFloor]: {
         name: "Mesh Floor",
         svgIds: {
-            [ModLocations.Bottom]: 'floor',
-            [ModLocations.Top]: 'ceiling'
+            [ModLocations.Bottom]: ['floor'],
+            [ModLocations.Top]: ['ceiling']
         },
         styles: [
             {
@@ -37,8 +37,8 @@ export const Modifications: ModRecord = {
     [ModTypes.MeshFloorX2]: {
         name: "Mesh Floor x2",
         svgIds: {
-            [ModLocations.Bottom]: 'floor',
-            [ModLocations.Top]: 'ceiling'
+            [ModLocations.Bottom]: ['floor'],
+            [ModLocations.Top]: ['ceiling']
         },
         styles: [
             {
@@ -57,8 +57,8 @@ export const Modifications: ModRecord = {
     [ModTypes.NoFloor]: {
         name: "No Floor",
         svgIds: {
-            [ModLocations.Bottom]: 'floor',
-            [ModLocations.Top]: 'ceiling'
+            [ModLocations.Bottom]: ['floor'],
+            [ModLocations.Top]: ['ceiling']
         },
         styles: [
             {
@@ -70,8 +70,8 @@ export const Modifications: ModRecord = {
     [ModTypes.SolidDivider]: {
         name: "Solid Divider",
         svgIds: {
-            [ModLocations.Left]: 'left',
-            [ModLocations.Right]: 'right'
+            [ModLocations.Left]: ['left'],
+            [ModLocations.Right]: ['right']
         },
         styles: [{
             property: "stroke",
@@ -81,8 +81,8 @@ export const Modifications: ModRecord = {
     [ModTypes.PCDivider]: {
         name: "Protected Contact Divider",
         svgIds: {
-            [ModLocations.Left]: 'left',
-            [ModLocations.Right]: 'right'
+            [ModLocations.Left]: ['left'],
+            [ModLocations.Right]: ['right']
         },
         styles: [{
             property: "stroke",
@@ -98,8 +98,8 @@ export const Modifications: ModRecord = {
     [ModTypes.VCDivider]: {
         name: "Visual Contact Divider",
         svgIds: {
-            [ModLocations.Left]: 'left',
-            [ModLocations.Right]: 'right'
+            [ModLocations.Left]: ['left'],
+            [ModLocations.Right]: ['right']
         },
         styles: [{
             property: "stroke",
@@ -115,8 +115,8 @@ export const Modifications: ModRecord = {
     [ModTypes.PrivacyDivider]: {
         name: "Privacy Divider",
         svgIds: {
-            [ModLocations.Left]: 'left',
-            [ModLocations.Right]: 'right'
+            [ModLocations.Left]: ['left'],
+            [ModLocations.Right]: ['right']
         },
         styles: [{
             property: "stroke",
@@ -132,8 +132,8 @@ export const Modifications: ModRecord = {
     [ModTypes.NoDivider]: {
         name: "No Divider",
         svgIds: {
-            [ModLocations.Left]: 'left',
-            [ModLocations.Right]: 'right'
+            [ModLocations.Left]: ['left'],
+            [ModLocations.Right]: ['right']
         },
         styles: [{
             property: "stroke",
@@ -143,7 +143,10 @@ export const Modifications: ModRecord = {
     [ModTypes.CTunnel]: {
         name: "C-Tunnel",
         svgIds: {
-            [ModLocations.Direct]: 'cTunnel',
+            [ModLocations.Top]: ['cTunnel-circle', 'cTunnel-top'],
+            [ModLocations.Bottom]: ['cTunnel-circle', 'cTunnel-bottom'],
+            [ModLocations.Left]: ['cTunnel-circle', 'cTunnel-left'],
+            [ModLocations.Right]: ['cTunnel-circle', 'cTunnel-right'],
         },
         styles: [{
             property: "stroke",
@@ -157,7 +160,7 @@ export const Modifications: ModRecord = {
     [ModTypes.Extension]: {
         name: "Extension",
         svgIds: {
-            [ModLocations.Direct]: 'extension',
+            [ModLocations.Direct]: ['extension'],
         },
         styles: [{
             property: "stroke",
@@ -173,7 +176,7 @@ export const Modifications: ModRecord = {
     [ModTypes.PlayCage]: {
         name: "Play Cage",
         svgIds: {
-            [ModLocations.Direct]: 'playCage',
+            [ModLocations.Direct]: ['playCage'],
         },
         styles: [{
             property: "stroke",

@@ -269,9 +269,11 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     }
 
     const loadCageMods = (cageToLoad: CageWithMods, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
+
         Object.entries(cageToLoad.mods).forEach(([loc,modList]) => {
             const modLoc = parseInt(loc) as ModLocations;
             modList.forEach((mod) => {
+                if(mod.mod === "newMod") return;
                 const modObj = Modifications[mod.mod];
                 modObj.svgIds[modLoc].forEach((svgId, idx) => {
                     const idParts = svgId.split('-');

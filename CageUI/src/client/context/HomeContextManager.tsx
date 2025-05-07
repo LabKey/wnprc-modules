@@ -1,14 +1,26 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Cage, CageNumber, CageWithMods, ModData, PrevRoom, Rack, RackGroup, Room, RoomItem } from '../types/typings';
-import { removeCircularReferences } from '../utils/homeHelpers';
+import {
+    Cage,
+    CageNumber,
+    CageWithMods,
+    ModData,
+    ModLocations,
+    PrevRoom,
+    Rack,
+    RackGroup,
+    Room,
+    RoomItem
+} from '../types/typings';
+import { findNextModId, removeCircularReferences } from '../utils/homeHelpers';
 import { HomeContextType } from '../types/homeContextTypes';
-import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, SelectedMods, SelectedPage } from '../types/homeTypes';
+import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, UpdatedMods, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectDistinctWithPromise, labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import { buildNewLocalRoom, findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { selectDistinctRows } from '@labkey/components';
 import { extractNumbers, parseRoomItemNum } from '../utils/helpers';
+import { SelectedObj } from '../types/layoutEditorTypes';
 
 
 const HomeContext = createContext<HomeContextType>({} as HomeContextType);
@@ -32,8 +44,8 @@ export const HomeContextProvider = ({children}) => {
     const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<CageWithMods>(null);
+    const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [abortController, setAbortController] = useState(null);
-    const [selectedRackMods, setSelectedRackMods] = useState<SelectedMods>([]);
 
     // map of loaded rooms, loaded means fetched from layout_history
     const [loadedRooms, setLoadedRooms] = useState<LoadedRooms>({});
@@ -185,7 +197,6 @@ export const HomeContextProvider = ({children}) => {
         const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
         setSelectedRack(currRack);
         setSelectedRackGroup(currGroup);
-        setSelectedRackMods([]);//TODO FIX
     }, [selectedPage.rack]);
 
     useEffect(() => {
@@ -225,6 +236,34 @@ export const HomeContextProvider = ({children}) => {
         });
     }*/
 
+    const addNewMod = (cage: CageWithMods, location: ModLocations)  => {
+
+        setSelectedRoom(prevState => ({
+            ...prevState,
+            rackGroups: prevState.rackGroups.map((group) => ({
+                ...group,
+                racks: group.racks.map((rack) => ({
+                    ...rack,
+                    cages: rack.cages.map((c) => {
+                        if(c.cageNum === cage.cageNum){
+                            const newCage = {
+                                ...c,
+                                mods: {
+                                    ...c.mods,
+                                    [location]: [...c.mods[location], {id: findNextModId(c.mods[location]), mod: 'newMod'}]
+                                }
+                            };
+                            setSelectedContextObj(newCage)
+                            return newCage;
+                        }else{
+                            return c;
+                        }
+                    })
+                }))
+            }))
+        }))
+    }
+
     return (
         <HomeContext.Provider value={{
             selectedPage,
@@ -237,8 +276,9 @@ export const HomeContextProvider = ({children}) => {
             selectedRackGroup,
             selectedRack,
             selectedCage,
-            selectedRackMods,
-            setSelectedRackMods
+            selectedContextObj,
+            setSelectedContextObj,
+            addNewMod
         }}>
             {children}
         </HomeContext.Provider>

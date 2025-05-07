@@ -19,7 +19,6 @@ import {
 } from './layoutEditorTypes';
 import * as d3 from 'd3';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { Direction } from './homeTypes';
 
 export interface LayoutContextProps {
     children: ReactNode;

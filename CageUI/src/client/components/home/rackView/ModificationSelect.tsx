@@ -7,25 +7,25 @@ import { Option } from '@labkey/components';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { Cage, Rack, RackTypes } from '../../../types/typings';
-import { Direction } from '../../../types/homeTypes';
+import { CageModType, CageWithMods, DirectionCategory, ModLocations, ModTypes, Rack } from '../../../types/typings';
+import { findCageInGroup, findRackInGroup } from '../../../utils/LayoutEditorHelpers';
 
-interface ModificationSelectProps{
-    type: RackTypes;
-    cage: Cage;
-    rack: Rack;
-    direction?: Direction;
+interface ModificationSelectProps {
+    cage: CageWithMods;
+    removeMod: () => void;
+    defaultValue?: Option<CageModType>;
+    directionCategory?: DirectionCategory;
 }
 
 export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
-    const {type, direction, cage, rack} = props;
-    const {setSelectedRackMods, selectedRack} = useHomeContext();
-    const [options, setOptions] = useState<Option<string>[]>(null);
-
+    const {directionCategory, cage, defaultValue, removeMod} = props;
+    const {selectedRoom} = useHomeContext();
+    const [options, setOptions] = useState<Option<ModTypes>[]>(null);
 
     useEffect(() => {
-        console.log("Opt: ", options);
-    }, [options]);
+        console.log("DV: ", defaultValue);
+    }, [defaultValue]);
+
 
     useEffect(() => {
         // the filter here assigns vertical to above and below, horizontal to left and right, and if no direction given then it is direct
@@ -34,17 +34,15 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
             queryName: 'cageui_modifications',
             columns: [],
             filterArray: [Filter.create('category',
-                direction === 'right' || direction === 'left' ? 'horizontal'
-                    : direction === 'below' || direction === 'above' ? 'vertical'
-                        : 'direct',
+                directionCategory ? directionCategory : "direct",
                 Filter.Types.EQUALS)]
         }
 
         labkeyActionSelectWithPromise(roomsConfig).then(result => {
             if(result.rows.length !== 0){
-                const rowOptions: Option<string>[] = [];
+                const rowOptions: Option<ModTypes>[] = [];
                 result.rows.forEach(row => {
-                    rowOptions.push({label: row.title, value: row.value});
+                    rowOptions.push({label: row.title, value: row.value as ModTypes});
                 })
                 setOptions(rowOptions);
             }
@@ -54,7 +52,12 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
     }, []);
 
     const handleChange = (option: Option<string>) => {
-        console.log("Mod: ", option)
+        console.log("Mod Change: ", option)
+        // If dropdown is cleared remove it.
+        if(!option){
+            removeMod()
+        }
+        /*
         setSelectedRackMods(prevState => {
             const exists = prevState.findIndex(mod => mod.cage.cageNum === cage.cageNum);
             if(exists >= 0){
@@ -65,13 +68,14 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
                 };
                 return updatedMods;
             }else{
+                const {rack: rack} = findCageInGroup(cage.cageNum, selectedRoom.rackGroups);
                 return [...prevState, {
                     rack: rack,
                     cage: cage,
                     mod: option
                 }]
             }
-        })
+        })*/
     }
 
     return (
@@ -79,6 +83,7 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
             options={options}
             placeholder={"Select a mod"}
             isClearable={true}
+            defaultValue={defaultValue}
             onChange={(option) =>  handleChange(option)}
             styles={{
                 container: (baseStyles, state) => ({

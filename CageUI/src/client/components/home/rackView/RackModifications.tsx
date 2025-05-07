@@ -3,28 +3,25 @@ import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { findRackInGroup } from '../../../utils/LayoutEditorHelpers';
-import { Cage, Rack, RackGroup, RackStringType, RackTypes } from '../../../types/typings';
-import { findConnectedCages, findConnectedRacks } from '../../../utils/homeHelpers';
-import { Direction, SelectedMods } from '../../../types/homeTypes';
+import { Cage, CageDirection, Rack, RackGroup } from '../../../types/typings';
+import { findConnectedCages, findConnectedRacks, getLocationDirection } from '../../../utils/homeHelpers';
 import { ModificationSelect } from './ModificationSelect';
-import { parseRoomItemType, stringToRoomItem } from '../../../utils/helpers';
 import { Button } from 'react-bootstrap';
 import { CurrentRackLayout } from './CurrentRackLayout';
 
 export const RackModifications: FC = () => {
-    const {selectedPage, selectedRoom, selectedRack, selectedRackMods} = useHomeContext();
+    const {selectedPage, selectedRoom, selectedRack} = useHomeContext();
     const [rackGroup, setRackGroup] = useState<RackGroup>(null);
-    const [connectedCages, setConnectedCages] = useState<[Cage, Direction, Cage][]>(null);
+    const [connectedCages, setConnectedCages] = useState<[Cage, CageDirection, Cage][]>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
-    const [connectedRacks, setConnectedRacks] = useState<[[Rack, Cage], Direction, [Rack, Cage]][]>(null);
+    const [connectedRacks, setConnectedRacks] = useState<[[Rack, Cage], CageDirection, [Rack, Cage]][]>(null);
 
     useEffect(() => {
         console.log("Room: ", selectedRoom);
         console.log("Rack: ", selectedRack);
         console.log("Page: ", selectedPage);
         console.log("RackGroup: ", rackGroup);
-        console.log("Rack Mods: ", selectedRackMods);
-    }, [selectedPage, rackGroup, selectedRack, selectedRackMods]);
+    }, [selectedPage, rackGroup, selectedRack]);
 
     useEffect(() => {
         console.log("Connected Cages: ", connectedCages);
@@ -63,6 +60,10 @@ export const RackModifications: FC = () => {
         console.log("Saving Mods");
     }
 
+    const handleRemoveMod = () => {
+
+    }
+
     return (
         <div className={"mod-container"}>
             <div className={"mod-container-columns"}>
@@ -82,9 +83,8 @@ export const RackModifications: FC = () => {
                                         </div>
                                         <div className={"mod-table-column"} key={`alone-mod-${idx}`}>
                                             <ModificationSelect
-                                                type={stringToRoomItem(parseRoomItemType(cage.cageNum) as RackStringType) as RackTypes}
                                                 cage={cage}
-                                                rack={selectedRack}
+                                                removeMod={handleRemoveMod}
                                             />
                                         </div>
                                     </li>
@@ -109,24 +109,22 @@ export const RackModifications: FC = () => {
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-inside-mod-left-${idx}`}>
                                             <ModificationSelect
-                                                type={stringToRoomItem(parseRoomItemType(cages[2].cageNum) as RackStringType) as RackTypes}
-                                                direction={cages[1]}
+                                                directionCategory={getLocationDirection(cages[1])}
                                                 cage={cages[2]}
-                                                rack={selectedRack}
+                                                removeMod={handleRemoveMod}
                                             />
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-inside-dir-${idx}`}>
-                                            {cages[1] === "left" || cages[1] === "right" ? `${cages[1]} of` : cages[1]}
+                                            {cages[1] === CageDirection.Left || cages[1] === CageDirection.Right ? `${cages[1]} of` : cages[1]}
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-inside-${cages[0].cageNum}-${idx}`}>
                                             {cages[0].cageNum}
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-inside-mod-right-${idx}`}>
                                             <ModificationSelect
-                                                type={stringToRoomItem(parseRoomItemType(cages[0].cageNum) as RackStringType) as RackTypes}
-                                                direction={cages[1]}
+                                                directionCategory={getLocationDirection(cages[1])}
                                                 cage={cages[0]}
-                                                rack={selectedRack}
+                                                removeMod={handleRemoveMod}
                                             />
                                         </div>
                                     </li>
@@ -158,14 +156,13 @@ export const RackModifications: FC = () => {
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-outside-mod-left-${idx}`}>
                                             <ModificationSelect
-                                                type={pairs[2][0].type.type}
-                                                direction={pairs[1]}
+                                                directionCategory={getLocationDirection(pairs[1])}
                                                 cage={pairs[2][1]}
-                                                rack={pairs[2][0]}
+                                                removeMod={handleRemoveMod}
                                             />
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-outside-dir-${idx}`}>
-                                            {pairs[1] === "left" || pairs[1] === "right" ? `${pairs[1]} of` : pairs[1]}
+                                            {pairs[1] === CageDirection.Left || pairs[1] === CageDirection.Right ? `${pairs[1]} of` : pairs[1]}
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-outside-rack-right${pairs[0][0].itemId} - ${idx}`}>
                                             {pairs[0][0].itemId}
@@ -175,10 +172,9 @@ export const RackModifications: FC = () => {
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-outside-mod-right-${idx}`}>
                                             <ModificationSelect
-                                                type={pairs[0][0].type.type}
-                                                direction={pairs[1]}
+                                                directionCategory={getLocationDirection(pairs[1])}
                                                 cage={pairs[0][1]}
-                                                rack={pairs[0][0]}
+                                                removeMod={handleRemoveMod}
                                             />
                                         </div>
                                     </li>

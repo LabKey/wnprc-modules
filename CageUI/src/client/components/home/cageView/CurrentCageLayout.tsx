@@ -30,27 +30,6 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
                  height={cage.size * CELL_SIZE}
                  viewBox={`0 0 ${cage.size * CELL_SIZE} ${cage.size * CELL_SIZE}`}
             />
-            <div className={"cage-mod-table"}>
-                <div className={"mod-table-header"}>
-                    Modifications
-                </div>
-                {Object.entries(cage.mods).map(([loc, mods]) => {
-                    const modLoc = parseInt(loc) as ModLocations;
-                    console.log("ModLoc: ", ModLocations[modLoc])
-                    return (
-                        <div key={`mod-${modLoc}`}>
-                            {ModLocations[modLoc]}
-                            {mods.map((mod, idx) => {
-                                return (
-                                    <div key={`mod-${modLoc}-${idx}`}>
-                                        {mod.mod}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )
-                })}
-            </div>
         </div>
     );
 }

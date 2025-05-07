@@ -1,6 +1,49 @@
 import { convertToTitleCase, zeroPadName } from './helpers';
-import { Cage, ModTypes, Rack, RackGroup, RackTypes, UnitType } from '../types/typings';
-import { Direction } from '../types/homeTypes';
+import {
+    Cage,
+    CageDirection,
+    CageModification,
+    DirectionCategory,
+    ModLocations,
+    ModTypes,
+    Rack,
+    RackGroup
+} from '../types/typings';
+
+
+export const getLocationDirection = (location: CageDirection | ModLocations): DirectionCategory => {
+    const modLoc = location as ModLocations;
+    const cageLoc = location as CageDirection;
+    if(modLoc){
+        if(modLoc === ModLocations.Direct) return 'direct';
+        return location === ModLocations.Top || location === ModLocations.Bottom ? 'vertical' : 'horizontal';
+    }else{
+        if(!cageLoc) {
+            return 'direct';
+        }
+        return location === CageDirection.Top || location === CageDirection.Bottom ? 'vertical' : 'horizontal';
+    }
+
+}
+
+export const findNextModId = (mods: CageModification[]) => {
+    if (!mods || mods.length === 0) return 1;
+
+    const ids = mods.map(mod => mod.id);
+    const maxId = Math.max(...ids);
+    return maxId + 1;
+}
+
+export const fixModIds = (mods: CageModification[]) => {
+    const newMods: CageModification[] = [];
+    mods.forEach((mod, idx) => {
+        newMods.push({
+            ...mod,
+            id: idx + 1,
+        })
+    })
+    return newMods;
+}
 
 function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: number; y: number } {
     // Calculate the global position of the box
@@ -19,7 +62,7 @@ function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: numbe
     };
 }
 
-function areAdjacent(cage1: Cage, rack1: Rack, cage2: Cage, rack2: Rack, group?: RackGroup): Direction | null {
+function areAdjacent(cage1: Cage, rack1: Rack, cage2: Cage, rack2: Rack, group?: RackGroup): CageDirection | null {
 
     // Calculate global positions
     const globalPos1 = getGlobalPosition(cage1, rack1, group);
@@ -37,18 +80,18 @@ function areAdjacent(cage1: Cage, rack1: Rack, cage2: Cage, rack2: Rack, group?:
 
     // Check for horizontal adjacency
     if (globalPos1.x === right2 && !(bottom1 <= globalPos2.y || bottom2 <= globalPos1.y)) {
-        return "left"; // Box1 is to the left of Box2
+        return CageDirection.Left; // Box1 is to the left of Box2
     }
     if (globalPos2.x === right1 && !(bottom1 <= globalPos2.y || bottom2 <= globalPos1.y)) {
-        return "right"; // Box1 is to the right of Box2
+        return CageDirection.Right; // Box1 is to the right of Box2
     }
 
     // Check for vertical adjacency
     if (globalPos1.y === bottom2 && !(right1 <= globalPos2.x || right2 <= globalPos1.x)) {
-        return "above"; // Box1 is above Box2
+        return CageDirection.Top; // Box1 is above Box2
     }
     if (globalPos2.y === bottom1 && !(right1 <= globalPos2.x || right2 <= globalPos1.x)) {
-        return "below"; // Box1 is below Box2
+        return CageDirection.Bottom; // Box1 is below Box2
     }
 
     // If not adjacent, return null
@@ -57,7 +100,7 @@ function areAdjacent(cage1: Cage, rack1: Rack, cage2: Cage, rack2: Rack, group?:
 
 export const findConnectedCages = (rack: Rack) => {
 
-    const connections: [Cage, Direction, Cage][] = [];
+    const connections: [Cage, CageDirection, Cage][] = [];
 
     for (let i = 0; i < rack.cages.length; i++) {
         for (let j = i + 1; j < rack.cages.length; j++) {
@@ -72,7 +115,7 @@ export const findConnectedCages = (rack: Rack) => {
 
 // This can be done by "guessing" the what other cage coords would be if they were adjacent, if they dont exist then they are not
 export const findConnectedRacks = (group: RackGroup, currRack: Rack) => {
-    const connections: [[Rack, Cage], Direction, [Rack, Cage]][] = [];
+    const connections: [[Rack, Cage], CageDirection, [Rack, Cage]][] = [];
 
     const areRacksConnected = (rack1: Rack, rack2: Rack) => {
         for (const cage1 of rack1.cages) {

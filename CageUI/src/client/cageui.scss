@@ -1206,10 +1206,50 @@ margin-bottom: 10px;
 }
 
 .cage-mod-table {
-  flex: 1;
-  padding-left: 10px;
+  margin-left: 25px;
+  display: table;
+  border-collapse: collapse;
 }
 
+.cage-mod-table-column {
+  display: table-cell;
+  align-items: center;
+  gap: 8px; /* Adjust spacing between column header and cells */
+  width: max-content;
+  min-width: 50px;
+  border: 2px solid lightgray;
+  //border-right: 1px solid black;
+  //border-left: 1px solid black;
+}
+
+.cage-mod-table-cell {
+  padding: 8px;
+  border-radius: 4px;
+  width: 100%;
+  text-align: center;
+  background-color: white;
+}
+
+.cage-mod-table-label {
+  font-size: large;
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  border-bottom: 2px solid lightgray;
+  //border: 1px solid black;
+}
+
+.cage-mod-table-add-mod {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  font-size: x-large;
+  cursor: pointer;
+}
+
+.cage-mod-table-add-mod:hover {
+  background-color: lightblue;
+}
 
 .modification-editor-popup {
   position: fixed;
@@ -1222,7 +1262,6 @@ margin-bottom: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 20px;
   width: auto;
-  max-width: 400px;
   min-width: 300px;
   animation: fadeIn 0.2s ease-out;
 }
@@ -1266,6 +1305,9 @@ margin-bottom: 10px;
 
 .modification-editor-popup-content {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+
 }
 
 .modification-editor-popup-input {

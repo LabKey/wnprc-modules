@@ -1,6 +1,7 @@
-import { Cage, Rack, RackGroup, Room, RoomItem } from './typings';
-import { LoadedRooms, SelectedMods, SelectedPage } from './homeTypes';
+import { Cage, CageWithMods, ModLocations, Rack, RackGroup, Room, RoomItem } from './typings';
+import { LoadedRooms, UpdatedMods, SelectedPage } from './homeTypes';
 import * as React from 'react';
+import { SelectedObj } from './layoutEditorTypes';
 
 export interface HomeContextType {
     selectedPage: SelectedPage;
@@ -13,6 +14,7 @@ export interface HomeContextType {
     selectedRackGroup: RackGroup,
     selectedRack: Rack,
     selectedCage: Cage,
-    selectedRackMods: SelectedMods,
-    setSelectedRackMods: React.Dispatch<React.SetStateAction<SelectedMods>>,
+    selectedContextObj: SelectedObj,
+    setSelectedContextObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
+    addNewMod: (cage: CageWithMods, location: ModLocations) => void;
 }

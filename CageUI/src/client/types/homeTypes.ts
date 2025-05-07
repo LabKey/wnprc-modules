@@ -1,17 +1,24 @@
-import { Cage, CageNumber, DefaultRackId, Rack, RealRackId, Room } from './typings';
+import {
+    Cage,
+    CageNumber,
+    DefaultRackId,
+    DirectionCategory,
+    ModLocations,
+    ModTypes,
+    Rack,
+    RealRackId,
+    Room
+} from './typings';
 
 
 type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
-type SelectedMod = {
-    rack: Rack,
+type UpdatedMod = {
     cage: Cage,
     mod: { label: string, value: string }
 }
 
-export type SelectedMods = SelectedMod[];
-
-export type Direction = "above" | "below" | "right" | "left";
+export type UpdatedMods = UpdatedMod[];
 
 export type ExpandedRooms = {
     [key: string]: boolean;
@@ -20,6 +27,14 @@ export type ExpandedRooms = {
 export type LoadedRooms = {
     [key: string]: { loaded: boolean, room?: Room };
 };
+
+export type EHRCageMods = {
+    [key in ModTypes]: {
+        category: DirectionCategory;
+        rowid: number;
+        title: string;
+    }
+}
 
 export interface SelectedPage {
     selected: SelectedViews

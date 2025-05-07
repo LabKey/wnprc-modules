@@ -7,7 +7,7 @@ import { ReactSVG } from 'react-svg';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { RoomItemTemplate } from './RoomItemTemplate';
 import {
-    Cage,
+    Cage, CageDirection,
     CageNumber,
     Rack,
     RackGroup,
@@ -63,7 +63,6 @@ import { GateChangeRoom } from './GateChangeRoom';
 import { TextInput } from '../TextInput';
 import { GateSwitch } from './GateSwitch';
 import { CELL_SIZE, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
-import { Direction } from '../../types/homeTypes';
 
 interface EditorProps {
     roomSize: SelectorOptions
@@ -368,7 +367,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
 
         let mergeAvail: boolean = false;
-        let direction: Direction;
+        let direction: CageDirection;
         let targetCageLoc;
         let draggedCageLoc;
 
@@ -416,7 +415,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
                             const adj = checkAdjacent(targetLoc, dragLoc, draggedCage.size,targetCage.size);
                             mergeAvail = adj.isAdjacent
-                            direction = adj.direction as Direction;
+                            direction = adj.direction as CageDirection;
 
                             if(mergeAvail){
                                 targetCageLoc = targetLoc;
@@ -460,7 +459,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                     }
                     const adj = checkAdjacent(targetLoc, draggedCageLoc, draggedCage.size,targetCage.size);
                     mergeAvail = adj.isAdjacent
-                    direction = adj.direction as Direction;
+                    direction = adj.direction as CageDirection;
                     if(mergeAvail){
                         targetCageLoc = targetLoc;
                     }
@@ -471,12 +470,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         if(mergeAvail) {
             const targetShape = layoutSvg.select(`#${targetCageLoc.num}`);
             if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
-            const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*=rack]');
+            const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*="rack"]');
             const {rack: targetRack, rackGroup: targetRackGroup} = findRackInGroup(targetRackShape.getAttribute('id'), localRoom.rackGroups);
 
 
             const draggedShape = layoutSvg.select(`#${draggedCageLoc.num}`);
-            const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*=rack]');
+            const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*="rack"]');
 
             const {rack: draggedRack, rackGroup: draggedRackGroup} = findRackInGroup(draggedRackShape.getAttribute('id'), localRoom.rackGroups);
 

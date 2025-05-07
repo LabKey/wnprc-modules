@@ -73,17 +73,17 @@ select 'cageui_modification_locations' as setname,
        container from ehr_lookups.lookup_sets where setname='ancestry';
 
 
-insert into ehr_lookups.lookups (set_name,container,value,title)
-select setname, container, 0 as value, 'Left' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+insert into ehr_lookups.lookups (set_name,container,value,category,title)
+select setname, container, 0 as value,'horizontal' as category, 'Left' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
 
-insert into ehr_lookups.lookups (set_name,container,value,title)
-select setname, container, 1 as value, 'Right' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+insert into ehr_lookups.lookups (set_name,container,value,category,title)
+select setname, container, 1 as value,'horizontal' as category, 'Right' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
 
-insert into ehr_lookups.lookups (set_name,container,value,title)
-select setname, container, 2 as value, 'Top' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+insert into ehr_lookups.lookups (set_name,container,value,category,title)
+select setname, container, 2 as value,'vertical' as category, 'Top' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
 
-insert into ehr_lookups.lookups (set_name,container,value,title)
-select setname, container, 3 as value, 'Bottom' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+insert into ehr_lookups.lookups (set_name,container,value,category,title)
+select setname, container, 3 as value,'vertical' as category, 'Bottom' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
 
-insert into ehr_lookups.lookups (set_name,container,value,title)
-select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+insert into ehr_lookups.lookups (set_name,container,value,category,title)
+select setname, container, 4 as value,'direct' as category, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';

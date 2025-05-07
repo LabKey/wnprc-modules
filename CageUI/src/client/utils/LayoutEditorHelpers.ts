@@ -2,7 +2,8 @@
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import {
-    defaultTypeToRackType, getSvgSize,
+    defaultTypeToRackType,
+    getSvgSize,
     getTypeClassFromElement,
     parseLongId,
     parseRoomItemNum,
@@ -10,17 +11,24 @@ import {
     roomItemToString
 } from './helpers';
 import {
-    Cage, CageModification, CageModifications,
-    CageNumber, CageWithMods, DefaultRackId,
+    Cage,
+    CageDirection,
+    CageModification,
+    CageModifications,
+    CageNumber,
+    CageWithMods,
+    DefaultRackId,
     DefaultRackTypes,
     GroupId,
     LayoutHistoryData,
-    LocationCoords, ModLocations,
+    LocationCoords,
+    ModLocations,
     PrevRoom,
     Rack,
     RackGroup,
     RackStringType,
-    RackTypes, RealRackId,
+    RackTypes,
+    RealRackId,
     Room,
     RoomItemClass,
     RoomItemStringType,
@@ -45,8 +53,7 @@ import { MutableRefObject } from 'react';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter, Security } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { Direction } from '../types/homeTypes';
-import { CELL_SIZE, Modifications } from './constants';
+import { CELL_SIZE } from './constants';
 
 
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
@@ -538,26 +545,26 @@ export const getAdjDirection = (
     draggedWidth,
     draggedHeight,
     targetWidth,
-    targetHeight): Direction => {
+    targetHeight): CageDirection => {
 
     // Check right side of A to left side of B
     if (draggedX + draggedWidth === targetX) {
-        return "right";
+        return CageDirection.Right;
     }
 
     // Check left side of A to right side of B
     if (draggedX === targetX + targetWidth) {
-        return "left";
+        return CageDirection.Left;
     }
 
     // Check bottom side of A to top side of B
     if (draggedY + draggedHeight === targetY) {
-        return "below";
+        return CageDirection.Bottom;
     }
 
     // Check top side of A to bottom side of B
     if (draggedY === targetY + targetHeight) {
-        return "above";
+        return CageDirection.Top;
     }
 }
 
@@ -954,7 +961,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 [ModLocations.Left]: [],
                 [ModLocations.Right]: [],
                 [ModLocations.Direct]: []
-            }
+            },
+            isDirty: false,
         }
         if(rack.type.isDefault){
             cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
@@ -986,7 +994,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
             size: svgSize,
-            mods: cageMods.mods
+            mods: cageMods.mods,
+            isDirty: cageMods.isDirty
         }
         rack.cages.push(cage);
     }

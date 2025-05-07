@@ -20,8 +20,7 @@ interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
-    const {selectedRoom} = useHomeContext();
-    const [selectedObj, setSelectedObj] = useState<SelectedObj>(null);
+    const {selectedRoom, selectedContextObj, setSelectedContextObj} = useHomeContext();
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
@@ -36,20 +35,20 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         d3.select("#layout-svg").selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg, setSelectedObj, contextRef);
+        addPrevRoomSvgs('view', selectedRoom, layoutSvg, setSelectedContextObj, contextRef);
     }, [selectedRoom.name]);
 
     // Effect watches for right clicks to open the modification editor
     useEffect(() => {
-        if(selectedObj){
+        if(selectedContextObj){
             setShowCageContextMenu(true);
         }
-    }, [selectedObj]);
+    }, [selectedContextObj]);
 
     // Cleans up selected object after modification editor is closed
     useEffect(() => {
         if(showCageContextMenu) return;
-        setSelectedObj(null);
+        setSelectedContextObj(null);
     }, [showCageContextMenu]);
 
     return (
@@ -86,7 +85,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
             </div>
             <ModificationEditor
                 showEditor={showCageContextMenu}
-                selectedObj={selectedObj}
+                selectedObj={selectedContextObj}
                 closeMenu={() => setShowCageContextMenu(false)}
             />
         </div>

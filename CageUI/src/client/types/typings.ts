@@ -60,6 +60,14 @@ export enum ModLocations {
     Direct
 }
 
+export enum CageDirection {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+export type DirectionCategory = "vertical" | "horizontal" | "direct";
 
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
@@ -104,8 +112,10 @@ export type ModRecord = Record<ModTypes, Modification>;
 
 export type CageModification = {
     id: number; // id for duplicate mods in the same location, imagine 2 cages on one side of a pen
-    mod: ModTypes; // Use mod in the Modifications constant to get styles for mod
+    mod: CageModType; // Use mod in the Modifications constant to get styles for mod
 }
+
+export type CageModType = ModTypes | 'newMod';
 
 export interface Cage {
     id: number; // Id local to rack
@@ -127,6 +137,7 @@ export interface CageModifications {
         [ModLocations.Right]: CageModification[];
         [ModLocations.Direct]: CageModification[];
     };
+    isDirty: boolean; // determines if modifications have been changed
 }
 
 export interface Room {

@@ -10,20 +10,19 @@ import {
     RackGroup
 } from '../types/typings';
 
-
 export const getLocationDirection = (location: CageDirection | ModLocations): DirectionCategory => {
-    const modLoc = location as ModLocations;
-    const cageLoc = location as CageDirection;
-    if(modLoc){
-        if(modLoc === ModLocations.Direct) return 'direct';
-        return location === ModLocations.Top || location === ModLocations.Bottom ? 'vertical' : 'horizontal';
-    }else{
-        if(!cageLoc) {
-            return 'direct';
-        }
-        return location === CageDirection.Top || location === CageDirection.Bottom ? 'vertical' : 'horizontal';
+    // Check for ModLocations enum values
+    if (Object.values(ModLocations).includes(location as ModLocations)) {
+        if (location === ModLocations.Direct) return 'direct';
+        return location === ModLocations.Top || location === ModLocations.Bottom
+            ? 'vertical'
+            : 'horizontal';
     }
 
+    // Otherwise it must be CageDirection
+    return location === CageDirection.Top || location === CageDirection.Bottom
+        ? 'vertical'
+        : 'horizontal';
 }
 
 export const findNextModId = (mods: CageModification[]) => {

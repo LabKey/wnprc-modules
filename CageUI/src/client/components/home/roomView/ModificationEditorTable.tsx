@@ -14,6 +14,7 @@ interface ModificationEditorTableProps {
     cage: CageWithMods;
     onModAdd: (location: ModLocations) => void;
     onModDelete: (location: ModLocations, locId: number) => void;
+    onModChange: (location: ModLocations, locId: number, newMod: ModTypes) => void;
 }
 
 /*
@@ -21,7 +22,7 @@ interface ModificationEditorTableProps {
 
  */
 export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props) => {
-    const {cage, onModAdd, onModDelete} = props;
+    const {cage, onModAdd, onModDelete, onModChange} = props;
     const {addNewMod} = useHomeContext();
     const [allCageMods, setAllCageMods] = useState<EHRCageMods>(null);
 
@@ -61,6 +62,11 @@ export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props)
         onModDelete(location, locId)
     }
 
+    const handleModChange = (location: ModLocations, locId: number, newMod: ModTypes) => {
+        onModChange(location, locId, newMod);
+    }
+
+
     return (
         options &&
         <div className={"cage-mod-table"}>
@@ -76,6 +82,7 @@ export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props)
                                     <ModificationSelect
                                         cage={cage}
                                         removeMod={() => handleRemoveMod(modLoc, mod.id)}
+                                        changeMod={(newMod) => handleModChange(modLoc, mod.id, newMod)}
                                         directionCategory={mod.mod === 'newMod' ? getLocationDirection(modLoc) : allCageMods[mod.mod].category}
                                         defaultValue={{value: mod.mod, label: mod.mod === 'newMod' ? "New Mod" : allCageMods[mod.mod].title}}
                                     />

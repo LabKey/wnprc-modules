@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import '../../../cageui.scss';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
-import { CageWithMods, ModLocations } from '../../../types/typings';
+import { CageWithMods, ModLocations, ModTypes } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
 import { ModificationEditorTable } from './ModificationEditorTable';
 import { findNextModId, fixModIds } from '../../../utils/homeHelpers';
@@ -91,6 +91,32 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         })
     }
 
+    const handleModChange = (location: ModLocations, locId: number, newMod: ModTypes) => {
+
+        setCurrCage((cage) => {
+            let newCage = cage;
+            if(newCage.cageNum === newCage.cageNum){
+                newCage = {
+                    ...newCage,
+                    mods: {
+                        ...newCage.mods,
+                        [location]: newCage.mods[location].map((mod) => {
+                            if(mod.id === locId){
+                                return {
+                                    ...mod,
+                                    mod: newMod
+                                }
+                            }else{
+                                return mod;
+                            }
+                        })
+                    }
+                };
+            }
+            return newCage;
+        })
+    }
+
     const handleSubmit = () => {
 
     }
@@ -107,7 +133,12 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                         <CurrentCageLayout
                             cage={currCage}
                         />
-                        <ModificationEditorTable onModDelete={handleModDelete} onModAdd={handleModAdd} cage={currCage} />
+                        <ModificationEditorTable
+                            onModDelete={handleModDelete}
+                            onModChange={handleModChange}
+                            onModAdd={handleModAdd}
+                            cage={currCage}
+                        />
                     </div>
                     <div className="modification-editor-popup-actions">
                         <button className="modification-editor-popup-button modification-editor-popup-cancel" onClick={closeMenu}>Cancel</button>

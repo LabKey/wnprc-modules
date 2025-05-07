@@ -64,6 +64,10 @@ export const RackModifications: FC = () => {
 
     }
 
+    const handleChangeMod = () => {
+
+    }
+
     return (
         <div className={"mod-container"}>
             <div className={"mod-container-columns"}>
@@ -85,6 +89,7 @@ export const RackModifications: FC = () => {
                                             <ModificationSelect
                                                 cage={cage}
                                                 removeMod={handleRemoveMod}
+                                                changeMod={handleChangeMod}
                                             />
                                         </div>
                                     </li>
@@ -112,6 +117,7 @@ export const RackModifications: FC = () => {
                                                 directionCategory={getLocationDirection(cages[1])}
                                                 cage={cages[2]}
                                                 removeMod={handleRemoveMod}
+                                                changeMod={handleChangeMod}
                                             />
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-inside-dir-${idx}`}>
@@ -125,6 +131,7 @@ export const RackModifications: FC = () => {
                                                 directionCategory={getLocationDirection(cages[1])}
                                                 cage={cages[0]}
                                                 removeMod={handleRemoveMod}
+                                                changeMod={handleChangeMod}
                                             />
                                         </div>
                                     </li>
@@ -159,6 +166,7 @@ export const RackModifications: FC = () => {
                                                 directionCategory={getLocationDirection(pairs[1])}
                                                 cage={pairs[2][1]}
                                                 removeMod={handleRemoveMod}
+                                                changeMod={handleChangeMod}
                                             />
                                         </div>
                                         <div className={"mod-table-column"} key={`adj-outside-dir-${idx}`}>
@@ -175,6 +183,7 @@ export const RackModifications: FC = () => {
                                                 directionCategory={getLocationDirection(pairs[1])}
                                                 cage={pairs[0][1]}
                                                 removeMod={handleRemoveMod}
+                                                changeMod={handleChangeMod}
                                             />
                                         </div>
                                     </li>

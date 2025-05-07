@@ -9,16 +9,19 @@ import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
 import { CageModType, CageWithMods, DirectionCategory, ModLocations, ModTypes, Rack } from '../../../types/typings';
 import { findCageInGroup, findRackInGroup } from '../../../utils/LayoutEditorHelpers';
+import { Simulate } from 'react-dom/test-utils';
+import change = Simulate.change;
 
 interface ModificationSelectProps {
     cage: CageWithMods;
     removeMod: () => void;
+    changeMod: (newMod: ModTypes) => void;
     defaultValue?: Option<CageModType>;
     directionCategory?: DirectionCategory;
 }
 
 export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
-    const {directionCategory, cage, defaultValue, removeMod} = props;
+    const {directionCategory, cage, defaultValue, removeMod, changeMod} = props;
     const {selectedRoom} = useHomeContext();
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
 
@@ -37,6 +40,7 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
                 directionCategory ? directionCategory : "direct",
                 Filter.Types.EQUALS)]
         }
+        console.log("Direction: ", directionCategory)
 
         labkeyActionSelectWithPromise(roomsConfig).then(result => {
             if(result.rows.length !== 0){
@@ -51,11 +55,13 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
         });
     }, []);
 
-    const handleChange = (option: Option<string>) => {
+    const handleChange = (option: Option<CageModType>) => {
         console.log("Mod Change: ", option)
         // If dropdown is cleared remove it.
         if(!option){
             removeMod()
+        }else{
+            changeMod(option.value as ModTypes);
         }
         /*
         setSelectedRackMods(prevState => {

@@ -18,7 +18,13 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
 
     useEffect(() => {
         if(!cageRef.current) return;
+        console.log("Load Cage: ", cage)
         const cageSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select(cageRef.current);
+        cageSvg.selectAll(':scope > g').each(function(d, i) {
+            // 'this' refers to the current DOM element
+            const element = d3.select(this) as  d3.Selection<SVGGElement, {}, null, undefined>;
+            element.remove();
+        });
         addPrevRoomSvgs('view', cage, cageSvg);
     }, [cage]);
 

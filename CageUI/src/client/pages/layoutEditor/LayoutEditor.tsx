@@ -18,7 +18,7 @@ import { SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
 export const LayoutEditor: FC<any> = () => {
     const roomName = ActionURL.getParameter("room");
     const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null});
-    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: LayoutHistoryData[]}>(null);
+    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: LayoutHistoryData[], isTemplate: boolean}>(null);
     const [selectedSize, setSelectedSize] = useState<SelectorOptions>(null);
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
@@ -119,17 +119,18 @@ export const LayoutEditor: FC<any> = () => {
     useEffect(() => {
         if(prevRoomData.name !== null){
             let newLocalRoom: Room;
-
+            let isTemplate: boolean;
             let newUnitLocs: UnitLocations;
 
             if(prevRoomData.cagingData.length !== 0){
                 newUnitLocs = buildNewLocs(prevRoomData.cagingData);
                 buildNewLocalRoom(prevRoomData).then((d) => {
                     if(d){
+                        isTemplate = d.name.includes("template");
                         newLocalRoom = d;
                         newLocalRoom = {
                             ...d,
-                            name: d.name.includes("template") ? 'new-layout' : d.name
+                            name: isTemplate ? 'new-layout' : d.name
                         }
 
                         newLocalRoom = {
@@ -140,13 +141,14 @@ export const LayoutEditor: FC<any> = () => {
                                 borderHeight: prevRoomData.layoutData.borderHeight
                             }
                         }
-                        setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData});
+                        setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData, isTemplate: isTemplate});
                         setIsLoading(false);
                     }
                 });
             }else{
+                isTemplate = prevRoomData.name.includes("template");
                 // Don't use template name instead treat the template as an empty room with objects already placed
-                newLocalRoom = {name: prevRoomData.name.includes("template") ? 'new-layout' : prevRoomData.name, rackGroups: [], objects: [], layoutData: null}
+                newLocalRoom = {name: isTemplate ? 'new-layout' : prevRoomData.name, rackGroups: [], objects: [], layoutData: null}
                 //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
                 newLocalRoom = {
                     ...newLocalRoom,
@@ -156,7 +158,7 @@ export const LayoutEditor: FC<any> = () => {
                         borderHeight: prevRoomData.layoutData.borderHeight
                     }
                 }
-                setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData.cagingData});
+                setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData.cagingData, isTemplate: isTemplate});
                 setIsLoading(false);
             }
         }

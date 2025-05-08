@@ -22,7 +22,7 @@ import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Per
 
 export interface LayoutContextProps {
     children: ReactNode;
-    prevRoom: {room: Room, locs: UnitLocations, data: LayoutHistoryData[]};
+    prevRoom: {room: Room, locs: UnitLocations, data: LayoutHistoryData[], isTemplate: boolean};
     user: GetUserPermissionsResponse;
 }
 

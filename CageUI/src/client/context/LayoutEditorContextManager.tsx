@@ -1097,10 +1097,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         });
     }
 
-//TODO
-// before submitting the rack, use type and id to find its row id and submit that to layout_history.
-// Then when loading, use the rowid and load the rack id.
-
     const saveRoom = async (templateRename?: boolean): Promise<LayoutSaveResult> => {
         const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
@@ -1201,15 +1197,18 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         // get data for updating layout history end dates
         if(prevRoom && prevRoom.data.length !== 0){
-            rowsToUpdate = prevRoom.data.reduce((acc, row) => {
-                return [
-                    ...acc,
-                    {
-                        ...row,
-                        end_date: newEndDate
-                    }
-                ];
-            }, []);
+            // Dont update template room when saving as a new room
+            if(!(prevRoom.isTemplate && prevRoom.room.name !== oldRoomName)) {
+                rowsToUpdate = prevRoom.data.reduce((acc, row) => {
+                    return [
+                        ...acc,
+                        {
+                            ...row,
+                            end_date: newEndDate
+                        }
+                    ];
+                }, []);
+            }
         }else if(templateHistory && templateHistory?.length !== 0) {// ensure template history exists and has data.
             rowsToUpdate = templateHistory.reduce((acc, row) => {
                 return [
@@ -1270,7 +1269,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             queryName: "rooms",
             rows: roomToSave
         });
-
+        console.log("commands: ",commands);
+        //return;
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){

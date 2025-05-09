@@ -16,6 +16,20 @@
                     </column>
                     <column columnName="status">
                         <columnTitle>Status</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Pending"/>
+                                </filters>
+                                <backgroundColor>FFA500</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Approved"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
                         <fk>
                             <fkDbSchema>core</fkDbSchema>
                             <fkTable>qcstate</fkTable>

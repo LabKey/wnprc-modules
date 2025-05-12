@@ -1142,7 +1142,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         ]
                     };
                     const rackResult = await labkeyActionSelectDistinctWithPromise(rackConfig);
-                    console.log('result: ', rackResult);
                     if (rackResult.values.length === 1) {
                         rackRowId = rackResult.values[0];
                     }
@@ -1269,8 +1268,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             queryName: "rooms",
             rows: roomToSave
         });
-        console.log("commands: ",commands);
-        //return;
+
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){

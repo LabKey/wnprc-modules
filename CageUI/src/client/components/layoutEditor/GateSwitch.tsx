@@ -20,10 +20,8 @@ export const GateSwitch: FC<GateSwitchProps> = (props) => {
         const gateSvg = layoutSvg.select(`#${selectedObj.itemId}`);
         let newGateIdPrefix;
         if(selectedObj.type === RoomObjectTypes.GateOpen){
-            console.log('Closing Gate', gateSvg.node());
             newGateIdPrefix = 'gateClosed';
         }else{
-            console.log('Opening Gate', gateSvg.node());
             newGateIdPrefix = 'gateOpen';
         }
 

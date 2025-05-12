@@ -108,7 +108,6 @@ export const LayoutEditor: FC<any> = () => {
                 setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
                 setShowSelectionPopup(false);
             }
-            console.log("Prev  Room: ", prevRoomResult.rows)
             setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
         }).catch(err => {
             setErrorPopup(err.toString());

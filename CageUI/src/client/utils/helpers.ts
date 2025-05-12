@@ -239,7 +239,6 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     if((unitsToRender as Room)?.rackGroups){
         renderType = 'room';
     } else if((unitsToRender as RackGroup)?.racks){ // we are rendering a single rack group
-        console.log("Rendering Rack Group")
         renderType = 'group';
         let tempX = (unitsToRender as RackGroup).x;
         let tempY = (unitsToRender as RackGroup).y;
@@ -396,11 +395,9 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             roomObjGroup.call(closeMenuThenDrag);
         });
     } else if(renderType === 'group'){ // we are rendering a single rack group
-        console.log("Rendering Rack Group")
         createGroup(unitsToRender as RackGroup);
 
     }else if(renderType === 'rack'){ // we are rendering a single rack
-        console.log("Rack Render");
     }else{ // we are rendering a single cage
         const cage: CageWithMods = unitsToRender as Cage;
         const cageGroup = layoutSvg.append('g')

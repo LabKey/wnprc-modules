@@ -975,7 +975,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         const svgSize = await getSvgSize(rack.type.type);
         //TODO Add mods if needed here
         if(loadMods && !rack.type.isDefault){
-            console.log("Prev Mods: ", prevRoom.modData);
             prevRoom.modData.forEach((mod) => {
                 if(rack.rowid === mod.rack && cageNum === mod.cage){
                     (cageMods.mods[mod.location] as CageModification[]).push({

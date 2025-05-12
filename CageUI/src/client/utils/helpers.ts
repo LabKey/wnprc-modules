@@ -21,12 +21,34 @@ import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { selectDistinctRows } from '@labkey/components';
 import { Modifications } from './constants';
-import { changeStyleProperty } from './homeHelpers';
-
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
-//TODO link with cage size table in labkey instead of hardcoding
+// Changes stroke color of svg element nodes keeping the other styles.
+export const changeStyleProperty  = (element: Element, property: string, newValue: string): void => {
+    const styleAttr = element.getAttribute('style');
+    if (styleAttr) {
+        const styles = styleAttr.split(';').map(style => style.trim()).filter(style => style !== "");
+        let updated = false;
+        const updatedStyles = styles.map(style => {
+            const [prop, value] = style.split(':').map(prop => prop.trim()).filter(prop => prop !== "");
+            if (prop.toLowerCase() === property.toLowerCase()) {
+                updated = true;
+                return `${property}: ${newValue}`;
+            } else {
+                return `${prop}: ${value}`;
+            }
+        });
+        if (!updated) {
+            updatedStyles.push(`${property}: ${newValue}`);
+        }
+        const updatedStyleAttr = updatedStyles.join(';');
+        element.setAttribute('style', updatedStyleAttr);
+    } else {
+        element.setAttribute('style', `${property}: ${newValue}`);
+    }
+}
+
 export const getSvgSize = async (type: RackTypes) => {
     const config: SelectDistinctOptions = {
         schemaName: "ehr_lookups",

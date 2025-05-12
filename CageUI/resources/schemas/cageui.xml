@@ -66,21 +66,4 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
-    <table tableName="cage_modifications" tableDbType="TABLE">
-        <columns>
-            <column columnName="rowid"/>
-            <column columnName="room"/>
-            <column columnName="rack"/>
-            <column columnName="cage"/>
-            <column columnName="modification" />
-            <column columnName="locationid" />
-            <column columnName="location" />
-            <column columnName="startDate" />
-            <column columnName="endDate"/>
-            <column columnName="createdby"/>
-            <column columnName="created"/>
-            <column columnName="modified"/>
-            <column columnName="modifiedby"/>
-        </columns>
-    </table>
 </tables>

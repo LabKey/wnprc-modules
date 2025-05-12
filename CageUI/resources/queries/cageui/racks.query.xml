@@ -1,0 +1,28 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="racks" tableDbType="TABLE">
+                <tableTitle>Racks</tableTitle>
+                <columns>
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="rackid"/>
+                    <column columnName="rack_type">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>rack_types</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="container"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modified"/>
+                    <column columnName="modifiedby"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

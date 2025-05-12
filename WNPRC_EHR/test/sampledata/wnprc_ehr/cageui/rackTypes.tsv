@@ -1,0 +1,3 @@
+rowid	name	type	manufacturer	length	width	height	sqft	supportsTunnel	description	container	createdby	created	modifiedby	modified
+1	cage-uk-0.0	0	Unknown					false	Default Unknown Rack	EHR	lcameron3	2025-02-07 09:31	lcameron3	2025-02-07 09:31
+2	pen-uk-0.0	1	Unknown					false	Default Unknown Pen	EHR	lcameron3	2025-02-07 09:31	lcameron3	2025-02-07 09:31

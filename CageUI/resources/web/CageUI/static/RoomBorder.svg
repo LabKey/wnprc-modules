@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="border_template" xmlns="http://www.w3.org/2000/svg" width="1290" height="810" viewBox="0 0 1290 810">
+    <rect id="resize-handle" x="1275.25" y="795.49" width="15" height="15.01"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10;" class="resize-handle"/>
+    <rect id="border-rect" x=".5" y=".5" width="1289" height="809"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+</svg>

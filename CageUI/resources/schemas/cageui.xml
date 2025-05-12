@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+
+ * Copyright (c) 2025 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+
+ -->
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="layout_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid" />
+            <column columnName="room"/>
+            <column columnName="object_type"/>
+            <column columnName="rack_group"/>
+            <column columnName="rack"/>
+            <column columnName="cage"/>
+            <column columnName="start_date"/>
+            <column columnName="end_date"/>
+            <column columnName="x_coord"/>
+            <column columnName="y_coord"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="racks" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="rackid"/>
+            <column columnName="rack_type"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="rack_types" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="name"/>
+            <column columnName="type"/>
+            <column columnName="manufacturer"/>
+            <column columnName="length"/>
+            <column columnName="width"/>
+            <column columnName="height"/>
+            <column columnName="supportsTunnel"/>
+            <column columnName="description"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="cage_modifications" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="room"/>
+            <column columnName="rack"/>
+            <column columnName="cage"/>
+            <column columnName="modification" />
+            <column columnName="locationid" />
+            <column columnName="location" />
+            <column columnName="startDate" />
+            <column columnName="endDate"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+</tables>

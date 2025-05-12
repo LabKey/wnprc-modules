@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="divider" xmlns="http://www.w3.org/2000/svg" width="53.2" height="50.87" viewBox="0 0 53.2 50.87">
+    <polygon points="35.7 3.89 17.5 1.82 1.6 3.89 1.6 43.4 17.5 41.33 35.7 43.4 51.6 41.33 51.6 1.82 35.7 3.89"
+             style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+    <line x1="17.5" y1=".87" x2="17.5" y2="42.17"
+          style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+    <line x1="35.7" y1="3.05" x2="35.7" y2="44.33"
+          style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+    <line x1="1.6" y1="50.87" x2="1.6" y2="44.33"
+          style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+    <line x1="17.5" y1="48.68" x2="17.5" y2="42.17"
+          style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+    <line x1="35.7" y1="50.87" x2="35.7" y2="44.33"
+          style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+    <line x1="51.6" y1="48.68" x2="51.6" y2="42.17"
+          style="fill:none; stroke:#020202; stroke-miterlimit:26.67; stroke-width:3.2px;"/>
+</svg>

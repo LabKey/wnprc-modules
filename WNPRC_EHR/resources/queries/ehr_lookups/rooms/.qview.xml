@@ -1,0 +1,10 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="room"/>
+        <column name="area"/>
+        <column name="housingType" />
+        <column name="housingCondition"/>
+        <column name="maxCages"/>
+        <column name="dateDisabled"/>
+    </columns>
+</customView>

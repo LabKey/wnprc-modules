@@ -1443,7 +1443,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
             // Filters data.
             for (HashMap<String, String> result : unfilteredReturnArray) {
-                if (result.get("Id/activeAssignments/projects").contains(result.get("project"))) {
+                if (!result.get("Id/activeAssignments/projects").contains(result.get("project"))) {
                     filteredReturnArray.add(result);
                 }
             }

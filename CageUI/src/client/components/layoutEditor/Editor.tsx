@@ -89,7 +89,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showRoomSelectorTemplateLoad, setShowRoomSelectorTemplateLoad] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
-    const [templateRename, setTemplateRename] = useState<boolean>(false);
 
     // number of cells in grid width/height, based off scale
     const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
@@ -744,7 +743,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }
 
     const handleSave = async () => {
-        const result = await saveRoom(templateRename);
+        const result = await saveRoom();
         setShowSaveResult(result);
     }
 
@@ -769,9 +768,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 ...prevRoom,
                 name: room.name
             }));
-        }
-        if(templateRename){
-            setTemplateRename(false);
         }
         if(templateOptions){
             setTemplateOptions(false);
@@ -912,7 +908,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             </div>
             {showSaveConfirm &&
                 <ConfirmationPopup
-                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${templateRename ? JSON.parse(localRoom.name)[1] : localRoom.name}</strong> ?`}
+                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
                     onConfirm={handleSave}
                     onCancel={handleCancelConfirm}
                     onClose={() => setShowSaveConfirm(false)}
@@ -922,7 +918,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <RoomSelectorPopup
                     setRoom={setLocalRoom}
                     template={templateOptions}
-                    setTemplateRename={setTemplateRename}
                     onConfirm={() => {setShowRoomSelector(false);setShowSaveConfirm(true);}}
                     onCancel={() => {setTemplateOptions(false);setShowRoomSelector(false);}}
                 />

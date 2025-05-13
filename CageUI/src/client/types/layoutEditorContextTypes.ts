@@ -29,7 +29,7 @@ export interface LayoutContextProps {
 export interface LayoutContextType {
     room: Room;
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
-    saveRoom: (templateRename?: boolean) => Promise<LayoutSaveResult>;
+    saveRoom: () => Promise<LayoutSaveResult>;
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     setLayoutSvg: React.Dispatch<React.SetStateAction<d3.Selection<SVGElement, {}, HTMLElement, any>>>;
     unitLocs: UnitLocations;

@@ -55,7 +55,7 @@ import {
     zeroPadName
 } from '../utils/helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { ActionURL, Filter } from '@labkey/api';
 import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import {
     labkeyActionSelectDistinctWithPromise,
@@ -1097,12 +1097,13 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         });
     }
 
-    const saveRoom = async (templateRename?: boolean): Promise<LayoutSaveResult> => {
+    const saveRoom = async (): Promise<LayoutSaveResult> => {
         const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
         // if template parse room name, 1 is the new name, 0 is the old name
-        const roomName = templateRename ? JSON.parse(localRoom.name)[1] : localRoom.name;
-        const oldRoomName = templateRename ? JSON.parse(localRoom.name)[0] : localRoom.name;
+        const roomName = localRoom.name;
+        const oldRoomName: string = ActionURL.getParameter('room');
+        const savingTemplate: boolean = roomName.toLowerCase().includes("template");
         const newEndDate = new Date();
         const newStartDate = new Date();
         let rowsToUpdate;
@@ -1197,7 +1198,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         // get data for updating layout history end dates
         if(prevRoom && prevRoom.data.length !== 0){
             // Dont update template room when saving as a new room
-            if(!(prevRoom.isTemplate && prevRoom.room.name !== oldRoomName)) {
+            // if prev room is template and saving as same room, update
+            // if prev room is template and saving as different room, don't update
+            // if prev room is room and saving as room, update
+            if((prevRoom.room.name === oldRoomName) || savingTemplate){
                 rowsToUpdate = prevRoom.data.reduce((acc, row) => {
                     return [
                         ...acc,
@@ -1221,14 +1225,14 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // update template name
-        if(templateRename){
+        if(savingTemplate && oldRoomName !== roomName){
             commands.push({
                 command: "updateChangingKeys" as CommandType,
                 schemaName: "ehr_lookups",
                 queryName: "rooms",
                 extraContext: {keyField: 'room'},
                 rows: [{
-                    oldKeys: {room: JSON.parse(localRoom.name)[0]},
+                    oldKeys: {room: oldRoomName},
                     values: {room: roomName}
                 }]
             });
@@ -1256,7 +1260,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // update room border and scale
-        const roomToSave = [{
+        const layoutToSave = [{
             room: roomName,
             layout_scale: localRoom.layoutData.scale,
             border_width: localRoom.layoutData.borderWidth,
@@ -1266,7 +1270,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             command: "update",
             schemaName: "ehr_lookups",
             queryName: "rooms",
-            rows: roomToSave
+            rows: layoutToSave
         });
 
         const result = await labkeySaveRows(commands);

@@ -16,6 +16,20 @@
                     </column>
                     <column columnName="status">
                         <columnTitle>Status</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Pending"/>
+                                </filters>
+                                <backgroundColor>FFA500</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Approved"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
                         <fk>
                             <fkDbSchema>core</fkDbSchema>
                             <fkTable>qcstate</fkTable>
@@ -69,6 +83,7 @@
                     </column>
                     <column columnName="allowableBlood">
                         <columnTitle>Volume Available Today (mL)</columnTitle>
+                        <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
                         <description>This shows the amount of blood remaining today. It includes blood draws that happened 30 days in the past up to today.</description>
                         <conditionalFormats>
                             <conditionalFormat>
@@ -77,12 +92,18 @@
                                 </filters>
                                 <backgroundColor>FF0000</backgroundColor>
                             </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="gte" value="0"/>
+                                </filters>
+                                <backgroundColor>f3ee99</backgroundColor>
+                            </conditionalFormat>
                         </conditionalFormats>
                     </column>
                     <column columnName="allowableBloodIncludingFutureDraws">
-                        <columnTitle>Volume Remaining After All Draws (mL)</columnTitle>
+                        <columnTitle>Volume Available Including Next 30 days (mL)</columnTitle>
                         <url>/WNPRC/EHR/ehr-animalHistory.view#subjects:${Id}&amp;inputType:singleSubject&amp;showReport:1&amp;activeReport:BloodSummary</url>
-                        <description>This column shows the amount of blood remaining for the animal while considering future draws. It includes approved blood draws 30 days into the future and past blood draws 30 days in the past.</description>
+                        <description>This column shows the amount of blood remaining for future blood draws and also 30 days into the past.</description>
                     </column>
                 </columns>
             </table>

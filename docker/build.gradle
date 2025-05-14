@@ -98,7 +98,7 @@ tasks.register("buildEhrCronPlug", DockerBuildImage){
     group 'DockerPlugin'
 }
 
-tasks.register("buildTomcat") { Task t ->
+tasks.register("buildCranr") { Task t ->
     doLast {
         if (!project.hasProperty("nocache")){
             ext.nocache = "false"
@@ -125,32 +125,32 @@ tasks.register("buildTomcat") { Task t ->
             if (nocache.equals("true")){
                 println "building image without cache"
                 t.project.exec{
-                    workingDir "$projectDir/tomcat"
+                    workingDir "$projectDir/cranrnutils"
                     executable "docker"
-                    args "build", ".", "--no-cache", "-t", "wnprcehr/tomcat:tomcat9_"+branch
+                    args "build", "--platform","linux/arm64,linux/amd64" ,"--no-cache", "-t", "wnprcehr/cranrnutils:cranrnutils_"+branch, "."
                 }
             }else{
                 t.project.exec{
-                    workingDir "$projectDir/tomcat"
+                    workingDir "$projectDir/cranrnutils"
                     executable "docker"
-                    args "build", ".", "-t", "wnprcehr/tomcat:tomcat9_"+branch
+                    args "build", "--platform","linux/arm64,linux/amd64" ,"-t", "wnprcehr/cranrnutils:cranrnutils_"+branch, "."
                 }
             }
             
         }else {
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcat -PbranchName=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildCranr -PbranchName=22.11_fb)'
         }
     }
     
 }
-configure(buildTomcat){
+configure(buildCranr){
     group 'Docker'
     description 'Generates the Tomcat docker image (with R)'
     dependsOn  "checkDocker", "dockerLogin", "processbranchName"
     onlyIf {buildType != ''}
 } 
 
-tasks.register("buildTomcatPlug", DockerBuildImage){
+tasks.register("buildCranrPlug", DockerBuildImage){
     def dockerStr = providers.gradleProperty("branchName")
     if (dockerStr.present){
       //  String branch = ""
@@ -169,13 +169,13 @@ tasks.register("buildTomcatPlug", DockerBuildImage){
                 break;
         }
         inputDir.set(file("tomcat/"))
-        images.add("wnprcehr/tomcat:tomcat9_${branch}")
+        images.add("wnprcehr/cranrnutils:cranrnutils_${branch}")
 
     }else {
-        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildTomcatPlug -PbranchName=22.11_fb)'
+        logger.warn 'Must provide docker string via command line. (ex. ./gradlew buildCranrPlug -PbranchName=22.11_fb)'
     }    
 }
-configure(buildTomcatPlug){
+configure(buildCranrPlug){
     group 'DockerPlugin'
     description 'Generates the Tomcat docker image (with R)'
     dependsOn  "checkDocker", "dockerLogin", "processbranchName"
@@ -184,7 +184,7 @@ configure(buildTomcatPlug){
 //Building LabKey with hooks/build for consistancy with Docker Hub and used of environment variables duirng the build process
 //Source: https://stackoverflow.com/questions/36322536/how-to-set-an-environment-variable-from-a-gradle-build / https://stackoverflow.com/a/63140816
 tasks.register("buildLabkey") { Task t ->
-//task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrCron", "buildPostfix"]) { Task t ->
+//task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildCranr", "buildEhrCron", "buildPostfix"]) { Task t ->
     doLast {
         def dockerStr = providers.gradleProperty("branchName")
 
@@ -317,7 +317,7 @@ configure(tagPostfixPlug){
 tasks.register("buildAll"){
     group 'Docker'
     description 'Generates all the docker images in the subfolders'
-    dependsOn "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" 
+    dependsOn "buildCranr", "buildEhrcron", "buildLabkey", "buildPostfix" 
 
 }
 

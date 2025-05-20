@@ -2,32 +2,35 @@
 
 This folder contains a set of folders with Dockerfiles and a Compose file which defining services to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), and the Gradle build file helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
 
-Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. All the variables in the `default.env` file has a prefix to the corresponding service (e.g. LK = labkey, PG = postgres) and they are all organized alphabetically to make it easier to group all variables that affect the different services. Before deploying the services with Compose, you will need to create the `.env` file (e.g., by copying and renaming `default.env`).
+Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. All the variables in the `default.env` file has a prefix to the corresponding service (e.g. LK = LabKey, PG = postgres) and they are all organized alphabetically to make it easier to group all variables that affect the different services. Before deploying the services with Compose, you will need to create the `.env` file (e.g., by copying and renaming `default.env`).
 
 The following files need to be rename to use SSL certificates in your local development machine: `cert.pem.default` and `key.pem.default` both files have to be rename to remove the .default . The names have to match the names in `.env` file.
 
 ## Downloading Docker Images from Docker Hub
 
-WNPRC maintains a service contract with Docker Hub. This allows the IDS unit to build images in this cloud service thus not requiring to locally build images in our production server, test environment and developer machines. The contract allows for five accounts to be associated with the WNPRCEHR Organization. The  `idsshared` account can be used to download and access our private LabKey images (i.e. [labkeysnapshot](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/general) and [labkey](https://hub.docker.com/repository/docker/wnprcehr/labkey/general)), the token and password for that account can be found in `Keypass-IDS.kdbx` in the `wnprc.drive.wisc.edu` shared folder.
+WNPRC maintains a service contract with Docker Hub. This contract allows the IDS unit to build images in this cloud service thus not requiring to locally build images in our production server, test environment and developer machines. The contract allows for five accounts to be associated with the WNPRCEHR Organization. The  `idsshared` account can be used to download and access our private LabKey images (i.e. [labkeysnapshot](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/general) and [labkey](https://hub.docker.com/repository/docker/wnprcehr/labkey/general)), the token and password for that account can be found in `Keypass-IDS.kdbx` in the `wnprc.drive.wisc.edu` shared folder.
 
-Another alternative is to login via the Docker CLI (`docker login`) with the shared username and password. Gradle tasks can login to Docker Hub without the need to type the password. 
-
-All the docker images can be downloaded from Docker Hub using the following commands, user has to be login into Docker Hub. It is best to use a token and/or a password saved on the user's home folder file called `~/.gradle/gradle.properties`, this is the same file used during the LabKey configuration. Add the following lines replacing the data inside brackets.
+Another alternative is to login via the Docker CLI (`docker login`) with the shared username and password. Gradle tasks can login to Docker Hub without the need to type the password but the credentials need to be stored in the gradle.properties. t is best to use a token and/or a password saved on the user's home folder file called `~/.gradle/gradle.properties`, this is the same file used during the LabKey development setup. Add the following lines replacing the data inside brackets.
 
 ```
 dockerhubUsername=idsshared
 dockerhubPassword=<dockerPassword>
 dockertokenpath=<dockerhubToken>
 ```
+For a list of all the task use the following commands:
 
-Gradle tasks to interact with Docker have two versions, one using a [plugin](https://github.com/bmuschko/gradle-docker-plugin) and the second one uses direct command line via the Docker CLI. Thus, all the tasks defined in the `build.gradle` file have two versions. Either of the following command downloads all the custom images manage by the IDS unit.
+```
+./gradlew tasks
+```
+
+Docker images can be downloaded from Docker Hub using the following commands, user has to be login into Docker Hub as explain in the previous chapter. All Gradle tasks to interact with Docker engine locally have two versions, one using a [plugin](https://github.com/bmuschko/gradle-docker-plugin) and the second one uses direct command line via the Docker CLI. Thus, all the tasks defined in the `build.gradle` file have two versions. Either of the following command downloads all the custom images manage by the IDS unit.
 
 ```
 ./gradlew downloadAll
 ./gradlew downloadAllPlug
 ```
 
-To download a specific images from a feature branch use the following commands replacing the Labkey version (i.e. XX.YY = 22.11) and the name of the branch inside the brackets:
+To download a specific images from a feature branch use the following commands replacing the Labkey version (i.e. XX.YY = 24.11) and the name of the branch inside the brackets:
 ```
 ./gradlew downloadLabkey -PbranchName=<XX.YY_fb_name>
 ./gradlew dowloadLabkeyPlug -PbranchName=<XX.YY_fb_name>
@@ -36,25 +39,22 @@ To download a specific images from a feature branch use the following commands r
 ./gradlew downloadEhrcronPlug -PbranchName=<XX.YY_fb_name>
 ```
 
-For a list of all the task use the follwowing commands:
-
-```
-./gradlew tasks
-```
-
 ## Building the Custom Images
 
 To build the custom images from a stand-alone clone, navigate to the **docker** folder (**not** the repository root) and execute the following command:
 ```
 ./gradlew buildAll -PbranchName=<XX.YY_fb_name>
 ```
-From a clone embedded inside a LabKey platform source code, you will need to execute the command from the LabKey root, with the appropriate adjustments to the project path:
+From a clone embedded inside a LabKey development setup with all the source code, you will need to execute the command from the LabKey root, with the appropriate adjustments to the project path:
 ```
 ./gradlew :externalModules:wnprc-modules:docker:buildall -PbranchName=<XX.YY_fb_name>
 ```
-Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`) and all have corresponding tasks using the pluging (e.g. `buildEhrcronPlug`, `buildPostfixPlug`). The Labkey and ehrcranrnutils images depends on hooks (`~/hooks/build`) which is used in Docker Hub to correctly interprete GitHub branches naming convencion and build the image for the correct architecture (i.e., arm64 and adm64). This same hook is used by the gradle task to download the correct LabKey installer and create the Docker image. This build tasks does not have a companion option using the plugin version.
+Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`) and all have corresponding tasks using the pluging (e.g. `buildEhrcronPlug`, `buildPostfixPlug`). The Labkey and ehrcranrnutils images depends on hooks (`~/hooks/build`) which is used in Docker Hub to correctly interprete GitHub branches naming convencion and build the image for the correct architecture (i.e., arm64 and adm64). This same hook is used by the gradle task to download the correct LabKey installer from TeamCity and create the corresponding Docker image. These build tasks does not have a companion option using the plugin version.
 
-For newer Apple Silicon all docker images can be build for ARM processors or as multi-platform builds by using  
+For newer Apple Silicon all docker images can be build for ARM processors or as multi-platform builds by using:
+```
+--platform linux/arm64,linux/amd64
+```  
 
 Other than using Gradle, the images can each be built directly using Docker by executing a command like this:
 ```
@@ -216,6 +216,16 @@ The script has very few options, as shown in these examples:
 ./load_database_backup.sh --postgres /usr/etc/postgresql94/bin/ --debug
 ```
 The use of the `-p` flag allows us to use this script to manage multiple instances of the LabKey PostgreSQL container on the same server, provided that each instance is run from its own folder with its own .env file (to specify ports, data file locations, etc.)
+
+## Configuration of nightly-ehr.primate.wisc.edu
+
+This server is configured to update every night after the production server completes a complete backup and move the created file to a long term ITSS storage (i.e., `PrimateFS`). The script called `load_database_update_testserver.sh` is based on `load_database_backup.sh` and it is configured to run as a cron job in the `nightly-ehr.primate.wisc.edu` server by the root user. 
+
+To check the current configuraion type: `sudo crontab -l`. To modify the configuration type: `sudo crontab -e`.
+
+The script uses multiple parameters: `-postgres` - location of postgres executable (i.e., /usr/lib/postgresql/15/bin/), `--dbname` - name of the databse to replace, `--jobs` - number of processes to run the backup, `--production` - restore a complete database, `--path` - location of the backup files (~/labkey_backup/database/daily/). 
+
+The script also downloads the latest image of LabKeySnapshot from Docker Hub and cleans all the old images from the local image repository. 
 
 ## Additional Configurations
 

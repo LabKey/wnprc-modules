@@ -294,31 +294,6 @@ export const loadRoom = (name: string): Rack[] => {
     return tempRoom
 }*/
 
-// Changes stroke color of svg element nodes keeping the other styles.
-export const changeStyleProperty  = (element: Element, property: string, newValue: string): void => {
-    const styleAttr = element.getAttribute('style');
-    if (styleAttr) {
-        const styles = styleAttr.split(';').map(style => style.trim()).filter(style => style !== "");
-        let updated = false;
-        const updatedStyles = styles.map(style => {
-            const [prop, value] = style.split(':').map(prop => prop.trim()).filter(prop => prop !== "");
-            if (prop.toLowerCase() === property.toLowerCase()) {
-                updated = true;
-                return `${property}: ${newValue}`;
-            } else {
-                return `${prop}: ${value}`;
-            }
-        });
-        if (!updated) {
-            updatedStyles.push(`${property}: ${newValue}`);
-        }
-        const updatedStyleAttr = updatedStyles.join(';');
-        element.setAttribute('style', updatedStyleAttr);
-    } else {
-        element.setAttribute('style', `${property}: ${newValue}`);
-    }
-}
-
 // Helper function to convert object keys into location names
 export const convertLocationName = (keyName: string) => {
     // Special cases

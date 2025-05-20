@@ -1,8 +1,8 @@
 # Creating and Using Docker Images
 
-This folder contains a set of folders with Dockerfiles and a Compose file which defining services to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), and the Gradle build file helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
+This folder contains a set of folders with Dockerfiles and a Compose file which define services to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), and the Gradle build file helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
 
-Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. All the variables in the `default.env` file has a prefix to the corresponding service (e.g. LK = LabKey, PG = postgres) and they are all organized alphabetically to make it easier to group all variables that affect the different services. Before deploying the services with Compose, you will need to create the `.env` file (e.g., by copying and renaming `default.env`).
+Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. All the variables in the `default.env` file have a prefix to the corresponding service (e.g. LK = LabKey, PG = postgres) and they are all organized alphabetically to make it easier to group all variables that affect the different services. Before deploying the services with Compose, you will need to create the `.env` file (e.g., by copying and renaming `default.env`).
 
 The following files need to be rename to use SSL certificates in your local development machine: `cert.pem.default` and `key.pem.default` both files have to be rename to remove the .default . The names have to match the names in `.env` file.
 
@@ -10,7 +10,7 @@ The following files need to be rename to use SSL certificates in your local deve
 
 WNPRC maintains a service contract with Docker Hub. This contract allows the IDS unit to build images in this cloud service thus not requiring to locally build images in our production server, test environment and developer machines. The contract allows for five accounts to be associated with the WNPRCEHR Organization. The  `idsshared` account can be used to download and access our private LabKey images (i.e. [labkeysnapshot](https://hub.docker.com/repository/docker/wnprcehr/labkeysnapshot/general) and [labkey](https://hub.docker.com/repository/docker/wnprcehr/labkey/general)), the token and password for that account can be found in `Keypass-IDS.kdbx` in the `wnprc.drive.wisc.edu` shared folder.
 
-Another alternative is to login via the Docker CLI (`docker login`) with the shared username and password. Gradle tasks can login to Docker Hub without the need to type the password but the credentials need to be stored in the gradle.properties. t is best to use a token and/or a password saved on the user's home folder file called `~/.gradle/gradle.properties`, this is the same file used during the LabKey development setup. Add the following lines replacing the data inside brackets.
+Another alternative is to login via the Docker CLI (`docker login`) with the shared username and password. Gradle tasks can login to Docker Hub without the need to type the password but the credentials need to be stored in the gradle.properties. It is best to use a token and/or a password saved on the user's home folder file called `~/.gradle/gradle.properties`, this is the same file used during the LabKey development setup. Add the following lines replacing the data inside brackets.
 
 ```
 dockerhubUsername=idsshared
@@ -23,14 +23,14 @@ For a list of all the task use the following commands:
 ./gradlew tasks
 ```
 
-Docker images can be downloaded from Docker Hub using the following commands, user has to be login into Docker Hub as explain in the previous chapter. All Gradle tasks to interact with Docker engine locally have two versions, one using a [plugin](https://github.com/bmuschko/gradle-docker-plugin) and the second one uses direct command line via the Docker CLI. Thus, all the tasks defined in the `build.gradle` file have two versions. Either of the following command downloads all the custom images manage by the IDS unit.
+Docker images can be downloaded from Docker Hub using the following commands, user has to be logged into Docker Hub as explained in the previous chapter. All Gradle tasks to interact with the Docker engine locally have two versions, one using a [plugin](https://github.com/bmuschko/gradle-docker-plugin) and the second one uses direct command line via the Docker CLI. Thus, all the tasks defined in the `build.gradle` file have two versions. Either of the following commands download all the custom images managed by the IDS unit.
 
 ```
 ./gradlew downloadAll
 ./gradlew downloadAllPlug
 ```
 
-To download a specific images from a feature branch use the following commands replacing the Labkey version (i.e. XX.YY = 24.11) and the name of the branch inside the brackets:
+To download a specific image from a feature branch use the following commands replacing the Labkey version (i.e. XX.YY = 24.11) and the name of the branch inside the brackets:
 ```
 ./gradlew downloadLabkey -PbranchName=<XX.YY_fb_name>
 ./gradlew dowloadLabkeyPlug -PbranchName=<XX.YY_fb_name>
@@ -49,9 +49,9 @@ From a clone embedded inside a LabKey development setup with all the source code
 ```
 ./gradlew :externalModules:wnprc-modules:docker:buildall -PbranchName=<XX.YY_fb_name>
 ```
-Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`) and all have corresponding tasks using the pluging (e.g. `buildEhrcronPlug`, `buildPostfixPlug`). The Labkey and ehrcranrnutils images depends on hooks (`~/hooks/build`) which is used in Docker Hub to correctly interprete GitHub branches naming convencion and build the image for the correct architecture (i.e., arm64 and adm64). This same hook is used by the gradle task to download the correct LabKey installer from TeamCity and create the corresponding Docker image. These build tasks does not have a companion option using the plugin version.
+Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`) and all have corresponding tasks using the pluging (e.g. `buildEhrcronPlug`, `buildPostfixPlug`). The Labkey and ehrcranrnutils images depend on hooks (`~/hooks/build`) which is used in Docker Hub to correctly interpret GitHub branches naming convencion and build the image for the correct architecture (i.e., arm64 and adm64). This same hook is used by the gradle task to download the correct LabKey installer from TeamCity and create the corresponding Docker image. These build tasks does not have a companion option using the plugin version.
 
-For newer Apple Silicon all docker images can be build for ARM processors or as multi-platform builds by using:
+For newer Apple Silicon all docker images can be built for ARM processors or as multi-platform builds by using:
 ```
 --platform linux/arm64,linux/amd64
 ```  
@@ -61,7 +61,7 @@ Other than using Gradle, the images can each be built directly using Docker by e
 docker build -t wnprcehr/ehrcron:vX.X.X ehrcron
 docker build --builder container --platform linux/arm64 -t wnprcehr/cranrnutils:cranrnutils_24.11_livebackuptestserver --load cranrnutils
 ```
-If  changes are only committed to TeamCity or a new based LabKey build needs to be create, use --no-cache option. To build localy, you must obtain the URL to download the installer from TeamCity. The Dockerfile connect to TeamCity using a set of credentials and downloads the LabKey installer.
+If  changes are only committed to TeamCity or a new based LabKey build needs to be created, use --no-cache option. To build localy, you must obtain the URL to download the installer from TeamCity. The Dockerfile connects to TeamCity using a set of credentials and downloads the LabKey installer.
 ```
 docker build --build-arg LABKEY_TEAMCITY_USERNAME=<teamcityUser> --build-arg LABKEY_TEAMCITY_PASSWORD=<teamCityPWD> --build-arg TEAMCITY_URL=<Z> --build-arg TOMCAT_IMAGE=<TOMCAT_IMAGE> --build-arg LK_VERSION=<LK_VERSION> --no-cache --rm=true -t wnprcehr/labkey:XX.YY labkey
 ```
@@ -93,7 +93,7 @@ docker build \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
     -t wnprcehr/labkey:XX.X labkey
 ```
-If you want to build an images for an specific branch within Github, you should pass one additional argument `--build-arg TOMCAT_IMAGE`. Your commands will look something like this, use the name of the branch without the fb prefix, the name should match as how TeamCity creates the image:
+If you want to build an image for a specific branch within Github, you should pass one additional argument `--build-arg TOMCAT_IMAGE`. Your commands will look something like this, use the name of the branch without the fb prefix, the name should match as how TeamCity creates the image:
 ```
 docker build \
     --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
@@ -102,7 +102,7 @@ docker build \
     -t wnprcehr/labkeyDev:XX.X labkey
 ```
 
-The LabKey image depends on the Tomcat image, which can be dowload from Docker Hub or build locally. This image takes a long time to build from scratch, it is best to download it from Docker Hub. Here are the commands to download or build this image.
+The LabKey image depends on the Tomcat image, which can be dowloaded from Docker Hub or built locally. This image takes a long time to build from scratch, it is best to download it from Docker Hub. Here are the commands to download or build this image.
 ```
 ./gradlew downloadTomcat -PbranchName=<XX.YY_fb_name>
 ./gradlew downloadTomcatPlug -PbranchName=<XX.YY_fb_name>
@@ -115,9 +115,9 @@ docker build --no-cache -t wnprcehr/tomcat:tomcat9_<XX.YY_fb_name> tomcat
 
 
 ## Deploying the Docker Compose Services
-There are several services controlled by the compose.yaml and production.yaml files. Spliting the Docker services in these two files allows to use the same GitHub repository in two different server without having to make changes locally except for changes in the `.env` file. 
+There are several services controlled by the compose.yaml and production.yaml files. Splitting the Docker services in these two files allows us to use the same GitHub repository in two different servers without having to make changes locally except for changes in the `.env` file. 
 
-The Docker services are production EHR, nightly-ehr and test servers ran are the follwoing:
+The Docker services ran in production EHR, nightly-ehr and test servers are the following:
 ||Service|Functionality|YAML File|Repository|
 |---|---|---|---|---|
 |1|postgres|database|compose.yaml|[postgres](https://hub.docker.com/_/postgres)|
@@ -140,7 +140,7 @@ To deploy the services, you again either use Gradle or use Docker Compose direct
 # for tearing down all the services
 ./gradlew :docker:down
 ```
-To use Docker Compose, you can execute commands like the following (*from this directory*, where your `.env` file is located), this commands will work on production server as well as other servers:
+To use Docker Compose, you can execute commands like the following (*from this directory*, where your `.env` file is located), these commands will work on the production server as well as the other servers:
 ```
 # for spinning up all the services in production server
 docker compose -f compose.yaml -f production.yaml up -d
@@ -149,7 +149,7 @@ docker compose -f compose.yaml -f production.yaml up -d
 docker compose -f compose.yaml -f production.yaml down --timeout 60
 ```
 
-Add `-f compose.yaml -f production.yaml` to make changes in the production server. If this is not added the system will provide a warning that there is an orphan services running.
+Add `-f compose.yaml -f production.yaml` to make changes in the production server. If this is not added the system will provide a warning that there are orphan services running.
 ```
 # for spinning up all the services
 docker compose up -d
@@ -188,17 +188,17 @@ We created a folder called `development` in this repo. This folder contains a si
  1. `nginx/nginx.conf`
  1. `compose.yaml`
 
-In the `.env` file, edit the following variables: `LK_DANGER_PORT` to other number than 8080, this is the port which LabKey service will use outside the Docker container. `LK_SECURE_PORT` this port is the one users will need to add to the test server URL to access your instance of LabKey (e.g. https://.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new LabKey service, it has to match the name you will modify in the `compose.yaml` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
+In the `.env` file, edit the following variables: `LK_DANGER_PORT` to a number other than 8080, this is the port which LabKey service will use outside the Docker container. `LK_SECURE_PORT` this port is the one users will need to add to the test server URL to access your instance of LabKey (e.g. https://.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new LabKey service, it has to match the name you will modify in the `compose.yaml` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
 
 In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `compose.yaml` and `.env` files.
 
-Finally, in your `compose.yaml` file edit the name of the LabKey service, it should be unique, therefore check other development folder for all the names used.
+Finally, in your `compose.yaml` file edit the name of the LabKey service, it should be unique, therefore check other development folders for all the names used.
 
-All the auxiliary LabKey instances can be manage via the manage_all_continers.sh script. This script accepts two values (-s || -d), s starts all the containers in the docker folder. Starts with the primary which contains postgres and than looks for any folder that starts with dev.
+All the auxiliary LabKey instances can be managed via the manage_all_continers.sh script. This script accepts two values (-s || -d), s starts all the containers in the docker folder. Starts with the primary which contains postgres and than looks for any folder that starts with dev.
 
 ## Loading a Database Backup Using the Script
 
-Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder. Depending on resource on local machine or server, it is possible to increase the number of processors for the restore process. Change the number in line 132 right after -j option, by default is set to 4 processes.
+Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder. Depending on the resources on the local machine or server, it is possible to increase the number of processors for the restore process. Change the number in line 132 right after -j option, which by default is set to 4 processes.
 
 The script has very few options, as shown in these examples:
 ```bash
@@ -219,11 +219,11 @@ The use of the `-p` flag allows us to use this script to manage multiple instanc
 
 ## Configuration of nightly-ehr.primate.wisc.edu
 
-This server is configured to update every night after the production server completes a complete backup and move the created file to a long term ITSS storage (i.e., `PrimateFS`). The script called `load_database_update_testserver.sh` is based on `load_database_backup.sh` and it is configured to run as a cron job in the `nightly-ehr.primate.wisc.edu` server by the root user. 
+This server is configured to update every night after the production server completes a complete backup and moves the created file to a long term ITSS storage (i.e., `PrimateFS`). The script called `load_database_update_testserver.sh` is based on `load_database_backup.sh` and it is configured to run as a cron job in the `nightly-ehr.primate.wisc.edu` server by the root user. 
 
 To check the current configuraion type: `sudo crontab -l`. To modify the configuration type: `sudo crontab -e`.
 
-The script uses multiple parameters: `-postgres` - location of postgres executable (i.e., /usr/lib/postgresql/15/bin/), `--dbname` - name of the databse to replace, `--jobs` - number of processes to run the backup, `--production` - restore a complete database, `--path` - location of the backup files (~/labkey_backup/database/daily/). 
+The script uses multiple parameters: `-postgres` - location of postgres executable (i.e., /usr/lib/postgresql/15/bin/), `--dbname` - name of the database to replace, `--jobs` - number of processes to run the backup, `--production` - restore a complete database, `--path` - location of the backup files (~/labkey_backup/database/daily/). 
 
 The script also downloads the latest image of LabKeySnapshot from Docker Hub and cleans all the old images from the local image repository. 
 

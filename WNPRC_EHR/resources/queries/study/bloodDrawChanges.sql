@@ -15,7 +15,7 @@
  */
 --this query is designed to return any dates when allowable blood draw volume changes
 --this includes dates of blood draws, plus the date those draws drop off
-PARAMETERS(DATE_INTERVAL INTEGER DEFAULT 30)
+PARAMETERS(DATE_INTERVAL INTEGER DEFAULT 31)
 
 SELECT
   b2.id,

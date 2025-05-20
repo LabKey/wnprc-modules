@@ -669,7 +669,7 @@ EHR.reports.currentBloodDraws = function(panel, tab) {
         schemaName: 'study',
         queryName: 'currentBloodDraws',
         title: "Current Blood " + title,
-        parameters: {'interval': '30'},
+        parameters: {'DATE_INTERVAL': '31'},
         filters: filterArray.nonRemovable,
         removeableFilters: filterArray.removable
     });

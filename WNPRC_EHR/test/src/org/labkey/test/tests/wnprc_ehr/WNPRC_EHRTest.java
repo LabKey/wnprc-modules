@@ -27,6 +27,7 @@ import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.ImportDataCommand;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
@@ -216,11 +217,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected File getStudyPolicyXML()
     {
         return TestFileUtils.getSampleData("wnprc_ehr/wnprcEhrTestStudyPolicy.xml");
-    }
-
-    private static void folderSetup()
-    {
-
     }
 
     @BeforeClass @LogMethod
@@ -1928,38 +1924,37 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void uploadData() throws IOException, CommandException
     {
         Connection connection = createDefaultConnection();
-        Map<String, Object> responseMap = new HashMap<>();
-
         truncateBillingTables(connection);
 
         //upload Tier Rates
-        List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
-        insertTsvData(connection, "wnprc_billing", "tierrates", tsv, PRIVATE_FOLDER_PATH)
-                .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
+        insertTsvData(connection, "wnprc_billing", "tierrates", TIER_RATES_TSV, PRIVATE_FOLDER_PATH);
 
         //upload Grant Accounts
-        tsv = loadTsv(ALIASES_TSV);
+        List<Map<String, Object>> tsv = loadTsv(ALIASES_TSV);
         insertTsvData(connection, "ehr_billing", "aliases", tsv, PRIVATE_FOLDER_PATH)
                 .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
-        tsv = loadTsv(CHARGE_UNITS_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv, PRIVATE_FOLDER_PATH)
-                .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
+        insertTsvData(connection, "ehr_billing", "chargeUnits", CHARGE_UNITS_TSV, PRIVATE_FOLDER_PATH);
 
         //upload Chargeable Item Categories
-        tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
-        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv, PRIVATE_FOLDER_PATH)
-                .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", CHARGEABLE_ITEM_CATEGORIES_TSV, PRIVATE_FOLDER_PATH);
 
         //upload Group-Category Associations
-        tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
-        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv, PRIVATE_FOLDER_PATH)
-                .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", GROUP_CATEGORY_ASSOCIATIONS_TSV, PRIVATE_FOLDER_PATH);
 
         //upload Chargeable Items and Charge Rates
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_TSV, CHARGE_RATES_NUM_ROWS, CHARGEABLE_ITEMS_NUM_ROWS);
 
+    }
+
+    private void insertTsvData(Connection connection, String schemaName, String queryName, File tsvFile, String folderPath) throws IOException, CommandException
+    {
+        log("Loading tsv data: " + schemaName + "." + queryName + " from file " + tsvFile.getPath());
+        ImportDataCommand command = new ImportDataCommand(schemaName,queryName);
+        command.setImportLookupByAlternateKey(true);
+        command.setFile(tsvFile);
+        command.execute(connection, folderPath);
     }
 
     private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv, String folderPath) throws IOException, CommandException

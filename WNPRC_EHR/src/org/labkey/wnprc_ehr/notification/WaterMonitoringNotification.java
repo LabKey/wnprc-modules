@@ -15,10 +15,8 @@
  */
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -131,7 +129,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         colKeys.add(FieldKey.fromString("project"));
         colKeys.add(FieldKey.fromString("currentWaterCondition"));
         var curLocationFieldKey = FieldKey.fromString("Id/curLocation/location");
-        colKeys.add(FieldKey.fromString("Id/curLocation/location"));
+        colKeys.add(curLocationFieldKey);
 
         final Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(waterTotalByDateWithWeightReport, colKeys);
         ColumnInfo curLocationColumn = columns.get(curLocationFieldKey);

@@ -15,8 +15,8 @@
  */
 package org.labkey.wnprc_ehr.table;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.BaseColumnInfo;
@@ -51,7 +51,6 @@ import org.labkey.api.util.GUID;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.LinkBuilder;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.writer.HtmlWriter;
@@ -59,16 +58,9 @@ import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: bimber
- * Date: 12/7/12
- * Time: 2:22 PM
- */
 public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 {
     protected static final Logger _log = LogManager.getLogger(WNPRC_EHRCustomizer.class);
@@ -976,27 +968,23 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 sireid.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                     {
                         ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
                         String joinedIds = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
                         if (joinedIds != null)
                         {
                             String[] ids = joinedIds.split(",");
-                            String urlString = "";
                             for (int i = 0; i < ids.length; i++)
                             {
                                 String id = ids[i];
                                 url.replaceParameter("participantId", id);
-                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                                urlString += PageFlowUtil.filter(id);
-                                urlString += "</a>";
+                                out.write(LinkBuilder.simpleLink(id, url));
                                 if (i + 1 < ids.length)
                                 {
-                                    urlString += ", ";
+                                    out.write(", ");
                                 }
                             }
-                            oldWriter.write(urlString);
                         }
                     }
 
@@ -1020,7 +1008,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 reason.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                     {
                         ActionURL url = new ActionURL("query", "recordDetails.view", us.getContainer());
                         String joinedReasons = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
@@ -1031,7 +1019,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             url.addParameter("query.queryName", "housing_reason");
                             url.addParameter("keyField", "value");
 
-                            StringBuilder urlString = new StringBuilder();
                             for (int i = 0; i < reasons.length; i++)
                             {
                                 String reasonForMoveValue = reasons[i];
@@ -1044,20 +1031,17 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                                 {
                                     reasonForMoveTitle = (String) ts.getMap().get("title");
                                     url.replaceParameter("key", reasonForMoveValue);
-                                    urlString.append("<a href=\"").append(PageFlowUtil.filter(url)).append("\">");
-                                    urlString.append(PageFlowUtil.filter(reasonForMoveTitle));
-                                    urlString.append("</a>");
+                                    out.write(LinkBuilder.simpleLink(reasonForMoveTitle, url));
                                 }
                                 else
                                 {
-                                    urlString.append(PageFlowUtil.filter("<" + reasonForMoveValue + ">"));
+                                    out.write("<" + reasonForMoveValue + ">");
                                 }
                                 if (i + 1 < reasons.length)
                                 {
-                                    urlString.append(", ");
+                                    out.write(", ");
                                 }
                             }
-                            oldWriter.write(urlString.toString());
                         }
                     }
 

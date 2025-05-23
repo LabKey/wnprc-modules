@@ -11,8 +11,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.io.IOException;
-import java.io.Writer;
+import static org.labkey.api.util.DOM.STRONG;
 
 public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
 {
@@ -63,26 +62,21 @@ public class WNPRC_VirologyCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
 
-            StringBuilder htmlString = new StringBuilder();
             String llodCol = ctx.get("below_llod").toString();
-            if (llodCol.toString().contains("Yes"))
+            if (llodCol.contains("Yes"))
             {
                 int parenIdx = llodCol.indexOf("(");
                 String firstPart = llodCol.substring(0, parenIdx);
                 String lastPart = llodCol.substring(parenIdx);
-                htmlString.append("<strong>");
-                htmlString.append(firstPart);
-                htmlString.append("</strong>");
-                htmlString.append(lastPart);
-                oldWriter.write(htmlString.toString());
+                STRONG(firstPart).appendTo(out);
+                out.write(lastPart);
             }
             else
             {
-                htmlString.append(llodCol);
-                oldWriter.write(htmlString.toString());
+                out.write(llodCol);
             }
         }
     }

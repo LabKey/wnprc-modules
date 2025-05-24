@@ -155,12 +155,12 @@ public class RecordListener extends DefaultRecordListener {
 
         // Set new record values
         JSONObject newRecordValues = RecordUtils.getJSON(record);
-        event.setNewRecordMap(AbstractAuditTypeProvider.encodeForDataMap(container, newRecordValues.toMap()));
+        event.setNewRecordMap(AbstractAuditTypeProvider.encodeForDataMap(newRecordValues.toMap()));
 
         if (!opType.equals(OpType.INSERT) && mapToOriginalRecordValues.containsKey(record)) {
             Record oldRecord = mapToOriginalRecordValues.get(record);
             JSONObject oldRecordValues = RecordUtils.getJSON(oldRecord);
-            event.setOldRecordMap(AbstractAuditTypeProvider.encodeForDataMap(container, oldRecordValues.toMap()));
+            event.setOldRecordMap(AbstractAuditTypeProvider.encodeForDataMap(oldRecordValues.toMap()));
             mapToOriginalRecordValues.remove(record);
         }
 

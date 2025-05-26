@@ -399,7 +399,7 @@ public class WNPRC_PurchasingManager
         domain.setFields(extensibleCols);
 
         try {
-            DomainUtil.createDomain(DOMAIN_NAME, domain, null, container, user, null, null);
+            DomainUtil.createDomain(DOMAIN_NAME, domain, null, container, user, null, null, false);
         }
         catch (ValidationException ve) {
             throw new RuntimeException(ve.getMessage(), ve);

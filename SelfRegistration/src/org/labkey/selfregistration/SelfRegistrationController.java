@@ -326,7 +326,7 @@ public class SelfRegistrationController extends SpringActionController
             // create issue tracker
             int issueDefId = IssuesListDefService.get().createIssueListDef(container, adminUser,"IssueDefinition","User Registrations", null,null);
             // The Domain object is the definition of the "table" that contains the custom fields.
-            Domain d = IssuesListDefService.get().getDomainFromIssueDefId(issueDefId, container, adminUser);
+            Domain d = IssuesListDefService.get().getDomainFromIssueDefId(issueDefId, container, adminUser, true);
             String[] fieldnames = {"firstname","lastname","email","institution","project","reason"};
             createTextFields(d,fieldnames,adminUser);
 

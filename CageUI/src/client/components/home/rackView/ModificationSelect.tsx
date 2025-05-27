@@ -63,25 +63,6 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
         }else{
             changeMod(option.value as ModTypes);
         }
-        /*
-        setSelectedRackMods(prevState => {
-            const exists = prevState.findIndex(mod => mod.cage.cageNum === cage.cageNum);
-            if(exists >= 0){
-                const updatedMods = [...prevState];
-                updatedMods[exists] = {
-                    ...updatedMods[exists],
-                    mod: option
-                };
-                return updatedMods;
-            }else{
-                const {rack: rack} = findCageInGroup(cage.cageNum, selectedRoom.rackGroups);
-                return [...prevState, {
-                    rack: rack,
-                    cage: cage,
-                    mod: option
-                }]
-            }
-        })*/
     }
 
     return (
@@ -89,7 +70,7 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
             options={options}
             placeholder={"Select a mod"}
             isClearable={true}
-            defaultValue={defaultValue}
+            value={defaultValue}
             onChange={(option) =>  handleChange(option)}
             styles={{
                 container: (baseStyles, state) => ({

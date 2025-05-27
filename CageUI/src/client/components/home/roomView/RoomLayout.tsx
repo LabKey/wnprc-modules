@@ -5,15 +5,16 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { ActionURL, Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
 import { ReactSVG } from 'react-svg';
-import { Cage, LayoutData, RoomItem, RoomItemType } from '../../../types/typings';
+import { Cage, CageWithMods, LayoutData, RoomItem, RoomItemType } from '../../../types/typings';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs, parseRoomItemNum } from '../../../utils/helpers';
-import { updateBorderSize } from '../../../utils/LayoutEditorHelpers';
+import { findCageInGroup, findRackInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
 import { ChangeRack } from '../../layoutEditor/ChangeRack';
 import { TextInput } from '../../TextInput';
 import { EditorContextMenu } from '../../layoutEditor/EditorContextMenu';
 import { ModificationEditor } from './ModificationEditor';
+import { ConfirmationPopup } from '../../ConfirmationPopup';
 
 interface RoomLayoutProps {
 
@@ -22,6 +23,7 @@ interface RoomLayoutProps {
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {selectedRoom, selectedContextObj, setSelectedContextObj} = useHomeContext();
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
+    const [errorPopup, setErrorPopup] = useState<string>(null);
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
 
@@ -41,7 +43,12 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     // Effect watches for right clicks to open the modification editor
     useEffect(() => {
         if(selectedContextObj){
-            setShowCageContextMenu(true);
+            const currRackDefault = findCageInGroup((selectedContextObj as CageWithMods).cageNum, selectedRoom.rackGroups).rack.type.isDefault;
+            if(currRackDefault){
+                setErrorPopup("This cage is a default cage and as such it cannot have mods attached. Please only attach mods to real cages");
+            }else{
+                setShowCageContextMenu(true);
+            }
         }
     }, [selectedContextObj]);
 
@@ -88,6 +95,9 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                 selectedObj={selectedContextObj}
                 closeMenu={() => setShowCageContextMenu(false)}
             />
+            {errorPopup &&
+                    <ConfirmationPopup message={errorPopup} onClose={() => setErrorPopup(null)} />
+            }
         </div>
     );
 }

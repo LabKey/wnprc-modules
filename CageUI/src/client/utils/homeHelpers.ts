@@ -2,8 +2,8 @@ import { convertToTitleCase, zeroPadName } from './helpers';
 import {
     Cage,
     CageDirection,
-    CageModification,
-    DirectionCategory,
+    CageModification, CageModifications, CageModType,
+    DirectionCategory, ModData,
     ModLocations,
     ModTypes,
     Rack,
@@ -140,6 +140,80 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack) => {
 }
 
 
+
+
+export const compareMods = (oldModData: ModData[], newModObj: CageModifications)=> {
+
+    //TODO Fix this or make sure it works in all cases
+    // Deep comparison helper (simplified - you might want to use lodash's isEqual in real code)
+    function isEqual(obj1: any, obj2: any): boolean {
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    }
+
+    const changes: {
+        direction: string;
+        type: 'added' | 'removed' | 'modified';
+        mod: CageModification;
+        oldMod?: CageModification; // Only for modified mods
+    }[] = [];
+
+    const oldModObj: CageModifications = {mods: {
+        [ModLocations.Bottom]: [],
+        [ModLocations.Top]: [],
+        [ModLocations.Left]: [],
+        [ModLocations.Right]: [],
+        [ModLocations.Direct]: [],
+        }}
+    oldModData.forEach((oldMod) => {
+        oldModObj.mods[oldMod.location].push({
+            id: oldMod.locationId,
+            mod: oldMod.modification
+        })
+    })
+
+    Object.keys(ModLocations).filter(key => !isNaN(Number(key))).forEach(direction => {
+        const oldMods: CageModification[] = oldModObj.mods[direction];
+        const newMods: CageModification[] = newModObj.mods[direction];
+
+        // Create maps for easier lookup
+        const oldModsMap = new Map(oldMods.map(mod => [mod.id, mod]));
+        const newModsMap = new Map(newMods.map(mod => [mod.id, mod]));
+
+        // Check for removed mods (in old but not in new)
+        oldMods.forEach(oldMod => {
+            if (!newModsMap.has(oldMod.id)) {
+                changes.push({
+                    direction,
+                    type: 'removed',
+                    mod: oldMod
+                });
+            }
+        });
+
+        // Check for added and modified mods
+        newMods.forEach(newMod => {
+            if (!oldModsMap.has(newMod.id)) {
+                changes.push({
+                    direction,
+                    type: 'added',
+                    mod: newMod
+                });
+            } else {
+                const oldMod = oldModsMap.get(newMod.id)!;
+                if (!isEqual(oldMod, newMod)) {
+                    changes.push({
+                        direction,
+                        type: 'modified',
+                        mod: newMod,
+                        oldMod: oldMod
+                    });
+                }
+            }
+        });
+    });
+
+    return changes;
+}
 
 export const getRackFromClass = (classString: string) => {
     let rackClass = classString.match(/rack-\d+/);

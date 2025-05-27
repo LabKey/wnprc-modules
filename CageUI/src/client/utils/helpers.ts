@@ -1,26 +1,47 @@
 import {
-    Cage, CageWithMods,
+    Cage,
+    CageModification,
+    CageModifications,
+    CageNumber,
+    CageWithMods,
+    DefaultRackId,
     DefaultRackStringType,
     DefaultRackTypes,
+    GroupId,
+    LayoutHistoryData,
     ModLocations,
+    PrevRoom,
     Rack,
     RackGroup,
     RackStringType,
     RackTypes,
+    RealRackId,
     Room,
     RoomItemStringType,
     RoomItemType,
+    RoomObject,
     RoomObjectStringType,
-    RoomObjectTypes
+    RoomObjectTypes,
+    UnitLocations,
+    UnitType
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
 import { ActionURL, Filter } from '@labkey/api';
-import { placeAndScaleGroup, setupEditCageEvent } from './LayoutEditorHelpers';
+import {
+    createEmptyUnitLoc,
+    isRackDefault,
+    isRackEnum,
+    placeAndScaleGroup,
+    setupEditCageEvent
+} from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { selectDistinctRows } from '@labkey/components';
 import { Modifications } from './constants';
+import { ExtraContext } from '../types/layoutEditorTypes';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
@@ -298,8 +319,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                 const modObj = Modifications[mod.mod];
                 modObj.svgIds[modLoc].forEach((svgId, idx) => {
                     const idParts = svgId.split('-');
-                    let modId = `${idParts[0]}-${mod.id}`;
-                    let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`#${modId}`);
+                    let modId = `${idParts[0]}`;
+                    let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id*=${modId}]`);
                     for (let i = 1; i < idParts.length; i++) {
                         if (currentSelection.empty()) return null;
                         currentSelection = currentSelection.select(`#${idParts[i]}`);
@@ -439,3 +460,215 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         });
     }
 };
+
+export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations => {
+    // Empty Unit locations object
+    const newUnitLocs: UnitLocations = createEmptyUnitLoc();
+
+    prevRoomData.forEach(roomItem => {
+        if (!isRackEnum(roomItem.object_type)) {
+            return;
+        } // ignore room objects here
+        let rackType: RoomItemStringType;
+        if (isRackDefault(roomItem.object_type)) {
+            rackType = roomItemToString(defaultTypeToRackType(roomItem.object_type));
+        } else {
+            rackType = roomItemToString(roomItem.object_type);
+        }
+        newUnitLocs[rackType].push({
+            num: `${rackType}-${parseInt(roomItem.cage)}` as CageNumber,
+            cellX: roomItem.x_coord,
+            cellY: roomItem.y_coord
+        });
+    });
+    return newUnitLocs;
+};
+
+export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
+    const newLocalRoom: Room = {
+        name: prevRoom.name,
+        rackGroups: [],
+        objects: [],
+        layoutData: null
+    };
+    let roomObjNum = 1;
+    const loadMods: boolean = !!prevRoom.modData;
+    //check if a group exists for the groupId, if it does return, else create new group for the room
+    const findOrAddGroup = (rackItem: LayoutHistoryData): RackGroup => {
+        // groupId is a single number so check if the GroupId string contains it
+        let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => parseLongId(group.groupId) === rackItem.rack_group);
+        if (!rackGroup) {
+            //create new rack group if it doesn't exist
+            rackGroup = {
+                groupId: `rack-group-${rackItem.rack_group}` as GroupId,
+                selectionType: 'rackGroup',
+                scale: prevRoom.layoutData.scale,
+                x: rackItem.x_coord,
+                y: rackItem.y_coord,
+                racks: []
+            };
+            newLocalRoom.rackGroups.push(rackGroup);
+        }
+        return rackGroup;
+    };
+
+    //check if a rack exists for the rackId, if it does return, else create new rack for the group
+    const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
+        const isDefault = isRackDefault(rackItem.object_type);
+        let rackIdNum;
+        let rowId;
+        let extraContext: ExtraContext;
+        let rackData;
+        // if rack is default, use default rack id instead
+        if (rackItem.extra_context) {
+            extraContext = JSON.parse(rackItem.extra_context);
+            if (extraContext?.rack?.rackId) {
+                rackIdNum = extraContext.rack.rackId;
+            }
+        }
+        console.log("Loading Rack: ");
+        if (!isDefault) {
+            const optConfig: SelectRowsOptions = {
+                schemaName: 'cageui',
+                queryName: 'racks',
+                filterArray: [
+                    Filter.create('rowid', rackItem.rack, Filter.Types.EQUALS)
+                ]
+            };
+            rackData = await labkeyActionSelectWithPromise(optConfig);
+            if (rackData.rowCount > 0) {
+                rackIdNum = rackData.rows[0].rackid;
+                rowId = rackData.rows[0].rowid;
+            }
+
+        }
+        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackIdNum);
+        if (!rack) {
+            //create new rack if it doesn't exist
+            let type: UnitType;
+            let rackId: DefaultRackId | RealRackId;
+            let typeRowId;
+            const rackPrefix = isDefault ? 'default-rack' : 'rack';
+
+            if (!isDefault) {
+                typeRowId = rackData.rows[0].rack_type;
+                rackId = `${rackPrefix}-${rackIdNum}` as RealRackId;
+            } else {
+                rackId = `${rackPrefix}-${rackIdNum}` as DefaultRackId;
+            }
+
+
+            // if default get base type, else get rack type from rack id
+            const optConfig = {
+                schemaName: 'cageui',
+                queryName: 'rack_types',
+                filterArray: [
+                    Filter.create(isDefault ? 'type' : 'rowid', isDefault ? rackItem.object_type : typeRowId, Filter.Types.EQUALS)
+                ]
+            };
+
+            const rackTypesData = await labkeyActionSelectWithPromise(optConfig);
+
+            type = {
+                rowid: typeRowId,
+                name: rackTypesData.rows[0].name,
+                type: isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type,
+                isDefault: isDefault,
+            };
+
+            rack = {
+                rowid: rowId,
+                selectionType: 'rack',
+                cages: [],
+                isActive: !isDefault,
+                itemId: rackId,
+                type: type,
+                x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
+                y: rackItem.y_coord - rackGroup.y,
+                extraContext: extraContext?.rack
+            };
+            rackGroup.racks.push(rack);
+        }
+        return rack;
+    };
+
+    const addCageToRack = async (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
+        // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
+        let cageNumType: RoomItemStringType;
+        let extraContext: ExtraContext;
+        let cageNum = parseInt(rackItem.cage);
+        let cageMods: CageModifications = {
+            mods: {
+                [ModLocations.Top]: [],
+                [ModLocations.Bottom]: [],
+                [ModLocations.Left]: [],
+                [ModLocations.Right]: [],
+                [ModLocations.Direct]: []
+            }
+        };
+        if (rack.type.isDefault) {
+            cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
+        } else {
+            cageNumType = roomItemToString(rackItem.object_type);
+        }
+        if (rackItem.extra_context) {
+            extraContext = JSON.parse(rackItem.extra_context);
+        }
+        const svgSize = await getSvgSize(rack.type.type);
+        //TODO Add mods if needed here
+        if (loadMods && !rack.type.isDefault) {
+            prevRoom.modData.forEach((mod) => {
+                if (rack.rowid === mod.rack && cageNum === mod.cage) {
+                    (cageMods.mods[mod.location] as CageModification[]).push({
+                        id: mod.locationId,
+                        mod: mod.modification,
+                    });
+                }
+            });
+        }
+
+        const cage: CageWithMods = {
+            cageNum: `${cageNumType}-${cageNum}` as CageNumber,
+            extraContext: extraContext?.cage,
+            selectionType: 'cage',
+            id: rack.cages.length + 1,
+            x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
+            y: rackItem.y_coord - rack.y - group.y,
+            size: svgSize,
+            mods: cageMods.mods,
+        };
+        rack.cages.push(cage);
+    };
+
+    const handleRackItem = async (rackItem: LayoutHistoryData) => {
+        const rackGroup: RackGroup = findOrAddGroup(rackItem);
+        const rack: Rack = await findOrAddRack(rackGroup, rackItem);
+        await addCageToRack(rack, rackItem, rackGroup);
+    };
+
+    // generates room object state for room objects from layout history data
+    const generateRoomObj = (roomObjItem: LayoutHistoryData): RoomObject => {
+        let context;
+        if (roomObjItem.extra_context) {
+            context = JSON.parse(roomObjItem.extra_context);
+        }
+        return ({
+            itemId: `${roomItemToString(roomObjItem.object_type)}-${roomObjNum++}`, // update room obj num after it is used to next num
+            type: roomObjItem.object_type as RoomObjectTypes,
+            selectionType: 'obj',
+            x: roomObjItem.x_coord,
+            y: roomObjItem.y_coord,
+            scale: prevRoom.layoutData.scale,
+            extraContext: context
+        });
+    };
+
+    for (const roomItem of prevRoom.cagingData) {
+        if (isRackEnum(roomItem.object_type)) { // Room item is an enclosure for animals
+            await handleRackItem(roomItem);
+        } else { // Room item is something else in the room, ex. Door
+            newLocalRoom.objects.push(generateRoomObj(roomItem));
+        }
+    }
+    return (newLocalRoom);
+}

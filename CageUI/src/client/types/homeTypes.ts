@@ -56,3 +56,8 @@ export interface ListRoom {
     name: string;
     racks?: ListRack[];
 }
+
+export interface ModificationSaveResult {
+    status: "Success" | "Failure";
+    reason?: string[];
+}

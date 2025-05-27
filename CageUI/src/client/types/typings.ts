@@ -137,7 +137,6 @@ export interface CageModifications {
         [ModLocations.Right]: CageModification[];
         [ModLocations.Direct]: CageModification[];
     };
-    isDirty: boolean; // determines if modifications have been changed
 }
 
 export interface Room {
@@ -176,13 +175,15 @@ export interface PrevRoom {
 }
 
 export interface ModData {
-    rowid: number;
+    rowid?: number;
     room: string;
     rack: number; // rowid of rack
     cage: number;
     location: ModLocations;
     locationId: number;
     modification: ModTypes;
+    startDate: Date;
+    endDate: Date | null;
 }
 
 export interface RackGroup {

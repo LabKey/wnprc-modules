@@ -1,26 +1,29 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
-    Cage,
+    CageModification, CageModifications, CageModType,
     CageNumber,
     CageWithMods,
     ModData,
-    ModLocations,
+    ModLocations, ModTypes,
     PrevRoom,
     Rack,
     RackGroup,
-    Room,
-    RoomItem
+    Room
 } from '../types/typings';
-import { findNextModId, removeCircularReferences } from '../utils/homeHelpers';
 import { HomeContextType } from '../types/homeContextTypes';
-import { ExpandedRooms, ListRack, ListRoom, LoadedRooms, UpdatedMods, SelectedPage } from '../types/homeTypes';
+import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
-import { labkeyActionSelectDistinctWithPromise, labkeyActionSelectWithPromise } from '../api/labkeyActions';
-import { buildNewLocalRoom, findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
-import { selectDistinctRows } from '@labkey/components';
-import { extractNumbers, parseRoomItemNum } from '../utils/helpers';
-import { SelectedObj } from '../types/layoutEditorTypes';
+import {
+    labkeyActionSelectDistinctWithPromise,
+    labkeyActionSelectWithPromise,
+    labkeySaveRows
+} from '../api/labkeyActions';
+import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
+import { buildNewLocalRoom, extractNumbers, parseRoomItemNum } from '../utils/helpers';
+import { LayoutSaveResult, SelectedObj } from '../types/layoutEditorTypes';
+import { Command } from '@labkey/api/dist/labkey/query/Rows';
+import { compareMods } from '../utils/homeHelpers';
 
 
 const HomeContext = createContext<HomeContextType>({} as HomeContextType);
@@ -122,7 +125,7 @@ export const HomeContextProvider = ({children}) => {
             columns: [],
             filterArray: [
                 Filter.create('room', selectedPage.room, Filter.Types.EQUALS),
-                Filter.create('end_date', null, Filter.Types.ISBLANK),
+                Filter.create('endDate', null, Filter.Types.ISBLANK),
             ]
         }
         // Ensures request is canceled if user clicks on a new room before return
@@ -137,28 +140,18 @@ export const HomeContextProvider = ({children}) => {
                 const tempModData: ModData[] = [];
                 if(modResult.rowCount > 0){
                     modResult.rows.forEach((row) => {
-                        const cageConfig = {
-                            schemaName: 'ehr_lookups',
-                            queryName: 'cage',
-                            column: 'cage',
-                            filterArray: [
-                                Filter.create('rowid', row.cage, Filter.Types.EQUALS),
-                            ]
-                        }
-                        labkeyActionSelectDistinctWithPromise(cageConfig, newAbortController.signal).then((cageResult) => {
-                            if(cageResult.values.length === 1){
-                                const newRow: ModData = {
-                                    cage: extractNumbers(cageResult.values[0]),
-                                    location: row.location,
-                                    locationId: row.locationid,
-                                    modification: row.modification,
-                                    rack: row.rack,
-                                    room: row.room,
-                                    rowid: row.rowid
-                                };
-                                tempModData.push(newRow);
-                            }
-                        });
+                        const newRow: ModData = {
+                            cage: row.cage,
+                            location: row.location,
+                            locationId: row.locationid,
+                            modification: row.modification,
+                            rack: row.rack,
+                            room: row.room,
+                            rowid: row.rowid,
+                            startDate: row.startDate,
+                            endDate: row.endDate,
+                        };
+                        tempModData.push(newRow);
                     })
                 }
 
@@ -207,61 +200,83 @@ export const HomeContextProvider = ({children}) => {
         setSelectedRack(currRack)
         setSelectedCage(currCage)
 
-        console.log("Changing rack");
-
     }, [selectedPage.cage]);
 
 
-    /*
-    End SVG context
 
-    const saveMod = () => {
-        setIsDirty(false);
-        setRoom(prevRoom => {
-            const updatedRoom = [...prevRoom];
-            const clickedRackIndex = updatedRoom.findIndex(((rack) => rack.itemId === clickedRack.itemId))
-            if (clickedRackIndex) {
-                // Create a deep copy of the cage state object
-                (updatedRoom[clickedRackIndex] as Rack).cages.find(
-                    (cage) => cage.id === clickedCage.id
-                ).cageState = clickedCage.cageState;
 
-                clickedRack.cages.forEach((cage) => {
-                    (updatedRoom[clickedRackIndex] as Rack).cages.find(
-                        (updateCage) => updateCage.id === cage.id
-                    ).cageState = cage.cageState;
+
+    const saveCageMods = async (currCage: CageWithMods, prevMods: ModData[]): Promise<ModificationSaveResult> => {
+        const {rack: currRack} = findCageInGroup(currCage.cageNum, selectedRoom.rackGroups);
+        console.log("Saving Mod Room: ", selectedRoom);
+        console.log("Saving Mod Rack: ", currRack);
+        console.log("Saving Mod Cage: ", currCage);
+        console.log("Saving Prev Mods: ", prevMods);
+        const commands: Command[] = [];
+        const modsToSave: ModData[] = [];
+        const modsToUpdate: ModData[] = [];
+        const modChanges = compareMods(prevMods, {mods: currCage.mods});
+        const newTimestamp = new Date();
+        console.log("Test: ", modChanges);
+        modChanges.forEach((change) => {
+            const modLoc = parseInt(change.direction);
+            // new mod data if adding or modifying
+            const newModData: ModData = {
+                cage: parseRoomItemNum(currCage.cageNum),
+                endDate: null,
+                location: modLoc,
+                locationId: change.mod.id,
+                modification: change.mod.mod as ModTypes,
+                rack: currRack.rowid,
+                room: selectedRoom.name,
+                startDate: newTimestamp
+            };
+            if(change.type === 'added'){
+                // Add new mod
+                modsToSave.push(newModData);
+            }else if(change.type === 'modified'){
+                // Set old mod date end date and add new mod to modsToSave
+                const modToEnd = prevMods.find((mod) => {
+                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id;
                 })
+                modsToUpdate.push({...modToEnd, endDate: newTimestamp});
+                modsToSave.push(newModData);
+            }else{
+                // Set mod end date
+                const modToEnd = prevMods.find((mod) => {
+                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id;
+                })
+                modsToUpdate.push({...modToEnd, endDate: newTimestamp});
             }
-            return updatedRoom;
-        });
-    }*/
+        })
 
-    const addNewMod = (cage: CageWithMods, location: ModLocations)  => {
+        if(modsToUpdate.length > 0){
+            commands.push({
+                command: "update",
+                schemaName: "cageui",
+                queryName: "cage_modifications",
+                rows: modsToUpdate
+            });
+        }
 
-        setSelectedRoom(prevState => ({
-            ...prevState,
-            rackGroups: prevState.rackGroups.map((group) => ({
-                ...group,
-                racks: group.racks.map((rack) => ({
-                    ...rack,
-                    cages: rack.cages.map((c) => {
-                        if(c.cageNum === cage.cageNum){
-                            const newCage = {
-                                ...c,
-                                mods: {
-                                    ...c.mods,
-                                    [location]: [...c.mods[location], {id: findNextModId(c.mods[location]), mod: 'newMod'}]
-                                }
-                            };
-                            setSelectedContextObj(newCage)
-                            return newCage;
-                        }else{
-                            return c;
-                        }
-                    })
-                }))
-            }))
-        }))
+        if(modsToSave){
+            commands.push({
+                command: "insert",
+                schemaName: "cageui",
+                queryName: "cage_modifications",
+                rows: modsToSave
+            });
+        }
+        const result = await labkeySaveRows(commands);
+        // Determine success or failure
+        if(result.errorCount === 0){
+            return { status: 'Success'};
+        }else{
+            return {
+                status: 'Failure',
+                reason: ["failures"] // Return an array of failure reasons
+            };
+        }
     }
 
     return (
@@ -278,7 +293,7 @@ export const HomeContextProvider = ({children}) => {
             selectedCage,
             selectedContextObj,
             setSelectedContextObj,
-            addNewMod
+            saveCageMods
         }}>
             {children}
         </HomeContext.Provider>

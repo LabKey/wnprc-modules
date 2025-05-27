@@ -24,12 +24,7 @@
                         </fk>
                     </column>
                     <column columnName="cage">
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cage</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>location</fkDisplayColumnName>
-                        </fk>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
                     </column>
                     <column columnName="modification">
                         <fk>

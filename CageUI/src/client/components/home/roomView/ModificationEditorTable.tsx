@@ -23,7 +23,6 @@ interface ModificationEditorTableProps {
  */
 export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props) => {
     const {cage, onModAdd, onModDelete, onModChange} = props;
-    const {addNewMod} = useHomeContext();
     const [allCageMods, setAllCageMods] = useState<EHRCageMods>(null);
 
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
@@ -54,7 +53,6 @@ export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props)
     }, []);
 
     const handleAddNewMod = (location: ModLocations) => {
-        //addNewMod(cage, location);
         onModAdd(location);
     }
 

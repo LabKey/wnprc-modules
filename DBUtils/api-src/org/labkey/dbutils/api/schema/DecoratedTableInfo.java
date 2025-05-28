@@ -367,6 +367,13 @@ public class DecoratedTableInfo implements TableInfo {
 
     @Nullable
     @Override
+    public Domain getDomain(boolean forUpdate) {
+        return _tableInfo.getDomain(forUpdate);
+    }
+
+
+    @Nullable
+    @Override
     public DomainKind getDomainKind() {
         return _tableInfo.getDomainKind();
     }

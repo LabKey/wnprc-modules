@@ -49,6 +49,7 @@ export const HomeContextProvider = ({children}) => {
     const [selectedCage, setSelectedCage] = useState<CageWithMods>(null);
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [abortController, setAbortController] = useState(null);
+    const [roomRefresh, setRoomRefresh] = useState<boolean>(false);
 
     // map of loaded rooms, loaded means fetched from layout_history
     const [loadedRooms, setLoadedRooms] = useState<LoadedRooms>({});
@@ -100,7 +101,11 @@ export const HomeContextProvider = ({children}) => {
 
     // Gets room data for selected room, has abort controller in case the user switches rooms before return
     useEffect(() => {
-        if(!selectedPage?.room) return;
+        const shouldRunEffect = (
+            roomRefresh || // Manual refresh requested
+            (selectedPage?.room !== null && selectedPage?.room !== undefined) // Valid dependency
+        );
+        if(!shouldRunEffect) return;
         if(loadedRooms[selectedPage.room].loaded) {
             setSelectedRoom(loadedRooms[selectedPage.room].room);
             return;
@@ -174,15 +179,24 @@ export const HomeContextProvider = ({children}) => {
                         }))
                         console.log(tempNewRoom)
                         setSelectedRoom(tempNewRoom);
+                        if(roomRefresh){
+                            setRoomRefresh(false);
+                        }
                     }
                 })
             }else{
                 setSelectedRoom(tempNewRoom);
+                if(roomRefresh){
+                    setRoomRefresh(false);
+                }
             }
         }).catch((err) => {
             console.error(err);
+            if(roomRefresh){
+                setRoomRefresh(false);
+            }
         })
-    }, [selectedPage.room]);
+    }, [selectedPage.room, roomRefresh]);
 
     useEffect(() => {
         if(!selectedPage?.rack) return;
@@ -236,15 +250,20 @@ export const HomeContextProvider = ({children}) => {
                 modsToSave.push(newModData);
             }else if(change.type === 'modified'){
                 // Set old mod date end date and add new mod to modsToSave
+
                 const modToEnd = prevMods.find((mod) => {
-                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id;
-                })
+                    // Finding the correct mod in the desired location that is currently active
+                    // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
+                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id && mod.endDate === null;
+                });
                 modsToUpdate.push({...modToEnd, endDate: newTimestamp});
                 modsToSave.push(newModData);
             }else{
                 // Set mod end date
                 const modToEnd = prevMods.find((mod) => {
-                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id;
+                    // Finding the correct mod in the desired location that is currently active
+                    // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
+                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id && mod.endDate === null;
                 })
                 modsToUpdate.push({...modToEnd, endDate: newTimestamp});
             }
@@ -270,6 +289,21 @@ export const HomeContextProvider = ({children}) => {
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){
+            // On success refresh the current room and ensure that it fetches new data by changing loaded to false.
+            setRoomRefresh(true);
+            setLoadedRooms((prevRooms) => {
+                if(prevRooms[selectedRoom.name]){
+                    return {
+                        ...prevRooms,
+                       [selectedRoom.name]: {
+                            ...prevRooms[selectedRoom.name],
+                            loaded: false
+                        }
+                    }
+                }else{
+                    return prevRooms;
+                }
+            });
             return { status: 'Success'};
         }else{
             return {

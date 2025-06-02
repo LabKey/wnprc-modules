@@ -34,11 +34,13 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     // Loads room into the svg
     useEffect(() => {
         if(!selectedRoom.name) return;
+        if(showCageContextMenu) return;
         d3.select("#layout-svg").selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
+        console.log("Load svg, ", selectedRoom)
         addPrevRoomSvgs('view', selectedRoom, layoutSvg, setSelectedContextObj, contextRef);
-    }, [selectedRoom.name]);
+    }, [selectedRoom.name, showCageContextMenu]);
 
     // Effect watches for right clicks to open the modification editor
     useEffect(() => {

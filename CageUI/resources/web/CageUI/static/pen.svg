@@ -3,8 +3,8 @@
      viewBox="0 0 239.91 239.91">
     <g id="pen">
         <g id="modifications">
-            <rect id="playCage-1" x="120" y="206.52" width="41.34" height="32.97" style="fill:none; stroke-width:0px;"/>
-            <rect id="extension-1" x="120" y="206.52" width="41.34" height="32.97"
+            <rect id="playCage" x="120" y="206.52" width="41.34" height="32.97" style="fill:none; stroke-width:0px;"/>
+            <rect id="extension" x="120" y="206.52" width="41.34" height="32.97"
                   style="fill:none; stroke-width:0px;"/>
         </g>
         <g id="sub-pen">

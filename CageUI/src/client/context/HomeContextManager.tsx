@@ -286,6 +286,7 @@ export const HomeContextProvider = ({children}) => {
                 rows: modsToSave
             });
         }
+
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){

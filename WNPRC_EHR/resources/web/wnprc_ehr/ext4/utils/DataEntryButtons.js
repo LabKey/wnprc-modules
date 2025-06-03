@@ -534,6 +534,128 @@
             return true;
         }
     });
+    registerBtn('SEND_BACK_TO_REQUESTOR', {
+        text:           'Request changes from requester',
+        requiredQC:     'In Progress',
+        targetQC:       'Request: On Hold',
+        errorThreshold: 'INFO',
+        successURL:     false,
+        disabled:       false,
+        //disabled:       this.storeCollection.getServerStoreForQuery("study", "Necropsy").getAt(0).getData().requestid == '',
+        disableOn:      'ERROR',
+        tooltip:        "This starts the task and inserts into or updates either the Prenatal Deaths or the regular Deaths table with information from the necropsy.  The insertion will cause any assigned treatments, housing, etc. to be closed, and will send a Death Notification email out.",
+        handler: function(btn) {
+            const storeCollection = this.storeCollection;
+            const necropsyStore = storeCollection.getServerStoreForQuery("study", "Necropsy");
+            const necropsyRecord = necropsyStore.getAt(0).getData();
+            const requestId = necropsyRecord.requestid;
+            const animalId = necropsyRecord.Id;
+            const taskStore = storeCollection.getServerStoreForQuery("ehr", "tasks").getAt(0).getData();
+            const taskId = taskStore.taskid;
+
+
+            this.saveRecords(btn).then(function() {
+
+                LABKEY.Query.selectRows({
+                    schemaName: "ehr",
+                    queryName: "requests",
+                    filterArray: [LABKEY.Filter.create("requestid", requestId, LABKEY.Filter.Types.EQUAL)],
+                    success: function (result) {
+                        console.log(result);
+                        new Ext.Window({
+                            title: 'Send email to requester',
+                            closeAction: 'destroy',
+                            width: 400,
+                            autoHeight: true,
+                            items: [{
+                                xtype: 'form',
+                                ref: 'theForm',
+                                bodyStyle: 'padding: 5px;',
+                                items: [{
+                                    xtype: 'textarea',
+                                    fieldLabel: 'Message',
+                                    id: 'messageField',
+                                    width: 350,
+                                    autoHeight: true,
+                                    ref: 'messageField'
+                                }, {
+                                    xtype: 'combo',
+                                    fieldLabel: 'Assigned To',
+                                    width: 200,
+                                    value: result.rows[0].createdby,
+                                    triggerAction: 'all',
+                                    mode: 'local',
+                                    store: new LABKEY.ext.Store({
+                                        xtype: 'labkey-store',
+                                        schemaName: 'core',
+                                        queryName: 'PrincipalsWithoutAdmin',
+                                        columns: 'UserId,DisplayName',
+                                        sort: 'Type,DisplayName',
+                                        autoLoad: true
+                                    }),
+                                    displayField: 'DisplayName',
+                                    valueField: 'UserId',
+                                    ref: 'assignedTo',
+                                    id: 'assignedTo',
+                                }
+                                ]
+                            }],
+                            buttons: [{
+                                text:'Submit',
+                                disabled:false,
+                                formBind: true,
+                                ref: '../submit',
+                                scope: this,
+                                handler: function(o){
+                                    var message = o.ownerCt.ownerCt.theForm.messageField.getValue();
+                                    var assignedTo = o.ownerCt.ownerCt.theForm.assignedTo.getValue();
+
+                                    if(!message){
+                                        alert('Must enter a message');
+                                        return;
+                                    } else {
+                                        LABKEY.Ajax.request({
+                                            url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'SendNecropsyEditRequestNotification', null),
+                                            method: 'POST',
+                                            jsonData: {
+                                                message: message,
+                                                animalId: animalId,
+                                                requestId: requestId,
+                                                assignedTo: assignedTo,
+                                                taskId: taskId,
+                                            },
+                                            success: function(data){
+                                                let resp = JSON.parse(data.response);
+                                                if (resp.success) {
+                                                    window.location =  LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view');
+                                                } else {
+                                                    alert(resp.message);
+                                                }
+                                            },
+                                            failure: LDK.Utils.getErrorCallback()
+                                        });
+                                    }
+
+
+                                }
+                            },{
+                                text: 'Close',
+                                handler: function(o){
+                                    o.ownerCt.ownerCt.close();
+                                }
+                            }]
+                        }).show();
+                    },
+                    failure: function () {
+
+                    }
+                })
+
+                //window.location.reload();
+
+            })['catch'](cancelErrorHandler);
+        },
+    });
 
     registerBtn('UPDATE_DEATH', {
         text:           'Update Death',

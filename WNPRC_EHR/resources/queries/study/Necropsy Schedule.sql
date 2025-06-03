@@ -20,6 +20,7 @@ SELECT lsid
       ,location
       ,delivery_option.title                                AS who_delivers
       ,shipping_comment                                     AS delivery_comment
+      ,qcstate
       ,animalid.Demographics.necropsyAbstractNotes.remark   AS remark
       ,CASE
       WHEN hasTissuesForAvrl IS NULL
@@ -61,6 +62,7 @@ SELECT lsid
              ,shipping_comment
              ,location
              ,performedby
+             ,qcstate.label as qcstate
              ,taskid.qcstate   AS state
         FROM study.necropsy
        WHERE taskid IS NOT NULL) necropsy

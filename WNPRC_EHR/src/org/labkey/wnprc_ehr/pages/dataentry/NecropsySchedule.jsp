@@ -170,6 +170,7 @@
                     <!-- ko foreach: _.keys(necropsySuiteLookup) -->
                     <span data-bind="style: {color: $root.necropsySuiteLookup[$data].color }">&#x2589;</span><span>{{$root.necropsySuiteLookup[$data].displayName}}</span>
                     <!-- /ko -->
+                    <span style="color: purple">&#x2589;</span><span>Waiting for Requester</span>
                 </div>
             </div>
         </div>
@@ -365,6 +366,11 @@
 
                             if (row.location in necropsySuiteLookup) {
                                 eventObj.color = necropsySuiteLookup[row.location].color;
+                            }
+                            debugger;
+
+                            if (row.qcstate == "Request: On Hold"){
+                                eventObj.color = "purple"
                             }
 
                             return eventObj;

@@ -1,0 +1,1 @@
+alter table if exists wnprc.session_log add column if not exists request_type varchar(255);

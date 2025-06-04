@@ -229,6 +229,7 @@
             <column columnName="created"/>
             <column columnName="modifiedby"/>
             <column columnName="modified"/>
+            <column columnName="request_type"/>
         </columns>
     </table>
     <table tableName="on_call_calendars" tableDbType="TABLE">

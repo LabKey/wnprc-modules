@@ -27,8 +27,8 @@ then
     GRADLE_IMAGE="wnprcehr/labkey${SHORT_BRANCH_NAME}:${LK_VERSION}"
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
 then
-    LK_VERSION=${BASH_REMATCH[1]}
-    GENERAL_LK_VERSION=${LK_VERSION//./}
+    LK_VERSION=${BASH_REMATCH[1]}    
+    GENERAL_LK_VERSION=${LK_VERSION//./}    
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers"
     SHORT_BRANCH_NAME="snapshot"
     FB_NAME=""
@@ -39,7 +39,7 @@ then
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
-    GENERAL_LK_VERSION=${LK_VERSION//./}
+    GENERAL_LK_VERSION=${LK_VERSION//./}   
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}

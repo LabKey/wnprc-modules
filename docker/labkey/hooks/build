@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "build ver 2.0"
+echo "build ver 1.9"
 echo "docker_tag text " $DOCKER_TAG
 
 # FB_REGEX will match if the docker tag looks like a feature branch, while
@@ -22,13 +22,13 @@ then
     LK_VERSION=${BASH_REMATCH[1]}
     SHORT_BRANCH_NAME="develop"
     FB_NAME="_develop"
-    LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2"  
+    LABKEY_TEAMCITY_CONFIG="LabKey_Trunk_External_Wnprc_Installers_2"
     echo -e "Building develop branch ";
     GRADLE_IMAGE="wnprcehr/labkey${SHORT_BRANCH_NAME}:${LK_VERSION}"
 elif [[ $DOCKER_TAG =~ $PROD_REGEX ]]
-then    
-    LK_VERSION=${BASH_REMATCH[1]}    
-    GENERAL_LK_VERSION=${LK_VERSION//./}    
+then
+    LK_VERSION=${BASH_REMATCH[1]}
+    GENERAL_LK_VERSION=${LK_VERSION//./}
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers"
     SHORT_BRANCH_NAME="snapshot"
     FB_NAME=""
@@ -39,7 +39,7 @@ then
 elif [[ $DOCKER_TAG =~ $FB_REGEX  ]]
 then
     LK_VERSION=${BASH_REMATCH[1]}
-    GENERAL_LK_VERSION=${LK_VERSION//./}   
+    GENERAL_LK_VERSION=${LK_VERSION//./}
     LABKEY_TEAMCITY_CONFIG="LabKey_${GENERAL_LK_VERSION}Release_External_Wnprc_Installers"
     SHORT_BRANCH_NAME=${BASH_REMATCH[2]}
     B=",branch:"${SHORT_BRANCH_NAME}
@@ -57,23 +57,19 @@ X="`curl -f --user "${teamcityUser}":"${teamCityPWD}" https://teamcity.labkey.or
 echo -e "value of X " ${X}
 Y="${LABKEY_TEAMCITY_BUILD:-$X}"
 echo -e "value of Y " ${Y}
-Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LK_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" 
-    
+Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LK_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}"
+
 echo -e "TEAMCTY_URL "${Z}
 
 # Some debugging info
 echo "LabKey version: $LK_VERSION"
 echo "Branch name: $SHORT_BRANCH_NAME"
 
-# Defining new docker builder for arm64
-docker buildx create --name=container  
-
 if [[ -z $IMAGE_NAME ]]
-then  
+then
   IMAGE_NAME=${GRADLE_IMAGE}
   echo "value of IMAGE_NAME " ${IMAGE_NAME}
-  docker build --builder container --platform linux/arm64,linux/amd64 --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME ../
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME ../
 else
-  echo "running inside Docker Hub for $platform" 
-  docker build --builder container --platform $platform --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true --load -t $IMAGE_NAME .
+  docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg TEAMCITY_URL=$Z --build-arg FB_NAME=$FB_NAME --build-arg LK_VERSION=$LK_VERSION --no-cache --rm=true -t $IMAGE_NAME .
 fi

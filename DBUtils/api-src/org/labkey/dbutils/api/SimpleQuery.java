@@ -253,7 +253,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
         ColumnInfo colInfo = dc.getColumnInfo();
 
         // see  Ext.grid.ColumnModel Ext.grid.Column
-        extGridColumn.put("dataIndex", colInfo.getColumnName());
+        extGridColumn.put("dataIndex", colInfo.getName());
         extGridColumn.put("sortable", dc.isSortable());
         extGridColumn.put("editable", isEditable(dc, tableInfo));
         extGridColumn.put("hidden", colInfo != null && (colInfo.isHidden() || colInfo.isAutoIncrement())); //auto-incr list key columns return false for isHidden(), so check isAutoIncrement as well

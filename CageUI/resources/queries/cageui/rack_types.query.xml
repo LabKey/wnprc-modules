@@ -1,0 +1,66 @@
+<!--
+  ~ /*
+  ~  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  *
+  ~  * Unless required by applicable law or agreed to in writing, software
+  ~  * distributed under the License is distributed on an "AS IS" BASIS,
+  ~  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  * See the License for the specific language governing permissions and
+  ~  * limitations under the License.
+  ~  */
+  -->
+
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="rack_types" tableDbType="TABLE">
+                <javaCustomizer class="org.labkey.cageui.table.CageUICustomizer" />
+                <tableTitle>Rack Types</tableTitle>
+                <columns>
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="name"/>
+                    <column columnName="type">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_item_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="category" value="Caging" operator="eq"/>
+                                </filterGroup>
+                            </filters>
+                        </fk>
+                    </column>
+                    <column columnName="manufacturer">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_rack_manufacturers</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="length"/>
+                    <column columnName="width"/>
+                    <column columnName="height"/>
+                    <column columnName="sqft"/>
+                    <column columnName="supportsTunnel"/>
+                    <column columnName="description"/>
+                    <column columnName="container"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modified"/>
+                    <column columnName="modifiedby"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

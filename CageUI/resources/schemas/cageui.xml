@@ -34,6 +34,7 @@
             <column columnName="created"/>
             <column columnName="modified"/>
             <column columnName="modifiedby"/>
+            <column columnName="extra_context"/>
         </columns>
     </table>
     <table tableName="racks" tableDbType="TABLE">

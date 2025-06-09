@@ -45,6 +45,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     // Effect watches for right clicks to open the modification editor
     useEffect(() => {
         if(selectedContextObj){
+            console.log("Selected Obj: ", selectedContextObj);
             const currRackDefault = findCageInGroup((selectedContextObj as CageWithMods).cageNum, selectedRoom.rackGroups).rack.type.isDefault;
             if(currRackDefault){
                 setErrorPopup("This cage is a default cage and as such it cannot have mods attached. Please only attach mods to real cages");

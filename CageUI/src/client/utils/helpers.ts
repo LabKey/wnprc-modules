@@ -312,16 +312,18 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
     const loadCageMods = (cageToLoad: CageWithMods, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
 
-        Object.entries(cageToLoad.mods).forEach(([loc,modList]) => {
+        Object.entries(cageToLoad.mods).forEach(([loc,modSubList]) => {
             const modLoc = parseInt(loc) as ModLocations;
-            modList.forEach((mod) => {
-                if(mod.mod === "newMod") return;
-                const modObj = Modifications[mod.mod];
-                modObj.svgIds[modLoc].forEach((svgId, idx) => {
-                    let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id=${svgId}]`);
-
-                    modObj.styles.forEach((style) => {
-                        changeStyleProperty(currentSelection.node() as SVGElement, style.property, style.value)
+            modSubList.forEach((modList) => {
+                const subId = modList.subId;
+                modList.mods.forEach(mod => {
+                    if(mod.mod === "newMod") return;
+                    const modObj = Modifications[mod.mod];
+                    modObj.svgIds[modLoc].forEach((svgId, idx) => {
+                        let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id=${svgId}-${subId}]`);
+                        modObj.styles.forEach((style) => {
+                            changeStyleProperty(currentSelection.node() as SVGElement, style.property, style.value)
+                        })
                     })
                 })
             })
@@ -352,6 +354,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                     unitSvg = d.querySelector(`svg[id*=template]`);
                 });
             }
+
+            console.log("unitSvg: ",rackTypeString, unitSvg, unitsToRender)
 
 
             // Only needed for layout editor to attach context menus
@@ -537,7 +541,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             }
 
         }
-        let rack: Rack = rackGroup.racks.find(r => parseRoomItemNum(r.itemId) === rackIdNum);
+        let rack: Rack = rackGroup.racks.find(r => r.rowid === rowId);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
@@ -563,13 +567,35 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             };
 
             const rackTypesData = await labkeyActionSelectWithPromise(optConfig);
-
+            if(rackTypesData.rowCount === 0){
+                return;
+            }
+            const svgSize = await getSvgSize(rackTypesData.rows[0].type);
+            // determine sizes for sides, (how many different lines make a side in an svg that could each have their own mods)
+            // my current ratio is 4 meaning a square of 4x4 cells will have one section.
             type = {
                 rowid: typeRowId,
                 name: rackTypesData.rows[0].name,
                 type: isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type,
                 isDefault: isDefault,
-            };
+                sides: isDefault ? undefined : {
+                    [ModLocations.Top]: {
+                        sections: svgSize / 4,
+                    },
+                    [ModLocations.Bottom]: {
+                        sections: svgSize / 4
+                    },
+                    [ModLocations.Left]: {
+                        sections: svgSize / 4
+                    },
+                    [ModLocations.Right]: {
+                        sections: svgSize / 4
+                    },
+                    [ModLocations.Direct]: {
+                        sections: 1
+                    }
+                }
+            }
 
             rack = {
                 rowid: rowId,
@@ -592,6 +618,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         let cageNumType: RoomItemStringType;
         let extraContext: ExtraContext;
         let cageNum = parseInt(rackItem.cage);
+
+
         let cageMods: CageModifications = {
             mods: {
                 [ModLocations.Top]: [],
@@ -614,10 +642,22 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         if (loadMods && !rack.type.isDefault) {
             prevRoom.modData.forEach((mod) => {
                 if (rack.rowid === mod.rack && cageNum === mod.cage) {
-                    (cageMods.mods[mod.location] as CageModification[]).push({
-                        id: mod.locationId,
-                        mod: mod.modification,
-                    });
+                    const subsection = cageMods.mods[mod.location].find(subsection => subsection.subId === mod.subsectionId);
+                    if(subsection){
+                        subsection.mods.push({
+                            id: mod.locationId,
+                            mod: mod.modification,
+                        });
+                    }else{
+                        cageMods.mods[mod.location].push({
+                            subId: cageMods.mods[mod.location].length + 1,
+                            mods: [{
+                                id: mod.locationId,
+                                mod: mod.modification
+                            }],
+                        });
+                    }
+
                 }
             });
         }

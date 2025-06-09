@@ -75,6 +75,7 @@
             <column columnName="modification" />
             <column columnName="locationid" />
             <column columnName="location" />
+            <column columnName="subsectionid" />
             <column columnName="startDate" />
             <column columnName="endDate"/>
             <column columnName="createdby"/>

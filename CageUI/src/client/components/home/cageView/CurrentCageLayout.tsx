@@ -28,13 +28,14 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
         addPrevRoomSvgs('view', cage, cageSvg);
     }, [cage]);
 
+    // adding 1 to the width/height helps make sure the lines don't get cut off in the image
     return (
         <div className={'cage-layout'}>
             <svg id={'cage-svg'}
                  ref={cageRef}
-                 width={cage.size * CELL_SIZE}
-                 height={cage.size * CELL_SIZE}
-                 viewBox={`0 0 ${cage.size * CELL_SIZE} ${cage.size * CELL_SIZE}`}
+                 width={cage.size * CELL_SIZE + 1}
+                 height={cage.size * CELL_SIZE + 1}
+                 viewBox={`0 0 ${cage.size * CELL_SIZE + 1} ${cage.size * CELL_SIZE + 1}`}
             />
         </div>
     );

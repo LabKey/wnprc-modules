@@ -8,7 +8,7 @@ import {
     CageWithMods,
     ModData,
     ModLocations,
-    ModTypes
+    ModTypes, Rack
 } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
 import { ModificationEditorTable } from './ModificationEditorTable';
@@ -42,6 +42,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     const {saveCageMods, selectedRoom} = useHomeContext();
 
     const [currCage, setCurrCage] = useState<CageWithMods>(selectedObj as CageWithMods);
+    const [currRack, setCurrRack] = useState<Rack>(null);
     const [prevCageMods, setPrevCageMods] = useState<ModData[]>(null);
     const [showErrorPopup, setShowErrorPopup] = useState<string>(null);
     const [showSavePopup, setShowSavePopup] = useState<string>(null); // if save is successful
@@ -50,12 +51,13 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     const menuRef = useRef(null);
 
     useEffect(() => {
-        console.log("Current Cage: ", currCage);
-        console.log("Prev Cage Mods: ", prevCageMods);
-    }, [currCage, prevCageMods]);
+        console.log("Current Cage: ", currCage, selectedObj);
+        console.log("Show Menu: ", showEditor);
+    }, [currCage, showEditor]);
 
     useEffect(() => {
         const tempCage = selectedObj as CageWithMods;
+        console.log("Selected Menu Obj: ", selectedObj);
         if(tempCage?.mods){
             const cageRack = findCageInGroup(tempCage.cageNum, selectedRoom.rackGroups).rack;
             const config: SelectRowsOptions = {
@@ -83,12 +85,14 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                             rack: row.rack,
                             room: row.room,
                             rowid: row.rowid,
-                            startDate: row.startDate
+                            startDate: row.startDate,
+                            subsectionId: row.subsectionid
                         })
                     })
                     setPrevCageMods(prevMods);
-                    setCurrCage(tempCage);
                 }
+                setCurrCage(tempCage);
+                setCurrRack(cageRack);
             });
 
 
@@ -118,62 +122,116 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         };
     }, [menuRef]);
 
-    const handleModAdd = (location: ModLocations) => {
+    const handleModAdd = (location: ModLocations, subsectionId: number) => {
+        console.log("Adding Mod: ", subsectionId)
         setCurrCage((cage) => {
-            if(cage.cageNum === cage.cageNum){
-                return {
+            if(cage.cageNum === currCage.cageNum){
+                const newCage = {
                     ...cage,
                     mods: {
                         ...cage.mods,
-                        [location]: [...cage.mods[location], {id: findNextModId(cage.mods[location]), mod: 'newMod'}]
+                        [location]: cage.mods[location].find((subLoc) => subLoc.subId === subsectionId)
+                            ? cage.mods[location].map(mods => {
+                            // Find subsection and then location in the subsection on where to add the mod
+                            if(mods.subId === subsectionId){
+                                if(mods.mods.length > 0){
+                                    return {
+                                        ...mods,
+                                        mods: [...mods.mods, {
+                                            id: findNextModId(mods.mods),
+                                            mod: 'newMod'
+                                        }]
+                                    }
+                                }else{
+                                    return {
+                                        ...mods,
+                                        mods: [{
+                                            id: findNextModId(mods.mods),
+                                            mod: 'newMod'
+                                        }]
+                                    }
+                                }
+                            }else{
+                                return mods;
+                            }
+                        }) : [...cage.mods[location], {
+                            subId: subsectionId,
+                            mods: [{
+                                id: 1,
+                                mod: 'newMod'
+                            }]
+                        }]
+
                     }
                 };
+                console.log(newCage);
+                return newCage;
             }else{
                 return cage;
             }
         })
     }
 
-    const handleModDelete = (location: ModLocations, locId: number) => {
+    const handleModDelete = (location: ModLocations, locId: number, subId: number) => {
 
         // removes the id and remaps ids so there are no gaps, and it starts at 1
         setCurrCage((cage) => {
             let newCage = cage;
-            if(newCage.cageNum === newCage.cageNum){
+            if(newCage.cageNum === currCage.cageNum){
                 newCage = {
                     ...newCage,
                     mods: {
                         ...newCage.mods,
-                        [location]: newCage.mods[location].filter((mod) => mod.id !== locId)
-                            .sort((a,b) => a.id - b.id)
-                            .map((m, idx) => ({
-                                ...m,
-                                id: idx + 1
-                        }))
+                        [location]: newCage.mods[location].map((subMods)=> {
+                            if(subId === subMods.subId){
+                                return {
+                                    ...subMods,
+                                    mods: subMods.mods.filter((mods) => mods.id !== locId)
+                                        .sort((a, b) => a.id - b.id)
+                                        .map((m, idx) => ({
+                                            ...m,
+                                            id: idx + 1
+                                    }))
+                                }
+                            }else{
+                                return subMods;
+                            }
+                        })
                     }
                 };
             }
+            console.log("Delete After: ", newCage)
             return newCage;
         })
     }
 
-    const handleModChange = (location: ModLocations, locId: number, newMod: ModTypes) => {
+    const handleModChange = (location: ModLocations, locId: number, subId: number, newMod: ModTypes) => {
 
         setCurrCage((cage) => {
             let newCage = cage;
-            if(newCage.cageNum === newCage.cageNum){
+            if(newCage.cageNum === currCage.cageNum){
                 newCage = {
                     ...newCage,
                     mods: {
                         ...newCage.mods,
-                        [location]: newCage.mods[location].map((mod) => {
-                            if(mod.id === locId){
+                        [location]: cage.mods[location].map(mods => {
+                            console.log("mods: ", mods)
+                            if(mods.subId === subId) {
                                 return {
-                                    ...mod,
-                                    mod: newMod,
-                                }
+                                    ...mods,
+                                    mods: mods.mods.map((mod) => {
+                                        if(mod.id === locId){
+                                            return {
+                                                ...mod,
+                                                mod: newMod,
+                                            }
+                                        }else{
+                                            return mod;
+                                        }
+                                    })
+                                };
                             }else{
-                                return mod;
+                                return mods;
                             }
                         })
                     }
@@ -188,11 +246,13 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         Object.entries(currCage.mods).forEach(([key, value]) => {
             console.log("Key: ", ModLocations[key], " value: ", value);
             if(value.length > 0){
-                value.forEach((mod) => {
-                    if(mod.mod === "newMod"){
-                        setShowErrorPopup("Please do not submit a new mod without first assigning it to a real mod");
-                        submit = false;
-                    }
+                value.forEach((subsection) => {
+                    subsection.mods.forEach((mod) => {
+                        if(mod.mod === "newMod"){
+                            setShowErrorPopup("Please do not submit a new mod without first assigning it to a real mod");
+                            submit = false;
+                        }
+                    })
                 })
             }
         })
@@ -225,6 +285,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                             onModChange={handleModChange}
                             onModAdd={handleModAdd}
                             cage={currCage}
+                            rack={currRack}
                         />
                     </div>
                     <div className="modification-editor-popup-actions">

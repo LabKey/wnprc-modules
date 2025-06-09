@@ -154,6 +154,7 @@ export const compareMods = (oldModData: ModData[], newModObj: CageModifications)
         direction: string;
         type: 'added' | 'removed' | 'modified';
         mod: CageModification;
+        subsectionId: number;
         oldMod?: CageModification; // Only for modified mods
     }[] = [];
 
@@ -164,53 +165,71 @@ export const compareMods = (oldModData: ModData[], newModObj: CageModifications)
         [ModLocations.Right]: [],
         [ModLocations.Direct]: [],
         }}
-    oldModData.forEach((oldMod) => {
-        oldModObj.mods[oldMod.location].push({
-            id: oldMod.locationId,
-            mod: oldMod.modification
+
+    if(oldModData){
+        oldModData.forEach((oldMod, idx) => {
+            oldModObj.mods[oldMod.location].push({
+                mods: [{
+                    id: oldMod.locationId,
+                    mod: oldMod.modification
+                }],
+                subId: idx
         })
-    })
+        })
+    }
 
-    Object.keys(ModLocations).filter(key => !isNaN(Number(key))).forEach(direction => {
-        const oldMods: CageModification[] = oldModObj.mods[direction];
-        const newMods: CageModification[] = newModObj.mods[direction];
 
-        // Create maps for easier lookup
-        const oldModsMap = new Map(oldMods.map(mod => [mod.id, mod]));
-        const newModsMap = new Map(newMods.map(mod => [mod.id, mod]));
+    Object.keys(ModLocations)
+        .filter(key => !isNaN(Number(key)))
+        .forEach(direction => {
+            // Flatten all mods from all subsections for this direction
+            const oldMods = (oldModObj.mods[direction] || [])
+                .flatMap(sub => sub.mods.map(mod => ({ ...mod, subId: sub.subId})));
 
-        // Check for removed mods (in old but not in new)
-        oldMods.forEach(oldMod => {
-            if (!newModsMap.has(oldMod.id)) {
-                changes.push({
-                    direction,
-                    type: 'removed',
-                    mod: oldMod
-                });
-            }
-        });
+            const newMods = (newModObj.mods[direction] || [])
+                .flatMap(sub => sub.mods.map(mod => ({ ...mod, subId: sub.subId})));
 
-        // Check for added and modified mods
-        newMods.forEach(newMod => {
-            if (!oldModsMap.has(newMod.id)) {
-                changes.push({
-                    direction,
-                    type: 'added',
-                    mod: newMod
-                });
-            } else {
-                const oldMod = oldModsMap.get(newMod.id)!;
-                if (!isEqual(oldMod, newMod)) {
+            // Create maps for easier lookup
+            const oldModsMap = new Map<string, CageModification>(oldMods.map(mod => [`${mod.subId}-${mod.id}`, mod]));
+            const newModsMap = new Map<string, CageModification>(newMods.map(mod => [`${mod.subId}-${mod.id}`, mod]));
+
+            // Check for removed mods (in old but not in new)
+            oldMods.forEach(oldMod => {
+                const compositeKey = `${oldMod.subId}-${oldMod.id}`;
+                if (!newModsMap.has(compositeKey)) {
                     changes.push({
                         direction,
-                        type: 'modified',
-                        mod: newMod,
-                        oldMod: oldMod
+                        type: 'removed',
+                        mod: oldMod,
+                        subsectionId: oldMod.subId
                     });
                 }
-            }
+            });
+
+            // Check for added and modified mods
+            newMods.forEach(newMod => {
+                const compositeKey = `${newMod.subId}-${newMod.id}`;
+                if (!oldModsMap.has(compositeKey)) {
+                    changes.push({
+                        direction,
+                        type: 'added',
+                        mod: newMod,
+                        subsectionId: newMod.subId
+                    });
+                } else {
+                    const oldMod = oldModsMap.get(compositeKey)!;
+                    if (!isEqual(oldMod, newMod)) {
+                        changes.push({
+                            direction,
+                            type: 'modified',
+                            mod: newMod,
+                            oldMod: oldMod,
+                            subsectionId: newMod.subId
+                        });
+                    }
+                }
+            });
         });
-    });
 
     return changes;
 }

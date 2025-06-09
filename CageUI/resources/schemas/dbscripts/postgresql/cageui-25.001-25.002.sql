@@ -8,6 +8,7 @@ CREATE TABLE cageui.cage_modifications
     modification varchar,
     locationid INTEGER,
     location INTEGER,
+    subsectionid INTEGER,
     startDate TIMESTAMP NOT NULL,
     endDate TIMESTAMP,
     container         entityid NOT NULL,

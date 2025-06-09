@@ -149,6 +149,7 @@ export const HomeContextProvider = ({children}) => {
                             cage: row.cage,
                             location: row.location,
                             locationId: row.locationid,
+                            subsectionId: row.subsectionid,
                             modification: row.modification,
                             rack: row.rack,
                             room: row.room,
@@ -213,25 +214,15 @@ export const HomeContextProvider = ({children}) => {
         setSelectedRackGroup(currGroup)
         setSelectedRack(currRack)
         setSelectedCage(currCage)
-
     }, [selectedPage.cage]);
-
-
-
-
 
     const saveCageMods = async (currCage: CageWithMods, prevMods: ModData[]): Promise<ModificationSaveResult> => {
         const {rack: currRack} = findCageInGroup(currCage.cageNum, selectedRoom.rackGroups);
-        console.log("Saving Mod Room: ", selectedRoom);
-        console.log("Saving Mod Rack: ", currRack);
-        console.log("Saving Mod Cage: ", currCage);
-        console.log("Saving Prev Mods: ", prevMods);
         const commands: Command[] = [];
         const modsToSave: ModData[] = [];
         const modsToUpdate: ModData[] = [];
         const modChanges = compareMods(prevMods, {mods: currCage.mods});
         const newTimestamp = new Date();
-        console.log("Test: ", modChanges);
         modChanges.forEach((change) => {
             const modLoc = parseInt(change.direction);
             // new mod data if adding or modifying
@@ -240,6 +231,7 @@ export const HomeContextProvider = ({children}) => {
                 endDate: null,
                 location: modLoc,
                 locationId: change.mod.id,
+                subsectionId: change.subsectionId,
                 modification: change.mod.mod as ModTypes,
                 rack: currRack.rowid,
                 room: selectedRoom.name,
@@ -248,24 +240,17 @@ export const HomeContextProvider = ({children}) => {
             if(change.type === 'added'){
                 // Add new mod
                 modsToSave.push(newModData);
-            }else if(change.type === 'modified'){
-                // Set old mod date end date and add new mod to modsToSave
-
+            }else {
+                // Set old mod date end date
                 const modToEnd = prevMods.find((mod) => {
                     // Finding the correct mod in the desired location that is currently active
                     // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
                     return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id && mod.endDate === null;
                 });
                 modsToUpdate.push({...modToEnd, endDate: newTimestamp});
-                modsToSave.push(newModData);
-            }else{
-                // Set mod end date
-                const modToEnd = prevMods.find((mod) => {
-                    // Finding the correct mod in the desired location that is currently active
-                    // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
-                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id && mod.endDate === null;
-                })
-                modsToUpdate.push({...modToEnd, endDate: newTimestamp});
+                if (change.type === 'modified') { // add new mod if modified
+                    modsToSave.push(newModData);
+                }
             }
         })
 
@@ -286,7 +271,8 @@ export const HomeContextProvider = ({children}) => {
                 rows: modsToSave
             });
         }
-
+        console.log("Commands: ", commands);
+        return;
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){

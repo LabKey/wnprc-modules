@@ -83,7 +83,7 @@ public class InvoicePDF extends FPDF
 
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);
-            boolean isGroupChange = false;
+            boolean isGroupChange;
             if(invoicedItem.getGroupName()== null){
                 isGroupChange = currentGroup != null;
             }
@@ -188,17 +188,9 @@ public class InvoicePDF extends FPDF
             addDetailsToLineItem(commentLines.get(0), invoicedItem);
         }
 
-        if (itemLines.size() > 0) {
-            for (FormattedLineItem itemLine : itemLines) {
-                formattedLineItems.add(itemLine);
-            }
-        }
+        formattedLineItems.addAll(itemLines);
+        formattedLineItems.addAll(commentLines);
 
-        if (commentLines.size() > 0) {
-            for (FormattedLineItem commentLine : commentLines) {
-                formattedLineItems.add(commentLine);
-            }
-        }
         return formattedLineItems;
     }
 
@@ -219,7 +211,7 @@ public class InvoicePDF extends FPDF
         }
         catch (IOException e)
         {
-            throw new UnexpectedException(e);
+            throw UnexpectedException.wrap(e);
         }
     }
 
@@ -387,7 +379,7 @@ public class InvoicePDF extends FPDF
         }
         catch (IOException e)
         {
-            throw new UnexpectedException(e);
+            throw UnexpectedException.wrap(e);
         }
     }
 

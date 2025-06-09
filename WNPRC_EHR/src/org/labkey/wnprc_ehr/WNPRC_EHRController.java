@@ -72,10 +72,12 @@ import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.Group;
 import org.labkey.api.security.GroupManager;
+import org.labkey.api.security.MemberType;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
@@ -114,6 +116,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
+import org.labkey.wnprc_ehr.notification.NecropsyEditRequestNotification;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
@@ -2312,6 +2315,140 @@ public class WNPRC_EHRController extends SpringActionController
             response.put("message", messageList);
 
             return response;
+
+        }
+    }
+
+    public static class NecropsyEditRequestNotificationForm
+    {
+        private String _message;
+        private String _animalId;
+        private String _requestId;
+        private Integer _assignedTo;
+        private String _taskId;
+
+        public String getMessage()
+        {
+            return _message;
+        }
+
+        public void setMessage(String message)
+        {
+            _message = message;
+        }
+
+        public String getAnimalId()
+        {
+            return _animalId;
+        }
+
+        public void setAnimalId(String animalId)
+        {
+            _animalId = animalId;
+        }
+
+        public String getRequestId()
+        {
+            return _requestId;
+        }
+
+        public void setRequestId(String requestId)
+        {
+            _requestId = requestId;
+        }
+
+        public void setAssignedTo(Integer assignedTo)
+        {
+            _assignedTo = assignedTo;
+        }
+
+        public Integer getAssignedTo()
+        {
+            return _assignedTo;
+        }
+
+        public void setTaskId(String taskId)
+        {
+            _taskId = taskId;
+        }
+        public String getTaskId()
+        {
+            return _taskId;
+        }
+    }
+
+
+    @ActionNames("SendNecropsyEditRequestNotification")
+    @RequiresNoPermission()
+    @RequiresLogin
+    public static class SendNecropsyEditRequestNotificationAction extends MutatingApiAction<NecropsyEditRequestNotificationForm>
+    {
+
+        @Override
+        public Object execute(NecropsyEditRequestNotificationForm form, BindException errors) throws Exception
+        {
+
+            try
+            {
+                String message = form.getMessage();
+                String animalId = form.getAnimalId();
+                String requestId = form.getRequestId();
+                Integer assignedTo = form.getAssignedTo();
+                String taskId = form.getTaskId();
+                User u = UserManager.getUser(assignedTo);
+
+                ArrayList<String> emails = new ArrayList<>();
+                if (u == null)
+                {
+                    Group g = SecurityManager.getGroup(assignedTo);
+                    Set<User> users = SecurityManager.getAllGroupMembers(g, MemberType.ACTIVE_USERS);
+                    for (User user : users)
+                    {
+                        emails.add(user.getEmail());
+                    }
+                    if (emails.isEmpty())
+                    {
+                        JSONObject response = new JSONObject();
+                        response.put("success",false);
+                        response.put("message", "There are no members in the group " + g.getName());
+                        return response;
+                    }
+                }
+                else
+                {
+                    emails.add(u.getEmail());
+                }
+
+
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+                QueryUpdateService service = ti.getUpdateService();
+                List<Map<String, Object>> keys = new ArrayList<>();
+                Map<String, Object> row = new HashMap<>();
+                row.put("taskid", taskId);
+                keys.add(row);
+                List<Map<String, Object>> rows = service.getRows(getUser(), getContainer(), keys);
+
+                rows.get(0).put("assignedTo", assignedTo);
+                rows.get(0).put("aspurasignedTo", assignedTo);
+
+                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rows, null, null, null);
+
+
+                Module WNPRC_EHRModule = ModuleLoader.getInstance().getModule("WNPRC_EHR");
+                NecropsyEditRequestNotification editRequestNotification = new NecropsyEditRequestNotification(WNPRC_EHRModule, message, animalId, requestId, emails);
+                editRequestNotification.sendManually(getContainer(), getUser());
+                JSONObject response = new JSONObject();
+                response.put("success",true);
+                return response;
+            }
+            catch (Exception e)
+            {
+                JSONObject response = new JSONObject();
+                response.put("success",false);
+                response.put("message",new Date().toInstant().toString() + e.getMessage());
+                return response;
+            }
+
 
         }
     }

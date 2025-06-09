@@ -232,7 +232,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder(initTest.getProjectName());
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId"));
+        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId", "CageUI"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
@@ -4692,4 +4692,90 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
+    // Imports rack data for cage ui testing
+    private void importRacks() throws IOException, CommandException
+    {
+        Connection connection = createDefaultConnection();
+        Map<String, Object> responseMap = new HashMap<>();
+
+        List<Map<String, Object>> tsv = loadTsv(TestFileUtils.getSampleData("wnprc_ehr/cageui/racks.tsv"));
+        insertTsvData(connection, "cageUI", "racks", tsv, EHR_FOLDER_PATH)
+                .forEach(row -> responseMap.put(row.get("rowid").toString(),row));
+    }
+    // Imports rack types data for cage ui testing
+    private void importRackTypes() throws IOException, CommandException
+    {
+        Connection connection = createDefaultConnection();
+        Map<String, Object> responseMap = new HashMap<>();
+
+        List<Map<String, Object>> tsv = loadTsv(TestFileUtils.getSampleData("wnprc_ehr/cageui/rackTypes.tsv"));
+        insertTsvData(connection, "cageUI", "rack_types", tsv, EHR_FOLDER_PATH)
+                .forEach(row -> responseMap.put(row.get("rowid").toString(),row));
+    }
+
+    // Adds required starting data to cage UI tables
+    public void cageUISetup() throws Exception {
+        importRackTypes();
+        importRacks();
+    }
+
+    /*
+        Tests the basic functionality, existence, saving, and loading for a basic cage UI editor layout.
+     */
+    @Test
+    public void testCageUIBasic() throws Exception {
+        cageUISetup();
+        beginAt(buildURL("cageui", getContainerPath(), "editLayout"));
+
+        // Ensure room size options exist and click the first option.
+        WebElement sizeSelector = getDriver().findElement(By.className("room-size-selector-content"));
+        Assert.assertTrue(sizeSelector.isDisplayed());
+        List<WebElement> sizes = sizeSelector.findElements(By.className("room-size-selector-option-card"));
+        Assert.assertFalse(sizes.isEmpty());
+        sizes.get(0).click();
+        WebElement sizeEnter = getDriver().findElement(By.xpath("//*[@id=\"app\"]/div/div[3]/div/div[2]/button"));
+        sizeEnter.click();
+
+        // Ensures the layout exists
+        WebElement layoutSvg = waitForElement(Locator.id("layout-svg"), 20000);
+        Assert.assertTrue(layoutSvg.isDisplayed());
+
+        // Puts a cage on the layout and ensures it exists
+        getDriver().findElement(By.id("cage_template_wrapper")).click();
+        WebElement cage = waitForElement(Locator.id("default-rack-1"), 10000);
+        assertTrue(cage.isDisplayed());
+
+        // Puts a door on the layout and ensures it exists
+        getDriver().findElement(By.id("door_template_wrapper")).click();
+        WebElement door = getDriver().findElement(By.id("door-1"));
+        assertTrue(door.isDisplayed());
+
+        // Click save and select room
+        getDriver().findElement(By.id("saveLayoutBtn")).click();
+        getDriver().findElement(By.xpath("//div[contains(@class, '-control')]")).click();
+        getDriver().findElement(By.id("react-select-2-option-0")).click();
+        // Click confirm button
+        WebElement btnDiv = getDriver().findElement(By.className("popup-buttons"));
+        List<WebElement> btns = btnDiv.findElements(By.tagName("button"));
+        btns.get(0).click();
+        // Click yes in confirmation window
+        btnDiv = getDriver().findElement(By.className("popup-buttons"));
+        btns = btnDiv.findElements(By.tagName("button"));
+        btns.get(0).click();
+
+        // Click close on success
+        btnDiv = waitForElement(Locator.byClass("popup-buttons"), 10000);
+        btns = btnDiv.findElements(By.tagName("button"));
+        btns.get(0).click();
+
+        // Wait for redirect and ensure page is loaded
+        layoutSvg = waitForElement(Locator.id("layout-svg"), 10000);
+        Assert.assertTrue(layoutSvg.isDisplayed());
+
+        // Ensure cage and door loaded in correctly
+        cage = waitForElement(Locator.id("default-rack-1"), 10000);
+        assertTrue(cage.isDisplayed());
+        door = getDriver().findElement(By.id("door-1"));
+        assertTrue(door.isDisplayed());
+    }
 }

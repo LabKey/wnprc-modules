@@ -53,6 +53,7 @@ public class NecropsyRequestForm extends SimpleRequestForm {
         buttons.addAll(super.getButtonConfigs());
 
         buttons.remove("REQUEST");
+        buttons.add("WNPRC_SAVE");
         buttons.add("WNPRC_REQUEST");
 
         return buttons;

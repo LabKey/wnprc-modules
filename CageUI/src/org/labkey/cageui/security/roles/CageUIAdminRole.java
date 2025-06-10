@@ -1,0 +1,54 @@
+/*
+ *
+ *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
+package org.labkey.cageui.security.roles;
+
+import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.security.roles.AbstractRole;
+import org.labkey.cageui.CageUIModule;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
+import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
+import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
+import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
+import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
+
+public class CageUIAdminRole extends AbstractRole
+{
+
+    public CageUIAdminRole(){
+        this("Cage UI Admin",
+                "Administrator role for Cage UI",
+                CageUITemplateCreatorPermission.class,
+                CageUILayoutEditorAccessPermission.class,
+                CageUIRoomModifierPermission.class,
+                CageUIRoomCreatorPermission.class,
+                CageUIAnimalEditorPermission.class,
+                CageUIAnimalReviewerPermission.class,
+                CageUIModificationEditorPermission.class,
+                CageUINotesEditorPermission.class
+        );
+    }
+
+    protected CageUIAdminRole(String name, String description, Class<? extends Permission>... perms) {
+        super(name, description, CageUIModule.class, perms);
+    }
+
+}

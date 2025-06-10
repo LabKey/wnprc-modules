@@ -117,7 +117,8 @@ WNPRC_EHR.DatasetButtons = new function(){
                             width: 200,
                             value: row.formtype,
                             ref: 'titleField'
-                        },{
+                        },
+                            {
                             xtype: 'combo',
                             fieldLabel: 'Assigned To',
                             width: 200,

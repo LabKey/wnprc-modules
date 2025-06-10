@@ -1,0 +1,1381 @@
+/*!
+ *
+ *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
+
+.room-header {
+  //background-color: lightgreen;
+}
+
+.legend-header-close {
+  //background-color: lightcoral;
+  flex: 0 1 auto; /* Takes only the space it needs */
+  padding: 20px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+
+}
+.room-legend-open {
+  flex: 0 1 auto; /* Takes only the space it needs */
+  padding: 20px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+
+}
+
+.room-toolbar {
+  background-color: lightpink;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.room-toolbar-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.room-display {
+  //background-color: lightblue;
+  //width: 100vw;
+  flex: 1; /* This will make the display take the remaining space */
+
+  //height: 100vh;
+}
+
+.room-container {
+  display: flex;
+  flex-direction: column; /* Arrange children in a column */
+  height: 100%;
+  width: 100%;
+  background-color: lightgrey;
+  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* Adds a shadow effect */
+  padding: 20px; /* Adds some padding inside the card */
+  box-sizing: border-box;
+}
+/* SVG Styling */
+
+.room-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  justify-content: center;
+  align-items: center;
+}
+
+.legend-svg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  margin-left: 5px;
+}
+
+.room-svg svg {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+}
+
+.room-sub-container {
+  display: flex;
+  flex: 1 1 auto; /* Take up remaining space */
+}
+
+.room-header, .room-display, .room-legend {
+  padding: 10px;
+}
+
+/* Media query for landscape orientation */
+@media screen and (orientation: portrait) {
+  .room-container {
+    flex-direction: column;
+  }
+
+  .room-sub-container {
+    flex-direction: column;
+  }
+
+  .room-legend, .room-display {
+    margin-right: 0;
+    margin-bottom: 5px;
+  }
+}
+
+
+.room-header-name {
+  display: inline-block;
+  margin-left: 20px;
+}
+.room-header-text {
+  display: inline-block;
+}
+
+
+
+.rack-container {
+  min-height: 100%;
+  max-width: 20%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.cage-container {
+  display: flex;
+  flex: 1 0;
+  max-width: fit-content;
+  box-sizing: border-box;
+}
+
+
+.room-svg rect {
+  fill: none;
+  pointer-events: visibleFill;
+}
+
+.room-svg tspan {
+  pointer-events: none;
+}
+
+/*
+.popup-content {
+  background-color: lightgrey;
+  margin: auto;
+  padding: 10px;
+  border: 1px solid #888;
+  width: 80%;
+  height: 90%;
+  overflow-y: auto;
+
+  border-radius: 25px;
+}
+
+.popup-close-button {
+  float: right;
+  font-size: 48px;
+  font-weight: bold;
+  padding: 5px;
+  border: none;
+  background: none;
+}
+
+.popup-close-button:hover,
+.popup-close-button:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  height: auto;
+  margin-inline: 10px
+}
+
+.popup-header h1 {
+  margin: 0;
+}
+.popup-header button {
+  margin: 0;
+}
+
+
+.popup-subheader {
+  padding-left: 10px;
+}
+.popup-subheader h4{
+  margin-top: 0;
+}
+
+.popup-sub-content {
+  margin: 10px
+}
+*/
+.divider {
+  width: calc(100% - 20px); /* Adjust width as needed */
+  height: 4px; /* Adjust height as needed */
+  background-color: darkgrey; /* Adjust color as needed */
+  border-radius: 5px; /* Adjust border radius for rounded corners */
+}
+
+.mini-divider {
+  width: calc(100% - 20px); /* Adjust width as needed */
+  height: 4px; /* Adjust height as needed */
+  background-color: darkgrey; /* Adjust color as needed */
+  margin: 10px; /* Adjust margin as needed */
+  border-radius: 5px; /* Adjust border radius for rounded corners */
+}
+
+.details-modifications {
+}
+
+.details-mod-header {
+  display: flex;
+  align-content: center;
+  align-items: baseline;
+}
+
+
+.details-add-mod {
+  float: right;
+  font-size: x-large;
+  padding: 5px;
+  border: none;
+  background: none;
+  margin-left: 20px;
+}
+
+.details-add-mod:hover,
+.details-add-mod:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.details-modifications ul {
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.details-modifications li {
+  font-size: large;
+}
+
+.details-table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: auto;
+}
+
+.details-table thead{
+  font-size: large;
+}
+
+.details-table td, th {
+  text-align: left;
+  padding: 8px;
+}
+
+.details-table tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+// Confirmation pop up
+.popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  padding-top: 100px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.popup {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  z-index: 10001;
+}
+
+.popup-row {
+margin-bottom: 10px;
+}
+
+.popup-row input {
+  width: 100%; /* Make the input field take full width */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Ensures padding is included in the width */
+}
+
+.popup-row label {
+  display: block;  /* Make the label block-level so it appears above the input */
+  margin-bottom: 5px; /* Space between label and input */
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.popup-buttons button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popup-buttons button:hover {
+  background: #ddd;
+}
+
+.legend-header-open {
+  margin-bottom: 20px;
+}
+
+.legend-header-btn {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+}
+
+/* CSS */
+.button-84 {
+  align-items: center;
+  background-color: initial;
+  background-image: linear-gradient(#464d55, #25292e);
+  border-radius: 8px;
+  border-width: 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, .1),0 3px 6px rgba(0, 0, 0, .05);
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  font-family: expo-brand-demi,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 18px;
+  height: 52px;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  overflow: hidden;
+  padding: 0 32px;
+  text-align: center;
+  text-decoration: none;
+  transform: translate3d(0, 0, 0);
+  transition: all 150ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-84:hover {
+  box-shadow: rgba(0, 1, 0, .2) 0 2px 8px;
+  opacity: .85;
+}
+
+.button-84:active {
+  outline: 0;
+}
+
+.button-84:focus {
+  box-shadow: rgba(0, 0, 0, .5) 0 0 0 3px;
+}
+
+@media (max-width: 420px) {
+  .button-84 {
+    height: 48px;
+  }
+}
+
+// Checkbox button css
+ .checkbox-wrapper-10 .tgl {
+   display: none;
+ }
+
+.checkbox-wrapper-10:not(:last-child) {
+  margin-right: 10px; /* Adjust the spacing as needed */
+}
+
+.checkbox-wrapper-10 .tgl,
+.checkbox-wrapper-10 .tgl:after,
+.checkbox-wrapper-10 .tgl:before,
+.checkbox-wrapper-10 .tgl *,
+.checkbox-wrapper-10 .tgl *:after,
+.checkbox-wrapper-10 .tgl *:before,
+.checkbox-wrapper-10 .tgl + .tgl-btn {
+  box-sizing: border-box;
+}
+.checkbox-wrapper-10 .tgl::-moz-selection,
+.checkbox-wrapper-10 .tgl:after::-moz-selection,
+.checkbox-wrapper-10 .tgl:before::-moz-selection,
+.checkbox-wrapper-10 .tgl *::-moz-selection,
+.checkbox-wrapper-10 .tgl *:after::-moz-selection,
+.checkbox-wrapper-10 .tgl *:before::-moz-selection,
+.checkbox-wrapper-10 .tgl + .tgl-btn::-moz-selection,
+.checkbox-wrapper-10 .tgl::selection,
+.checkbox-wrapper-10 .tgl:after::selection,
+.checkbox-wrapper-10 .tgl:before::selection,
+.checkbox-wrapper-10 .tgl *::selection,
+.checkbox-wrapper-10 .tgl *:after::selection,
+.checkbox-wrapper-10 .tgl *:before::selection,
+.checkbox-wrapper-10 .tgl + .tgl-btn::selection {
+  background: none;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn {
+  outline: 0;
+  display: block;
+  width: 12em;
+  height: 2em;
+  position: relative;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn:after,
+.checkbox-wrapper-10 .tgl + .tgl-btn:before {
+  position: relative;
+  display: block;
+  content: "";
+  width: 50%;
+  height: 100%;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn:after {
+  left: 0;
+}
+.checkbox-wrapper-10 .tgl + .tgl-btn:before {
+  display: none;
+}
+.checkbox-wrapper-10 .tgl:checked + .tgl-btn:after {
+  left: 50%;
+}
+
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn {
+  padding: 2px;
+  transition: all 0.2s ease;
+  font-family: sans-serif;
+  perspective: 100px;
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:after,
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:before {
+  display: inline-block;
+  transition: all 0.4s ease;
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  line-height: 2em;
+  font-weight: bold;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 4px;
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:after {
+  content: attr(data-tg-on);
+  background: #02C66F;
+  transform: rotateY(-180deg);
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:before {
+  background: #FF3A19;
+  content: attr(data-tg-off);
+}
+.checkbox-wrapper-10 .tgl-flip + .tgl-btn:active:before {
+  transform: rotateY(-20deg);
+}
+.checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:before {
+  transform: rotateY(180deg);
+}
+.checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:after {
+  transform: rotateY(0);
+  left: 0;
+  background: #7FC6A6;
+}
+.checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:active:after {
+  transform: rotateY(20deg);
+}
+
+// End Checkbox button css
+
+.cage-templates {
+  display: flex;
+  justify-content: space-around; /* Ensure equal spacing around the templates */
+  gap: 10px; /* Add space between each template */
+}
+
+.cage-template {
+  display: flex;
+  flex-direction: column; /* Arrange items in a column */
+  align-items: center; /* Center items horizontally */
+  padding: 10px; /* Add padding around each template */
+}
+
+.cage-template h2 {
+  margin: 0 0 10px 0; /* Add space below the name */
+  text-align: center; /* Center the name */
+}
+
+.layout-tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.layout-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: black;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-size: 14px;
+}
+
+.layout-editor-toolbar {
+  flex: 1;
+}
+
+.layout-editor {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "room-utils room-utils"
+    "layout-grid layout-toolbar";
+  gap: 10px; /* Adjust the gap between elements as needed */
+  width: 100%;
+  padding: 10px;
+  flex-grow: 1;
+}
+
+#utils {
+  grid-area: room-utils;
+}
+
+#layout-grid {
+  grid-area: layout-grid;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: auto;
+  background-color: white;
+}
+
+#layout-toolbar {
+  grid-area: layout-toolbar;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#layout-grid svg {
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
+  display: block;
+}
+
+
+   /* CSS */
+.layout-toolbar-btn {
+  background-color: dimgray;
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  height: 40px;
+  line-height: 20px;
+  list-style: none;
+  margin-top: 10px;
+  outline: none;
+  padding: 10px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: color 100ms;
+  vertical-align: baseline;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.layout-toolbar-btn:hover,
+.layout-toolbar-btn:focus {
+  background-color: gray;
+}
+
+/*
+<div class="checkbox-wrapper-8">
+<input class="tgl tgl-skewed" id="cb3-8" type="checkbox"/>
+<label class="tgl-btn" data-tg-off="OFF" data-tg-on="ON" for="cb3-8"></label>
+</div>*/
+
+ .checkbox-wrapper-8 .tgl {
+   display: none;
+ }
+.checkbox-wrapper-8 .tgl,
+.checkbox-wrapper-8 .tgl:after,
+.checkbox-wrapper-8 .tgl:before,
+.checkbox-wrapper-8 .tgl *,
+.checkbox-wrapper-8 .tgl *:after,
+.checkbox-wrapper-8 .tgl *:before,
+.checkbox-wrapper-8 .tgl + .tgl-btn {
+  box-sizing: border-box;
+}
+.checkbox-wrapper-8 .tgl::-moz-selection,
+.checkbox-wrapper-8 .tgl:after::-moz-selection,
+.checkbox-wrapper-8 .tgl:before::-moz-selection,
+.checkbox-wrapper-8 .tgl *::-moz-selection,
+.checkbox-wrapper-8 .tgl *:after::-moz-selection,
+.checkbox-wrapper-8 .tgl *:before::-moz-selection,
+.checkbox-wrapper-8 .tgl + .tgl-btn::-moz-selection,
+.checkbox-wrapper-8 .tgl::selection,
+.checkbox-wrapper-8 .tgl:after::selection,
+.checkbox-wrapper-8 .tgl:before::selection,
+.checkbox-wrapper-8 .tgl *::selection,
+.checkbox-wrapper-8 .tgl *:after::selection,
+.checkbox-wrapper-8 .tgl *:before::selection,
+.checkbox-wrapper-8 .tgl + .tgl-btn::selection {
+  background: none;
+}
+.checkbox-wrapper-8 .tgl + .tgl-btn {
+  outline: 0;
+  display: block;
+  height: 2em;
+  position: relative;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.checkbox-wrapper-8 .tgl + .tgl-btn:after,
+.checkbox-wrapper-8 .tgl + .tgl-btn:before {
+  position: relative;
+  display: block;
+  content: "";
+  width: 50%;
+  height: 100%;
+}
+.checkbox-wrapper-8 .tgl + .tgl-btn:after {
+  left: 0;
+}
+.checkbox-wrapper-8 .tgl + .tgl-btn:before {
+  display: none;
+}
+.checkbox-wrapper-8 .tgl:checked + .tgl-btn:after {
+  left: 50%;
+}
+
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn {
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: all 0.2s ease;
+  font-family: sans-serif;
+  background: indianred;
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
+  display: inline-block;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  line-height: 2em;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {
+  left: 100%;
+  content: attr(data-tg-on);
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
+  left: 0;
+  content: attr(data-tg-off);
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active {
+  background: #888;
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active:before {
+  left: -10%;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn {
+  background: #86d993;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:before {
+  left: -100%;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:after {
+  left: 0;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:active:after {
+  left: 10%;
+}
+
+
+.home-container {
+  display: flex;
+  height: 100vh; /* Full viewport height */
+  width: 100%; /* Full viewport width */
+}
+// Editor Context menu
+
+
+/* Custom context menu styling */
+.context-menu {
+  position: absolute;
+  display: none;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 500;
+  width: 200px; /* Set default width */
+  height: 150px; /* Set default height */
+  overflow: visible; /* Hide overflow during resizing */
+  resize: none; /* Disable the native resize */
+}
+
+/* Menu item styling */
+.menu-item {
+  margin-bottom: 8px;
+}
+
+.menu-item label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.menu-item-group {
+  display: flex;               /* Aligns buttons in a row */
+  justify-content: center;      /* Centers the buttons horizontally */
+  gap: 5px;                    /* Space between buttons */
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-item input,
+.menu-item select {
+  width: 100%;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Default styles */
+.select-menu .select__option--is-selected {
+  background-color: white;
+  color: black;
+}
+
+/* Highlight selected option */
+.select-menu  .select__option:hover {
+  background-color: lightgray;
+  opacity: 0.8;
+}
+
+
+.context-menu-input {
+  overflow-y: visible;
+}
+// End Editor Context menu styles
+
+// Room Size Selector styles
+
+/* General popup styling */
+.room-size-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.room-size-selector-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.room-size-selector-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.room-size-selector-option-card {
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.room-size-selector-option-card:hover {
+  border-color: #007bff;
+}
+
+.room-size-selector-option-card.selected {
+  border-color: #007bff;
+  background-color: #e9f7fe;
+}
+
+.room-size-selector-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.room-size-selector-close-btn, .room-size-selector-select-btn {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.room-size-selector-close-btn {
+  background-color: #ccc;
+}
+
+.room-size-selector-select-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.room-size-selector-select-btn:disabled {
+  background-color: #007bff80;
+  cursor: not-allowed;
+}
+
+// Home Room Styles
+
+// START CSS FOR HOME
+
+.page-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid lightgray;
+  width: 90%; /* Adjust width as needed */
+}
+.page-content {
+  flex-grow: 1;
+}
+
+.page-map {
+  height: 3vh; /* Adjust height as needed */
+  border-bottom: 1px solid lightgray;
+  border-top: 1px solid lightgray;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.page-map-url {
+  text-align: center;
+  padding: 2px;
+  font-size: large;
+  display: flex;
+  flex-direction: row;
+}
+
+.page-map-link {
+  padding-right: 10px;
+  padding-left: 10px;
+  color: #007bff;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+// END CSS FOR HOME
+
+
+// START CSS FOR ROOM LIST
+.room-list {
+  display: flex;
+  flex-direction: column;
+ // border-right: 1px solid black;
+}
+
+.room-title, .room-list-title {
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 5px 0;
+}
+
+.room-list-items {
+  padding: 5px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.arrow {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid black;
+  border-right: 2px solid black;
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+}
+
+.room-dir {
+  width: 10%; /* Adjust width as needed */
+  border: 1px solid black;
+}
+
+.room-dir-header {
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: large;
+}
+
+.room-dir-room-obj {
+  margin: 10px 10px 10px 5px;
+}
+
+.room-dir-rack-obj {
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.room-dir-cage-obj {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.room-dir-header.open .arrow {
+  transform: rotate(135deg);
+}
+
+
+.room-dir-rack-obj.open .arrow {
+  transform: rotate(135deg);
+}
+
+.room-search {
+  width: 100%;
+  border: 3px solid #9DBFAF;
+  padding: 5px;
+  height: 3vh;
+  border-radius: 5px 0 0 5px;
+  outline: none;
+}
+
+.room-search:focus{
+  border-color: #00B4CC;
+}
+// END CSS FOR ROOM LIST
+
+.view-content {
+  display: block;
+  padding: 5px;
+  height: 100%;
+  width: 100%;
+}
+
+.room-view-container {
+  position: relative;
+  margin: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+.room-view-title {
+  font-size: xx-large;
+  padding: 5px;
+}
+
+.room-view-title label {
+  margin-left: 10px;
+}
+
+.room-view-checkbox {
+  appearance: none; /* Hide default checkbox */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  border: none;
+  outline: none;
+  pointer-events: none;
+}
+
+/* Green checkmark when checked */
+.room-view-checkbox:checked::before {
+  content: "✔"; /* Checkmark symbol */
+  color: green;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Red X when unchecked */
+.room-view-checkbox:not(:checked)::before {
+  content: "✖";
+  color: red;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+
+
+.page-tab-container {
+  font-family: Arial, sans-serif;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.tab-content {
+  flex: 1;
+  width: fit-content;
+  height: fit-content;
+}
+.tab-buttons {
+  display: flex;
+  gap: 20px; /* Space between buttons */
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd; /* Light gray line under all buttons */
+
+}
+
+.tab-buttons button {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent; /* No background */
+  cursor: pointer;
+  font-size: large;
+  color: #333; /* Default text color */
+  position: relative; /* For the underline */
+  transition: color 0.3s;
+}
+
+/* Underline for each button */
+.tab-buttons button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px; /* Position the line below the button */
+  width: 100%;
+  height: 2px; /* Thickness of the line */
+  background-color: transparent; /* Default line color */
+  transition: background-color 0.3s;
+}
+
+/* Blue underline for the active button */
+.tab-buttons button.active::after {
+  background-color: #007bff; /* Blue color for active tab */
+}
+
+/* Hover effect for buttons */
+.tab-buttons button:hover {
+  color: #007bff; /* Blue text on hover */
+}
+
+/* Hover effect for the underline */
+.tab-buttons button:hover::after {
+  background-color: #007bff; /* Blue underline on hover */
+}
+
+
+.mod-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.mod-container-columns {
+  display: flex;
+  gap: 20px; /* space between columns */
+  margin-bottom: 20px; /* space between columns and full row */
+}
+
+.mod-container-column {
+  flex: 1;
+  padding: 20px;
+  background: #f0f0f0;
+  box-sizing: border-box;
+}
+
+.mod-container-row {
+  width: 100%;
+  padding: 20px;
+  background: #e0e0e0; /* for visualization */
+  box-sizing: border-box;
+}
+
+// Mod table css
+.mod-table-container {
+  max-width: 3000px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: visible;
+}
+
+.mod-table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%; /* Full width */
+  display: table; /* Use table layout */
+  table-layout: auto; /* Allow columns to expand based on content */
+}
+
+/* Style for each row */
+.mod-table-row {
+  display: table-row; /* Use table-row layout */
+  width: 100%;
+  border-bottom: 1px solid #ccc; /* Optional: Add a border between rows */
+}
+
+/* Style for header row */
+.mod-table-header {
+  font-weight: bold;
+  background-color: #f0f0f0; /* Optional: Add a background color for the header */
+}
+
+/* Style for each column */
+.mod-table-column {
+  display: table-cell; /* Use table-cell layout */
+  padding: 10px; /* Adjust padding as needed */
+  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 100px; /* Set a minimum width for columns */
+  text-align: center; /* Center text horizontally */
+}
+
+.small-svg {
+  margin-inside: 10px;
+}
+
+.small-svg svg {
+  overflow: scroll;
+}
+.small-svg g {
+  overflow: scroll;
+}
+
+.cage-layout {
+  display: flex;
+  flex-direction: row;
+}
+
+.cage-layout svg {
+  display: block;
+  margin: auto;
+}
+
+.cage-mod-table {
+  margin-left: 25px;
+  display: table;
+  border-collapse: collapse;
+}
+
+.cage-mod-table-column {
+  display: table-cell;
+  align-items: center;
+  gap: 8px; /* Adjust spacing between column header and cells */
+  width: max-content;
+  min-width: 50px;
+  border: 2px solid lightgray;
+  //border-right: 1px solid black;
+  //border-left: 1px solid black;
+}
+
+.cage-mod-table-cell {
+  padding: 8px;
+  border-radius: 4px;
+  width: 100%;
+  text-align: center;
+  background-color: white;
+}
+
+.cage-mod-table-label {
+  font-size: large;
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  border-bottom: 2px solid lightgray;
+  //border: 1px solid black;
+}
+
+.cage-mod-table-add-mod {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  font-size: x-large;
+  cursor: pointer;
+}
+
+.cage-mod-table-add-mod:hover {
+  background-color: lightblue;
+}
+
+.modification-editor-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  width: auto;
+  min-width: 300px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modification-editor-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.modification-editor-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modification-editor-popup-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modification-editor-popup-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
+.modification-editor-popup-close:hover {
+  color: #333;
+}
+
+.modification-editor-popup-content {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+
+}
+
+.modification-editor-popup-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.modification-editor-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modification-editor-popup-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.modification-editor-popup-save {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.modification-editor-popup-save:hover {
+  background-color: #45a049;
+}
+
+.modification-editor-popup-cancel {
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.modification-editor-popup-cancel:hover {
+  background-color: #e7e7e7;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

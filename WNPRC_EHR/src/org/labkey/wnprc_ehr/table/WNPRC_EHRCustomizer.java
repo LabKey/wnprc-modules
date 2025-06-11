@@ -51,6 +51,7 @@ import org.labkey.api.util.GUID;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.LinkBuilder;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.writer.HtmlWriter;
@@ -183,7 +184,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 }
             });
 
-            BaseColumnInfo updateTitleCol = (BaseColumnInfo) ti.getColumn("updateTitle");
+            BaseColumnInfo updateTitleCol = (BaseColumnInfo) ti.getColumn("title");
             if (updateTitleCol != null && us != null)
             {
                 updateTitleCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
@@ -194,6 +195,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         String updateTitle = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "updateTitle"));
                         String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
                         String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+                        String qcState = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "QCState$Label"));
 
                         if (isExt4Form("form", formType))
                         {
@@ -209,7 +211,33 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         }
                         else
                         {
-                            super.renderGridCellContents(ctx, out);
+                            if ("Necropsy".equalsIgnoreCase(formType) && qcState.contains("Request"))
+                            {
+                                ActionURL url = new ActionURL("ehr", "dataEntryForm.view", us.getContainer());
+                                formType = "NecropsyRequest";
+                                url.addParameter("formType", formType);
+                                SimplerFilter filter = new SimplerFilter("taskid", CompareType.EQUAL, taskId);
+                                TableInfo necropsyTable = getRealTableForDataset(ti, "necropsy");
+
+                                TableSelector ts = new TableSelector(necropsyTable, filter, null);
+                                String requestid;
+                                if (ts.getMap() != null && ts.getMap().get("requestid") != null)
+                                {
+                                    requestid = (String) ts.getMap().get("requestid");
+                                    url.addParameter("requestid",requestid);
+                                }
+
+                                StringBuilder urlString = new StringBuilder();
+                                urlString.append("<a href=\"" + PageFlowUtil.filter(url) + "\">");
+                                urlString.append(PageFlowUtil.filter(updateTitle));
+                                urlString.append("</a>");
+                                out.write(urlString.toString());
+
+                            } else
+                            {
+                                super.renderGridCellContents(ctx, out);
+                            }
+
                         }
                     }
                 });

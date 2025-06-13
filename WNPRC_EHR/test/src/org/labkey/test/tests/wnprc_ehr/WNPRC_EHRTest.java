@@ -4701,7 +4701,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> responseMap = new HashMap<>();
 
         List<Map<String, Object>> tsv = loadTsv(TestFileUtils.getSampleData("wnprc_ehr/cageui/racks.tsv"));
-        insertTsvData(connection, "cageUI", "racks", tsv, EHR_FOLDER_PATH)
+        insertTsvData(connection, "cageui", "racks", tsv, EHR_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("rowid").toString(),row));
     }
     // Imports rack types data for cage ui testing
@@ -4711,7 +4711,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> responseMap = new HashMap<>();
 
         List<Map<String, Object>> tsv = loadTsv(TestFileUtils.getSampleData("wnprc_ehr/cageui/rackTypes.tsv"));
-        insertTsvData(connection, "cageUI", "rack_types", tsv, EHR_FOLDER_PATH)
+        insertTsvData(connection, "cageui", "rack_types", tsv, EHR_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("rowid").toString(),row));
     }
 

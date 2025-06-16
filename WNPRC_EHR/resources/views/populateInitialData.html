@@ -269,6 +269,20 @@
             queryName: 'husbandry_assigned',
             module: 'wnprc_ehr',
             pk: 'rowid'
+        },{
+            label: 'Room Item Type Field Values',
+            populateFn: 'populateFromFile',
+            schemaName: 'ehr_lookups',
+            queryName: 'cageui_item_types',
+            module: 'wnprc_ehr',
+            pk: 'value'
+        },{
+            label: 'Rack Manufacturer Field Values',
+            populateFn: 'populateFromFile',
+            schemaName: 'ehr_lookups',
+            queryName: 'cageui_rack_manufacturers',
+            module: 'wnprc_ehr',
+            pk: 'value'
         }];
 
         tables.sort(function(a, b) {

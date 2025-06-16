@@ -1117,12 +1117,14 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         setNextAvailGroup('rack-group-1');
     }
 
-    const saveRoom = async (): Promise<LayoutSaveResult> => {
+    const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
         const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
+
         // if template parse room name, 1 is the new name, 0 is the old name
+
         const roomName = localRoom.name;
-        const oldRoomName: string = ActionURL.getParameter('room');
+        const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
         const savingTemplate: boolean = roomName.toLowerCase().includes("template");
         const newEndDate = new Date();
         const newStartDate = new Date();

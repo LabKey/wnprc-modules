@@ -44,7 +44,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 
 public class ViralLoadRSEHRRunner implements Job {
-    private static Logger _log = LogManager.getLogger(ViralLoadRSEHRRunner.class);
+    private static final Logger _log = LogManager.getLogger(ViralLoadRSEHRRunner.class);
 
     public static String GROUP_ID = "wnprc_virology";
     public static String JOB_ID = "vl_rsehr_job";
@@ -95,27 +95,10 @@ public class ViralLoadRSEHRRunner implements Job {
                 _log.warn("Viral Load RSEHR Job did not complete successfully");
             }
         }
-        catch (QueryUpdateServiceException e)
+        catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | InvalidKeyException | SQLException e)
         {
-            e.printStackTrace();
+            _log.error("Viral Load RSEHR Job did not complete successfully", e);
         }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        catch (BatchValidationException e)
-        {
-            e.printStackTrace();
-        }
-        catch (DuplicateKeyException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InvalidKeyException e)
-        {
-            e.printStackTrace();
-        }
-
 
     }
 
@@ -148,16 +131,15 @@ public class ViralLoadRSEHRRunner implements Job {
             SimpleQueryUpdater qu = new SimpleQueryUpdater(user, viralLoadContainer, "wnprc_virology", "folder_paths_with_readers");
             SimpleQueryFactory sf = new SimpleQueryFactory(user,viralLoadContainer);
             JSONArray rowsToDelete = sf.selectRows("wnprc_virology", "folder_paths_with_readers");
-            if (rowsToDelete.length() > 0)
+            if (!rowsToDelete.isEmpty())
                 qu.delete(JsonUtil.toMapList(rowsToDelete));
-            if (rowsToInsert.size() > 0)
+            if (!rowsToInsert.isEmpty())
                 qu.insert(rowsToInsert);
 
         }
         catch (Exception e)
         {
-            _log.error("Viral Load RSEHR Job ERROR");
-            e.printStackTrace();
+            _log.error("Viral Load RSEHR Job ERROR", e);
             return false;
         }
         return true;

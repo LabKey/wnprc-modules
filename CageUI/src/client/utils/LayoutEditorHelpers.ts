@@ -150,8 +150,8 @@ export const updateGrid = (transform, width, height, gridSize) => {
     const yMax = Math.ceil((height - transform.y) / transform.k / gridSize) * gridSize;
 
     // Draw the grid within the current visible area
-    for (let x = xMin; x <= xMax; x += gridSize) {
-        for (let y = yMin; y <= yMax; y += gridSize) {
+    for (let x = xMin; x < xMax; x += gridSize) {
+        for (let y = yMin; y < yMax; y += gridSize) {
             g.append("rect")
                 .attr("x", x)
                 .attr("y", y)
@@ -734,8 +734,9 @@ export function createDragInLayout() {
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
             const scale = transform.k;
+            const [newX, newY] = d3.pointer(event.sourceEvent, this.parentNode);
 
-            element.attr('transform', `translate(${event.x},${event.y}) scale(${scale})`);
+            element.attr('transform', `translate(${newX},${newY}) scale(${scale})`);
         }
     )
 }

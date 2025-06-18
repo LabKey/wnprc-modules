@@ -1113,6 +1113,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 objects: []
             }
         });
+        setUnitLocs(createEmptyUnitLoc());
+        setNextAvailGroup('rack-group-1');
     }
 
     const saveRoom = async (): Promise<LayoutSaveResult> => {

@@ -273,7 +273,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // Drag end for dragging from the utilities to the layout
     const dragEnded = useCallback(async (event) => {
-        const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging');
+        // clear transform attribute to prevent it from applying the transform while in groups. This was a change from Chrome 136 -> 137
+        const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging').attr('transform', '');
         if(draggedShape.empty()) {
             dragLockRef.current = false;
             return;

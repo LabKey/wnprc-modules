@@ -578,6 +578,17 @@ margin-bottom: 10px;
 
 #utils {
   grid-area: room-utils;
+  display: grid;
+  grid-template-areas: "room-objects cage-templates .";
+}
+
+.util-svg-template-wrapper {
+  overflow: visible;
+}
+
+
+.layout-tooltip-container > * {
+  padding: 10px;
 }
 
 #layout-grid {

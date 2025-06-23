@@ -107,6 +107,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showRoomSelectorTemplateLoad, setShowRoomSelectorTemplateLoad] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
+    const [templateRename, setTemplateRename] = useState<string>(null);
 
     // number of cells in grid width/height, based off scale
     const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
@@ -762,7 +763,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }
 
     const handleSave = async () => {
-        const result = await saveRoom();
+
+        const result = await saveRoom(templateRename);
         setShowSaveResult(result);
     }
 
@@ -937,6 +939,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <RoomSelectorPopup
                     setRoom={setLocalRoom}
                     template={templateOptions}
+                    templateRename={setTemplateRename}
                     onConfirm={() => {setShowRoomSelector(false);setShowSaveConfirm(true);}}
                     onCancel={() => {setTemplateOptions(false);setShowRoomSelector(false);}}
                 />

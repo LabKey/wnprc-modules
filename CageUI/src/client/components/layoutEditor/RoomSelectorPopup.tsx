@@ -32,11 +32,12 @@ interface RoomSelectorPopup {
     setRoom: React.Dispatch<React.SetStateAction<Room>>;
     template: boolean;
     templateLoad?: boolean;
+    templateRename?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // For saving and loading in the layout editor, this is a room selector component
 export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
-    const { onConfirm, onCancel, setRoom, template,templateLoad } = props;
+    const { onConfirm, onCancel, setRoom, template,templateLoad, templateRename } = props;
     const [selectedRoom, setSelectedRoom] = useState<string>(null);
     const [options, setOptions] = useState<Option<number>[]>(null);
     const [templateName, setTemplateName] = useState<string>('');
@@ -76,11 +77,12 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
                 onCancel();
                 return;
             }
-            // if template, save old name and new name together to parse later in submission
+            // if template, save old template name for later
             setRoom(prevState => ({
                 ...prevState,
                 name: templateName
             }));
+            templateRename(selectedRoom);
         }else{
             setRoom(prevState => ({
                 ...prevState,

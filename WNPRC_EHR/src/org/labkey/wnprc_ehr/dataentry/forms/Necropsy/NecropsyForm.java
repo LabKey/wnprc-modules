@@ -54,6 +54,7 @@ public class NecropsyForm extends SimpleTaskForm {
         List<String> buttons = super.getMoreActionButtonConfigs();
 
         buttons.add("FINALIZE_DEATH");
+        buttons.add("SEND_BACK_TO_REQUESTOR");
         buttons.add("UPDATE_DEATH");
 
         return buttons;

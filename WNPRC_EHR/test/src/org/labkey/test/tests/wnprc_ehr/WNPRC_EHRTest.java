@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.data.Container;
 import org.labkey.remoteapi.Command;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.CommandResponse;
@@ -39,6 +40,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestFileUtils;
+import org.labkey.test.WebDriverWrapper;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
@@ -4045,24 +4047,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // Setup
         log("Starting notification revamp test: Blood Draw Review (Daily)");
         ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
-        // Creates tomorrow's date.
-        Calendar todayCalendar = Calendar.getInstance();
-        todayCalendar.add(Calendar.DATE, 1);
-        Date dateTomorrow = todayCalendar.getTime();
 
         // Navigates to home to get a fresh start.
         myReusableFunctions.goHome();
-
-        // Creates test data.
-        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId1", false, new Date(), true, Double.valueOf(2.0), false); // Testing for blood scheduled for today with a dead animal.
-        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId2", true, dateTomorrow, false, Double.valueOf(2.0), false); // Testing for blood scheduled for tomorrow with an animal not assigned to a project.
 
         // Runs test email in the browser.
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawReviewDailyNotification").withText("Run Report In Browser"));
 
-        // Validates necessary info.
         // Verifies the notification shows that there is a draw scheduled for a dead animal.
         assertTextPresent("bloodDrawReviewDailyId1");
         // Verifies the notification shows that there is a draw scheduled for an animal who is unassigned to a project.
@@ -4105,9 +4098,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // Navigates to home to get a fresh start.
         myReusableFunctions.goHome();
 
-        // Creates test data.
-        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "testID", true, new Date(), true, Double.valueOf(-1), true);
-
         // Runs test email in the browser.
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
@@ -4130,45 +4120,362 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // Navigates to home to get a fresh start.
         myReusableFunctions.goHome();
 
-        // Creates test data.
-        myReusableFunctions.insertValueIntoNecropsyDataset("necropsyTestId1", new Date());
-
         // Runs test email in the browser.
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
         waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
 
         // Validates necessary info.
-        assertTextPresent("necropsyTestId1 has been marked as dead.");
+        assertTextPresent("pdNecropsyTestId1 has been marked as dead.");
+        assertTextPresent("Dam");
 
         // Finishes test.
         log("Completed notification revamp test: Death Notification Revamp");
     }
 
     @Test
-    public void notificationRevampTestPrenatalDeathNotificationRevamp() throws UnhandledAlertException, IOException, CommandException {
+    public void notificationRevampTestAdminAlerts() throws UnhandledAlertException, IOException, CommandException {
         // Setup
-        log("Starting notification revamp test: Prenatal Death Notification Revamp");
+        log("Starting notification revamp test: Admin Alerts Notification Revamp");
         ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
 
         // Navigates to home to get a fresh start.
         myReusableFunctions.goHome();
 
-        // Creates test data.
-        myReusableFunctions.insertValueIntoNecropsyDataset("pdNecropsyTestId2", new Date());
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.AdminAlertsNotificationRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("Site Logins In The Past 7 Days:");
+
+        // Finishes test.
+        log("Completed notification revamp test: Admin Alerts Notification Revamp");
+    }
+
+    @Test
+    public void notificationRevampTestAnimalRequest() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Animal Request Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
 
         // Runs test email in the browser.
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
         EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
-        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.DeathNotificationRevamp").withText("Run Report In Browser"));
-
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.AnimalRequestNotificationRevamp").withText("Run Report In Browser"));
         // Validates necessary info.
-        assertTextPresent("pdNecropsyTestId2 has been marked as dead.");
-        assertTextPresent("Dam");
+        assertTextPresent("There was a new animal request submitted on: ");
 
         // Finishes test.
-        log("Completed notification revamp test: Prenatal Death Notification Revamp");
+        log("Completed notification revamp test: Animal Request Notification Revamp");
     }
+
+    @Test
+    public void notificationRevampTestBloodDrawsTodayAll() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draws Today (All)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayAll").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains all scheduled blood draws for today (for all groups).");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draws Today (All)");
+    }
+
+    @Test
+    public void notificationRevampTestBloodDrawsTodayAnimalCare() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draws Today (Animal Care)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayAnimalCare").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains all scheduled blood draws for today (for Animal Care only).");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draws Today (Animal Care)");
+    }
+
+    @Test
+    public void notificationRevampTestBloodDrawsTodayVetStaff() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Blood Draws Today (Vet Staff)");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.BloodDrawsTodayVetStaff").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains all scheduled blood draws for today (for Vet Staff only).");
+
+        // Finishes test.
+        log("Completed notification revamp test: Blood Draws Today (Vet Staff)");
+    }
+
+    // TODO: Make sure to add dataset 'animalsExcludedFromColonyNotificationDeaths', then unmute this test.
+//    @Test
+//    public void notificationRevampTestColonyAlerts() throws UnhandledAlertException, IOException, CommandException {
+//        // Setup
+//        log("Starting notification revamp test: Colony Alerts Notification Revamp");
+//        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+//
+//        // Navigates to home to get a fresh start.
+//        myReusableFunctions.goHome();
+//
+//        // Runs test email in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.ColonyAlertsNotificationRevamp").withText("Run Report In Browser"));
+//        // Validates necessary info.
+//        assertTextPresent("This email contains a series of automatic alerts about the colony.");
+//
+//        // Finishes test.
+//        log("Completed notification revamp test: Colony Alerts Notification Revamp");
+//    }
+
+    @Test
+    public void notificationRevampTestColonyAlertsLite() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Colony Alerts Lite Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.ColonyAlertsLiteNotificationRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains a series of automatic alerts about the WNPRC colony.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Colony Alerts Lite Notification Revamp");
+    }
+
+    @Test
+    public void notificationRevampTestColonyManagement() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Colony Management Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.ColonyManagementNotificationRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains a series of automatic alerts about the WNPRC colony.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Colony Management Notification Revamp");
+    }
+
+    // TODO: Make sure to add dataset 'inRoomNotSubmitted', then unmute this test.
+//    @Test
+//    public void notificationRevampTestTreatmentAlerts() throws UnhandledAlertException, IOException, CommandException {
+//        // Setup
+//        log("Starting notification revamp test: Treatment Alerts Notification Revamp");
+//        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+//
+//        // Navigates to home to get a fresh start.
+//        myReusableFunctions.goHome();
+//
+//        // Runs test email in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.TreatmentAlertsNotificationRevamp").withText("Run Report In Browser"));
+//        // Validates necessary info.
+//        assertTextPresent("This email contains any scheduled treatments not marked as completed.");
+//
+//        // Finishes test.
+//        log("Completed notification revamp test: Treatment Alerts Notification Revamp");
+//    }
+
+    @Test
+    public void notificationRevampTestClinpathAbnormalResultsAlerts() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Clinpath Abnormal Results Alerts Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.ClinpathAbnormalResultsAlertsRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("clinpath tasks completed since");
+
+        // Finishes test.
+        log("Completed notification revamp test: Clinpath Abnormal Results Alerts Revamp");
+    }
+
+    @Test
+    public void notificationRevampTestClinpathAlerts() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Clinpath Alerts Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.ClinpathAlertsRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains reports on Clinpath Requests.");
+
+        // Finishes test.
+        log("Completed notification revamp test: Clinpath Alerts Revamp");
+    }
+
+    @Test
+    public void notificationRevampTestClinpathResultAlerts() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Clinpath Result Alerts Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.ClinpathResultAlertsRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains clinpath results entered since");
+
+        // Finishes test.
+        log("Completed notification revamp test: Clinpath Result Alerts Revamp");
+    }
+
+    @Test
+    public void notificationRevampTestOverdueWeightAlerts() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Overdue Weight Alerts Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.OverdueWeightAlertsRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("Living animals without a weight:");
+
+        // Finishes test.
+        log("Completed notification revamp test: Overdue Weight Alerts Revamp");
+    }
+
+    @Test
+    public void notificationRevampTestWeightAlerts() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Weight Alerts Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.WeightAlertsRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("This email contains alerts of weight changes");
+
+        // Finishes test.
+        log("Completed notification revamp test: Weight Alerts Revamp");
+    }
+
+    // TODO: Make sure to add dataset 'auditLog', then unmute this test.
+//    @Test
+//    public void notificationRevampTestSiteErrorAlertsRevamp() throws UnhandledAlertException, IOException, CommandException {
+//        // Setup
+//        log("Starting notification revamp test: Site Error ALerts Revamp");
+//        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+//
+//        // Navigates to home to get a fresh start.
+//        myReusableFunctions.goHome();
+//
+//        // Runs test email in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.SiteErrorAlertsRevamp").withText("Run Report In Browser"));
+//        // Validates necessary info.
+//        assertTextPresent("Site Error Alerts Revamp");
+//
+//        // Finishes test.
+//        log("Completed notification revamp test: Site Error ALerts Revamp");
+//    }
+
+    @Test
+    public void notificationRevampTestAnimalRequestUpdate() throws UnhandledAlertException, IOException, CommandException {
+        // Setup
+        log("Starting notification revamp test: Animal Request Update Notification Revamp");
+        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+        // Navigates to home to get a fresh start.
+        myReusableFunctions.goHome();
+
+        // Runs test email in the browser.
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.AnimalRequestUpdateNotificationRevamp").withText("Run Report In Browser"));
+        // Validates necessary info.
+        assertTextPresent("Animal Request Update Notification Revamp");
+
+        // Finishes test.
+        log("Completed notification revamp test: Animal Request Update Notification Revamp");
+    }
+
+    // TODO: Make sure to add dataset 'infantsWithExcessWeight', then unmute this test.
+//    @Test
+//    public void notificationRevampTestLargeInfantAlerts() throws UnhandledAlertException, IOException, CommandException {
+//        // Setup
+//        log("Starting notification revamp test: Large Infant Alerts Revamp");
+//        ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+//
+//        // Navigates to home to get a fresh start.
+//        myReusableFunctions.goHome();
+//
+//        // Runs test email in the browser.
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath());
+//        EHRAdminPage.beginAt(this, "/ehr/" + getContainerPath()).clickNotificationService(this);
+//        waitAndClickAndWait(Locator.tagWithAttributeContaining("a", "href", "wnprc_ehr.notification.LargeInfantAlertsRevamp").withText("Run Report In Browser"));
+//        // Validates necessary info.
+//        assertTextPresent("Large Infant Alerts Revamp");
+//
+//        // Finishes test.
+//        log("Completed notification revamp test: Large Infant Alerts Revamp");
+//    }
 
     public void notificationRevampSetup() throws UnhandledAlertException, IOException, CommandException {
         // Set up.
@@ -4184,49 +4491,30 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // Updates the notification user and reply email.
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
 
-        // ***PLEASE LEAVE THE FOLLOWING CODE BLOCK COMMENTED OUT - DO NOT DELETE***
-        // ***THIS WILL BE USED TO ENABLE DUMBSTER IN FUTURE NOTIFICATIONS***
-        // Enables all notification that we will be testing. //TODO a34: Can we remake a function with an appropriate name for this?  Something like "enableNotification" maybe.
-//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
-//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");
-//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff");
-//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification");
-//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification");
-//        notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification");
-//        // Adds recipients for all notifications we will be testing.
-//        waitForText("Blood Draws Today (All)");
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll", "EHR Administrators");
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare", "EHR Administrators");
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff", "EHR Administrators");
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification", "EHR Administrators");
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification", "EHR Administrators");
-//        notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification", "EHR Administrators");
-        // Enables dumbster.
-//        _containerHelper.enableModules(Arrays.asList("Dumbster"));
-        // Enable LDK Site Notification
-//        beginAt(buildURL("ldk", "notificationSiteAdmin"));
-//        waitForText("Notification Site Admin");
-//        waitForElement(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
-//        click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
-//        click(Locator.tagWithText("li", "Enabled"));
-//        click(Locator.tagWithText("span", "Save"));
-//        waitForText("Success");
-//        clickButtonContainingText("OK");
-//        waitForText("Notification Site Admin");
+        // Creates variables to use for uploading test data.
+        Calendar todayCalendar = Calendar.getInstance();
+        todayCalendar.add(Calendar.DATE, 1);
+        Date dateTomorrow = todayCalendar.getTime();
 
         // Creates billing groups for testing.
         myReusableFunctions.insertValueIntoBloodBilledByDataset("animalCare", "Animal Care");
         myReusableFunctions.insertValueIntoBloodBilledByDataset("vetStaff", "Vet Staff");
         myReusableFunctions.insertValueIntoBloodBilledByDataset("spi", "SPI");
 
-        // TODO: Run test for: Admin Alerts
-        // TODO: Run test for: Animal Request
-        // TODO: Run test for: Colony Alerts
-        // TODO: Run test for: Colony Alerts (Lite)
-        // TODO: Run test for: Colony Management
+        // Uploads Test Data: Blood Draw Review (Daily)
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId1", false, new Date(), true, Double.valueOf(2.0), false); // Testing for blood scheduled for today with a dead animal.
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawReviewDailyId2", true, dateTomorrow, false, Double.valueOf(2.0), false); // Testing for blood scheduled for tomorrow with an animal not assigned to a project.
+        // Uploads Test Data: Blood Overdraw Trigger
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("spi", "testID", true, new Date(), true, Double.valueOf(-1), true);
+        // Uploads Test Data: Death Notification (Prenatal)
+        myReusableFunctions.insertValueIntoNecropsyDataset("pdNecropsyTestId1", new Date());
+        // Uploads Test Data: Blood Draws Today (Animal Care)
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("animalCare", "bloodDrawTodayAnimalCareId1", true, new Date(), true, Double.valueOf(20.0), false);
+        // Uploads Test Data: Blood Draws Today (Vet Staff)
+        myReusableFunctions.insertValueIntoBloodScheduleDataset("vetStaff", "bloodDrawTodayVetStaffId1", true, new Date(), true, Double.valueOf(20.0), false);
 
         // Logs completion.
-        log("Completed notificationRevampSetup().  All revamped notifications have been checked.");
+        log("Completed notificationRevampSetup().  All test data has been added.");
     }
 
     public class ReusableTestFunctions {
@@ -4360,6 +4648,50 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             return null;
         }
 
+        public void activateDumbster(WebDriverWrapper myDriver) {
+            // Set up.
+            log("Activating Dumbster()");
+            ReusableTestFunctions myReusableFunctions = new ReusableTestFunctions();
+
+            // Navigates to home to get a fresh start.
+            myReusableFunctions.goHome();
+
+            // Navigates to admin notifications page.
+            EHRAdminPage ehrAdminPage = EHRAdminPage.beginAt(myDriver);
+            NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(myDriver);
+            // Updates the notification user and reply email.
+            notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
+
+            notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll");
+            notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare");
+            notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff");
+            notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification");
+            notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification");
+            notificationAdminPage.enableDeathNotification("status_org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification");
+            // Adds recipients for all notifications we will be testing.
+            waitForText("Blood Draws Today (All)");
+            notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAll", "EHR Administrators");
+            notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayAnimalCare", "EHR Administrators");
+            notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawsTodayVetStaff", "EHR Administrators");
+            notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewDailyNotification", "EHR Administrators");
+            notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodDrawReviewTriggerNotification", "EHR Administrators");
+            notificationAdminPage.addManageUsers("org.labkey.wnprc_ehr.notification.BloodOverdrawTriggerNotification", "EHR Administrators");
+            // Enables dumbster.
+            _containerHelper.enableModules(Arrays.asList("Dumbster"));
+            // Enable LDK Site Notification
+            beginAt(buildURL("ldk", "notificationSiteAdmin"));
+            waitForText("Notification Site Admin");
+            waitForElement(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+            click(Locator.tagWithClass("div", "x4-form-arrow-trigger"));
+            click(Locator.tagWithText("li", "Enabled"));
+            click(Locator.tagWithText("span", "Save"));
+            waitForText("Success");
+            clickButtonContainingText("OK");
+            waitForText("Notification Site Admin");
+
+            log("Successfully Activated Dumbster()");
+        }
+
     }
 
     // Imports rack data for cage ui testing
@@ -4369,7 +4701,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> responseMap = new HashMap<>();
 
         List<Map<String, Object>> tsv = loadTsv(TestFileUtils.getSampleData("wnprc_ehr/cageui/racks.tsv"));
-        insertTsvData(connection, "cageUI", "racks", tsv, EHR_FOLDER_PATH)
+        insertTsvData(connection, "cageui", "racks", tsv, EHR_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("rowid").toString(),row));
     }
     // Imports rack types data for cage ui testing
@@ -4379,7 +4711,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Map<String, Object> responseMap = new HashMap<>();
 
         List<Map<String, Object>> tsv = loadTsv(TestFileUtils.getSampleData("wnprc_ehr/cageui/rackTypes.tsv"));
-        insertTsvData(connection, "cageUI", "rack_types", tsv, EHR_FOLDER_PATH)
+        insertTsvData(connection, "cageui", "rack_types", tsv, EHR_FOLDER_PATH)
                 .forEach(row -> responseMap.put(row.get("rowid").toString(),row));
     }
 

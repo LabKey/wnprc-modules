@@ -27,14 +27,17 @@ SELECT
     t.mostRecentWeightDate,
     t.death,
     cast(round(t.allowableBlood,1) as numeric) as maxAllowableBlood,
-    cast(t.bloodPrevious as double) as bloodPrevious,
-    cast((t.allowableBlood - t.bloodPrevious) as double) as allowablePrevious,
+    round(cast(t.bloodPrevious as double),1) as bloodPrevious,
+    round(cast((t.allowableBlood - t.bloodPrevious) as double),1) as allowablePrevious,
 
-    cast(t.bloodFuture as double) as bloodFuture,
+    round(cast(t.bloodFuture as double),1) as bloodFuture,
     cast((t.allowableBlood - t.bloodFuture) as double) as allowableFuture,
 
     ROUND(CAST((t.allowableBlood - t.bloodPrevious) AS double),1)  as allowableBlood,
-    ROUND(CAST((t.allowableBlood - t.bloodPrevious - t.bloodFuture) AS double),1) as allowableBloodIncludingFutureDraws,
+    CASE
+        WHEN t.date < CURDATE() THEN NULL
+        ELSE ROUND(CAST((t.allowableBlood - t.bloodFuture - t.bloodPrevious) AS double),1)
+    END AS allowableBloodIncludingFutureDraws,
     t.minDate,
     t.maxDate
 

@@ -1,0 +1,13 @@
+Value	Title	Category	Description	Sort Order	Date Disabled
+0	Default Cage	Caging	4
+1	Default Pen	Caging	8
+2	Default Temp Cage	Caging	4
+3	Default Play Cage	Caging	8
+4	Cage	Caging	4
+5	Pen	Caging	8
+6	Temp Cage	Caging	4
+7	Play Cage	Caging	8
+100	Room Divider	Room Object
+101	Drain	Room Object
+102	Door	Room Object
+103	Gate	Room Object

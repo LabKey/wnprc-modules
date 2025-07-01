@@ -104,20 +104,16 @@ import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
 import org.labkey.wnprc_ehr.notification.*;
-import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
-import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.FoodCompletedProblemsNotification;
 import org.labkey.wnprc_ehr.notification.FoodNotCompletedNotification;
 import org.labkey.wnprc_ehr.notification.FoodNotStartedNoonNotification;
 import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
 import org.labkey.wnprc_ehr.notification.IrregularObsBehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
-import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
-import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotificationRevamp;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesSupervisorNotification;
@@ -362,16 +358,12 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public void registerNotifications() {
         List<Notification> notifications = Arrays.asList(
                 new BehaviorNotification(this),
-                new DeathNotification(),
                 new ColonyAlertsNotification(this),
-                new TreatmentAlertsNotification(this),
                 new VvcNotification(this),
                 new FoodNotStartedNotification(this),
                 new FoodNotStartedNoonNotification(this),
                 new FoodNotCompletedNotification(this),
                 new FoodCompletedProblemsNotification(this),
-                new AnimalRequestNotification(this),
-                new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
                 new WaterOrdersAlertNotification(this),
@@ -391,13 +383,17 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new ColonyManagementNotificationRevamp(this),
                 new ColonyAlertsLiteNotificationRevamp(this),
                 new BloodOverdrawTriggerNotification(this),
+                new NecropsyEditRequestNotification(this),
                 new EmptyNotificationRevamp(this),
                 new AnimalRequestUpdateNotificationRevamp(this),
                 new TreatmentAlertsNotificationRevamp(this),
                 new ClinpathAbnormalResultsAlertsRevamp(this),
                 new ClinpathAlertsRevamp(this),
                 new ClinpathResultAlertsRevamp(this),
-                new LargeInfantAlertsRevamp(this)
+                new LargeInfantAlertsRevamp(this),
+                new OverdueWeightAlertsRevamp(this),
+                new SiteErrorAlertsRevamp(this),
+                new WeightAlertsRevamp(this)
                 );
 
         for (Notification notification : notifications)

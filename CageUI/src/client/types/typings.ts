@@ -1,3 +1,21 @@
+/*
+ *
+ *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
 import { ExtraContext, GateContext } from './layoutEditorTypes';
 
 /*
@@ -111,7 +129,7 @@ export type Modification = {
 export type ModRecord = Record<ModTypes, Modification>;
 
 export type CageModification = {
-    id: number; // id for duplicate mods in the same mod location
+    id: number; // id for duplicate mods in the same location, imagine 2 cages on one side of a pen
     mod: CageModType; // Use mod in the Modifications constant to get styles for mod
 }
 
@@ -131,27 +149,13 @@ export type CageWithMods = Cage & Partial<CageModifications>;
 
 export interface CageModifications {
     mods: {
-        [ModLocations.Top]: {
-            mods: CageModification[];
-            subId: number; // subsection id
-        }[];
-        [ModLocations.Bottom]: {
-            mods: CageModification[];
-            subId: number;
-        }[];
-        [ModLocations.Left]: {
-            mods: CageModification[];
-            subId: number;
-        }[];
-        [ModLocations.Right]: {
-            mods: CageModification[];
-            subId: number;
-        }[];
-        [ModLocations.Direct]: {
-            mods: CageModification[];
-            subId: number;
-        }[];
+        [ModLocations.Top]: CageModification[]
+        [ModLocations.Bottom]: CageModification[];
+        [ModLocations.Left]: CageModification[];
+        [ModLocations.Right]: CageModification[];
+        [ModLocations.Direct]: CageModification[];
     };
+    isDirty: boolean; // determines if modifications have been changed
 }
 
 export interface Room {
@@ -190,16 +194,13 @@ export interface PrevRoom {
 }
 
 export interface ModData {
-    rowid?: number;
+    rowid: number;
     room: string;
     rack: number; // rowid of rack
     cage: number;
     location: ModLocations;
     locationId: number;
-    subsectionId: number;
     modification: ModTypes;
-    startDate: Date;
-    endDate: Date | null;
 }
 
 export interface RackGroup {
@@ -238,24 +239,6 @@ export interface UnitType {
     name: string; // naming convention is 'type-manufacturer-sqft'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
-    sides: {
-        [ModLocations.Top]: {
-            sections: number
-        };
-        [ModLocations.Bottom]: {
-            sections: number
-        };
-        [ModLocations.Left]: {
-            sections: number
-        };
-        [ModLocations.Right]: {
-            sections: number
-        };
-        [ModLocations.Direct]: {
-            sections: number
-        };
-    }
-
 }
 
 export interface LocationCoords {

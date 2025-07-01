@@ -119,6 +119,8 @@
                 In the event of an injury or potential exposure occurring on the weekend that requires a trip the UW Hospital Emergency
                 Department, contact<br>either the Colony Management Supervisor or the Veterinarian on-call, and they will contact the
                 appropriate HR representative.
+                <br>
+                <b style='color:red;'>NOTE: HR contacts should be used only for emergencies during non-business hours.</b>
                 <br><br>
             </div>
         </div>

@@ -16,8 +16,8 @@
     "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Board of Regents of the University of Wisconsin System",
+  "license": "Apache-2.0",
   "dependencies": {
     "@labkey/api": "1.35.6",
     "dayjs": "^1.11.8",

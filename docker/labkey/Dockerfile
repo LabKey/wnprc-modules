@@ -2,7 +2,7 @@
 # HELPER IMAGE (to download LabKey)
 ARG LK_VERSION
 ARG FB_NAME
-FROM alpine:latest as download
+FROM alpine:latest AS download
 
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
@@ -22,7 +22,7 @@ RUN echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
-FROM wnprcehr/cranrnutils:cranrnutils_${LK_VERSION}${FB_NAME}
+FROM --platform=$BUILDPLATFORM wnprcehr/cranrnutils:cranrnutils_${LK_VERSION}${FB_NAME}
 
 # creating folders for LabKey installation
 RUN mkdir -p /labkey/labkey
@@ -36,9 +36,9 @@ RUN mkdir -p /labkey/labkey/config
 #COPY LabKey24.3Beta-79-UWisc/labkeyServer.jar /labkey/src
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
-ENV LABKEY_HOME /labkey/labkey
-ENV LABKEY_SRC /labkey/src
-ENV LABKEY_LOGS /labkey/logs
+ENV LABKEY_HOME=/labkey/labkey
+ENV LABKEY_SRC=/labkey/src
+ENV LABKEY_LOGS=/labkey/logs
 
 COPY --from=download /tmp/labkey $LABKEY_SRC
 WORKDIR ${LABKEY_HOME}

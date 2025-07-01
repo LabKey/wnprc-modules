@@ -1,3 +1,21 @@
+/*
+ *
+ *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
 import * as React from 'react';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
@@ -89,7 +107,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showRoomSelectorTemplateLoad, setShowRoomSelectorTemplateLoad] = useState<boolean>(false);
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
-    const [templateRename, setTemplateRename] = useState<boolean>(false);
+    const [templateRename, setTemplateRename] = useState<string>(null);
 
     // number of cells in grid width/height, based off scale
     const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
@@ -256,7 +274,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     // Drag end for dragging from the utilities to the layout
     const dragEnded = useCallback(async (event) => {
-        const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging');
+        // clear transform attribute to prevent it from applying the transform while in groups. This was a change from Chrome 136 -> 137
+        const draggedShape:  d3.Selection<d3.BaseType, unknown, HTMLElement, any> = d3.select('.dragging').attr('transform', '');
         if(draggedShape.empty()) {
             dragLockRef.current = false;
             return;
@@ -744,6 +763,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }
 
     const handleSave = async () => {
+
         const result = await saveRoom(templateRename);
         setShowSaveResult(result);
     }
@@ -769,9 +789,6 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 ...prevRoom,
                 name: room.name
             }));
-        }
-        if(templateRename){
-            setTemplateRename(false);
         }
         if(templateOptions){
             setTemplateOptions(false);
@@ -912,7 +929,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             </div>
             {showSaveConfirm &&
                 <ConfirmationPopup
-                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${templateRename ? JSON.parse(localRoom.name)[1] : localRoom.name}</strong> ?`}
+                    message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
                     onConfirm={handleSave}
                     onCancel={handleCancelConfirm}
                     onClose={() => setShowSaveConfirm(false)}
@@ -922,7 +939,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <RoomSelectorPopup
                     setRoom={setLocalRoom}
                     template={templateOptions}
-                    setTemplateRename={setTemplateRename}
+                    templateRename={setTemplateRename}
                     onConfirm={() => {setShowRoomSelector(false);setShowSaveConfirm(true);}}
                     onCancel={() => {setTemplateOptions(false);setShowRoomSelector(false);}}
                 />

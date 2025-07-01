@@ -1,3 +1,21 @@
+/*
+ *
+ *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
 import * as React from 'react';
 import { createContext, FC, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
@@ -55,7 +73,7 @@ import {
     zeroPadName
 } from '../utils/helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { ActionURL, Filter } from '@labkey/api';
 import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import {
     labkeyActionSelectDistinctWithPromise,
@@ -313,7 +331,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             name: rackTypeData.rows[0].name,
             type: rackType,
             isDefault: true,
-            sides: null
         };
 
         const newRack: Rack = {
@@ -1096,14 +1113,19 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 objects: []
             }
         });
+        setUnitLocs(createEmptyUnitLoc());
+        setNextAvailGroup('rack-group-1');
     }
 
-    const saveRoom = async (templateRename?: boolean): Promise<LayoutSaveResult> => {
+    const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
         const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
+
         // if template parse room name, 1 is the new name, 0 is the old name
-        const roomName = templateRename ? JSON.parse(localRoom.name)[1] : localRoom.name;
-        const oldRoomName = templateRename ? JSON.parse(localRoom.name)[0] : localRoom.name;
+
+        const roomName = localRoom.name;
+        const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
+        const savingTemplate: boolean = roomName.toLowerCase().includes("template");
         const newEndDate = new Date();
         const newStartDate = new Date();
         let rowsToUpdate;
@@ -1198,7 +1220,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         // get data for updating layout history end dates
         if(prevRoom && prevRoom.data.length !== 0){
             // Dont update template room when saving as a new room
-            if(!(prevRoom.isTemplate && prevRoom.room.name !== oldRoomName)) {
+            // if prev room is template and saving as same room, update
+            // if prev room is template and saving as different room, don't update
+            // if prev room is room and saving as room, update
+            if((prevRoom.room.name === oldRoomName) || savingTemplate){
                 rowsToUpdate = prevRoom.data.reduce((acc, row) => {
                     return [
                         ...acc,
@@ -1222,14 +1247,14 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // update template name
-        if(templateRename){
+        if(savingTemplate && oldRoomName !== roomName){
             commands.push({
                 command: "updateChangingKeys" as CommandType,
                 schemaName: "ehr_lookups",
                 queryName: "rooms",
                 extraContext: {keyField: 'room'},
                 rows: [{
-                    oldKeys: {room: JSON.parse(localRoom.name)[0]},
+                    oldKeys: {room: oldRoomName},
                     values: {room: roomName}
                 }]
             });
@@ -1257,7 +1282,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // update room border and scale
-        const roomToSave = [{
+        const layoutToSave = [{
             room: roomName,
             layout_scale: localRoom.layoutData.scale,
             border_width: localRoom.layoutData.borderWidth,
@@ -1267,7 +1292,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             command: "update",
             schemaName: "ehr_lookups",
             queryName: "rooms",
-            rows: roomToSave
+            rows: layoutToSave
         });
 
         const result = await labkeySaveRows(commands);

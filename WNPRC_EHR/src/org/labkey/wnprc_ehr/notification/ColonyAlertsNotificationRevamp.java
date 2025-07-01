@@ -292,12 +292,12 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view these animals</p>\n", myColonyAlertObject.prenatalRecordsMissingSpeciesURLView));
             messageBody.append("<hr>");
         }
-        //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
-        if (!myColonyAlertObject.animalsThatDiedWithoutWeight.isEmpty()) {
-            messageBody.append("<b>WARNING: There are " + myColonyAlertObject.animalsThatDiedWithoutWeight.size() + " animals that are dead, but do not have a weight within the previous 7 days.</b><br>");
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them</p>\n", myColonyAlertObject.animalsThatDiedWithoutWeightURLView));
-            messageBody.append("<hr>");
-        }
+//        //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
+//        if (!myColonyAlertObject.animalsThatDiedWithoutWeight.isEmpty()) {
+//            messageBody.append("<b>WARNING: There are " + myColonyAlertObject.animalsThatDiedWithoutWeight.size() + " animals that are dead, but do not have a weight within the previous 7 days.</b><br>");
+//            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them</p>\n", myColonyAlertObject.animalsThatDiedWithoutWeightURLView));
+//            messageBody.append("<hr>");
+//        }
         //25. Find TB records lacking a result more than 10 days old, but less than 90.
         if (!myColonyAlertObject.tbRecordsLackingResult.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myColonyAlertObject.tbRecordsLackingResult.size() + " TB Tests in the past 10-90 days that are missing results.</b><br>");
@@ -340,43 +340,43 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myColonyAlertObject.animalsWithHoldCodesNotPendingURLView));
             messageBody.append("<hr>\n");
         }
-        //32. Find assignments with projected releases today.
-        if (!myColonyAlertObject.assignmentsWithProjectedReleasesToday.isEmpty()) {
-            messageBody.append("<b>ALERT: There are " + myColonyAlertObject.assignmentsWithProjectedReleasesToday.size() + " assignments with a projected release date for today that have not already been ended.</b><br>");
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myColonyAlertObject.assignmentsWithProjectedReleasesTodayURLView));
-            messageBody.append("<hr>\n");
-        }
-        //33. Find assignments with projected releases tomorrow.
-        if (!myColonyAlertObject.assignmentsWithProjectedReleasesTomorrow.isEmpty()) {
-            messageBody.append("<b>ALERT: There are " + myColonyAlertObject.assignmentsWithProjectedReleasesTomorrow.size() + " assignments with a projected release date for tomorrow.</b><br>");
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view and update them<br>\n", myColonyAlertObject.assignmentsWithProjectedReleasesTomorrowURLView));
-            messageBody.append("<hr>\n");
-        }
-        //34. Summarize events in the last 5 days.
-        if (!myColonyAlertObject.birthsInLastFiveDays.isEmpty()) {
-            messageBody.append("Births since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
-            for (String result : myColonyAlertObject.birthsInLastFiveDays) {
-                messageBody.append(result + "<br>");
-            }
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.birthsInLastFiveDaysURLView));
-        }
-        //35. Deaths in the last 5 days.
-        if (!myColonyAlertObject.deathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
-            for (String result : myColonyAlertObject.deathsInLastFiveDays) {
-                messageBody.append(result + "<br>");
-            }
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.deathsInLastFiveDaysURLView));
-        }
-        //36. Prenatal deaths in the last 5 days.
-        if (!myColonyAlertObject.prenatalDeathsInLastFiveDays.isEmpty()) {
-            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
-            for (String result : myColonyAlertObject.prenatalDeathsInLastFiveDays) {
-                messageBody.append(result + "<br>");
-            }
-            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.prenatalDeathsInLastFiveDaysURLView));
-            messageBody.append("<hr>");
-        }
+//        //32. Find assignments with projected releases today.
+//        if (!myColonyAlertObject.assignmentsWithProjectedReleasesToday.isEmpty()) {
+//            messageBody.append("<b>ALERT: There are " + myColonyAlertObject.assignmentsWithProjectedReleasesToday.size() + " assignments with a projected release date for today that have not already been ended.</b><br>");
+//            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<br>\n", myColonyAlertObject.assignmentsWithProjectedReleasesTodayURLView));
+//            messageBody.append("<hr>\n");
+//        }
+//        //33. Find assignments with projected releases tomorrow.
+//        if (!myColonyAlertObject.assignmentsWithProjectedReleasesTomorrow.isEmpty()) {
+//            messageBody.append("<b>ALERT: There are " + myColonyAlertObject.assignmentsWithProjectedReleasesTomorrow.size() + " assignments with a projected release date for tomorrow.</b><br>");
+//            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view and update them<br>\n", myColonyAlertObject.assignmentsWithProjectedReleasesTomorrowURLView));
+//            messageBody.append("<hr>\n");
+//        }
+//        //34. Summarize events in the last 5 days.
+//        if (!myColonyAlertObject.birthsInLastFiveDays.isEmpty()) {
+//            messageBody.append("Births since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
+//            for (String result : myColonyAlertObject.birthsInLastFiveDays) {
+//                messageBody.append(result + "<br>");
+//            }
+//            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.birthsInLastFiveDaysURLView));
+//        }
+//        //35. Deaths in the last 5 days.
+//        if (!myColonyAlertObject.deathsInLastFiveDays.isEmpty()) {
+//            messageBody.append("Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
+//            for (String result : myColonyAlertObject.deathsInLastFiveDays) {
+//                messageBody.append(result + "<br>");
+//            }
+//            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.deathsInLastFiveDaysURLView));
+//        }
+//        //36. Prenatal deaths in the last 5 days.
+//        if (!myColonyAlertObject.prenatalDeathsInLastFiveDays.isEmpty()) {
+//            messageBody.append("Prenatal Deaths since " + dateToolkit.getDateXDaysFromNow(-5) + ":<br>");
+//            for (String result : myColonyAlertObject.prenatalDeathsInLastFiveDays) {
+//                messageBody.append(result + "<br>");
+//            }
+//            messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view them<p>\n", myColonyAlertObject.prenatalDeathsInLastFiveDaysURLView));
+//            messageBody.append("<hr>");
+//        }
         //37. Find the total finalized records with future dates.
         if (!myColonyAlertObject.totalFinalizedRecordsWithFutureDates.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myColonyAlertObject.totalFinalizedRecordsWithFutureDates.size() + " finalized records with future dates.</b><br>");
@@ -395,6 +395,14 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             messageBody.append(notificationToolkit.createHyperlink("<p>Click here to view all Assignments.<br>\n", myColonyAlertObject.animalsWithInvalidProjectOrProtocolURLView));
             messageBody.append("<hr>\n");
 
+        }
+        //39. Find any food deprives today where the animal is not assigned to the project that the food deprive is on.
+        if (!myColonyAlertObject.foodDeprivesTodayAnimalUnassigned.isEmpty()) {
+            messageBody.append("<b>WARNING: The following animals have food deprives today, but are not assigned to the project that the food deprive is on:</b><br>");
+            for (HashMap<String, String> currentResult : myColonyAlertObject.foodDeprivesTodayAnimalUnassigned) {
+                messageBody.append(currentResult.get("id") + "<br>");
+            }
+            messageBody.append("<hr>\n");
         }
 
         //Returns string.
@@ -467,8 +475,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
                 getPrenatalRecordsMissingGender();
                 //23. Find prenatal records in the past 90 days missing species.
                 getPrenatalRecordsMissingSpecies();
-                //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
-                getAnimalsThatDiedWithoutWeight();
+//                //24. Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
+//                getAnimalsThatDiedWithoutWeight();
                 //25. Find TB records lacking a result more than 10 days old, but less than 90.
                 getTbRecordsLackingResult();
                 // REMOVED 26 & 27 per user request (getProtocolsNearingAnimalLimitCount & getProtocolsNearingAnimalLimitPercentage).
@@ -480,20 +488,24 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
                 getDeathRecordsWithoutDemographicsRecord();
                 //31. Find animals with hold codes, but not on pending.
                 getAnimalsWithHoldCodesNotPending();
-                //32. Find assignments with projected releases today.
-                getAssignmentsWithProjectedReleasesToday();
-                //33. Find assignments with projected releases tomorrow.
-                getAssignmentsWithProjectedReleasesTomorrow();
-                //34. Summarize events in the last 5 days.
-                getBirthsInLastFiveDays();
-                //35. Deaths in the last 5 days.
-                getDeathsInLastFiveDays();
-                //36. Prenatal deaths in the last 5 days.
-                getPrenatalDeathsInLastFiveDays();
+//                //32. Find assignments with projected releases today.
+//                getAssignmentsWithProjectedReleasesToday();
+//                //33. Find assignments with projected releases tomorrow.
+//                getAssignmentsWithProjectedReleasesTomorrow();
+//                //34. Summarize events in the last 5 days.
+//                getBirthsInLastFiveDays();
+//                //35. Deaths in the last 5 days.
+//                getDeathsInLastFiveDays();
+//                //36. Prenatal deaths in the last 5 days.
+//                getPrenatalDeathsInLastFiveDays();
                 //37. Find the total finalized records with future dates.
                 getTotalFinalizedRecordsWithFutureDates();
                 //38. Find any animals assigned to an inactivated project or deactivated protocol.
                 getAnimalsWithInvalidProjectOrProtocol();
+
+                //39. Find any food deprives today where the animal is not assigned to the project that the food deprive is on.
+                getFoodDeprivesTodayAnimalUnassigned();
+
             }
             else if (alertType.equals("colonyManagement")) {
                 // 1. Find all living animals without a weight.
@@ -552,6 +564,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("calculated_status", "Alive", CompareType.EQUAL);
             myFilter.addCondition("Id/MostRecentWeight/MostRecentWeightDate", "", CompareType.ISBLANK);
+            myFilter.addCondition("Id/age/ageInDays", 10, CompareType.GT);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
@@ -854,6 +867,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("calculated_status", "Alive", CompareType.EQUAL);
             myFilter.addCondition("medical", "siv", CompareType.CONTAINS);
             myFilter.addCondition("Id/assignmentSummary/ActiveVetAssignments", "20060202", CompareType.DOES_NOT_CONTAIN);
+            myFilter.addCondition("Id/curLocation/cond/description", "single", CompareType.EQUAL);
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Demographics", myFilter, null, "Id", null);
 
@@ -873,6 +887,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             SimpleFilter myFilter = new SimpleFilter("calculated_status", "Alive", CompareType.EQUAL);
             myFilter.addCondition("medical", "shiv", CompareType.CONTAINS);
             myFilter.addCondition("Id/assignmentSummary/ActiveVetAssignments", "20060202", CompareType.DOES_NOT_CONTAIN);
+            myFilter.addCondition("Id/curLocation/cond/description", "single", CompareType.EQUAL);
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "demographics", myFilter, null, "Id", null);
 
@@ -950,6 +965,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("gender", "", CompareType.ISBLANK);
             myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
+            myFilter.addCondition("Id/age/ageInDays", 10, CompareType.GT);
+
             //Runs query.
             ArrayList<String[]> returnArray = notificationToolkit.getTableMultiRowMultiColumn(c, u, "study", "Birth", myFilter, null, new String[]{"Id", "date"});
 
@@ -968,6 +985,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("gender", "", CompareType.ISBLANK);
             myFilter.addCondition("created", "-90d", CompareType.DATE_GTE);
+            myFilter.addCondition("Id/age/ageInDays", 10, CompareType.GT);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
@@ -987,7 +1005,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         private void getPrenatalRecordsMissingGender() {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("gender", "", CompareType.ISBLANK);
-            myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
+            myFilter.addCondition("date", "-30d", CompareType.DATE_GTE);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
@@ -1007,7 +1025,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         private void getPrenatalRecordsMissingSpecies() {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("species", "", CompareType.ISBLANK);
-            myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
+            myFilter.addCondition("date", "-30d", CompareType.DATE_GTE);
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
@@ -1021,24 +1039,25 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.prenatalRecordsMissingSpeciesURLView = viewQueryURL.toString();
         }
 
-        // Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
-        ArrayList<String> animalsThatDiedWithoutWeight;                                 //id
-        String animalsThatDiedWithoutWeightURLView;                                     //url string (view)
-        private void getAnimalsThatDiedWithoutWeight() {
-            //Creates filter.
-            SimpleFilter myFilter = new SimpleFilter("death", "-90d", CompareType.DATE_GTE);
-            //Creates sort.
-            Sort mySort = new Sort("Id");
-            //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id", null);
-
-            //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "validateFinalWeights", myFilter);
-
-            //Returns data.
-            this.animalsThatDiedWithoutWeight = returnArray;
-            this.animalsThatDiedWithoutWeightURLView = viewQueryURL.toString();
-        }
+        // Removed this via ticket #19668
+//        // Find all animals that died in the past 90 days where there isn't a weight within 7 days of death.
+//        ArrayList<String> animalsThatDiedWithoutWeight;                                 //id
+//        String animalsThatDiedWithoutWeightURLView;                                     //url string (view)
+//        private void getAnimalsThatDiedWithoutWeight() {
+//            //Creates filter.
+//            SimpleFilter myFilter = new SimpleFilter("death", "-90d", CompareType.DATE_GTE);
+//            //Creates sort.
+//            Sort mySort = new Sort("Id");
+//            //Runs query.
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "validateFinalWeights", myFilter, mySort, "Id", null);
+//
+//            //Creates URL.
+//            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "validateFinalWeights", myFilter);
+//
+//            //Returns data.
+//            this.animalsThatDiedWithoutWeight = returnArray;
+//            this.animalsThatDiedWithoutWeightURLView = viewQueryURL.toString();
+//        }
 
         // Find TB records lacking a result more than 10 days old, but less than 90.
         ArrayList<String> tbRecordsLackingResult;                                       //id
@@ -1046,8 +1065,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         private void getTbRecordsLackingResult() {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("missingresults", true, CompareType.EQUAL);
-            myFilter.addCondition("date", "-90d", CompareType.DATE_GTE);
-            myFilter.addCondition("date", "-10d", CompareType.DATE_LTE);
+            myFilter.addCondition("date", "-7d", CompareType.DATE_GTE);
+            myFilter.addCondition("date", "-30d", CompareType.DATE_LTE);
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "TB Tests", myFilter, null, "Id", null);
 
@@ -1102,16 +1121,41 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
         }
 
         // Find death records without a corresponding demographics record.
-        ArrayList<String> deathRecordsWithoutDemographicsRecord;                        //id
+        ArrayList<HashMap<String, String>> deathRecordsWithoutDemographicsRecord;                        //id
         String deathRecordsWithoutDemographicsRecordURLView;                            //url string (view)
         private void getDeathRecordsWithoutDemographicsRecord() {
+            // Gets excluded IDs.
+            String[] excludedTargetColumns = new String[]{"id"};
+            ArrayList<HashMap<String, String>> excludedIds = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "animalsExcludedFromColonyNotificationDeaths", null, null, excludedTargetColumns);
+
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("Id/Dataset/Demographics/Id", "", CompareType.ISBLANK);
             myFilter.addCondition("notAtCenter", true, CompareType.NEQ_OR_NULL);
+            for (HashMap<String, String> excludedId : excludedIds) {
+                myFilter.addCondition("id", excludedId.get("id"), CompareType.NEQ);
+            }
             //Creates sort.
             Sort mySort = new Sort("Id");
+            // Sets target columns.
+            String[] targetColumns = new String[]{"id"};
             //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id", null);
+            ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Deaths", myFilter, mySort, targetColumns);
+
+//            // Removes excluded ID's from query results.
+//            ArrayList<HashMap<String, String>> filteredReturnArray = new ArrayList<>();
+//            for (HashMap<String, String> result : returnArray) {
+//                Boolean isExcluded = false;
+//                for (HashMap<String, String> exclusion : excludedIds) {
+//                    // Updates boolean if an ID in the query matches an excluded ID.
+//                    if (result.get("id").equals(exclusion.get("id"))) {
+//                        isExcluded = true;
+//                    }
+//                }
+//                // Adds ID to the results if valid.
+//                if (!isExcluded) {
+//                    filteredReturnArray.add(result);
+//                }
+//            }
 
             //Creates URL.
             String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
@@ -1128,6 +1172,8 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             //Creates filter.
             SimpleFilter myFilter = new SimpleFilter("hold", "", CompareType.NONBLANK);
             myFilter.addCondition("Id/assignmentSummary/NumPendingAssignments", 0, CompareType.EQUAL);
+            myFilter.addCondition("hold", "U24 offspring", CompareType.EQUAL);
+
             //Creates sort.
             Sort mySort = new Sort("Id");
             //Runs query.
@@ -1140,110 +1186,110 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             this.animalsWithHoldCodesNotPending = returnArray;
             this.animalsWithHoldCodesNotPendingURLView = viewQueryURL.toString();
         }
-
-        // Find assignments with projected releases today.
-        ArrayList<String> assignmentsWithProjectedReleasesToday;                        //id
-        String assignmentsWithProjectedReleasesTodayURLView;                            //url string (view)
-        private void getAssignmentsWithProjectedReleasesToday() {
-            //Gets info.
-            Date currentDate = dateToolkit.getDateToday();
-            //Creates filter.
-            SimpleFilter myFilter = new SimpleFilter("projectedRelease", currentDate, CompareType.DATE_EQUAL);
-            myFilter.addCondition("enddate", "", CompareType.NONBLANK);
-            //Creates sort.
-            Sort mySort = new Sort("Id");
-            //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id", null);
-
-            //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
-
-            //Returns data.
-            this.assignmentsWithProjectedReleasesToday = returnArray;
-            this.assignmentsWithProjectedReleasesTodayURLView = viewQueryURL.toString();
-        }
-
-        // Find assignments with projected releases tomorrow.
-        ArrayList<String> assignmentsWithProjectedReleasesTomorrow;                     //id
-        String assignmentsWithProjectedReleasesTomorrowURLView;                         //url string (view)
-        private void getAssignmentsWithProjectedReleasesTomorrow() {
-            //Gets info.
-            Date tomorrowDate = dateToolkit.getDateXDaysFromNow(1);
-            //Creates filter.
-            SimpleFilter myFilter = new SimpleFilter("projectedRelease", tomorrowDate, CompareType.DATE_EQUAL);
-            //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id", null);
-
-            //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c,"execute", "study", "Assignment", myFilter);
-
-            //Returns data.
-            this.assignmentsWithProjectedReleasesTomorrow = returnArray;
-            this.assignmentsWithProjectedReleasesTomorrowURLView = viewQueryURL.toString();
-        }
-
-        // Summarize events in the last 5 days.
-        ArrayList<String> birthsInLastFiveDays;                                         //id
-        String birthsInLastFiveDaysURLView;                                             //url string (view)
-        private void getBirthsInLastFiveDays() {
-            //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
-            //Creates filter.
-            SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
-            //Creates sort.
-            Sort mySort = new Sort("Id");
-            //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id", null);
-
-            //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
-
-            //Returns data.
-            this.birthsInLastFiveDays = returnArray;
-            this.birthsInLastFiveDaysURLView = viewQueryURL.toString();
-        }
-
-        // Deaths in the last 5 days.
-        ArrayList<String> deathsInLastFiveDays;                                         //id
-        String deathsInLastFiveDaysURLView;                                             //url string (view)
-        private void getDeathsInLastFiveDays() {
-            //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
-            //Creates filter.
-            SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
-            //Creates sort.
-            Sort mySort = new Sort("Id");
-            //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id", null);
-
-            //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
-
-            //Returns data.
-            this.deathsInLastFiveDays = returnArray;
-            this.deathsInLastFiveDaysURLView = viewQueryURL.toString();
-        }
-
-        // Prenatal deaths in the last 5 days.
-        ArrayList<String> prenatalDeathsInLastFiveDays;                                 //id
-        String prenatalDeathsInLastFiveDaysURLView;                                     //url string (view)
-        private void getPrenatalDeathsInLastFiveDays() {
-            //Gets info.
-            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
-            //Creates filter.
-            SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
-            //Creates sort.
-            Sort mySort = new Sort("Id");
-            //Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id", null);
-
-            //Creates URL.
-            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Prenatal Deaths", myFilter);
-
-            //Returns data.
-            this.prenatalDeathsInLastFiveDays = returnArray;
-            this.prenatalDeathsInLastFiveDaysURLView = viewQueryURL.toString();
-        }
+//
+//        // Find assignments with projected releases today.
+//        ArrayList<String> assignmentsWithProjectedReleasesToday;                        //id
+//        String assignmentsWithProjectedReleasesTodayURLView;                            //url string (view)
+//        private void getAssignmentsWithProjectedReleasesToday() {
+//            //Gets info.
+//            Date currentDate = dateToolkit.getDateToday();
+//            //Creates filter.
+//            SimpleFilter myFilter = new SimpleFilter("projectedRelease", currentDate, CompareType.DATE_EQUAL);
+//            myFilter.addCondition("enddate", "", CompareType.NONBLANK);
+//            //Creates sort.
+//            Sort mySort = new Sort("Id");
+//            //Runs query.
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, mySort, "Id", null);
+//
+//            //Creates URL.
+//            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", myFilter);
+//
+//            //Returns data.
+//            this.assignmentsWithProjectedReleasesToday = returnArray;
+//            this.assignmentsWithProjectedReleasesTodayURLView = viewQueryURL.toString();
+//        }
+//
+//        // Find assignments with projected releases tomorrow.
+//        ArrayList<String> assignmentsWithProjectedReleasesTomorrow;                     //id
+//        String assignmentsWithProjectedReleasesTomorrowURLView;                         //url string (view)
+//        private void getAssignmentsWithProjectedReleasesTomorrow() {
+//            //Gets info.
+//            Date tomorrowDate = dateToolkit.getDateXDaysFromNow(1);
+//            //Creates filter.
+//            SimpleFilter myFilter = new SimpleFilter("projectedRelease", tomorrowDate, CompareType.DATE_EQUAL);
+//            //Runs query.
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Assignment", myFilter, null, "Id", null);
+//
+//            //Creates URL.
+//            String viewQueryURL = notificationToolkit.createQueryURL(c,"execute", "study", "Assignment", myFilter);
+//
+//            //Returns data.
+//            this.assignmentsWithProjectedReleasesTomorrow = returnArray;
+//            this.assignmentsWithProjectedReleasesTomorrowURLView = viewQueryURL.toString();
+//        }
+//
+//        // Summarize events in the last 5 days.
+//        ArrayList<String> birthsInLastFiveDays;                                         //id
+//        String birthsInLastFiveDaysURLView;                                             //url string (view)
+//        private void getBirthsInLastFiveDays() {
+//            //Gets info.
+//            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
+//            //Creates filter.
+//            SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
+//            //Creates sort.
+//            Sort mySort = new Sort("Id");
+//            //Runs query.
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Birth", myFilter, mySort, "Id", null);
+//
+//            //Creates URL.
+//            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Birth", myFilter);
+//
+//            //Returns data.
+//            this.birthsInLastFiveDays = returnArray;
+//            this.birthsInLastFiveDaysURLView = viewQueryURL.toString();
+//        }
+//
+//        // Deaths in the last 5 days.
+//        ArrayList<String> deathsInLastFiveDays;                                         //id
+//        String deathsInLastFiveDaysURLView;                                             //url string (view)
+//        private void getDeathsInLastFiveDays() {
+//            //Gets info.
+//            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
+//            //Creates filter.
+//            SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
+//            //Creates sort.
+//            Sort mySort = new Sort("Id");
+//            //Runs query.
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Deaths", myFilter, mySort, "Id", null);
+//
+//            //Creates URL.
+//            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Deaths", myFilter);
+//
+//            //Returns data.
+//            this.deathsInLastFiveDays = returnArray;
+//            this.deathsInLastFiveDaysURLView = viewQueryURL.toString();
+//        }
+//
+//        // Prenatal deaths in the last 5 days.
+//        ArrayList<String> prenatalDeathsInLastFiveDays;                                 //id
+//        String prenatalDeathsInLastFiveDaysURLView;                                     //url string (view)
+//        private void getPrenatalDeathsInLastFiveDays() {
+//            //Gets info.
+//            Date fiveDaysAgoDate = dateToolkit.getDateXDaysFromNow(-5);
+//            //Creates filter.
+//            SimpleFilter myFilter = new SimpleFilter("date", fiveDaysAgoDate, CompareType.DATE_GTE);
+//            //Creates sort.
+//            Sort mySort = new Sort("Id");
+//            //Runs query.
+//            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "Prenatal Deaths", myFilter, mySort, "Id", null);
+//
+//            //Creates URL.
+//            String viewQueryURL = notificationToolkit.createQueryURL(c, "execute", "study", "Prenatal Deaths", myFilter);
+//
+//            //Returns data.
+//            this.prenatalDeathsInLastFiveDays = returnArray;
+//            this.prenatalDeathsInLastFiveDaysURLView = viewQueryURL.toString();
+//        }
 
         // Find the total finalized records with future dates.
         ArrayList<String> totalFinalizedRecordsWithFutureDates;                         //id
@@ -1256,6 +1302,15 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             myFilter.addCondition("date", todayDate, CompareType.DATE_GT);
             myFilter.addCondition("dataset/label", "Treatment Orders", CompareType.NEQ);
             myFilter.addCondition("dataset/label", "Assignment", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Tissue Samples", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Necropsies", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Organ Weights", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Alopecia", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Body Condition", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Morphologic Diagnosis", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "Water Orders", CompareType.NEQ);
+            myFilter.addCondition("dataset/label", "waterAmount", CompareType.NEQ);
+
             //Runs query.
             ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(c, u, "study", "StudyData", myFilter, null, "Id", null);
 
@@ -1398,6 +1453,30 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
             // Creates url link to the assignments table.
             this.animalsWithInvalidProjectOrProtocolURLView = notificationToolkit.createQueryURL(c, "execute", "study", "Assignment", null);
+        }
+
+        // Find any food deprives today where the animal is not assigned to the project that the food deprive is on.
+        ArrayList<HashMap<String, String>> foodDeprivesTodayAnimalUnassigned;       //protocol
+        private void getFoodDeprivesTodayAnimalUnassigned() {
+            // Creates filter.
+            SimpleFilter myFilter = new SimpleFilter("date", dateToolkit.getCalendarDateToday(), CompareType.DATE_EQUAL);
+
+            // Sets target columns.
+            String[] targetColumns = new String[]{"id", "date", "project", "Id/activeAssignments/projects"};
+
+            // Runs query.
+            ArrayList<HashMap<String, String>> unfilteredReturnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "study", "Food Deprives", myFilter, null, targetColumns);
+            ArrayList<HashMap<String, String>> filteredReturnArray = new ArrayList<>();
+
+            // Filters data.
+            for (HashMap<String, String> result : unfilteredReturnArray) {
+                if (!result.get("Id/activeAssignments/projects").contains(result.get("project"))) {
+                    filteredReturnArray.add(result);
+                }
+            }
+
+            //Returns data.
+            this.foodDeprivesTodayAnimalUnassigned = filteredReturnArray;
         }
     }
 }

@@ -28,10 +28,11 @@ import Editor from '../../components/layoutEditor/Editor';
 import { labkeyActionSelectWithPromise, labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { buildNewLocalRoom, buildNewLocs, isTemplateCreator } from '../../utils/LayoutEditorHelpers';
+import {isTemplateCreator } from '../../utils/LayoutEditorHelpers';
 import {Security} from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
+import { buildNewLocalRoom, buildNewLocs } from '../../utils/helpers';
 
 export const LayoutEditor: FC<any> = () => {
     const roomName = ActionURL.getParameter("room");

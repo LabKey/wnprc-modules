@@ -149,13 +149,27 @@ export type CageWithMods = Cage & Partial<CageModifications>;
 
 export interface CageModifications {
     mods: {
-        [ModLocations.Top]: CageModification[]
-        [ModLocations.Bottom]: CageModification[];
-        [ModLocations.Left]: CageModification[];
-        [ModLocations.Right]: CageModification[];
-        [ModLocations.Direct]: CageModification[];
+        [ModLocations.Top]: {
+            mods: CageModification[];
+            subId: number; // subsection id
+        }[];
+        [ModLocations.Bottom]: {
+            mods: CageModification[];
+            subId: number;
+        }[];
+        [ModLocations.Left]: {
+            mods: CageModification[];
+            subId: number;
+        }[];
+        [ModLocations.Right]: {
+            mods: CageModification[];
+            subId: number;
+        }[];
+        [ModLocations.Direct]: {
+            mods: CageModification[];
+            subId: number;
+        }[];
     };
-    isDirty: boolean; // determines if modifications have been changed
 }
 
 export interface Room {
@@ -194,13 +208,16 @@ export interface PrevRoom {
 }
 
 export interface ModData {
-    rowid: number;
+    rowid?: number;
     room: string;
     rack: number; // rowid of rack
     cage: number;
     location: ModLocations;
     locationId: number;
+    subsectionId: number;
     modification: ModTypes;
+    startDate: Date;
+    endDate: Date | null;
 }
 
 export interface RackGroup {
@@ -239,6 +256,23 @@ export interface UnitType {
     name: string; // naming convention is 'type-manufacturer-sqft'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
+    sides: {
+        [ModLocations.Top]: {
+            sections: number
+        };
+        [ModLocations.Bottom]: {
+            sections: number
+        };
+        [ModLocations.Left]: {
+            sections: number
+        };
+        [ModLocations.Right]: {
+            sections: number
+        };
+        [ModLocations.Direct]: {
+            sections: number
+        };
+    };
 }
 
 export interface LocationCoords {

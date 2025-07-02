@@ -19,7 +19,7 @@ import {
     labkeyActionSelectWithPromise,
     labkeySaveRows
 } from '../api/labkeyActions';
-import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
+import {findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, extractNumbers, parseRoomItemNum } from '../utils/helpers';
 import { LayoutSaveResult, SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';

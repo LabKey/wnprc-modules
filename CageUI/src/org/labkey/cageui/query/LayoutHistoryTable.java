@@ -41,11 +41,8 @@ import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.labkey.api.query.QueryUpdateService.ConfigParameters.PreferPKOverObjectUriAsKey;
 
 public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
 {
@@ -69,7 +66,7 @@ public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserS
 
         // This checks permission before any data modification occurs
         @Override
-        public boolean hasPermission(@NotNull UserPrincipal user, Class<? extends Permission> perm)
+        public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
         {
             boolean hasPermission = super.hasPermission(user, perm);
             boolean isEditPerm = perm == InsertPermission.class || perm == UpdatePermission.class || perm == DeletePermission.class;

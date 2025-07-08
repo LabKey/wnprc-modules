@@ -105,7 +105,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     @NotNull
     private List<User> getFolderAdmins()
     {
-        List<RoleAssignment> folderAdminGroups = getContainer().getPolicy().getAssignments().stream().filter(roleAssignment -> roleAssignment.getRole().getName().equals(FOLDER_ADMIN_ROLE)).collect(Collectors.toList());
+        List<RoleAssignment> folderAdminGroups = getContainer().getPolicy().getAssignments().stream().filter(roleAssignment -> roleAssignment.getRole().getName().equals(FOLDER_ADMIN_ROLE)).toList();
         List<User> folderAdmins = new ArrayList<>();
         for (RoleAssignment folderAdmin : folderAdminGroups)
         {
@@ -128,50 +128,57 @@ public class WNPRC_PurchasingController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class RequesterAction extends SimpleViewAction
+    public static class RequesterAction extends SimpleViewAction<Object>
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
-            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Requester");
+            WebPartFactory factory = Portal.getPortalPart("WNPRC Purchasing Requester");
             Portal.WebPart part = factory.createWebPart();
             getPageConfig().setTitle("Purchasing Requester");
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }
 
+        @Override
         public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class PurchaseAdminAction extends SimpleViewAction
+    public static class PurchaseAdminAction extends SimpleViewAction<Object>
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
-            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Admin");
+            WebPartFactory factory = Portal.getPortalPart("WNPRC Purchasing Admin");
             getPageConfig().setTitle("Purchasing Admin");
             Portal.WebPart part = factory.createWebPart();
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }
 
+        @Override
         public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class PurchaseReceiverAction extends SimpleViewAction
+    public static class PurchaseReceiverAction extends SimpleViewAction<Object>
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
-            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Receiver");
+            WebPartFactory factory = Portal.getPortalPart("WNPRC Purchasing Receiver");
             getPageConfig().setTitle("Purchasing Receiver");
             Portal.WebPart part = factory.createWebPart();
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }
 
+        @Override
         public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class PurchasingRequestAction extends SimpleViewAction
+    public static class PurchasingRequestAction extends SimpleViewAction<Object>
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             ModuleHtmlView view = ModuleHtmlView.get(ModuleLoader.getInstance().getModule("WNPRC_Purchasing"), ModuleHtmlView.getGeneratedViewPath("RequestEntry"));
@@ -180,11 +187,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             return view;
         }
 
+        @Override
         public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class GetFolderAdminsAction extends ReadOnlyApiAction
+    public class GetFolderAdminsAction extends ReadOnlyApiAction<Object>
     {
         @Override
         public Object execute(Object o, BindException errors)
@@ -249,7 +257,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
 
-            if (validationExceptions.size() > 0)
+            if (!validationExceptions.isEmpty())
             {
                 throw new BatchValidationException(validationExceptions, null);
             }
@@ -287,7 +295,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             List<User> usersWithInsertPerm = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
 
             //get the lab end user who originated the request
-            List <User> labEndUsers = usersWithInsertPerm.stream().filter(u -> u.getUserId() == emailTemplateForm.getRequester().getUserId()).collect(Collectors.toList());
+            List <User> labEndUsers = usersWithInsertPerm.stream().filter(u -> u.getUserId() == emailTemplateForm.getRequester().getUserId()).toList();
             User endUser = labEndUsers.size() == 1 ? labEndUsers.get(0) : null;
 
             //request status change email notification
@@ -351,16 +359,16 @@ public class WNPRC_PurchasingController extends SpringActionController
             List<LineItem> removed = oldLineItems.stream().filter(o1 -> updatedLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
 
             List<LineItem> quantityChange = updatedLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o1.getRowId() == o2.getRowId()
-                                                                                    && o2.getQuantity() == o1.getQuantity())).collect(Collectors.toList());
+                                                                                    && o2.getQuantity() == o1.getQuantity())).toList();
 
             boolean fullQuantityReceived = updatedLineItems.stream().filter(o2 -> o2.getQuantityReceived() >= o2.getQuantity()).count() == updatedLineItems.size();
 
-            if (removed.size() > 0 || quantityChange.size() > 0 || fullQuantityReceived)
+            if (!removed.isEmpty() || !quantityChange.isEmpty() || fullQuantityReceived)
             {
                 LineItemChangeEmailTemplate lineItemChangeEmailTemplate = EmailTemplateService.get().getEmailTemplate(LineItemChangeEmailTemplate.class);
                 lineItemChangeEmailTemplate.setUpdatedLineItemsList(updatedLineItems);
                 lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
-                lineItemChangeEmailTemplate.setDeletedLineItemFlag(removed.size() > 0);
+                lineItemChangeEmailTemplate.setDeletedLineItemFlag(!removed.isEmpty());
                 lineItemChangeEmailTemplate.setFullQuantityReceivedFlag(fullQuantityReceived);
                 lineItemChangeEmailTemplate.setNotificationBean(emailTemplateForm);
                 String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
@@ -604,7 +612,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         }
     }
 
-    public class EmailTemplateForm
+    public static class EmailTemplateForm
     {
         Integer _rowId;
         String _vendor;

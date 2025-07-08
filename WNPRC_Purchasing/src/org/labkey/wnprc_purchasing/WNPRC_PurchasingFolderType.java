@@ -27,7 +27,7 @@ public class WNPRC_PurchasingFolderType extends DefaultFolderType
 
     private static @Nullable Portal.WebPart createWebPart(String name)
     {
-        WebPartFactory factory = Portal.getPortalPartCaseInsensitive(name);
+        WebPartFactory factory = Portal.getPortalPart(name);
         return null != factory ? factory.createWebPart(WebPartFactory.LOCATION_BODY) : null;
     }
 

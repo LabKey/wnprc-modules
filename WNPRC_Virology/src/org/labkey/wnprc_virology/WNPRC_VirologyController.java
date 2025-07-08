@@ -2,8 +2,8 @@ package org.labkey.wnprc_virology;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
@@ -52,9 +52,10 @@ import static org.labkey.wnprc_virology.ViralLoadRSEHRRunner.virologyModule;
 public class WNPRC_VirologyController extends SpringActionController
 {
     public static final String CONFIGURE_VIROLOGY_FOLDER = "Configure WNPRC Virology Shared Data Folder";
-    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_VirologyController.class);
     public static final String NAME = "wnprc_virology";
-    private static Logger _log = LogManager.getLogger(WNPRC_VirologyController.class);
+
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_VirologyController.class);
+    private static final Logger _log = LogManager.getLogger(WNPRC_VirologyController.class);
 
     private static final String _sourceDataTableName = "viral_load_data_filtered";
 
@@ -64,11 +65,12 @@ public class WNPRC_VirologyController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
+    public static class BeginAction extends SimpleViewAction<Object>
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        @Override
+        public ModelAndView getView(Object o, BindException errors)
         {
-            return new JspView("/org/labkey/wnprc_virology/view/hello.jsp");
+            return new JspView<>("/org/labkey/wnprc_virology/view/hello.jsp");
         }
 
         @Override
@@ -108,9 +110,9 @@ public class WNPRC_VirologyController extends SpringActionController
 
         List<Integer> newList = new ArrayList<>();
         List<JSONObject> currentList = new ArrayList<>();
-        for (int k = 0; k < accountNumbers.length; k ++)
+        for (int accountNumber : accountNumbers)
         {
-            newList.add(accountNumbers[k]);
+            newList.add(accountNumber);
         }
 
         SimpleQueryUpdater qu = new SimpleQueryUpdater(getUser(), viralLoadContainer, schemaName, queryName);
@@ -120,32 +122,31 @@ public class WNPRC_VirologyController extends SpringActionController
             currentList.add(ja.getJSONObject(r));
         }
 
-        if (newList.size() == 0)
+        if (newList.isEmpty())
         {
-            for (int j = 0; j < currentList.size(); j++)
+            for (JSONObject jo : currentList)
             {
-                JSONObject jo = currentList.get(j);
-                Map<String,Object> mp = new HashMap<>();
+                Map<String, Object> mp = new HashMap<>();
                 mp.put("folder_name", currentContainer.getName());
                 mp.put("account", jo.get("account"));
                 mp.put("rowid", jo.get("rowid"));
                 rowsToDelete.add(mp);
             }
-        } else if (ja.length() == 0)
+        }
+        else if (ja.isEmpty())
         {
-            for (int i = 0; i < newList.size(); i++)
+            for (Integer integer : newList)
             {
-                Map<String,Object> mp = new HashMap<>();
+                Map<String, Object> mp = new HashMap<>();
                 mp.put("folder_name", currentContainer.getName());
-                mp.put("account", newList.get(i));
+                mp.put("account", integer);
                 rowsToInsert.add(mp);
             }
-        } else if (newList.size() > 0 && ja.length() > 0)
+        }
+        else if (!ja.isEmpty())
         {
-
-            for (int t = 0; t < currentList.size(); t++)
+            for (JSONObject jo : currentList)
             {
-                JSONObject jo = currentList.get(t);
                 boolean neverFound = true;
                 for (int h = 0; h < newList.size(); h++)
                 {
@@ -157,27 +158,25 @@ public class WNPRC_VirologyController extends SpringActionController
                 }
                 if (neverFound)
                 {
-                    Map<String,Object> mp = new HashMap<>();
+                    Map<String, Object> mp = new HashMap<>();
                     mp.put("folder_name", currentContainer.getName());
                     mp.put("account", jo.get("account"));
                     mp.put("rowid", jo.get("rowid"));
                     rowsToDelete.add(mp);
                 }
             }
-            for (int g = 0; g < newList.size(); g++)
+            for (Integer integer : newList)
             {
-                Map<String,Object> mp = new HashMap<>();
+                Map<String, Object> mp = new HashMap<>();
                 mp.put("folder_name", currentContainer.getName());
-                mp.put("account", newList.get(g));
+                mp.put("account", integer);
                 rowsToInsert.add(mp);
             }
-
         }
         if (!rowsToInsert.isEmpty())
             qu.insert(rowsToInsert);
         if (!rowsToDelete.isEmpty())
             qu.delete(rowsToDelete);
-
     }
 
     /* An action to update accounts without folder setup */
@@ -276,15 +275,12 @@ public class WNPRC_VirologyController extends SpringActionController
             result.put("success", true);
             return new ApiSimpleResponse(result);
         }
-
-
     }
 
     // Intended to be called from test code
     @RequiresPermission(AdminPermission.class)
     public static class StartRSEHRJobAction extends MutatingApiAction<Object>
     {
-
         @Override
         public Object execute(Object o, BindException errors) throws Exception
         {
@@ -322,7 +318,6 @@ public class WNPRC_VirologyController extends SpringActionController
             QueryService.get().createLinkedSchema(getUser(), c, "wnprc_virology_linked", viralLoadContainer.getId(), "wnprc_virology", null, "grant_accounts, folders_accounts_mappings", null);
             return null;
         }
-
     }
 
     // Only to be called from test code

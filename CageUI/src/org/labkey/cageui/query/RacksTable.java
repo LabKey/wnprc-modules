@@ -26,26 +26,19 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
-import org.labkey.api.query.RuntimeValidationException;
 import org.labkey.api.query.SimpleQueryUpdateService;
 import org.labkey.api.query.SimpleUserSchema;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.view.UnauthorizedException;
-import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
-import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +64,7 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
 
         // This checks permission before any data modification occurs
         @Override
-        public boolean hasPermission(@NotNull UserPrincipal user, Class<? extends Permission> perm)
+        public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
         {
             boolean hasPermission = super.hasPermission(user, perm);
             boolean isEditPerm = perm == InsertPermission.class || perm == UpdatePermission.class || perm == DeletePermission.class;

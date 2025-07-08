@@ -1532,7 +1532,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Verify per diems");
         beginAt(buildURL("query", PRIVATE_FOLDER_PATH, "executeQuery", Maps.of("schemaName", "wnprc_billing", "queryName", "perDiemFeeRates", "query.param.StartDate", startDate, "query.param.EndDate", endDate)));
         DataRegionTable perDiemFeeRates = new DataRegionTable("query", this);
-        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.0", "0.3", "$780.00");
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.00000", "0.3", "$780.00");
         actualRowData = perDiemFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
         assertEquals("Wrong row data for Per Diems: ", expectedRowData, actualRowData);
         assertEquals("One row should be displayed", perDiemFeeRates.getDataRowCount(), 1);

@@ -337,6 +337,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
     }
 
+    // this function renders the actual visible svg in some groups
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
 
@@ -368,7 +369,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             shape.style('pointer-events', 'none');
 
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
-            setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,setCtxMenuStyle, rackTypeString);
+            // in order to set the event pass in the context menu ref and styles to show/hide it
+            setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,mode,setCtxMenuStyle, rackTypeString);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             if(mode ==='view'){
@@ -529,7 +531,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 rackIdNum = extraContext.rack.rackId;
             }
         }
-        console.log("Loading Rack: ");
+
         if (!isDefault) {
             const optConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
@@ -545,7 +547,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             }
 
         }
-        let rack: Rack = rackGroup.racks.find(r => r.rowid === rowId);
+
+        let rack: Rack = rackGroup.racks.find(r => rackIdNum === r.itemId);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;

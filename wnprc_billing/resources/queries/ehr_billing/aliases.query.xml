@@ -3,10 +3,16 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
                 <javaCustomizer class="org.labkey.ehr_billing.table.EHR_BillingCustomizer" />
+                <importTemplates>
+                    <template label="WorkDay Template" url="/query/exportExcelTemplate.view?schemaName=ehr_billing&amp;query.queryName=aliasesTemplate&amp;captionType=Label&amp;filenamePrefix=aliasesTemplate" />
+                </importTemplates>
                 <tableTitle>Grant Accounts</tableTitle>
             <auditLogging>DETAILED</auditLogging>
             <columns>
                 <column columnName="alias">
+                    <importAliases>
+                        <importAlias>GrantWorkday</importAlias>
+                    </importAliases>
                     <columnTitle>Grant</columnTitle>
                     <nullable>false</nullable>
                 </column>
@@ -84,12 +90,21 @@
                 </column>
                 <column columnName="charge_grant_accounts_id"/>
                 <column columnName="uw_fund">
+                    <importAliases>
+                        <importAlias>Fund</importAlias>
+                    </importAliases>
                     <columnTitle>Fund</columnTitle>
                 </column>
                 <column columnName="uw_account">
+                    <importAliases>
+                        <importAlias>ledgerAccount</importAlias>
+                    </importAliases>
                     <columnTitle>Ledger Account</columnTitle>
                 </column>
                 <column columnName="uw_udds">
+                    <importAliases>
+                        <importAlias>costCenter</importAlias>
+                    </importAliases>
                     <columnTitle>Cost Center</columnTitle>
                 </column>
                 <column columnName="uw_class_code"/>

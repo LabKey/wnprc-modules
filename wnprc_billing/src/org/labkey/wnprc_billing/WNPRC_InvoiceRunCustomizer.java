@@ -15,6 +15,8 @@ public class WNPRC_InvoiceRunCustomizer extends AbstractTableCustomizer
     {
         addViewJetInvoiceItems(tableInfo);
         addDownloadCSV(tableInfo);
+        addViewWorkdayInvoiceItems(tableInfo);
+        addDownloadWorkdayCSV(tableInfo);
     }
 
     private void addViewJetInvoiceItems(TableInfo ti)
@@ -52,6 +54,48 @@ public class WNPRC_InvoiceRunCustomizer extends AbstractTableCustomizer
                 ActionURL url = new ActionURL(WNPRC_BillingController.GetJetInvoiceCSVAction.class, ti.getUserSchema().getContainer());
                 url.addParameter("runId", "${rowId}");
                 UrlColumn urlColumn = new UrlColumn(url, "Download CSV");
+                urlColumn.setName(colName);
+                return urlColumn;
+            });
+
+            ((AbstractTableInfo) ti).addColumn(wrappedColumnPDF);
+        }
+    }
+
+    private void addViewWorkdayInvoiceItems(TableInfo ti)
+    {
+        String colName = "viewWorkdayInvoice";
+
+        if (ti.getColumn(colName) == null)
+        {
+            WrappedColumn wrappedColumnPDF = new WrappedColumn(ti.getColumn("rowId"),colName);
+            wrappedColumnPDF.setHidden(false);
+            wrappedColumnPDF.setLabel("View Workday Invoice");
+
+            wrappedColumnPDF.setDisplayColumnFactory(colInfo -> {
+                String url = "/query/executeQuery.view?schemaName=wnprc_billing&" +
+                        "query.queryName=workdayInvoiceItems&query.runId~eq=${rowId}";
+                UrlColumn urlColumn = new UrlColumn(DetailsURL.fromString(url, ti.getUserSchema().getContainer()), "View Workday");
+                urlColumn.setName(colName);
+                return urlColumn;
+            });
+            ((AbstractTableInfo) ti).addColumn(wrappedColumnPDF);
+        }
+    }
+    private void addDownloadWorkdayCSV(TableInfo ti)
+    {
+        String colName = "downloadWorkdayCsv";
+
+        if (ti.getColumn(colName) == null)
+        {
+            WrappedColumn wrappedColumnPDF = new WrappedColumn(ti.getColumn("rowId"),colName);
+            wrappedColumnPDF.setHidden(false);
+            wrappedColumnPDF.setLabel("Download Workday CSV");
+
+            wrappedColumnPDF.setDisplayColumnFactory(colInfo -> {
+                ActionURL url = new ActionURL(WNPRC_BillingController.GetWorkdayInvoiceCSVAction.class, ti.getUserSchema().getContainer());
+                url.addParameter("runId", "${rowId}");
+                UrlColumn urlColumn = new UrlColumn(url, "Download Workday CSV");
                 urlColumn.setName(colName);
                 return urlColumn;
             });

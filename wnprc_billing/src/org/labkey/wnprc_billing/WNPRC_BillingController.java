@@ -221,10 +221,26 @@ public class WNPRC_BillingController extends SpringActionController
         {
             String contentType = "text/plain";
             JetCSV csv = getJetCsv(invoiceRunForm.getRunId());
+            JetCSV csvWD = getWorkdayCsv(invoiceRunForm.getRunId());
             response.setContentType(contentType);
             response.setHeader("Content-Disposition", "attachment; filename=\"" + csv.getFileName() + ".csv" + "\"");
             response.setContentLength(csv.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET).length);
             response.getOutputStream().write(csv.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET));
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class GetWorkdayInvoiceCSVAction extends ExportAction<InvoiceRunForm>
+    {
+        @Override
+        public void export(InvoiceRunForm invoiceRunForm, HttpServletResponse response, BindException errors) throws Exception
+        {
+            String contentType = "text/plain";
+            JetCSV csvWD = getWorkdayCsv(invoiceRunForm.getRunId());
+            response.setContentType(contentType);
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + csvWD.getFileName() + ".csv" + "\"");
+            response.setContentLength(csvWD.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET).length);
+            response.getOutputStream().write(csvWD.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET));
         }
     }
 
@@ -299,6 +315,95 @@ public class WNPRC_BillingController extends SpringActionController
         return new JetCSV(fileName,writer.toString());
     }
 
+    private JetCSV getWorkdayCsv(int runId) throws IOException
+    {
+        List<JetInvoiceItem> invoiceItems = getWorkItems(runId);
+        if (invoiceItems.isEmpty())
+        {
+            throw new NotFoundException("Unable to generate JET CSV. Invoiced Items not found for the selected invoice.");
+        }
+
+        InvoiceRun invoiceRun = getInvoiceRunById(runId);
+        StringWriter writer = new StringWriter();
+
+        Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
+        String jetSettingFromModuleProperty = moduleProperties.get(WNPRC_BillingModule.JetCsvSetting).getEffectiveValue(getContainer());
+        String[] jetSettings = jetSettingFromModuleProperty.split(",");
+
+
+        CSVWriter csvWriter = new CSVWriter(writer,CSVWriter.DEFAULT_SEPARATOR,CSVWriter.NO_QUOTE_CHARACTER);
+        //csvWriter.writeNext(new String[]{"NSCT"});
+        csvWriter.writeNext(new String[]{"Submit Internal Service Delivery - v42.1"});
+        csvWriter.writeNext(new String[]{"Area", "All", "Internal Service Delivery Data", "Internal Service Delivery Line Data+"});
+        csvWriter.writeNext(new String[]{"Restrictions", "Required", "Optional", "Required","Required","Required",
+                "Optional", "Optional", "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",
+                "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Required",	"Required",
+                "Optional",	"Optional",	"Optional",	"Optional",	"Optional",	"Optional",	"Required",	"Optional",	"Optional",	"Optional. May have multiples",
+                "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",
+                "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples"});
+        csvWriter.writeNext(new String[]{"Format",	"Text",	"Y/N",	"Company_Reference_ID",	"Internal_Service_Provider_ID",	"YYYY-MM-DD", "YYYY-MM-DD",	"Text",	"Program_ID",
+                "Project_ID", "Gift_Reference_ID", "Cost_Center_Reference_ID",	"Fund_ID",	"Custom_Organization_Reference_ID",	"Custom_Organization_Reference_ID",	"Custom_Worktag_1_ID",
+                "Text",	"Number",	"Company_Reference_ID",	"Catalog_Item_ID",	"Revenue_Category_ID",	"Number (22,2)",	"UN_CEFACT_Common_Code_ID",	"Number (26,6)",	"Number (18,3)",
+                "YYYY-MM-DD", "Text", "Program_ID",	"Project_ID", "Grant_ID",	"Gift_Reference_ID", "Cost_Center_Reference_ID", "Fund_ID",	"Custom_Organization_Reference_ID",
+                "Custom_Organization_Reference_ID",	"Custom_Worktag_1_ID"});
+
+        String[] emptyLine = {""};
+        csvWriter.writeNext(emptyLine);
+        //csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
+        //        "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
+        csvWriter.writeNext(new String[]{"Fields",	"Spreadsheet Key*",	"Submit*",	"Company*",	"Internal Service Provider*",	"Document Date*",	"Delivery Date",	"Memo",
+                "Program",	"Project",	"Gift",	"Cost Center",	"Fund",	"Function",	"Activity",	"Additional Worktags",	"Row ID**",	"Internal Service Delivery Line Number*",
+                "Intercompany Affiliate", "Catalog Item",	"Revenue Category",	"Quantity*", "Unit of Measure*", "Unit Cost*", "Extended Amount*",	"Delivery Date", "Memo",
+                "Program",	"Project",	"Grant",	"Gift",	"Cost Center*",	"Fund*",	"Function*",	"Activity",	"Additional Worktags"});
+
+        double sum = 0.0;
+        for (JetInvoiceItem invoiceItem : invoiceItems)
+        {
+            csvWriter.writeNext(emptyLine);
+            csvWriter.writeNext(new String[]{
+                    invoiceItem.Department, //column 32
+                    invoiceItem.Fund,
+                    invoiceItem.Program,
+                    invoiceItem.Project,
+                    invoiceItem.ActivityID,
+                    String.valueOf(invoiceItem.Account != null ? invoiceItem.Account.intValue() : 0),
+                    invoiceItem.Class,
+                    String.valueOf(invoiceItem.Amount != null ? decimalFormat.format(invoiceItem.Amount.doubleValue()) : 0.00),
+                    invoiceItem.Description,
+                    (invoiceItem.billingPeriodMMyy + invoiceItem.Project), //Jnl_Ln_Ref
+                    invoiceItem.PurchRefNo,
+                    invoiceItem.VoucherNo,
+                    invoiceItem.InvoiceNo
+            });
+            sum += invoiceItem.Amount != null ? invoiceItem.Amount.doubleValue() : 0;
+        }
+
+        csvWriter.writeNext(emptyLine);
+        //last row in JET CSV with a negative total
+        csvWriter.writeNext(new String[]{
+                jetSettings[0], //Department
+                jetSettings[1], //Fund
+                jetSettings[2], //Program
+                jetSettings[3], //Project
+                null, //ActivityID
+                jetSettings[4], //Account,
+                null, //Class
+                String.valueOf(decimalFormat.format(sum * -1.0)), //Amount
+                invoiceItems.get(0).Description, //Description, which is same for all the rows
+                (invoiceItems.get(0).billingPeriodMMyy + jetSettings[3]), //Jnl_Ln_Ref. billingPeriodMMyy is same for all the rows
+                null, //PurchRefNo
+                null, //VoucherNo
+                null //InvoiceNo
+        });
+        csvWriter.writeNext(emptyLine);
+        csvWriter.close();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yy");
+        String fileName = "JET_" + dateFormat.format(invoiceRun.getBillingPeriodStart()) + "_" +
+                dateFormat.format(invoiceRun.getBillingPeriodEnd());
+        return new JetCSV(fileName,writer.toString());
+    }
+
     private class JetCSV{
         private final String _fileName;
         private final String _csvData;
@@ -324,6 +429,15 @@ public class WNPRC_BillingController extends SpringActionController
     {
         UserSchema wnprc_billing = QueryService.get().getUserSchema(getUser(), getContainer(), WNPRC_BillingSchema.NAME);
         TableInfo tableInfo = wnprc_billing.getTable(WNPRC_BillingSchema.TABLE_JET_INVOICE_ITEMS);
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("runId"), runId);
+        TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
+        return tableSelector.getArrayList(JetInvoiceItem.class);    }
+
+    private List<JetInvoiceItem> getWorkItems(int runId)
+    {
+        UserSchema wnprc_billing = QueryService.get().getUserSchema(getUser(), getContainer(), WNPRC_BillingSchema.NAME);
+        TableInfo tableInfo = wnprc_billing.getTable(WNPRC_BillingSchema.TABLE_WORKDAY_INVOICE_ITEMS);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("runId"), runId);
         TableSelector tableSelector = new TableSelector(tableInfo, filter, null);

@@ -25,7 +25,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.InsertRowsCommand;
-import org.labkey.remoteapi.query.SaveRowsResponse;
+import org.labkey.remoteapi.query.RowsResponse;
 import org.labkey.remoteapi.query.TruncateTableCommand;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
@@ -279,7 +279,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Loading data in: " + schemaName + "." + queryName);
         InsertRowsCommand command = new InsertRowsCommand(schemaName, queryName);
         command.setRows(rows);
-        SaveRowsResponse response = command.execute(connection, projectName);
+        RowsResponse response = command.execute(connection, projectName);
         return response.getRows();
     }
 

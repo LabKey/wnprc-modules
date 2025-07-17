@@ -29,7 +29,7 @@ import org.labkey.remoteapi.SimplePostCommand;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.ImportDataCommand;
 import org.labkey.remoteapi.query.InsertRowsCommand;
-import org.labkey.remoteapi.query.SaveRowsResponse;
+import org.labkey.remoteapi.query.RowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.remoteapi.query.Sort;
@@ -1962,7 +1962,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Loading tsv data: " + schemaName + "." + queryName);
         InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
         command.setRows(tsv);
-        SaveRowsResponse response = command.execute(connection, folderPath);
+        RowsResponse response = command.execute(connection, folderPath);
         return response.getRows();
     }
 

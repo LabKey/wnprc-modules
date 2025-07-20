@@ -229,5 +229,8 @@
     <dataset name="BehaviorAbstract" id="5015" category="ColonyManagement" type="Standard">
       <tags/>
     </dataset>
+    <dataset name="cases" id="6020" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
   </datasets>
 </datasets>

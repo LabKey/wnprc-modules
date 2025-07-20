@@ -248,6 +248,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.updateEHRFormFrameworkTypes();
 
+        initTest.addWnprcEHRWebparts();
+        initTest._containerHelper.createSubfolder(EHR_FOLDER_PATH, "About The EHR", "Collaboration");
+        initTest._containerHelper.createSubfolder(EHR_FOLDER_PATH, "Backups", "Collaboration");
+        initTest._containerHelper.createSubfolder(EHR_FOLDER_PATH + "/Backups", "Gems Backups", "Collaboration");
+        initTest.addWNPRCGroups();
+
         initTest.createEHRLinkedSchema("/" + EHR_FOLDER_PATH); // Needed for query validation
         initTest._schemaHelper.createLinkedSchema("/" + EHR_FOLDER_PATH, "PublicSOPs", "/" + EHR_FOLDER_PATH, null, "lists", null, null);
 
@@ -281,7 +287,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.checkUpdateProgramIncomeAccount();
 
-        initTest.notificationRevampSetup(); //TODO: to uncomment, fix issue mentioned here - https://www.labkey.org/WNPRC/support%20tickets/issues-details.view?issueId=51256
+        initTest.notificationRevampSetup();
+
+        initTest.populateAnimalRequestTableLookups();
     }
 
     private void billingSetup() throws Exception
@@ -387,6 +395,40 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         int numRows = insertCmd.execute(cn, PRIVATE_FOLDER_PATH).getRows().size();
         log("Inserted " + numRows + " into ehr_billing.procedureQueryChargeIdAssoc table.");
+    }
+
+    @Override
+    protected List<String> skipLinksForCrawling()
+    {
+        List<String> links = new ArrayList<>(super.skipLinksForCrawling());
+        links.add("wnprc_ehr-PerDiems.view");
+        links.add("wnprc_ehr-WaterCalendar.view");
+        links.add("wnprc_ehr-NecropsySchedule.view");
+        return links;
+    }
+
+    @Override
+    protected List<String> skipLinksForValidation()
+    {
+        List<String> links = new ArrayList<>(super.skipLinksForValidation());
+        links.add("query-executeQuery.view?query.queryName=Current%20Colony%20Condition&schemaName=study");
+        links.add("query-executeQuery.view?schemaName=col_dump&query.queryName=mysql_check");
+//        links.add("ehr-dataEntryFormDetails.view?formtype=Enter%20Water%20Orders&taskid=");
+        links.add("wnprc_ehr-UnscheduleBCReports.view");
+        links.add("wnprc_ehr-ScheduleBCReports.view");
+        links.add("Documentation/Admin/project-begin.view");
+        links.add("Documentation/Data Management/project-begin.view");
+        links.add("Development Notes/project-begin.view");
+        links.add("/Logs/project-begin.view");
+        return links;
+    }
+
+    private void addWNPRCGroups()
+    {
+        _permissionsHelper.createGlobalPermissionsGroup("veterinarians (LDAP)");
+        _permissionsHelper.createGlobalPermissionsGroup("compliance (LDAP)");
+        _permissionsHelper.createGlobalPermissionsGroup("animalcare (LDAP)");
+        _permissionsHelper.createGlobalPermissionsGroup("pathology (LDAP)");
     }
 
     @LogMethod
@@ -653,6 +695,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //add WNPRC Finance Admin webpart
         (new PortalHelper(this)).addWebPart("WNPRC Finance Admin");
+    }
+
+    private void addWnprcEHRWebparts()
+    {
+        log("Add WNPRC EHR Webparts.");
+
+        //enable Page Admin Mode
+        new SiteNavBar(getDriver()).enterPageAdminMode();
+
+        (new PortalHelper(this)).removeAllWebParts();
+        (new PortalHelper(this)).addWebPart("WNPRC Electronic Health Record ");
+        (new PortalHelper(this)).addWebPart("wnprcUnits");
     }
 
     private void addBillingPublicWebParts()
@@ -3185,6 +3239,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public void populateAnimalRequestTableLookups() throws IOException, CommandException
     {
+        goToEHRFolder();
 
         populateLookupSet("animal_requests_sex");
         populateLookupVals("animal_requests_sex", "value", "M");
@@ -3317,7 +3372,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = currentDate.format(formatter);
         goToEHRFolder();
-        populateAnimalRequestTableLookups();
+
         navigateToAnimalRequestForm();
         waitForText("Comments:");
         //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
@@ -3425,6 +3480,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("newCreditToAccountField", "testString");
         click(Locator.tagWithId("button","updateCreditToAccountButton"));
 
+        sleep(2000);
         //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
         assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
 

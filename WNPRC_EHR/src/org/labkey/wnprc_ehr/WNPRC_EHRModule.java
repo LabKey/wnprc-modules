@@ -45,10 +45,12 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.Directive;
 import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.filters.ContentSecurityPolicyFilter;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
@@ -192,6 +194,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     protected void init() {
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
         addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
+
+        ContentSecurityPolicyFilter.registerAllowedSources("bs_style", Directive.Style, "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css");
+        ContentSecurityPolicyFilter.registerAllowedSources("bs_font", Directive.Font, "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/fonts/");
 
         registerRoles();
         registerPermissions();

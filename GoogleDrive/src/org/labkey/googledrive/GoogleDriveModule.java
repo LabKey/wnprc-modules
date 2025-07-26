@@ -38,11 +38,14 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
         Container home = ContainerManager.getHomeContainer();
 
         // Ensure that we're enabled in the home module, since we'll use that for our queries.
-        Set<Module> homeModules = new HashSet<>();
-        homeModules.addAll(home.getActiveModules());
-        if (!homeModules.contains(thisModule)) {
-            homeModules.add(thisModule);
-            home.setActiveModules(homeModules);
+        if (ModuleLoader.getInstance().shouldInsertData())
+        {
+            Set<Module> homeModules = new HashSet<>(home.getActiveModules());
+            if (!homeModules.contains(thisModule))
+            {
+                homeModules.add(thisModule);
+                home.setActiveModules(homeModules);
+            }
         }
     }
 

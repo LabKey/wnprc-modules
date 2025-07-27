@@ -403,7 +403,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         List<String> links = new ArrayList<>(super.skipLinksForCrawling());
         links.add("wnprc_ehr-PerDiems.view");
         links.add("wnprc_ehr-WaterCalendar.view");
-        links.add("wnprc_ehr-NecropsySchedule.view");
         return links;
     }
 
@@ -411,11 +410,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected List<String> skipLinksForValidation()
     {
         List<String> links = new ArrayList<>(super.skipLinksForValidation());
-        links.add("query-executeQuery.view?query.queryName=Current%20Colony%20Condition&schemaName=study");
+        links.add("query-executeQuery.view?query.queryName=Current Colony Condition&schemaName=study");
         links.add("query-executeQuery.view?schemaName=col_dump&query.queryName=mysql_check");
 //        links.add("ehr-dataEntryFormDetails.view?formtype=Enter%20Water%20Orders&taskid=");
         links.add("wnprc_ehr-UnscheduleBCReports.view");
         links.add("wnprc_ehr-ScheduleBCReports.view");
+        links.add("wnprc_ehr-NecropsySchedule.view");
         links.add("Documentation/Admin/project-begin.view");
         links.add("Documentation/Data Management/project-begin.view");
         links.add("Development Notes/project-begin.view");

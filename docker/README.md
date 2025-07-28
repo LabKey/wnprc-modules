@@ -51,15 +51,20 @@ From a clone embedded inside a LabKey development setup with all the source code
 ```
 Each of the custom images has its own build task as well (e.g., `buildLabkey`, `buildEhrcron`) and all have corresponding tasks using the pluging (e.g. `buildEhrcronPlug`, `buildPostfixPlug`). The Labkey and ehrcranrnutils images depend on hooks (`~/hooks/build`) which is used in Docker Hub to correctly interpret GitHub branches naming convencion and build the image for the correct architecture (i.e., arm64 and adm64). This same hook is used by the gradle task to download the correct LabKey installer from TeamCity and create the corresponding Docker image. These build tasks does not have a companion option using the plugin version.
 
-For newer Apple Silicon all docker images can be built for ARM processors or as multi-platform builds by using:
+For newer Apple Silicon all docker images can be built for ARM processors or as multi-platform builds by using the platform argument. Before building a multi-platform version a new builder has to be created.
 ```
+docker buildx create --name=container 
+```
+This builder uses an emulator to create images for AMD processor. In the Apple Silicon the build process for AMD images take longer therefore is best to just use arm64 or the default builder.
+```
+--platform linux/arm64
 --platform linux/arm64,linux/amd64
 ```  
 
 Other than using Gradle, the images can each be built directly using Docker by executing a command like this:
 ```
 docker build -t wnprcehr/ehrcron:vX.X.X ehrcron
-docker build --builder container --platform linux/arm64 -t wnprcehr/cranrnutils:cranrnutils_24.11_livebackuptestserver --load cranrnutils
+docker build --builder container --platform linux/arm64 -t wnprcehr/cranrnutils:cranrnutils_YY.MM_featureBranch --load cranrnutils
 ```
 If  changes are only committed to TeamCity or a new based LabKey build needs to be created, use --no-cache option. To build localy, you must obtain the URL to download the installer from TeamCity. The Dockerfile connects to TeamCity using a set of credentials and downloads the LabKey installer.
 ```
@@ -88,10 +93,14 @@ labkeyTeamcityPassword=<your password>
 
 To build using Docker directly, you will need to pass those same credentials as run-time build arguments on the command line:
 ```
-docker build \
-    --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
-    --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
-    -t wnprcehr/labkey:XX.X labkey
+docker build                                                        \
+--builder container --platform linux/arm64,linux/amd64              \
+--build-arg LABKEY_TEAMCITY_USERNAME=<your username>                \
+--build-arg LABKEY_TEAMCITY_PASSWORD=<your password>                \
+--build-arg TEAMCITY_URL=<Teamcity url to download installer>       \
+--build-arg FB_NAME=<Feature_Branch>                                \
+--build-arg LK_VERSION=<YY.MM> --no-cache --rm=true --load          \
+-t wnprcehr/labkey:YY.MM_Feature_Branch labkey
 ```
 If you want to build an image for a specific branch within Github, you should pass one additional argument `--build-arg TOMCAT_IMAGE`. Your commands will look something like this, use the name of the branch without the fb prefix, the name should match as how TeamCity creates the image:
 ```
@@ -104,11 +113,11 @@ docker build \
 
 The LabKey image depends on the Tomcat image, which can be dowloaded from Docker Hub or built locally. This image takes a long time to build from scratch, it is best to download it from Docker Hub. Here are the commands to download or build this image.
 ```
-./gradlew downloadTomcat -PbranchName=<XX.YY_fb_name>
+./gradlew downloadCranr -PbranchName=<XX.YY_fb_name>
 ./gradlew downloadTomcatPlug -PbranchName=<XX.YY_fb_name>
 
-./gradlew buildTomcat -PbranchName=<XX.YY_fb_name>
-./gradlew buildTomcatPlug -PbranchName=<XX.YY_fb_name>
+./gradlew buildCranr -PbranchName=<XX.YY_fb_name>
+./gradlew buildCranrPlug -PbranchName=<XX.YY_fb_name>
 
 docker build --no-cache -t wnprcehr/tomcat:tomcat9_<XX.YY_fb_name> tomcat
 ```
@@ -194,7 +203,7 @@ In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end
 
 Finally, in your `compose.yaml` file edit the name of the LabKey service, it should be unique, therefore check other development folders for all the names used.
 
-All the auxiliary LabKey instances can be managed via the manage_all_continers.sh script. This script accepts two values (-s || -d), s starts all the containers in the docker folder. Starts with the primary which contains postgres and than looks for any folder that starts with dev.
+All the auxiliary LabKey instances can be managed via the manage_all_continers.sh script. This script accepts two values (i.e., -s || -d), `-s` - starts all the containers in the docker folder and `-d` - shuts down all the instances running in the server. This script starts with the primary which contains postgres and than looks for any folder that has the prefix dev.
 
 ## Loading a Database Backup Using the Script
 

@@ -445,7 +445,7 @@ tasks.register("downloadPostfixPlug",DockerPullImage){
     dependsOn 'checkDocker'
 }
 
-tasks.register("downloadTomcat"){
+tasks.register("downloadCranr"){
     doLast {
         def dockerStr = providers.gradleProperty("branchName")
         if (dockerStr.present)
@@ -454,11 +454,11 @@ tasks.register("downloadTomcat"){
             String branchName = dockerStr.get()
             t.project.exec {
                 executable "docker"
-                args "pull", "wnprcehr/tomcat:tomcat9_${branchName}"
+                args "pull", "wnprcehr/cranrnutils:cranrnutils_${branch}"
             }
         }
         else{
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcat -PbranchName=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadCranr -PbranchName=22.11_fb)'
         }
     }
     group 'Docker'
@@ -467,8 +467,8 @@ tasks.register("downloadTomcat"){
 
 }
 
-tasks.register("downloadTomcatPlug",DockerPullImage){
-    image = "wnprcehr/tomcat:tomcat9_${branchName}"
+tasks.register("downloadCranrPlug",DockerPullImage){
+    image = "wnprcehr/cranrnutils:cranrnutils_${branch}"
     
     onComplete{
         def dockerStr = providers.gradleProperty("branchName")
@@ -478,7 +478,7 @@ tasks.register("downloadTomcatPlug",DockerPullImage){
         }
         else{
 
-            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadTomcatPlug -PbranchName=22.11_fb)'
+            logger.warn 'Must provide docker string via command line. (ex. ./gradlew downloadCranrPlug -PbranchName=22.11_fb)'
         }
     }
     doLast{

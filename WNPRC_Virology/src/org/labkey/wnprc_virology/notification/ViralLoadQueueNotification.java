@@ -4,6 +4,7 @@ import jakarta.mail.Address;
 import jakarta.mail.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
@@ -65,7 +66,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
 
     public Map<String, Object> _emailSummaryTable;
-    public Map<Integer, String> _accounts = new HashMap<>();
+    public Map<Integer, String> _accounts = new IntHashMap<>();
     private static final Logger _log = LogHelper.getLogger(ViralLoadQueueNotification.class, "Server-side logger for WNPRC_Virology notifications");
 
     public ViralLoadQueueNotification(Module owner)
@@ -210,7 +211,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 }
                 // old notes:
                 //emails.put(createdByUserId, getEmailArray(notifyEmails)); - old way, user id is unique.
-                //used to use public Map<Integer, List<String>> emails = new HashMap<Integer,List<String>>();
+                //used to use public Map<Integer, List<String>> emails = new IntHashMap<Integer,List<String>>();
                 //but ideally instead of Integer as the key it would be a a string of:
                 //submitter email + notify email string(normalized = sorted in such a way there arent repeats).
                 countEmailsAndPut(notifyEmails);
@@ -247,7 +248,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }*/
         //pull out accounts
         Set<Integer> accounts = new HashSet<>();
-        Map<Integer, Integer> accountsAndCount = new HashMap<>();
+        Map<Integer, Integer> accountsAndCount = new IntHashMap<>();
         Integer arr[] = new Integer[VLSampleListResults.size()];
         for (int i = 0; i < VLSampleListResults.size(); i++)
         {

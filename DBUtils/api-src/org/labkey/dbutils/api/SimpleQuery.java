@@ -1,5 +1,6 @@
 package org.labkey.dbutils.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.labkey.api.data.ColumnInfo;
@@ -267,15 +268,16 @@ public class SimpleQuery<RowType> extends QueryHelper {
             extGridColumn.put("tooltip", dc.getDescription());
         if (dc.getWidth() != null)
         {
+            extGridColumn.put("width", dc.getWidth());
             try
             {
                 //try to parse as integer (which is what Ext wants)
-                extGridColumn.put("width", Integer.parseInt(dc.getWidth()));
+                if (StringUtils.isNotBlank(dc.getWidth()))
+                    extGridColumn.put("width", Integer.parseInt(dc.getWidth()));
             }
-            catch(NumberFormatException e)
+            catch (NumberFormatException e)
             {
-                //include it as a string
-                extGridColumn.put("width", dc.getWidth());
+                // pass
             }
         }
 

@@ -17,6 +17,7 @@ package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -87,6 +88,7 @@ import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -3485,7 +3487,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         click(Locator.tagWithId("button","updateCreditToAccountButton"));
 
         //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
-        Awaitility.await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> 
+        Awaitility.await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
             assertEquals("Updated Program Income Account with invalid permissions.",
                 "testString", Locator.id("ctaCell1").findElement(getDriver()).getText()));
 

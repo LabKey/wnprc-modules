@@ -701,12 +701,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Add WNPRC EHR Webparts.");
 
-        //enable Page Admin Mode
-        new SiteNavBar(getDriver()).enterPageAdminMode();
-
-        (new PortalHelper(this)).removeAllWebParts();
-        (new PortalHelper(this)).addWebPart("WNPRC Electronic Health Record ");
-        (new PortalHelper(this)).addWebPart("wnprcUnits");
+        new PortalHelper(getDriver()).doInAdminMode(ph -> {
+            ph.removeAllWebParts();
+            ph.addWebPart("WNPRC Electronic Health Record ");
+            ph.addWebPart("wnprcUnits");
+        });
     }
 
     private void addBillingPublicWebParts()

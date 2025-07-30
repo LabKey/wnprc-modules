@@ -231,12 +231,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.clickFolder("EHR");
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "PrimateId", "CageUI"));
-        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("PrimateId", "/" +
-                initTest.getProjectName(), "PrimateIdPrefix", "Prefix (2 chars max)", "XX")));
+        List<ModulePropertyValue> properties = new ArrayList<>();
+        properties.add(new ModulePropertyValue("EHR_Billing", "/" + initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH));
+        properties.add(new ModulePropertyValue("PrimateId", "/" + initTest.getProjectName(), "PrimateIdPrefix", "Prefix (2 chars max)", "XX"));
+        properties.add(new ModulePropertyValue("WNPRC_EHR", "/", "NightlyTestServer", initTest.getURL().toString()));
+        initTest.setModuleProperties(properties);
 
         initTest.goToEHRFolder();
         initTest._containerHelper.createSubfolder(initTest.getProjectName(), "WNPRC_Units", "Collaboration");
@@ -427,9 +426,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         links.add("Documentation/Data Management/project-begin.view");
         links.add("Development Notes/project-begin.view");
         links.add("/Logs/project-begin.view");
-
-        // Link on home page (Nightly-EHRTestServer) not fully set up
-        links.add("WNPRC/EHR/undefined");
 
         return links;
     }

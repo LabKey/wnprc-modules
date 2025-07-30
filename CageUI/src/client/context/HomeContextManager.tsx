@@ -1,29 +1,28 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
-    CageModification, CageModifications, CageModType,
+    Cage,
+    CageMapKey, CageModification, CageModificationsType,
     CageNumber,
-    CageWithMods,
-    ModData,
-    ModLocations, ModTypes,
+    CurrRoomMods,
+    ModData, ModDirections, ModLocations,
+    ModTypes,
     PrevRoom,
     Rack,
     RackGroup,
-    Room
+    Room,
+    RoomMods
 } from '../types/typings';
 import { HomeContextType } from '../types/homeContextTypes';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
-import {
-    labkeyActionSelectDistinctWithPromise,
-    labkeyActionSelectWithPromise,
-    labkeySaveRows
-} from '../api/labkeyActions';
-import {findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
-import { buildNewLocalRoom, extractNumbers, parseRoomItemNum } from '../utils/helpers';
-import { LayoutSaveResult, SelectedObj } from '../types/layoutEditorTypes';
+import { labkeyActionSelectWithPromise, labkeySaveRows } from '../api/labkeyActions';
+import { findCageInGroup, findRackInGroup, getAdjDirection } from '../utils/LayoutEditorHelpers';
+import { buildNewLocalRoom, parseRoomItemNum } from '../utils/helpers';
+import { SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
-import { compareMods } from '../utils/homeHelpers';
+import { compareMods, getAdjLocation, resetMod } from '../utils/homeHelpers';
+//import { compareMods } from '../utils/homeHelpers';
 
 
 const HomeContext = createContext<HomeContextType>({} as HomeContextType);
@@ -46,7 +45,11 @@ export const HomeContextProvider = ({children}) => {
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
     const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
-    const [selectedCage, setSelectedCage] = useState<CageWithMods>(null);
+    const [selectedCage, setSelectedCage] = useState<Cage>(null);
+
+    const [roomMods, setRoomMods] = useState<RoomMods>({});
+    const [prevRoomMods, setPrevRoomMods] = useState<RoomMods>({});
+
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [abortController, setAbortController] = useState(null);
     const [roomRefresh, setRoomRefresh] = useState<boolean>(false);
@@ -126,7 +129,7 @@ export const HomeContextProvider = ({children}) => {
         }
         const modHistoryConfig = {
             schemaName: 'cageui',
-            queryName: 'cage_modifications',
+            queryName: 'cage_modifications_history',
             columns: [],
             filterArray: [
                 Filter.create('room', selectedPage.room, Filter.Types.EQUALS),
@@ -146,21 +149,20 @@ export const HomeContextProvider = ({children}) => {
                 if(modResult.rowCount > 0){
                     modResult.rows.forEach((row) => {
                         const newRow: ModData = {
-                            cage: row.cage,
                             location: row.location,
-                            locationId: row.locationid,
-                            subsectionId: row.subsectionid,
+                            modId: row.modId,
+                            subId: row.subId,
+                            cage: row.cage,
                             modification: row.modification,
-                            rack: row.rack,
+                            rackRowId: row.rack,
                             room: row.room,
                             rowid: row.rowid,
                             startDate: row.startDate,
-                            endDate: row.endDate,
+                            endDate: row.endDate
                         };
                         tempModData.push(newRow);
-                    })
+                    });
                 }
-
 
                 const prevRoom: PrevRoom = {
                     name: selectedPage.room,
@@ -168,12 +170,15 @@ export const HomeContextProvider = ({children}) => {
                     layoutData: tempNewRoom.layoutData,
                     modData: modResult.rowCount > 0 ? tempModData : undefined,
                 }
+                console.log("Prev Room: ", prevRoom)
                 buildNewLocalRoom(prevRoom).then((d) => {
                     if(d){
                         tempNewRoom = {
                             ...d,
                             layoutData: tempNewRoom.layoutData,
                         }
+                        setRoomMods(d.mods);
+                        setPrevRoomMods(d.mods);
                         setLoadedRooms((prevRooms) => ({
                             ...prevRooms,
                             [tempNewRoom.name]: {loaded: true, room: tempNewRoom}
@@ -216,24 +221,306 @@ export const HomeContextProvider = ({children}) => {
         setSelectedCage(currCage)
     }, [selectedPage.cage]);
 
-    const saveCageMods = async (currCage: CageWithMods, prevMods: ModData[]): Promise<ModificationSaveResult> => {
+    // Saves cage mods from popup window for submission
+    //TODO Add checks to prevent mods of same types to be connected.
+    const saveCageMods = (currCage: Cage, currCageMods: CurrRoomMods): ModificationSaveResult  => {
+        console.log("Saving cage mods: ", currCageMods);
+
+        // convert currCageMods -> roomMods
+
+        const newCageKeys: {[key in CageNumber]: CageModificationsType} = {};
+
+
+        const tempRoomMods: RoomMods = roomMods;
+        let newRoomMods: RoomMods = {};
+        // captures used mod keys, at the end we can check for mods that are removed using this
+        const usedKeys: CageMapKey[] = [];
+
+        // Currently subsections only is for non direct mods
+        currCageMods.currCage.forEach((mod) => {
+            tempRoomMods[mod.id] = {label: mod.label, value: mod.value}
+            usedKeys.push(mod.id);
+
+            if(!newCageKeys[currCage.cageNum]){
+                newCageKeys[currCage.cageNum] = {
+                    [ModLocations.Top]: [],
+                    [ModLocations.Bottom]: [],
+                    [ModLocations.Left]: [],
+                    [ModLocations.Right]: [],
+                    [ModLocations.Direct]: [{subId: 1, mods: [mod.id]}]
+                };
+            }else{
+                newCageKeys[currCage.cageNum] = {
+                    ...newCageKeys[currCage.cageNum],
+                    [ModLocations.Direct]: newCageKeys[currCage.cageNum][ModLocations.Direct].map((subsections) => {
+                        if(subsections.subId === 1){
+                            return ({
+                                ...subsections,
+                                mods: [...subsections.mods, mod.id]
+                            })
+                        }
+                    })
+                };
+            }
+        });
+
+        Object.entries(currCageMods.adjCages).forEach(([direction, allDirMods]) => {
+            allDirMods.forEach((modSubsection) => {
+                const cageMods = modSubsection.mods;
+                cageMods.forEach((mod) => {
+                    tempRoomMods[mod.id] = {label: mod.label, value: mod.value}
+                    usedKeys.push(mod.id);
+
+                    if(!newCageKeys[modSubsection.currCage.cageNum]){
+                        newCageKeys[modSubsection.currCage.cageNum] = {
+                            [ModLocations.Top]: [],
+                            [ModLocations.Bottom]: [],
+                            [ModLocations.Left]: [],
+                            [ModLocations.Right]: [],
+                            [ModLocations.Direct]: []
+                        };
+                        newCageKeys[modSubsection.currCage.cageNum][direction] = [{subId: 1, mods: [mod.id]}]
+                    }else{
+                        // update current cage mod
+                        const currMods = newCageKeys[modSubsection.currCage.cageNum][direction];
+                        if(currMods.length === 0){
+                            newCageKeys[modSubsection.currCage.cageNum] = {
+                                ...newCageKeys[modSubsection.currCage.cageNum],
+                                [direction]: [{
+                                    subId: 1,
+                                    mods: [ mod.id]
+                                }]
+                            };
+                        }else{
+                            //TODO fix the id and subId matching system for this
+                            newCageKeys[modSubsection.currCage.cageNum] = {
+                                ...newCageKeys[modSubsection.currCage.cageNum],
+                                [direction]: newCageKeys[modSubsection.currCage.cageNum][direction].map((subsections) => {
+                                    console.log("Current SUb: ", subsections)
+                                    if(subsections.subId === modSubsection.id){
+                                        return ({
+                                            ...subsections,
+                                            mods: [...subsections.mods, mod.id]
+                                        })
+                                    }else{
+                                        return subsections;
+                                    }
+                                })
+                            };
+                        }
+
+                    }
+
+                    if(!newCageKeys[modSubsection.adjCage.cageNum]){
+                        newCageKeys[modSubsection.adjCage.cageNum] = {
+                            [ModLocations.Top]: [],
+                            [ModLocations.Bottom]: [],
+                            [ModLocations.Left]: [],
+                            [ModLocations.Right]: [],
+                            [ModLocations.Direct]: []
+                        };
+                        newCageKeys[modSubsection.adjCage.cageNum][getAdjLocation(parseInt(direction) as ModLocations)] = [{subId: 1, mods: [mod.id]}]
+                    }else{
+
+                        const currMods = newCageKeys[modSubsection.adjCage.cageNum][getAdjLocation(parseInt(direction) as ModLocations)];
+                        if(currMods.length === 0){
+                            newCageKeys[modSubsection.adjCage.cageNum] = {
+                                ...newCageKeys[modSubsection.adjCage.cageNum],
+                                [getAdjLocation(parseInt(direction) as ModLocations)]: [{
+                                    subId: 1,
+                                    mods: [ mod.id]
+                                }]
+                            };
+                        }else{
+                            //TODO fix the id and subId matching system for this
+                            // update adjacent cage mod
+                            newCageKeys[modSubsection.adjCage.cageNum] = {
+                                ...newCageKeys[modSubsection.adjCage.cageNum],
+                                [getAdjLocation(parseInt(direction) as ModLocations)]: newCageKeys[modSubsection.adjCage.cageNum][getAdjLocation(parseInt(direction) as ModLocations)].map((subsections) => {
+                                    if(subsections.subId === modSubsection.id){
+                                        return ({
+                                            ...subsections,
+                                            mods: [...subsections.mods, mod.id]
+                                        })
+                                    }else{
+                                        return subsections;
+                                    }
+                                })
+                            };
+                        }
+
+                    }
+                })
+            })
+        })
+        console.log("Temp Mods: ", tempRoomMods);
+
+        // Updating adjacent racks
+        Object.entries(currCageMods.adjRacks).forEach(([direction, connectedRacks]) => {
+            connectedRacks.forEach((modSubsection) => {
+                const cageMods = modSubsection.mods;
+                cageMods.forEach((mod) => {
+                    tempRoomMods[mod.id] = {label: mod.label, value: mod.value}
+                    usedKeys.push(mod.id);
+
+                    // Create update for current cage
+                    if(!newCageKeys[modSubsection.currCage.cageNum]){
+                        newCageKeys[modSubsection.currCage.cageNum] = {
+                            [ModLocations.Top]: [],
+                            [ModLocations.Bottom]: [],
+                            [ModLocations.Left]: [],
+                            [ModLocations.Right]: [],
+                            [ModLocations.Direct]: []
+                        };
+                        newCageKeys[modSubsection.currCage.cageNum][direction] = [{subId: 1, mods: [mod.id]}]
+                    }else{
+                        // update current cage mod
+                        const currMods = newCageKeys[modSubsection.currCage.cageNum][direction];
+                        if(currMods.length === 0){
+                            newCageKeys[modSubsection.currCage.cageNum] = {
+                                ...newCageKeys[modSubsection.currCage.cageNum],
+                                [direction]: [{
+                                    subId: 1,
+                                    mods: [ mod.id]
+                                }]
+                            };
+                        }else{
+                            //TODO fix the id and subId matching system for this
+                            newCageKeys[modSubsection.currCage.cageNum] = {
+                                ...newCageKeys[modSubsection.currCage.cageNum],
+                                [direction]: newCageKeys[modSubsection.currCage.cageNum][direction].map((subsections) => {
+                                    console.log("Current SUb: ", subsections.subId, modSubsection.id)
+                                    if(subsections.subId === modSubsection.id){
+                                        return ({
+                                            ...subsections,
+                                            mods: [...subsections.mods, mod.id]
+                                        })
+                                    }else{
+                                        return subsections;
+                                    }
+                                })
+                            };
+                        }
+
+                    }
+
+                    // Create update for the adjacent cage
+
+                    /*
+                        ISSUE
+
+                           This currently wipes all the mods in the adjacent cage. what needs to happen is to remember prev mods or find a better way to track removals.
+                     */
+                    if(!newCageKeys[modSubsection.adjCage.cageNum]){
+                        newCageKeys[modSubsection.adjCage.cageNum] = {
+                            [ModLocations.Top]: modSubsection.adjCage.mods[ModLocations.Top] || [],
+                            [ModLocations.Bottom]: modSubsection.adjCage.mods[ModLocations.Bottom] || [],
+                            [ModLocations.Left]: modSubsection.adjCage.mods[ModLocations.Left] || [],
+                            [ModLocations.Right]: modSubsection.adjCage.mods[ModLocations.Right] || [],
+                            [ModLocations.Direct]: modSubsection.adjCage.mods[ModLocations.Direct] || [],
+                        };
+                        //newCageKeys[modSubsection.adjCage.cageNum][getAdjLocation(parseInt(direction) as ModLocations)] = [{subId: 1, mods: [mod.id]}]
+                    }
+                    const currMods = newCageKeys[modSubsection.adjCage.cageNum][getAdjLocation(parseInt(direction) as ModLocations)];
+                    if(currMods.length === 0){
+                        newCageKeys[modSubsection.adjCage.cageNum] = {
+                            ...newCageKeys[modSubsection.adjCage.cageNum],
+                            [getAdjLocation(parseInt(direction) as ModLocations)]: [{
+                                subId: 1,
+                                mods: [ mod.id]
+                            }]
+                        };
+                    }else{
+                        //TODO fix the id and subId matching system for this
+                        // update adjacent cage mod
+                        newCageKeys[modSubsection.adjCage.cageNum] = {
+                            ...newCageKeys[modSubsection.adjCage.cageNum],
+                            [getAdjLocation(parseInt(direction) as ModLocations)]: newCageKeys[modSubsection.adjCage.cageNum][getAdjLocation(parseInt(direction) as ModLocations)].map((subsections) => {
+                                if(subsections.subId === modSubsection.id){
+                                    return ({
+                                        ...subsections,
+                                        mods: [...subsections.mods, mod.id]
+                                    })
+                                }else{
+                                    return subsections;
+                                }
+                            })
+                        };
+                    }
+
+                })
+            })
+
+        })
+
+
+
+        // set removed mods to back to default states if required (floors/dividers)
+        Object.keys(tempRoomMods).forEach( async (key) => {
+            if(usedKeys.includes(key)){
+                newRoomMods[key] = {label: tempRoomMods[key].label, value: tempRoomMods[key].value}
+            }else{
+                newRoomMods[key] = await resetMod(tempRoomMods[key].value);
+                //newRoomMods[key] = {label: "", value: ""}
+            }
+        })
+
+        console.log(newRoomMods);
+        setRoomMods(newRoomMods);
+
+        setSelectedRoom(prevState => {
+            let newRackGroups = prevState.rackGroups;
+
+            Object.entries(newCageKeys).forEach(([cageNum, value]) => {
+                const {rack, rackGroup} = findCageInGroup(cageNum as CageNumber, newRackGroups);
+                newRackGroups = newRackGroups.map(g => ({
+                    ...g,
+                    racks: g.racks.map(r => ({
+                        ...r,
+                        cages: r.cages.map(c => {
+                            if(c.cageNum === cageNum){
+                                return ({
+                                    ...c,
+                                    mods: value
+                                })
+                            }else{
+                                return c;
+                            }
+                        })
+                    }))
+                }))
+            })
+            return {
+                ...prevState,
+                rackGroups: newRackGroups
+            }
+        })
+
+        return {
+            status: "Success"
+        }
+    }
+
+
+    const submitCageMods = async (currCage: Cage, currCageMods: CurrRoomMods): Promise<ModificationSaveResult> => {
         const {rack: currRack} = findCageInGroup(currCage.cageNum, selectedRoom.rackGroups);
         const commands: Command[] = [];
         const modsToSave: ModData[] = [];
         const modsToUpdate: ModData[] = [];
-        const modChanges = compareMods(prevMods, {mods: currCage.mods});
+        const modChanges = compareMods(prevRoomMods, currCageMods);
+        console.log("Mod Changes: ", modChanges);
         const newTimestamp = new Date();
         modChanges.forEach((change) => {
             const modLoc = parseInt(change.direction);
             // new mod data if adding or modifying
             const newModData: ModData = {
+                location: undefined,
+                subId: 0,
+                modId: '',
                 cage: parseRoomItemNum(currCage.cageNum),
                 endDate: null,
-                location: modLoc,
-                locationId: change.mod.id,
-                subsectionId: change.subsectionId,
-                modification: change.mod.mod as ModTypes,
-                rack: currRack.rowid,
+                modification: change.mod as ModTypes,
+                rackRowId: currRack.rowid,
                 room: selectedRoom.name,
                 startDate: newTimestamp
             };
@@ -242,15 +529,15 @@ export const HomeContextProvider = ({children}) => {
                 modsToSave.push(newModData);
             }else {
                 // Set old mod date end date
-                const modToEnd = prevMods.find((mod) => {
+                /*const modToEnd = prevRoomMods.find((mod) => {
                     // Finding the correct mod in the desired location that is currently active
                     // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
-                    return mod.rack === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.location === modLoc && mod.locationId === change.oldMod.id && mod.endDate === null;
+                    return mod.rackRowId === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.endDate === null;
                 });
                 modsToUpdate.push({...modToEnd, endDate: newTimestamp});
                 if (change.type === 'modified') { // add new mod if modified
                     modsToSave.push(newModData);
-                }
+                }*/
             }
         })
 
@@ -258,7 +545,7 @@ export const HomeContextProvider = ({children}) => {
             commands.push({
                 command: "update",
                 schemaName: "cageui",
-                queryName: "cage_modifications",
+                queryName: "cage_modifications_history",
                 rows: modsToUpdate
             });
         }
@@ -267,7 +554,7 @@ export const HomeContextProvider = ({children}) => {
             commands.push({
                 command: "insert",
                 schemaName: "cageui",
-                queryName: "cage_modifications",
+                queryName: "cage_modifications_history",
                 rows: modsToSave
             });
         }
@@ -314,7 +601,9 @@ export const HomeContextProvider = ({children}) => {
             selectedCage,
             selectedContextObj,
             setSelectedContextObj,
-            saveCageMods
+            saveCageMods,
+            submitCageMods,
+            roomMods,
         }}>
             {children}
         </HomeContext.Provider>

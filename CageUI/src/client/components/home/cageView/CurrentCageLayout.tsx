@@ -4,15 +4,16 @@ import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
-import { Cage, CageWithMods, DefaultRackTypes, ModLocations, RackTypes, RoomItemType } from '../../../types/typings';
+import { Cage, DefaultRackTypes, ModLocations, RackTypes, RoomItemType } from '../../../types/typings';
 import { CELL_SIZE } from '../../../utils/constants';
 
 interface CurrentCageLayoutProps {
-    cage: CageWithMods;
+    cage: Cage;
 }
 
 export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
     const {cage} = props;
+    const {roomMods} = useHomeContext();
 
     const cageRef = useRef<SVGSVGElement>(null);
 
@@ -25,7 +26,7 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
             const element = d3.select(this) as  d3.Selection<SVGGElement, {}, null, undefined>;
             element.remove();
         });
-        addPrevRoomSvgs('view', cage, cageSvg);
+        addPrevRoomSvgs('view', cage, cageSvg, roomMods);
     }, [cage]);
 
     // adding 1 to the width/height helps make sure the lines don't get cut off in the image

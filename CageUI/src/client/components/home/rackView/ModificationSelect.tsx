@@ -7,42 +7,29 @@ import { Option } from '@labkey/components';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { CageModType, CageWithMods, DirectionCategory, ModLocations, ModTypes, Rack } from '../../../types/typings';
+import { Cage, ModDirections, ModLocations, ModTypes, Rack } from '../../../types/typings';
 import { findCageInGroup, findRackInGroup } from '../../../utils/LayoutEditorHelpers';
 import { Simulate } from 'react-dom/test-utils';
 import change = Simulate.change;
+import { cageModLookup } from '../../../api/popularQueries';
 
 interface ModificationSelectProps {
-    cage: CageWithMods;
     removeMod: () => void;
     changeMod: (newMod: ModTypes) => void;
-    defaultValue?: Option<CageModType>;
-    directionCategory?: DirectionCategory;
+    defaultValue?: Option<ModTypes>;
+    directionCategory?: ModDirections;
 }
 
 export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
-    const {directionCategory, cage, defaultValue, removeMod, changeMod} = props;
+    const {directionCategory, defaultValue, removeMod, changeMod} = props;
     const {selectedRoom} = useHomeContext();
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
 
     useEffect(() => {
-        console.log("DV: ", defaultValue);
-    }, [defaultValue]);
-
-
-    useEffect(() => {
         // the filter here assigns vertical to above and below, horizontal to left and right, and if no direction given then it is direct
-        const roomsConfig: SelectRowsOptions = {
-            schemaName: 'ehr_lookups',
-            queryName: 'cageui_modifications',
-            columns: [],
-            filterArray: [Filter.create('category',
-                directionCategory ? directionCategory : "direct",
-                Filter.Types.EQUALS)]
-        }
-        console.log("Direction: ", directionCategory)
-
-        labkeyActionSelectWithPromise(roomsConfig).then(result => {
+        cageModLookup([], [Filter.create('category',
+            directionCategory ? directionCategory : ModDirections.Direct,
+            Filter.Types.EQUALS)]).then(result => {
             if(result.rows.length !== 0){
                 const rowOptions: Option<ModTypes>[] = [];
                 result.rows.forEach(row => {
@@ -51,12 +38,11 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log("Error fetching prev room", err);
+            console.log("Error fetching prev room mods", err);
         });
     }, []);
 
-    const handleChange = (option: Option<CageModType>) => {
-        console.log("Mod Change: ", option)
+    const handleChange = (option: Option<ModTypes>) => {
         // If dropdown is cleared remove it.
         if(!option){
             removeMod()

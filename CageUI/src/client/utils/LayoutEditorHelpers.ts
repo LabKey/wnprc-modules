@@ -31,10 +31,7 @@ import {
 import {
     Cage,
     CageDirection,
-    CageModification,
-    CageModifications,
     CageNumber,
-    CageWithMods,
     DefaultRackId,
     DefaultRackTypes,
     GroupId,
@@ -327,6 +324,7 @@ export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
     localRoomRef: MutableRefObject<Room>,
+    eventType: "view" | "edit",
     setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
     rackTypeString?: RackStringType
 ): () => void {
@@ -362,12 +360,20 @@ export function setupEditCageEvent(
 
     };
 
-    // Attach context menu to the lowest level group for that cFage.
+    // Attach context menu to the lowest level group for that cage.
     cageGroupElement.style.pointerEvents = 'bounding-box';
-    cageGroupElement.addEventListener('contextmenu', handleContextMenu);
+    if(eventType === "edit"){
+        cageGroupElement.addEventListener('contextmenu', handleContextMenu);
+    }else{
+        cageGroupElement.addEventListener('click', handleContextMenu);
+    }
 
     return () => {
-        cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
+        if(eventType === "edit"){
+            cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
+        }else{
+            cageGroupElement.removeEventListener('click', handleContextMenu);
+        }
     };
 }
 
@@ -405,7 +411,7 @@ export async function mergeRacks(props: MergeProps) {
             element.setAttribute('class',`grouped-${shapeType}`);
             element.setAttribute('style', "");
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, cageActionProps.setCtxMenuStyle, shapeType);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, "edit", cageActionProps.setCtxMenuStyle, shapeType);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.

@@ -7,6 +7,7 @@ import { RoomLayout } from '../roomView/RoomLayout';
 import { RoomDetails } from '../roomView/RoomDetails';
 import { RackModifications } from './RackModifications';
 import { RackDetails } from './RackDetails';
+import { CurrentRackLayout } from './CurrentRackLayout';
 
 export const RackViewContent: FC = () => {
     const {selectedPage, selectedRoom, selectedRack} = useHomeContext();
@@ -23,7 +24,11 @@ export const RackViewContent: FC = () => {
                     tabs={[{
                         name: 'Modifications',
                         children:
-                            <RackModifications />
+                            <>
+                                <RackModifications />
+                                <CurrentRackLayout />
+                            </>
+
                     },{
                         name: 'Details',
                         children: <RackDetails />

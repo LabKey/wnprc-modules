@@ -1,0 +1,58 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="cage_modifications" tableDbType="TABLE">
+                <tableTitle>Cage Modifications</tableTitle>
+                <columns>
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="modId" />
+                    <column columnName="room">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                            <fkDisplayColumnName>room</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="rack">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>racks</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>rack_type</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cage">
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                    </column>
+                    <column columnName="modification">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cage_modifications</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="location">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_modification_locations</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="subId" />
+                    <column columnName="startDate"/>
+                    <column columnName="endDate"/>
+                    <column columnName="container"/>
+                    <column columnName="createdby"/>
+                    <column columnName="created"/>
+                    <column columnName="modified"/>
+                    <column columnName="modifiedby"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

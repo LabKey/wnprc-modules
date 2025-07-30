@@ -304,7 +304,7 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  z-index: 10001;
+  z-index: 1001;
 }
 
 .popup-row {
@@ -1207,10 +1207,10 @@ margin-bottom: 10px;
 /* Style for each column */
 .mod-table-column {
   display: table-cell; /* Use table-cell layout */
-  padding: 10px; /* Adjust padding as needed */
+  padding: 10px 10px 10px 0; /* Adjust padding as needed */
   white-space: nowrap; /* Prevent text wrapping */
   min-width: 100px; /* Set a minimum width for columns */
-  text-align: center; /* Center text horizontally */
+  text-align: left;
 }
 
 .small-svg {
@@ -1227,6 +1227,7 @@ margin-bottom: 10px;
 .cage-layout {
   display: flex;
   flex-direction: row;
+  padding: 10px;
 }
 
 .cage-layout svg {
@@ -1291,7 +1292,6 @@ margin-bottom: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 20px;
   width: auto;
-  min-width: 300px;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -1336,7 +1336,6 @@ margin-bottom: 10px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: row;
-
 }
 
 .modification-editor-popup-input {
@@ -1390,3 +1389,101 @@ margin-bottom: 10px;
     transform: translate(-50%, -50%);
   }
 }
+
+
+/*
+Multi Dropdown Css
+
+ */
+
+.multi-select-container {
+  position: relative; /* This is crucial */
+  width: 100%;
+  max-width: 500px;
+  font-family: Arial, sans-serif;
+}
+
+.selected-items-container {
+  min-height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  cursor: pointer;
+  background-color: white;
+  position: relative; /* Ensure this stays in normal flow */
+}
+
+.multi-select-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px); /* Position below the container */
+  left: 0;
+  right: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10000; /* High z-index to ensure it's on top */
+  margin-top: 0; /* Remove any conflicting margin */
+}
+
+.selected-items-container:hover {
+  border-color: #888;
+}
+
+.placeholder {
+  color: #999;
+  padding: 8px;
+}
+
+.selected-item {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.remove-item {
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove-item:hover {
+  color: #f44336;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid #eee;
+  outline: none;
+}
+
+.dropdown-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.no-options {
+  padding: 8px 12px;
+  color: #999;
+  text-align: center;
+}
+
+// END MULTI DROPDOWN CSS

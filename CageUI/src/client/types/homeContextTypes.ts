@@ -1,13 +1,12 @@
 import {
     Cage,
-    CageModifications,
-    CageWithMods,
+    CageModificationsType, CurrRoomMods,
     ModData,
     ModLocations,
     Rack,
     RackGroup,
     Room,
-    RoomItem
+    RoomItem, RoomMods
 } from './typings';
 import { LoadedRooms, UpdatedMods, SelectedPage, ModificationSaveResult } from './homeTypes';
 import * as React from 'react';
@@ -26,5 +25,7 @@ export interface HomeContextType {
     selectedCage: Cage,
     selectedContextObj: SelectedObj,
     setSelectedContextObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
-    saveCageMods: (currCage: CageWithMods, prevMods: ModData[]) => Promise<ModificationSaveResult>;
+    saveCageMods: (currCage: Cage, currCageMods: CurrRoomMods) => ModificationSaveResult;
+    submitCageMods: (currCage: Cage, currCageMods: CurrRoomMods) => Promise<ModificationSaveResult>;
+    roomMods: RoomMods;
 }

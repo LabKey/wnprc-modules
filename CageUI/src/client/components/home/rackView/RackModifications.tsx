@@ -16,24 +16,13 @@ export const RackModifications: FC = () => {
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
     const [connectedRacks, setConnectedRacks] = useState<[[Rack, Cage], CageDirection, [Rack, Cage]][]>(null);
 
-    useEffect(() => {
-        console.log("Room: ", selectedRoom);
-        console.log("Rack: ", selectedRack);
-        console.log("Page: ", selectedPage);
-        console.log("RackGroup: ", rackGroup);
-    }, [selectedPage, rackGroup, selectedRack]);
-
-    useEffect(() => {
-        console.log("Connected Cages: ", connectedCages);
-        console.log("Connected Racks: ", connectedRacks);
-    }, [connectedRacks, connectedCages]);
-
     // Find possible connects
     useEffect(() => {
         if(!selectedRack) return;
-        const connections = findConnectedCages(selectedRack);
-        setConnectedCages(connections);
-        setRackGroup(findRackInGroup(selectedRack.itemId, selectedRoom.rackGroups).rackGroup);
+        const currGroup = findRackInGroup(selectedRack.itemId, selectedRoom.rackGroups).rackGroup;
+        const connections = findConnectedCages(selectedRack,undefined);
+        //setConnectedCages(connections);
+        setRackGroup(currGroup);
     }, [selectedRack]);
 
     useEffect(() => {
@@ -41,10 +30,10 @@ export const RackModifications: FC = () => {
         const connections = findConnectedRacks(rackGroup, selectedRack);
         let tempAloneCages: Cage[] = rackGroup.racks.flatMap(r => r.cages);
         // filter out cages that are in rack connections
-        connections.forEach(group => {
+/*        connections.forEach(group => {
             tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group[0][1].cageNum);
             tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group[2][1].cageNum);
-        });
+        });*/
         // filter out cages that are in cage connections
         connectedCages.forEach(group => {
             tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group[0].cageNum);
@@ -52,7 +41,7 @@ export const RackModifications: FC = () => {
         });
         // filter out cages that are in the same rack group as a result from rack connections, but aren't in the current rack
         tempAloneCages = tempAloneCages.filter(c => selectedRack.cages.some(tc => tc.cageNum === c.cageNum));
-        setConnectedRacks(connections);
+        //setConnectedRacks(connections);
         setAloneCages(tempAloneCages)
     }, [rackGroup, selectedRack, connectedCages]);
 
@@ -87,7 +76,6 @@ export const RackModifications: FC = () => {
                                         </div>
                                         <div className={"mod-table-column"} key={`alone-mod-${idx}`}>
                                             <ModificationSelect
-                                                cage={cage}
                                                 removeMod={handleRemoveMod}
                                                 changeMod={handleChangeMod}
                                             />
@@ -115,7 +103,6 @@ export const RackModifications: FC = () => {
                                         <div className={"mod-table-column"} key={`adj-inside-mod-left-${idx}`}>
                                             <ModificationSelect
                                                 directionCategory={getLocationDirection(cages[1])}
-                                                cage={cages[2]}
                                                 removeMod={handleRemoveMod}
                                                 changeMod={handleChangeMod}
                                             />
@@ -129,7 +116,6 @@ export const RackModifications: FC = () => {
                                         <div className={"mod-table-column"} key={`adj-inside-mod-right-${idx}`}>
                                             <ModificationSelect
                                                 directionCategory={getLocationDirection(cages[1])}
-                                                cage={cages[0]}
                                                 removeMod={handleRemoveMod}
                                                 changeMod={handleChangeMod}
                                             />
@@ -164,7 +150,6 @@ export const RackModifications: FC = () => {
                                         <div className={"mod-table-column"} key={`adj-outside-mod-left-${idx}`}>
                                             <ModificationSelect
                                                 directionCategory={getLocationDirection(pairs[1])}
-                                                cage={pairs[2][1]}
                                                 removeMod={handleRemoveMod}
                                                 changeMod={handleChangeMod}
                                             />
@@ -181,7 +166,6 @@ export const RackModifications: FC = () => {
                                         <div className={"mod-table-column"} key={`adj-outside-mod-right-${idx}`}>
                                             <ModificationSelect
                                                 directionCategory={getLocationDirection(pairs[1])}
-                                                cage={pairs[0][1]}
                                                 removeMod={handleRemoveMod}
                                                 changeMod={handleChangeMod}
                                             />
@@ -193,7 +177,6 @@ export const RackModifications: FC = () => {
                     </div>
                 </div>
                 <div className={"mod-container-column"}>
-                    <CurrentRackLayout />
                 </div>
             </div>
 

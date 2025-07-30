@@ -2,29 +2,42 @@ import { convertToTitleCase, zeroPadName } from './helpers';
 import {
     Cage,
     CageDirection,
-    CageModification, CageModifications, CageModType,
-    DirectionCategory, ModData,
+    CurrRoomMods,
+    ModDirections,
     ModLocations,
     ModTypes,
     Rack,
-    RackGroup
+    RackGroup,
+    RoomMods
 } from '../types/typings';
+import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
+import { Option } from '@labkey/components';
+import { cageModLookup } from '../api/popularQueries';
 
-export const getLocationDirection = (location: CageDirection | ModLocations): DirectionCategory => {
+// Returns a better formatted string for the modification directions shown to users
+export const findDirStr = (dir: ModLocations) => {
+    return dir === ModLocations.Bottom ? 'Above'
+        : dir === ModLocations.Top ? 'Below'
+        : dir === ModLocations.Right ? `${ModLocations[ModLocations.Left]} of`
+            : `${ModLocations[ModLocations.Right]} of`;
+}
+
+export const getLocationDirection = (location: CageDirection | ModLocations): ModDirections => {
     // Check for ModLocations enum values
     if (Object.values(ModLocations).includes(location as ModLocations)) {
-        if (location === ModLocations.Direct) return 'direct';
+        if (location === ModLocations.Direct) return ModDirections.Direct;
         return location === ModLocations.Top || location === ModLocations.Bottom
-            ? 'vertical'
-            : 'horizontal';
+            ? ModDirections.Vertical
+            : ModDirections.Horizontal;
     }
 
     // Otherwise it must be CageDirection
     return location === CageDirection.Top || location === CageDirection.Bottom
-        ? 'vertical'
-        : 'horizontal';
+        ? ModDirections.Vertical
+        : ModDirections.Horizontal;
 }
 
+/*
 export const findNextModId = (mods: CageModification[]) => {
     if (!mods || mods.length === 0) return 1;
 
@@ -43,7 +56,7 @@ export const fixModIds = (mods: CageModification[]) => {
     })
     return newMods;
 }
-
+*/
 function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: number; y: number } {
     // Calculate the global position of the box
     let x;
@@ -61,51 +74,77 @@ function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: numbe
     };
 }
 
-function areAdjacent(cage1: Cage, rack1: Rack, cage2: Cage, rack2: Rack, group?: RackGroup): CageDirection | null {
+// returns location of adjacency of currCage, if it exists, in relation to the adjCage
+// Ex. return is "Bottom": currCage is ABOVE adjCage (the adjacent edge is the bottom of the currCage)
+function areAdjacent(currCage: Cage, currRack: Rack, adjCage: Cage, adjRack: Rack, group?: RackGroup): ModLocations | null {
 
     // Calculate global positions
-    const globalPos1 = getGlobalPosition(cage1, rack1, group);
-    const globalPos2 = getGlobalPosition(cage2, rack2, group);
+    const currGlobalPos = getGlobalPosition(currCage, currRack, group);
+    const adjGlobalPos = getGlobalPosition(adjCage, adjRack, group);
 
     const cellSize = 30; // Each cell is 30 pixels
-    const width1 = cage1.size * cellSize; // Width of box1 in pixels
-    const width2 = cage2.size * cellSize; // Width of box2 in pixels
+    const width1 = currCage.size * cellSize; // Width of box1 in pixels
+    const width2 = adjCage.size * cellSize; // Width of box2 in pixels
 
     // Calculate the right and bottom edges of both boxes
-    const right1 = globalPos1.x + width1;
-    const bottom1 = globalPos1.y + width1;
-    const right2 = globalPos2.x + width2;
-    const bottom2 = globalPos2.y + width2;
+    const right1 = currGlobalPos.x +
+        width1;
+    const bottom1 = currGlobalPos.y + width1;
+    const right2 = adjGlobalPos.x + width2;
+    const bottom2 = adjGlobalPos.y + width2;
 
     // Check for horizontal adjacency
-    if (globalPos1.x === right2 && !(bottom1 <= globalPos2.y || bottom2 <= globalPos1.y)) {
-        return CageDirection.Left; // Box1 is to the left of Box2
+    if (currGlobalPos.x === right2 && !(bottom1 <= adjGlobalPos.y || bottom2 <= currGlobalPos.y)) {
+
+        return ModLocations.Left; // curr is to the left of adj
     }
-    if (globalPos2.x === right1 && !(bottom1 <= globalPos2.y || bottom2 <= globalPos1.y)) {
-        return CageDirection.Right; // Box1 is to the right of Box2
+    if (adjGlobalPos.x === right1 && !(bottom1 <= adjGlobalPos.y || bottom2 <= currGlobalPos.y)) {
+
+        return ModLocations.Right; // curr is to the right of adj
     }
 
     // Check for vertical adjacency
-    if (globalPos1.y === bottom2 && !(right1 <= globalPos2.x || right2 <= globalPos1.x)) {
-        return CageDirection.Top; // Box1 is above Box2
+    if (currGlobalPos.y === bottom2 && !(right1 <= adjGlobalPos.x || right2 <= currGlobalPos.x)) {
+        return ModLocations.Top; // curr is above adj
     }
-    if (globalPos2.y === bottom1 && !(right1 <= globalPos2.x || right2 <= globalPos1.x)) {
-        return CageDirection.Bottom; // Box1 is below Box2
+    if (adjGlobalPos.y === bottom1 && !(right1 <= adjGlobalPos.x || right2 <= currGlobalPos.x)) {
+        return ModLocations.Bottom; // curr is below adj
     }
-
+    console.log("not adj: ", currCage, currRack, adjCage, adjRack)
     // If not adjacent, return null
     return null;
 }
 
-export const findConnectedCages = (rack: Rack) => {
+// Finds the cage connections in a rack.
+//
+// If cage is passed then it only finds the connections with that cage.
+export const findConnectedCages = (rack: Rack, cage?: Cage) => {
 
-    const connections: [Cage, CageDirection, Cage][] = [];
-
-    for (let i = 0; i < rack.cages.length; i++) {
-        for (let j = i + 1; j < rack.cages.length; j++) {
-            const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack);
-            if (adj) {
-                connections.push([rack.cages[i], adj, rack.cages[j]]);
+    const connections: ConnectedCages = {[ModLocations.Top]: [], [ModLocations.Bottom]: [], [ModLocations.Right]: [], [ModLocations.Left]: [], [ModLocations.Direct]: []};
+    let id = 1;
+    if(cage){
+        for (let i = 0; i < rack.cages.length; i++) {
+            if(rack.cages[i].cageNum !== cage.cageNum){
+                const adj = areAdjacent(cage, rack, rack.cages[i], rack);
+                if (adj) {
+                    connections[adj].push({
+                        id: id++,
+                        currCage: cage,
+                        adjCage: rack.cages[i]
+                    });
+                }
+            }
+        }
+    }else{
+        for (let i = 0; i < rack.cages.length; i++) {
+            for (let j = i + 1; j < rack.cages.length; j++) {
+                const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack);
+                if (adj) {
+                    connections[adj].push({
+                        id: id++,
+                        currCage: rack.cages[i],
+                        adjCage: rack.cages[j]});
+                }
             }
         }
     }
@@ -113,36 +152,52 @@ export const findConnectedCages = (rack: Rack) => {
 }
 
 // This can be done by "guessing" the what other cage coords would be if they were adjacent, if they dont exist then they are not
-export const findConnectedRacks = (group: RackGroup, currRack: Rack) => {
-    const connections: [[Rack, Cage], CageDirection, [Rack, Cage]][] = [];
+// If cage is passed then it will only include connections with that cage
+export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage) => {
+    const connections: ConnectedRacks = {[ModLocations.Top]: [], [ModLocations.Bottom]: [], [ModLocations.Right]: [], [ModLocations.Left]: [], [ModLocations.Direct]: []};
 
-    const areRacksConnected = (rack1: Rack, rack2: Rack) => {
-        for (const cage1 of rack1.cages) {
-            for (const cage2 of rack2.cages) {
-                const adj = areAdjacent(cage1, rack1, cage2, rack2, group);
-                if(rack1.itemId !== currRack.itemId && rack2.itemId !== currRack.itemId){
+    const areRacksConnected = (cRack: Rack, adjRack: Rack) => {
+        let subId = 1;
+        for (const currCage of cRack.cages) {
+            for (const adjCage of adjRack.cages) {
+                console.log(`Is ${currCage.cageNum} adj with ${adjCage.cageNum}`);
+
+                // If cage is passed then determine if either cage is included and skip if not.
+                if(cage){
+                    if(cage.cageNum !== currCage.cageNum && cage.cageNum !== adjCage.cageNum){
+                        continue;
+                    }
+                }
+
+                const adj = areAdjacent(currCage, cRack, adjCage, adjRack, group);
+                // skip racks that arent connected to the current rack
+                if(cRack.rowid !== currRack.rowid && adjRack.rowid !== currRack.rowid){
                     continue;
                 }
-                if(adj){
-                    connections.push([[rack1,cage1], adj, [rack2,cage2]]);
+                if(adj !== null){
+                    //[[rack1,cage1], adj, [rack2,cage2]]
+                    connections[adj].push({
+                        id: subId++,
+                        currRack: cRack,
+                        currCage: currCage,
+                        adjRack: adjRack,
+                        adjCage: adjCage,
+                    });
                 }
             }
         }
     }
 
     for (let i = 0; i < group.racks.length; i++) {
-        for (let j = i + 1; j < group.racks.length; j++) {
-            areRacksConnected(group.racks[i], group.racks[j]);
+        if(group.racks[i].rowid !== currRack.rowid){
+            areRacksConnected(currRack, group.racks[i]);
         }
     }
-
+    console.log("XXX: ", connections)
     return connections;
 }
 
-
-
-
-export const compareMods = (oldModData: ModData[], newModObj: CageModifications)=> {
+export const compareMods = (oldModData: RoomMods, newModData: CurrRoomMods)=> {
 
     //TODO Fix this or make sure it works in all cases
     // Deep comparison helper (simplified - you might want to use lodash's isEqual in real code)
@@ -153,18 +208,21 @@ export const compareMods = (oldModData: ModData[], newModObj: CageModifications)
     const changes: {
         direction: string;
         type: 'added' | 'removed' | 'modified';
-        mod: CageModification;
-        subsectionId: number;
-        oldMod?: CageModification; // Only for modified mods
+        mod: ModTypes;
+        oldMod?: ModTypes; // Only for modified mods
     }[] = [];
 
-    const oldModObj: CageModifications = {mods: {
-        [ModLocations.Bottom]: [],
-        [ModLocations.Top]: [],
-        [ModLocations.Left]: [],
-        [ModLocations.Right]: [],
-        [ModLocations.Direct]: [],
-        }}
+    console.log("Old Mods: ", oldModData)
+    console.log("New Mods: ", newModData)
+    newModData.currCage.forEach((directMod) => {
+
+    })
+/*
+    const oldModObj: CurrRoomMods = {
+        currCage: [],
+        adjCages: [],
+        adjRacks: []
+    }
 
     if(oldModData){
         oldModData.forEach((oldMod, idx) => {
@@ -174,7 +232,7 @@ export const compareMods = (oldModData: ModData[], newModObj: CageModifications)
                     mod: oldMod.modification
                 }],
                 subId: idx
-        })
+            })
         })
     }
 
@@ -229,7 +287,7 @@ export const compareMods = (oldModData: ModData[], newModObj: CageModifications)
                     }
                 }
             });
-        });
+        });*/
 
     return changes;
 }
@@ -740,3 +798,34 @@ export const updateCageIds = (updatedRacks) => {
         return rack;
     });
 };
+
+// Sadly we kind of have to hard code this function.
+export const getAdjLocation = (loc: ModLocations): ModLocations => {
+    switch (loc) {
+        case ModLocations.Left:
+            return ModLocations.Right;
+        case ModLocations.Right:
+            return ModLocations.Left;
+        case ModLocations.Top:
+            return ModLocations.Bottom;
+        case ModLocations.Bottom:
+            return ModLocations.Top;
+        default:
+            return ModLocations.Direct;
+    }
+}
+
+export const resetMod = async  (value: ModTypes):  Promise<Option<ModTypes>> => {
+    // todo perform async lookup to determine what type the mod is.
+
+    const newVal: Option<ModTypes> = {label: '', value: value}
+    let modLookupData;
+    const res = await cageModLookup([],[]);
+    if(res){
+        modLookupData = res.rows;
+        console.log("Mod Lookup: ", modLookupData);
+    }
+
+
+    return newVal;
+}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
-import { CageWithMods, ModLocations, ModTypes, Rack } from '../../../types/typings';
+import { Cage, ModLocations, ModTypes, Rack } from '../../../types/typings';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
 import { EHRCageMods } from '../../../types/homeTypes';
@@ -9,9 +9,11 @@ import { Option } from '@labkey/components';
 import { ModificationSelect } from '../rackView/ModificationSelect';
 import { getLocationDirection } from '../../../utils/homeHelpers';
 import { useHomeContext } from '../../../context/HomeContextManager';
+import { cageModLookup } from '../../../api/popularQueries';
+import { Filter } from '@labkey/api';
 
 interface ModificationEditorTableProps {
-    cage: CageWithMods;
+    cage: Cage;
     rack: Rack;
     onModAdd: (location: ModLocations, subsectionId: number) => void;
     onModDelete: (location: ModLocations, locId: number, subId: number) => void;
@@ -30,18 +32,14 @@ export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props)
 
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
-            schemaName: 'ehr_lookups',
-            queryName: 'cageui_modifications',
-            columns: ['rowid', 'value', 'title', 'category']
-        }
-        labkeyActionSelectWithPromise(config).then((result) => {
+
+        cageModLookup(['rowid', 'value', 'title', 'direction'], []).then(result => {
             const newMods = {};
             const newOptions = [];
             if(result.rowCount > 0){
                 result.rows.forEach((row) => {
                     newMods[(row.value as ModTypes)] = {
-                        category: row.category,
+                        direction: row.direction,
                         rowid: row.rowid,
                         title: row.title,
                     }
@@ -50,7 +48,10 @@ export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props)
                 setAllCageMods(newMods as EHRCageMods);
                 setOptions(newOptions)
             }
+        }).catch(err => {
+            console.log("Error fetching cageui mods", err);
         });
+
     }, []);
 
     const handleAddNewMod = (location: ModLocations, subId: number) => {
@@ -97,10 +98,9 @@ export const ModificationEditorTable: FC<ModificationEditorTableProps> = (props)
                                             return (
                                                 <div key={`mod-${modLoc}-${mod.id}`} className={"cage-mod-table-cell"}>
                                                     <ModificationSelect
-                                                        cage={cage}
                                                         removeMod={() => handleRemoveMod(modLoc, mod.id, subsectionId)}
                                                         changeMod={(newMod) => handleModChange(modLoc, mod.id, subsectionId, newMod)}
-                                                        directionCategory={mod.mod === 'newMod' ? getLocationDirection(modLoc) : allCageMods[mod.mod].category}
+                                                        directionCategory={mod.mod === 'newMod' ? getLocationDirection(modLoc) : allCageMods[mod.mod].direction}
                                                         defaultValue={{value: mod.mod, label: mod.mod === 'newMod' ? "New Mod" : allCageMods[mod.mod].title}}
                                                     />
                                                 </div>

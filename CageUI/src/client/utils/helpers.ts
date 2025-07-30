@@ -17,37 +17,40 @@
  */
 
 import {
-    Cage, CageModifications, CageNumber, CageWithMods, DefaultRackId,
+    Cage, CageModificationsType, CageNumber, DefaultRackId,
     DefaultRackStringType,
     DefaultRackTypes, GroupId, LayoutHistoryData,
-    ModLocations, PrevRoom,
+    ModLocations, ModTypes, PrevRoom,
     Rack,
     RackGroup,
     RackStringType,
     RackTypes, RealRackId,
     Room,
     RoomItemStringType,
-    RoomItemType, RoomObject,
+    RoomItemType, RoomMods, RoomObject,
     RoomObjectStringType,
-    RoomObjectTypes, UnitLocations, UnitType
+    RoomObjectTypes, RoomWithMods, UnitLocations, UnitType
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
-import { ActionURL, Filter } from '@labkey/api';
+import { ActionURL, Filter, Utils } from '@labkey/api';
 import {
-    createEmptyUnitLoc,
+    createEmptyUnitLoc, findCageInGroup,
     isRackDefault,
     isRackEnum,
     placeAndScaleGroup,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { selectDistinctRows } from '@labkey/components';
+import { generateId, Option, selectDistinctRows } from '@labkey/components';
 import { Modifications } from './constants';
 import { ExtraContext } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
+import { findConnectedCages, findConnectedRacks, getLocationDirection } from './homeHelpers';
+import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
+import { cageModLookup } from '../api/popularQueries';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
@@ -281,52 +284,39 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
 }
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
-export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+// roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
+export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
-    let minX;
-    let minY;
+
     if((unitsToRender as Room)?.rackGroups){
         renderType = 'room';
     } else if((unitsToRender as RackGroup)?.racks){ // we are rendering a single rack group
         renderType = 'group';
-        let tempX = (unitsToRender as RackGroup).x;
-        let tempY = (unitsToRender as RackGroup).y;
-        (unitsToRender as RackGroup).racks.forEach(r => {
-            if(tempX + r.x < tempX){
-                tempX = tempX + r.x;
-            }
-            if(tempY + r.y < tempY){
-                tempY = tempY + r.y;
-            }
-            r.cages.forEach(c => {
-                if(tempX + c.x < tempX){
-                    tempX = tempX + c.x
-                }
-                if(tempY + c.y < tempY){
-                    tempY = tempY + c.y;
-                }
-            })
-        })
-        minX = tempX;
-        minY = tempY;
-    }else if((unitsToRender as Rack)?.cages){ // we are rendering a single rack
+    }else if((unitsToRender as Rack)?.cages) { // we are rendering a single rack
         renderType = 'rack';
-
     }else{ // we are rendering a single cage
         renderType = 'cage';
     }
 
-    const loadCageMods = (cageToLoad: CageWithMods, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
-
+    // Loads modifications from constant styles and ids to inject into the svgs
+    const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
+        console.log("Load Cage Mods: ", cageToLoad, modsToLoad)
+        if(!cageToLoad.mods) return;
         Object.entries(cageToLoad.mods).forEach(([loc,modSubList]) => {
             const modLoc = parseInt(loc) as ModLocations;
             modSubList.forEach((modList) => {
                 const subId = modList.subId;
-                modList.mods.forEach(mod => {
-                    if(mod.mod === "newMod") return;
-                    const modObj = Modifications[mod.mod];
+                modList.mods.forEach(modId => {
+                    const currMod = modsToLoad[modId];
+                    const modObj = Modifications[currMod.value];// find mod in mod constants array
+                    // for each id in the location map the style if it exists
                     modObj.svgIds[modLoc].forEach((svgId, idx) => {
-                        let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id=${svgId}-${subId}]`);
+                        // If ids contain "-" they are split and searched left to right, helpful for listing parent-child ids
+                        const svgIdSplit = svgId.split('-');
+                        let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id=${svgIdSplit[0]}-${subId}]`);
+                        for (let i = 1; i < svgIdSplit.length; i++) {
+                            currentSelection = currentSelection.select(`#${svgIdSplit[i]}`)
+                        }
                         modObj.styles.forEach((style) => {
                             changeStyleProperty(currentSelection.node() as SVGElement, style.property, style.value)
                         })
@@ -353,6 +343,8 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
             let unitSvg: SVGElement;
+            // If we are editing we can simply copy the svg from the ones displayed.
+            // If we are in view mode they aren't on the page so we must fetch and load them in
             if (mode === 'edit') {
                 unitSvg = (d3.select(`[id=${rackTypeString}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
                     .node().cloneNode(true) as SVGElement;
@@ -447,7 +439,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
     }else if(renderType === 'rack'){ // we are rendering a single rack
     }else{ // we are rendering a single cage
-        const cage: CageWithMods = unitsToRender as Cage;
+        const cage: Cage = unitsToRender as Cage;
         const cageGroup = layoutSvg.append('g')
             .attr('id', cage.cageNum)
             .attr('transform', `translate(0,0)`);
@@ -489,13 +481,15 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
     return newUnitLocs;
 };
 
-export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
-    const newLocalRoom: Room = {
+export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<RoomWithMods> => {
+    const newLocalRoom: RoomWithMods = {
         name: prevRoom.name,
         rackGroups: [],
         objects: [],
-        layoutData: null
+        layoutData: null,
+        mods: null
     };
+    let newMods: RoomMods = {};
     let roomObjNum = 1;
     const loadMods: boolean = !!prevRoom.modData;
     //check if a group exists for the groupId, if it does return, else create new group for the room
@@ -548,7 +542,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
 
         }
 
-        let rack: Rack = rackGroup.racks.find(r => rackIdNum === r.itemId);
+        let rack: Rack;
+        if(rowId){
+            rack = rackGroup.racks.find(r => rowId === r.rowid);
+        }else {
+            rack = rackGroup.racks.find(r => rackIdNum === r.itemId);
+        }
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
@@ -627,14 +626,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         let cageNum = parseInt(rackItem.cage);
 
 
-        let cageMods: CageModifications = {
-            mods: {
-                [ModLocations.Top]: [],
-                [ModLocations.Bottom]: [],
-                [ModLocations.Left]: [],
-                [ModLocations.Right]: [],
-                [ModLocations.Direct]: []
-            }
+        let cageMods: CageModificationsType = {
+            [ModLocations.Top]: [],
+            [ModLocations.Bottom]: [],
+            [ModLocations.Left]: [],
+            [ModLocations.Right]: [],
+            [ModLocations.Direct]: []
         };
         if (rack.type.isDefault) {
             cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
@@ -645,31 +642,35 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             extraContext = JSON.parse(rackItem.extra_context);
         }
         const svgSize = await getSvgSize(rack.type.type);
+
         //TODO Add mods if needed here
         if (loadMods && !rack.type.isDefault) {
-            prevRoom.modData.forEach((mod) => {
-                if (rack.rowid === mod.rack && cageNum === mod.cage) {
-                    const subsection = cageMods.mods[mod.location].find(subsection => subsection.subId === mod.subsectionId);
-                    if(subsection){
-                        subsection.mods.push({
-                            id: mod.locationId,
-                            mod: mod.modification,
-                        });
-                    }else{
-                        cageMods.mods[mod.location].push({
-                            subId: cageMods.mods[mod.location].length + 1,
-                            mods: [{
-                                id: mod.locationId,
-                                mod: mod.modification
-                            }],
-                        });
-                    }
 
+            const modReturnData = await cageModLookup([],[]);
+            const availMods = modReturnData.rows.map(row => ({value: row.value, label: row.title}));
+
+            const prevMods = prevRoom.modData.filter((mod) => mod.rackRowId === rack.rowid && mod.cage === cageNum);
+            prevMods.forEach((mod) => {
+                // If Mod id exists in newMods we can skip adding it to newMods
+                if(!Object.keys(newMods).find(key => key === mod.modId)){
+                    newMods[mod.modId] = availMods.find(am => am.value === mod.modification);
                 }
-            });
+                // if subId already exists add the mod to that subsection
+                if(cageMods[mod.location].find(m => m.subId === mod.subId)){
+                    cageMods[mod.location] = cageMods[mod.location].map(mods => {
+                        if(mods.subId === mod.subId){
+                            return {
+                                ...mods,
+                                mods: [...mods.mods, mod.modId]
+                            }
+                        }
+                    });
+                }else{
+                    cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, mods: [mod.modId]}];
+                }
+            })
         }
-
-        const cage: CageWithMods = {
+        const cage: Cage = {
             cageNum: `${cageNumType}-${cageNum}` as CageNumber,
             extraContext: extraContext?.cage,
             selectionType: 'cage',
@@ -677,7 +678,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
             size: svgSize,
-            mods: cageMods.mods,
+            mods: cageMods
         };
         rack.cages.push(cage);
     };
@@ -712,5 +713,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             newLocalRoom.objects.push(generateRoomObj(roomItem));
         }
     }
+    newLocalRoom.mods = newMods;
     return (newLocalRoom);
 }

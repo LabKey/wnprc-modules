@@ -706,12 +706,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         log("Add WNPRC EHR Webparts.");
 
-        //enable Page Admin Mode
-        new SiteNavBar(getDriver()).enterPageAdminMode();
-
-        (new PortalHelper(this)).removeAllWebParts();
-        (new PortalHelper(this)).addWebPart("WNPRC Electronic Health Record ");
-        (new PortalHelper(this)).addWebPart("wnprcUnits");
+        new PortalHelper(getDriver()).doInAdminMode(ph -> {
+            ph.removeAllWebParts();
+            ph.addWebPart("WNPRC Electronic Health Record ");
+            ph.addWebPart("wnprcUnits");
+        });
     }
 
     private void addBillingPublicWebParts()
@@ -3485,9 +3484,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         fillAnInputByName("newCreditToAccountField", "testString");
         click(Locator.tagWithId("button","updateCreditToAccountButton"));
 
-        sleep(2000);
         //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.
-        assertEquals("Updated Program Income Account with invalid permissions.", "testString", Locator.id("ctaCell1").findElement(getDriver()).getText());
+        Awaitility.await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> 
+            assertEquals("Updated Program Income Account with invalid permissions.",
+                "testString", Locator.id("ctaCell1").findElement(getDriver()).getText()));
 
         //Navigates to various containers and removes corresponding permissions.
         stopImpersonating();

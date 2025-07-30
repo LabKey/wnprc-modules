@@ -427,6 +427,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         links.add("Documentation/Data Management/project-begin.view");
         links.add("Development Notes/project-begin.view");
         links.add("/Logs/project-begin.view");
+
+        // Link on home page (Nightly-EHRTestServer) not fully set up
+        links.add("WNPRC/EHR/undefined");
+
         return links;
     }
 

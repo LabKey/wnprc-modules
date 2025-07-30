@@ -401,6 +401,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected List<String> skipLinksForCrawling()
     {
         List<String> links = new ArrayList<>(super.skipLinksForCrawling());
+        // These have lots of links and they don't completely function with our current test data
         links.add("wnprc_ehr-PerDiems.view");
         links.add("wnprc_ehr-WaterCalendar.view");
         return links;
@@ -410,12 +411,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected List<String> skipLinksForValidation()
     {
         List<String> links = new ArrayList<>(super.skipLinksForValidation());
+        // These don't render with current test data
         links.add("query-executeQuery.view?query.queryName=Current Colony Condition&schemaName=study");
         links.add("query-executeQuery.view?schemaName=col_dump&query.queryName=mysql_check");
-//        links.add("ehr-dataEntryFormDetails.view?formtype=Enter%20Water%20Orders&taskid=");
         links.add("wnprc_ehr-UnscheduleBCReports.view");
         links.add("wnprc_ehr-ScheduleBCReports.view");
+
+        // Currently has a CSP violation
         links.add("wnprc_ehr-NecropsySchedule.view");
+
+        // Subfolders not setup in test project
         links.add("Documentation/Admin/project-begin.view");
         links.add("Documentation/Data Management/project-begin.view");
         links.add("Development Notes/project-begin.view");

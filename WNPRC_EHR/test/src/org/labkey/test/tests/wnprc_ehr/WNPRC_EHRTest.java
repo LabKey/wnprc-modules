@@ -405,6 +405,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         // These have lots of links and they don't completely function with our current test data
         links.add("wnprc_ehr-PerDiems.view");
         links.add("wnprc_ehr-WaterCalendar.view");
+        links.add("wnprc_ehr-PathologyCaseList.view");
         return links;
     }
 

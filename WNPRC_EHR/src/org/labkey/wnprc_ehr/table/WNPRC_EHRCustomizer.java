@@ -197,7 +197,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
                         String qcState = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "QCState$Label"));
 
-                        if (isExt4Form("form", formType))
+                        if (formType != null && isExt4Form("form", formType))
                         {
                             ActionURL url = new ActionURL("ehr", "dataEntryForm.view", us.getContainer());
                             if ("Research Ultrasounds".equalsIgnoreCase(formType))

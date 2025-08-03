@@ -135,36 +135,46 @@ public class ColonyCensus {
         Map<LocalDate, Integer> deltasPerDate = new HashMap<>();
         Integer animalsAtStart = 0;
 
-        for( String id : animalsBySpeciesId.get(species)) {
-            AnimalEventSet animalEventSet = animalEventSetsById.get(id);
-            for( StintAtPrimateCenter stint: animalEventSet.getStints() ) {
-                // Null startdate is okay...
-                LocalDate startDate = (stint.getStartDay() == null) ? null : new LocalDate(stint.getStartDay());
-                LocalDate endDate   = ( stint.getEndDay()  == null) ? null : new LocalDate(stint.getEndDay());
+        if (animalsBySpeciesId.get(species) != null)
+        {
+            for (String id : animalsBySpeciesId.get(species))
+            {
+                AnimalEventSet animalEventSet = animalEventSetsById.get(id);
+                for (StintAtPrimateCenter stint : animalEventSet.getStints())
+                {
+                    // Null startdate is okay...
+                    LocalDate startDate = (stint.getStartDay() == null) ? null : new LocalDate(stint.getStartDay());
+                    LocalDate endDate = (stint.getEndDay() == null) ? null : new LocalDate(stint.getEndDay());
 
 
-                // Increment the counter for start of stints, if there was a start
-                if (startDate != null) {
-                    Integer currentStartDelta = deltasPerDate.get(startDate);
-                    if (currentStartDelta == null) {
-                        currentStartDelta = 0;
+                    // Increment the counter for start of stints, if there was a start
+                    if (startDate != null)
+                    {
+                        Integer currentStartDelta = deltasPerDate.get(startDate);
+                        if (currentStartDelta == null)
+                        {
+                            currentStartDelta = 0;
+                        }
+                        deltasPerDate.put(startDate, currentStartDelta + 1);
                     }
-                    deltasPerDate.put(startDate, currentStartDelta + 1);
-                }
-                else {
-                    // If there wasn't a start, assume the animal was always in the colony
-                    animalsAtStart++;
-                }
-
-                // Decrement the counter for end of stints, if there was an end
-                if ( endDate != null) {
-                    Integer currentEndDelta = deltasPerDate.get(endDate);
-                    if ( currentEndDelta == null ) {
-                        currentEndDelta = 0;
+                    else
+                    {
+                        // If there wasn't a start, assume the animal was always in the colony
+                        animalsAtStart++;
                     }
-                    deltasPerDate.put(endDate, currentEndDelta - 1);
-                }
 
+                    // Decrement the counter for end of stints, if there was an end
+                    if (endDate != null)
+                    {
+                        Integer currentEndDelta = deltasPerDate.get(endDate);
+                        if (currentEndDelta == null)
+                        {
+                            currentEndDelta = 0;
+                        }
+                        deltasPerDate.put(endDate, currentEndDelta - 1);
+                    }
+
+                }
             }
         }
 

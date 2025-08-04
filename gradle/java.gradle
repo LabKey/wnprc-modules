@@ -3,12 +3,12 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
         maven {
-            url "${artifactory_contextUrl}/plugins-release-no-proxy"
+            url = "${artifactory_contextUrl}/plugins-release-no-proxy"
         }
         if (gradlePluginsVersion.contains("SNAPSHOT"))
         {
             maven {
-                url "${artifactory_contextUrl}/plugins-snapshot-local"
+                url = "${artifactory_contextUrl}/plugins-snapshot-local"
             }
 
         }

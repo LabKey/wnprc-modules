@@ -20,5 +20,4 @@ comment
 
 FROM auditlog."Client API Actions" a
 
-WHERE
-a.key1 = 'LabKey Server Backup'
+WHERE a.SubType = 'LabKey Server Backup'

@@ -56,10 +56,6 @@ public class SiteErrorAlertsRevamp extends AbstractEHRNotification {
         return "Revamped Notifications";
     }
 
-
-
-
-
     //Message Creation
     @Override
     public String getMessageBodyHTML(Container c, User u) {
@@ -69,13 +65,13 @@ public class SiteErrorAlertsRevamp extends AbstractEHRNotification {
 
         // Creates filter.
         SimpleFilter myFilter = new SimpleFilter("date", lastRunDate, CompareType.GTE);
-        myFilter.addCondition("key1", "LabKeyServer Backup", CompareType.NEQ);
+        myFilter.addCondition("SubType", "LabKeyServer Backup", CompareType.NEQ);
         // Gets columns to retrieve.
         String[] targetColumns = new String[]{"id"};
         // Runs query.
-        ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "auditlog", "audit", myFilter, null, targetColumns);
+        ArrayList<HashMap<String, String>> returnArray = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(c, u, "auditlog", "Client API Actions", myFilter, null, targetColumns);
         // Creates URL.
-        String queryURL = notificationToolkit.createQueryURL(c, "execute", "auditlog", "audit", myFilter);
+        String queryURL = notificationToolkit.createQueryURL(c, "execute", "auditlog", "Client API Actions", myFilter);
 
         // Sends the message only if there are results (otherwise sends notification to admins via emptyNotificationRevamp).
         if (returnArray.isEmpty()) {
@@ -89,7 +85,6 @@ public class SiteErrorAlertsRevamp extends AbstractEHRNotification {
             return messageBody.toString();
         }
     }
-    
 }
 
 

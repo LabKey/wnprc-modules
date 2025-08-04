@@ -18,9 +18,7 @@ EventType,
 date,
 comment
 
-FROM auditlog.audit a
+FROM auditlog."Client API Actions" a
 
 WHERE
-a.key1 = 'LabKey Server Backup' AND
-a.EventType = 'Client API Actions'
-
+a.key1 = 'LabKey Server Backup'

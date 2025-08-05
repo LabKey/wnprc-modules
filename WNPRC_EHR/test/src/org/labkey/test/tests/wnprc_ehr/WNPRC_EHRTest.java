@@ -324,7 +324,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Setup the EHR Billing table definitions");
         EHRAdminPage.beginAt(this,getContainerPath());
         click(Locator.linkWithText("EHR EXTENSIBLE COLUMNS"));
-        fillAnInputByName("ehrbilling_container", "/WNPRC/EHR");
+        fillAnInputByName("ehrbilling_container", "/" + EHR_FOLDER_PATH);
         click(Locator.linkWithText("Load EHR_Billing table definitions"));
         waitForElement(Locator.tagWithClass("span", "x4-window-header-text").withText("Success"));
         assertExt4MsgBox("EHR_Billing tables updated successfully.", "OK");
@@ -3272,7 +3272,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    public WebElement fillAnInputByName(String name, String value)
+    private WebElement fillAnInputByName(String name, String value)
     {
         WebElement el = Locator.name(name).findElement(getDriver());
         el.click();

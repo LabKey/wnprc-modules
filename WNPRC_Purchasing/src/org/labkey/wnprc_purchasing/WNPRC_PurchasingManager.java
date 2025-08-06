@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.labkey.api.exp.api.ExperimentService.asInteger;
+
 public class WNPRC_PurchasingManager
 {
     private static final WNPRC_PurchasingManager _instance = new WNPRC_PurchasingManager();
@@ -240,7 +242,7 @@ public class WNPRC_PurchasingManager
                     insertedPurchasingReq = qus.updateRows(user, container, purchasingRequestsData, null, errors, null, null);
 
                 if (null != insertedPurchasingReq)
-                    requestForm.setRowId((Integer) insertedPurchasingReq.get(0).get("rowId"));
+                    requestForm.setRowId(asInteger(insertedPurchasingReq.get(0).get("rowId")));
                 else
                 {
                     requestOrderErrors.addError(new SimpleValidationError("Unable to submit purchasing request"));

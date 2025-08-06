@@ -324,7 +324,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Setup the EHR Billing table definitions");
         EHRAdminPage.beginAt(this,getContainerPath());
         click(Locator.linkWithText("EHR EXTENSIBLE COLUMNS"));
-        fillAnInputByName("ehrbilling_container", "/" + EHR_FOLDER_PATH);
+        _helper.fillAnInputByName("ehrbilling_container", "/" + EHR_FOLDER_PATH);
         click(Locator.linkWithText("Load EHR_Billing table definitions"));
         waitForElement(Locator.tagWithClass("span", "x4-window-header-text").withText("Success"));
         assertExt4MsgBox("EHR_Billing tables updated successfully.", "OK");
@@ -3272,14 +3272,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private WebElement fillAnInputByName(String name, String value)
-    {
-        WebElement el = Locator.name(name).findElement(getDriver());
-        el.click();
-        el.sendKeys(value);
-        return el;
-    }
-
     @Test
     public void testClinpathVirologyBulkUpload() throws IOException, CommandException
     {
@@ -3386,34 +3378,34 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
 
         //this is dependent on the billing setup above which populates the investigators table
-        fillAnInputByName("principalinvestigator", "Snow, Jon");
-        fillAnInputByName("numberofanimals", "23");
-        fillAnInputByName("speciesneeded", "Cyno");
-        fillAnInputByName("originneeded", "any");
-        fillAnInputByName("sex", "M");
-        fillAnInputByName("age", "10");
-        fillAnInputByName("weight", "2");
-        fillAnInputByName("mhctype", "2");
-        fillAnInputByName("viralstatus", "SPF4");
-        fillAnInputByName("infectiousdisease", "Yes");
-        fillAnInputByName("majorsurgery", "Yes");
-        fillAnInputByName("pregnantanimalsrequired", "Yes");
-        fillAnInputByName("pregnantanimalsrequiredterminfant", "Yes");
-        fillAnInputByName("pregnantanimalsrequiredtermdam", "Yes");
-        fillAnInputByName("disposition", "Terminal");
-        fillAnInputByName("executivecommitteeapproval", "Yes");
-        fillAnInputByName("previousexposures", "None");
-        fillAnInputByName("optionalproject", "TBD");
-        fillAnInputByName("account", "80085");
-        fillAnInputByName("protocol", "TBD");
+        _helper.fillAnInputByName("principalinvestigator", "Snow, Jon");
+        _helper.fillAnInputByName("numberofanimals", "23");
+        _helper.fillAnInputByName("speciesneeded", "Cyno");
+        _helper.fillAnInputByName("originneeded", "any");
+        _helper.fillAnInputByName("sex", "M");
+        _helper.fillAnInputByName("age", "10");
+        _helper.fillAnInputByName("weight", "2");
+        _helper.fillAnInputByName("mhctype", "2");
+        _helper.fillAnInputByName("viralstatus", "SPF4");
+        _helper.fillAnInputByName("infectiousdisease", "Yes");
+        _helper.fillAnInputByName("majorsurgery", "Yes");
+        _helper.fillAnInputByName("pregnantanimalsrequired", "Yes");
+        _helper.fillAnInputByName("pregnantanimalsrequiredterminfant", "Yes");
+        _helper.fillAnInputByName("pregnantanimalsrequiredtermdam", "Yes");
+        _helper.fillAnInputByName("disposition", "Terminal");
+        _helper.fillAnInputByName("executivecommitteeapproval", "Yes");
+        _helper.fillAnInputByName("previousexposures", "None");
+        _helper.fillAnInputByName("optionalproject", "TBD");
+        _helper.fillAnInputByName("account", "80085");
+        _helper.fillAnInputByName("protocol", "TBD");
         WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
         el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
         el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
         el.sendKeys(formattedDate);
         el.sendKeys(Keys.TAB);
-        fillAnInputByName("comments", "test");
-        fillAnInputByName("contacts", "test@test.com");
+        _helper.fillAnInputByName("comments", "test");
+        _helper.fillAnInputByName("contacts", "test@test.com");
 
         clickAndWait(Locator.tagWithId("button","submit-final"));
         assertTextPresent("Data Entry");
@@ -3462,7 +3454,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Attempts to change the value.
         //Assumes an error is presented and the test is complete.
-        fillAnInputByName("newCreditToAccountField", "asdf");
+        _helper.fillAnInputByName("newCreditToAccountField", "asdf");
         click(Locator.tagWithId("button","updateCreditToAccountButton"));
         assertAlert("Unable to update the program income account.  User does not have the correct permissions.");
 
@@ -3485,7 +3477,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         impersonate(BASIC_SUBMITTER.getEmail());
 
         //Attempts to change the value.
-        fillAnInputByName("newCreditToAccountField", "testString");
+        _helper.fillAnInputByName("newCreditToAccountField", "testString");
         click(Locator.tagWithId("button","updateCreditToAccountButton"));
 
         //Verifies the value has been changed, then continues. If value has not been changed, the test fails here.

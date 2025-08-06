@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tables xmlns="http://labkey.org/data/xml">
+<!--  Case dataset added just to clear errors for common EHR components -->
+  <table tableName="cases" tableDbType="TABLE">
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+        </importAliases>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+      </column>
+      <column columnName="enddate">
+        <datatype>timestamp</datatype>
+        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+      </column>
+      <column columnName="caseid">
+        <datatype>varchar</datatype>
+        <propertyURI>urn:ehr.labkey.org/#CaseId</propertyURI>
+      </column>
+      <column columnName="reviewdate">
+        <datatype>timestamp</datatype>
+      </column>
+      <column columnName="category">
+        <datatype>varchar</datatype>
+      </column>
+      <column columnName="problemCategory">
+        <datatype>varchar</datatype>
+      </column>
+      <column columnName="problemSubcategory">
+        <datatype>varchar</datatype>
+      </column>
+      <column columnName="plan">
+        <datatype>varchar</datatype>
+      </column>
+      <column columnName="vetreview">
+        <datatype>varchar</datatype>
+        <propertyURI>urn:ehr.labkey.org/#VetReview</propertyURI>
+      </column>
+      <column columnName="vetreviewdate">
+        <datatype>timestamp</datatype>
+        <propertyURI>urn:ehr.labkey.org/#VetReviewDate</propertyURI>
+      </column>
+    </columns>
+    <tableTitle>Cases</tableTitle>
+  </table>
+<!--  -->
   <table tableName="breeding_encounters" tableDbType="TABLE">
     <description>Contains one row for each breeding pairing/assignment for a dam at the center.</description>
     <columns>

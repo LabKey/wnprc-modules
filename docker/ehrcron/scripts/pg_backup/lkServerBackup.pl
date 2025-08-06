@@ -508,7 +508,7 @@ sub lk_log {
         -queryName     => "Client API Actions",
         -rows          =>
         [ {
-            "Key1"      => "LabKey Server Backup",
+            "SubType"   => "LabKey Server Backup",
             "Comment"   => $status,
             "Date"      => $date
         } ]

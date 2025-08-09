@@ -13,7 +13,6 @@ if (LABKEY.Security.currentUser.isAdmin){
                 items: [
                     {name: 'Client Errors', url: '<%=contextPath%>' + '/shared/query-executeQuery.view?schemaName=auditlog&query.queryName=Client%20API%20Actions'},
                     {name: 'EHR Backups', url: '<%=contextPath%><%=containerPath%>/Backups/project-begin.view'},
-                    {name: 'ETL Admin', url: '<%=contextPath%><%=containerPath%>/onprc_ehr-etlAdmin.view'},
                     {name: 'Genetics Calculations', url: '<%=contextPath%><%=containerPath%>/ehr-geneticCalculationSettings.view'},
                     //{name: 'ETL Duration', url: '<%=contextPath%><%=containerPath%>/query-executeQuery.view?schemaName=core&query.queryName=Sync Duration'},
                     //{name: 'ETL History', url: '<%=contextPath%><%=containerPath%>/query-executeQuery.view?schemaName=core&query.queryName=Sync History'},
@@ -41,15 +40,6 @@ if (LABKEY.Security.currentUser.isAdmin){
             {header: 'Logs',
                 items: [
                     {name: 'All Logs', url: '<%=contextPath%><%=containerPath%>/Logs/project-begin.view'},
-                    {name: 'Labkey.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/labkey.log'},
-                    {name: 'Labkey-errors.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/labkey-errors.log'},
-                    {name: 'ETL Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/ehr-etl.log'},
-                    {name: 'ETL Errors Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/ehr-etl-errors.log'},
-                    {name: 'ActiveMQ.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/ActiveMQ/activemq.log'},
-                    {name: 'Monit.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Monit/monit.log'},
-                    {name: 'Munin.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Munin/munin.log'},
-                    {name: 'Inbreeding Coefficients Reload Cron Job Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Kinship/kinshipOut.txt'},
-                    {name: 'Kinship Reload Cron Job Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Kinship/inbreedingOut.txt'}
                 ]
             },
             {header: 'Notifications',

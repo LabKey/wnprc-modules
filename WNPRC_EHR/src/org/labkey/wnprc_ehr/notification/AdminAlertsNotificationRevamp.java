@@ -5,10 +5,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.module.Module;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -142,14 +140,13 @@ public class AdminAlertsNotificationRevamp extends AbstractEHRNotification {
             // Creates filter.
             Date dateYesterday = dateToolkit.getDateXDaysFromNow(-1);
             SimpleFilter myFilter = new SimpleFilter("date", dateYesterday, CompareType.DATE_GTE);
-            myFilter.addCondition("key1", "LabKey Server Backup", CompareType.NEQ_OR_NULL);
-            myFilter.addCondition("EventType", "Client API Actions", CompareType.EQUAL);
+            myFilter.addCondition("SubType", "LabKey Server Backup", CompareType.NEQ_OR_NULL);
 
             // Runs query.
-            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(currentContainer, currentUser, "auditlog", "audit", myFilter, null, "RowId", null);
+            ArrayList<String> returnArray = notificationToolkit.getTableMultiRowSingleColumn(currentContainer, currentUser, "auditlog", "Client API Actions", myFilter, null, "RowId", null);
             this.numClientErrorsSinceYesterday = Long.valueOf(returnArray.size());
             // Creates a URL to view number of client errors since yesterday.
-            this.numClientErrorsSinceYesterdayURLView = notificationToolkit.createQueryURL(currentContainer, "execute", "auditlog", "audit", myFilter);
+            this.numClientErrorsSinceYesterdayURLView = notificationToolkit.createQueryURL(currentContainer, "execute", "auditlog", "Client API Actions", myFilter);
         }
     }
 }

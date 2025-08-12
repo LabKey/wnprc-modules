@@ -3,7 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
-import { Cage } from '../../../types/typings';
+import { Cage, RoomMods } from '../../../types/typings';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import { findCageInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
@@ -12,13 +12,13 @@ import { TextInput } from '../../TextInput';
 import { EditorContextMenu } from '../../layoutEditor/EditorContextMenu';
 import { ModificationEditor } from './ModificationEditor';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
+import _ from 'lodash';
 
 interface RoomLayoutProps {
-
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
-    const {selectedRoom, selectedContextObj, setSelectedContextObj, roomMods} = useHomeContext();
+    const {selectedRoom, selectedContextObj, setSelectedContextObj, roomMods, prevRoomMods} = useHomeContext();
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [errorPopup, setErrorPopup] = useState<string>(null);
     const borderRef = useRef(null);
@@ -27,7 +27,8 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     useEffect(() => {
         console.log("SR: ", selectedRoom);
         console.log("Room Mods: ", roomMods);
-    }, [selectedRoom, roomMods]);
+        console.log("Prev Mods: ", prevRoomMods);
+    }, [selectedRoom, roomMods, prevRoomMods]);
 
     // Loads room into the svg
     useEffect(() => {
@@ -37,7 +38,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
         console.log("Load svg, ", selectedRoom);
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg,roomMods, setSelectedContextObj, contextRef);
+        addPrevRoomSvgs('view', selectedRoom, layoutSvg, roomMods, setSelectedContextObj, contextRef);
     }, [selectedRoom.name, showCageContextMenu]);
 
 
@@ -62,6 +63,12 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
 
     return (
         <div className={'room-layout'}>
+            {!(_.isEqual(prevRoomMods, roomMods)) &&
+                    <div className={'room-layout-message'}>
+                        Changes have been made to this room. Please save the room before continuing.
+                    </div>
+            }
+
             <div id={"layout-grid"}>
                 <svg // svg here is the size of the border (objects outside of border ignored), add 1 to viewbox to prevent visual cutting by a pixel
                     width={selectedRoom.layoutData.borderWidth + 1}

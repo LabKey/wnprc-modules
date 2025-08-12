@@ -24,8 +24,7 @@ import { buildNewLocalRoom, parseRoomItemNum } from '../utils/helpers';
 import { SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
 import { compareMods, getAdjLocation } from '../utils/homeHelpers';
-//import { compareMods } from '../utils/homeHelpers';
-
+import _ from 'lodash';
 
 const HomeContext = createContext<HomeContextType>({} as HomeContextType);
 
@@ -172,7 +171,6 @@ export const HomeContextProvider = ({children}) => {
                     layoutData: tempNewRoom.layoutData,
                     modData: modResult.rowCount > 0 ? tempModData : undefined,
                 }
-                console.log("Prev Room: ", prevRoom)
                 buildNewLocalRoom(prevRoom).then((d) => {
                     if(d){
                         tempNewRoom = {
@@ -180,12 +178,12 @@ export const HomeContextProvider = ({children}) => {
                             layoutData: tempNewRoom.layoutData,
                         }
                         setRoomMods(d.mods);
-                        setPrevRoomMods(d.mods);
+                        // Ensure they don't share the same reference (using lodash to clone)
+                        setPrevRoomMods(_.cloneDeep(d.mods));
                         setLoadedRooms((prevRooms) => ({
                             ...prevRooms,
                             [tempNewRoom.name]: {loaded: true, room: tempNewRoom}
                         }))
-                        console.log(tempNewRoom)
                         setSelectedRoom(tempNewRoom);
                         if(roomRefresh){
                             setRoomRefresh(false);
@@ -614,6 +612,7 @@ export const HomeContextProvider = ({children}) => {
             saveCageMods,
             submitCageMods,
             roomMods,
+            prevRoomMods
         }}>
             {children}
         </HomeContext.Provider>

@@ -52,14 +52,10 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
 
     useEffect(() => {
         const tempCage = selectedObj as Cage;
-        console.log("Selected Menu Obj: ", selectedObj);
         if(tempCage){
             const cageRack = findCageInGroup(tempCage.cageNum, selectedRoom.rackGroups).rack;
-
             setCurrCage(tempCage);
             setCurrRack(cageRack);
-
-
         }
     }, [selectedObj]);
 

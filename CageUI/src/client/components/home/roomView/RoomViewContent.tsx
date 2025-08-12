@@ -50,5 +50,3 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
             </div>
     );
 }
-
-// <button onClick={handleLayoutEdit}>Edit Layout</button>

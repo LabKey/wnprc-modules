@@ -30,9 +30,9 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
         cageModLookup([], [Filter.create('category',
             directionCategory ? directionCategory : ModDirections.Direct,
             Filter.Types.EQUALS)]).then(result => {
-            if(result.rows.length !== 0){
+            if(result.length !== 0){
                 const rowOptions: Option<ModTypes>[] = [];
-                result.rows.forEach(row => {
+                result.forEach(row => {
                     rowOptions.push({label: row.title, value: row.value as ModTypes});
                 })
                 setOptions(rowOptions);

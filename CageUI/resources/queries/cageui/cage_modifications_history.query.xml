@@ -1,8 +1,8 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="cage_modifications" tableDbType="TABLE">
-                <tableTitle>Cage Modifications</tableTitle>
+            <table tableName="cage_modifications_history" tableDbType="TABLE">
+                <tableTitle>Cage Modification History</tableTitle>
                 <columns>
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>

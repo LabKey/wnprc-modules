@@ -1,7 +1,7 @@
 import {
     Cage,
     CageModificationsType, CurrRoomMods,
-    ModData,
+    ModHistoryData,
     ModLocations,
     Rack,
     RackGroup,

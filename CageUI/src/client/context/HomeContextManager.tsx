@@ -5,7 +5,7 @@ import {
     CageMapKey, CageModification, CageModificationsType,
     CageNumber,
     CurrRoomMods,
-    ModData, ModDirections, ModLocations,
+    ModHistoryData, ModDirections, ModLocations,
     ModTypes,
     PrevRoom,
     Rack,
@@ -145,10 +145,10 @@ export const HomeContextProvider = ({children}) => {
         Promise.all([modReturnPromise, layoutReturnPromise]).then(([modResult, historyResult]) => {
             let tempNewRoom: Room = loadedRooms[selectedPage.room].room;
             if(historyResult.rowCount > 0) {
-                const tempModData: ModData[] = [];
+                const tempModData: ModHistoryData[] = [];
                 if(modResult.rowCount > 0){
                     modResult.rows.forEach((row) => {
-                        const newRow: ModData = {
+                        const newRow: ModHistoryData = {
                             location: row.location,
                             modId: row.modId,
                             subId: row.subId,
@@ -513,15 +513,15 @@ export const HomeContextProvider = ({children}) => {
     const submitCageMods = async (currCage: Cage, currCageMods: CurrRoomMods): Promise<ModificationSaveResult> => {
         const {rack: currRack} = findCageInGroup(currCage.cageNum, selectedRoom.rackGroups);
         const commands: Command[] = [];
-        const modsToSave: ModData[] = [];
-        const modsToUpdate: ModData[] = [];
+        const modsToSave: ModHistoryData[] = [];
+        const modsToUpdate: ModHistoryData[] = [];
         const modChanges = compareMods(prevRoomMods, currCageMods);
         console.log("Mod Changes: ", modChanges);
         const newTimestamp = new Date();
         modChanges.forEach((change) => {
             const modLoc = parseInt(change.direction);
             // new mod data if adding or modifying
-            const newModData: ModData = {
+            const newModData: ModHistoryData = {
                 location: undefined,
                 subId: 0,
                 modId: '',

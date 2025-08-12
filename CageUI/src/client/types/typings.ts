@@ -79,6 +79,11 @@ export enum ModDirections {
     Direct
 }
 
+export enum ModStyle {
+    Attachment,
+    Separator
+}
+
 export enum ModLocations {
     Left,
     Right,
@@ -220,11 +225,11 @@ export interface LayoutHistoryData {
 export interface PrevRoom {
     cagingData: LayoutHistoryData[];
     layoutData: LayoutData;
-    modData?: ModData[];
+    modData?: ModHistoryData[];
     name: string | null;
 }
 
-export interface ModData {
+export interface ModHistoryData {
     rowid?: number;
     modId: string; // rows with same modId are the same mod from perspective of that cage
     room: string;

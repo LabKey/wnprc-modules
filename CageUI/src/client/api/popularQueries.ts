@@ -23,8 +23,9 @@
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
+import { EHRCageMods } from '../types/homeTypes';
 
-export const cageModLookup = async (columns: string[], filterArray:  Filter.IFilter[]) => {
+export const cageModLookup = async (columns: string[], filterArray:  Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_modifications',
@@ -32,9 +33,9 @@ export const cageModLookup = async (columns: string[], filterArray:  Filter.IFil
         filterArray: filterArray
     }
     const res = await labkeyActionSelectWithPromise(config);
-    console.log("Lookup: ", res, config)
+
     if(res.rows.length !== 0){
-        return res;
+        return res.rows as EHRCageMods[];
     }else{
         console.log("Error cageui modifications", res);
     }

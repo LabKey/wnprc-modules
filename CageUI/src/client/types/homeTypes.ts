@@ -1,12 +1,12 @@
 import {
     Cage, CageDirection, CageMapKey,
     CageNumber,
-    DefaultRackId, ModData, ModDirections,
+    DefaultRackId, ModHistoryData, ModDirections,
     ModLocations,
     ModTypes,
     Rack,
     RealRackId,
-    Room
+    Room, ModStyle
 } from './typings';
 import { Option } from '@labkey/components';
 
@@ -31,11 +31,12 @@ export type LoadedRooms = {
 };
 
 export type EHRCageMods = {
-    [key in ModTypes]: {
-        category: ModDirections;
-        rowid: number;
-        title: string;
-    }
+    rowid: number;
+    value: ModTypes;
+    title: string;
+    direction: ModDirections;
+    type: ModStyle;
+
 }
 
 export interface SelectedPage {

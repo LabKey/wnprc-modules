@@ -28,7 +28,7 @@ import {
     DefaultRackId,
     GroupId,
     LayoutHistoryData,
-    LocationCoords, ModData,
+    LocationCoords, ModHistoryData,
     Rack,
     RackGroup,
     RackStringType,

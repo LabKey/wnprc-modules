@@ -22,7 +22,7 @@ import { ModDirections, ModTypes } from '../../../types/typings';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter, Utils } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { ConnectedModType } from '../../../types/homeTypes';
+import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
 
 
@@ -40,22 +40,59 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const dropdownRef = useRef(null);
 
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
+    const [availableMods, setAvailableMods] = useState<EHRCageMods[]>(null);
 
     useEffect(() => {
-        console.log("Direction: ", options);
-    }, [options]);
+        if (!availableMods) return;
+
+        // If nothing is selected, reset to all available options
+        if (!selectedItems || selectedItems.length === 0) {
+            setOptions(availableMods.map(m => ({ label: m.title, value: m.value })));
+            return;
+        }
+
+        // Build quick lookups
+        const selectedValueSet = new Set(selectedItems.map(s => s.value));
+
+        // For each selected value, find its (direction, type)
+        const selectedDirTypePairs = new Set(
+            selectedItems
+                .map(sel => availableMods.find(m => m.value === sel.value))
+                .filter((m): m is EHRCageMods => !!m)
+                .map(m => `${m.direction}|${m.type}`)
+        );
+
+        // Filter out any option whose (direction, type) matches a selected one,
+        // except keep the currently selected values visible
+        const allowedMods = availableMods.filter(m => {
+            if (selectedValueSet.has(m.value)) return true; // always keep selected
+            const key = `${m.direction}|${m.type}`;
+            return !selectedDirTypePairs.has(key);
+        });
+
+        setOptions(allowedMods.map(m => ({ label: m.title, value: m.value })));
+    }, [selectedItems, availableMods]);
 
     useEffect(() => {
         // the filter here assigns vertical to above and below, horizontal to left and right, and if no direction given then it is direct
-        console.log("Pre LookIP{ : ", directionCategory);
-        cageModLookup([], [Filter.create('direction',
+        const directionFilter = Filter.create('direction',
             directionCategory !== undefined ? directionCategory : ModDirections.Direct,
-            Filter.Types.EQUALS)]).then(result => {
-            if(result.rows.length !== 0){
+            Filter.Types.EQUALS);
+
+        // This filter removes options that would create incorrect modification layouts (multiple floors/dividers in one location, etc)
+        const typesFilter = Filter.create('direction',
+            directionCategory !== undefined ? directionCategory : ModDirections.Direct,
+            Filter.Types.EQUALS);
+
+        cageModLookup([], [directionFilter]).then(result => {
+            if(result.length !== 0){
                 const rowOptions: Option<ModTypes>[] = [];
-                result.rows.forEach(row => {
+                const availMods: EHRCageMods[] = [];
+                result.forEach(row => {
                     rowOptions.push({label: row.title, value: row.value as ModTypes});
+                    availMods.push({...row});
                 })
+                setAvailableMods(availMods);
                 setOptions(rowOptions);
             }
         }).catch(err => {
@@ -88,6 +125,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const handleSelectItem = (item: Option<ModTypes>) => {
         const newItems = selectedItems || [];
 
+        console.log("Selected Items: ", newItems, item);
         if (!newItems.find(items => items.value === item.value)) {
             setSelectedItems([...newItems, {
                 ...item,

@@ -647,7 +647,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<RoomWithMod
         if (loadMods && !rack.type.isDefault) {
 
             const modReturnData = await cageModLookup([],[]);
-            const availMods = modReturnData.rows.map(row => ({value: row.value, label: row.title}));
+            const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
 
             const prevMods = prevRoom.modData.filter((mod) => mod.rackRowId === rack.rowid && mod.cage === cageNum);
             prevMods.forEach((mod) => {

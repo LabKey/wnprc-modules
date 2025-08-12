@@ -5,12 +5,11 @@ import { SelectedObj } from '../../../types/layoutEditorTypes';
 import {
     CageModification,
     CageModificationsType,
-    ModData,
+    ModHistoryData,
     ModLocations,
     ModTypes, Rack, Cage, RoomMods, CurrRoomMods
 } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
-import { ModificationEditorTable } from './ModificationEditorTable';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';

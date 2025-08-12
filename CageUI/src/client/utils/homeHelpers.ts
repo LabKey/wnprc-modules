@@ -767,38 +767,6 @@ export const removeCircularReferences = (obj) => {
     }));
 }
 
-/*
-export const getCageMod = (modId: string, rack: Rack) => {
-    const rackPos = parseCageMod(modId);
-    const cage = rack.cages[rackPos - 1];
-    const mod = parseSeparator(modId);
-    let cageMod: Modification;
-    const cleanName = cleanString(cage.cageState.extraMod.modData.mod.name);
-    const cleanModName = cleanString(mod);
-    if(cleanName === cleanModName){
-        cageMod = cage.cageState.extraMod.modData.mod;
-        return cageMod;
-    }
-    return cageMod;
-}
-*/
-//Helper function to update cage id and names when a rack is removed for the rest of cages in a room
-export const updateCageIds = (updatedRacks) => {
-    let currentCageId = 1;
-    return updatedRacks.map((rack) => {
-        if (rack.isActive) {
-            rack.cages = rack.cages.map((prevCage) => (
-                {
-                    ...prevCage,
-                    id: currentCageId,
-                    name: zeroPadName(currentCageId++, 4)
-                })
-            );
-        }
-        return rack;
-    });
-};
-
 // Sadly we kind of have to hard code this function.
 export const getAdjLocation = (loc: ModLocations): ModLocations => {
     switch (loc) {
@@ -819,11 +787,10 @@ export const resetMod = async  (value: ModTypes):  Promise<Option<ModTypes>> => 
     // todo perform async lookup to determine what type the mod is.
 
     const newVal: Option<ModTypes> = {label: '', value: value}
-    let modLookupData;
-    const res = await cageModLookup([],[]);
-    if(res){
-        modLookupData = res.rows;
-        console.log("Mod Lookup: ", modLookupData);
+
+    const rows = await cageModLookup([],[]);
+    if(rows.length > 0){
+        console.log("Mod Lookup: ", rows);
     }
 
 

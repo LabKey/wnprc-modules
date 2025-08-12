@@ -114,7 +114,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
 
     const handleChange = (location: ModLocations, pairs: ConnectedRack | ConnectedCage | Cage, selectedItems: ConnectedModType[]) => {
-        console.log("Changing Mods:  ", pairs, selectedItems)
+        console.log("Changing Mods:  ", location, pairs, selectedItems)
         if((pairs as ConnectedRack).adjRack){
             const newPairs = pairs as ConnectedRack;
             // edit if pair already exists

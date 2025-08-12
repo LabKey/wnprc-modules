@@ -4,13 +4,9 @@ import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import Select from 'react-select';
 import { Option } from '@labkey/components';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
-import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { Cage, ModDirections, ModLocations, ModTypes, Rack } from '../../../types/typings';
-import { findCageInGroup, findRackInGroup } from '../../../utils/LayoutEditorHelpers';
+import { ModDirections, ModTypes } from '../../../types/typings';
 import { Simulate } from 'react-dom/test-utils';
-import change = Simulate.change;
 import { cageModLookup } from '../../../api/popularQueries';
 
 interface ModificationSelectProps {

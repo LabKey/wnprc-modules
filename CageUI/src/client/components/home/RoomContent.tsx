@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import '../../cageui.scss';
 import { useHomeContext } from '../../context/HomeContextManager';
 import { RoomViewContent } from './roomView/RoomViewContent';

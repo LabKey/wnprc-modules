@@ -19,7 +19,6 @@
 import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ActionURL } from '@labkey/api';
-import { RoomItemStringType } from '../../types/typings';
 import { ReactSVG } from 'react-svg';
 
 interface RoomItemTemplateProps {

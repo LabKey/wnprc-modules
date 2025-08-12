@@ -16,7 +16,7 @@
  *
  */
 
-import { ExtraContext, GateContext } from './layoutEditorTypes';
+import { GateContext } from './layoutEditorTypes';
 import { ConnectedCages, ConnectedModType, ConnectedRacks } from './homeTypes';
 import { Option } from '@labkey/components';
 

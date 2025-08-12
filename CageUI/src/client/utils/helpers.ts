@@ -17,39 +17,49 @@
  */
 
 import {
-    Cage, CageModificationsType, CageNumber, DefaultRackId,
+    Cage,
+    CageModificationsType,
+    CageNumber,
+    DefaultRackId,
     DefaultRackStringType,
-    DefaultRackTypes, GroupId, LayoutHistoryData,
-    ModLocations, ModTypes, PrevRoom,
+    DefaultRackTypes,
+    GroupId,
+    LayoutHistoryData,
+    ModLocations,
+    PrevRoom,
     Rack,
     RackGroup,
     RackStringType,
-    RackTypes, RealRackId,
+    RackTypes,
+    RealRackId,
     Room,
     RoomItemStringType,
-    RoomItemType, RoomMods, RoomObject,
+    RoomItemType,
+    RoomMods,
+    RoomObject,
     RoomObjectStringType,
-    RoomObjectTypes, RoomWithMods, UnitLocations, UnitType
+    RoomObjectTypes,
+    RoomWithMods,
+    UnitLocations,
+    UnitType
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
-import { ActionURL, Filter, Utils } from '@labkey/api';
+import { ActionURL, Filter } from '@labkey/api';
 import {
-    createEmptyUnitLoc, findCageInGroup,
+    createEmptyUnitLoc,
     isRackDefault,
     isRackEnum,
     placeAndScaleGroup,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { generateId, Option, selectDistinctRows } from '@labkey/components';
+import { selectDistinctRows } from '@labkey/components';
 import { Modifications } from './constants';
 import { ExtraContext } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
-import { findConnectedCages, findConnectedRacks, getLocationDirection } from './homeHelpers';
-import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 import { cageModLookup } from '../api/popularQueries';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};

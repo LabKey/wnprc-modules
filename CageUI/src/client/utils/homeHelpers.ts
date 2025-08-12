@@ -1,4 +1,4 @@
-import { convertToTitleCase, zeroPadName } from './helpers';
+import { convertToTitleCase } from './helpers';
 import {
     Cage,
     CageDirection,

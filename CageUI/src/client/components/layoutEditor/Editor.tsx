@@ -25,7 +25,8 @@ import { ReactSVG } from 'react-svg';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { RoomItemTemplate } from './RoomItemTemplate';
 import {
-    Cage, CageDirection,
+    Cage,
+    CageDirection,
     CageNumber,
     Rack,
     RackGroup,
@@ -56,17 +57,20 @@ import {
     findRackInGroup,
     getLayoutOffset,
     getTargetRect,
-    isRackEnum, isRoomCreator,
+    isRackEnum,
+    isRoomCreator,
     isTemplateCreator,
     mergeRacks,
     parseWrapperId,
     placeAndScaleGroup,
     setupEditCageEvent,
-    showLayoutEditorConfirmation, showLayoutEditorError,
+    showLayoutEditorConfirmation,
+    showLayoutEditorError,
     updateBorderSize,
 } from '../../utils/LayoutEditorHelpers';
 import {
-    addPrevRoomSvgs, getNextDefaultRackId,
+    addPrevRoomSvgs,
+    getNextDefaultRackId,
     parseRoomItemNum,
     parseRoomItemType,
     roomItemToString,

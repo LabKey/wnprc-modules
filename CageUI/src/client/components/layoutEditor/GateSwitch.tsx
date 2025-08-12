@@ -17,7 +17,7 @@
  */
 
 import * as React from 'react';
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import * as d3 from 'd3';
 import { Room, RoomObject, RoomObjectTypes } from '../../types/typings';
 import { parseRoomItemNum } from '../../utils/helpers';

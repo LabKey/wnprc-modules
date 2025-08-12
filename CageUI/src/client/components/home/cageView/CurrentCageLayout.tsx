@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
-import { Cage, DefaultRackTypes, ModLocations, RackTypes, RoomItemType } from '../../../types/typings';
+import { Cage } from '../../../types/typings';
 import { CELL_SIZE } from '../../../utils/constants';
 
 interface CurrentCageLayoutProps {

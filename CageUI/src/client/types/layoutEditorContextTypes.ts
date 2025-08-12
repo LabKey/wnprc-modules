@@ -19,22 +19,19 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
 import {
-    Cage, CageNumber, DefaultRackId,
-    LayoutHistoryData, LocationCoords,
+    Cage,
+    CageNumber,
+    LayoutHistoryData,
+    LocationCoords,
     Rack,
     RackGroup,
-    RackStringType, RealRackId,
+    RackStringType,
     Room,
     RoomItemClass,
     RoomItemType,
     UnitLocations
 } from './typings';
-import {
-    DeleteActions,
-    LayoutSaveResult,
-    RackActions,
-    SelectedObj
-} from './layoutEditorTypes';
+import { DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from './layoutEditorTypes';
 import * as d3 from 'd3';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 

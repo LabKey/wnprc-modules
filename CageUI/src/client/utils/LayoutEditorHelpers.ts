@@ -19,42 +19,25 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
-import {
-    defaultTypeToRackType,
-    getSvgSize,
-    getTypeClassFromElement,
-    parseLongId,
-    parseRoomItemNum,
-    parseRoomItemType,
-    roomItemToString
-} from './helpers';
+import { getTypeClassFromElement, parseRoomItemType, roomItemToString } from './helpers';
 import {
     Cage,
     CageDirection,
     CageNumber,
-    DefaultRackId,
     DefaultRackTypes,
     GroupId,
-    LayoutHistoryData,
     LocationCoords,
-    ModLocations,
-    PrevRoom,
     Rack,
     RackGroup,
     RackStringType,
     RackTypes,
-    RealRackId,
     Room,
     RoomItemClass,
     RoomItemStringType,
     RoomItemType,
-    RoomObject,
-    RoomObjectTypes,
-    UnitLocations,
-    UnitType
+    UnitLocations
 } from '../types/typings';
 import {
-    ExtraContext,
     LayoutDragProps,
     MergeProps,
     OffsetProps,
@@ -62,11 +45,9 @@ import {
     SelectedObj,
     StartDragProps
 } from '../types/layoutEditorTypes';
-import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter, Security } from '@labkey/api';
+import { Security } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
 

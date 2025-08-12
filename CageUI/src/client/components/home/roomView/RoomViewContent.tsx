@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import '../../../cageui.scss';
 import { ActionURL } from '@labkey/api';
 import { useHomeContext } from '../../../context/HomeContextManager';

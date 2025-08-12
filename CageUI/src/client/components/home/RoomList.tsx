@@ -1,20 +1,19 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
-import { selectDistinctRows } from '@labkey/components';
 import { useHomeContext } from '../../context/HomeContextManager';
-import { ExpandedRooms, ListRoom, ListCage, ListRack } from '../../types/homeTypes';
+import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
-import { Filter, Query } from '@labkey/api';
-import { HomeContextType } from '../../types/homeContextTypes';
+import { Filter } from '@labkey/api';
 import {
     convertToTitleCase,
-    defaultTypeToRackType, formatRackId,
+    defaultTypeToRackType,
+    formatRackId,
     parseRoomItemNum,
     parseRoomItemType,
     roomItemToString
 } from '../../utils/helpers';
-import { CageNumber, DefaultRackId, DefaultRackTypes, RackTypes, RealRackId, RoomItemType } from '../../types/typings';
+import { CageNumber, DefaultRackId, DefaultRackTypes, RackTypes, RealRackId } from '../../types/typings';
 
 export const RoomList: FC = () => {
     const {setSelectedPage, loadedRooms } = useHomeContext();

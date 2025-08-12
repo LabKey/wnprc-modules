@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';

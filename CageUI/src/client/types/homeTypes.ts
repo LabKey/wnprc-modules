@@ -1,12 +1,15 @@
 import {
-    Cage, CageDirection, CageMapKey,
+    Cage,
+    CageMapKey,
     CageNumber,
-    DefaultRackId, ModHistoryData, ModDirections,
+    DefaultRackId,
+    ModDirections,
     ModLocations,
+    ModStyle,
     ModTypes,
     Rack,
     RealRackId,
-    Room, ModStyle
+    Room
 } from './typings';
 import { Option } from '@labkey/components';
 

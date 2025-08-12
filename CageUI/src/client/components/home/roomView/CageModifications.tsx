@@ -46,12 +46,6 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
     const [connectedRacks, setConnectedRacks] = useState<ConnectedRacks>(null);
 
-
-    useEffect(() => {
-        console.log("current mods: ", currCageMods);
-    }, [currCageMods]);
-
-
     // Find possible connects
     useEffect(() => {
         const {rackGroup: currGroup , rack: currRack}= findCageInGroup(cage.cageNum, selectedRoom.rackGroups);
@@ -114,7 +108,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
 
     const handleChange = (location: ModLocations, pairs: ConnectedRack | ConnectedCage | Cage, selectedItems: ConnectedModType[]) => {
-        console.log("Changing Mods:  ", location, pairs, selectedItems)
+
         if((pairs as ConnectedRack).adjRack){
             const newPairs = pairs as ConnectedRack;
             // edit if pair already exists

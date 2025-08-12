@@ -2,24 +2,13 @@ import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import '../../../cageui.scss';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
-import {
-    CageModification,
-    CageModificationsType,
-    ModHistoryData,
-    ModLocations,
-    ModTypes, Rack, Cage, RoomMods, CurrRoomMods
-} from '../../../types/typings';
+import { Cage, CurrRoomMods, ModLocations, Rack } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
 import { useHomeContext } from '../../../context/HomeContextManager';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { ConnectedCages, ConnectedRacks, EHRCageMods } from '../../../types/homeTypes';
-import { Filter } from '@labkey/api';
-import { parseRoomItemNum } from '../../../utils/helpers';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import { RackModifications } from '../rackView/RackModifications';
-import {CageModifications} from './CageModifications';
+import { CageModifications } from './CageModifications';
 
 interface ModificationEditorProps {
     showEditor: boolean;

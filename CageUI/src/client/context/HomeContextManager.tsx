@@ -2,10 +2,12 @@ import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
     Cage,
-    CageMapKey, CageModification, CageModificationsType,
+    CageMapKey,
+    CageModificationsType,
     CageNumber,
     CurrRoomMods,
-    ModHistoryData, ModDirections, ModLocations,
+    ModHistoryData,
+    ModLocations,
     ModTypes,
     PrevRoom,
     Rack,
@@ -17,11 +19,11 @@ import { HomeContextType } from '../types/homeContextTypes';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise, labkeySaveRows } from '../api/labkeyActions';
-import { findCageInGroup, findRackInGroup, getAdjDirection } from '../utils/LayoutEditorHelpers';
+import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, parseRoomItemNum } from '../utils/helpers';
 import { SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
-import { compareMods, getAdjLocation, resetMod } from '../utils/homeHelpers';
+import { compareMods, getAdjLocation } from '../utils/homeHelpers';
 //import { compareMods } from '../utils/homeHelpers';
 
 

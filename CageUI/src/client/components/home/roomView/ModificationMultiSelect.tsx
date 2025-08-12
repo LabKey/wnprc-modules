@@ -16,15 +16,12 @@
  *
  */
 import * as React from 'react';
-import { useState, useRef, useEffect, FC } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { Option } from '@labkey/components';
 import { ModDirections, ModTypes } from '../../../types/typings';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter, Utils } from '@labkey/api';
-import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
-
 
 
 interface ModificationMultiSelectProps {

@@ -1,14 +1,5 @@
-import {
-    Cage,
-    CageModificationsType, CurrRoomMods,
-    ModHistoryData,
-    ModLocations,
-    Rack,
-    RackGroup,
-    Room,
-    RoomItem, RoomMods
-} from './typings';
-import { LoadedRooms, UpdatedMods, SelectedPage, ModificationSaveResult } from './homeTypes';
+import { Cage, CurrRoomMods, Rack, RackGroup, Room, RoomMods } from './typings';
+import { LoadedRooms, ModificationSaveResult, SelectedPage } from './homeTypes';
 import * as React from 'react';
 import { SelectedObj } from './layoutEditorTypes';
 

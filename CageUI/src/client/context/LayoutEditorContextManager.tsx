@@ -17,18 +17,15 @@
  */
 
 import * as React from 'react';
-import { createContext, FC, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import {
-    LayoutContextProps,
-    LayoutContextType
-} from '../types/layoutEditorContextTypes';
+import { createContext, FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { LayoutContextProps, LayoutContextType } from '../types/layoutEditorContextTypes';
 import {
     Cage,
     CageNumber,
     DefaultRackId,
     GroupId,
     LayoutHistoryData,
-    LocationCoords, ModHistoryData,
+    LocationCoords,
     Rack,
     RackGroup,
     RackStringType,
@@ -55,7 +52,8 @@ import {
     createEmptyUnitLoc,
     findCageInGroup,
     findRackInGroup,
-    findSelectObjRack, getNextGroupId,
+    findSelectObjRack,
+    getNextGroupId,
     getTranslation,
     isRackDefault,
     isRackEnum,
@@ -63,7 +61,8 @@ import {
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
-    defaultTypeToRackType, getNextDefaultRackId,
+    defaultTypeToRackType,
+    getNextDefaultRackId,
     getSvgSize,
     parseLongId,
     parseRoomItemNum,

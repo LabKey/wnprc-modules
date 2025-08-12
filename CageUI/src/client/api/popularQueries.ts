@@ -17,9 +17,6 @@
  */
 
 
-
-
-
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';

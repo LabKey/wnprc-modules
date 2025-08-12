@@ -16,11 +16,10 @@
  *
  */
 
-import { Cage, CageNumber, Rack, RackGroup, Room, RoomItem, RoomItemType } from './typings';
+import { Cage, CageNumber, Rack, RackGroup, Room, RoomItem, RoomItemClass, RoomItemType } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
-import {RoomItemClass} from './typings';
 
 export type GateContext = {room: string, roomId: number}; // extra context for Gate Object, describes target room and status
 

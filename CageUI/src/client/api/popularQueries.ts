@@ -16,22 +16,26 @@
  *
  */
 
-module.exports = {
-    apps: [
-        {
-            name: "home",
-            title: "Cage Display",
-            permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
-            path: './src/client/pages/home'
-        },
-        {
-            name: "editLayout",
-            title: "Room Layout Editor",
-            permissionClasses: [
-                'org.labkey.api.security.permissions.ReadPermission',
-                'org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission',
-            ],
-            path: './src/client/pages/layoutEditor'
-        }
-    ]
-};
+
+
+
+
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { Filter } from '@labkey/api';
+import { labkeyActionSelectWithPromise } from './labkeyActions';
+
+export const cageModLookup = async (columns: string[], filterArray:  Filter.IFilter[]) => {
+    const config: SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'cage_modifications',
+        columns: columns,
+        filterArray: filterArray
+    }
+    const res = await labkeyActionSelectWithPromise(config);
+    console.log("Lookup: ", res, config)
+    if(res.rows.length !== 0){
+        return res;
+    }else{
+        console.log("Error cageui modifications", res);
+    }
+}

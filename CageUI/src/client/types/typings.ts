@@ -17,6 +17,8 @@
  */
 
 import { ExtraContext, GateContext } from './layoutEditorTypes';
+import { ConnectedCages, ConnectedModType, ConnectedRacks } from './homeTypes';
+import { Option } from '@labkey/components';
 
 /*
    **IMPORTANT**
@@ -25,6 +27,7 @@ import { ExtraContext, GateContext } from './layoutEditorTypes';
    Type checking and enum looping is used throughout the cage UI project so it's important to have them written here.
 
    RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types.
+
  */
 
 
@@ -70,6 +73,12 @@ export enum ModTypes {
     PlayCage='pc',
 }
 
+export enum ModDirections {
+    Horizontal,
+    Vertical,
+    Direct
+}
+
 export enum ModLocations {
     Left,
     Right,
@@ -84,8 +93,6 @@ export enum CageDirection {
     Top,
     Bottom,
 }
-
-export type DirectionCategory = "vertical" | "horizontal" | "direct";
 
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
@@ -130,10 +137,8 @@ export type ModRecord = Record<ModTypes, Modification>;
 
 export type CageModification = {
     id: number; // id for duplicate mods in the same location, imagine 2 cages on one side of a pen
-    mod: CageModType; // Use mod in the Modifications constant to get styles for mod
+    mod: ModTypes; // Use mod in the Modifications constant to get styles for mod
 }
-
-export type CageModType = ModTypes | 'newMod';
 
 export interface Cage {
     id: number; // Id local to rack
@@ -143,19 +148,43 @@ export interface Cage {
     y: number; // y coordinate of cage in rack coordinate plane
     size: number; // length in cells of cage square of svg image
     extraContext?:  {[key: string]: any}; // extra context if needed for cage
+    mods?: CageModificationsType;
 }
 
-export type CageWithMods = Cage & Partial<CageModifications>;
 
-export interface CageModifications {
-    mods: {
-        [ModLocations.Top]: CageModification[]
-        [ModLocations.Bottom]: CageModification[];
-        [ModLocations.Left]: CageModification[];
-        [ModLocations.Right]: CageModification[];
-        [ModLocations.Direct]: CageModification[];
-    };
-    isDirty: boolean; // determines if modifications have been changed
+export type CageMapKey = string;
+
+export interface RoomMods {
+    [key: CageMapKey]: Option<ModTypes>;
+}
+
+export interface CurrRoomMods {
+    adjCages: ConnectedCages;
+    adjRacks: ConnectedRacks;
+    currCage: ConnectedModType[];
+}
+
+export interface CageModificationsType {
+    [ModLocations.Top]: {
+        mods: CageMapKey[];
+        subId: number; // subsection id
+    }[];
+    [ModLocations.Bottom]: {
+        mods: CageMapKey[];
+        subId: number;
+    }[];
+    [ModLocations.Left]: {
+        mods: CageMapKey[];
+        subId: number;
+    }[];
+    [ModLocations.Right]: {
+        mods: CageMapKey[];
+        subId: number;
+    }[];
+    [ModLocations.Direct]: {
+        mods: CageMapKey[];
+        subId: number;
+    }[];
 }
 
 export interface Room {
@@ -164,6 +193,8 @@ export interface Room {
     objects: RoomObject[];
     layoutData: LayoutData;
 }
+
+export type RoomWithMods = Room & Partial<{ mods: RoomMods }>
 
 export interface LayoutData {
     scale: number;
@@ -194,13 +225,16 @@ export interface PrevRoom {
 }
 
 export interface ModData {
-    rowid: number;
+    rowid?: number;
+    modId: string; // rows with same modId are the same mod from perspective of that cage
     room: string;
-    rack: number; // rowid of rack
+    rackRowId: number;
     cage: number;
-    location: ModLocations;
-    locationId: number;
     modification: ModTypes;
+    location: ModLocations;
+    subId: number;
+    startDate: Date;
+    endDate: Date | null;
 }
 
 export interface RackGroup {
@@ -217,7 +251,7 @@ export interface Rack {
     rowid?: number; // if real rack this will have a rowid
     selectionType: SelectionType;
     type: UnitType;
-    cages: CageWithMods[];
+    cages: Cage[];
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
     isActive?: boolean; // Determines if rack is "in use or active"
@@ -239,6 +273,23 @@ export interface UnitType {
     name: string; // naming convention is 'type-manufacturer-sqft'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
+    sides: {
+        [ModLocations.Top]: {
+            sections: number
+        };
+        [ModLocations.Bottom]: {
+            sections: number
+        };
+        [ModLocations.Left]: {
+            sections: number
+        };
+        [ModLocations.Right]: {
+            sections: number
+        };
+        [ModLocations.Direct]: {
+            sections: number
+        };
+    };
 }
 
 export interface LocationCoords {

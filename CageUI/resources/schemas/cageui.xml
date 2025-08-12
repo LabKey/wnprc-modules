@@ -67,4 +67,37 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="cage_modifications_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="modId"/>
+            <column columnName="room"/>
+            <column columnName="rack"/>
+            <column columnName="cage"/>
+            <column columnName="modification"/>
+            <column columnName="subId"/>
+            <column columnName="location"/>
+            <column columnName="startDate"/>
+            <column columnName="endDate"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="cage_modifications" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="value"/>
+            <column columnName="title"/>
+            <column columnName="direction"/>
+            <column columnName="type"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

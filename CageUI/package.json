@@ -19,7 +19,7 @@
   "author": "Board of Regents of the University of Wisconsin System",
   "license": "Apache-2.0",
   "dependencies": {
-    "@labkey/api": "1.35.6",
+    "@labkey/api": "1.42.0",
     "dayjs": "^1.11.8",
     "react": "~18.3.1",
     "react-bootstrap": "~2.10.4",
@@ -35,8 +35,8 @@
   },
   "devDependencies": {
     "@babel/core": "7.26.7",
-    "@labkey/build": "8.2.0",
-    "@labkey/components": "5.20.4",
+    "@labkey/build": "8.6.0",
+    "@labkey/components": "6.56.2",
     "@types/react": "~18.3.3",
     "@types/react-bootstrap": "~0.32.32",
     "@types/react-dom": "~18.3.0",

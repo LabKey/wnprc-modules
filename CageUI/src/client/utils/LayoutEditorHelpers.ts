@@ -445,10 +445,10 @@ export async function mergeRacks(props: MergeProps) {
     }
     if (action !== 'cancel') {
         let targetRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
-            = layoutSvg.select(`[id^=${targetRack.itemId}]`);
+            = layoutSvg.select(`[id=${targetRack.itemId}]`);
 
         let draggedRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
-            = layoutSvg.select(`[id^=${draggedRack.itemId}]`);
+            = layoutSvg.select(`[id=${draggedRack.itemId}]`);
 
         let newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>;
 

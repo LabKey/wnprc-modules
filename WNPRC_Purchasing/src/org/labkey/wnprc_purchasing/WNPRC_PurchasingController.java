@@ -38,6 +38,7 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.notification.NotificationService;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Filter;
@@ -398,7 +399,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
         private Map<Integer, String> getPurchasingDirectorUserIds()
         {
-            Map<Integer, String> purchasingDirUserIds = new HashMap<>();
+            Map<Integer, String> purchasingDirUserIds = new IntHashMap<>();
             for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
             {
                 if (roleAssignment.getRole().getName().equals(WNPRC_PurchasingDirectorRole.PURCHASING_DIRECTOR_ROLE_NAME))

@@ -17,6 +17,7 @@ package org.labkey.wnprc_ehr.notification;
 
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -149,7 +150,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         {
             //Organizing report by project
             Map<String,Object>[] totalWaterForDay = ts.getMapArray();
-            Map<Integer, List<Map<String,Object>>> projectMap = new HashMap<>();
+            Map<Integer, List<Map<String,Object>>> projectMap = new IntHashMap<>();
             int animalsWaterMeaning = 0;
             for(Map<String,Object> mapItem : totalWaterForDay){
                 int projectNum = ConvertHelper.convert(mapItem.get("project"),Integer.class);

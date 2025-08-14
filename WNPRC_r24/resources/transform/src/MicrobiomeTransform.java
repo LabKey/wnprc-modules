@@ -31,7 +31,7 @@ public class MicrobiomeTransform extends AbstractAssayValidator
 {
     private File _errorFile;
     private Map<String, String> _runProperties = new HashMap<>();
-    private Map<Integer, String> _colMap = new HashMap<>();
+    private Map<Integer, String> _colMap = new IntHashMap<>();
     private Map<String, String> _dictionary = new HashMap<>();
     private final int numHeaderCols = 4;
 

@@ -113,6 +113,23 @@ export const Modifications: ModRecord = {
             value: "4"
         }]
     },
+    [ModTypes.SPDivider]: {
+        name: "Social Panel Divider",
+        svgIds: {
+            [ModLocations.Left]: ['left'],
+            [ModLocations.Right]: ['right']
+        },
+        styles: [{
+            property: "stroke",
+            value: "black"
+        },{
+            property: "stroke-dasharray",
+            value: "2 5 2 5"
+        },{
+            property: "stroke-width",
+            value: "4"
+        }]
+    },
     [ModTypes.VCDivider]: {
         name: "Visual Contact Divider",
         svgIds: {
@@ -190,21 +207,5 @@ export const Modifications: ModRecord = {
             property: "fill",
             value: "#FCB017"
         }]
-    },
-    [ModTypes.PlayCage]: {
-        name: "Play Cage",
-        svgIds: {
-            [ModLocations.Direct]: ['playCage'],
-        },
-        styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-width",
-            value: "1px"
-        },{
-            property: "fill",
-            value: "#6D88C4"
-        }]
-    },
+    }
 }

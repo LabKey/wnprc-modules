@@ -1,4 +1,4 @@
-import { Cage, CurrRoomMods, Rack, RackGroup, Room, RoomMods, RoomWithMods } from './typings';
+import { Cage, CurrCageMods, Rack, RackGroup, Room, RoomMods, RoomWithMods } from './typings';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from './homeTypes';
 import * as React from 'react';
 import { SelectedObj } from './layoutEditorTypes';
@@ -16,8 +16,9 @@ export interface HomeContextType {
     selectedCage: Cage,
     selectedContextObj: SelectedObj,
     setSelectedContextObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
-    saveCageMods: (currCage: Cage, currCageMods: CurrRoomMods) => ModificationSaveResult;
-    submitCageMods: (currCage: Cage, currCageMods: CurrRoomMods) => Promise<ModificationSaveResult>;
+    saveCageMods: (currCage: Cage, currCageMods: CurrCageMods) => ModificationSaveResult;
+    submitCageMods: (currCage: Cage, currCageMods: CurrCageMods) => Promise<ModificationSaveResult>;
     roomMods: RoomMods;
     prevRoomMods: RoomMods;
+    setPrevRoomMods: React.Dispatch<React.SetStateAction<RoomMods>>;
 }

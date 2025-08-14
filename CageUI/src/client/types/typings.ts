@@ -70,7 +70,7 @@ export enum ModTypes {
     NoDivider='nd',
     CTunnel='ct',
     Extension='ex',
-    PlayCage='pc',
+    SPDivider = 'spd' // Social Panel
 }
 
 export enum ModDirections {
@@ -163,7 +163,7 @@ export interface RoomMods {
     [key: CageMapKey]: Option<ModTypes>;
 }
 
-export interface CurrRoomMods {
+export interface CurrCageMods {
     adjCages: ConnectedCages;
     adjRacks: ConnectedRacks;
     currCage: ConnectedModType[];

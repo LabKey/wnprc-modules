@@ -20,6 +20,7 @@ interface RoomLayoutProps {
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {selectedRoom, selectedContextObj, setSelectedContextObj, roomMods, prevRoomMods} = useHomeContext();
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
+    const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
     const [errorPopup, setErrorPopup] = useState<string>(null);
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
@@ -61,14 +62,20 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         setSelectedContextObj(null);
     }, [showCageContextMenu]);
 
+    useEffect(() => {
+        if(!roomMods || !prevRoomMods) return;
+        setShowChangesMenu((_.isEqual(prevRoomMods, roomMods)));
+    }, [roomMods]);
+
     return (
         <div className={'room-layout'}>
-            {!(_.isEqual(prevRoomMods, roomMods)) &&
-                    <div className={'room-layout-message'}>
-                        Changes have been made to this room. Please save the room before continuing.
+            {!showChangesMenu &&
+                    <div className={'room-changes-toolbar'}>
+                        <div className={'room-layout-message'}>
+                            Changes have been made to this room. Please save the room before continuing.
+                        </div>
                     </div>
             }
-
             <div id={"layout-grid"}>
                 <svg // svg here is the size of the border (objects outside of border ignored), add 1 to viewbox to prevent visual cutting by a pixel
                     width={selectedRoom.layoutData.borderWidth + 1}

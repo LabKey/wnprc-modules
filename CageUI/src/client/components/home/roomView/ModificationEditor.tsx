@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import '../../../cageui.scss';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
-import { Cage, CurrRoomMods, ModLocations, Rack } from '../../../types/typings';
+import { Cage, CurrCageMods, ModLocations, Rack } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
 import { useHomeContext } from '../../../context/HomeContextManager';
@@ -31,7 +31,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
 
     const [currCage, setCurrCage] = useState<Cage>(null);
     const [currRack, setCurrRack] = useState<Rack>(null);
-    const [currCageMods, setCurrCageMods] = useState<CurrRoomMods>({adjCages: {
+    const [currCageMods, setCurrCageMods] = useState<CurrCageMods>({adjCages: {
             [ModLocations.Left]: [],
             [ModLocations.Right]: [],
             [ModLocations.Top]: [],

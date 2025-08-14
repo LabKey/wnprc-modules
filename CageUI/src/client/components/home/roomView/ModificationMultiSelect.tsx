@@ -18,19 +18,21 @@
 import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Option } from '@labkey/components';
-import { ModDirections, ModTypes } from '../../../types/typings';
+import { Cage, ModDirections, ModTypes, RoomMods } from '../../../types/typings';
 import { Filter, Utils } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
-
+import { useHomeContext } from '../../../context/HomeContextManager';
 
 interface ModificationMultiSelectProps {
     handleChange: (selectedItems: ConnectedModType[]) => void;
     prevItems?: ConnectedModType[];
     directionCategory?: ModDirections;
 }
+
 export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props) => {
     const {directionCategory, handleChange, prevItems} = props;
+    const {setPrevRoomMods} = useHomeContext();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedItems, setSelectedItems] = useState<ConnectedModType[]>(prevItems || []);
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +40,10 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
 
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
     const [availableMods, setAvailableMods] = useState<EHRCageMods[]>(null);
+
+    useEffect(() => {
+        console.log("prev items", prevItems);
+    }, [prevItems]);
 
     useEffect(() => {
         if (!availableMods) return;
@@ -73,11 +79,6 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     useEffect(() => {
         // the filter here assigns vertical to above and below, horizontal to left and right, and if no direction given then it is direct
         const directionFilter = Filter.create('direction',
-            directionCategory !== undefined ? directionCategory : ModDirections.Direct,
-            Filter.Types.EQUALS);
-
-        // This filter removes options that would create incorrect modification layouts (multiple floors/dividers in one location, etc)
-        const typesFilter = Filter.create('direction',
             directionCategory !== undefined ? directionCategory : ModDirections.Direct,
             Filter.Types.EQUALS);
 

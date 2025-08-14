@@ -5,7 +5,7 @@ import {
     CageMapKey,
     CageModificationsType,
     CageNumber,
-    CurrRoomMods,
+    CurrCageMods,
     ModHistoryData,
     ModLocations,
     ModTypes,
@@ -223,7 +223,7 @@ export const HomeContextProvider = ({children}) => {
 
     // Saves cage mods from popup window for submission
     //TODO Add checks to prevent mods of same types to be connected.
-    const saveCageMods = (currCage: Cage, currCageMods: CurrRoomMods): ModificationSaveResult  => {
+    /*const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult  => {
         console.log("Saving cage mods: ", currCageMods);
 
         // convert currCageMods -> roomMods
@@ -231,7 +231,7 @@ export const HomeContextProvider = ({children}) => {
         const newCageKeys: {[key in CageNumber]: CageModificationsType} = {};
 
 
-        const tempRoomMods: RoomMods = roomMods;
+        const tempRoomMods: RoomMods = {};
         let newRoomMods: RoomMods = {};
         // captures used mod keys, at the end we can check for mods that are removed using this
         const usedKeys: CageMapKey[] = [];
@@ -264,6 +264,7 @@ export const HomeContextProvider = ({children}) => {
             }
         });
 
+        // updating adjacent cages
         Object.entries(currCageMods.adjCages).forEach(([direction, allDirMods]) => {
             allDirMods.forEach((modSubsection) => {
                 const cageMods = modSubsection.mods;
@@ -296,7 +297,6 @@ export const HomeContextProvider = ({children}) => {
                             newCageKeys[modSubsection.currCage.cageNum] = {
                                 ...newCageKeys[modSubsection.currCage.cageNum],
                                 [direction]: newCageKeys[modSubsection.currCage.cageNum][direction].map((subsections) => {
-                                    console.log("Current SUb: ", subsections)
                                     if(subsections.subId === modSubsection.id){
                                         return ({
                                             ...subsections,
@@ -412,11 +412,11 @@ export const HomeContextProvider = ({children}) => {
 
                     // Create update for the adjacent cage
 
-                    /*
+                    /!*
                         ISSUE
 
                            This currently wipes all the mods in the adjacent cage. what needs to happen is to remember prev mods or find a better way to track removals.
-                     */
+                     *!/
                     if(!newCageKeys[modSubsection.adjCage.cageNum]){
                         newCageKeys[modSubsection.adjCage.cageNum] = {
                             [ModLocations.Top]: modSubsection.adjCage.mods[ModLocations.Top] || [],
@@ -465,12 +465,12 @@ export const HomeContextProvider = ({children}) => {
         Object.keys(tempRoomMods).forEach( async (key) => {
             newRoomMods[key] = {label: tempRoomMods[key].label, value: tempRoomMods[key].value}
 
-            /*if(usedKeys.includes(key)){
+            /!*if(usedKeys.includes(key)){
                 newRoomMods[key] = {label: tempRoomMods[key].label, value: tempRoomMods[key].value}
             }else{
                 newRoomMods[key] = await resetMod(tempRoomMods[key].value);
                 //newRoomMods[key] = {label: "", value: ""}
-            }*/
+            }*!/
         })
 
         console.log(newRoomMods, newCageKeys);
@@ -507,10 +507,178 @@ export const HomeContextProvider = ({children}) => {
         return {
             status: "Success"
         }
-    }
+    }*/
+    // Refactored saveCageMods: clearer helpers, less duplication, and includes the missing state updates
+    const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
+        console.log("Saving cage mods: ", currCageMods);
 
+        const cageModsByCage: { [key in CageNumber]: CageModificationsType } = {};
+        const roomModsAccumulator: RoomMods = {};
+        let newRoomMods: RoomMods = {};
+        const usedModKeys: CageMapKey[] = [];
 
-    const submitCageMods = async (currCage: Cage, currCageMods: CurrRoomMods): Promise<ModificationSaveResult> => {
+        // Helpers
+        const emptyCageMods = (): CageModificationsType => ({
+            [ModLocations.Top]: [],
+            [ModLocations.Bottom]: [],
+            [ModLocations.Left]: [],
+            [ModLocations.Right]: [],
+            [ModLocations.Direct]: []
+        });
+
+        const ensureCageEntry = (cageNum: CageNumber) => {
+            if (!cageModsByCage[cageNum]) {
+                cageModsByCage[cageNum] = emptyCageMods();
+            }
+            return cageModsByCage[cageNum];
+        };
+
+        const addOrAppendSubsectionMod = (
+            cageNum: CageNumber,
+            location: ModLocations,
+            subsectionId: number,
+            modId: CageMapKey
+        ) => {
+            const cageEntry = ensureCageEntry(cageNum);
+            const subsections = cageEntry[location];
+
+            const existing = subsections.find(s => s.subId === subsectionId);
+            if (!existing) {
+                cageEntry[location] = [...subsections, { subId: subsectionId, mods: [modId] }];
+            } else {
+                cageEntry[location] = subsections.map(s =>
+                    s.subId === subsectionId ? { ...s, mods: [...s.mods, modId] } : s
+                );
+            }
+        };
+
+        const recordRoomMod = (id: CageMapKey, label: string, value: ModTypes) => {
+            roomModsAccumulator[id] = { label, value };
+            usedModKeys.push(id);
+        };
+
+        // 1) Current cage → Direct subsection 1
+        currCageMods.currCage.forEach(mod => {
+            recordRoomMod(mod.id, mod.label, mod.value);
+            addOrAppendSubsectionMod(currCage.cageNum, ModLocations.Direct, 1, mod.id);
+        });
+
+        // 2) Adjacent cages
+        Object.entries(currCageMods.adjCages).forEach(([dirKey, allDirMods]) => {
+            const dir = Number(dirKey) as ModLocations;
+
+            allDirMods.forEach(modSubsection => {
+                const subsectionId = modSubsection.id;
+
+                modSubsection.mods.forEach(mod => {
+                    recordRoomMod(mod.id, mod.label, mod.value);
+
+                    // Update current cage in given direction
+                    addOrAppendSubsectionMod(modSubsection.currCage.cageNum, dir, subsectionId, mod.id);
+
+                    // Update adjacent cage in opposite direction
+                    const adjDir = getAdjLocation(dir);
+                    addOrAppendSubsectionMod(modSubsection.adjCage.cageNum, adjDir, subsectionId, mod.id);
+                });
+            });
+        });
+
+        console.log("Temp Mods: ", roomModsAccumulator);
+
+        // 3) Adjacent racks
+        Object.entries(currCageMods.adjRacks).forEach(([dirKey, connectedRacks]) => {
+            const dir = Number(dirKey) as ModLocations;
+
+            connectedRacks.forEach(modSubsection => {
+                const subsectionId = modSubsection.id;
+
+                // Ensure current cage entry exists (seed from existing cage mods if available and not already present)
+                const currEntry = ensureCageEntry(modSubsection.currCage.cageNum);
+                const isEntryEmpty =
+                    currEntry[ModLocations.Top].length === 0 &&
+                    currEntry[ModLocations.Bottom].length === 0 &&
+                    currEntry[ModLocations.Left].length === 0 &&
+                    currEntry[ModLocations.Right].length === 0 &&
+                    currEntry[ModLocations.Direct].length === 0;
+
+                if (isEntryEmpty && modSubsection.currCage.mods) {
+                    cageModsByCage[modSubsection.currCage.cageNum] = {
+                        [ModLocations.Top]: modSubsection.currCage.mods[ModLocations.Top] || [],
+                        [ModLocations.Bottom]: modSubsection.currCage.mods[ModLocations.Bottom] || [],
+                        [ModLocations.Left]: modSubsection.currCage.mods[ModLocations.Left] || [],
+                        [ModLocations.Right]: modSubsection.currCage.mods[ModLocations.Right] || [],
+                        [ModLocations.Direct]: modSubsection.currCage.mods[ModLocations.Direct] || []
+                    };
+                }
+
+                modSubsection.mods.forEach(mod => {
+                    console.log("Current Adj Rack: ", mod);
+                    recordRoomMod(mod.id, mod.label, mod.value);
+
+                    // Update current cage at dir
+                    addOrAppendSubsectionMod(modSubsection.currCage.cageNum, dir, subsectionId, mod.id);
+
+                    // If needed later, mirror to adj cage:
+                    // const adjDir = getAdjLocation(dir);
+                    // addOrAppendSubsectionMod(modSubsection.adjCage.cageNum, adjDir, subsectionId, mod.id);
+                });
+            });
+        });
+
+        // Build newRoomMods from accumulated room mods.
+        // Keeping this synchronous as resetMod path is commented out.
+        Object.keys(roomModsAccumulator).forEach((key) => {
+            newRoomMods[key] = {
+                label: roomModsAccumulator[key].label,
+                value: roomModsAccumulator[key].value
+            };
+
+            /*
+            if (usedModKeys.includes(key as CageMapKey)) {
+                newRoomMods[key] = { label: roomModsAccumulator[key].label, value: roomModsAccumulator[key].value };
+            } else {
+                newRoomMods[key] = await resetMod(roomModsAccumulator[key].value);
+            }
+            */
+        });
+
+        console.log(newRoomMods, cageModsByCage);
+        setRoomMods(newRoomMods);
+
+        // Merge cage modifications back into selectedRoom.rackGroups
+        setSelectedRoom(prevState => {
+            let newRackGroups = prevState.rackGroups;
+
+            Object.entries(cageModsByCage).forEach(([cageNum, value]) => {
+                const { rack, rackGroup } = findCageInGroup(cageNum as CageNumber, newRackGroups);
+                // rack and rackGroup are used indirectly by the map below; not mutated directly
+                newRackGroups = newRackGroups.map(g => ({
+                    ...g,
+                    racks: g.racks.map(r => ({
+                        ...r,
+                        cages: r.cages.map(c => {
+                            if (c.cageNum === cageNum) {
+                                return { ...c, mods: value };
+                            } else {
+                                return c;
+                            }
+                        })
+                    }))
+                }));
+            });
+
+            return {
+                ...prevState,
+                rackGroups: newRackGroups
+            };
+        });
+
+        // TODO: Optionally use usedModKeys to detect and remove deleted mods from state.
+
+        return { status: "Success" };
+    };
+
+    const submitCageMods = async (currCage: Cage, currCageMods: CurrCageMods): Promise<ModificationSaveResult> => {
         const {rack: currRack} = findCageInGroup(currCage.cageNum, selectedRoom.rackGroups);
         const commands: Command[] = [];
         const modsToSave: ModHistoryData[] = [];
@@ -612,7 +780,8 @@ export const HomeContextProvider = ({children}) => {
             saveCageMods,
             submitCageMods,
             roomMods,
-            prevRoomMods
+            prevRoomMods,
+            setPrevRoomMods
         }}>
             {children}
         </HomeContext.Provider>

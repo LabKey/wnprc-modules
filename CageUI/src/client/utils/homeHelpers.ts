@@ -2,7 +2,7 @@ import { convertToTitleCase } from './helpers';
 import {
     Cage,
     CageDirection,
-    CurrRoomMods,
+    CurrCageMods,
     ModDirections,
     ModLocations,
     ModTypes,
@@ -197,7 +197,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 }
 
-export const compareMods = (oldModData: RoomMods, newModData: CurrRoomMods)=> {
+export const compareMods = (oldModData: RoomMods, newModData: CurrCageMods)=> {
 
     //TODO Fix this or make sure it works in all cases
     // Deep comparison helper (simplified - you might want to use lodash's isEqual in real code)

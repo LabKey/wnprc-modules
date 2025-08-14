@@ -20,7 +20,7 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
-import { Cage, CurrRoomMods, ModLocations, Rack, RackGroup } from '../../../types/typings';
+import { Cage, CurrCageMods, ModLocations, Rack, RackGroup } from '../../../types/typings';
 import { findConnectedCages, findConnectedRacks, findDirStr, getLocationDirection } from '../../../utils/homeHelpers';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import {
@@ -35,8 +35,8 @@ import { ModificationMultiSelect } from './ModificationMultiSelect';
 interface CageModificationsProps {
     cage: Cage;
     rack: Rack;
-    currCageMods: CurrRoomMods;
-    setCurrCageMods: React.Dispatch<React.SetStateAction<CurrRoomMods>>;
+    currCageMods: CurrCageMods;
+    setCurrCageMods: React.Dispatch<React.SetStateAction<CurrCageMods>>;
 }
 export const CageModifications: FC<CageModificationsProps> = (props) => {
     const {cage, rack, currCageMods, setCurrCageMods} = props;

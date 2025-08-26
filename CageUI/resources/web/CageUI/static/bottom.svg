@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="bottom" xmlns="http://www.w3.org/2000/svg" width="88.9" height="26.09" viewBox="0 0 88.9 26.09">
+    <text transform="translate(0 20.09)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:24px;">
+        <tspan x="0" y="0">B</tspan>
+        <tspan x="13.01" y="0" style="letter-spacing:-.03em;">O</tspan>
+        <tspan x="28.94" y="0" style="letter-spacing:.04em;">T</tspan>
+        <tspan x="41.78" y="0" style="letter-spacing:-.03em;">T</tspan>
+        <tspan x="53.06" y="0">OM</tspan>
+    </text>
+</svg>

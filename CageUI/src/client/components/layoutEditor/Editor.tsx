@@ -810,6 +810,18 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         <div className={"layout-editor"}>
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
+                    <LayoutTooltip text={"Top"}>
+                        <RoomItemTemplate
+                            fileName={"top"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
+                    <LayoutTooltip text={"Bottom"}>
+                        <RoomItemTemplate
+                            fileName={"bottom"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
                     <LayoutTooltip text={"Door"}>
                         <RoomItemTemplate
                             fileName={"door"}

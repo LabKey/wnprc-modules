@@ -216,7 +216,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 textElement.setAttribute('contentEditable', 'true');
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-                const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
+                const cageGroupElement = textElement.closest(`[id=${roomItemToString(updateItemType)}]`) as SVGGElement;
                 setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,setCtxMenuStyle, roomItemToString(updateItemType) as RackStringType);
             });
         }else{

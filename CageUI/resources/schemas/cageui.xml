@@ -71,6 +71,7 @@
         <columns>
             <column columnName="rowid"/>
             <column columnName="modId"/>
+            <column columnName="parentModId"/>
             <column columnName="room"/>
             <column columnName="rack"/>
             <column columnName="cage"/>

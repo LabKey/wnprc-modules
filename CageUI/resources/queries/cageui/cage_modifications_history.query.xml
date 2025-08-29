@@ -8,6 +8,7 @@
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="modId" />
+                    <column columnName="parentModId" />
                     <column columnName="room">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>

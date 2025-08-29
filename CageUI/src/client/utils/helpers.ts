@@ -19,13 +19,14 @@
 import {
     Cage,
     CageModificationsType,
-    CageNumber,
+    CageNumber, CurrCageMods,
     DefaultRackId,
     DefaultRackStringType,
     DefaultRackTypes,
     GroupId,
     LayoutHistoryData,
     ModLocations,
+    ModTypes,
     PrevRoom,
     Rack,
     RackGroup,
@@ -56,11 +57,12 @@ import {
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { selectDistinctRows } from '@labkey/components';
-import { Modifications } from './constants';
+import { CELL_SIZE, Modifications } from './constants';
 import { ExtraContext } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
+import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
@@ -659,7 +661,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<RoomWithMod
             const modReturnData = await cageModLookup([],[]);
             const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
 
-            const prevMods = prevRoom.modData.filter((mod) => mod.rackRowId === rack.rowid && mod.cage === cageNum);
+            const prevMods = prevRoom.modData.filter((mod) => mod.rack === rack.rowid && mod.cage === cageNum);
             prevMods.forEach((mod) => {
                 // If Mod id exists in newMods we can skip adding it to newMods
                 if(!Object.keys(newMods).find(key => key === mod.modId)){
@@ -725,4 +727,342 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<RoomWithMod
     }
     newLocalRoom.mods = newMods;
     return (newLocalRoom);
+}
+
+// Sadly we kind of have to hard code this function.
+export const getAdjLocation = (loc: ModLocations): ModLocations => {
+    switch (loc) {
+        case ModLocations.Left:
+            return ModLocations.Right;
+        case ModLocations.Right:
+            return ModLocations.Left;
+        case ModLocations.Top:
+            return ModLocations.Bottom;
+        case ModLocations.Bottom:
+            return ModLocations.Top;
+        default:
+            return ModLocations.Direct;
+    }
+}
+
+export const getDefaultMod = (loc: ModLocations): ModTypes | null => {
+    if(loc === ModLocations.Top || loc === ModLocations.Bottom){
+        return ModTypes.StandardFloor;
+    }
+    if(loc === ModLocations.Left || loc === ModLocations.Right){
+        return ModTypes.SolidDivider;
+    }
+    return null;
+}
+
+function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: number; y: number } {
+    // Calculate the global position of the box
+    let x;
+    let y;
+    if(group){
+        x = group.x + rack.x + box.x;
+        y = group.y + rack.y + box.y;
+    }else{
+        x = rack.x + box.x;
+        y = rack.y + box.y;
+    }
+    return {
+        x: x,
+        y: y,
+    };
+}
+
+// Helper: robust float comparison
+const EPS = 0.0001;
+
+// Helper: clamp intersection range along one axis
+function getOverlapRange(aStart: number, aEnd: number, bStart: number, bEnd: number): { start: number; end: number } | null {
+    const start = Math.max(aStart, bStart);
+    const end = Math.min(aEnd, bEnd);
+    return end - start > EPS ? { start, end } : null;
+}
+
+// Helper: compute which segment indices intersect an overlap range.
+// sideLenPx: total length in px of the side (height for left/right; width for top/bottom)
+// numSections: number of polyline segments on that side (from UnitType.sides[side].sections)
+// localStartPx/localEndPx: overlap range relative to the cage's local side start (0..sideLenPx)
+function getIntersectingSectionIndices(
+    sideLenPx: number,
+    numSections: number,
+    localStartPx: number,
+    localEndPx: number
+): number[] {
+    if (numSections <= 0) return [];
+    if (sideLenPx <= 0) return [];
+
+    const segLen = sideLenPx / numSections;
+    const indices: number[] = [];
+
+    // Find first and last segments that have any overlap with [localStartPx, localEndPx]
+    // We expand slightly by EPS to avoid precision misses on boundaries.
+    const firstIdx = Math.max(0, Math.floor((localStartPx - EPS) / segLen));
+    const lastIdx = Math.min(numSections - 1, Math.floor((localEndPx - EPS) / segLen));
+
+    for (let i = firstIdx; i <= lastIdx; i++) {
+        const segStart = i * segLen;
+        const segEnd = segStart + segLen;
+        if (segEnd > localStartPx + EPS && segStart < localEndPx - EPS) {
+            indices.push(i);
+        }
+    }
+    return indices;
+}
+
+// Helper: build side-id strings (e.g., "left-2") from indices (0-based -> 1-based)
+function buildSideIds(sideName: 'left' | 'right' | 'top' | 'bottom', indices: number[]): string[] {
+    // ensure unique & sorted
+    const uniqSorted = Array.from(new Set(indices)).sort((a, b) => a - b);
+    return uniqSorted.map(i => `${sideName}-${i + 1}`);
+}
+
+function areAdjacent(
+    currCage: Cage,
+    currRack: Rack,
+    adjCage: Cage,
+    adjRack: Rack,
+    group?: RackGroup
+): {
+    location: ModLocations | null,
+    currLines: string[],
+    adjLines: string[]
+} {
+    const cellSize = CELL_SIZE;
+
+    // Global positions (top-left of each cage in px)
+    const currGlobalPos = getGlobalPosition(currCage, currRack, group);
+    const adjGlobalPos = getGlobalPosition(adjCage, adjRack, group);
+
+    // Cages are squares of size "cage.size" cells
+    const width1 = currCage.size * cellSize;
+    const height1 = width1;
+
+    const width2 = adjCage.size * cellSize;
+    const height2 = width2;
+
+    // Box edges
+    const left1 = currGlobalPos.x;
+    const right1 = currGlobalPos.x + width1;
+    const top1 = currGlobalPos.y;
+    const bottom1 = currGlobalPos.y + height1;
+
+    const left2 = adjGlobalPos.x;
+    const right2 = adjGlobalPos.x + width2;
+    const top2 = adjGlobalPos.y;
+    const bottom2 = adjGlobalPos.y + height2;
+
+    // Section counts per side from UnitType
+    const currSides = currCage.size / 4;
+    const adjSides = adjCage.size / 4;
+
+    // Early guard
+    if (!currSides || !adjSides) {
+        return { location: null, currLines: [], adjLines: [] };
+    }
+
+    // Horizontal adjacency: adj is directly to the left of curr (their vertical spans overlap)
+    if (Math.abs(left1 - right2) < EPS) {
+        const yOverlap = getOverlapRange(top1, bottom1, top2, bottom2);
+        if (yOverlap) {
+            const overlapStartY = yOverlap.start;
+            const overlapEndY = yOverlap.end;
+
+            // Map overlap to local coordinates on each cage side (along vertical)
+            const currLocalStart = overlapStartY - top1;
+            const currLocalEnd = overlapEndY - top1;
+            const adjLocalStart = overlapStartY - top2;
+            const adjLocalEnd = overlapEndY - top2;
+
+            const currIdx = getIntersectingSectionIndices(height1, currSides, currLocalStart, currLocalEnd);
+            const adjIdx = getIntersectingSectionIndices(height2, adjSides, adjLocalStart, adjLocalEnd);
+
+            return {
+                location: ModLocations.Left,
+                currLines: buildSideIds('left', currIdx),
+                adjLines: buildSideIds('right', adjIdx)
+            };
+        }
+    }
+
+    // Horizontal adjacency: adj is directly to the right of curr
+    if (Math.abs(right1 - left2) < EPS) {
+        const yOverlap = getOverlapRange(top1, bottom1, top2, bottom2);
+        if (yOverlap) {
+            const overlapStartY = yOverlap.start;
+            const overlapEndY = yOverlap.end;
+
+            const currLocalStart = overlapStartY - top1;
+            const currLocalEnd = overlapEndY - top1;
+            const adjLocalStart = overlapStartY - top2;
+            const adjLocalEnd = overlapEndY - top2;
+
+            const currIdx = getIntersectingSectionIndices(height1, currSides, currLocalStart, currLocalEnd);
+            const adjIdx = getIntersectingSectionIndices(height2, adjSides, adjLocalStart, adjLocalEnd);
+
+            return {
+                location: ModLocations.Right,
+                currLines: buildSideIds('right', currIdx),
+                adjLines: buildSideIds('left', adjIdx)
+            };
+        }
+    }
+
+    // Vertical adjacency: adj is directly above curr
+    if (Math.abs(top1 - bottom2) < EPS) {
+        const xOverlap = getOverlapRange(left1, right1, left2, right2);
+        if (xOverlap) {
+            const overlapStartX = xOverlap.start;
+            const overlapEndX = xOverlap.end;
+
+            // Map overlap to local coordinates on each cage side (along horizontal)
+            const currLocalStart = overlapStartX - left1;
+            const currLocalEnd = overlapEndX - left1;
+            const adjLocalStart = overlapStartX - left2;
+            const adjLocalEnd = overlapEndX - left2;
+
+            const currIdx = getIntersectingSectionIndices(width1, currSides, currLocalStart, currLocalEnd);
+            const adjIdx = getIntersectingSectionIndices(width2, adjSides, adjLocalStart, adjLocalEnd);
+
+            return {
+                location: ModLocations.Top,
+                currLines: buildSideIds('top', currIdx),
+                adjLines: buildSideIds('bottom', adjIdx)
+            };
+        }
+    }
+
+    // Vertical adjacency: adj is directly below curr
+    if (Math.abs(bottom1 - top2) < EPS) {
+        const xOverlap = getOverlapRange(left1, right1, left2, right2);
+        if (xOverlap) {
+            const overlapStartX = xOverlap.start;
+            const overlapEndX = xOverlap.end;
+
+            const currLocalStart = overlapStartX - left1;
+            const currLocalEnd = overlapEndX - left1;
+            const adjLocalStart = overlapStartX - left2;
+            const adjLocalEnd = overlapEndX - left2;
+
+            const currIdx = getIntersectingSectionIndices(width1, currSides, currLocalStart, currLocalEnd);
+            const adjIdx = getIntersectingSectionIndices(width2, adjSides, adjLocalStart, adjLocalEnd);
+
+            return {
+                location: ModLocations.Bottom,
+                currLines: buildSideIds('bottom', currIdx),
+                adjLines: buildSideIds('top', adjIdx)
+            };
+        }
+    }
+
+    // Not adjacent
+    return {
+        location: null,
+        currLines: [],
+        adjLines: []
+    };
+}
+
+// Finds the cage connections in a rack.
+//
+// If cage is passed then it only finds the connections with that cage.
+export const findConnectedCages = (rack: Rack, cage?: Cage) => {
+
+    const connections: ConnectedCages = {[ModLocations.Top]: [], [ModLocations.Bottom]: [], [ModLocations.Right]: [], [ModLocations.Left]: [], [ModLocations.Direct]: []};
+    if(cage){
+        for (let i = 0; i < rack.cages.length; i++) {
+            if(rack.cages[i].cageNum !== cage.cageNum){
+                const adj = areAdjacent(cage, rack, rack.cages[i], rack);
+                if (adj.location !== null) {
+                    adj.currLines.forEach(((line,idx) => {
+                        const currSubId = parseInt(line.split('-')[1]);
+                        const adjSubId = parseInt(adj.adjLines[idx].split('-')[1]);
+                        connections[adj.location].push({
+                            currSubId: currSubId,
+                            adjSubId: adjSubId,
+                            currCage: cage,
+                            adjCage: rack.cages[i]
+                        });
+                    }))
+                }
+            }
+        }
+    }else{
+        for (let i = 0; i < rack.cages.length; i++) {
+            for (let j = i + 1; j < rack.cages.length; j++) {
+                const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack);
+                if (adj.location !== null) {
+                    adj.currLines.forEach((line,idx) => {
+                        const currSubId = parseInt(line.split('-')[1]);
+                        const adjSubId = parseInt(adj.adjLines[idx].split('-')[1]);
+                        connections[adj.location].push({
+                            currSubId: currSubId,
+                            adjSubId: adjSubId,
+                            currCage: rack.cages[i],
+                            adjCage: rack.cages[j]
+                        });
+                    });
+                }
+            }
+        }
+    }
+
+    console.log(`XXX Cage: ${rack}`, connections)
+
+    return connections;
+}
+
+// This can be done by "guessing" the what other cage coords would be if they were adjacent, if they dont exist then they are not
+// If cage is passed then it will only include connections with that cage
+export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage) => {
+    const connections: ConnectedRacks = {[ModLocations.Top]: [], [ModLocations.Bottom]: [], [ModLocations.Right]: [], [ModLocations.Left]: [], [ModLocations.Direct]: []};
+
+    const areRacksConnected = (cRack: Rack, adjRack: Rack) => {
+        for (const currCage of cRack.cages) {
+            let subId = 1;
+            for (const adjCage of adjRack.cages) {
+                console.log(`Is ${currCage.cageNum} adj with ${adjCage.cageNum}`);
+
+                // If cage is passed then determine if either cage is included and skip if not.
+                if(cage){
+                    if(cage.cageNum !== currCage.cageNum && cage.cageNum !== adjCage.cageNum){
+                        continue;
+                    }
+                }
+
+                const adj = areAdjacent(currCage, cRack, adjCage, adjRack, group);
+                // skip racks that arent connected to the current rack
+                if(cRack.rowid !== currRack.rowid && adjRack.rowid !== currRack.rowid){
+                    continue;
+                }
+                console.log(`Adjacent: ${currCage.cageNum}`, adj);
+                if(adj.location !== null){
+                    //[[rack1,cage1], adj, [rack2,cage2]]
+                    adj.currLines.forEach((line,idx) => {
+                        const currSubId = parseInt(line.split('-')[1]);
+                        const adjSubId = parseInt(adj.adjLines[idx].split('-')[1]);
+                        connections[adj.location].push({
+                            currSubId: currSubId,
+                            adjSubId: adjSubId,
+                            currRack: cRack,
+                            currCage: currCage,
+                            adjRack: adjRack,
+                            adjCage: adjCage,
+                        });
+                    });
+                }
+            }
+        }
+    }
+
+    for (let i = 0; i < group.racks.length; i++) {
+        if(group.racks[i].rowid !== currRack.rowid){
+            areRacksConnected(currRack, group.racks[i]);
+        }
+    }
+    console.log(`XXX Rack: ${currRack}`, connections)
+    return connections;
 }

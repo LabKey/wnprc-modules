@@ -68,7 +68,8 @@ export interface ConnectedRack {
     currCage: Cage;
     adjRack: Rack;
     adjCage: Cage;
-    id: number;
+    currSubId: number;
+    adjSubId: number;
     mods?: ConnectedModType[];
 }
 
@@ -77,9 +78,10 @@ export type ConnectedRacks = {
 };
 
 export interface ConnectedCage {
-    id: number;
+    currSubId: number;
     currCage: Cage;
     adjCage: Cage;
+    adjSubId: number;
     mods?: ConnectedModType[];
 }
 

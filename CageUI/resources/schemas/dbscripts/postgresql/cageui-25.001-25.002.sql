@@ -3,6 +3,7 @@ CREATE TABLE cageui.cage_modifications_history
 (
     rowid SERIAL NOT NULL,
     modId varchar NOT NULL,
+    parentModId varchar,
     room VARCHAR(50) NOT NULL,
     rack INTEGER,
     cage INTEGER,

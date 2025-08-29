@@ -25,7 +25,7 @@ import {
     DefaultRackId,
     GroupId,
     LayoutHistoryData,
-    LocationCoords,
+    LocationCoords, ModHistoryData, ModLocations,
     Rack,
     RackGroup,
     RackStringType,
@@ -61,7 +61,7 @@ import {
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
-    defaultTypeToRackType,
+    defaultTypeToRackType, getAdjLocation, getDefaultMod,
     getNextDefaultRackId,
     getSvgSize,
     parseLongId,
@@ -72,14 +72,15 @@ import {
     zeroPadName
 } from '../utils/helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { ActionURL, Filter } from '@labkey/api';
+import { ActionURL, Filter, Utils } from '@labkey/api';
 import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import {
     labkeyActionSelectDistinctWithPromise,
     labkeyActionSelectWithPromise,
-    labkeySaveRows,
+    labkeySaveRows, saveCageModificationHistory,
 } from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
+import { findConnectedCages, findConnectedRacks } from '../utils/helpers';
 
 const LayoutEditorContext = createContext<LayoutContextType | null>(null);
 
@@ -983,10 +984,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         fixGroupIds();
     }
 
-    const changeRack = async (newType: {value: string, label: string}): Promise<string | null> => {
-        let {value: oldRackId, label: oldRackType} = newType;
-        const rackId = parseInt(oldRackId);
-        const rackType = oldRackType.split(' - ')[1];
+    const changeRack = async (newType: {value: number, label: string}): Promise<string | null> => {
+        let {value: rackRowId, label: rackLabel} = newType;
+        const rackType = rackLabel.split(' - ')[1];
+        const rackId = rackLabel.split(' - ')[0];
         const optConfig: SelectRowsOptions = {
             schemaName: "cageui",
             queryName: "rack_types",
@@ -1012,6 +1013,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                                 ...group,
                                 racks: group.racks.map((r) => r.itemId === rack.itemId ? {
                                     ...r,
+                                    rowid: rackRowId,
                                     itemId: `rack-${rackId.toString()}` as RealRackId,
                                     type: {
                                         ...r.type,
@@ -1121,8 +1123,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
 
-        // if template parse room name, 1 is the new name, 0 is the old name
-
         const roomName = localRoom.name;
         const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
         const savingTemplate: boolean = roomName.toLowerCase().includes("template");
@@ -1149,26 +1149,11 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             }
         }
 
-        await Promise.all(localRoom.rackGroups.map(async (group) => {
+        localRoom.rackGroups.map((group) => {
             const groupId = parseLongId(group.groupId);
-            await Promise.all(group.racks.map(async (rack) => {
+            group.racks.map((rack) => {
                 const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseRoomItemNum(rack.itemId);
-                let rackRowId;
-                if (!rack.type.isDefault) {
-                    const rackConfig = {
-                        schemaName: 'cageui',
-                        queryName: 'racks',
-                        column: 'rowid',
-                        filterArray: [
-                            Filter.create('rackid', newRackId, Filter.Types.EQUALS),
-                            Filter.create('rack_type', rack.type.rowid, Filter.Types.EQUALS),
-                        ]
-                    };
-                    const rackResult = await labkeyActionSelectDistinctWithPromise(rackConfig);
-                    if (rackResult.values.length === 1) {
-                        rackRowId = rackResult.values[0];
-                    }
-                }
+
                 rack.cages.forEach((cage) => {
                     const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.num === cage.cageNum);
                     let extraContext: ExtraContext = {};
@@ -1188,7 +1173,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         cage: zeroPadName(parseRoomItemNum(cage.cageNum), 4), // converts number into string with leading 0s
                         end_date: null,
                         extra_context: Object.keys(extraContext).length !== 0 ? JSON.stringify(extraContext) : null,
-                        rack: rack.type.isDefault ? null : rackRowId,
+                        rack: rack.type.isDefault ? null : rack.rowid,
                         object_type: rack.type.isDefault ? rackTypeToDefaultType(rack.type.type) : rack.type.type,
                         rack_group: groupId,
                         room: roomName,
@@ -1198,8 +1183,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                     };
                     dataToSave.push(newCageData);
                 });
-            }));
-        }));
+            });
+        });
 
         localRoom.objects.forEach((roomObj) => {
             const newObjData: LayoutHistoryData = {
@@ -1294,7 +1279,132 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             queryName: "rooms",
             rows: layoutToSave
         });
+        if(dataToSave.length > 0){
+            const racks = dataToSave.map(obj => obj.hasOwnProperty('rack') ? obj.rack : undefined);
 
+            // All rack values must be either null or all must be non-null
+            const nullCount = racks.filter(val => val === null).length;
+            const nonNullCount = racks.filter(val => val !== null && val !== undefined).length;
+
+            // Check if we have a mix of null and non-null rack values
+            if (nullCount > 0 && nonNullCount > 0){
+                return { status: 'Failure', roomName: roomName, reason: ['Cannot save room with mix of default racks and real racks']};;
+            }
+
+            // Check if rack property is consistently present or absent
+            const hasRackCount = racks.filter(val => val !== undefined).length;
+            if(hasRackCount !== 0 && hasRackCount !== racks.length){
+                return { status: 'Failure', roomName: roomName, reason: ['Cannot save room with inconsistent rack property']};
+            }
+            // TODO make sure previous rooms/cage mods are ended correctly, if we are saving a new room we can probably just end all previous room mods
+            if(nullCount === 0){
+                // TODO add cage modification data to commands
+                const newModData: ModHistoryData[] = [];
+
+                const usedMap = new Map<string, boolean>();
+
+                localRoom.rackGroups.forEach((group) => {
+                    group.racks.forEach((r) => {
+                        const connectedCages = findConnectedCages(r);
+
+                        // Build mod data entries for cages within the same rack
+                        Object.entries(connectedCages).forEach(([direction, connections]) => {
+                            const locDir = parseInt(direction) as ModLocations;
+                            if(connections.length === 0) {
+                                return;
+                            }
+                            connections.forEach((connect) => {
+                                const newMapKey = [`${connect.currCage.cageNum}-${connect.currSubId}`, `${connect.adjCage.cageNum}-${connect.adjSubId}`].sort().join('_');
+                                if(usedMap.has(newMapKey)) return;
+                                // add mod data for current cage
+                                const modId = Utils.generateUUID();
+                                newModData.push({
+                                    cage: parseRoomItemNum(connect.currCage.cageNum),
+                                    endDate: undefined,
+                                    location: locDir,
+                                    modId: modId,
+                                    parentModId: null,
+                                    modification: getDefaultMod(locDir),
+                                    rack: r.rowid,
+                                    room: localRoom.name,
+                                    startDate: newStartDate,
+                                    subId: connect.currSubId // TODO might not be correct/ accurate id
+                                });
+                                // add mod data for adjacent cage
+                                const adjLocation = getAdjLocation(locDir);
+                                newModData.push({
+                                    cage: parseRoomItemNum(connect.adjCage.cageNum),
+                                    endDate: undefined,
+                                    location: adjLocation,
+                                    modId: Utils.generateUUID(),
+                                    parentModId: modId,
+                                    modification: getDefaultMod(adjLocation),
+                                    rack: r.rowid,
+                                    room: localRoom.name,
+                                    startDate: newStartDate,
+                                    subId: connect.adjSubId // TODO might not be correct/ accurate id
+                                });
+
+                                usedMap.set(newMapKey, true);
+                            })
+                        })
+
+                        const connectedRacks = findConnectedRacks(group, r);
+                        // build mod data entries for racks within the same group
+                        Object.entries(connectedRacks).forEach(([direction, connections]) => {
+                            const locDir = parseInt(direction) as ModLocations;
+                            if(connections.length === 0) {
+                                return;
+                            }
+                            connections.forEach((connect) => {
+                                // add mod data for current cage
+                                const newMapKey = [`${connect.currCage.cageNum}-${connect.currSubId}`, `${connect.adjCage.cageNum}-${connect.adjSubId}`].sort().join('_');
+                                if(usedMap.has(newMapKey)) return;
+                                const modId = Utils.generateUUID();
+                                newModData.push({
+                                    cage: parseRoomItemNum(connect.currCage.cageNum),
+                                    endDate: undefined,
+                                    location: locDir,
+                                    modId: modId,
+                                    parentModId: null,
+                                    modification: getDefaultMod(locDir),
+                                    rack: connect.currRack.rowid,
+                                    room: localRoom.name,
+                                    startDate: newStartDate,
+                                    subId: connect.currSubId // TODO might not be correct/ accurate id
+                                });
+                                // add mod data for adjacent cage
+                                const adjLocation = getAdjLocation(locDir);
+                                newModData.push({
+                                    cage: parseRoomItemNum(connect.adjCage.cageNum),
+                                    endDate: undefined,
+                                    location: adjLocation,
+                                    modId: Utils.generateUUID(),
+                                    parentModId: modId,
+                                    modification: getDefaultMod(adjLocation),
+                                    rack: connect.adjRack.rowid,
+                                    room: localRoom.name,
+                                    startDate: newStartDate,
+                                    subId: connect.adjSubId // TODO might not be correct/ accurate id
+                                });
+                                usedMap.set(newMapKey, true);
+                            })
+                        })
+                    })
+                })
+                const results = await saveCageModificationHistory(newModData);
+                console.log("Saved modification history", results);
+                /*commands.push({
+                    command: "insert",
+                    schemaName: "cageui",
+                    queryName: "cage_modifications_history",
+                    rows: newModData
+                });*/
+            }
+        }
+
+        /*console.log("Commands:", commands);
+        return;*/
         const result = await labkeySaveRows(commands);
         // Determine success or failure
         if(result.errorCount === 0){

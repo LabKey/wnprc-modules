@@ -20,10 +20,10 @@ import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/home
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise, labkeySaveRows } from '../api/labkeyActions';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
-import { buildNewLocalRoom, parseRoomItemNum } from '../utils/helpers';
+import { buildNewLocalRoom, parseRoomItemNum, getAdjLocation } from '../utils/helpers';
 import { SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
-import { compareMods, getAdjLocation } from '../utils/homeHelpers';
+import { compareMods  } from '../utils/homeHelpers';
 import _ from 'lodash';
 
 const HomeContext = createContext<HomeContextType>({} as HomeContextType);
@@ -152,10 +152,11 @@ export const HomeContextProvider = ({children}) => {
                         const newRow: ModHistoryData = {
                             location: row.location,
                             modId: row.modId,
+                            parentModId: row.parentModId,
                             subId: row.subId,
                             cage: row.cage,
                             modification: row.modification,
-                            rackRowId: row.rack,
+                            rack: row.rack,
                             room: row.room,
                             rowid: row.rowid,
                             startDate: row.startDate,
@@ -568,17 +569,16 @@ export const HomeContextProvider = ({children}) => {
             const dir = Number(dirKey) as ModLocations;
 
             allDirMods.forEach(modSubsection => {
-                const subsectionId = modSubsection.id;
 
                 modSubsection.mods.forEach(mod => {
                     recordRoomMod(mod.id, mod.label, mod.value);
 
                     // Update current cage in given direction
-                    addOrAppendSubsectionMod(modSubsection.currCage.cageNum, dir, subsectionId, mod.id);
+                    addOrAppendSubsectionMod(modSubsection.currCage.cageNum, dir, modSubsection.currSubId, mod.id);
 
                     // Update adjacent cage in opposite direction
                     const adjDir = getAdjLocation(dir);
-                    addOrAppendSubsectionMod(modSubsection.adjCage.cageNum, adjDir, subsectionId, mod.id);
+                    addOrAppendSubsectionMod(modSubsection.adjCage.cageNum, adjDir, modSubsection.adjSubId, mod.id);
                 });
             });
         });
@@ -590,7 +590,6 @@ export const HomeContextProvider = ({children}) => {
             const dir = Number(dirKey) as ModLocations;
 
             connectedRacks.forEach(modSubsection => {
-                const subsectionId = modSubsection.id;
 
                 // Ensure current cage entry exists (seed from existing cage mods if available and not already present)
                 const currEntry = ensureCageEntry(modSubsection.currCage.cageNum);
@@ -616,7 +615,7 @@ export const HomeContextProvider = ({children}) => {
                     recordRoomMod(mod.id, mod.label, mod.value);
 
                     // Update current cage at dir
-                    addOrAppendSubsectionMod(modSubsection.currCage.cageNum, dir, subsectionId, mod.id);
+                    addOrAppendSubsectionMod(modSubsection.currCage.cageNum, dir, modSubsection.currSubId, mod.id);
 
                     // If needed later, mirror to adj cage:
                     // const adjDir = getAdjLocation(dir);
@@ -693,10 +692,11 @@ export const HomeContextProvider = ({children}) => {
                 location: undefined,
                 subId: 0,
                 modId: '',
+                parentModId: null,
                 cage: parseRoomItemNum(currCage.cageNum),
                 endDate: null,
                 modification: change.mod as ModTypes,
-                rackRowId: currRack.rowid,
+                rack: currRack.rowid,
                 room: selectedRoom.name,
                 startDate: newTimestamp
             };

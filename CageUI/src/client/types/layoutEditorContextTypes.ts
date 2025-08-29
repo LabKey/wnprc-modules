@@ -62,7 +62,7 @@ export interface LayoutContextType {
     delObject: (objId: string) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
-    changeRack: (newType: {value: string, label: string}) => Promise<string>;
+    changeRack: (newType: {value: number, label: string}) => Promise<string>;
     clearGrid: () => void;
     user: GetUserPermissionsResponse;
     getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];

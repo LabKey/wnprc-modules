@@ -212,7 +212,7 @@ export interface LayoutHistoryData {
     object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
     extra_context: string | null;
     rack_group: number | null;
-    rack: number | null;
+    rack: number | null; // row id of rack in racks table
     cage: string | null;
     x_coord: number;
     y_coord: number;
@@ -231,13 +231,14 @@ export interface PrevRoom {
 
 export interface ModHistoryData {
     rowid?: number;
-    modId: string; // rows with same modId are the same mod from perspective of that cage
+    modId: string; // unique mod id
+    parentModId: string | null; // this determines if the mod is the flipped perspective of the inserted mod or the original (null if original, or modId of the original mod if flipped perspective)
     room: string;
-    rackRowId: number;
+    rack: number; // rack row id
     cage: number;
     modification: ModTypes;
     location: ModLocations;
-    subId: number;
+    subId: number; // subsection of location where the mod is located
     startDate: Date;
     endDate: Date | null;
 }

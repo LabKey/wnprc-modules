@@ -21,7 +21,8 @@ import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
 import { useHomeContext } from '../../../context/HomeContextManager';
 import { Cage, CurrCageMods, ModLocations, Rack, RackGroup } from '../../../types/typings';
-import { findConnectedCages, findConnectedRacks, findDirStr, getLocationDirection } from '../../../utils/homeHelpers';
+import { findDirStr, getLocationDirection } from '../../../utils/homeHelpers';
+import {findConnectedCages, findConnectedRacks} from '../../../utils/helpers';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import {
     ConnectedCage,
@@ -56,7 +57,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
             connections.forEach((connection) => {
                 if(cage.mods[direction].length > 0 ){
                     cage.mods[direction].forEach((modKeysInLoc) => {
-                        if(modKeysInLoc.subId === connection.id){
+                        if(modKeysInLoc.subId === connection.currSubId){
                             connection.mods = modKeysInLoc.mods.map(key => ({label: roomMods[key].label, value: roomMods[key].value, id: key}));
                         }
                     })
@@ -77,7 +78,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
             connections.forEach(connection => {
                 if(cage.mods[direction].length > 0 ){
                     cage.mods[direction].forEach((modKeysInLoc) => {
-                        if(modKeysInLoc.subId === connection.id){
+                        if(modKeysInLoc.subId === connection.currSubId){
                             connection.mods = modKeysInLoc.mods.map(key => ({label: roomMods[key].label, value: roomMods[key].value, id: key}));
                         }
                     })
@@ -121,7 +122,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                     adjRacks: {
                         ...prevState.adjRacks,
                         [location]: prevState.adjRacks[location].map((c) => {
-                            if(c.id === newPairs.id){
+                            if(c.currSubId === newPairs.currSubId){
                                 return ({
                                     ...c,
                                     mods: selectedItems
@@ -250,7 +251,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                     const loc: ModLocations = parseInt(direction) as ModLocations;
                                     const directionStr = findDirStr(loc);
                                     return (
-                                        <li className={"mod-table-row"} key={`adj-outside-row-${r.id}`} >
+                                        <li className={"mod-table-row"} key={`adj-outside-row-${r.currSubId}`} >
                                             <div className={"mod-table-column"} key={`adj-outside-currRack-${r.currRack.itemId} - ${idx}`}>
                                                 {r.currRack.itemId}
                                             </div>

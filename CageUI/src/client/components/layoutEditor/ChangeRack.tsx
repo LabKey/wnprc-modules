@@ -44,7 +44,7 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             const optConfig: SelectRowsOptions = {
                 schemaName: "cageui",
                 queryName: "racks",
-                columns: ['rackid', 'rack_type']
+                columns: ['rackid', 'rack_type', 'rowid']
             }
             const rackTypesConfig: SelectRowsOptions = {
                 schemaName: "cageui",
@@ -61,7 +61,7 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
 
                     for (const row of rackResult.rows) {
                         const rackTypeName = rackTypesResult.rows.find(r => r.rowid === parseInt(row.rack_type)).name;
-                        tmp.push({label: `${row.rackid} - ${rackTypeName}`, value: `${row.rackid}`});
+                        tmp.push({label: `${row.rackid} - ${rackTypeName}`, value: row.rowid});
                     }
                     setOptions(tmp);
                 }

@@ -17,10 +17,12 @@
  */
 
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { ActionURL, Query, Security } from '@labkey/api';
+import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
+import { ModHistoryData } from '../types/typings';
+import { buildURL } from '@labkey/components';
 
 export function labkeyActionSelectWithPromise(
     options: SelectRowsOptions,
@@ -113,4 +115,28 @@ export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => 
             }
         };
     })
+}
+
+export function saveCageModificationHistory(mods: ModHistoryData[]): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'saveCageModificationHistoryLayoutEditor.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {mods: mods},
+        });
+    });
+/*    const promises: Promise<any>[] = mods.map(mod => {
+        return new Promise((resolve, reject) => {
+            Ajax.request({
+                url: buildURL('cageui', 'saveCageModificationHistory.api'),
+                method: 'POST',
+                success: (res) => resolve(JSON.parse(res.response)),
+                failure: Utils.getCallbackWrapper((error) => reject(error)),
+                jsonData: {...mod}
+            });
+        })
+    })
+    return Promise.all(promises);*/
 }

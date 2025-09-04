@@ -102,6 +102,7 @@ public class CageUIController extends SpringActionController
             JSONArray jsonModsArray = json.getJSONArray("mods");
             List<Map<String, Object>> modList = JsonUtil.toMapList(jsonModsArray);
             Date newEndDate = new Date();
+            BatchValidationException batchErrors = new BatchValidationException();
 
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
             TableInfo historyTable = schema.getTable("cage_modifications_history");
@@ -133,9 +134,14 @@ public class CageUIController extends SpringActionController
             try (DbScope.Transaction tx = historyTable.getSchema().getScope().ensureTransaction())
             {
                 if(!oldRowsToUpdate.isEmpty()){
-                    qus.updateRows(getUser(), getContainer(), oldRowsToUpdate, null, null, null);
+                    qus.updateRows(getUser(), getContainer(), oldRowsToUpdate, null, batchErrors, null, null);
                 }
-                qus.insertRows(getUser(), getContainer(), modList, null, null, null);
+                qus.insertRows(getUser(), getContainer(), modList, batchErrors, null, null);
+                if(batchErrors.hasErrors()){
+                    response.put("success", false);
+                    response.put("errors", batchErrors);
+                    return response;
+                }
                 tx.commit();
                 response.put("success", true);
             }

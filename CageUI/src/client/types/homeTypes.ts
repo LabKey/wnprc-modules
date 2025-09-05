@@ -9,7 +9,7 @@ import {
     ModTypes,
     Rack,
     RealRackId,
-    Room
+    Room, RoomWithMods
 } from './typings';
 import { Option } from '@labkey/components';
 
@@ -30,7 +30,7 @@ export type ExpandedRooms = {
 }
 
 export type LoadedRooms = {
-    [key: string]: { loaded: boolean, room?: Room };
+    [key: string]: { loaded: boolean, room?: RoomWithMods };
 };
 
 export type EHRCageMods = {

@@ -27,9 +27,8 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
 
     useEffect(() => {
         console.log("SR: ", selectedRoom);
-        console.log("Room Mods: ", roomMods);
         console.log("Prev Mods: ", prevRoomMods);
-    }, [selectedRoom, roomMods, prevRoomMods]);
+    }, [selectedRoom, prevRoomMods]);
 
     // Loads room into the svg
     useEffect(() => {

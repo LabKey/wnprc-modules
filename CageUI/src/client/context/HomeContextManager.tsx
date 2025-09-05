@@ -13,7 +13,7 @@ import {
     Rack,
     RackGroup,
     Room,
-    RoomMods
+    RoomMods, RoomWithMods
 } from '../types/typings';
 import { HomeContextType } from '../types/homeContextTypes';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
@@ -43,7 +43,7 @@ export const useHomeContext = () => {
 export const HomeContextProvider = ({children}) => {
     // New state management
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: "Home"});
-    const [selectedRoom, setSelectedRoom] = useState<Room>(null);
+    const [selectedRoom, setSelectedRoom] = useState<RoomWithMods>(null);
     const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
@@ -112,6 +112,9 @@ export const HomeContextProvider = ({children}) => {
         if(!shouldRunEffect) return;
         if(loadedRooms[selectedPage.room].loaded) {
             setSelectedRoom(loadedRooms[selectedPage.room].room);
+            setRoomMods(loadedRooms[selectedPage.room].room.mods);
+            // Ensure they don't share the same reference (using lodash to clone)
+            setPrevRoomMods(_.cloneDeep(loadedRooms[selectedPage.room].room.mods));
             return;
         }
         if (abortController) {

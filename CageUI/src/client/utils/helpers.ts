@@ -312,7 +312,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
     // Loads modifications from constant styles and ids to inject into the svgs
     const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
-        console.log("Load Cage Mods: ", cageToLoad, modsToLoad)
+        //console.log("Load Cage Mods: ", cageToLoad, modsToLoad)
         if(!cageToLoad.mods) return;
         Object.entries(cageToLoad.mods).forEach(([loc,modSubList]) => {
             const modLoc = parseInt(loc) as ModLocations;
@@ -378,6 +378,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             if(mode ==='view'){
+                console.log("Load Cage Mods: ", cage);
                 loadCageMods(cage, shape);
             }
 

@@ -63,6 +63,14 @@ public class CageUIUserSchema extends SimpleUserSchema
                         return new RackTypesTable(schema, CageUISchema.getInstance().getRackTypesTable(), cf).init();
                     }
                 },
+        cage_modifications_history
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        return new CageModificationsHistoryTable(schema, CageUISchema.getInstance().getRackTypesTable(), cf).init();
+                    }
+                },
         racks
                 {
                     @Override

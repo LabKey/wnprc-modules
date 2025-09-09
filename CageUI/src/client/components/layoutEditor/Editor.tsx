@@ -216,7 +216,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 textElement.setAttribute('contentEditable', 'true');
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-                const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
+                const cageGroupElement = textElement.closest(`[id=${roomItemToString(updateItemType)}]`) as SVGGElement;
                 setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,setCtxMenuStyle, roomItemToString(updateItemType) as RackStringType);
             });
         }else{
@@ -810,6 +810,18 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         <div className={"layout-editor"}>
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
+                    <LayoutTooltip text={"Top"}>
+                        <RoomItemTemplate
+                            fileName={"top"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
+                    <LayoutTooltip text={"Bottom"}>
+                        <RoomItemTemplate
+                            fileName={"bottom"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
                     <LayoutTooltip text={"Door"}>
                         <RoomItemTemplate
                             fileName={"door"}

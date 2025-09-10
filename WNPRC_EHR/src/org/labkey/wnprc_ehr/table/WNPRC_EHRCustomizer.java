@@ -61,6 +61,7 @@ import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermissi
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 {
@@ -190,12 +191,22 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 updateTitleCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
                 {
                     @Override
+                    public void addQueryFieldKeys(Set<FieldKey> keys)
+                    {
+                        super.addQueryFieldKeys(keys);
+                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "updateTitle"));
+                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
+                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+                        keys.add(FieldKey.fromParts("qcstate","label"));
+                    }
+
+                    @Override
                     public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                     {
                         String updateTitle = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "updateTitle"));
                         String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
                         String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
-                        String qcState = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "QCState$Label"));
+                        String qcState = (String) ctx.get(FieldKey.fromParts("taskid","qcstate","label"));
 
                         if (formType != null && isExt4Form("form", formType))
                         {

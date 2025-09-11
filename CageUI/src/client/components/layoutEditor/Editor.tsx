@@ -295,8 +295,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
 
         if (targetRect) {
-            const cellX = Math.max(0,targetRect.x);
-            const cellY = Math.max(0,targetRect.y);
+            // update the found x and y coords with new cell coords if the object was outside the available layout range.
+            const cellX = targetRect.x < SVG_WIDTH && targetRect.x > 0 ? targetRect.x : 0;
+            const cellY = targetRect.y < SVG_HEIGHT && targetRect.y > 0 ? targetRect.y : 0;
 
             let newId: string;
 

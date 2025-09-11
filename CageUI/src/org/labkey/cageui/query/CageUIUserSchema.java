@@ -34,6 +34,7 @@ public class CageUIUserSchema extends SimpleUserSchema
     public static final String LAYOUT_HISTORY_TABLE = "layout_history";
     public static final String RACK_TYPES_TABLE = "rack_types";
     public static final String RACKS_TABLE = "racks";
+    public static final String CAGE_MODIFICATIONS_HISTORY_TABLE = "cage_modifications_history";
 
     public CageUIUserSchema(User user, Container container, DbSchema dbschema)
     {
@@ -68,7 +69,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        return new CageModificationsHistoryTable(schema, CageUISchema.getInstance().getRackTypesTable(), cf).init();
+                        return new CageModificationsHistoryTable(schema, CageUISchema.getInstance().getCageModificationsHistoryTable(), cf).init();
                     }
                 },
         racks

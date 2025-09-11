@@ -18,6 +18,9 @@
 
 package org.labkey.cageui;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -45,6 +48,9 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.CageModificationHistoryForm;
+import org.labkey.cageui.action.LayoutHistoryForm;
+import org.labkey.cageui.model.RackGroup;
+import org.labkey.cageui.model.Room;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
@@ -53,6 +59,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -98,45 +105,119 @@ public class CageUIController extends SpringActionController
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
         {
-            JSONObject json = form.getJsonObject();
-            JSONArray jsonModsArray = json.getJSONArray("mods");
-            List<Map<String, Object>> modList = JsonUtil.toMapList(jsonModsArray);
-            Date newEndDate = new Date();
             BatchValidationException batchErrors = new BatchValidationException();
-
-            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
-            TableInfo historyTable = schema.getTable("cage_modifications_history");
-
-            QueryUpdateService qus = historyTable.getUpdateService();
-
-            if (qus == null)
-            {
-                throw new IllegalStateException(historyTable.getName() + " query update service");
-            }
-
+            JSONObject json = form.getJsonObject();
+            Date newEndDate = new Date();
             ApiSimpleResponse response = new ApiSimpleResponse();
 
-            SimpleFilter filter = new SimpleFilter();
-            filter.addCondition(FieldKey.fromParts("room"),modList.get(0).get("room"), CompareType.EQUAL);
-            filter.addCondition(FieldKey.fromParts("endDate"),null, CompareType.ISBLANK);
-            TableSelector selector = new TableSelector(historyTable, filter, null);
+            JSONArray jsonModsArray = json.getJSONArray("mods");
+            JSONObject jsonRoom = json.getJSONObject("room");
+
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
+            String prevRoomName = json.get("prevRoomName").toString();
+            UserSchema cageuiSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
+            UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_lookups");
+            TableInfo layoutHistoryTable = cageuiSchema.getTable("layout_history");
+
+            // Get previous room data
+            SimpleFilter prevRoomFilter = new SimpleFilter();
+            prevRoomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
+            prevRoomFilter.addCondition(FieldKey.fromString("end_date"),null, CompareType.ISBLANK);
+            TableSelector prevRoomSelector = new TableSelector(layoutHistoryTable, prevRoomFilter, null);
+            List<LayoutHistoryForm> prevRoomFormData = prevRoomSelector.getArrayList(LayoutHistoryForm.class);
+
+            boolean savingTemplate = room.getName().toLowerCase().contains("template");
 
 
-            List<CageModificationHistoryForm> formData = selector.getArrayList(CageModificationHistoryForm.class);
-            JSONArray jsonData = new JSONArray();
-            for (CageModificationHistoryForm data : formData)
+            /*
+                First check if the room is saving as one of following:
+                1. Room save from blank editor
+                  - Check if room name has data, end previous room then if it does.
+                 - submit new room
+                2. Room save from previous room
+                - End previous room data
+                - submit new room
+                3. Template save
+                -
+                - End previous template data
+                - Update template name in ehr_lookups.rooms
+                - submit new template data
+                4. Room save from template
+                - Treat room as in 1.
+             */
+
+            // Save condition 1.
+
+            // When saving template if name changed then update the ehr_lookups.rooms table as well.
+            if(savingTemplate && !prevRoomName.equals(room.getName())){
+                TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
+                SimpleFilter roomFilter = new SimpleFilter();
+                roomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
+                TableSelector roomSelector = new TableSelector(roomsTable, roomFilter, null);
+                Map<String, Object> result = roomSelector.getMap();
+                result.put("room", room.getName());
+
+                QueryUpdateService roomQus = roomsTable.getUpdateService();
+                if (roomQus == null)
+                {
+                    throw new IllegalStateException(roomsTable.getName() + " query update service");
+                }
+
+                // Write transaction to push roomQus to db
+
+            }
+
+
+
+            // table info/filters/selectors for cage_modifications_history
+            List<Map<String, Object>> modsToInsert = JsonUtil.toMapList(jsonModsArray);
+            TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
+            SimpleFilter modFilter = new SimpleFilter();
+            modFilter.addCondition(FieldKey.fromString("room"), room.getName(), CompareType.EQUAL);
+            modFilter.addCondition(FieldKey.fromString("endDate"),null, CompareType.ISBLANK);
+            TableSelector modSelector = new TableSelector(modHistoryTable, modFilter, null);
+
+            QueryUpdateService modQus = modHistoryTable.getUpdateService();
+            if (modQus == null)
+            {
+                throw new IllegalStateException(modHistoryTable.getName() + " query update service");
+            }
+
+            List<CageModificationHistoryForm> modHistoryFormData = modSelector.getArrayList(CageModificationHistoryForm.class);
+            JSONArray modJsonData = new JSONArray();
+            for (CageModificationHistoryForm data : modHistoryFormData)
             {
                 data.setEndDate(newEndDate);
-                jsonData.put(data.toJSON());
+                modJsonData.put(data.toJSON());
             }
-            List<Map<String, Object>> oldRowsToUpdate = JsonUtil.toMapList(jsonData);
+            List<Map<String, Object>> oldModRowsToUpdate = JsonUtil.toMapList(modJsonData);
 
-            try (DbScope.Transaction tx = historyTable.getSchema().getScope().ensureTransaction())
+            // table info/filters/selectors for layout_history
+            QueryUpdateService layoutHistoryQus = layoutHistoryTable.getUpdateService();
+            if (layoutHistoryQus == null)
             {
-                if(!oldRowsToUpdate.isEmpty()){
-                    qus.updateRows(getUser(), getContainer(), oldRowsToUpdate, null, batchErrors, null, null);
+                throw new IllegalStateException(layoutHistoryTable.getName() + " query update service");
+            }
+
+            // End previous data forms for prev room name, if any.
+            List<LayoutHistoryForm> layoutHistoryFormData = prevRoomSelector.getArrayList(LayoutHistoryForm.class);
+            JSONArray oldLayoutHistoryJsonData = new JSONArray();
+            for (LayoutHistoryForm data : layoutHistoryFormData)
+            {
+                data.setEndDate(newEndDate);
+                oldLayoutHistoryJsonData.put(data.toJSON());
+            }
+            List<Map<String, Object>> oldlayoutHistoryRowsToUpdate = JsonUtil.toMapList(oldLayoutHistoryJsonData);
+
+
+            try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction())
+            {
+                if(!oldModRowsToUpdate.isEmpty()){
+                    modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
                 }
-                qus.insertRows(getUser(), getContainer(), modList, batchErrors, null, null);
+                modQus.insertRows(getUser(), getContainer(), modsToInsert, batchErrors, null, null);
                 if(batchErrors.hasErrors()){
                     response.put("success", false);
                     response.put("errors", batchErrors);

@@ -197,15 +197,14 @@ export interface Room {
     rackGroups: RackGroup[];
     objects: RoomObject[];
     layoutData: LayoutData;
+    mods?: RoomMods;
 }
-
-export type RoomWithMods = Room & Partial<{ mods: RoomMods }>
 
 export interface LayoutData {
     scale: number;
     borderWidth: number;
     borderHeight: number;
-    status?: boolean;
+    status: boolean;
 }
 
 export interface LayoutHistoryData {

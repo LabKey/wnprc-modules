@@ -40,7 +40,6 @@ import {
     RoomObject,
     RoomObjectStringType,
     RoomObjectTypes,
-    RoomWithMods,
     UnitLocations,
     UnitType
 } from '../types/typings';
@@ -494,8 +493,8 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
     return newUnitLocs;
 };
 
-export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<RoomWithMods> => {
-    const newLocalRoom: RoomWithMods = {
+export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
+    const newLocalRoom: Room = {
         name: prevRoom.name,
         rackGroups: [],
         objects: [],

@@ -122,6 +122,7 @@ export const LayoutEditor: FC<any> = () => {
                     scale: borderResult.rows[0].layout_scale || 1,
                     borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
                     borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
+                    status: borderResult.rows[0].status || false
                 };
                 setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
                 setShowSelectionPopup(false);
@@ -155,7 +156,8 @@ export const LayoutEditor: FC<any> = () => {
                             layoutData: {
                                 scale: prevRoomData.layoutData.scale,
                                 borderWidth: prevRoomData.layoutData.borderWidth,
-                                borderHeight: prevRoomData.layoutData.borderHeight
+                                borderHeight: prevRoomData.layoutData.borderHeight,
+                                status: prevRoomData.layoutData.status,
                             }
                         }
                         setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData, isTemplate: isTemplate});
@@ -172,7 +174,8 @@ export const LayoutEditor: FC<any> = () => {
                     layoutData: {
                         scale: prevRoomData.layoutData.scale,
                         borderWidth: prevRoomData.layoutData.borderWidth,
-                        borderHeight: prevRoomData.layoutData.borderHeight
+                        borderHeight: prevRoomData.layoutData.borderHeight,
+                        status: prevRoomData.layoutData.status,
                     }
                 }
                 setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData.cagingData, isTemplate: isTemplate});

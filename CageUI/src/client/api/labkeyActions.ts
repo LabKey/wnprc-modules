@@ -21,7 +21,7 @@ import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { ModHistoryData } from '../types/typings';
+import { ModHistoryData, Room } from '../types/typings';
 import { buildURL } from '@labkey/components';
 
 export function labkeyActionSelectWithPromise(
@@ -117,14 +117,14 @@ export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => 
     })
 }
 
-export function saveCageModificationHistory(mods: ModHistoryData[]): Promise<any[]> {
+export function saveRoomLayout(room: Room, mods: ModHistoryData[], prevRoomName: string): Promise<{ success: boolean, errors: any[] }> {
     return new Promise((resolve, reject) => {
         Ajax.request({
             url: buildURL('cageui', 'saveCageModificationHistoryLayoutEditor.api'),
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {mods: mods},
+            jsonData: {mods: mods, room: room, prevRoomName: prevRoomName},
         });
     });
 /*    const promises: Promise<any>[] = mods.map(mod => {

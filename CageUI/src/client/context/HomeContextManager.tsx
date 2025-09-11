@@ -13,7 +13,7 @@ import {
     Rack,
     RackGroup,
     Room,
-    RoomMods, RoomWithMods
+    RoomMods
 } from '../types/typings';
 import { HomeContextType } from '../types/homeContextTypes';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
@@ -43,7 +43,7 @@ export const useHomeContext = () => {
 export const HomeContextProvider = ({children}) => {
     // New state management
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: "Home"});
-    const [selectedRoom, setSelectedRoom] = useState<RoomWithMods>(null);
+    const [selectedRoom, setSelectedRoom] = useState<Room>(null);
     const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);

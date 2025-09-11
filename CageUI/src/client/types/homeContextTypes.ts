@@ -1,4 +1,4 @@
-import { Cage, CurrCageMods, Rack, RackGroup, Room, RoomMods, RoomWithMods } from './typings';
+import { Cage, CurrCageMods, Rack, RackGroup, Room, RoomMods } from './typings';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from './homeTypes';
 import * as React from 'react';
 import { SelectedObj } from './layoutEditorTypes';
@@ -8,7 +8,7 @@ export interface HomeContextType {
     setSelectedPage: React.Dispatch<React.SetStateAction<SelectedPage>>;
     loading: boolean;
     error: string;
-    selectedRoom: RoomWithMods;
+    selectedRoom: Room;
     loadedRooms: LoadedRooms,
     setLoadedRooms: React.Dispatch<React.SetStateAction<LoadedRooms>>,
     selectedRackGroup: RackGroup,

@@ -595,7 +595,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 layoutData: {
                     scale: roomSize.scale,
                     borderWidth: parseInt(borderRect.attr('width')),
-                    borderHeight: parseInt(borderRect.attr('height'))
+                    borderHeight: parseInt(borderRect.attr('height')),
+                    status: false
                 }
             }));
         }else{

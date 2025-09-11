@@ -77,7 +77,7 @@ import { Command, CommandType } from '@labkey/api/dist/labkey/query/Rows';
 import {
     labkeyActionSelectDistinctWithPromise,
     labkeyActionSelectWithPromise,
-    labkeySaveRows, saveCageModificationHistory,
+    labkeySaveRows, saveRoomLayout,
 } from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
 import { findConnectedCages, findConnectedRacks } from '../utils/helpers';
@@ -1122,12 +1122,14 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
         const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
+        const newModData: ModHistoryData[] = [];
 
         const roomName = localRoom.name;
         const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
         const savingTemplate: boolean = roomName.toLowerCase().includes("template");
         const newEndDate = new Date();
         const newStartDate = new Date();
+
         let rowsToUpdate;
         let templateHistory: LayoutHistoryData[];
 
@@ -1299,7 +1301,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             // TODO make sure previous rooms/cage mods are ended correctly, if we are saving a new room we can probably just end all previous room mods
             if(nullCount === 0){
                 // TODO add cage modification data to commands
-                const newModData: ModHistoryData[] = [];
 
                 const usedMap = new Map<string, boolean>();
 
@@ -1392,8 +1393,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         })
                     })
                 })
-                const results = await saveCageModificationHistory(newModData);
-                console.log("Saved modification history", results);
+                //const results = await saveRoomLayout(newModData);
+                //console.log("Saved modification history", results);
                 /*commands.push({
                     command: "insert",
                     schemaName: "cageui",
@@ -1405,9 +1406,13 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         /*console.log("Commands:", commands);
         return;*/
-        const result = await labkeySaveRows(commands);
+        //const result = await labkeySaveRows(commands);
+
+        console.log("localRoom", localRoom);
+
+        const result= await saveRoomLayout(localRoom, newModData, oldRoomName);
         // Determine success or failure
-        if(result.errorCount === 0){
+        if(result.success === true){
             return { status: 'Success', roomName: roomName};
         }else{
             return {

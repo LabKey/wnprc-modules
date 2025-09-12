@@ -55,6 +55,8 @@ export enum RoomObjectTypes {
     Door = 102,
     GateClosed = 103,
     GateOpen = 104,
+    Top = 104,
+    Bottom = 104,
 }
 
 // value in the cage modifications table in EHR

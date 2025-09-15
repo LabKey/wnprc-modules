@@ -37,7 +37,7 @@ public class LayoutData
         _borderHeight = borderHeight;
     }
 
-    public boolean isStatus()
+    public boolean getStatus()
     {
         return _status;
     }

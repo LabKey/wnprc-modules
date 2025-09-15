@@ -29,6 +29,7 @@ import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
@@ -43,6 +44,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
@@ -147,27 +149,29 @@ public class CageUIController extends SpringActionController
                 4. Room save from template
                 - Treat room as in 1.
              */
-
-            // Save condition 1.
-
-            // When saving template if name changed then update the ehr_lookups.rooms table as well.
+            
+            // Save layout data to ehr_lookups.rooms
+            List<Map<String, Object>> newEhrRoom = new ArrayList<>();
+            TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
+            SimpleFilter roomFilter = new SimpleFilter();
+            roomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
+            TableSelector roomSelector = new TableSelector(roomsTable, roomFilter, null);
+            Map<String, Object> result = roomSelector.getMap();
+            // update old name with new name if it changed
             if(savingTemplate && !prevRoomName.equals(room.getName())){
-                TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
-                SimpleFilter roomFilter = new SimpleFilter();
-                roomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
-                TableSelector roomSelector = new TableSelector(roomsTable, roomFilter, null);
-                Map<String, Object> result = roomSelector.getMap();
                 result.put("room", room.getName());
-
-                QueryUpdateService roomQus = roomsTable.getUpdateService();
-                if (roomQus == null)
-                {
-                    throw new IllegalStateException(roomsTable.getName() + " query update service");
-                }
-
-                // Write transaction to push roomQus to db
-
             }
+            result.put("border_width", room.getLayoutData().getBorderWidth());
+            result.put("border_height", room.getLayoutData().getBorderHeight());
+            result.put("layout_scale", room.getLayoutData().getScale());
+            result.put("status", room.getLayoutData().getStatus());
+            newEhrRoom.add(result);
+            QueryUpdateService roomQus = roomsTable.getUpdateService();
+            if (roomQus == null)
+            {
+                throw new IllegalStateException(roomsTable.getName() + " query update service");
+            }
+
 
 
 
@@ -218,6 +222,12 @@ public class CageUIController extends SpringActionController
                     modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
                 }
                 modQus.insertRows(getUser(), getContainer(), modsToInsert, batchErrors, null, null);
+
+                // update ehr_lookups.rooms with new layout data and possible template name change.
+                if(!newEhrRoom.isEmpty()){
+                    roomQus.updateRows(getUser(), getContainer(), newEhrRoom, null, batchErrors, null, null);
+                }
+                //
                 if(batchErrors.hasErrors()){
                     response.put("success", false);
                     response.put("errors", batchErrors);

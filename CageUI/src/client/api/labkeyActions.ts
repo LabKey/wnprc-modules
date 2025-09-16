@@ -121,23 +121,11 @@ export function saveRoomLayout(room: Room, mods: ModHistoryData[], prevRoomName:
     const newPrevRoomName = prevRoomName || room.name;
     return new Promise((resolve, reject) => {
         Ajax.request({
-            url: buildURL('cageui', 'saveCageModificationHistoryLayoutEditor.api'),
+            url: buildURL('cageui', 'saveLayoutHistory.api'),
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, newRoomData: newRoomData},
         });
     });
-/*    const promises: Promise<any>[] = mods.map(mod => {
-        return new Promise((resolve, reject) => {
-            Ajax.request({
-                url: buildURL('cageui', 'saveCageModificationHistory.api'),
-                method: 'POST',
-                success: (res) => resolve(JSON.parse(res.response)),
-                failure: Utils.getCallbackWrapper((error) => reject(error)),
-                jsonData: {...mod}
-            });
-        })
-    })
-    return Promise.all(promises);*/
 }

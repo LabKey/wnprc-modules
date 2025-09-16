@@ -90,9 +90,9 @@ public class CageUIController extends SpringActionController
 
     //APIs here
 
-    // this api action saves cage modification history from the layout editor to initiate the default cage mods
+    // this api action saves the layout for a given room
     @RequiresAnyOf({CageUILayoutEditorAccessPermission.class, CageUIRoomCreatorPermission.class, CageUITemplateCreatorPermission.class})
-    public static class SaveCageModificationHistoryLayoutEditorAction extends MutatingApiAction<SimpleApiJsonForm>
+    public static class SaveLayoutHistoryAction extends MutatingApiAction<SimpleApiJsonForm>
     {
 
         @Override
@@ -121,6 +121,7 @@ public class CageUIController extends SpringActionController
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
             String prevRoomName = json.get("prevRoomName").toString();
+
             UserSchema cageuiSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
             UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_lookups");
             TableInfo layoutHistoryTable = cageuiSchema.getTable("layout_history");
@@ -132,24 +133,6 @@ public class CageUIController extends SpringActionController
             TableSelector prevRoomSelector = new TableSelector(layoutHistoryTable, prevRoomFilter, null);
 
             boolean savingTemplate = room.getName().toLowerCase().contains("template");
-
-
-            /*
-                First check if the room is saving as one of following:
-                1. Room save from blank editor
-                  - Check if room name has data, end previous room then if it does.
-                 - submit new room
-                2. Room save from previous room
-                - End previous room data
-                - submit new room
-                3. Template save
-                -
-                - End previous template data
-                - Update template name in ehr_lookups.rooms
-                - submit new template data
-                4. Room save from template
-                - Treat room as in 1.
-             */
 
             // Save layout data to ehr_lookups.rooms
             List<Map<String, Object>> oldRoomToUpdate = new ArrayList<>();

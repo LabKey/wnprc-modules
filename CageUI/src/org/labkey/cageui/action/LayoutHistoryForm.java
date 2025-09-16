@@ -7,9 +7,9 @@ import java.util.Date;
 public class LayoutHistoryForm
 {
     private int _rowid;
-    private int _rack;
+    private Integer _rack;
     private int _objectType;
-    private int _rackGroup;
+    private Integer _rackGroup;
     private String _extraContext;
     private String _cage;
     private String _xCoord;
@@ -18,12 +18,12 @@ public class LayoutHistoryForm
     private Date _startDate;
     private Date _endDate;
 
-    public int getRack()
+    public Integer getRack()
     {
         return _rack;
     }
 
-    public void setRack(int rack)
+    public void setRack(Integer rack)
     {
         _rack = rack;
     }
@@ -88,12 +88,12 @@ public class LayoutHistoryForm
         _objectType = objectType;
     }
 
-    public int getRackGroup()
+    public Integer getRackGroup()
     {
         return _rackGroup;
     }
 
-    public void setRackGroup(int rackGroup)
+    public void setRackGroup(Integer rackGroup)
     {
         _rackGroup = rackGroup;
     }

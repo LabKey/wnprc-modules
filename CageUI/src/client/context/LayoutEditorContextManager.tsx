@@ -1410,7 +1410,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         console.log("localRoom", localRoom);
 
-        const result= await saveRoomLayout(localRoom, newModData, oldRoomName);
+        const result= await saveRoomLayout(localRoom, newModData, oldRoomName, dataToSave);
         // Determine success or failure
         if(result.success === true){
             return { status: 'Success', roomName: roomName};

@@ -114,6 +114,8 @@ public class CageUIController extends SpringActionController
 
             JSONArray jsonModsArray = json.getJSONArray("mods");
             JSONObject jsonRoom = json.getJSONObject("room");
+            JSONArray jsonNewLayoutHistoryData = json.getJSONArray("newRoomData");
+            List<Map<String, Object>> newLayoutHistoryData = JsonUtil.toMapList(json.getJSONArray("newRoomData"));
 
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -128,7 +130,6 @@ public class CageUIController extends SpringActionController
             prevRoomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
             prevRoomFilter.addCondition(FieldKey.fromString("end_date"),null, CompareType.ISBLANK);
             TableSelector prevRoomSelector = new TableSelector(layoutHistoryTable, prevRoomFilter, null);
-            List<LayoutHistoryForm> prevRoomFormData = prevRoomSelector.getArrayList(LayoutHistoryForm.class);
 
             boolean savingTemplate = room.getName().toLowerCase().contains("template");
 
@@ -149,9 +150,9 @@ public class CageUIController extends SpringActionController
                 4. Room save from template
                 - Treat room as in 1.
              */
-            
+
             // Save layout data to ehr_lookups.rooms
-            List<Map<String, Object>> newEhrRoom = new ArrayList<>();
+            List<Map<String, Object>> oldRoomToUpdate = new ArrayList<>();
             TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
             SimpleFilter roomFilter = new SimpleFilter();
             roomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
@@ -165,7 +166,7 @@ public class CageUIController extends SpringActionController
             result.put("border_height", room.getLayoutData().getBorderHeight());
             result.put("layout_scale", room.getLayoutData().getScale());
             result.put("status", room.getLayoutData().getStatus());
-            newEhrRoom.add(result);
+            oldRoomToUpdate.add(result);
             QueryUpdateService roomQus = roomsTable.getUpdateService();
             if (roomQus == null)
             {
@@ -218,16 +219,22 @@ public class CageUIController extends SpringActionController
 
             try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction())
             {
+                // closes out previous mods and inserts new mods for the room
                 if(!oldModRowsToUpdate.isEmpty()){
                     modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
                 }
                 modQus.insertRows(getUser(), getContainer(), modsToInsert, batchErrors, null, null);
 
                 // update ehr_lookups.rooms with new layout data and possible template name change.
-                if(!newEhrRoom.isEmpty()){
-                    roomQus.updateRows(getUser(), getContainer(), newEhrRoom, null, batchErrors, null, null);
+                if(!oldRoomToUpdate.isEmpty()){
+                    roomQus.updateRows(getUser(), getContainer(), oldRoomToUpdate, null, batchErrors, null, null);
                 }
-                //
+                // close out previous layout data and submit new layout data for room.
+                if(!oldlayoutHistoryRowsToUpdate.isEmpty()){
+                    layoutHistoryQus.updateRows(getUser(), getContainer(), oldlayoutHistoryRowsToUpdate, null, batchErrors, null, null);
+                }
+                layoutHistoryQus.insertRows(getUser(), getContainer(), newLayoutHistoryData,  batchErrors, null, null);
+
                 if(batchErrors.hasErrors()){
                     response.put("success", false);
                     response.put("errors", batchErrors);

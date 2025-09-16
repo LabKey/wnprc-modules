@@ -121,9 +121,3 @@ select setname, container, 3 as value, 'Bottom' as title from ehr_lookups.lookup
 
 insert into ehr_lookups.lookups (set_name,container,value,title)
 select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
-
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 105 as value, 'Room Object' as category, 'Top' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';
-
-insert into ehr_lookups.lookups (set_name,container,value, category, title)
-select setname, container, 106 as value, 'Room Object' as category, 'Bottom' as title from ehr_lookups.lookup_sets where setname='cageui_item_types';

@@ -319,13 +319,12 @@ export function setupEditCageEvent(
         if(d3.select(element).classed('room-obj')){
             tempObj = localRoom.objects.find((obj) => obj.itemId === element.id);
         }else{
-            const cageGroupElement = element.closest(`[id^=${rackTypeString}-]`) as SVGGElement | null;
             localRoom.rackGroups.forEach((g) => {
                 g.racks.forEach((r) => {
                     if(tempObj){
                         return;
                     }
-                    tempObj = r.cages.find(c => c.cageNum === cageGroupElement.id);
+                    tempObj = r.cages.find(c => c.id === element.id);
                 })
             })
         }

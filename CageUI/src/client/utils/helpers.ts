@@ -55,15 +55,20 @@ import {
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { selectDistinctRows } from '@labkey/components';
+import { generateId, selectDistinctRows } from '@labkey/components';
 import { CELL_SIZE, Modifications } from './constants';
 import { ExtraContext } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
+import { Utils } from '@labkey/api';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
+
+export const generateCageId = () => {
+    return generateId('cageSVG-');
+}
 
 // Changes stroke color of svg element nodes keeping the other styles.
 export const changeStyleProperty  = (element: Element, property: string, newValue: string): void => {
@@ -350,7 +355,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
         rack.cages.forEach(async (cage) => {
             const cageGroup = rackGroup.append('g')
-                .attr('id', cage.cageNum)
+                .attr('id', cage.id)
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
             let unitSvg: SVGElement;
@@ -683,10 +688,11 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             })
         }
         const cage: Cage = {
+            id: generateCageId(),
             cageNum: `${cageNumType}-${cageNum}` as CageNumber,
             extraContext: extraContext?.cage,
             selectionType: 'cage',
-            id: rack.cages.length + 1,
+            localRackId: rack.cages.length + 1,
             x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.y_coord - rack.y - group.y,
             size: svgSize,

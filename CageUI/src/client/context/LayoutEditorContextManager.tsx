@@ -17,7 +17,7 @@
  */
 
 import * as React from 'react';
-import { createContext, FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, FC, useCallback, useContext, useEffect, useId, useRef, useState } from 'react';
 import { LayoutContextProps, LayoutContextType } from '../types/layoutEditorContextTypes';
 import {
     Cage,
@@ -61,7 +61,7 @@ import {
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
-    defaultTypeToRackType, getAdjLocation, getDefaultMod,
+    defaultTypeToRackType, generateCageId, getAdjLocation, getDefaultMod,
     getNextDefaultRackId,
     getSvgSize,
     parseLongId,
@@ -81,6 +81,7 @@ import {
 } from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
 import { findConnectedCages, findConnectedRacks } from '../utils/helpers';
+import { generateId } from '@labkey/components';
 
 const LayoutEditorContext = createContext<LayoutContextType | null>(null);
 
@@ -284,18 +285,19 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     // This only adds default racks/cages to the layout, it is not used in loading in previous layouts
-    const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes) => {
+    const addRack = async (id: string, x: number, y: number, newScale: number, rackType: RackTypes): Promise<Cage | null> => {
         const newCageNum: CageNumber = `${roomItemToString(rackType) as RackStringType}-${getNextCageNum(roomItemToString(rackType) as RackStringType)}`;
 
         const svgSize = await getSvgSize(rackType);
         if(!svgSize){
             await showLayoutEditorError("No size found for cage");
-            return false;
+            return null;
         }
 
         const newCage: Cage = {
+            id: generateCageId(),
             selectionType: 'cage',
-            id: 1,
+            localRackId: 1,
             cageNum: newCageNum,
             x: 0,
             y: 0,
@@ -322,7 +324,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         const rackTypeData = await labkeyActionSelectWithPromise(optConfig);
         if(rackTypeData.rows.length === 0){
             await showLayoutEditorError("Unable to find rack type data");
-            return false;
+            return null;
         }
 
         // make first rack type
@@ -374,7 +376,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             adjacency: {...cageConnections.current.adjacency},
             root: {...cageConnections.current.root, [newCageNum]: newCageNum},
         };
-        return true;
+        return newCage;
     };
 
     const mergeLocalRacks = (newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, targetCageNum, dragCageNum) => {
@@ -397,7 +399,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             // Merge cages and reassign local IDs
             const mergedCages = [...targetRack.cages, ...dragRack.cages].map((cage, index) => ({
                 ...cage,
-                id: index + 1, // Reassign local IDs
+                localRackId: index + 1, // Reassign local IDs
             }));
 
 
@@ -540,7 +542,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     // Adds item to the local room. return the new room for listeners.
-    const addRoomItem = async (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number): Promise<boolean> => {
+    const addRoomItem = async (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number): Promise<Cage | RoomObject | null> => {
         if(isRackEnum(itemType)){
             return await addRack(itemId, x, y, scale, itemType as RackTypes);
         }else{
@@ -556,7 +558,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 ...prevRoom,
                 objects: [...prevRoom.objects, newRoomObj]
             }));
-            return true;
+            return newRoomObj;
         }
     }
 
@@ -888,7 +890,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                     for (let j = 0; j < absoluteCagePositions.length; j++) {
                         newCages.push({
                             ...absoluteCagePositions[j].cage,
-                            id: j + 1,
+                            localRackId: j + 1,
                             x: absoluteCagePositions[j].x - minX,
                             y: absoluteCagePositions[j].y - minY
                         });
@@ -1037,20 +1039,15 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
-        const selectedCage = (selectedObj as Cage).cageNum;
-        const objType = parseRoomItemType(selectedCage);
-
-        if(unitLocs[objType].find(prevLoc => parseRoomItemNum(prevLoc.num) === numAfter)){
-            console.log("Please add a different cage num that doesnt exist in the current room");
-            return;
-        }
+        const selectedCage = (selectedObj as Cage);
+        const objType = parseRoomItemType(selectedCage.cageNum);
 
         setLocalRoom((prevRoom) => {
             // Find the clicked rack
             let currRack: Rack;
             prevRoom.rackGroups.forEach(group => {
                 if(currRack) return;
-                currRack = findSelectObjRack(group.racks, selectedCage)
+                currRack = findSelectObjRack(group.racks, selectedCage.cageNum)
             });
 
             if (!currRack) return prevRoom; // If the clicked rack is not found, return the previous state
@@ -1061,11 +1058,11 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 rackGroups: prevRoom.rackGroups.map((group: RackGroup): RackGroup => ({
                     ...group,
                     racks: group.racks.map((rack: Rack): Rack =>
-                        rack.cages.some((cage: Cage) => cage.cageNum === selectedCage) // Check if any cage matches selectedObj
+                        rack.cages.some((cage: Cage) => cage.id === selectedCage.id) // Check if any cage matches selectedObj
                             ? {
                                 ...rack,
                                 cages: rack.cages.map((cage: Cage): Cage =>
-                                    cage.cageNum === selectedCage // Only update the cage with matching cageNum
+                                    cage.id === selectedCage.id // Only update the cage with matching cageNum
                                         ? { ...cage, cageNum: `${roomItemToString(rack.type.type)}-${numAfter}` } as Cage
                                         : cage
                                 )
@@ -1120,7 +1117,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        const commands: Command[] = [];
         const dataToSave: LayoutHistoryData[] = [];
         const newModData: ModHistoryData[] = [];
 
@@ -1130,26 +1126,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         const newEndDate = new Date();
         const newStartDate = new Date();
 
-        let rowsToUpdate;
-        let templateHistory: LayoutHistoryData[];
-
-        //check if template already had layout in history and needs to be updated
-        if(prevRoom && prevRoom.room.name !== roomName){
-            const prevRoomConfig: SelectRowsOptions = {
-                schemaName: 'cageui',
-                queryName: 'layout_history',
-                columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid'],
-                filterArray: [
-                    Filter.create('room', oldRoomName, Filter.Types.EQUALS),
-                    Filter.create('end_date', null, Filter.Types.ISBLANK)
-                ]
-            }
-            const prevTemplate = await labkeyActionSelectWithPromise(prevRoomConfig)
-
-            if(prevTemplate.rowCount > 0){
-                templateHistory = prevTemplate.rows;
-            }
-        }
 
         localRoom.rackGroups.map((group) => {
             const groupId = parseLongId(group.groupId);
@@ -1204,83 +1180,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             dataToSave.push(newObjData);
         });
 
-        // get data for updating layout history end dates
-        if(prevRoom && prevRoom.data.length !== 0){
-            // Dont update template room when saving as a new room
-            // if prev room is template and saving as same room, update
-            // if prev room is template and saving as different room, don't update
-            // if prev room is room and saving as room, update
-            if((prevRoom.room.name === oldRoomName) || savingTemplate){
-                rowsToUpdate = prevRoom.data.reduce((acc, row) => {
-                    return [
-                        ...acc,
-                        {
-                            ...row,
-                            end_date: newEndDate
-                        }
-                    ];
-                }, []);
-            }
-        }else if(templateHistory && templateHistory?.length !== 0) {// ensure template history exists and has data.
-            rowsToUpdate = templateHistory.reduce((acc, row) => {
-                return [
-                    ...acc,
-                    {
-                        ...row,
-                        end_date: newEndDate
-                    }
-                ];
-            }, []);
-        }
 
-        // update template name
-        if(savingTemplate && oldRoomName !== roomName){
-            commands.push({
-                command: "updateChangingKeys" as CommandType,
-                schemaName: "ehr_lookups",
-                queryName: "rooms",
-                extraContext: {keyField: 'room'},
-                rows: [{
-                    oldKeys: {room: oldRoomName},
-                    values: {room: roomName}
-                }]
-            });
-        }
-
-        // update prevRoom rows to include end date marking end of layout for that time frame
-        if(rowsToUpdate){
-            commands.push({
-                command: "update",
-                schemaName: "cageui",
-                queryName: "layout_history",
-                rows: rowsToUpdate
-            });
-        }
-
-        // insert rows to layout history for cages and room objects, no end date
-        if(dataToSave.length !== 0){
-            commands.push({
-                command: "insert",
-                schemaName: "cageui",
-                queryName: "layout_history",
-                rows: dataToSave
-            });
-
-        }
-
-        // update room border and scale
-        const layoutToSave = [{
-            room: roomName,
-            layout_scale: localRoom.layoutData.scale,
-            border_width: localRoom.layoutData.borderWidth,
-            border_height: localRoom.layoutData.borderHeight
-        }];
-        commands.push({
-            command: "update",
-            schemaName: "ehr_lookups",
-            queryName: "rooms",
-            rows: layoutToSave
-        });
+        // adds default mods if appropriate
         if(dataToSave.length > 0){
             const racks = dataToSave.map(obj => obj.hasOwnProperty('rack') ? obj.rack : undefined);
 
@@ -1298,9 +1199,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             if(hasRackCount !== 0 && hasRackCount !== racks.length){
                 return { status: 'Failure', roomName: roomName, reason: ['Cannot save room with inconsistent rack property']};
             }
-            // TODO make sure previous rooms/cage mods are ended correctly, if we are saving a new room we can probably just end all previous room mods
+
             if(nullCount === 0){
-                // TODO add cage modification data to commands
 
                 const usedMap = new Map<string, boolean>();
 

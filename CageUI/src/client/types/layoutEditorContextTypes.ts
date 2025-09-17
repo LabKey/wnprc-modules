@@ -28,7 +28,7 @@ import {
     RackStringType,
     Room,
     RoomItemClass,
-    RoomItemType,
+    RoomItemType, RoomObject,
     UnitLocations
 } from './typings';
 import { DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from './layoutEditorTypes';
@@ -50,7 +50,7 @@ export interface LayoutContextType {
     unitLocs: UnitLocations;
     localRoom: Room;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
-    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => Promise<boolean>;
+    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => Promise<Cage | RoomObject | null>;
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;

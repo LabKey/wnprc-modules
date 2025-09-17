@@ -20,7 +20,7 @@ import * as React from 'react';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { BaseType, zoomTransform } from 'd3';
-import { ActionURL } from '@labkey/api';
+import { ActionURL, Utils } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { RoomItemTemplate } from './RoomItemTemplate';
@@ -192,6 +192,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             group.append(() => draggedShape.node());
 
         } else { // adding dragged caging unit
+            const newCage: Cage = res as Cage;
             const updateItemTypeString: RackStringType = roomItemToString(updateItemType) as RackStringType;
             group = layoutSvg.append('g')
                 .attr('class', `draggable rack type-${updateItemTypeString}`)
@@ -199,7 +200,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 .style('pointer-events', 'bounding-box');
 
             const cageGroup: d3.Selection<BaseType, unknown, HTMLElement, any> = group.append('g')
-                .attr('id', `${updateItemTypeString}-${getNextCageNum(updateItemTypeString)}`)
+                .attr('id', `${newCage.id}`)
+                .attr('name', newCage.cageNum)
                 .attr('transform', `translate(0,0)`)
                 .append(() => draggedShape.node());
 
@@ -220,7 +222,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 textElement.setAttribute('contentEditable', 'true');
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-                const cageGroupElement = textElement.closest(`[id=${roomItemToString(updateItemType)}]`) as SVGGElement;
+                const cageGroupElement = textElement.closest(`[id="${(res as Cage).id}"]`) as SVGGElement;
                 setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,"edit",setCtxMenuStyle, roomItemToString(updateItemType) as RackStringType);
             });
         }else{
@@ -454,7 +456,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 return;
             }
             //This is the first cage in the dragged rack that will determine if a merge is possible
-            const draggedCage: Cage = draggedRack.cages.find((cage) => cage.id === 1);
+            const draggedCage: Cage = draggedRack.cages.find((cage) => cage.localRackId === 1);
 
             draggedCageLoc = unitLocs[draggedRackType].find((cage) => cage.num === draggedCage.cageNum);
 
@@ -556,9 +558,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     // After state is done updating for cage id change. refresh svg text and ids
     useEffect(() => {
         if(cageNumChange){
+            const cageId = (selectedObj as Cage).id;
             const cageNum = (selectedObj as Cage).cageNum;
             const objType = parseRoomItemType(cageNum);
-            let group = layoutSvg.select(`#${cageNum}`).attr('id', `${objType}-${cageNumChange.after}`);
+            let group = layoutSvg.select(`#${cageId}`).attr('name', `${objType}-${cageNumChange.after}`);
             (group.selectAll('tspan').node() as SVGTSpanElement).textContent = cageNumChange.after.toString();
             setShowCageContextMenu(false);
         }

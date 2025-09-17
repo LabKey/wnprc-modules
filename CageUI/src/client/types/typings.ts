@@ -148,7 +148,8 @@ export type CageModification = {
 }
 
 export interface Cage {
-    id: number; // Id local to rack
+    id: string; // unique id
+    localRackId: number; // Id local to rack
     selectionType: SelectionType;
     cageNum: CageNumber; // Id local to room
     x: number; // x coordinate of cage in rack coordinate plane

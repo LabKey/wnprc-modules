@@ -20,7 +20,7 @@ import * as React from 'react';
 import { ReactNode } from 'react';
 import {
     Cage,
-    CageNumber,
+    CageNumber, CageSvgId,
     LayoutHistoryData,
     LocationCoords,
     Rack,
@@ -54,7 +54,7 @@ export interface LayoutContextType {
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
-    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageNumber, dragCageNum: CageNumber, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
+    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageId: CageSvgId, dragCageId: CageSvgId, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     getNextCageNum: (rackType: RackStringType) => number;
     selectedObj: SelectedObj;
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>;

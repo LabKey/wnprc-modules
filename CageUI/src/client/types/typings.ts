@@ -106,6 +106,7 @@ export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" 
 export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
 export type DefaultRackId = `default-rack-${number}`;
 export type RealRackId = `rack-${number}`;
+export type CageSvgId = `cageSVG-${number}`;
 
 export type GroupId = `rack-group-${number}`
 export type CageNumber = `${RackStringType}-${number}`
@@ -148,7 +149,7 @@ export type CageModification = {
 }
 
 export interface Cage {
-    id: string; // unique id
+    id: CageSvgId; // unique id
     localRackId: number; // Id local to rack
     selectionType: SelectionType;
     cageNum: CageNumber; // Id local to room
@@ -301,7 +302,7 @@ export interface UnitType {
 }
 
 export interface LocationCoords {
-    num: CageNumber;
+    cageId: CageSvgId;
     cellX: number;
     cellY: number;
 }

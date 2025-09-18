@@ -53,7 +53,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     useEffect(() => {
         const tempCage = selectedObj as Cage;
         if(tempCage){
-            const cageRack = findCageInGroup(tempCage.cageNum, selectedRoom.rackGroups).rack;
+            const cageRack = findCageInGroup(tempCage.id, selectedRoom.rackGroups).rack;
             setCurrCage(tempCage);
             setCurrRack(cageRack);
         }
@@ -103,18 +103,15 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     const handleSubmit = () => {
         const result = saveCageMods(currCage, currCageMods);
         console.log("Submit result: ", result);
-        closeMenu();
-        /*
-        let submit: boolean = true;
-        // if data is correct then continue with submission
-       if(submit){
+
+       if(result){
             if(result.status === "Success"){
                 setShowSavePopup("Success");
             }else{
                 setShowErrorPopup(result.reason.map((err, index) => `${index + 1}. ${err}`).join("\n"));
             }
-        }*/
-
+        }
+        closeMenu();
     }
 
     return (

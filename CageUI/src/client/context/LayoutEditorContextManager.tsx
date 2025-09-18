@@ -17,11 +17,11 @@
  */
 
 import * as React from 'react';
-import { createContext, FC, useCallback, useContext, useEffect, useId, useRef, useState } from 'react';
+import { createContext, FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { LayoutContextProps, LayoutContextType } from '../types/layoutEditorContextTypes';
 import {
     Cage,
-    CageNumber,
+    CageNumber, CageSvgId,
     DefaultRackId,
     GroupId,
     LayoutHistoryData,
@@ -81,7 +81,6 @@ import {
 } from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
 import { findConnectedCages, findConnectedRacks } from '../utils/helpers';
-import { generateId } from '@labkey/components';
 
 const LayoutEditorContext = createContext<LayoutContextType | null>(null);
 
@@ -121,10 +120,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     });
 
     const cageConnections = useRef<{
-        parent: Record<CageNumber, CageNumber>,
-        rank: Record<CageNumber, number>,
-        root: Record<CageNumber, CageNumber>,    // Root with path compression
-        adjacency: Record<CageNumber, Set<CageNumber>>; // Track all adjacent cages
+        parent: Record<CageSvgId, CageSvgId>,
+        rank: Record<CageSvgId, number>,
+        root: Record<CageSvgId, CageSvgId>,    // Root with path compression
+        adjacency: Record<CageSvgId, Set<CageSvgId>>; // Track all adjacent cages
     }>({
         parent: {},
         rank: {},
@@ -152,9 +151,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
     const grid = useRef<Map<CellKey, LocationCoords[]>>(new Map());
 
-    const getCageLoc = (cageNum: CageNumber): LocationCoords => {
+    const getCageLoc = (cageId: CageSvgId, cageNum: CageNumber): LocationCoords => {
         for (const cageLoc of unitLocs[parseRoomItemType(cageNum)]) {
-            if((cageLoc as LocationCoords).num === cageNum){
+            if((cageLoc as LocationCoords).cageId === cageId){
                 return(cageLoc);
             }
         }
@@ -212,14 +211,14 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 for (let yCheck = y; yCheck < y + height; yCheck += CELL_SIZE) {
                     const cell = getCellKey(checkX, yCheck);
                     for (const otherBox of grid.current.get(cell) || []) {
-                        if (otherBox.num !== cageLoc.num) adjacentCages.add(otherBox);
+                        if (otherBox.cageId !== cageLoc.cageId) adjacentCages.add(otherBox);
                     }
                 }
             } else { // Top/Bottom check
                 for (let xCheck = x; xCheck < x + width; xCheck += CELL_SIZE) {
                     const cell = getCellKey(xCheck, checkY);
                     for (const otherBox of grid.current.get(cell) || []) {
-                        if (otherBox.num !== cageLoc.num) adjacentCages.add(otherBox);
+                        if (otherBox.cageId !== cageLoc.cageId) adjacentCages.add(otherBox);
                     }
                 }
             }
@@ -233,7 +232,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         for (const cell of cells) {
             const cagesInCell = grid.current.get(cell);
             if (cagesInCell) {
-                const updatedBoxes = cagesInCell.filter((b) => b.num !== cageLoc.num);
+                const updatedBoxes = cagesInCell.filter((b) => b.cageId !== cageLoc.cageId);
                 if (updatedBoxes.length === 0) {
                     grid.current.delete(cell); // Prune empty cells
                 } else {
@@ -294,8 +293,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             return null;
         }
 
+        const newCageId = generateCageId();
         const newCage: Cage = {
-            id: generateCageId(),
+            id: newCageId,
             selectionType: 'cage',
             localRackId: 1,
             cageNum: newCageNum,
@@ -306,7 +306,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         // First cage in rack is always at rack starting position as well
         const newCageLoc: LocationCoords = {
-            num: newCageNum,
+            cageId: newCageId,
             cellX: x,
             cellY: y
         };
@@ -379,12 +379,12 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         return newCage;
     };
 
-    const mergeLocalRacks = (newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, targetCageNum, dragCageNum) => {
+    const mergeLocalRacks = (newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, targetCageId: CageSvgId, dragCageId: CageSvgId) => {
 
         setLocalRoom(prevRoom => {
 
-            let {rack: targetRack, rackGroup: targetGroup, cage: targetCage} = findCageInGroup(targetCageNum, prevRoom.rackGroups);
-            let {rack: dragRack, rackGroup: dragGroup, cage: dragCage} = findCageInGroup(dragCageNum, prevRoom.rackGroups);
+            let {rack: targetRack, rackGroup: targetGroup, cage: targetCage} = findCageInGroup(targetCageId, prevRoom.rackGroups);
+            let {rack: dragRack, rackGroup: dragGroup, cage: dragCage} = findCageInGroup(dragCageId, prevRoom.rackGroups);
 
             if (!targetRack || !dragRack) {
                 console.log("One or both racks not found");
@@ -404,7 +404,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
 
             const updatedCages: Cage[] = mergedCages.map(cage => {
-                const newCage = newGroup.select(`#${cage.cageNum}`);
+                const newCage = newGroup.select(`#${cage.id}`);
                 const cageCoords = getTranslation(newCage.attr('transform'));
 
                 return {
@@ -446,7 +446,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         });
     }
 
-    const connectLocalRacks = (targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, targetCageNum, dragCageNum) => {
+    const connectLocalRacks = (targetId: string, dragId: string, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
         setLocalRoom(prevRoom => {
             let {rack: targetRack, rackGroup: targetGroup} = findRackInGroup(targetId, prevRoom.rackGroups);
             let {rack: dragRack, rackGroup: dragGroup} = findRackInGroup(dragId, prevRoom.rackGroups);
@@ -492,50 +492,50 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         })
     }
 
-    const doRackAction = (action: RackActions, targetRackId: string, dragRackId: string, targetCageNum, dragCageNum, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, ) => {
-        const { rack: targetRack, rackGroup: targetGroup} = findCageInGroup(targetCageNum, localRoom.rackGroups);
-        const {rack: dragRack, rackGroup: dragGroup} = findCageInGroup(dragCageNum, localRoom.rackGroups);
+    const doRackAction = (action: RackActions, targetRackId: string, dragRackId: string, targetCageId: CageSvgId, dragCageId: CageSvgId, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, ) => {
+        const { rack: targetRack, rackGroup: targetGroup} = findCageInGroup(targetCageId, localRoom.rackGroups);
+        const {rack: dragRack, rackGroup: dragGroup} = findCageInGroup(dragCageId, localRoom.rackGroups);
         if(action === 'merge'){
-            mergeLocalRacks(newGroup, targetCageNum, dragCageNum);
+            mergeLocalRacks(newGroup, targetCageId, dragCageId);
 
         }else{ // action = connect
-            connectLocalRacks(targetRackId, dragRackId, newGroup, targetCageNum, dragCageNum);
+            connectLocalRacks(targetRackId, dragRackId, newGroup);
 
         }
         // Initialize if needed
-        if (!cageConnections.current.parent[targetCageNum]) {
-            cageConnections.current.parent[targetCageNum] = targetCageNum;
-            cageConnections.current.root[targetCageNum] = targetCageNum;
-            cageConnections.current.rank[targetCageNum] = 0;
+        if (!cageConnections.current.parent[targetCageId]) {
+            cageConnections.current.parent[targetCageId] = targetCageId;
+            cageConnections.current.root[targetCageId] = targetCageId;
+            cageConnections.current.rank[targetCageId] = 0;
         }
-        if (!cageConnections.current.parent[dragCageNum]) {
-            cageConnections.current.parent[dragCageNum] = dragCageNum;
-            cageConnections.current.root[dragCageNum] = dragCageNum;
-            cageConnections.current.rank[dragCageNum] = 0;
+        if (!cageConnections.current.parent[dragCageId]) {
+            cageConnections.current.parent[dragCageId] = dragCageId;
+            cageConnections.current.root[dragCageId] = dragCageId;
+            cageConnections.current.rank[dragCageId] = 0;
         }
 
         // Update adjacency
         for (const dc of dragRack.cages) {
-            cageConnections.current.adjacency[dc.cageNum] = cageConnections.current.adjacency[dc.cageNum] || new Set();
-            getAdjCages(dc, getCageLoc(dc.cageNum)).forEach((c) => {
+            cageConnections.current.adjacency[dc.id] = cageConnections.current.adjacency[dc.id] || new Set();
+            getAdjCages(dc, getCageLoc(dc.id, dc.cageNum)).forEach((c) => {
                 // check if adj cage is in target group, if not ignore it
-                if(findCageInGroup(c.num, [targetGroup])?.cage){
-                    cageConnections.current.adjacency[dc.cageNum].add(c.num);
+                if(findCageInGroup(c.cageId, [targetGroup])?.cage) {
+                    cageConnections.current.adjacency[dc.id].add(c.cageId);
                 }
             });
         }
 
         for (const tc of targetRack.cages){
-            cageConnections.current.adjacency[tc.cageNum] = cageConnections.current.adjacency[tc.cageNum] || new Set();
-            getAdjCages(tc, getCageLoc(tc.cageNum)).forEach((c) => {
-                if (findCageInGroup(c.num, [dragGroup])?.cage) {
-                    cageConnections.current.adjacency[tc.cageNum].add(c.num)
+            cageConnections.current.adjacency[tc.id] = cageConnections.current.adjacency[tc.id] || new Set();
+            getAdjCages(tc, getCageLoc(tc.id,tc.cageNum)).forEach((c) => {
+                if (findCageInGroup(c.cageId, [dragGroup])?.cage) {
+                    cageConnections.current.adjacency[tc.id].add(c.cageId)
                 }
             });
         }
 
         // Perform union
-        union(targetCageNum, dragCageNum);
+        cageUnion(targetCageId, dragCageId);
 
         // After merging / connecting fix the group ids so that they have no gaps
         fixGroupIds();
@@ -597,9 +597,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         ({
                             ...prevUnitLocations,
                             // Access the correct unit location array using rack type
-                            [roomItemToString(movedRack.type.type)]: prevUnitLocations[roomItemToString(movedRack.type.type)].map(cage => {
+                            [roomItemToString(movedRack.type.type)]: prevUnitLocations[roomItemToString(movedRack.type.type)].map((cage: LocationCoords) => {
                                 // Check if the cage belongs to the moved rack using cageNum
-                                const movedRackCage = movedRack.cages.find(rackCage => rackCage.cageNum === cage.num);
+                                const movedRackCage = movedRack.cages.find(rackCage => rackCage.id === cage.cageId);
 
                                 if(movedRackCage) {
                                     const oldLocCoords: LocationCoords = {
@@ -646,8 +646,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                     setUnitLocs((prevUnitLocations) => {
                         const updatedUnitLocations = { ...prevUnitLocations };
                         movedRacks.forEach((movedRack) => {
-                            updatedUnitLocations[roomItemToString(movedRack.type.type)] = updatedUnitLocations[roomItemToString(movedRack.type.type)].map((cage) => {
-                                const movedRackCage = movedRack.cages.find((rackCage) => rackCage.cageNum === cage.num);
+                            updatedUnitLocations[roomItemToString(movedRack.type.type)] = updatedUnitLocations[roomItemToString(movedRack.type.type)].map((cage: LocationCoords) => {
+                                const movedRackCage = movedRack.cages.find((rackCage) => rackCage.id === cage.cageId);
                                 if (movedRackCage) {
                                     const oldLocCoords: LocationCoords = {
                                         ...cage
@@ -693,15 +693,15 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     // Modified find that only compresses the root structure
-    const find = useCallback((id: CageNumber, root: Record<CageNumber, CageNumber>): CageNumber => {
+    const findCageInRoot = useCallback((id: CageSvgId, root: Record<CageSvgId, CageSvgId>): CageSvgId => {
         if (root[id] !== id) {
-            root[id] = find(root[id], root); // Path compression
+            root[id] = findCageInRoot(root[id], root); // Path compression
         }
         return root[id];
     }, []);
 
     // Modified union operation
-    const union = useCallback((a: CageNumber, b: CageNumber) => {
+    const cageUnion = useCallback((a: CageSvgId, b: CageSvgId) => {
         // Set direct parent relationship (maintains connection chain)
         if (parseRoomItemNum(a) < parseRoomItemNum(b)) {
             cageConnections.current.parent[b] = a;
@@ -710,8 +710,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // Standard union-by-rank on the root structure
-        const rootA = find(a, cageConnections.current.root);
-        const rootB = find(b, cageConnections.current.root);
+        const rootA = findCageInRoot(a, cageConnections.current.root);
+        const rootB = findCageInRoot(b, cageConnections.current.root);
 
         if (rootA !== rootB) {
             if (cageConnections.current.rank[rootA] < cageConnections.current.rank[rootB]) {
@@ -723,33 +723,33 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 cageConnections.current.rank[rootA]++;
             }
         }
-    }, [find]);
+    }, [findCageInRoot]);
 
-    const disconnectCage = (cageNum: CageNumber) => {
+    const disconnectCage = (cageId: CageSvgId) => {
         // Get current connections
         const { parent, rank, adjacency } = cageConnections.current;
-        const location = findCageInGroup(cageNum, localRoom.rackGroups);
+        const location = findCageInGroup(cageId, localRoom.rackGroups);
 
         if (!location) return;
 
         // 1. Remove from adjacency lists (direct connections)
-        const directlyConnected = adjacency[cageNum] ? Array.from(adjacency[cageNum]) : [];
+        const directlyConnected = adjacency[cageId] ? Array.from(adjacency[cageId]) : [];
         for (const neighbor of directlyConnected) {
-            adjacency[neighbor]?.delete(cageNum);
+            adjacency[neighbor]?.delete(cageId);
         }
-        delete adjacency[cageNum];
+        delete adjacency[cageId];
 
         // 2. Handle DSU structure
         // Find all cages that point to this cage and reset them
-        const children = Object.keys(parent).filter(id => parent[id] === cageNum);
+        const children = Object.keys(parent).filter(id => parent[id] === cageId);
         for (const child of children) {
             parent[child] = child; // Reset to self
             rank[child] = 0;
         }
 
         // Remove the cage from DSU
-        delete parent[cageNum];
-        delete rank[cageNum];
+        delete parent[cageId];
+        delete rank[cageId];
 
         // 3. Rebuild connections between remaining directly connected cages
         for (let i = 0; i < directlyConnected.length; i++) {
@@ -757,7 +757,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 const a = directlyConnected[i];
                 const b = directlyConnected[j];
                 if (adjacency[a]?.has(b)) {
-                    union(a, b);
+                    cageUnion(a, b);
                 }
             }
         }
@@ -773,7 +773,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                     if (r.itemId !== location.rack.itemId) return r;
                     return {
                         ...r,
-                        cages: r.cages.filter(c => c.cageNum !== cageNum)
+                        cages: r.cages.filter(c => c.id !== cageId)
                     }
                 }).filter(r => r.cages.length > 0) // Remove empty racks
             };
@@ -785,24 +785,24 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         // Build cage map for the affected group
         const cageMap = Object.fromEntries(
-            affectedGroup.racks.flatMap(r => r.cages.map(c => [c.cageNum, c]))
+            affectedGroup.racks.flatMap(r => r.cages.map(c => [c.id, c]))
         );
 
         // Find connected components using DSU roots
         const components = new Map<string, Set<string>>();
         const processed = new Set<string>();
 
-        for (const cageNumInGroup of Object.keys(cageMap)) {
-            if (processed.has(cageNumInGroup)) continue;
+        for (const cageIdsInGroup of Object.keys(cageMap)) {
+            if (processed.has(cageIdsInGroup)) continue;
 
-            const root = find(cageNumInGroup as CageNumber, parent);
+            const root = findCageInRoot(cageIdsInGroup as CageSvgId, parent);
             if (!components.has(root)) {
                 components.set(root, new Set());
             }
 
             // BFS to find all cages in this component
-            const queue = [cageNumInGroup];
-            processed.add(cageNumInGroup);
+            const queue = [cageIdsInGroup];
+            processed.add(cageIdsInGroup);
 
             while (queue.length > 0) {
                 const current = queue.shift()!;
@@ -817,7 +817,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             }
         }
 
-        // 6. Split groups based on components (your existing coordinate logic)
+        // 6. Split groups based on components
         let finalGroups = updatedGroups.filter(g => g.groupId !== location.rackGroup.groupId);
         let nextGroupId = nextAvailGroup;
 
@@ -825,10 +825,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         if (components.size > 1) {
             const componentList = Array.from(components.values());
 
-            // First component keeps original group ID
+            // First component keeps original group ID and rack id. the rest should be reset to default racks
             const firstComponent = componentList[0];
             const firstGroupRacks = affectedGroup.racks.map(r => {
-                const componentCages = r.cages.filter(c => firstComponent.has(c.cageNum));
+                const componentCages = r.cages.filter(c => firstComponent.has(c.id));
                 return componentCages.length > 0 ? {
                     ...r,
                     cages: componentCages
@@ -846,9 +846,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                 // Separate racks with cages in this component
                 const componentRacks = affectedGroup.racks.map(r => {
-                    const componentCages = r.cages.filter(c => component.has(c.cageNum));
+                    const componentCages = r.cages.filter(c => component.has(c.id));
                     return componentCages.length > 0 ? {
                         ...r,
+                        itemId: `default-rack-${affectedGroup.racks.length + 1}`,
                         cages: componentCages
                     } : null;
                 }).filter(Boolean) as Rack[];
@@ -907,12 +908,13 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 else {
                     newRacks.push({
                         ...componentRacks[0],
-                        x: (affectedGroup.x + componentRacks[0].x) - minX,
-                        y: (affectedGroup.y + componentRacks[0].y) - minY,
+                        x: 0,
+                        y: 0,
                         cages: componentRacks[0].cages.map(c => ({
                             ...c,
-                            x: c.x,
-                            y: c.y
+                            x: 0,
+                            y: 0,
+                            localRackId: newRacks.length + 1
                         }))
                     });
                 }
@@ -948,10 +950,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
     const delCage = (cage: Cage, rack: Rack, rackGroup: RackGroup, action: DeleteActions) => {
         if(action !== 'group'){
-            disconnectCage(cage.cageNum);
+            disconnectCage(cage.id);
             setUnitLocs((prevLocs) => ({
                 ...prevLocs,
-                [roomItemToString(rack.type.type)]: prevLocs[roomItemToString(rack.type.type)].filter((loc) => loc.num !== cage.cageNum)
+                [roomItemToString(rack.type.type)]: prevLocs[roomItemToString(rack.type.type)].filter((loc) => loc.cageId !== cage.id)
             }));
             return;
         }else{
@@ -966,15 +968,15 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 }
                 // remove all cages in group
                 setUnitLocs((prevLocs) => {
-                    const cageIds = new Set<CageNumber>();
+                    const cageIds = new Set<CageSvgId>();
                     rackGroup.racks.forEach((r) => {
                         r.cages.forEach((c) => {
-                            cageIds.add(c.cageNum);
+                            cageIds.add(c.id);
                         })
                     })
                     const filteredLocs: UnitLocations = {};
                     Object.keys(prevLocs).forEach(key => {
-                        filteredLocs[key] = prevLocs[key].filter((loc: LocationCoords) => !cageIds.has(loc.num));
+                        filteredLocs[key] = prevLocs[key].filter((loc: LocationCoords) => !cageIds.has(loc.cageId));
                     })
                     return filteredLocs;
                 });
@@ -1006,7 +1008,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 newRackType.type = defaultTypeToRackType(newRackType.type);
             }
             setLocalRoom(prevRoom => {
-                const {rackGroup, rack, cage} = findCageInGroup((selectedObj as Cage).cageNum as CageNumber, prevRoom.rackGroups);
+                const {rackGroup, rack, cage} = findCageInGroup((selectedObj as Cage).id as CageSvgId, prevRoom.rackGroups);
                 const roomToUpdate: Room = {
                     ...prevRoom,
                     rackGroups: prevRoom.rackGroups.map(group =>
@@ -1040,7 +1042,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
         const selectedCage = (selectedObj as Cage);
-        const objType = parseRoomItemType(selectedCage.cageNum);
 
         setLocalRoom((prevRoom) => {
             // Find the clicked rack
@@ -1072,17 +1073,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 }))
             };
 
-
-
-            // Now update the unit locations using the rackType from currRack
-            setUnitLocs(prevUnitLocations => ({
-                ...prevUnitLocations,
-                // Access the correct unit location array based on clickedRack's rackType
-                [roomItemToString(currRack.type.type)]: prevUnitLocations[roomItemToString(currRack.type.type)].map(cage =>
-                    convertCageNumToNum(cage.num) === numBefore ? { ...cage, num: `${roomItemToString(currRack.type.type)}-${numAfter}` } : cage
-                )
-            }));
-
             return updatedLocalRoom; // Return the updated local room state
         });
 
@@ -1098,7 +1088,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // Get the maximum cageNum in the current array of cages
-        const maxCageNum = Math.max(...cages.map(cage => convertCageNumToNum(cage.num)));
+        const maxCageNum = cages.length;
 
         // Return the next available cageNum (max + 1)
         return maxCageNum + 1;
@@ -1133,7 +1123,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 const newRackId = rack.type.isDefault ? parseLongId(rack.itemId) : parseRoomItemNum(rack.itemId);
 
                 rack.cages.forEach((cage) => {
-                    const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.num === cage.cageNum);
+                    const cageLocData = unitLocs[roomItemToString(rack.type.type)].find((loc) => loc.cageId === cage.id);
                     let extraContext: ExtraContext = {};
 
                     // set up cage extra context

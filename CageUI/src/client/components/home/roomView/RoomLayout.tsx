@@ -25,11 +25,6 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
 
-    useEffect(() => {
-        console.log("SR: ", selectedRoom);
-        console.log("Prev Mods: ", prevRoomMods);
-    }, [selectedRoom, prevRoomMods]);
-
     // Loads room into the svg
     useEffect(() => {
         if(!selectedRoom.name) return;
@@ -37,7 +32,6 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         d3.select("#layout-svg").selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
-        console.log("Load svg, ", selectedRoom);
         addPrevRoomSvgs('view', selectedRoom, layoutSvg, roomMods, setSelectedContextObj, contextRef);
     }, [selectedRoom.name, showCageContextMenu]);
 
@@ -45,8 +39,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     // Effect watches for right clicks to open the modification editor
     useEffect(() => {
         if(selectedContextObj){
-            console.log("Selected Obj: ", selectedContextObj);
-            const currRackDefault = findCageInGroup((selectedContextObj as Cage).cageNum, selectedRoom.rackGroups).rack.type.isDefault;
+            const currRackDefault = findCageInGroup((selectedContextObj as Cage).id, selectedRoom.rackGroups).rack.type.isDefault;
             if(currRackDefault){
                 setErrorPopup("This cage is a default cage and as such it cannot have mods attached. Please only attach mods to real cages");
             }else{

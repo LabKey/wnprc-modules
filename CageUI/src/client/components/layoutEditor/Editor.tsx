@@ -27,7 +27,7 @@ import { RoomItemTemplate } from './RoomItemTemplate';
 import {
     Cage,
     CageDirection,
-    CageNumber,
+    CageNumber, CageSvgId,
     Rack,
     RackGroup,
     RackStringType,
@@ -223,7 +223,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
                 const cageGroupElement = textElement.closest(`[id="${(res as Cage).id}"]`) as SVGGElement;
-                setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,"edit",setCtxMenuStyle, roomItemToString(updateItemType) as RackStringType);
+                setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,"edit",setCtxMenuStyle);
             });
         }else{
             setupEditCageEvent(group.node(), setSelectedObj, contextMenuRef, "edit", setCtxMenuStyle);
@@ -398,14 +398,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             const draggedRackGroup: Rack[] = localRoom.rackGroups.find((group) =>
                 group.groupId === (selectedObj as RackGroup).groupId
             ).racks;
-            const draggedCagesGroup: string[] = draggedRackGroup.flatMap((rack) => rack.cages.map(cage => cage.cageNum));
+            const draggedCagesGroup: CageSvgId[] = draggedRackGroup.flatMap((rack) => rack.cages.map(cage => cage.id));
 
             // Create temp object of cage locations not in the dragged group
             const cagesNotInDragged: UnitLocations = (() => {
                 const tempLocs: UnitLocations = {...unitLocs};
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[roomItemToString(rack.type.type)] = tempLocs[roomItemToString(rack.type.type)].filter((unit) => !draggedCagesGroup.includes(unit.num))
+                    tempLocs[roomItemToString(rack.type.type)] = tempLocs[roomItemToString(rack.type.type)].filter((unit) => !draggedCagesGroup.includes(unit.cageId))
                 })
 
                 return tempLocs;
@@ -417,7 +417,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 const tempLocs: UnitLocations = createEmptyUnitLoc();
 
                 draggedRackGroup.forEach((rack) => {
-                    tempLocs[roomItemToString(rack.type.type)] = unitLocs[roomItemToString(rack.type.type)].filter((unit) => draggedCagesGroup.includes(unit.num))
+                    tempLocs[roomItemToString(rack.type.type)] = unitLocs[roomItemToString(rack.type.type)].filter((unit) => draggedCagesGroup.includes(unit.cageId))
                 })
 
                 return tempLocs;
@@ -432,8 +432,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         if(targetCageLocs.length === 0 || mergeAvail) return;
                         targetCageLocs.forEach((targetLoc) => {
                             if(mergeAvail) return;
-                            const {cage: draggedCage} = findCageInGroup(dragLoc.num, localRoom.rackGroups);
-                            const {cage: targetCage} = findCageInGroup(targetLoc.num, localRoom.rackGroups);
+                            const {cage: draggedCage} = findCageInGroup(dragLoc.cageId, localRoom.rackGroups);
+                            const {cage: targetCage} = findCageInGroup(targetLoc.cageId, localRoom.rackGroups);
 
                             const adj = checkAdjacent(targetLoc, dragLoc, draggedCage.size,targetCage.size);
                             mergeAvail = adj.isAdjacent
@@ -458,14 +458,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             //This is the first cage in the dragged rack that will determine if a merge is possible
             const draggedCage: Cage = draggedRack.cages.find((cage) => cage.localRackId === 1);
 
-            draggedCageLoc = unitLocs[draggedRackType].find((cage) => cage.num === draggedCage.cageNum);
+            draggedCageLoc = unitLocs[draggedRackType].find((cage) => cage.cageId === draggedCage.id);
 
             // rackType is the string for the enum here, cages is the array of locations for that unit
             Object.entries(unitLocs).forEach(([unitRackType, cageLocs]) => {
                 if(cageLocs.length === 0 || mergeAvail) return;
                 cageLocs.forEach((targetLoc) => {
-                    if(draggedCage.cageNum === targetLoc.num || mergeAvail) return; // cant merge into itself
-                    const {cage: targetCage} = findCageInGroup(targetLoc.num, localRoom.rackGroups);
+                    if(draggedCage.id === targetLoc.cageId || mergeAvail) return; // cant merge into itself
+                    const {cage: targetCage} = findCageInGroup(targetLoc.cageId, localRoom.rackGroups);
                     let inSameRack = false;
                     localRoom.rackGroups.forEach((group) => {
                         group.racks.forEach(rack => {
@@ -490,13 +490,13 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
 
         if(mergeAvail) {
-            const targetShape = layoutSvg.select(`#${targetCageLoc.num}`);
+            const targetShape = layoutSvg.select(`#${targetCageLoc.cageId}`);
             if(targetShape.empty()) return; // Sometimes it doesn't register a targetShape causing a random crash
             const targetRackShape = (targetShape.node() as SVGGElement).closest('[class*="rack"]');
             const {rack: targetRack, rackGroup: targetRackGroup} = findRackInGroup(targetRackShape.getAttribute('id'), localRoom.rackGroups);
 
 
-            const draggedShape = layoutSvg.select(`#${draggedCageLoc.num}`);
+            const draggedShape = layoutSvg.select(`#${draggedCageLoc.cageId}`);
             const draggedRackShape = (draggedShape.node() as SVGGElement).closest('[class*="rack"]');
 
             const {rack: draggedRack, rackGroup: draggedRackGroup} = findRackInGroup(draggedRackShape.getAttribute('id'), localRoom.rackGroups);
@@ -509,9 +509,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             const mergeProps: MergeProps = {
                 contextMenuRef: contextMenuRef,
                 targetRack,
-                targetCageNum: targetCageLoc.num,
+                targetCageId: targetCageLoc.cageId,
                 draggedRack,
-                dragCageNum: draggedCageLoc.num,
+                dragCageId: draggedCageLoc.cageId,
                 targetRackGroup,
                 dragRackGroup: draggedRackGroup,
                 doRackAction,
@@ -713,7 +713,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     // Deletes rack or cage from layout
     const handleDel = (type: 'rack' | 'cage') => {
         // state in local room of cage, rack, and group that cage is apart of
-        const {cage: localCage, rack: localRack, rackGroup: localGroup} = findCageInGroup((selectedObj as Cage).cageNum as CageNumber, localRoom.rackGroups);
+        const {cage: localCage, rack: localRack, rackGroup: localGroup} = findCageInGroup((selectedObj as Cage).id, localRoom.rackGroups);
 
         const cagesToDelete: string = type === "rack" ? localRack.cages.map((cage) => cage.cageNum).join(", ") : localCage.cageNum;
         showLayoutEditorConfirmation(`Are you sure you want to delete ${cagesToDelete}`).then((r) => {
@@ -807,7 +807,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     // Handles changing racks in the layout editor
     const handleRackChange = async (newType) => {
         const result: string = await changeRack(newType);
-        const {rack: currRack} = findCageInGroup((selectedObj as Cage).cageNum, localRoom.rackGroups);
+        const {rack: currRack} = findCageInGroup((selectedObj as Cage).id, localRoom.rackGroups);
         const idToChange = currRack.itemId;
         if(result){
             layoutSvg.select(`#${idToChange}`).attr("id", result);

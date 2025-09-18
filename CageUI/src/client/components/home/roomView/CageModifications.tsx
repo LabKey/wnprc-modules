@@ -49,7 +49,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
     // Find possible connects
     useEffect(() => {
-        const {rackGroup: currGroup , rack: currRack}= findCageInGroup(cage.cageNum, selectedRoom.rackGroups);
+        const {rackGroup: currGroup , rack: currRack}= findCageInGroup(cage.id, selectedRoom.rackGroups);
         const connectionsObj = findConnectedCages(currRack,cage);
 
         // connect prev cages
@@ -90,19 +90,19 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
         // filter out cages that are in rack connections
         Object.entries(connectionsObj).forEach(([d, groups]) => {
             groups.forEach((group) => {
-                tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group.adjCage.cageNum);
-                tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group.currCage.cageNum);
+                tempAloneCages = tempAloneCages.filter(c => c.id !== group.adjCage.id);
+                tempAloneCages = tempAloneCages.filter(c => c.id !== group.currCage.id);
             })
         });
         // filter out cages that are in cage connections
         Object.entries(connectedCages).forEach(([d, groups]) => {
             groups.forEach((group) => {
-                tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group.adjCage.cageNum);
-                tempAloneCages = tempAloneCages.filter(c => c.cageNum !== group.currCage.cageNum);
+                tempAloneCages = tempAloneCages.filter(c => c.id !== group.adjCage.id);
+                tempAloneCages = tempAloneCages.filter(c => c.id !== group.currCage.id);
             })
         });
         // filter out cages that are in the same rack group as a result from rack connections, but aren't in the current rack
-        tempAloneCages = tempAloneCages.filter(c => rack.cages.some(tc => tc.cageNum === c.cageNum));
+        tempAloneCages = tempAloneCages.filter(c => rack.cages.some(tc => tc.id === c.id));
         setConnectedRacks(connectionsObj);
         setAloneCages(tempAloneCages)
     }, [rackGroup, rack, connectedCages]);
@@ -114,7 +114,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
             const newPairs = pairs as ConnectedRack;
             // edit if pair already exists
             if(currCageMods.adjRacks[location].find(c => {
-                return newPairs.currCage.cageNum === c.currCage.cageNum
+                return newPairs.currCage.id === c.currCage.id
                     && newPairs.currRack.itemId === c.currRack.itemId
             })){
                 setCurrCageMods(prevState => ({
@@ -147,14 +147,14 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
             // edit if pair already exists
             if(currCageMods.adjCages[location].find(c => {
-                return newPairs.currCage.cageNum === c.currCage.cageNum
+                return newPairs.currCage.id === c.currCage.id
             })){
                 setCurrCageMods(prevState => ({
                     ...prevState,
                     adjCages: {
                         ...prevState.adjCages,
                         [location]: prevState.adjCages[location].map((c) => {
-                            if(c.adjCage.cageNum === newPairs.adjCage.cageNum && c.currCage.cageNum === newPairs.currCage.cageNum){
+                            if(c.adjCage.id === newPairs.adjCage.id && c.currCage.id === newPairs.currCage.id){
                                 return ({
                                     ...c,
                                     mods: selectedItems
@@ -214,13 +214,13 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                     const directionStr = findDirStr(loc);
                                     return (
                                         <li className={"mod-table-row"} key={`adj-inside-row-${idx}`} >
-                                            <div className={"mod-table-column"} key={`adj-inside-${c.currCage.cageNum}-${idx}`}>
+                                            <div className={"mod-table-column"} key={`adj-inside-${c.currCage.id}-${idx}`}>
                                                 {c.currCage.cageNum}
                                             </div>
                                             <div className={"mod-table-column"} key={`adj-inside-dir-${idx}`}>
                                                 {directionStr}
                                             </div>
-                                            <div className={"mod-table-column"} key={`adj-inside-${c.adjCage.cageNum}-${idx}`}>
+                                            <div className={"mod-table-column"} key={`adj-inside-${c.adjCage.id}-${idx}`}>
                                                 {c.adjCage.cageNum}
                                             </div>
                                             <div className={"mod-table-column"} key={`adj-inside-mod-${idx}`}>

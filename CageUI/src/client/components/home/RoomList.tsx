@@ -8,7 +8,7 @@ import { Filter } from '@labkey/api';
 import {
     convertToTitleCase,
     defaultTypeToRackType,
-    formatRackId,
+    formatRackId, generateCageId,
     parseRoomItemNum,
     parseRoomItemType,
     roomItemToString
@@ -85,13 +85,17 @@ export const RoomList: FC = () => {
                                 tempRacks[rackIdx] = {
                                     ...tempRacks[rackIdx],
                                     cages: [...tempRacks[rackIdx].cages, {
-                                        id: `${cageType}-${parseInt(row.cage)}` as CageNumber,
+                                        name: `${cageType}-${parseInt(row.cage)}` as CageNumber,
+                                        id: generateCageId(),
                                     }]
                                 }
                             }else{
                                 tempRacks.push({
                                     id: rackId,
-                                    cages: [{id: `${cageType}-${parseInt(row.cage)}` as CageNumber}],
+                                    cages: [{
+                                        name: `${cageType}-${parseInt(row.cage)}` as CageNumber,
+                                        id: generateCageId()
+                                    }],
                                 });
                             }
                         })

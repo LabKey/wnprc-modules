@@ -19,7 +19,7 @@
 import {
     Cage,
     CageModificationsType,
-    CageNumber, CurrCageMods,
+    CageNumber, CageSvgId, CurrCageMods,
     DefaultRackId,
     DefaultRackStringType,
     DefaultRackTypes,
@@ -66,8 +66,8 @@ import { Utils } from '@labkey/api';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
-export const generateCageId = () => {
-    return generateId('cageSVG-');
+export const generateCageId = (): CageSvgId => {
+    return generateId('cageSVG-') as CageSvgId;
 }
 
 // Changes stroke color of svg element nodes keeping the other styles.
@@ -316,7 +316,6 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
     // Loads modifications from constant styles and ids to inject into the svgs
     const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
-        //console.log("Load Cage Mods: ", cageToLoad, modsToLoad)
         if(!cageToLoad.mods) return;
         Object.entries(cageToLoad.mods).forEach(([loc,modSubList]) => {
             const modLoc = parseInt(loc) as ModLocations;
@@ -378,11 +377,10 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
             // in order to set the event pass in the context menu ref and styles to show/hide it
-            setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,mode,setCtxMenuStyle, rackTypeString);
+            setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,mode,setCtxMenuStyle);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             if(mode ==='view'){
-                console.log("Load Cage Mods: ", cage);
                 loadCageMods(cage, shape);
             }
 
@@ -1016,7 +1014,6 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
         }
     }
 
-    console.log(`XXX Cage: ${rack}`, connections)
 
     return connections;
 }
@@ -1030,7 +1027,6 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
         for (const currCage of cRack.cages) {
             let subId = 1;
             for (const adjCage of adjRack.cages) {
-                console.log(`Is ${currCage.cageNum} adj with ${adjCage.cageNum}`);
 
                 // If cage is passed then determine if either cage is included and skip if not.
                 if(cage){
@@ -1044,7 +1040,6 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
                 if(cRack.rowid !== currRack.rowid && adjRack.rowid !== currRack.rowid){
                     continue;
                 }
-                console.log(`Adjacent: ${currCage.cageNum}`, adj);
                 if(adj.location !== null){
                     //[[rack1,cage1], adj, [rack2,cage2]]
                     adj.currLines.forEach((line,idx) => {

@@ -73,8 +73,6 @@ export const compareMods = (oldModData: RoomMods, newModData: CurrCageMods)=> {
         oldMod?: ModTypes; // Only for modified mods
     }[] = [];
 
-    console.log("Old Mods: ", oldModData)
-    console.log("New Mods: ", newModData)
     newModData.currCage.forEach((directMod) => {
 
     })

@@ -23,7 +23,7 @@ import { getTypeClassFromElement, parseRoomItemType, roomItemToString } from './
 import {
     Cage,
     CageDirection,
-    CageNumber,
+    CageNumber, CageSvgId,
     DefaultRackTypes,
     GroupId,
     LocationCoords,
@@ -307,7 +307,6 @@ export function setupEditCageEvent(
     localRoomRef: MutableRefObject<Room>,
     eventType: "view" | "edit",
     setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
-    rackTypeString?: RackStringType
 ): () => void {
     const handleContextMenu = (event: MouseEvent)=> {
         event.preventDefault();
@@ -319,14 +318,9 @@ export function setupEditCageEvent(
         if(d3.select(element).classed('room-obj')){
             tempObj = localRoom.objects.find((obj) => obj.itemId === element.id);
         }else{
-            localRoom.rackGroups.forEach((g) => {
-                g.racks.forEach((r) => {
-                    if(tempObj){
-                        return;
-                    }
-                    tempObj = r.cages.find(c => c.id === element.id);
-                })
-            })
+            const cageGroupElement = element.closest(`[id^="cageSVG-"]`) as SVGGElement | null;
+            const cageObj = localRoom.rackGroups.flatMap(g => g.racks).flatMap(r => r.cages).find(c => c.id === cageGroupElement.id);
+            tempObj = cageObj;
         }
         setSelectedObj(tempObj);
         if(setCtxMenuStyle){
@@ -374,8 +368,8 @@ export async function mergeRacks(props: MergeProps) {
         doRackAction,
         layoutDrag,
         cageActionProps,
-        dragCageNum,
-        targetCageNum
+        dragCageId,
+        targetCageId
     } = props;
     if(!d3.select('.popup').empty()) return false;
     const action: RackActions = await showConfirmationPopup();
@@ -391,7 +385,7 @@ export async function mergeRacks(props: MergeProps) {
             element.setAttribute('class',`grouped-${shapeType}`);
             element.setAttribute('style', "");
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, "edit", cageActionProps.setCtxMenuStyle, shapeType);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, "edit", cageActionProps.setCtxMenuStyle);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -528,7 +522,7 @@ export async function mergeRacks(props: MergeProps) {
 
         newGroup.call(layoutDrag);
 
-        doRackAction(action,targetRackId, draggedRackId, targetCageNum, dragCageNum, newGroup);
+        doRackAction(action,targetRackId, draggedRackId, targetCageId, dragCageId, newGroup);
 
         // Remove the original shapes from the DOM
         targetRackShape.remove();
@@ -778,8 +772,8 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
         return false;
     }
 
-    const nums = rack.cages.map(item => item.cageNum);
-    return nums.includes(cage1.num) && nums.includes(cage2.num);
+    const nums = rack.cages.map(item => item.id);
+    return nums.includes(cage1.cageId) && nums.includes(cage2.cageId);
 }
 
 
@@ -812,10 +806,10 @@ export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: R
 
 
 // finds a cage in room/groups of racks if it exists and return the rack, rack group and cage state
-export const findCageInGroup = (targetId: CageNumber, groups: RackGroup[]): {cage: Cage, rack: Rack, rackGroup: RackGroup} | undefined => {
+export const findCageInGroup = (targetId: CageSvgId, groups: RackGroup[]): {cage: Cage, rack: Rack, rackGroup: RackGroup} | undefined => {
     for (const group of groups) {
         for (const rack of group.racks) {
-            const targetCage = rack.cages.find(cage => cage.cageNum === targetId);
+            const targetCage = rack.cages.find(cage => cage.id === targetId);
             if (targetCage) {
                 return { cage: targetCage, rack: rack, rackGroup: group };
             }

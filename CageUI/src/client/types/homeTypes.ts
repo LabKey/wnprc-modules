@@ -1,7 +1,7 @@
 import {
     Cage,
     CageMapKey,
-    CageNumber,
+    CageNumber, CageSvgId,
     DefaultRackId,
     ModDirections,
     ModLocations,
@@ -46,11 +46,12 @@ export interface SelectedPage {
     selected: SelectedViews
     room?: string;
     rack?: DefaultRackId | RealRackId;
-    cage?: CageNumber;
+    cage?: CageSvgId;
 }
 
 export interface ListCage {
-    id: CageNumber;
+    id: CageSvgId;
+    name: CageNumber;
 }
 
 export interface ListRack {

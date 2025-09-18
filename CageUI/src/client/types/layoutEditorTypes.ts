@@ -16,7 +16,7 @@
  *
  */
 
-import { Cage, CageNumber, Rack, RackGroup, Room, RoomItem, RoomItemClass, RoomItemType } from './typings';
+import { Cage, CageNumber, CageSvgId, Rack, RackGroup, Room, RoomItem, RoomItemClass, RoomItemType } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
@@ -72,12 +72,12 @@ export interface LayoutDragProps {
 export interface MergeProps {
     contextMenuRef: MutableRefObject<Room>;
     targetRack: Rack;
-    targetCageNum: CageNumber;
+    targetCageId: CageSvgId;
     draggedRack: Rack;
-    dragCageNum: CageNumber;
+    dragCageId: CageSvgId;
     targetRackGroup: RackGroup;
     dragRackGroup: RackGroup;
-    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageNumber, dragCageNum: CageNumber, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
+    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageSvgId, dragCageNum: CageSvgId, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     layoutDrag: d3.DragBehavior<any, any, any>;
     cageActionProps: CageActionProps;
 }

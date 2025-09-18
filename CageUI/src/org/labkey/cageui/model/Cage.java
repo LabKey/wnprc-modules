@@ -12,7 +12,8 @@ import java.util.Optional;
 
 public class Cage
 {
-    private int _id;
+    private String _id;
+    private int _localRackId;
     private SelectionType _selectionType;
     private String _cageNum;
     private int _x;
@@ -20,6 +21,8 @@ public class Cage
     private int _size;
     private Map<String, Object> _extraContext;
     private CageModKeyMap _mods;
+
+
 
     public static final class CageModKeyMap {
         private final Map<ModLocations, List<CageModification>> mods;
@@ -123,16 +126,25 @@ public class Cage
         _mods = mods;
     }
 
-    public int getId()
+    public String getId()
     {
         return _id;
     }
 
-    public void setId(int id)
+    public void setId(String id)
     {
         _id = id;
     }
 
+    public int getLocalRackId()
+    {
+        return _localRackId;
+    }
+
+    public void setLocalRackId(int localRackId)
+    {
+        _localRackId = localRackId;
+    }
     public SelectionType getSelectionType()
     {
         return _selectionType;

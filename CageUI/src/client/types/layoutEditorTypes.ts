@@ -40,9 +40,9 @@ export interface ExtraContext {
 }
 
 export interface LayoutSaveResult {
-    status: string;
+    success: boolean;
     roomName: string // redirect room
-    reason?: any;
+    reason?: string[];
 }
 
 export interface OffsetProps {

@@ -778,7 +778,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     }
 
     const handleSaveClose = (roomName: string) => {
-        if(showSaveResult?.reason){ // don't switch windows if error occurred
+        if(!showSaveResult.success){ // don't switch windows if error occurred
             setShowSaveResult(null);
         }else{
             setShowSaveResult(null);
@@ -976,7 +976,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
             {showSaveResult &&
                 <ConfirmationPopup
-                    message={`${showSaveResult.status}\n${showSaveResult?.reason ? showSaveResult.reason : ''}`}
+                    message={
+                        `${showSaveResult.success === true ? "Success" : "Failure"}
+                        ${showSaveResult?.reason ? showSaveResult.reason.map(((error, idx) => `${idx + 1}. ` + error + "\n")) : ''}`
+                    }
                     onClose={() => handleSaveClose(showSaveResult.roomName)}
                 />
             }

@@ -18,6 +18,7 @@
 
 package org.labkey.cageui;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -62,9 +63,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class CageUIController extends SpringActionController
 {
@@ -98,10 +102,34 @@ public class CageUIController extends SpringActionController
         @Override
         public void validateForm(SimpleApiJsonForm form, Errors errors)
         {
-            /*if (form.getRoom().isEmpty())
-            {
-                errors.reject(ERROR_MSG, "Must have a room");
-            }*/
+            JSONObject json = form.getJsonObject();
+            if(json == null){
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+            JSONObject jsonRoom = json.getJSONObject("room");
+            JSONArray jsonModsArray = json.getJSONArray("mods");
+            String prevRoomName = json.get("prevRoomName").toString();
+            List<Map<String, Object>> newLayoutHistoryData = JsonUtil.toMapList(json.getJSONArray("newRoomData"));
+
+
+            Set<String> seenCageNumByType = new HashSet<>();
+            for (Map<String, Object> map : newLayoutHistoryData) {
+                Object typeObj = map.get("object_type");
+                Object nameObj = map.get("cage");
+
+                if (typeObj == null || nameObj == null) {
+                    continue;
+                }
+
+                String compositeKey = typeObj + ":" + nameObj;
+
+                if (!seenCageNumByType.add(compositeKey)) {
+                    errors.reject(ERROR_MSG, "Duplicate cage numbers found: " + nameObj);
+                    return; // Duplicate composite key found
+                }
+            }
+
         }
 
         @Override
@@ -114,7 +142,6 @@ public class CageUIController extends SpringActionController
 
             JSONArray jsonModsArray = json.getJSONArray("mods");
             JSONObject jsonRoom = json.getJSONObject("room");
-            JSONArray jsonNewLayoutHistoryData = json.getJSONArray("newRoomData");
             List<Map<String, Object>> newLayoutHistoryData = JsonUtil.toMapList(json.getJSONArray("newRoomData"));
 
             ObjectMapper mapper = JsonUtil.createDefaultMapper();

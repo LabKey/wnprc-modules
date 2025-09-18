@@ -31,7 +31,7 @@ export const ConfirmationPopup: FC<ConfirmationPopupProps> = (props) => {
     return (
         <div className="popup-overlay">
             <div className="popup">
-                <p dangerouslySetInnerHTML={{__html: message}}/>
+                <p className={"popup-paragraph"} dangerouslySetInnerHTML={{ __html: message.replace(/\n/g, '<br />')}}/>
                 {!onConfirm &&
                         <div className="popup-buttons">
                             <button onClick={onClose}>Close</button>

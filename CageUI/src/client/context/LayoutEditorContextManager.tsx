@@ -1112,8 +1112,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         const roomName = localRoom.name;
         const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
-        const savingTemplate: boolean = roomName.toLowerCase().includes("template");
-        const newEndDate = new Date();
         const newStartDate = new Date();
 
 
@@ -1181,13 +1179,13 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
             // Check if we have a mix of null and non-null rack values
             if (nullCount > 0 && nonNullCount > 0){
-                return { status: 'Failure', roomName: roomName, reason: ['Cannot save room with mix of default racks and real racks']};;
+                return { success: false, roomName: roomName, reason: ['Cannot save room with mix of default racks and real racks']};;
             }
 
             // Check if rack property is consistently present or absent
             const hasRackCount = racks.filter(val => val !== undefined).length;
             if(hasRackCount !== 0 && hasRackCount !== racks.length){
-                return { status: 'Failure', roomName: roomName, reason: ['Cannot save room with inconsistent rack property']};
+                return { success: false, roomName: roomName, reason: ['Cannot save room with inconsistent rack property']};
             }
 
             if(nullCount === 0){
@@ -1283,34 +1281,18 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                         })
                     })
                 })
-                //const results = await saveRoomLayout(newModData);
-                //console.log("Saved modification history", results);
-                /*commands.push({
-                    command: "insert",
-                    schemaName: "cageui",
-                    queryName: "cage_modifications_history",
-                    rows: newModData
-                });*/
             }
         }
 
-        /*console.log("Commands:", commands);
-        return;*/
-        //const result = await labkeySaveRows(commands);
-
-        console.log("localRoom", localRoom);
-
-        const result= await saveRoomLayout(localRoom, newModData, oldRoomName, dataToSave);
-        // Determine success or failure
-        if(result.success === true){
-            return { status: 'Success', roomName: roomName};
-        }else{
-            return {
-                status: 'Failure',
-                roomName: roomName,
-                reason: ["failures"] // Return an array of failure reasons
-            };
+        let result: LayoutSaveResult;
+        try {
+            const layoutSave = await saveRoomLayout(localRoom, newModData, oldRoomName, dataToSave);
+            result = {success: layoutSave.success, roomName: roomName};
+        } catch (e){
+            result = {success: e.success, roomName: roomName, reason: [`${e.exception}`]};
         }
+        // Determine success or failure
+        return result;
     }
 
     useEffect(() => {

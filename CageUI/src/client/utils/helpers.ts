@@ -488,7 +488,7 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
             rackType = roomItemToString(roomItem.object_type);
         }
         newUnitLocs[rackType].push({
-            num: `${rackType}-${parseInt(roomItem.cage)}` as CageNumber,
+            cageId: generateCageId(),
             cellX: roomItem.x_coord,
             cellY: roomItem.y_coord
         });
@@ -496,7 +496,7 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
     return newUnitLocs;
 };
 
-export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
+export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, UnitLocations]> => {
     const newLocalRoom: Room = {
         name: prevRoom.name,
         rackGroups: [],
@@ -504,6 +504,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         layoutData: null,
         mods: null
     };
+    const newUnitLocs: UnitLocations = createEmptyUnitLoc();
     let newMods: RoomMods = {};
     let roomObjNum = 1;
     const loadMods: boolean = !!prevRoom.modData;
@@ -685,8 +686,9 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
                 }
             })
         }
+        const newCageId = generateCageId();
         const cage: Cage = {
-            id: generateCageId(),
+            id: newCageId,
             cageNum: `${cageNumType}-${cageNum}` as CageNumber,
             extraContext: extraContext?.cage,
             selectionType: 'cage',
@@ -696,6 +698,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
             size: svgSize,
             mods: cageMods
         };
+
+        newUnitLocs[cageNumType].push({
+            cageId: newCageId,
+            cellX:  rackItem.x_coord + rack.x + group.x, // global coords
+            cellY: rackItem.y_coord + rack.y + group.y
+        });
         rack.cages.push(cage);
     };
 
@@ -728,9 +736,10 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<Room> => {
         } else { // Room item is something else in the room, ex. Door
             newLocalRoom.objects.push(generateRoomObj(roomItem));
         }
+
     }
     newLocalRoom.mods = newMods;
-    return (newLocalRoom);
+    return ([newLocalRoom, newUnitLocs]);
 }
 
 // Sadly we kind of have to hard code this function.

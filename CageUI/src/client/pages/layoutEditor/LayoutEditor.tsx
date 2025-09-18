@@ -141,14 +141,15 @@ export const LayoutEditor: FC<any> = () => {
             let newUnitLocs: UnitLocations;
 
             if(prevRoomData.cagingData.length !== 0){
-                newUnitLocs = buildNewLocs(prevRoomData.cagingData);
+                //newUnitLocs = buildNewLocs(prevRoomData.cagingData);
                 buildNewLocalRoom(prevRoomData).then((d) => {
-                    if(d){
-                        isTemplate = d.name.includes("template");
-                        newLocalRoom = d;
+                    let newLocalRoom = d[0];
+                    newUnitLocs = d[1];
+                    if(newLocalRoom){
+                        isTemplate = newLocalRoom.name.includes("template");
                         newLocalRoom = {
-                            ...d,
-                            name: isTemplate ? 'new-layout' : d.name
+                            ...newLocalRoom,
+                            name: isTemplate ? 'new-layout' : newLocalRoom.name
                         }
 
                         newLocalRoom = {

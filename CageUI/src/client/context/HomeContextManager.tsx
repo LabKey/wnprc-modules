@@ -176,14 +176,15 @@ export const HomeContextProvider = ({children}) => {
                     modData: modResult.rowCount > 0 ? tempModData : undefined,
                 }
                 buildNewLocalRoom(prevRoom).then((d) => {
-                    if(d){
+                    const newLocalRoom = d[0];
+                    if(newLocalRoom){
                         tempNewRoom = {
-                            ...d,
+                            ...newLocalRoom,
                             layoutData: tempNewRoom.layoutData,
                         }
-                        setRoomMods(d.mods);
+                        setRoomMods(newLocalRoom.mods);
                         // Ensure they don't share the same reference (using lodash to clone)
-                        setPrevRoomMods(_.cloneDeep(d.mods));
+                        setPrevRoomMods(_.cloneDeep(newLocalRoom.mods));
                         setLoadedRooms((prevRooms) => ({
                             ...prevRooms,
                             [tempNewRoom.name]: {loaded: true, room: tempNewRoom}

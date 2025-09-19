@@ -762,8 +762,8 @@ margin-bottom: 10px;
 
 .home-container {
   display: flex;
-  height: 100vh; /* Full viewport height */
   width: 100%; /* Full viewport width */
+  align-items: flex-start;
 }
 // Editor Context menu
 
@@ -949,6 +949,8 @@ margin-bottom: 10px;
 .room-list {
   display: flex;
   flex-direction: column;
+  height: 150vh;
+  max-height: inherit;
  // border-right: 1px solid black;
 }
 
@@ -960,9 +962,8 @@ margin-bottom: 10px;
 }
 
 .room-list-items {
-  padding: 5px;
   overflow-y: auto;
-  height: 100%;
+  padding: 5px;
 }
 
 .arrow {

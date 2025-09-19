@@ -18,10 +18,8 @@
 
 package org.labkey.cageui;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -30,7 +28,6 @@ import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
@@ -45,14 +42,12 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
-import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -63,7 +58,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -221,7 +215,7 @@ public class CageUIController extends SpringActionController
             JSONArray oldLayoutHistoryJsonData = new JSONArray();
             for (LayoutHistoryForm data : layoutHistoryFormData)
             {
-                data.setEndDate(newEndDate);
+                data.setEnd_date(newEndDate);
                 oldLayoutHistoryJsonData.put(data.toJSON());
             }
             List<Map<String, Object>> oldlayoutHistoryRowsToUpdate = JsonUtil.toMapList(oldLayoutHistoryJsonData);

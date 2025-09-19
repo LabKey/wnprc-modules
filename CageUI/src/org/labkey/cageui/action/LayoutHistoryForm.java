@@ -8,15 +8,15 @@ public class LayoutHistoryForm
 {
     private int _rowid;
     private Integer _rack;
-    private int _objectType;
-    private Integer _rackGroup;
-    private String _extraContext;
+    private int _object_type;
+    private Integer _rack_group;
+    private String _extra_context;
     private String _cage;
-    private String _xCoord;
-    private String _yCoord;
+    private String _x_coord;
+    private String _y_coord;
     private String _room;
-    private Date _startDate;
-    private Date _endDate;
+    private Date _start_date;
+    private Date _end_date;
 
     public Integer getRack()
     {
@@ -48,24 +48,24 @@ public class LayoutHistoryForm
         _room = room;
     }
 
-    public Date getStartDate()
+    public Date getStart_date()
     {
-        return _startDate;
+        return _start_date;
     }
 
-    public void setStartDate(Date startDate)
+    public void setStart_date(Date start_date)
     {
-        _startDate = startDate;
+        _start_date = start_date;
     }
 
-    public Date getEndDate()
+    public Date getEnd_date()
     {
-        return _endDate;
+        return _end_date;
     }
 
-    public void setEndDate(Date endDate)
+    public void setEnd_date(Date end_date)
     {
-        _endDate = endDate;
+        _end_date = end_date;
     }
 
     public int getRowid()
@@ -78,54 +78,54 @@ public class LayoutHistoryForm
         _rowid = rowid;
     }
 
-    public int getObjectType()
+    public int getObject_type()
     {
-        return _objectType;
+        return _object_type;
     }
 
-    public void setObjectType(int objectType)
+    public void setObject_type(int object_type)
     {
-        _objectType = objectType;
+        _object_type = object_type;
     }
 
-    public Integer getRackGroup()
+    public Integer getRack_group()
     {
-        return _rackGroup;
+        return _rack_group;
     }
 
-    public void setRackGroup(Integer rackGroup)
+    public void setRack_group(Integer rack_group)
     {
-        _rackGroup = rackGroup;
+        _rack_group = rack_group;
     }
 
-    public String getExtraContext()
+    public String getExtra_context()
     {
-        return _extraContext;
+        return _extra_context;
     }
 
-    public void setExtraContext(String extraContext)
+    public void setExtra_context(String extra_context)
     {
-        _extraContext = extraContext;
+        _extra_context = extra_context;
     }
 
-    public String getXCoord()
+    public String getX_coord()
     {
-        return _xCoord;
+        return _x_coord;
     }
 
-    public void setXCoord(String xCoord)
+    public void setX_coord(String xCoord)
     {
-        _xCoord = xCoord;
+        _x_coord = xCoord;
     }
 
-    public String getYCoord()
+    public String getY_coord()
     {
-        return _yCoord;
+        return _y_coord;
     }
 
-    public void setYCoord(String yCoord)
+    public void setY_coord(String yCoord)
     {
-        _yCoord = yCoord;
+        _y_coord = yCoord;
     }
 
     public JSONObject toJSON()
@@ -135,14 +135,14 @@ public class LayoutHistoryForm
         json.put("rowid", getRowid());
         json.put("rack", getRack());
         json.put("cage", getCage());
-        json.put("objectType", getObjectType());
-        json.put("extraContext", getExtraContext());
-        json.put("rackGroup", getRackGroup());
-        json.put("xCoord", getXCoord());
-        json.put("yCoord", getYCoord());
+        json.put("object_type", getObject_type());
+        json.put("extra_context", getExtra_context());
+        json.put("rack_group", getRack_group());
+        json.put("x_coord", getX_coord());
+        json.put("y_coord", getY_coord());
         json.put("room", getRoom());
-        json.put("startDate", getStartDate());
-        json.put("endDate", getEndDate());
+        json.put("start_date", getStart_date());
+        json.put("end_date", getEnd_date());
 
         return json;
     }

@@ -701,9 +701,10 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
         newUnitLocs[cageNumType].push({
             cageId: newCageId,
-            cellX:  rackItem.x_coord + rack.x + group.x, // global coords
-            cellY: rackItem.y_coord + rack.y + group.y
+            cellX:  group.x + rack.x + cage.x, // global coords
+            cellY:  group.y + rack.y + cage.y
         });
+
         rack.cages.push(cage);
     };
 

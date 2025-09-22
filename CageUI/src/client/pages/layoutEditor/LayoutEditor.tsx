@@ -190,7 +190,7 @@ export const LayoutEditor: FC<any> = () => {
                 prevRoom={prevRoom}
                 user={userProfile}
                 children={
-                    <div className={"room-container"}>
+                    <div id={'layout-editor-container'} className={"room-container"}>
                         <RoomHeader
                             name={roomName}
                         />

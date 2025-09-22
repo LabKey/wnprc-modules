@@ -106,7 +106,6 @@ public class CageUIController extends SpringActionController
             String prevRoomName = json.get("prevRoomName").toString();
             List<Map<String, Object>> newLayoutHistoryData = JsonUtil.toMapList(json.getJSONArray("newRoomData"));
 
-
             Set<String> seenCageNumByType = new HashSet<>();
             for (Map<String, Object> map : newLayoutHistoryData) {
                 Object typeObj = map.get("object_type");
@@ -120,10 +119,8 @@ public class CageUIController extends SpringActionController
 
                 if (!seenCageNumByType.add(compositeKey)) {
                     errors.reject(ERROR_MSG, "Duplicate cage numbers found: " + nameObj);
-                    return; // Duplicate composite key found
                 }
             }
-
         }
 
         @Override

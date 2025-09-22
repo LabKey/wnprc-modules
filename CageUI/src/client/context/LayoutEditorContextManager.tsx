@@ -1289,7 +1289,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             const layoutSave = await saveRoomLayout(localRoom, newModData, oldRoomName, dataToSave);
             result = {success: layoutSave.success, roomName: roomName};
         } catch (e){
-            result = {success: e.success, roomName: roomName, reason: [`${e.exception}`]};
+            result = {success: e.success, roomName: roomName, reason: e.errors.map(err => err.message)};
         }
         // Determine success or failure
         return result;

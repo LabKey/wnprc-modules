@@ -85,6 +85,8 @@ import { GateChangeRoom } from './GateChangeRoom';
 import { TextInput } from '../TextInput';
 import { GateSwitch } from './GateSwitch';
 import { CELL_SIZE, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
+import { LayoutErrors } from './LayoutErrors';
+import { LoadingScreen } from '../LoadingScreen';
 
 interface EditorProps {
     roomSize: SelectorOptions
@@ -112,6 +114,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [showSaveResult, setShowSaveResult] = useState<LayoutSaveResult>(null);
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
     const [templateRename, setTemplateRename] = useState<string>(null);
+    const [startSaving, setStartSaving] = useState<boolean>(false);
 
     // number of cells in grid width/height, based off scale
     const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
@@ -773,7 +776,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     const handleSave = async () => {
 
+
         const result = await saveRoom(templateRename);
+        setStartSaving(false);
         setShowSaveResult(result);
     }
 
@@ -817,6 +822,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
     return (
         <div className={"layout-editor"}>
+            {startSaving &&
+                <LoadingScreen
+                        isVisible={startSaving}
+                        targetElement={document.getElementById('layout-editor-container')}
+                />
+            }
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
                     <LayoutTooltip text={"Top"}>
@@ -951,7 +962,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             {showSaveConfirm &&
                 <ConfirmationPopup
                     message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}
-                    onConfirm={handleSave}
+                    onConfirm={() => {
+                        setStartSaving(true);
+                        handleSave();
+                    }}
                     onCancel={handleCancelConfirm}
                     onClose={() => setShowSaveConfirm(false)}
                 />
@@ -974,13 +988,17 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         onCancel={() => {setShowRoomSelectorTemplateLoad(false); setTemplateOptions(false);}}
                 />
             }
-            {showSaveResult &&
+            {showSaveResult && showSaveResult.success &&
                 <ConfirmationPopup
                     message={
-                        `${showSaveResult.success === true ? "Success" : "Failure"}
-                        ${showSaveResult?.reason ? showSaveResult.reason.map(((error, idx) => `${idx + 1}. ` + error + "\n")) : ''}`
+                        `${showSaveResult.roomName} was submitted successfully.`
                     }
                     onClose={() => handleSaveClose(showSaveResult.roomName)}
+                />
+            }
+            {showSaveResult && !showSaveResult.success &&
+                <LayoutErrors
+                    errors={showSaveResult.reason}
                 />
             }
             {showCageContextMenu &&

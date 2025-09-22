@@ -197,7 +197,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "updateTitle"));
                         keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
                         keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
-                        keys.add(FieldKey.fromParts("qcstate","label"));
+                        keys.add(FieldKey.fromParts("taskid","qcstate","label"));
                     }
 
                     @Override

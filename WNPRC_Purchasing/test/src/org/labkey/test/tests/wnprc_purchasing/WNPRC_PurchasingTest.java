@@ -62,6 +62,10 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
+import static org.labkey.test.util.PermissionsHelper.EDITOR_ROLE;
+import static org.labkey.test.util.PermissionsHelper.PROJECT_ADMIN_ROLE;
+import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
+import static org.labkey.test.util.PermissionsHelper.SUBMITTER_ROLE;
 
 @Category({EHR.class, WNPRC_EHR.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
@@ -216,10 +220,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         _permissionsHelper.addUserToProjGroup(REQUESTER_USER_1, getProjectName(), PURCHASE_REQUESTER_GROUP);
         _permissionsHelper.addUserToProjGroup(REQUESTER_USER_2, getProjectName(), PURCHASE_REQUESTER_GROUP);
 
-        _permissionsHelper.setPermissions(PURCHASE_ADMIN_GROUP, "Project Administrator");
-        _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, "Submitter");
-        _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, "Reader");
-        _permissionsHelper.setPermissions(PURCHASE_RECEIVER_GROUP, "Editor");
+        _permissionsHelper.setPermissions(PURCHASE_ADMIN_GROUP, PROJECT_ADMIN_ROLE);
+        _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, SUBMITTER_ROLE);
+        _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, READER_ROLE);
+        _permissionsHelper.setPermissions(PURCHASE_RECEIVER_GROUP, EDITOR_ROLE);
         _permissionsHelper.setUserPermissions(PURCHASE_DIRECTOR_USER, "WNPRC Purchasing Director");
     }
 

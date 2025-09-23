@@ -1033,7 +1033,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 }
                 return roomToUpdate;
             })
-            return `rack-${rackId}`;
+            return `rack-${rackRowId}`;
         }else{
             console.log("Error fetching rack type");
             return null;

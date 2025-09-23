@@ -9,7 +9,7 @@ public class LayoutHistoryForm
 {
     private int _rowid;
     private Integer _rack;
-    private RackTypes _object_type;
+    private int _object_type;
     private Integer _rack_group;
     private String _extra_context;
     private String _cage;
@@ -79,12 +79,12 @@ public class LayoutHistoryForm
         _rowid = rowid;
     }
 
-    public RackTypes getObject_type()
+    public int getObject_type()
     {
         return _object_type;
     }
 
-    public void setObject_type(RackTypes object_type)
+    public void setObject_type(int object_type)
     {
         _object_type = object_type;
     }

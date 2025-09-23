@@ -352,9 +352,11 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');
 
+        // This is where the cage svg group is created.
         rack.cages.forEach(async (cage) => {
             const cageGroup = rackGroup.append('g')
                 .attr('id', cage.id)
+                .attr('name', cage.cageNum)
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
             let unitSvg: SVGElement;
@@ -659,7 +661,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         }
         const svgSize = await getSvgSize(rack.type.type);
 
-        //TODO Add mods if needed here
+        // This is where mods are loaded into state for the room
         if (loadMods && !rack.type.isDefault) {
 
             const modReturnData = await cageModLookup([],[]);
@@ -675,6 +677,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 if(cageMods[mod.location].find(m => m.subId === mod.subId)){
                     cageMods[mod.location] = cageMods[mod.location].map(mods => {
                         if(mods.subId === mod.subId){
+                            if(mod.parentModId !== null){
+                                return {
+                                    ...mods,
+                                    mods: [...mods.mods, mod.parentModId]
+                                }
+                            }
                             return {
                                 ...mods,
                                 mods: [...mods.mods, mod.modId]
@@ -682,7 +690,11 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                         }
                     });
                 }else{
-                    cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, mods: [mod.modId]}];
+                    if(mod.parentModId !== null){
+                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, mods: [mod.parentModId]}];
+                    }else{
+                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, mods: [mod.modId]}];
+                    }
                 }
             })
         }

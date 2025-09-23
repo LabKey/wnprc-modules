@@ -386,8 +386,6 @@ export const HomeContextProvider = ({children}) => {
             };
         });
 
-        // TODO: Optionally use usedModKeys to detect and remove deleted mods from state.
-
         return { status: "Success" };
     };
 

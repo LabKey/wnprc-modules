@@ -1171,11 +1171,12 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         // adds default mods if appropriate
         if(dataToSave.length > 0){
-            const racks = dataToSave.map(obj => obj.hasOwnProperty('rack') ? obj.rack : undefined);
+            const dataWithoutObjects = dataToSave.filter(data => data.cage !== null);
+            const racks = dataWithoutObjects.map(obj => obj.hasOwnProperty('rack') ? obj.rack : undefined);
 
-            // All rack values must be either null or all must be non-null
-            const nullCount = racks.filter(val => val === null).length;
-            const nonNullCount = racks.filter(val => val !== null && val !== undefined).length;
+            // All rack values must be either null or all must be non-null (all real racks or all default racks)
+            const nullCount = racks.filter(val => val === null).length; // default
+            const nonNullCount = racks.filter(val => val !== null && val !== undefined).length; //real
 
             // Check if we have a mix of null and non-null rack values
             if (nullCount > 0 && nonNullCount > 0){
@@ -1217,7 +1218,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                                     rack: r.rowid,
                                     room: localRoom.name,
                                     startDate: newStartDate,
-                                    subId: connect.currSubId // TODO might not be correct/ accurate id
+                                    subId: connect.currSubId
                                 });
                                 // add mod data for adjacent cage
                                 const adjLocation = getAdjLocation(locDir);
@@ -1231,7 +1232,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                                     rack: r.rowid,
                                     room: localRoom.name,
                                     startDate: newStartDate,
-                                    subId: connect.adjSubId // TODO might not be correct/ accurate id
+                                    subId: connect.adjSubId
                                 });
 
                                 usedMap.set(newMapKey, true);
@@ -1260,7 +1261,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                                     rack: connect.currRack.rowid,
                                     room: localRoom.name,
                                     startDate: newStartDate,
-                                    subId: connect.currSubId // TODO might not be correct/ accurate id
+                                    subId: connect.currSubId
                                 });
                                 // add mod data for adjacent cage
                                 const adjLocation = getAdjLocation(locDir);
@@ -1274,7 +1275,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                                     rack: connect.adjRack.rowid,
                                     room: localRoom.name,
                                     startDate: newStartDate,
-                                    subId: connect.adjSubId // TODO might not be correct/ accurate id
+                                    subId: connect.adjSubId
                                 });
                                 usedMap.set(newMapKey, true);
                             })

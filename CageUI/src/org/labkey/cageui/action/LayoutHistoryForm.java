@@ -1,6 +1,7 @@
 package org.labkey.cageui.action;
 
 import org.json.JSONObject;
+import org.labkey.cageui.model.RackTypes;
 
 import java.util.Date;
 
@@ -8,7 +9,7 @@ public class LayoutHistoryForm
 {
     private int _rowid;
     private Integer _rack;
-    private int _object_type;
+    private RackTypes _object_type;
     private Integer _rack_group;
     private String _extra_context;
     private String _cage;
@@ -78,12 +79,12 @@ public class LayoutHistoryForm
         _rowid = rowid;
     }
 
-    public int getObject_type()
+    public RackTypes getObject_type()
     {
         return _object_type;
     }
 
-    public void setObject_type(int object_type)
+    public void setObject_type(RackTypes object_type)
     {
         _object_type = object_type;
     }

@@ -48,6 +48,7 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
+import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -108,17 +109,19 @@ public class CageUIController extends SpringActionController
 
             Set<String> seenCageNumByType = new HashSet<>();
             for (Map<String, Object> map : newLayoutHistoryData) {
-                Object typeObj = map.get("object_type");
+                if(map.get("cage") == null){continue;}// ignore room objects
+
+                RackTypes typeObj = RackTypes.fromNumericValue((Integer) map.get("object_type"));
                 Object nameObj = map.get("cage");
 
-                if (typeObj == null || nameObj == null) {
+                if (nameObj == null) {
                     continue;
                 }
 
                 String compositeKey = typeObj + ":" + nameObj;
 
                 if (!seenCageNumByType.add(compositeKey)) {
-                    errors.reject(ERROR_MSG, "Duplicate cage numbers found: " + nameObj);
+                    errors.reject(ERROR_MSG, "Duplicate numbers found in layout: " + RackTypes.getName(typeObj) + ": " + nameObj);
                 }
             }
         }

@@ -135,13 +135,13 @@ public class DecoratedTableInfo implements TableInfo {
 
     @NotNull
     @Override
-    public Map<String, Pair<IndexType, List<ColumnInfo>>> getUniqueIndices() {
+    public Map<String, IndexDef> getUniqueIndices() {
         return _tableInfo.getUniqueIndices();
     }
 
     @NotNull
     @Override
-    public Map<String, Pair<IndexType, List<ColumnInfo>>> getAllIndices() {
+    public Map<String, IndexDef> getAllIndices() {
         return _tableInfo.getAllIndices();
     }
 

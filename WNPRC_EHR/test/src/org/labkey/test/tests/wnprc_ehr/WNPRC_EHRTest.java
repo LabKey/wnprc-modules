@@ -108,6 +108,8 @@ import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
+import static org.labkey.test.util.PermissionsHelper.EDITOR_ROLE;
+import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 
 /**
  * This should contain tests designed to validate EHR data entry or associated business logic.
@@ -3467,8 +3469,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //Navigates to various containers and sets corresponding permissions.
         beginAt(buildURL("project", getProjectName(), "begin"));
-        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Reader");
-        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "Editor");
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), READER_ROLE);
+        _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), EDITOR_ROLE);
         beginAt(buildURL("wnprc_billing", getContainerPath(), "updateProgramIncomeAccount"));
         _permissionsHelper.setPermissions(BASIC_SUBMITTER.getGroup(), "EHR Finance Admin");
 

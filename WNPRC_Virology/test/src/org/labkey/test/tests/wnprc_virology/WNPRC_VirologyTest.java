@@ -26,6 +26,7 @@ import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.PasswordUtil;
+import org.labkey.test.util.PermissionsHelper;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.RemoteConnectionHelper;
 import org.labkey.test.util.SchemaHelper;
@@ -45,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
+import static org.labkey.test.util.PermissionsHelper.FOLDER_ADMIN_ROLE;
+import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 
 @Category({WNPRC_EHR.class})
 public class WNPRC_VirologyTest extends ViralLoadAssayTest
@@ -172,7 +175,7 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         _containerHelper.createProject(PROJECT_NAME_EHR, type);
         _containerHelper.enableModules(Arrays.asList(MODULE_NAME, "Dumbster", "EHR_Billing", "DataIntegration"));
         _userHelper.createUser(ADMIN_USER);
-        _apiPermissionsHelper.setUserPermissions(ADMIN_USER, "Folder Administrator");
+        _apiPermissionsHelper.setUserPermissions(ADMIN_USER, FOLDER_ADMIN_ROLE);
         // Set up the module properties
         List<ModulePropertyValue> properties = new ArrayList<>();
         properties.add(new ModulePropertyValue(MODULE_NAME, "/", "virologyEHRVLSampleQueueFolderPath", PROJECT_NAME_EHR));
@@ -253,8 +256,8 @@ public class WNPRC_VirologyTest extends ViralLoadAssayTest
         _userHelper.createUser(TEST_USER);
         _userHelper.createUser(TEST_USER_2);
         _containerHelper.createSubfolder(getProjectNameRSEHR(), getProjectNameRSEHRPublic(), "Collaboration");
-        _apiPermissionsHelper.setUserPermissions(TEST_USER, "Reader");
-        _apiPermissionsHelper.setUserPermissions(TEST_USER_2, "Reader");
+        _apiPermissionsHelper.setUserPermissions(TEST_USER, READER_ROLE);
+        _apiPermissionsHelper.setUserPermissions(TEST_USER_2, READER_ROLE);
         createWiki("Information", "Information");
 
 

@@ -142,6 +142,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.labkey.api.action.SimpleApiJsonForm;
+import org.springframework.validation.Errors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -2451,6 +2453,51 @@ public class WNPRC_EHRController extends SpringActionController
 
 
         }
+    }
+
+
+    public void validateAnesthesiaRecovery(SimpleApiJsonForm form, Errors errors) {
+
+        // Verifies passed-in arguments are not null.
+        if (form.getJsonObject() == null) {
+            errors.reject(ERROR_MSG, "JSON argument cannot be null.");
+            return;
+        }
+        JSONObject myForm = form.getJsonObject();
+
+        // Retrieves the passed-in arguments.
+        JSONObject recordId = myForm.getJSONObject("Id");
+        JSONObject recordRoom = myForm.getJSONObject("room");
+        JSONObject recordDate = myForm.getJSONObject("date");
+        JSONObject recordObservation = myForm.getJSONObject("observation");
+        JSONObject recordRecoveryStart = myForm.getJSONObject("recoveryStart");
+        JSONObject recordObserverComments = myForm.getJSONObject("observerComments");
+        JSONObject recordObserver = myForm.getJSONObject("observer");
+        JSONObject recordRecoveryId = myForm.getJSONObject("recoveryId");
+
+        _log.info("TEST MESSAGE:" +
+                "ID: " + recordId +
+                "ROOM: " + recordRoom +
+                "DATE: " + recordDate +
+                "OBSERVATION: " + recordObservation +
+                "RECOVERY START: " + recordRecoveryStart +
+                "OBSERVER COMMENTS: " + recordObserverComments +
+                "OBSERVER: " + recordObserver +
+                "RECOVERY ID: " + recordRecoveryId
+        );
+
+
+
+
+//        public boolean isAliveAndAtCenter = false;
+//
+//        private String animalid;
+//
+//        public String getAnimalid() {return animalid;}
+//
+//        public void setAnimalid(String animalid) {this.animalid = animalid;}
+//
+//        public void setIsAliveAndAtCenter(boolean checkAlive) {this.isAliveAndAtCenter = checkAlive;}
     }
 
 }

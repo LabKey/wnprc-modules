@@ -1,6 +1,7 @@
 package org.labkey.cageui.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class Room
 {
@@ -8,6 +9,7 @@ public class Room
     private List<RackGroup> _rackGroups;
     private List<RoomObject> _objects;
     private LayoutData _layoutData;
+    private Map<String, Object> _mods;
 
     public String getName()
     {
@@ -47,5 +49,15 @@ public class Room
     public void setLayoutData(LayoutData layoutData)
     {
         _layoutData = layoutData;
+    }
+
+    public Map<String, Object>  getMods()
+    {
+        return _mods;
+    }
+
+    public void setMods(Map<String, Object>  mods)
+    {
+        _mods = mods;
     }
 }

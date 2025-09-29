@@ -175,23 +175,23 @@ export interface CurrCageMods {
 
 export interface CageModificationsType {
     [ModLocations.Top]: {
-        mods: CageMapKey[];
+        modKeys: CageMapKey[];
         subId: number; // subsection id
     }[];
     [ModLocations.Bottom]: {
-        mods: CageMapKey[];
+        modKeys: CageMapKey[];
         subId: number;
     }[];
     [ModLocations.Left]: {
-        mods: CageMapKey[];
+        modKeys: CageMapKey[];
         subId: number;
     }[];
     [ModLocations.Right]: {
-        mods: CageMapKey[];
+        modKeys: CageMapKey[];
         subId: number;
     }[];
     [ModLocations.Direct]: {
-        mods: CageMapKey[];
+        modKeys: CageMapKey[];
         subId: number;
     }[];
 }

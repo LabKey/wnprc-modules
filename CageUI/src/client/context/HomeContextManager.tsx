@@ -18,10 +18,10 @@ import {
 import { HomeContextType } from '../types/homeContextTypes';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
-import { labkeyActionSelectWithPromise, labkeySaveRows } from '../api/labkeyActions';
+import { labkeyActionSelectWithPromise, labkeySaveRows, saveModLayout } from '../api/labkeyActions';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, parseRoomItemNum, getAdjLocation } from '../utils/helpers';
-import { SelectedObj } from '../types/layoutEditorTypes';
+import { LayoutSaveResult, SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
 import { compareMods  } from '../utils/homeHelpers';
 import _ from 'lodash';
@@ -48,7 +48,6 @@ export const HomeContextProvider = ({children}) => {
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
-    const [roomMods, setRoomMods] = useState<RoomMods>({});
     const [prevRoomMods, setPrevRoomMods] = useState<RoomMods>({});
 
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
@@ -112,7 +111,6 @@ export const HomeContextProvider = ({children}) => {
         if(!shouldRunEffect) return;
         if(loadedRooms[selectedPage.room].loaded) {
             setSelectedRoom(loadedRooms[selectedPage.room].room);
-            setRoomMods(loadedRooms[selectedPage.room].room.mods);
             // Ensure they don't share the same reference (using lodash to clone)
             setPrevRoomMods(_.cloneDeep(loadedRooms[selectedPage.room].room.mods));
             return;
@@ -182,7 +180,6 @@ export const HomeContextProvider = ({children}) => {
                             ...newLocalRoom,
                             layoutData: tempNewRoom.layoutData,
                         }
-                        setRoomMods(newLocalRoom.mods);
                         // Ensure they don't share the same reference (using lodash to clone)
                         setPrevRoomMods(_.cloneDeep(newLocalRoom.mods));
                         setLoadedRooms((prevRooms) => ({
@@ -261,10 +258,10 @@ export const HomeContextProvider = ({children}) => {
 
             const existing = subsections.find(s => s.subId === subsectionId);
             if (!existing) {
-                cageEntry[location] = [...subsections, { subId: subsectionId, mods: [modId] }];
+                cageEntry[location] = [...subsections, { subId: subsectionId, modKeys: [modId] }];
             } else {
                 cageEntry[location] = subsections.map(s =>
-                    s.subId === subsectionId ? { ...s, mods: [...s.mods, modId] } : s
+                    s.subId === subsectionId ? { ...s, modKeys: [...s.modKeys, modId] } : s
                 );
             }
         };
@@ -356,7 +353,6 @@ export const HomeContextProvider = ({children}) => {
         });
 
         console.log(newRoomMods, cageModsByCage);
-        setRoomMods(newRoomMods);
 
         // Merge cage modifications back into selectedRoom.rackGroups
         setSelectedRoom(prevState => {
@@ -382,15 +378,19 @@ export const HomeContextProvider = ({children}) => {
 
             return {
                 ...prevState,
-                rackGroups: newRackGroups
+                rackGroups: newRackGroups,
+                mods: newRoomMods
             };
         });
 
         return { status: "Success" };
     };
 
-    const submitCageMods = async (currCage: Cage, currCageMods: CurrCageMods): Promise<ModificationSaveResult> => {
-        const {rack: currRack} = findCageInGroup(currCage.id, selectedRoom.rackGroups);
+    const submitCageMods = async (): Promise<LayoutSaveResult> => {
+
+
+
+        /*const {rack: currRack} = findCageInGroup(currCage.id, selectedRoom.rackGroups);
         const commands: Command[] = [];
         const modsToSave: ModHistoryData[] = [];
         const modsToUpdate: ModHistoryData[] = [];
@@ -417,7 +417,7 @@ export const HomeContextProvider = ({children}) => {
                 modsToSave.push(newModData);
             }else {
                 // Set old mod date end date
-                /*const modToEnd = prevRoomMods.find((mod) => {
+                /!*const modToEnd = prevRoomMods.find((mod) => {
                     // Finding the correct mod in the desired location that is currently active
                     // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
                     return mod.rackRowId === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.endDate === null;
@@ -425,7 +425,7 @@ export const HomeContextProvider = ({children}) => {
                 modsToUpdate.push({...modToEnd, endDate: newTimestamp});
                 if (change.type === 'modified') { // add new mod if modified
                     modsToSave.push(newModData);
-                }*/
+                }*!/
             }
         })
 
@@ -472,7 +472,18 @@ export const HomeContextProvider = ({children}) => {
                 status: 'Failure',
                 reason: ["failures"] // Return an array of failure reasons
             };
+        }*/
+
+
+        let result: LayoutSaveResult;
+        try {
+            const layoutSave = await saveModLayout(selectedRoom, prevRoomMods);
+            result = {success: layoutSave.success, roomName: selectedRoom.name};
+        } catch (e){
+            result = {success: e.success, roomName: selectedRoom.name, reason: e.errors};
         }
+        // Determine success or failure
+        return result;
     }
 
     return (
@@ -490,8 +501,7 @@ export const HomeContextProvider = ({children}) => {
             selectedContextObj,
             setSelectedContextObj,
             saveCageMods,
-            submitCageMods,
-            roomMods,
+            submitLayoutMods: submitCageMods,
             prevRoomMods,
             setPrevRoomMods
         }}>

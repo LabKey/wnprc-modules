@@ -41,7 +41,7 @@ interface CageModificationsProps {
 }
 export const CageModifications: FC<CageModificationsProps> = (props) => {
     const {cage, rack, currCageMods, setCurrCageMods} = props;
-    const {roomMods, selectedRoom} = useHomeContext();
+    const { selectedRoom} = useHomeContext();
     const [rackGroup, setRackGroup] = useState<RackGroup>(null);
     const [connectedCages, setConnectedCages] = useState<ConnectedCages>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
@@ -58,7 +58,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                 if(cage.mods[direction].length > 0 ){
                     cage.mods[direction].forEach((modKeysInLoc) => {
                         if(modKeysInLoc.subId === connection.currSubId){
-                            connection.mods = modKeysInLoc.mods.map(key => ({label: roomMods[key].label, value: roomMods[key].value, id: key}));
+                            connection.mods = modKeysInLoc.mods.map(key => ({label: selectedRoom.mods[key].label, value: selectedRoom.mods[key].value, id: key}));
                         }
                     })
                 }
@@ -79,7 +79,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                 if(cage.mods[direction].length > 0 ){
                     cage.mods[direction].forEach((modKeysInLoc) => {
                         if(modKeysInLoc.subId === connection.currSubId){
-                            connection.mods = modKeysInLoc.mods.map(key => ({label: roomMods[key].label, value: roomMods[key].value, id: key}));
+                            connection.mods = modKeysInLoc.modKeys.map(key => ({label: selectedRoom.mods[key].label, value: selectedRoom.mods[key].value, id: key}));
                         }
                     })
                 }
@@ -196,7 +196,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                             <ModificationMultiSelect
                                 handleChange={(selectedItems) =>  handleChange(ModLocations.Direct, cage, selectedItems)}
                                 prevItems={cage.mods[ModLocations.Direct].flatMap(subMods => {
-                                    return subMods.mods.map(key => ({label: roomMods[key].label, value: roomMods[key].value, id: key}))
+                                    return subMods.modKeys.map(key => ({label: selectedRoom.mods[key].label, value: selectedRoom.mods[key].value, id: key}))
                                 })}
                             />
                         </ul>

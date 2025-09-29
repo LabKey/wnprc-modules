@@ -85,7 +85,7 @@ import { GateChangeRoom } from './GateChangeRoom';
 import { TextInput } from '../TextInput';
 import { GateSwitch } from './GateSwitch';
 import { CELL_SIZE, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
-import { LayoutErrors } from './LayoutErrors';
+import { LayoutErrors } from '../LayoutErrors';
 import { LoadingScreen } from '../LoadingScreen';
 
 interface EditorProps {

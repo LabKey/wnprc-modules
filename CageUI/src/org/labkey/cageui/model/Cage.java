@@ -1,6 +1,7 @@
 package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -82,14 +83,10 @@ public class Cage
             private final List<String> modKeys;
             private final int subId;
 
-            public CageModification(List<String> modKeys, int subId) {
+            @JsonCreator
+            public CageModification(@JsonProperty("modKeys") List<String> modKeys, @JsonProperty("subId") int subId)
+            {
                 this.modKeys = modKeys != null ? modKeys : new ArrayList<>();
-                this.subId = subId;
-            }
-
-            // Alternative constructor for array
-            public CageModification(String[] modKeys, int subId) {
-                this.modKeys = modKeys != null ? List.of(modKeys) : new ArrayList<>();
                 this.subId = subId;
             }
 

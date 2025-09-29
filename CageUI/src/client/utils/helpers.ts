@@ -321,7 +321,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             const modLoc = parseInt(loc) as ModLocations;
             modSubList.forEach((modList) => {
                 const subId = modList.subId;
-                modList.mods.forEach(modId => {
+                modList.modKeys.forEach(modId => {
                     const currMod = modsToLoad[modId];
                     const modObj = Modifications[currMod.value];// find mod in mod constants array
                     // for each id in the location map the style if it exists
@@ -680,20 +680,20 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                             if(mod.parentModId !== null){
                                 return {
                                     ...mods,
-                                    mods: [...mods.mods, mod.parentModId]
+                                    modKeys: [...mods.modKeys, mod.parentModId]
                                 }
                             }
                             return {
                                 ...mods,
-                                mods: [...mods.mods, mod.modId]
+                                modKeys: [...mods.modKeys, mod.modId]
                             }
                         }
                     });
                 }else{
                     if(mod.parentModId !== null){
-                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, mods: [mod.parentModId]}];
+                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, modKeys: [mod.parentModId]}];
                     }else{
-                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, mods: [mod.modId]}];
+                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, modKeys: [mod.modId]}];
                     }
                 }
             })

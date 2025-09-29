@@ -13,15 +13,20 @@ import { EditorContextMenu } from '../../layoutEditor/EditorContextMenu';
 import { ModificationEditor } from './ModificationEditor';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
 import _ from 'lodash';
+import { ModificationSaveResult } from '../../../types/homeTypes';
+import { LayoutErrors } from '../../LayoutErrors';
+import { LayoutSaveResult } from '../../../types/layoutEditorTypes';
 
 interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
-    const {selectedRoom, selectedContextObj, setSelectedContextObj, roomMods, prevRoomMods} = useHomeContext();
+    const {selectedRoom, selectedContextObj, setSelectedContextObj, prevRoomMods, submitLayoutMods} = useHomeContext();
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
     const [errorPopup, setErrorPopup] = useState<string>(null);
+    const [showLayoutErrors, setShowLayoutErrors] = useState<string[]>([]);
+    const [isSaving, setIsSaving] = useState<boolean>(false);
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
 
@@ -32,7 +37,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         d3.select("#layout-svg").selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select("#layout-svg") as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg, roomMods, setSelectedContextObj, contextRef);
+        addPrevRoomSvgs('view', selectedRoom, layoutSvg, selectedRoom.mods, setSelectedContextObj, contextRef);
     }, [selectedRoom.name, showCageContextMenu]);
 
 
@@ -55,19 +60,57 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     }, [showCageContextMenu]);
 
     useEffect(() => {
-        if(!roomMods || !prevRoomMods) return;
-        setShowChangesMenu((_.isEqual(prevRoomMods, roomMods)));
-    }, [roomMods]);
+        if(!selectedRoom.mods || !prevRoomMods) return;
+        setShowChangesMenu(!(_.isEqual(prevRoomMods, selectedRoom.mods)));
+    }, [selectedRoom.mods]);
+
+
+    const saveLayout = async () => {
+
+        console.log("Room Mods: ", selectedRoom.mods);
+        const res: LayoutSaveResult = await submitLayoutMods();
+        console.log("Save Layout Result: ", res);
+
+        if(res.success){
+            // succssesful save
+            //TODO refresh current room.
+        }else{
+            if(res?.reason){
+                setShowLayoutErrors(res.reason);
+            }else{
+                setShowLayoutErrors(["Unknown error occurred. Please try again or submit a ticket."]);
+            }
+
+        }
+        setIsSaving(false);
+
+    }
 
     return (
         <div className={'room-layout'}>
-            {!showChangesMenu &&
-                    <div className={'room-changes-toolbar'}>
-                        <div className={'room-layout-message'}>
-                            Changes have been made to this room. Please save the room before continuing.
-                        </div>
+            <div className={'room-layout-toolbar'}>
+            {showChangesMenu &&
+                <div className={'room-changes-toolbar'}>
+                    <div className={'room-layout-message'}>
+                        Changes have been made to this room. Please save before continuing.
                     </div>
+                    <button className={'room-layout-save-btn'}
+                        onClick={() => {
+                            setIsSaving(true);
+                            saveLayout();
+                        }}
+                        disabled={isSaving}
+                    >
+                        Save
+                    </button>
+                </div>
             }
+            {showLayoutErrors && showLayoutErrors.length > 0 &&
+                <LayoutErrors
+                        errors={showLayoutErrors}
+                />
+            }
+            </div>
             <div id={"layout-grid"}>
                 <svg // svg here is the size of the border (objects outside of border ignored), add 1 to viewbox to prevent visual cutting by a pixel
                     width={selectedRoom.layoutData.borderWidth + 1}

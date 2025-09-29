@@ -28,10 +28,12 @@ import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
@@ -42,24 +44,31 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
+import org.labkey.cageui.model.Cage;
+import org.labkey.cageui.model.Rack;
+import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
+import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +84,24 @@ public class CageUIController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
+    private static List<Map<String, Object>> getModsToEnd(String roomName, Date newEndDate, User user, Container container)
+    {
+        UserSchema cageuiSchema = QueryService.get().getUserSchema(user, container, "cageui");
+        TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
+        SimpleFilter modFilter = new SimpleFilter();
+        modFilter.addCondition(FieldKey.fromString("room"), roomName, CompareType.EQUAL);
+        modFilter.addCondition(FieldKey.fromString("endDate"),null, CompareType.ISBLANK);
+        TableSelector modSelector = new TableSelector(modHistoryTable, modFilter, null);
+        List<CageModificationHistoryForm> modHistoryFormData = modSelector.getArrayList(CageModificationHistoryForm.class);
+        JSONArray modJsonData = new JSONArray();
+        for (CageModificationHistoryForm data : modHistoryFormData){
+            data.setEndDate(newEndDate);
+            modJsonData.put(data.toJSON());
+        }
+        List<Map<String, Object>> oldModRowsToUpdate = JsonUtil.toMapList(modJsonData);
+        return oldModRowsToUpdate;
+    }
+
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
@@ -88,6 +115,80 @@ public class CageUIController extends SpringActionController
 
 
     //APIs here
+
+    // This api action saves the modifications for a given room.
+    // Completely saves a new room by closing it out and re-opening it with new modifications, even ones that didn't change.?
+    @RequiresPermission(CageUIModificationEditorPermission.class)
+    public static class SaveCageModificationAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+            }
+        }
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            BatchValidationException batchErrors = new BatchValidationException();
+            JSONObject json = form.getJsonObject();
+
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            Room room = mapper.readValue(json.get("room").toString(), mapper.getTypeFactory().constructType(Room.class));
+            Object prevRoomMods = json.get("prevMods");
+            Date newEndDate = new Date();
+
+            UserSchema cageuiSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
+            TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
+            List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(room.getName(), newEndDate, getUser(), getContainer());
+
+
+            for (RackGroup rackGroup : room.getRackGroups()){
+                for(Rack rack : rackGroup.getRacks()){
+                    for (Cage cage : rack.getCages()){
+                        Cage.CageModKeyMap currCageMods = cage.getMods();
+
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
+
+            QueryUpdateService modQus = modHistoryTable.getUpdateService();
+            if (modQus == null){
+                throw new IllegalStateException(modHistoryTable.getName() + " query update service");
+            }
+
+            try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction()){
+                if(!oldModRowsToUpdate.isEmpty()){
+                    //modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
+                }
+
+                if(batchErrors.hasErrors()){
+                    response.put("success", false);
+                    response.put("errors", batchErrors);
+                    return response;
+                }
+            }
+
+            response.put("success", false);
+            return response;
+        }
+    }
+
 
     // this api action saves the layout for a given room
     @RequiresAnyOf({CageUILayoutEditorAccessPermission.class, CageUIRoomCreatorPermission.class, CageUITemplateCreatorPermission.class})
@@ -177,31 +278,15 @@ public class CageUIController extends SpringActionController
                 throw new IllegalStateException(roomsTable.getName() + " query update service");
             }
 
-
-
-
             // table info/filters/selectors for cage_modifications_history
             List<Map<String, Object>> modsToInsert = JsonUtil.toMapList(jsonModsArray);
+            List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(room.getName(), newEndDate, getUser(), getContainer());
             TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
-            SimpleFilter modFilter = new SimpleFilter();
-            modFilter.addCondition(FieldKey.fromString("room"), room.getName(), CompareType.EQUAL);
-            modFilter.addCondition(FieldKey.fromString("endDate"),null, CompareType.ISBLANK);
-            TableSelector modSelector = new TableSelector(modHistoryTable, modFilter, null);
-
             QueryUpdateService modQus = modHistoryTable.getUpdateService();
             if (modQus == null)
             {
                 throw new IllegalStateException(modHistoryTable.getName() + " query update service");
             }
-
-            List<CageModificationHistoryForm> modHistoryFormData = modSelector.getArrayList(CageModificationHistoryForm.class);
-            JSONArray modJsonData = new JSONArray();
-            for (CageModificationHistoryForm data : modHistoryFormData)
-            {
-                data.setEndDate(newEndDate);
-                modJsonData.put(data.toJSON());
-            }
-            List<Map<String, Object>> oldModRowsToUpdate = JsonUtil.toMapList(modJsonData);
 
             // table info/filters/selectors for layout_history
             QueryUpdateService layoutHistoryQus = layoutHistoryTable.getUpdateService();

@@ -19,7 +19,7 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import Select from 'react-select';
-import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
+import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 

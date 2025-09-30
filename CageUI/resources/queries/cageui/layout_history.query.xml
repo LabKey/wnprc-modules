@@ -25,13 +25,6 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="room">
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>rooms</fkTable>
-                            <fkColumnName>room</fkColumnName>
-                        </fk>
-                    </column>
                     <column columnName="extra_context"/>
                     <column columnName="object_type">
                         <datatype>integer</datatype>
@@ -43,16 +36,13 @@
                         </fk>
                     </column>
                     <column columnName="rack_group"/>
-                    <column columnName="rack">
+                    <column columnName="cage">
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>racks</fkTable>
+                            <fkTable>cages</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
+                            <fkDisplayColumnName>cagenum</fkDisplayColumnName>
                         </fk>
-                    </column>
-                    <column columnName="cage">
-                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
                     </column>
                     <column columnName="start_date"/>
                     <column columnName="end_date"/>

@@ -33,7 +33,9 @@ public class CageUIUserSchema extends SimpleUserSchema
     public static final String NAME = "cageui";
     public static final String LAYOUT_HISTORY_TABLE = "layout_history";
     public static final String RACK_TYPES_TABLE = "rack_types";
+    public static final String CAGES_TABLE = "cages";
     public static final String RACKS_TABLE = "racks";
+    public static final String CAGE_MODIFICATIONS_TABLE = "cage_modifications";
     public static final String CAGE_MODIFICATIONS_HISTORY_TABLE = "cage_modifications_history";
 
     public CageUIUserSchema(User user, Container container, DbSchema dbschema)
@@ -73,6 +75,22 @@ public class CageUIUserSchema extends SimpleUserSchema
                     }
                 },
         racks
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        return new RacksTable(schema, CageUISchema.getInstance().getRacksTable(), cf).init();
+                    }
+                },
+        cages
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        return new CagesTable(schema, CageUISchema.getInstance().getRacksTable(), cf).init();
+                    }
+                },
+        cage_modifications
                 {
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)

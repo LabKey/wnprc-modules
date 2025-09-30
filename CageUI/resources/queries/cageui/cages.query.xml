@@ -19,28 +19,25 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="racks" tableDbType="TABLE">
-                <tableTitle>Racks</tableTitle>
+            <table tableName="cages" tableDbType="TABLE">
+                <tableTitle>Cages</tableTitle>
                 <columns>
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="room">
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>rooms</fkTable>
-                            <fkColumnName>room</fkColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="rackid"/>
-                    <column columnName="rack_type">
+                    <column columnName="rack">
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>rack_types</fkTable>
+                            <fkTable>racks</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="cageNum"/>
+                    <column columnName="isDefault"/>
+                    <column columnName="length"/>
+                    <column columnName="width"/>
+                    <column columnName="height"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

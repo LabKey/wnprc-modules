@@ -16,14 +16,32 @@
  *
  */
 
+
+DROP TABLE IF EXISTS cageui.cages;
+CREATE TABLE cageui.cages
+(
+    rowid SERIAL NOT NULL,
+    rack INTEGER NOT NULL,
+    cageNum VARCHAR(20) NOT NULL,
+    isDefault BOOLEAN NOT NULL,
+    length INTEGER,
+    width INTEGER,
+    height INTEGER,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_cages PRIMARY KEY (rowid),
+    CONSTRAINT FK_cages_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
+
 DROP TABLE IF EXISTS cageui.cage_modifications_history;
 CREATE TABLE cageui.cage_modifications_history
 (
     rowid SERIAL NOT NULL,
     modId varchar NOT NULL,
     parentModId varchar,
-    room VARCHAR(50) NOT NULL,
-    rack INTEGER,
     cage INTEGER,
     modification varchar,
     subId INTEGER,
@@ -121,3 +139,15 @@ select setname, container, 3 as value, 'Bottom' as title from ehr_lookups.lookup
 
 insert into ehr_lookups.lookups (set_name,container,value,title)
 select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+
+
+
+ALTER TABLE cageui.layout_history
+    DROP COLUMN cage,
+    DROP COLUMN room,
+    DROP COLUMN rack,
+    ADD COLUMN cage INTEGER;
+
+
+ALTER TABLE cageui.racks
+    ADD COLUMN room varchar(50);

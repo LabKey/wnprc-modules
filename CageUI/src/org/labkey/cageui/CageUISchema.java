@@ -65,6 +65,16 @@ public class CageUISchema {
         return getSchema().getTable(CageUIUserSchema.RACKS_TABLE);
     }
 
+    public TableInfo getCagesTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.CAGES_TABLE);
+    }
+
+    public TableInfo GetCageModificationsTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_TABLE);
+    }
+
     public TableInfo getCageModificationsHistoryTable() {return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_HISTORY_TABLE);}
 
 

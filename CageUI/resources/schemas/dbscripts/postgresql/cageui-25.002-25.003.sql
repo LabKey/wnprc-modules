@@ -16,6 +16,47 @@
  *
  */
 
+
+/*
+ List of all the racks at the center (for WNPRC cages are NOT removable from racks)
+ */
+DROP TABLE IF EXISTS cageui.racks;
+CREATE TABLE cageui.racks
+(
+    rowid SERIAL NOT NULL,
+    room VARCHAR NOT NULL,
+    rackid INTEGER NOT NULL,
+    rack_type varchar(50) NOT NULL,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_racks PRIMARY KEY (rowid),
+    CONSTRAINT FK_racks_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
+
+-- Table for storing layout history data, either room object or (rack_group, rack, cage) must exist
+-- If end_date is null, that is the current layout for the room
+DROP TABLE IF EXISTS cageui.layout_history;
+CREATE TABLE cageui.layout_history
+(
+    rowid SERIAL NOT NULL,
+    historyid VARCHAR NOT NULL,
+    cage_historyid VARCHAR,
+    object_type INTEGER,
+    extra_context VARCHAR,
+    x_coord INTEGER NOT NULL,
+    y_coord INTEGER NOT NULL,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_layout_history PRIMARY KEY (rowid),
+    CONSTRAINT FK_layout_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
+
 /*
  This table manages all histories for each room and template room
  */
@@ -211,16 +252,3 @@ insert into ehr_lookups.lookups (set_name,container,value,title)
 select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
 
 
-
-ALTER TABLE cageui.layout_history
-    DROP COLUMN cage,
-    DROP COLUMN room,
-    DROP COLUMN rack,
-    DROP COLUMN rack_group,
-    DROP COLUMN start_date,
-    DROP COLUMN end_date,
-    ADD COLUMN historyid varchar,
-    ADD COLUMN cage_historyid varchar;
-
-ALTER TABLE cageui.racks
-    ADD COLUMN room varchar(50);

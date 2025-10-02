@@ -202,6 +202,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         registerPermissions();
     }
 
+        @Override
         @NotNull
         protected Collection<WebPartFactory> createWebPartFactories()
         {
@@ -546,8 +547,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     }
 
     @Override
-    @NotNull
-    public Set<Class> getIntegrationTests()
+    public @NotNull Set<Class<?>> getIntegrationTests()
     {
         return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
                 .filter(c -> c.getSimpleName().endsWith("IntegrationTest"))
@@ -555,8 +555,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     }
 
     @Override
-    @NotNull
-    public Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
                 .filter(c -> c.getSimpleName().endsWith("UnitTest"))

@@ -53,7 +53,7 @@ public class SelfRegistrationModule extends CodeOnlyModule
     }
 
     @Override
-    public @NotNull Set<Class> getIntegrationTests()
+    public @NotNull Set<Class<?>> getIntegrationTests()
     {
         return PageFlowUtil.set(SelfRegistrationController.TestCase.class);
     }

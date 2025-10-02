@@ -16,14 +16,86 @@
  *
  */
 
+/*
+ This table manages all histories for each room and template room
+ */
+DROP TABLE IF EXISTS cageui.all_history;
+CREATE TABLE cageui.all_history
+(
+    rowid SERIAL NOT NULL,
+    room VARCHAR NOT NULL,
+    history_type VARCHAR(20) NOT NULL CHECK (history_type IN ('template', 'real')),
+    start_date DATE NOT NULL,
+    end_date Date,
+    room_historyid VARCHAR NOT NULL,
+    real_historyid VARCHAR,
+    template_historyid VARCHAR,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT single_layout CHECK (
+        (history_type = 'template' AND template_historyid IS NOT NULL AND real_historyid IS NULL) OR
+        (history_type = 'real' AND real_historyid IS NOT NULL AND template_historyid IS NULL)
+        ),
+    CONSTRAINT PK_all_history PRIMARY KEY (rowid),
+    CONSTRAINT FK_all_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+
+);
+
+
+/*
+ This table manages room layout status and layout scale and border information
+ */
+DROP TABLE IF EXISTS cageui.room_history;
+CREATE TABLE cageui.room_history
+(
+    rowid SERIAL NOT NULL,
+    historyid VARCHAR NOT NULL,
+    scale INTEGER,
+    border_width INTEGER,
+    border_height INTEGER,
+    status BOOLEAN,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_room_history PRIMARY KEY (rowid),
+    CONSTRAINT FK_room_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
+
+/*
+ This table is for room defaults/template histories
+ */
+DROP TABLE IF EXISTS cageui.template_layout_history;
+CREATE TABLE cageui.template_layout_history
+(
+    rowid SERIAL NOT NULL,
+    historyid VARCHAR NOT NULL,
+    rack_group INTEGER,
+    rack INTEGER,
+    cage VARCHAR(50),
+    object_type INTEGER,
+    extra_context VARCHAR,
+    x_coord INTEGER NOT NULL,
+    y_coord INTEGER NOT NULL,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_template_layout_history PRIMARY KEY (rowid),
+    CONSTRAINT FK_template_layout_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
 
 DROP TABLE IF EXISTS cageui.cages;
 CREATE TABLE cageui.cages
 (
     rowid SERIAL NOT NULL,
     rack INTEGER NOT NULL,
-    cageNum VARCHAR(20) NOT NULL,
-    isDefault BOOLEAN NOT NULL,
+    cage_number VARCHAR(20) NOT NULL,
     length INTEGER,
     width INTEGER,
     height INTEGER,
@@ -40,14 +112,12 @@ DROP TABLE IF EXISTS cageui.cage_modifications_history;
 CREATE TABLE cageui.cage_modifications_history
 (
     rowid SERIAL NOT NULL,
-    modId varchar NOT NULL,
-    parentModId varchar,
-    cage INTEGER,
+    historyid VARCHAR NOT NULL,
+    modid varchar NOT NULL,
+    parent_modid varchar,
     modification varchar,
-    subId INTEGER,
+    subid INTEGER,
     location INTEGER,
-    startDate TIMESTAMP NOT NULL,
-    endDate TIMESTAMP,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -146,8 +216,11 @@ ALTER TABLE cageui.layout_history
     DROP COLUMN cage,
     DROP COLUMN room,
     DROP COLUMN rack,
-    ADD COLUMN cage INTEGER;
-
+    DROP COLUMN rack_group,
+    DROP COLUMN start_date,
+    DROP COLUMN end_date,
+    ADD COLUMN historyid varchar,
+    ADD COLUMN cage_historyid varchar;
 
 ALTER TABLE cageui.racks
     ADD COLUMN room varchar(50);

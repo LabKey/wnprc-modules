@@ -8,26 +8,14 @@ import java.util.Date;
 public class LayoutHistoryForm
 {
     private int _rowid;
-    private Integer _rack;
     private int _object_type;
     private Integer _rack_group;
     private String _extra_context;
     private String _cage;
     private String _x_coord;
     private String _y_coord;
-    private String _room;
     private Date _start_date;
     private Date _end_date;
-
-    public Integer getRack()
-    {
-        return _rack;
-    }
-
-    public void setRack(Integer rack)
-    {
-        _rack = rack;
-    }
 
     public String getCage()
     {
@@ -37,16 +25,6 @@ public class LayoutHistoryForm
     public void setCage(String cage)
     {
         _cage = cage;
-    }
-
-    public String getRoom()
-    {
-        return _room;
-    }
-
-    public void setRoom(String room)
-    {
-        _room = room;
     }
 
     public Date getStart_date()
@@ -134,14 +112,12 @@ public class LayoutHistoryForm
         JSONObject json = new JSONObject();
 
         json.put("rowid", getRowid());
-        json.put("rack", getRack());
         json.put("cage", getCage());
         json.put("object_type", getObject_type());
         json.put("extra_context", getExtra_context());
         json.put("rack_group", getRack_group());
         json.put("x_coord", getX_coord());
         json.put("y_coord", getY_coord());
-        json.put("room", getRoom());
         json.put("start_date", getStart_date());
         json.put("end_date", getEnd_date());
 

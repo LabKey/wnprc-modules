@@ -145,6 +145,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         setReloadRoom
     } = useLayoutEditorContext();
 
+    useEffect(() => {
+        console.log("room", localRoom);
+    }, [localRoom]);
+
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
 

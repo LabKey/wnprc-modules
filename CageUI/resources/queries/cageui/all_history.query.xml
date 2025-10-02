@@ -19,26 +19,25 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="layout_history" tableDbType="TABLE">
-                <tableTitle>Layout History</tableTitle>
+            <table tableName="all_history" tableDbType="TABLE">
+                <tableTitle>All History</tableTitle>
                 <columns>
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="historyid"/>
-                    <column columnName="cage_historyid"/>
-                    <column columnName="extra_context"/>
-                    <column columnName="object_type">
-                        <datatype>integer</datatype>
+                    <column columnName="room">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_item_types</fkTable>
-                            <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="x_coord"/>
-                    <column columnName="y_coord"/>
+                    <column columnName="history_type"/>
+                    <column columnName="start_date"/>
+                    <column columnName="end_date"/>
+                    <column columnName="room_historyid"/>
+                    <column columnName="real_historyid"/>
+                    <column columnName="template_historyid"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

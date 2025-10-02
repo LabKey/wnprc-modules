@@ -7,20 +7,14 @@ import java.util.Date;
 public class CageModificationHistoryForm
 {
     private int _rowid;
-    private int _rack;
     private int _cage;
     private int _subId;
     private int _location;
     private String _modification;
     private String _modId;
     private String _parentModId;
-    private String _room;
     private Date _startDate;
     private Date _endDate;
-
-    public int getRack() {return _rack;}
-
-    public void setRack(int rack) {_rack = rack;}
 
     public int getCage() {return _cage;}
 
@@ -41,10 +35,6 @@ public class CageModificationHistoryForm
     public String getModId() {return _modId;}
 
     public void setModId(String modId) {_modId = modId;}
-
-    public String getRoom() {return _room;}
-
-    public void setRoom(String room) {_room = room;}
 
     public Date getStartDate() {return _startDate;}
 
@@ -67,14 +57,12 @@ public class CageModificationHistoryForm
         JSONObject json = new JSONObject();
 
         json.put("rowid", getRowid());
-        json.put("rack", getRack());
         json.put("cage", getCage());
         json.put("subId", getSubId());
         json.put("location", getLocation());
         json.put("modification", getModification());
         json.put("modId", getModId());
         json.put("parentModId",getParentModId());
-        json.put("room", getRoom());
         json.put("startDate", getStartDate());
         json.put("endDate", getEndDate());
 

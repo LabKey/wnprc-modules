@@ -18,17 +18,30 @@
 
 package org.labkey.cageui;
 
+import org.labkey.api.cache.Cache;
+import org.labkey.api.cache.CacheManager;
+
+import java.util.Map;
+
 public class CageUIManager
 {
     private static final CageUIManager _instance = new CageUIManager();
 
+    private final Cache<String, Map<String, Map<String,  Map<String, Object>>>> _cache;
+
     private CageUIManager()
     {
         // prevent external construction with a private default constructor
+        _cache = CacheManager.getStringKeyCache(1000, CacheManager.UNLIMITED, "CageUICache");
     }
 
     public static CageUIManager get()
     {
         return _instance;
+    }
+
+    public Cache<String, Map<String, Map<String,  Map<String, Object>>>> getCache()
+    {
+        return _cache;
     }
 }

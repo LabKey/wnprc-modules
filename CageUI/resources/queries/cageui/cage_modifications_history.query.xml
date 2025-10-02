@@ -7,27 +7,9 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="modId" />
-                    <column columnName="parentModId" />
-                    <column columnName="room">
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>rooms</fkTable>
-                            <fkColumnName>room</fkColumnName>
-                            <fkDisplayColumnName>room</fkDisplayColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="rack">
-                        <fk>
-                            <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>racks</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>rack_type</fkDisplayColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="cage">
-                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
-                    </column>
+                    <column columnName="historyid" />
+                    <column columnName="modid" />
+                    <column columnName="parent_modid" />
                     <column columnName="modification">
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
@@ -44,9 +26,7 @@
                             <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="subId" />
-                    <column columnName="startDate"/>
-                    <column columnName="endDate"/>
+                    <column columnName="subid" />
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

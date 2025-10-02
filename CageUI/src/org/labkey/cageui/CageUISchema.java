@@ -55,6 +55,22 @@ public class CageUISchema {
         return getSchema().getTable(CageUIUserSchema.LAYOUT_HISTORY_TABLE);
     }
 
+    public TableInfo getRoomHistoryTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.ROOM_HISTORY_TABLE);
+    }
+
+    public TableInfo getAllHistoryTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.ALL_HISTORY_TABLE);
+    }
+
+
+    public TableInfo getTemplateLayoutHistoryTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.TEMPLATE_LAYOUT_HISTORY_TABLE);
+    }
+
     public TableInfo getRackTypesTable()
     {
         return getSchema().getTable(CageUIUserSchema.RACK_TYPES_TABLE);
@@ -70,7 +86,7 @@ public class CageUISchema {
         return getSchema().getTable(CageUIUserSchema.CAGES_TABLE);
     }
 
-    public TableInfo GetCageModificationsTable()
+    public TableInfo getCageModificationsTable()
     {
         return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_TABLE);
     }

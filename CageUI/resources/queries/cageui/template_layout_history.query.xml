@@ -19,14 +19,16 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="layout_history" tableDbType="TABLE">
+            <table tableName="template_layout_history" tableDbType="TABLE">
                 <tableTitle>Layout History</tableTitle>
                 <columns>
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="historyid"/>
-                    <column columnName="cage_historyid"/>
+                    <column columnName="rack_group"/>
+                    <column columnName="rack"/>
+                    <column columnName="cage" />
                     <column columnName="extra_context"/>
                     <column columnName="object_type">
                         <datatype>integer</datatype>

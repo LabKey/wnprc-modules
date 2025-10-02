@@ -27,6 +27,7 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.cache.Cache;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -84,12 +85,13 @@ public class CageUIController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    private static List<Map<String, Object>> getModsToEnd(String roomName, Date newEndDate, User user, Container container)
+    // todo fix this method to use array of cage ids to end. currently does not
+    private static List<Map<String, Object>> getModsToEnd(int[] cages, Date newEndDate, User user, Container container)
     {
         UserSchema cageuiSchema = QueryService.get().getUserSchema(user, container, "cageui");
         TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
         SimpleFilter modFilter = new SimpleFilter();
-        modFilter.addCondition(FieldKey.fromString("room"), roomName, CompareType.EQUAL);
+        modFilter.addCondition(FieldKey.fromString("cage"), cages, CompareType.CONTAINS_ONE_OF);
         modFilter.addCondition(FieldKey.fromString("endDate"),null, CompareType.ISBLANK);
         TableSelector modSelector = new TableSelector(modHistoryTable, modFilter, null);
         List<CageModificationHistoryForm> modHistoryFormData = modSelector.getArrayList(CageModificationHistoryForm.class);
@@ -147,7 +149,7 @@ public class CageUIController extends SpringActionController
 
             UserSchema cageuiSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
             TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
-            List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(room.getName(), newEndDate, getUser(), getContainer());
+            //List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(room.getName(), newEndDate, getUser(), getContainer());
 
 
             for (RackGroup rackGroup : room.getRackGroups()){
@@ -173,9 +175,9 @@ public class CageUIController extends SpringActionController
             }
 
             try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction()){
-                if(!oldModRowsToUpdate.isEmpty()){
+               /* if(!oldModRowsToUpdate.isEmpty()){
                     //modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
-                }
+                }*/
 
                 if(batchErrors.hasErrors()){
                     response.put("success", false);
@@ -195,6 +197,8 @@ public class CageUIController extends SpringActionController
     public static class SaveLayoutHistoryAction extends MutatingApiAction<SimpleApiJsonForm>
     {
 
+        //todo add room name validation to prevent template saving without template in the name
+        // todo add validation to prevent room from being save with default cages, and templates being saved with real cages.
         @Override
         public void validateForm(SimpleApiJsonForm form, Errors errors)
         {
@@ -232,37 +236,53 @@ public class CageUIController extends SpringActionController
         {
             BatchValidationException batchErrors = new BatchValidationException();
             JSONObject json = form.getJsonObject();
-            Date newEndDate = new Date();
             ApiSimpleResponse response = new ApiSimpleResponse();
 
             JSONArray jsonModsArray = json.getJSONArray("mods");
             JSONObject jsonRoom = json.getJSONObject("room");
             List<Map<String, Object>> newLayoutHistoryData = JsonUtil.toMapList(json.getJSONArray("newRoomData"));
+            Date newEndDate = (Date) newLayoutHistoryData.get(0).get("stat_date");
 
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
+            boolean savingTemplate = room.getName().toLowerCase().contains("template");
             String prevRoomName = json.get("prevRoomName").toString();
 
-            UserSchema cageuiSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
             UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_lookups");
-            TableInfo layoutHistoryTable = cageuiSchema.getTable("layout_history");
+            TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
 
-            // Get previous room data
+            Cache<String, Map<String, Map<String, Map<String, Object>>>> _cache = CageUIManager.get().getCache();
+
+            // Determine which history table to use
+            TableInfo prevLayoutHistoryTable;
+            if (savingTemplate) {
+                prevLayoutHistoryTable = CageUISchema.getInstance().getTemplateLayoutHistoryTable();
+            }else{
+                prevLayoutHistoryTable = CageUISchema.getInstance().getLayoutHistoryTable();
+            }
+
             SimpleFilter prevRoomFilter = new SimpleFilter();
             prevRoomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
             prevRoomFilter.addCondition(FieldKey.fromString("end_date"),null, CompareType.ISBLANK);
-            TableSelector prevRoomSelector = new TableSelector(layoutHistoryTable, prevRoomFilter, null);
+            TableSelector prevRoomSelector = new TableSelector(prevLayoutHistoryTable, prevRoomFilter, null);
 
-            boolean savingTemplate = room.getName().toLowerCase().contains("template");
+            List<LayoutHistoryForm> layoutHistoryFormData = prevRoomSelector.getArrayList(LayoutHistoryForm.class);
+            JSONArray oldLayoutHistoryJsonData = new JSONArray();
+            for (LayoutHistoryForm data : layoutHistoryFormData)
+            {
+                data.setEnd_date(newEndDate);
+                oldLayoutHistoryJsonData.put(data.toJSON());
+            }
+            List<Map<String, Object>> oldlayoutHistoryRowsToUpdate = JsonUtil.toMapList(oldLayoutHistoryJsonData);
 
             // Save layout data to ehr_lookups.rooms
             List<Map<String, Object>> oldRoomToUpdate = new ArrayList<>();
-            TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
             SimpleFilter roomFilter = new SimpleFilter();
             roomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
             TableSelector roomSelector = new TableSelector(roomsTable, roomFilter, null);
             Map<String, Object> result = roomSelector.getMap();
+
             // update old name with new name if it changed
             if(savingTemplate && !prevRoomName.equals(room.getName())){
                 result.put("room", room.getName());
@@ -278,9 +298,16 @@ public class CageUIController extends SpringActionController
                 throw new IllegalStateException(roomsTable.getName() + " query update service");
             }
 
+            /*
+            // Get previous room data
+
+
+
+
+
             // table info/filters/selectors for cage_modifications_history
             List<Map<String, Object>> modsToInsert = JsonUtil.toMapList(jsonModsArray);
-            List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(room.getName(), newEndDate, getUser(), getContainer());
+            //List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(, newEndDate, getUser(), getContainer());
             TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
             QueryUpdateService modQus = modHistoryTable.getUpdateService();
             if (modQus == null)
@@ -296,22 +323,17 @@ public class CageUIController extends SpringActionController
             }
 
             // End previous data forms for prev room name, if any.
-            List<LayoutHistoryForm> layoutHistoryFormData = prevRoomSelector.getArrayList(LayoutHistoryForm.class);
-            JSONArray oldLayoutHistoryJsonData = new JSONArray();
-            for (LayoutHistoryForm data : layoutHistoryFormData)
-            {
-                data.setEnd_date(newEndDate);
-                oldLayoutHistoryJsonData.put(data.toJSON());
-            }
-            List<Map<String, Object>> oldlayoutHistoryRowsToUpdate = JsonUtil.toMapList(oldLayoutHistoryJsonData);
+
 
 
             try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction())
             {
                 // closes out previous mods and inserts new mods for the room
-                if(!oldModRowsToUpdate.isEmpty()){
+                */
+/*if(!oldModRowsToUpdate.isEmpty()){
                     modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
-                }
+                }*//*
+
                 modQus.insertRows(getUser(), getContainer(), modsToInsert, batchErrors, null, null);
 
                 // update ehr_lookups.rooms with new layout data and possible template name change.
@@ -336,6 +358,7 @@ public class CageUIController extends SpringActionController
             {
                 throw new ValidationException(e.getMessage());
             }
+*/
 
             return response;
         }

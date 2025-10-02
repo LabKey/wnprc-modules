@@ -25,7 +25,6 @@ server {
 
     ssl_certificate         ${NGINX_SERVER_CER};
     ssl_certificate_key     ${NGINX_SERVER_KEY};
-    ssl_password_file       ${NGINX_SERVER_PASS};
 
     # Turn on OCSP stapling as recommended at
     # https://community.letsencrypt.org/t/integration-guide/13123
@@ -72,7 +71,6 @@ server {
 
     ssl_certificate         ${NGINX_SERVER_CER};
     ssl_certificate_key     ${NGINX_SERVER_KEY};
-    ssl_password_file       ${NGINX_SERVER_PASS};
 
     # Uncomment the following three lines to enable client auth for this module.  You must supply valid files in the
     # .env file if you do this.
@@ -98,7 +96,6 @@ server {
 
     ssl_certificate         ${NGINX_SERVER_CER};
     ssl_certificate_key     ${NGINX_SERVER_KEY};
-    ssl_password_file       ${NGINX_SERVER_PASS};
 
     # Uncomment the following three lines to enable client auth for this module.  You must supply valid files in the
     # .env file if you do this.

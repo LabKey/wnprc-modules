@@ -120,12 +120,10 @@ services:
       TZ: America/Chicago
       NGINX_SERVER_CER: /run/secrets/server-certificate
       NGINX_SERVER_KEY: /run/secrets/server-key
-      NGINX_SERVER_PASS: /run/secrets/server-pass
       HT_PASSWORD: /run/secrets/server-htpasswd
     secrets:
       - server-certificate
       - server-key
-      - server-pass
       - server-htpasswd
 
   cadvisor:
@@ -147,7 +145,5 @@ secrets:
     file: ${NGINX_SERVER_CER_FILE}
   server-key:
     file: ${NGINX_SERVER_KEY_FILE}
-  server-pass:
-    file: ${NGINX_SERVER_PASS_FILE}
   server-htpasswd:
     file: ${MAIL_CATCHER_HTPASSWD_FILE}

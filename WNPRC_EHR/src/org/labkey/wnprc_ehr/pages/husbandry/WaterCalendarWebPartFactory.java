@@ -16,8 +16,8 @@ public class WaterCalendarWebPartFactory extends BaseWebPartFactory
     public WaterCalendarWebPartFactory(){super ("Water Calendar");}
 
     @Override
-    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webpart){
-
+    public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webpart)
+    {
         Map<String, String> props = webpart.getPropertyMap();
 
         String animalIds = webpart.getPropertyMap().get("animalIds");
@@ -32,7 +32,7 @@ public class WaterCalendarWebPartFactory extends BaseWebPartFactory
             unBindJSON.put(unBindComponent);
         }
 
-        JspView view = new JspView("/org/labkey/wnprc_ehr/pages/husbandry/WaterCalendar.jsp");
+        JspView<?> view = new JspView<>("/org/labkey/wnprc_ehr/pages/husbandry/WaterCalendar.jsp");
         view.setTitle("Water Calendar");
         view.setFrame(WebPartView.FrameType.PORTAL);
 

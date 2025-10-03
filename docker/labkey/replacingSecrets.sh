@@ -31,6 +31,11 @@ sed -i "s/@@smtpPort@@/${LK_MAIL_PORT}/" /labkey/labkey/config/application.prope
 sed -i "s/@@smtpFrom@@/${LK_SERVER_EMAIL_ADDRESS}/" /labkey/labkey/config/application.properties
 sed -i "s/@@smtpAuth@@/${LK_MAIL_AUTHENTICATION}/" /labkey/labkey/config/application.properties
 
+echo "replacing LabKey SSL configuration"
+sed -i "s/@@keyCertFile@@/${NGINX_SERVER_CER_FILE}/" /labkey/labkey/config/application.properties
+sed -i "s/@@keyFile@@/${NGINX_SERVER_KEY_FILE}/" /labkey/labkey/config/application.properties
+
+
 #java -XX:MaxRAMPercentage=75.0 -Dlabkey.home=${LABKEY_HOME} -Dlabkey.log.home=/labkey/logs -Dlogback.debug=true -jar /labkey/labkey/labkeyServer.jar
 
 exec "$@"

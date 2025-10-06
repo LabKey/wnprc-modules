@@ -327,8 +327,8 @@ export function setupEditCageEvent(
             setCtxMenuStyle((prevState) => ({
                 ...prevState,
                 display: 'block',
-                left: `${event.pageX - 10}px`,
-                top: `${event.pageY - 10}px`,
+                left: `${event.clientX}px`,
+                top: `${event.clientY - 5}px`,
             }));
         }
 

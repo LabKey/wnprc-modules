@@ -54,6 +54,7 @@ import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.ModuleProperty;
@@ -117,6 +118,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
 import org.labkey.wnprc_ehr.notification.NecropsyEditRequestNotification;
+import org.labkey.wnprc_ehr.notification.NotificationToolkit;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
@@ -2455,49 +2457,134 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+    @RequiresLogin
+//    @RequiresNoPermission
+    public static class UpdateAnesthesiaRecoveryDatasetAction extends MutatingApiAction<SimpleApiJsonForm> {
 
-    public void validateAnesthesiaRecovery(SimpleApiJsonForm form, Errors errors) {
+//        @Override
+//        public void validateForm(SimpleApiJsonForm form, Errors errors) {
+//
+//            // Verifies passed-in arguments are not null.
+//            if (form.getJsonObject() == null) {
+//                errors.reject(ERROR_MSG, "JSON argument cannot be null.");
+//                return;
+//            }
+//            JSONObject myForm = form.getJsonObject();
+//            _log.info("TEST MESSAGE: JSON argument is: " + myForm);
+//
+//            // Retrieves the passed-in arguments.
+//            String recordId = myForm.get("Id").toString();
+//            String recordRoom = myForm.get("room").toString();
+//            String recordDate = myForm.get("date").toString();
+//            String recordObservation = myForm.get("observation").toString();
+//            String recordRecoveryStart = myForm.get("recoveryStart").toString();
+//            String recordObserverComments = myForm.get("observerComments").toString();
+//            String recordObserver = myForm.get("observer").toString();
+//            String recordRecoveryId = myForm.get("recoveryId").toString();
+//
+//            _log.info("TEST MESSAGE: ANESTHESIA VALIDATION 1");
+//
+//            _log.info("TEST MESSAGE 3:" +
+//                    "ID: " + recordId +
+//                    "ROOM: " + recordRoom +
+//                    "DATE: " + recordDate +
+//                    "OBSERVATION: " + recordObservation +
+//                    "RECOVERY START: " + recordRecoveryStart +
+//                    "OBSERVER COMMENTS: " + recordObserverComments +
+//                    "OBSERVER: " + recordObserver +
+//                    "RECOVERY ID: " + recordRecoveryId
+//            );
+//
+//            AnimalVerifier avrh1234 = new AnimalVerifier("rh1234", getUser(), getContainer());  // Does not exist
+//            AnimalVerifier avc19006 = new AnimalVerifier("c19006", getUser(), getContainer());  // Dead
+//            AnimalVerifier avc19007 = new AnimalVerifier("c19007", getUser(), getContainer());  // Alive
+//
+//            AnimalVerifier av = new AnimalVerifier("rh1234", getUser(), getContainer());  // Alive
+//
+//
+//            // TODO: Validate data here.
+//
+//
+//
+//
+////        public boolean isAliveAndAtCenter = false;
+////
+////        private String animalid;
+////
+////        public String getAnimalid() {return animalid;}
+////
+////        public void setAnimalid(String animalid) {this.animalid = animalid;}
+////
+////        public void setIsAliveAndAtCenter(boolean checkAlive) {this.isAliveAndAtCenter = checkAlive;}
+//        }
 
-        // Verifies passed-in arguments are not null.
-        if (form.getJsonObject() == null) {
-            errors.reject(ERROR_MSG, "JSON argument cannot be null.");
-            return;
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
+            // Creates function variables.
+            BatchValidationException batchErrors = new BatchValidationException();
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            NotificationToolkit notificationToolkit = new NotificationToolkit();
+            _log.info("Started update to the anesthesia recovery dataset.");
+
+            // Verifies passed-in arguments are not null.
+            if (form.getJsonObject() == null) {
+                response.put("detailedResponse", "JSON argument cannot be null.");
+                response.put("success", false);
+                return response;
+            }
+
+            // Retrieves passed-in arguments.
+            JSONObject myForm = form.getJsonObject();
+            String recordId = myForm.get("Id").toString();
+            String recordObservation = myForm.get("observation").toString();
+
+            // Retrieves all necessary data.
+            try {
+                // Gets animal demographics record.
+                SimpleFilter demographicsFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
+                String[] demographicsTargetColumns = new String[]{"Id", "calculated_status"};
+                ArrayList<HashMap<String, String>> demographicsRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", demographicsFilter, null, demographicsTargetColumns);
+                if (!demographicsRows.isEmpty()) {
+                    if (!demographicsRows.get(0).get("calculated_status").equals("Alive")) {
+                        response.put("detailedResponse", "Animal " + recordId + " is not currently alive at the center.");
+                        response.put("success", false);
+                        return response;
+                    }
+                }
+
+                // Gets all recoveries started.
+                SimpleFilter recoveryStartFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
+                recoveryStartFilter.addCondition("observation", "Started Recovery", CompareType.EQUAL);
+                String[] recoveryStartTargetColumn = new String[]{"Id"};
+                ArrayList<HashMap<String, String>> recoveryStartRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryStartFilter, null, recoveryStartTargetColumn);
+                // Gets all recoveries finished.
+                SimpleFilter recoveryEndFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
+                recoveryEndFilter.addCondition("observation", "Fully Recovered", CompareType.EQUAL);
+                String[] recoveryEndTargetColumn = new String[]{"Id"};
+                ArrayList<HashMap<String, String>> recoveryEndRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryEndFilter, null, recoveryEndTargetColumn);
+                // Verifies all recoveries have been closed before a new recovery can be started.
+                if (recordObservation.equals("Started Recovery")) {
+                    if (recoveryStartRows.size() > recoveryEndRows.size()) {
+                        response.put("detailedResponse", "Animal " + recordId + " still has open anesthesia recovery records.");
+                        response.put("success", false);
+                        return response;
+                    }
+                }
+            }
+            catch (Exception e) {
+                response.put("detailedResponse", "There was an issue querying the necessary datasets for anesthesia recovery validation: " + e.getMessage());
+                response.put("success", false);
+                return response;
+            }
+
+            // Returns successfully.
+            _log.info("Successfully updated the anesthesia recovery dataset.");
+            response.put("detailedResponse", "Anesthesia table was successfully updated for animal: " + recordId);
+            response.put("success", true);
+            return response;
         }
-        JSONObject myForm = form.getJsonObject();
-
-        // Retrieves the passed-in arguments.
-        JSONObject recordId = myForm.getJSONObject("Id");
-        JSONObject recordRoom = myForm.getJSONObject("room");
-        JSONObject recordDate = myForm.getJSONObject("date");
-        JSONObject recordObservation = myForm.getJSONObject("observation");
-        JSONObject recordRecoveryStart = myForm.getJSONObject("recoveryStart");
-        JSONObject recordObserverComments = myForm.getJSONObject("observerComments");
-        JSONObject recordObserver = myForm.getJSONObject("observer");
-        JSONObject recordRecoveryId = myForm.getJSONObject("recoveryId");
-
-        _log.info("TEST MESSAGE:" +
-                "ID: " + recordId +
-                "ROOM: " + recordRoom +
-                "DATE: " + recordDate +
-                "OBSERVATION: " + recordObservation +
-                "RECOVERY START: " + recordRecoveryStart +
-                "OBSERVER COMMENTS: " + recordObserverComments +
-                "OBSERVER: " + recordObserver +
-                "RECOVERY ID: " + recordRecoveryId
-        );
-
-
-
-
-//        public boolean isAliveAndAtCenter = false;
-//
-//        private String animalid;
-//
-//        public String getAnimalid() {return animalid;}
-//
-//        public void setAnimalid(String animalid) {this.animalid = animalid;}
-//
-//        public void setIsAliveAndAtCenter(boolean checkAlive) {this.isAliveAndAtCenter = checkAlive;}
     }
+
+
 
 }

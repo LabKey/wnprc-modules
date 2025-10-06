@@ -30,7 +30,7 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
                         type="checkbox"
                         className="room-view-checkbox"
                         disabled={true}
-                        checked={selectedRoom?.layoutData.status ?? false}
+                        checked={selectedRoom?.valid ?? false}
                     />
                     <label>
                         {roomName}

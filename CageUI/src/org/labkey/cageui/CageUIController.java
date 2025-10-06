@@ -34,15 +34,11 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
 import org.labkey.api.query.BatchValidationException;
-import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
@@ -86,6 +82,7 @@ public class CageUIController extends SpringActionController
     }
 
     // todo fix this method to use array of cage ids to end. currently does not
+    // todo move helper functions to CageUIManager
     private static List<Map<String, Object>> getModsToEnd(int[] cages, Date newEndDate, User user, Container container)
     {
         UserSchema cageuiSchema = QueryService.get().getUserSchema(user, container, "cageui");

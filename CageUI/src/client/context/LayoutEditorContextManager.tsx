@@ -101,6 +101,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     const [room, setRoom] = useState<Room>({
         name: "new-layout",
         rackGroups: [],
+        valid: false,
         objects: [],
         layoutData: null
     });
@@ -115,6 +116,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     const [localRoom, setLocalRoom] = useState<Room>({
         name:"new-layout",
         rackGroups: [],
+        valid: false,
         objects: [],
         layoutData: null
     });
@@ -333,7 +335,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             name: rackTypeData.rows[0].name,
             type: rackType,
             isDefault: true,
-            sides: null
         };
 
         const newRack: Rack = {
@@ -1107,7 +1108,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        const dataToSave: LayoutHistoryData[] = [];
+        /*const dataToSave: LayoutHistoryData[] = [];
         const newModData: ModHistoryData[] = [];
 
         const roomName = localRoom.name;
@@ -1283,15 +1284,15 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                     })
                 })
             }
-        }
+        }*/
 
         let result: LayoutSaveResult;
-        try {
+        /*try {
             const layoutSave = await saveRoomLayout(localRoom, newModData, oldRoomName, dataToSave);
             result = {success: layoutSave.success, roomName: roomName};
         } catch (e){
             result = {success: e.success, roomName: roomName, reason: e.errors.map(err => err.message)};
-        }
+        }*/
         // Determine success or failure
         return result;
     }

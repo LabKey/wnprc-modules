@@ -20,7 +20,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="template_layout_history" tableDbType="TABLE">
-                <tableTitle>Layout History</tableTitle>
+                <tableTitle>Template Layout History</tableTitle>
                 <columns>
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>

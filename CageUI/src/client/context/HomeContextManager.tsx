@@ -81,13 +81,13 @@ export const HomeContextProvider = ({children}) => {
                         loaded: false,
                         room: {
                             name: row.room,
+                            valid: row.valid,
                             objects: [],
                             rackGroups: [],
                             layoutData: {
                                 scale: row.layout_scale,
                                 borderWidth: row.border_width,
                                 borderHeight: row.border_height,
-                                status: row.status,
                             }
                         }
                     }
@@ -169,6 +169,7 @@ export const HomeContextProvider = ({children}) => {
 
                 const prevRoom: PrevRoom = {
                     name: selectedPage.room,
+                    isDefault: true,// todo update
                     cagingData: historyResult.rows,
                     layoutData: tempNewRoom.layoutData,
                     modData: modResult.rowCount > 0 ? tempModData : undefined,

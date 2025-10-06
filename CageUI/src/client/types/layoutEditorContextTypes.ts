@@ -20,8 +20,8 @@ import * as React from 'react';
 import { ReactNode } from 'react';
 import {
     Cage,
-    CageNumber, CageSvgId,
-    LayoutHistoryData,
+    CageNumber, CageSvgId, FullObjectHistoryData,
+    LayoutHistoryData, LayoutObjectData,
     LocationCoords,
     Rack,
     RackGroup,
@@ -37,7 +37,7 @@ import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Per
 
 export interface LayoutContextProps {
     children: ReactNode;
-    prevRoom: {room: Room, locs: UnitLocations, data: LayoutHistoryData[], isTemplate: boolean};
+    prevRoom: {room: Room, locs: UnitLocations, data: FullObjectHistoryData[], isTemplate: boolean};
     user: GetUserPermissionsResponse;
 }
 

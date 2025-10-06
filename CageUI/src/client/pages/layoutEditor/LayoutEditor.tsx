@@ -22,7 +22,15 @@ import { RoomHeader } from '../../components/layoutEditor/RoomHeader';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../../cageui.scss';
 import { ActionURL, Filter } from '@labkey/api';
-import { LayoutData, LayoutHistoryData, PrevRoom, Room, UnitLocations } from '../../types/typings';
+import {
+    FullObjectHistoryData,
+    LayoutData,
+    LayoutHistoryData,
+    LayoutObjectData,
+    PrevRoom,
+    Room,
+    UnitLocations
+} from '../../types/typings';
 import { LayoutEditorContextProvider } from '../../context/LayoutEditorContextManager';
 import Editor from '../../components/layoutEditor/Editor';
 import { labkeyActionSelectWithPromise, labkeyGetUserPermissions } from '../../api/labkeyActions';
@@ -35,8 +43,8 @@ import { buildNewLocalRoom, buildNewLocs } from '../../utils/helpers';
 
 export const LayoutEditor: FC<any> = () => {
     const roomName = ActionURL.getParameter("room");
-    const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null});
-    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: LayoutHistoryData[], isTemplate: boolean}>(null);
+    const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null, isDefault: true});
+    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: FullObjectHistoryData[], isTemplate: boolean}>(null);
     const [selectedSize, setSelectedSize] = useState<SelectorOptions>(null);
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
@@ -86,58 +94,93 @@ export const LayoutEditor: FC<any> = () => {
 
     // Loads prev room into memory if it exists
     useEffect(() => {
-        if(!roomName){
-            setIsLoading(false);
-            return;
-        }
-        const prevRoomConfig: SelectRowsOptions = {
-            schemaName: 'cageui',
-            queryName: 'layout_history',
-            columns: ['object_type', 'rack_group', 'rack', 'cage', 'x_coord', 'y_coord', 'rowid', 'extra_context'],
-            filterArray: [
-                Filter.create('room', roomName, Filter.Types.EQUALS),
-                Filter.create('end_date', null, Filter.Types.ISBLANK)
-            ],
-            sort: "-rack_group",
-        }
-
-        const prevRoomBorderConfig: SelectRowsOptions = {
-            schemaName: 'ehr_lookups',
-            queryName: 'rooms',
-            columns: ['layout_scale', 'border_width','border_height'],
-            filterArray: [
-                Filter.create('room', roomName, Filter.Types.EQUALS)
-            ]
-        }
-        const prevRoomPromise = labkeyActionSelectWithPromise(prevRoomConfig);
-        const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
-
-        Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(([prevRoomResult, borderResult]) => {
-            let borderObj: LayoutData;
-            if(borderResult.rowCount === 0){
-                throw new Error(`No room found in EHR for ${roomName}`);
-            }else{
-
-                 borderObj = {
-                    scale: borderResult.rows[0].layout_scale || 1,
-                    borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
-                    borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
-                    status: borderResult.rows[0].status || false
-                };
-                setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
-                setShowSelectionPopup(false);
+        const fetchData = async () => {
+            if (!roomName) {
+                setIsLoading(false);
+                return;
             }
-            setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj});
-        }).catch(err => {
-            setErrorPopup(err.toString());
-        });
+            let historyTable: string;
+            let roomHistoryId: string;
+            let layoutHistoryId: string;
+            let isDefaultRoom: boolean;
+            // Make call to all_history for room and determine if template or not.
+            const allHistoryCfg: SelectRowsOptions = {
+                schemaName: 'cageui',
+                queryName: 'all_history',
+                columns: [],
+                filterArray: [
+                    Filter.create('room', roomName, Filter.Types.EQUALS),
+                    Filter.create('end_date', null, Filter.Types.ISBLANK)
+                ]
+            }
+            const allHistRes = await labkeyActionSelectWithPromise(allHistoryCfg);
+            if (allHistRes.rowCount === 1) {
+                console.log(allHistRes)
+                const allHistObj = allHistRes.rows[0];
+                if (allHistObj.history_type === "template") {
+                    historyTable = "template_layout_history"
+                    layoutHistoryId = allHistObj.template_historyid;
+                } else {
+                    historyTable = "layout_history"
+                    layoutHistoryId = allHistObj.real_historyid;
+                }
+                roomHistoryId = allHistObj.room_historyid
+                isDefaultRoom = allHistObj.history_type === "template";
+            }
+
+            const prevRoomConfig: SelectRowsOptions = {
+                schemaName: 'cageui',
+                queryName: historyTable,
+                columns: [],
+                filterArray: [
+                    Filter.create('historyid', layoutHistoryId, Filter.Types.EQUALS),
+                    Filter.create('end_date', null, Filter.Types.ISBLANK)
+                ]
+            }
+
+            const prevRoomBorderConfig: SelectRowsOptions = {
+                schemaName: 'cageui',
+                queryName: 'room_history',
+                columns: ['scale', 'border_width', 'border_height'],
+                filterArray: [
+                    Filter.create('historyid', roomHistoryId, Filter.Types.EQUALS)
+                ]
+            }
+            const prevRoomPromise = labkeyActionSelectWithPromise(prevRoomConfig);
+            const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
+
+            Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(([prevRoomResult, borderResult]) => {
+                let borderObj: LayoutData;
+                let cagingData: LayoutObjectData;
+                if (borderResult.rowCount === 0) {
+                    throw new Error(`No room found in EHR for ${roomName}`);
+                } else {
+
+                    borderObj = {
+                        scale: borderResult.rows[0].scale || 1,
+                        borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
+                        borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
+                    };
+                    setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
+                    setShowSelectionPopup(false);
+                }
+
+
+                setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj, isDefault: isDefaultRoom});
+            }).catch(err => {
+                setErrorPopup(err.toString());
+            });
+        };
+
+        fetchData();
     }, []);
 
     // Converts data from ehr into layout editor objects for use seen in typings
     useEffect(() => {
         if(prevRoomData.name !== null){
+            console.log("prevRoom: ", prevRoomData);
             let newLocalRoom: Room;
-            let isTemplate: boolean;
+            let isTemplate: boolean; // this template is a real template room, not a room saved with defaults
             let newUnitLocs: UnitLocations;
 
             if(prevRoomData.cagingData.length !== 0){
@@ -158,7 +201,6 @@ export const LayoutEditor: FC<any> = () => {
                                 scale: prevRoomData.layoutData.scale,
                                 borderWidth: prevRoomData.layoutData.borderWidth,
                                 borderHeight: prevRoomData.layoutData.borderHeight,
-                                status: prevRoomData.layoutData.status,
                             }
                         }
                         setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData, isTemplate: isTemplate});
@@ -168,7 +210,13 @@ export const LayoutEditor: FC<any> = () => {
             }else{
                 isTemplate = prevRoomData.name.includes("template");
                 // Don't use template name instead treat the template as an empty room with objects already placed
-                newLocalRoom = {name: isTemplate ? 'new-layout' : prevRoomData.name, rackGroups: [], objects: [], layoutData: null}
+                newLocalRoom = {
+                    name: isTemplate ? 'new-layout' : prevRoomData.name,
+                    rackGroups: [],
+                    valid: false,
+                    objects: [],
+                    layoutData: null
+                }
                 //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
                 newLocalRoom = {
                     ...newLocalRoom,
@@ -176,10 +224,9 @@ export const LayoutEditor: FC<any> = () => {
                         scale: prevRoomData.layoutData.scale,
                         borderWidth: prevRoomData.layoutData.borderWidth,
                         borderHeight: prevRoomData.layoutData.borderHeight,
-                        status: prevRoomData.layoutData.status,
                     }
                 }
-                setPrevRoom({room: newLocalRoom, locs: null, data: prevRoomData.cagingData, isTemplate: isTemplate});
+                setPrevRoom({room: newLocalRoom, locs: null, data: [], isTemplate: isTemplate});
                 setIsLoading(false);
             }
         }

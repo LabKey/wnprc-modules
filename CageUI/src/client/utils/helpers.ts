@@ -22,7 +22,7 @@ import {
     CageNumber, CageSvgId, CurrCageMods,
     DefaultRackId,
     DefaultRackStringType,
-    DefaultRackTypes,
+    DefaultRackTypes, FullObjectHistoryData,
     GroupId,
     LayoutHistoryData,
     ModLocations,
@@ -502,6 +502,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     const newLocalRoom: Room = {
         name: prevRoom.name,
         rackGroups: [],
+        valid: false,
         objects: [],
         layoutData: null,
         mods: null
@@ -511,7 +512,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     let roomObjNum = 1;
     const loadMods: boolean = !!prevRoom.modData;
     //check if a group exists for the groupId, if it does return, else create new group for the room
-    const findOrAddGroup = (rackItem: LayoutHistoryData): RackGroup => {
+    const findOrAddGroup = (rackItem: FullObjectHistoryData): RackGroup => {
         // groupId is a single number so check if the GroupId string contains it
         let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => parseLongId(group.groupId) === rackItem.rack_group);
         if (!rackGroup) {
@@ -530,21 +531,14 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     };
 
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
-    const findOrAddRack = async (rackGroup: RackGroup, rackItem: LayoutHistoryData): Promise<Rack> => {
-        const isDefault = isRackDefault(rackItem.object_type);
+    const findOrAddRack = async (rackGroup: RackGroup, rackItem: FullObjectHistoryData): Promise<Rack> => {
         let rackIdNum;
         let rowId;
         let extraContext: ExtraContext;
         let rackData;
-        // if rack is default, use default rack id instead
-        if (rackItem.extra_context) {
-            extraContext = JSON.parse(rackItem.extra_context);
-            if (extraContext?.rack?.rackId) {
-                rackIdNum = extraContext.rack.rackId;
-            }
-        }
+        let rack: Rack;
 
-        if (!isDefault) {
+        if (!prevRoom.isDefault) {
             const optConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'racks',
@@ -556,24 +550,22 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             if (rackData.rowCount > 0) {
                 rackIdNum = rackData.rows[0].rackid;
                 rowId = rackData.rows[0].rowid;
+                rack = rackGroup.racks.find(r => rowId === r.rowid);
             }
-
+        }else{
+            rackIdNum = rackItem.rack;
+            rack = rackGroup.racks.find(r => `default-rack-${rackIdNum}` === r.itemId);
         }
 
-        let rack: Rack;
-        if(rowId){
-            rack = rackGroup.racks.find(r => rowId === r.rowid);
-        }else {
-            rack = rackGroup.racks.find(r => rackIdNum === r.itemId);
-        }
+        console.log('rack', rack);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
             let rackId: DefaultRackId | RealRackId;
             let typeRowId;
-            const rackPrefix = isDefault ? 'default-rack' : 'rack';
+            const rackPrefix = prevRoom.isDefault ? 'default-rack' : 'rack';
 
-            if (!isDefault) {
+            if (!prevRoom.isDefault) {
                 typeRowId = rackData.rows[0].rack_type;
                 rackId = `${rackPrefix}-${rackIdNum}` as RealRackId;
             } else {
@@ -586,7 +578,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 schemaName: 'cageui',
                 queryName: 'rack_types',
                 filterArray: [
-                    Filter.create(isDefault ? 'type' : 'rowid', isDefault ? rackItem.object_type : typeRowId, Filter.Types.EQUALS)
+                    Filter.create(prevRoom.isDefault ? 'type' : 'rowid', prevRoom.isDefault ? rackItem.object_type : typeRowId, Filter.Types.EQUALS)
                 ]
             };
 
@@ -598,34 +590,17 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             // determine sizes for sides, (how many different lines make a side in an svg that could each have their own mods)
             // my current ratio is 4 meaning a square of 4x4 cells will have one section.
             type = {
-                rowid: typeRowId as number,
+                rowid: rackTypesData.rows[0].rowid as number,
                 name: rackTypesData.rows[0].name as string,
-                type: (isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type) as RackTypes,
-                isDefault: isDefault,
-                sides: isDefault ? undefined : {
-                    [ModLocations.Top]: {
-                        sections: svgSize / 4,
-                    },
-                    [ModLocations.Bottom]: {
-                        sections: svgSize / 4
-                    },
-                    [ModLocations.Left]: {
-                        sections: svgSize / 4
-                    },
-                    [ModLocations.Right]: {
-                        sections: svgSize / 4
-                    },
-                    [ModLocations.Direct]: {
-                        sections: 1
-                    }
-                }
+                type: (prevRoom.isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type) as RackTypes,
+                isDefault: prevRoom.isDefault,
             };
 
             rack = {
                 rowid: rowId,
                 selectionType: 'rack',
                 cages: [],
-                isActive: !isDefault,
+                isActive: !prevRoom.isDefault,
                 itemId: rackId,
                 type: type,
                 x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
@@ -637,7 +612,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         return rack;
     };
 
-    const addCageToRack = async (rack: Rack, rackItem: LayoutHistoryData, group: RackGroup) => {
+    const addCageToRack = async (rack: Rack, rackItem: FullObjectHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
         let cageNumType: RoomItemStringType;
         let extraContext: ExtraContext;
@@ -720,14 +695,14 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         rack.cages.push(cage);
     };
 
-    const handleRackItem = async (rackItem: LayoutHistoryData) => {
+    const handleRackItem = async (rackItem: FullObjectHistoryData) => {
         const rackGroup: RackGroup = findOrAddGroup(rackItem);
         const rack: Rack = await findOrAddRack(rackGroup, rackItem);
         await addCageToRack(rack, rackItem, rackGroup);
     };
 
     // generates room object state for room objects from layout history data
-    const generateRoomObj = (roomObjItem: LayoutHistoryData): RoomObject => {
+    const generateRoomObj = (roomObjItem: FullObjectHistoryData): RoomObject => {
         let context;
         if (roomObjItem.extra_context) {
             context = JSON.parse(roomObjItem.extra_context);

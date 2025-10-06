@@ -198,6 +198,7 @@ export interface CageModificationsType {
 
 export interface Room {
     name: string;
+    valid: boolean;
     rackGroups: RackGroup[];
     objects: RoomObject[];
     layoutData: LayoutData;
@@ -208,27 +209,60 @@ export interface LayoutData {
     scale: number;
     borderWidth: number;
     borderHeight: number;
-    status: boolean;
 }
 
-export interface LayoutHistoryData {
+export type LayoutObjectData = TemplateHistoryData | LayoutHistoryData;
+
+export interface TemplateHistoryData {
     object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    history_id?: string;
     extra_context: string | null;
-    rack_group: number | null;
-    rack: number | null; // row id of rack in racks table
-    cage: string | null;
+    rack_group: number;
+    rack: number; // row id of rack in racks table
+    cage: string;
     x_coord: number;
     y_coord: number;
-    start_date?: Date;
-    end_date?: Date;
-    room?: string;
     rowid?: number;
 }
 
+export interface LayoutHistoryData {
+    historyid: string;
+    cage_historyid: string;
+    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extra_context: string | null;
+    x_coord: number;
+    y_coord: number;
+    rowid?: number;
+}
+
+export interface CageHistoryData {
+    rowid?: number;
+    historyid: string;
+    mod_historyid: string;
+    animal_historyid: string;
+    cage: number; // rowid of cage in cages table
+}
+
+export interface CageData {
+    rowid: number;
+    cageNum: CageNumber;
+}
+
+export interface FullObjectHistoryData {
+    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extra_context: string | null;
+    rack_group?: number;
+    rack?: number; // row id of rack in racks table
+    cage?: string;
+    x_coord: number;
+    y_coord: number;
+}
+
 export interface PrevRoom {
-    cagingData: LayoutHistoryData[];
+    cagingData: FullObjectHistoryData[];
     layoutData: LayoutData;
     modData?: ModHistoryData[];
+    isDefault: boolean;
     name: string | null;
 }
 
@@ -282,23 +316,6 @@ export interface UnitType {
     name: string; // naming convention is 'type-manufacturer-sqft'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
-    sides: {
-        [ModLocations.Top]: {
-            sections: number
-        };
-        [ModLocations.Bottom]: {
-            sections: number
-        };
-        [ModLocations.Left]: {
-            sections: number
-        };
-        [ModLocations.Right]: {
-            sections: number
-        };
-        [ModLocations.Direct]: {
-            sections: number
-        };
-    };
 }
 
 export interface LocationCoords {

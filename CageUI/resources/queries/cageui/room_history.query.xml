@@ -29,7 +29,6 @@
                     <column columnName="scale"/>
                     <column columnName="border_width"/>
                     <column columnName="border_height"/>
-                    <column columnName="status"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

@@ -95,12 +95,16 @@ services:
       LK_MAILSERVER: ${LK_MAILSERVER}
       LK_MAIL_PORT: ${LK_MAIL_PORT}
       LK_SERVER_EMAIL_ADDRESS: ${LK_SERVER_EMAIL_ADDRESS}
+      NGINX_SERVER_CER: /run/secrets/server-certificate
+      NGINX_SERVER_KEY: /run/secrets/server-key
       PG_NAME: ${PG_NAME}
       PG_PASS: ${PG_PASS}
       PG_USER: ${PG_USER}
       TZ: America/Chicago
     secrets:
       - master_encryption_pwd
+      - server-certificate
+      - server-key
 
   nginx:
     image: nginx:1.25

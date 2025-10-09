@@ -63,4 +63,5 @@ EXPOSE 8080
 
 ENTRYPOINT ["/etc/replacingSecrets.sh" ]
 
-CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:MaxRAMPercentage=75.0 -Dlabkey.home=$LABKEY_HOME -Dlabkey.log.home=$LABKEY_LOGS -Dlogback.debug=true -jar /labkey/labkey/labkeyServer.jar
+CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:MaxRAMPercentage=75.0 -Dlabkey.home=$LABKEY_HOME -Dlabkey.log.home=$LABKEY_LOGS -Dlogback.debug=true -jar /labkey/labkey/labkeyServer.jar \
+--server.ssl.trust-certificate=$NGINX_SERVER_CER --server.ssl.trust-certificate-private-key=$NGINX_SERVER_KEY

@@ -68,7 +68,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     {
                         if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
                         {
-                            return new LayoutHistoryTable(schema, CageUISchema.getInstance().getRoomHistoryTable(), cf).init();
+                            return new RoomHistoryTable(schema, CageUISchema.getInstance().getRoomHistoryTable(), cf).init();
                         }
 
                         return null;
@@ -81,7 +81,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     {
                         if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
                         {
-                            return new LayoutHistoryTable(schema, CageUISchema.getInstance().getRoomHistoryTable(), cf).init();
+                            return new AllHistoryTable(schema, CageUISchema.getInstance().getAllHistoryTable(), cf).init();
                         }
 
                         return null;
@@ -94,7 +94,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     {
                         if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
                         {
-                            return new LayoutHistoryTable(schema, CageUISchema.getInstance().getTemplateLayoutHistoryTable(), cf).init();
+                            return new TemplateLayoutHistoryTable(schema, CageUISchema.getInstance().getTemplateLayoutHistoryTable(), cf).init();
                         }
 
                         return null;
@@ -137,7 +137,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        return new RacksTable(schema, CageUISchema.getInstance().getCageModificationsTable(), cf).init();
+                        return new CageModificationsTable(schema, CageUISchema.getInstance().getCageModificationsTable(), cf).init();
                     }
                 };
 

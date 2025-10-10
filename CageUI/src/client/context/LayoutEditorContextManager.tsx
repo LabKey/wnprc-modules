@@ -1108,11 +1108,12 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        /*const dataToSave: LayoutHistoryData[] = [];
         const newModData: ModHistoryData[] = [];
 
         const roomName = localRoom.name;
         const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
+        /*const dataToSave: LayoutHistoryData[] = [];
+
         const newStartDate = new Date();
 
 
@@ -1287,12 +1288,12 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }*/
 
         let result: LayoutSaveResult;
-        /*try {
-            const layoutSave = await saveRoomLayout(localRoom, newModData, oldRoomName, dataToSave);
+        try {
+            const layoutSave = await saveRoomLayout(localRoom, newModData, oldRoomName);
             result = {success: layoutSave.success, roomName: roomName};
         } catch (e){
             result = {success: e.success, roomName: roomName, reason: e.errors.map(err => err.message)};
-        }*/
+        }
         // Determine success or failure
         return result;
     }
@@ -1301,8 +1302,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         if(!prevRoom) {
             return;
         }
-
-
         if(prevRoom.room.rackGroups.length !== 0){
             setNextAvailGroup(getNextGroupId(prevRoom.room.rackGroups));
         }
@@ -1312,6 +1311,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
         setLocalRoom(prevRoom.room);
         setRoom(prevRoom.room);
+        console.log('prevRoom', prevRoom);
         setIsLoading(false);
     }, [prevRoom]);
 

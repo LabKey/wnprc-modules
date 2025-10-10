@@ -117,15 +117,24 @@ export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => 
     })
 }
 
-export function saveRoomLayout(room: Room, mods: ModHistoryData[], prevRoomName: string, newRoomData: LayoutHistoryData[]): Promise<{ success: boolean, errors: any[] }> {
+export function saveRoomLayout(room: Room, mods: ModHistoryData[], prevRoomName: string): Promise<{ success: boolean, errors: any[] }> {
     const newPrevRoomName = prevRoomName || room.name;
+    let isDefault = false;
+    room.rackGroups.forEach((g) => {
+        if(isDefault) return;
+        g.racks.forEach(r => {
+            if(r.type.isDefault){
+                isDefault = true;
+            }
+        })
+    })
     return new Promise((resolve, reject) => {
         Ajax.request({
             url: buildURL('cageui', 'saveLayoutHistory.api'),
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, newRoomData: newRoomData},
+            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault},
         });
     });
 }

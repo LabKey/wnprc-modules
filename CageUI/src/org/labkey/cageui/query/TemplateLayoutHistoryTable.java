@@ -26,9 +26,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public class TemplateLayoutHistory extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
+public class TemplateLayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
 {
-    public TemplateLayoutHistory(CageUIUserSchema schema, TableInfo table, ContainerFilter cf)
+    public TemplateLayoutHistoryTable(CageUIUserSchema schema, TableInfo table, ContainerFilter cf)
     {
         super(schema, table, cf);
     }
@@ -36,7 +36,7 @@ public class TemplateLayoutHistory extends SimpleUserSchema.SimpleTable<CageUIUs
     @Override
     public QueryUpdateService getUpdateService()
     {
-        return new TemplateLayoutHistory.UpdateService(this);
+        return new TemplateLayoutHistoryTable.UpdateService(this);
     }
 
     protected class UpdateService extends SimpleQueryUpdateService

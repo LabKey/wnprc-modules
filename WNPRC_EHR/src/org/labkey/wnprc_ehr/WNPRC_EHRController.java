@@ -2458,65 +2458,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-//    @RequiresNoPermission
     public static class UpdateAnesthesiaRecoveryDatasetAction extends MutatingApiAction<SimpleApiJsonForm> {
-
-//        @Override
-//        public void validateForm(SimpleApiJsonForm form, Errors errors) {
-//
-//            // Verifies passed-in arguments are not null.
-//            if (form.getJsonObject() == null) {
-//                errors.reject(ERROR_MSG, "JSON argument cannot be null.");
-//                return;
-//            }
-//            JSONObject myForm = form.getJsonObject();
-//            _log.info("TEST MESSAGE: JSON argument is: " + myForm);
-//
-//            // Retrieves the passed-in arguments.
-//            String recordId = myForm.get("Id").toString();
-//            String recordRoom = myForm.get("room").toString();
-//            String recordDate = myForm.get("date").toString();
-//            String recordObservation = myForm.get("observation").toString();
-//            String recordRecoveryStart = myForm.get("recoveryStart").toString();
-//            String recordObserverComments = myForm.get("observerComments").toString();
-//            String recordObserver = myForm.get("observer").toString();
-//            String recordRecoveryId = myForm.get("recoveryId").toString();
-//
-//            _log.info("TEST MESSAGE: ANESTHESIA VALIDATION 1");
-//
-//            _log.info("TEST MESSAGE 3:" +
-//                    "ID: " + recordId +
-//                    "ROOM: " + recordRoom +
-//                    "DATE: " + recordDate +
-//                    "OBSERVATION: " + recordObservation +
-//                    "RECOVERY START: " + recordRecoveryStart +
-//                    "OBSERVER COMMENTS: " + recordObserverComments +
-//                    "OBSERVER: " + recordObserver +
-//                    "RECOVERY ID: " + recordRecoveryId
-//            );
-//
-//            AnimalVerifier avrh1234 = new AnimalVerifier("rh1234", getUser(), getContainer());  // Does not exist
-//            AnimalVerifier avc19006 = new AnimalVerifier("c19006", getUser(), getContainer());  // Dead
-//            AnimalVerifier avc19007 = new AnimalVerifier("c19007", getUser(), getContainer());  // Alive
-//
-//            AnimalVerifier av = new AnimalVerifier("rh1234", getUser(), getContainer());  // Alive
-//
-//
-//            // TODO: Validate data here.
-//
-//
-//
-//
-////        public boolean isAliveAndAtCenter = false;
-////
-////        private String animalid;
-////
-////        public String getAnimalid() {return animalid;}
-////
-////        public void setAnimalid(String animalid) {this.animalid = animalid;}
-////
-////        public void setIsAliveAndAtCenter(boolean checkAlive) {this.isAliveAndAtCenter = checkAlive;}
-//        }
 
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {

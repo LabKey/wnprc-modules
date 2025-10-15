@@ -71,6 +71,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class CageUIController extends SpringActionController
 {
@@ -246,6 +247,8 @@ public class CageUIController extends SpringActionController
             boolean savingTemplate = room.getName().toLowerCase().contains("template");
             String prevRoomName = json.get("prevRoomName").toString();
             boolean isDefaultSave = json.get("isDefault").toString().equals("true");
+            boolean isTemplateSave = savingTemplate || isDefaultSave;
+            Date newEndAndStartDate = new Date();
 
             UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_lookups");
             TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
@@ -254,11 +257,16 @@ public class CageUIController extends SpringActionController
 
             // 1. get row in allHistory to end the current room.
 
-            AllHistoryForm allHistoryToEnd = CageUIManager.get().endPreviousAllHistory(prevRoomName);
-            Date newStartDate = allHistoryToEnd.getEndDate();
+            AllHistoryForm allHistoryToEnd = CageUIManager.get().endPreviousAllHistory(prevRoomName, newEndAndStartDate);
 
             // 2. Create new all history record
-            AllHistoryForm allHistoryToStart = CageUIManager.get().startNewAllHistory(room.getName(), isDefaultSave || savingTemplate, newStartDate);
+            AllHistoryForm allHistoryToStart = CageUIManager.get().startNewAllHistory(room.getName(), isTemplateSave, newEndAndStartDate);
+
+            // Generate ids for linking history tables together
+            String roomHistoryId = CageUIManager.get().checkRoomHistoryChanges(room.getName(), room.getLayoutData());
+            String taskId = UUID.randomUUID().toString();
+
+
 
 
            /* // Determine which history table to use

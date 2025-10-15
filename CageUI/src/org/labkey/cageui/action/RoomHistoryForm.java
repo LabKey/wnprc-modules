@@ -1,11 +1,16 @@
-package org.labkey.cageui.model;
+package org.labkey.cageui.action;
 
-public class LayoutData
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class RoomHistoryForm
 {
     private int _scale;
+    @JsonProperty("border_width")
     private int _borderWidth;
+    @JsonProperty("border_height")
     private int _borderHeight;
-    private boolean _status;
+    @JsonProperty("historyid")
+    private String _historyId;
 
     public int getScale()
     {
@@ -37,13 +42,13 @@ public class LayoutData
         _borderHeight = borderHeight;
     }
 
-    public boolean getStatus()
+    public String getHistoryId()
     {
-        return _status;
+        return _historyId;
     }
 
-    public void setStatus(boolean status)
+    public void setHistoryId(String historyId)
     {
-        _status = status;
+        _historyId = historyId;
     }
 }

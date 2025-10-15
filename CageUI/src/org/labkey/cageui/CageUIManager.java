@@ -18,10 +18,8 @@
 
 package org.labkey.cageui;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONArray;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.CompareType;
@@ -29,17 +27,13 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryService;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.cageui.action.AllHistoryForm;
-import org.labkey.cageui.action.CageModificationHistoryForm;
-import org.labkey.cageui.model.Room;
-import org.labkey.cageui.query.AllHistoryTable;
+import org.labkey.cageui.action.RoomHistoryForm;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class CageUIManager
 {
@@ -77,11 +71,24 @@ public class CageUIManager
         return allHistory;
     }
 
-    public AllHistoryForm endPreviousAllHistory(String room)
+    public RoomHistoryForm getRoomHistory(String historyid)
+    {
+        TableInfo table = CageUISchema.getInstance().getRoomHistoryTable();
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("historyid"), historyid, CompareType.EQUAL);
+        TableSelector selector = new TableSelector(table, filter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        RoomHistoryForm roomHistory = mapper.convertValue(selector.getMap(), RoomHistoryForm.class);
+        return roomHistory;
+    }
+
+    // ends an all history row
+    public AllHistoryForm endPreviousAllHistory(String room, Date endDate)
     {
         AllHistoryForm allHistory = getAllHistory(room);
-        Date newDate = new Date();
-        allHistory.setEndDate(newDate);
+        allHistory.setEndDate(endDate);
         return allHistory;
     }
 
@@ -96,6 +103,31 @@ public class CageUIManager
             allHistoryToStart.setHistoryType("template");
         }
         return allHistoryToStart;
+    }
+
+    /*
+        This method checks for room history (layout) changes
+
+        @param room the name of the room
+        @param newRoomHistory the layout data for the new layout submission
+        @return current historyId if no changes, new historyId otherwise
+     */
+    public String checkRoomHistoryChanges(String room, RoomHistoryForm newRoomHistory)
+    {
+
+        AllHistoryForm allHistory = getAllHistory(room);
+        String historyid = UUID.randomUUID().toString();
+
+        if(allHistory != null){
+            RoomHistoryForm roomHistory = getRoomHistory(allHistory.getRoomHistoryId());
+            if(roomHistory.getBorderHeight() == newRoomHistory.getBorderHeight()
+            && roomHistory.getBorderWidth() == newRoomHistory.getBorderWidth()
+            && roomHistory.getScale() == newRoomHistory.getScale()){
+                historyid = roomHistory.getHistoryId();
+            }
+        }
+
+        return historyid;
     }
 
 }

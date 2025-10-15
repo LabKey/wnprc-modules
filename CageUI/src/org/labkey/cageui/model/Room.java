@@ -1,5 +1,7 @@
 package org.labkey.cageui.model;
 
+import org.labkey.cageui.action.RoomHistoryForm;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +10,7 @@ public class Room
     private String _name;
     private List<RackGroup> _rackGroups;
     private List<RoomObject> _objects;
-    private LayoutData _layoutData;
+    private RoomHistoryForm _roomHistoryForm;
     private Map<String, Object> _mods;
 
     public String getName()
@@ -41,14 +43,14 @@ public class Room
         _objects = objects;
     }
 
-    public LayoutData getLayoutData()
+    public RoomHistoryForm getLayoutData()
     {
-        return _layoutData;
+        return _roomHistoryForm;
     }
 
-    public void setLayoutData(LayoutData layoutData)
+    public void setLayoutData(RoomHistoryForm roomHistoryForm)
     {
-        _layoutData = layoutData;
+        _roomHistoryForm = roomHistoryForm;
     }
 
     public Map<String, Object>  getMods()

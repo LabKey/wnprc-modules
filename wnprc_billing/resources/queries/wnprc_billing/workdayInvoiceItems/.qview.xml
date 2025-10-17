@@ -1,36 +1,21 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
-        <column name="spreadsheet_key"/>
-        <column name="company"/>
-        <column name="Internal_Service_Provider"/>
+        <column name="runId"/>
+        <column name="Project"/> <!--Grant -->
+        <column name="Amount"/>
+        <column name="Department"/> <!-- Cost Center -->
         <column name="document_date"/>
         <column name="memo"/>
-        <column name="project"/>
+
         <column name="costCenter"/>
-        <column name="fund"/>
+        <column name="Fund"/>
         <column name="function"/>
-        <column name="runId"/>
+
 <!--        Internal Service Delivery Line Data    -->
         <column name ="row_id"/>
         <column name="internal_service_delivery"/>
         <column name="Intercompany_Affiliate"/>
         <column name="Description"/> <!-- Catalog_Item -->
-        <column name="Amount"/>
-        <column name="Workday_Program"/>
-        <column name="Workday_Project"/>
 
-        <column name="Project"/> <!--Grant -->
-        <column name="Department"/> <!-- Cost Center -->
-        <column name="Fund"/>
-        <column name="workday_function"/>
-
-
-
-        <column name="Jnl_Ln_Ref"/>
-        <column name="Class"/>
-        <column name="PurchRefNo"/>
-        <column name="VoucherNo"/>
-        <column name="InvoiceNo"/>
-        <column name="ActivityID"/>
     </columns>
 </customView>

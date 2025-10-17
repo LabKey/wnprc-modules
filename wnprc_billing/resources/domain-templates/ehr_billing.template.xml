@@ -118,10 +118,6 @@
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>500</dat:scale>
                 </dat:column>
-                <dat:column columnName="program">
-                    <dat:rangeURI>string</dat:rangeURI>
-                    <dat:scale>500</dat:scale>
-                </dat:column>
             </dat:columns>
         </table>
     </template>

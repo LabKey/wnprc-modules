@@ -216,7 +216,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 textElement.setAttribute('contentEditable', 'true');
                 (textElement.children[0] as SVGTSpanElement).style.cursor = "pointer";
                 (textElement.children[0] as SVGTSpanElement).style.pointerEvents = "auto";
-                const cageGroupElement = textElement.closest(`[id^=${roomItemToString(updateItemType)}]`) as SVGGElement;
+                const cageGroupElement = textElement.closest(`[id=${roomItemToString(updateItemType)}]`) as SVGGElement;
                 setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef,setCtxMenuStyle, roomItemToString(updateItemType) as RackStringType);
             });
         }else{
@@ -295,8 +295,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
 
         if (targetRect) {
-            const cellX = Math.max(0,targetRect.x);
-            const cellY = Math.max(0,targetRect.y);
+            // update the found x and y coords with new cell coords if the object was outside the available layout range.
+            const cellX = targetRect.x < SVG_WIDTH && targetRect.x > 0 ? targetRect.x : 0;
+            const cellY = targetRect.y < SVG_HEIGHT && targetRect.y > 0 ? targetRect.y : 0;
 
             let newId: string;
 
@@ -810,6 +811,18 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         <div className={"layout-editor"}>
             <div ref={utilsRef} id="utils" className={"room-utils"}>
                 <div className={'room-objects'}>
+                    <LayoutTooltip text={"Top"}>
+                        <RoomItemTemplate
+                            fileName={"top"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
+                    <LayoutTooltip text={"Bottom"}>
+                        <RoomItemTemplate
+                            fileName={"bottom"}
+                            className={"draggable"}
+                        />
+                    </LayoutTooltip>
                     <LayoutTooltip text={"Door"}>
                         <RoomItemTemplate
                             fileName={"door"}

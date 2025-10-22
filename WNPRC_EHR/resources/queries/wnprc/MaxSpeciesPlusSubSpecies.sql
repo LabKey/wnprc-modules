@@ -20,6 +20,12 @@ FROM (
              SELECT rowid, 'Cynomolgus' AS arrow_common_name, protocol_id, max_three_year, date_modified, date_expiration
              FROM arrow_protocols
              WHERE arrow_common_name = 'Macaque'
+
+             UNION ALL
+
+             SELECT rowid, 'Pigtail' AS arrow_common_name, protocol_id, max_three_year, date_modified, date_expiration
+             FROM arrow_protocols
+             WHERE arrow_common_name = 'Macaque'
          )
 
          UNION ALL

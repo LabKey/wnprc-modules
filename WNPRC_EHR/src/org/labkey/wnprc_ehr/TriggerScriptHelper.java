@@ -2678,6 +2678,7 @@ public class TriggerScriptHelper {
     {
         final String RHESUS_SPECIES = "Rhesus";
         final String CYNOMOLGUS_SPECIES = "Cynomolgus";
+        final String PIGTAIL_SPECIES = "Pigtail";
         final String MACAQUE_SPECIES = "Macaque";
         final String ALL_SPECIES = "All Species";
         if (id == null)
@@ -2748,7 +2749,7 @@ public class TriggerScriptHelper {
                         AnimalRecord ar = EHRDemographicsService.get().getAnimal(container, id);
 
                         //we don't want to exit the animal count if ar.species() is cyno or rhesus and the protocol's species value is macaque.
-                        if (!ALL_SPECIES.equals(species) && !(RHESUS_SPECIES.equals(ar.getSpecies()) || CYNOMOLGUS_SPECIES.equals(ar.getSpecies()) && MACAQUE_SPECIES.equals(species)))
+                        if (!ALL_SPECIES.equals(species) && !(RHESUS_SPECIES.equals(ar.getSpecies()) || CYNOMOLGUS_SPECIES.equals(ar.getSpecies()) || PIGTAIL_SPECIES.equals(ar.getSpecies()) && MACAQUE_SPECIES.equals(species)))
                         {
                             //find species
                             if (ar.getSpecies() == null || !species.equals(ar.getSpecies()))

@@ -21,13 +21,13 @@ import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { getTypeClassFromElement, parseRoomItemType, roomItemToString } from './helpers';
 import {
-    Cage,
-    CageDirection,
+    Cage, CageData,
+    CageDirection, CageHistoryData,
     CageNumber, CageSvgId,
-    DefaultRackTypes,
-    GroupId,
+    DefaultRackTypes, FullObjectHistoryData,
+    GroupId, LayoutHistoryData,
     LocationCoords,
-    Rack,
+    Rack, RackData,
     RackGroup,
     RackStringType,
     RackTypes,
@@ -50,6 +50,7 @@ import { MutableRefObject } from 'react';
 import { Security } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
+import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
 
 
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
@@ -62,6 +63,49 @@ export const isRoomCreator = (user: GetUserPermissionsResponse) => {
 
 export const isRoomModifier = (user: GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
+}
+
+export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{fulfilled: FullObjectHistoryData[]; rejected: PromiseRejectedResult[]}> => {
+
+    const processItem = async (item: LayoutHistoryData): Promise<FullObjectHistoryData> => {
+        if(item.cageHistoryId === null){
+            return {
+                extraContext: item.extraContext,
+                objectType: item.objectType,
+                xCoord: item.xCoord,
+                yCoord: item.yCoord
+            }
+        }else{
+            const cageHistory: CageHistoryData = await fetchCageHistory(item.cageHistoryId);
+            const cageData: CageData = await fetchCage(cageHistory.cage);
+            const rackData: RackData = await fetchRack(cageData.rack);
+            return {
+                extraContext: item.extraContext,
+                objectType: item.objectType,
+                xCoord: item.xCoord,
+                yCoord: item.yCoord,
+                rackGroup: cageHistory.rackGroup,
+                rack: rackData.rackid,
+                cage: cageData.cageNum
+            }
+        }
+    }
+
+    const promises = data.map(async (item) => processItem(item));
+    const results = await Promise.allSettled(promises);
+
+    const fulfilled: FullObjectHistoryData[] = [];
+    const rejected: PromiseRejectedResult[] = [];
+
+    results.forEach(result => {
+        if (result.status === 'fulfilled') {
+            fulfilled.push(result.value);
+        } else {
+            rejected.push(result);
+        }
+    });
+
+    return { fulfilled, rejected };
 }
 
 

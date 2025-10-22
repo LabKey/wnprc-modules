@@ -214,48 +214,62 @@ export interface LayoutData {
 export type LayoutObjectData = TemplateHistoryData | LayoutHistoryData;
 
 export interface TemplateHistoryData {
-    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
-    history_id?: string;
-    extra_context: string | null;
-    rack_group: number;
+    objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    historyId?: string;
+    extraContext: string | null;
+    rackGroup: number;
     rack: number; // row id of rack in racks table
     cage: string;
-    x_coord: number;
-    y_coord: number;
+    xCoord: number;
+    yCoord: number;
     rowid?: number;
 }
 
 export interface LayoutHistoryData {
-    historyid: string;
-    cage_historyid: string;
-    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
-    extra_context: string | null;
-    x_coord: number;
-    y_coord: number;
+    historyId: string;
+    cageHistoryId: string;
+    objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extraContext: string | null;
+    xCoord: number;
+    yCoord: number;
     rowid?: number;
 }
 
 export interface CageHistoryData {
     rowid?: number;
-    historyid: string;
-    mod_historyid: string;
-    animal_historyid: string;
+    historyId: string;
+    modHistoryId?: string;
+    animalHistoryId?: string;
     cage: number; // rowid of cage in cages table
+    rackGroup: number;
 }
 
+// interface for cageui.cages table
 export interface CageData {
     rowid: number;
-    cageNum: CageNumber;
+    rack: number;
+    cageNum: string;
+    length: number;
+    width: number;
+    height: number;
+}
+
+// interface for cageui.racks table
+export interface RackData {
+    rowid: number;
+    room: string;
+    rackid: number;
+    rackType: number;
 }
 
 export interface FullObjectHistoryData {
-    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
-    extra_context: string | null;
-    rack_group?: number;
+    objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extraContext: string | null;
+    rackGroup?: number;
     rack?: number; // row id of rack in racks table
     cage?: string;
-    x_coord: number;
-    y_coord: number;
+    xCoord: number;
+    yCoord: number;
 }
 
 export interface PrevRoom {

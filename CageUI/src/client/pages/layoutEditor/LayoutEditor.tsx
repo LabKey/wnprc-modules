@@ -36,7 +36,7 @@ import Editor from '../../components/layoutEditor/Editor';
 import { labkeyActionSelectWithPromise, labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { isTemplateCreator } from '../../utils/LayoutEditorHelpers';
+import { isTemplateCreator, processRealLayoutHistory } from '../../utils/LayoutEditorHelpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
 import { buildNewLocalRoom, buildNewLocs } from '../../utils/helpers';
@@ -149,9 +149,9 @@ export const LayoutEditor: FC<any> = () => {
             const prevRoomPromise = labkeyActionSelectWithPromise(prevRoomConfig);
             const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
 
-            Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(([prevRoomResult, borderResult]) => {
+            Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(async ([prevRoomResult, borderResult]) => {
                 let borderObj: LayoutData;
-                let cagingData: LayoutObjectData;
+                let cagingData: FullObjectHistoryData[] = [];
                 if (borderResult.rowCount === 0) {
                     throw new Error(`No room found in EHR for ${roomName}`);
                 } else {
@@ -165,8 +165,36 @@ export const LayoutEditor: FC<any> = () => {
                     setShowSelectionPopup(false);
                 }
 
-
-                setPrevRoomData({name: roomName, cagingData: prevRoomResult.rows || [], layoutData: borderObj, isDefault: isDefaultRoom});
+                if(prevRoomResult.rowCount > 0){
+                    if(isDefaultRoom){
+                        cagingData = prevRoomResult.rows.map(row => ({
+                            objectType: row.object_type,
+                            extraContext: row.extra_context,
+                            rackGroup: row.rack_group,
+                            rack: row.rack,
+                            cage: row.cage,
+                            xCoord: row.x_coord,
+                            yCoord: row.y_coord,
+                        }));
+                    }else{
+                        const layoutHistoryData: LayoutHistoryData[] = prevRoomResult.rows.map(row => ({
+                            historyId: row.historyid,
+                            cageHistoryId: row.cage_historyid,
+                            objectType: row.object_type,
+                            extraContext: row.extra_context,
+                            xCoord: row.x_coord,
+                            yCoord: row.y_coord,
+                            rowid: row.rowid,
+                        }))
+                        const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
+                        if(layoutHistoryResults.rejected.length > 0){
+                            throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`)
+                        }else{
+                            cagingData = layoutHistoryResults.fulfilled;
+                        }
+                    }
+                }
+                setPrevRoomData({name: roomName, cagingData: cagingData, layoutData: borderObj, isDefault: isDefaultRoom});
             }).catch(err => {
                 setErrorPopup(err.toString());
             });

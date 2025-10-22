@@ -480,19 +480,19 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
     const newUnitLocs: UnitLocations = createEmptyUnitLoc();
 
     prevRoomData.forEach(roomItem => {
-        if (!isRackEnum(roomItem.object_type)) {
+        if (!isRackEnum(roomItem.objectType)) {
             return;
         } // ignore room objects here
         let rackType: RoomItemStringType;
-        if (isRackDefault(roomItem.object_type)) {
-            rackType = roomItemToString(defaultTypeToRackType(roomItem.object_type));
+        if (isRackDefault(roomItem.objectType)) {
+            rackType = roomItemToString(defaultTypeToRackType(roomItem.objectType));
         } else {
-            rackType = roomItemToString(roomItem.object_type);
+            rackType = roomItemToString(roomItem.objectType);
         }
         newUnitLocs[rackType].push({
             cageId: generateCageId(),
-            cellX: roomItem.x_coord,
-            cellY: roomItem.y_coord
+            cellX: roomItem.xCoord,
+            cellY: roomItem.yCoord
         });
     });
     return newUnitLocs;
@@ -514,15 +514,15 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     //check if a group exists for the groupId, if it does return, else create new group for the room
     const findOrAddGroup = (rackItem: FullObjectHistoryData): RackGroup => {
         // groupId is a single number so check if the GroupId string contains it
-        let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => parseLongId(group.groupId) === rackItem.rack_group);
+        let rackGroup: RackGroup = newLocalRoom.rackGroups.find(group => parseLongId(group.groupId) === rackItem.rackGroup);
         if (!rackGroup) {
             //create new rack group if it doesn't exist
             rackGroup = {
-                groupId: `rack-group-${rackItem.rack_group}` as GroupId,
+                groupId: `rack-group-${rackItem.rackGroup}` as GroupId,
                 selectionType: 'rackGroup',
                 scale: prevRoom.layoutData.scale,
-                x: rackItem.x_coord,
-                y: rackItem.y_coord,
+                x: rackItem.xCoord,
+                y: rackItem.yCoord,
                 racks: []
             };
             newLocalRoom.rackGroups.push(rackGroup);
@@ -578,7 +578,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 schemaName: 'cageui',
                 queryName: 'rack_types',
                 filterArray: [
-                    Filter.create(prevRoom.isDefault ? 'type' : 'rowid', prevRoom.isDefault ? rackItem.object_type : typeRowId, Filter.Types.EQUALS)
+                    Filter.create(prevRoom.isDefault ? 'type' : 'rowid', prevRoom.isDefault ? rackItem.objectType : typeRowId, Filter.Types.EQUALS)
                 ]
             };
 
@@ -603,8 +603,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 isActive: !prevRoom.isDefault,
                 itemId: rackId,
                 type: type,
-                x: rackItem.x_coord - rackGroup.x, // subtract group coords from layout coords to get rack coords
-                y: rackItem.y_coord - rackGroup.y,
+                x: rackItem.xCoord - rackGroup.x, // subtract group coords from layout coords to get rack coords
+                y: rackItem.yCoord - rackGroup.y,
                 extraContext: extraContext?.rack
             };
             rackGroup.racks.push(rack);
@@ -627,12 +627,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             [ModLocations.Direct]: []
         };
         if (rack.type.isDefault) {
-            cageNumType = roomItemToString(defaultTypeToRackType(rackItem.object_type as DefaultRackTypes));
+            cageNumType = roomItemToString(defaultTypeToRackType(rackItem.objectType as DefaultRackTypes));
         } else {
-            cageNumType = roomItemToString(rackItem.object_type);
+            cageNumType = roomItemToString(rackItem.objectType);
         }
-        if (rackItem.extra_context) {
-            extraContext = JSON.parse(rackItem.extra_context);
+        if (rackItem.extraContext) {
+            extraContext = JSON.parse(rackItem.extraContext);
         }
         const svgSize = await getSvgSize(rack.type.type);
 
@@ -680,8 +680,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             extraContext: extraContext?.cage,
             selectionType: 'cage',
             localRackId: rack.cages.length + 1,
-            x: rackItem.x_coord - rack.x - group.x, // get cage coords by subtracting from both rack and group
-            y: rackItem.y_coord - rack.y - group.y,
+            x: rackItem.xCoord - rack.x - group.x, // get cage coords by subtracting from both rack and group
+            y: rackItem.yCoord - rack.y - group.y,
             size: svgSize,
             mods: cageMods
         };
@@ -704,22 +704,22 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     // generates room object state for room objects from layout history data
     const generateRoomObj = (roomObjItem: FullObjectHistoryData): RoomObject => {
         let context;
-        if (roomObjItem.extra_context) {
-            context = JSON.parse(roomObjItem.extra_context);
+        if (roomObjItem.extraContext) {
+            context = JSON.parse(roomObjItem.extraContext);
         }
         return ({
-            itemId: `${roomItemToString(roomObjItem.object_type)}-${roomObjNum++}`, // update room obj num after it is used to next num
-            type: roomObjItem.object_type as RoomObjectTypes,
+            itemId: `${roomItemToString(roomObjItem.objectType)}-${roomObjNum++}`, // update room obj num after it is used to next num
+            type: roomObjItem.objectType as RoomObjectTypes,
             selectionType: 'obj',
-            x: roomObjItem.x_coord,
-            y: roomObjItem.y_coord,
+            x: roomObjItem.xCoord,
+            y: roomObjItem.yCoord,
             scale: prevRoom.layoutData.scale,
             extraContext: context
         });
     };
 
     for (const roomItem of prevRoom.cagingData) {
-        if (isRackEnum(roomItem.object_type)) { // Room item is an enclosure for animals
+        if (isRackEnum(roomItem.objectType)) { // Room item is an enclosure for animals
             await handleRackItem(roomItem);
         } else { // Room item is something else in the room, ex. Door
             newLocalRoom.objects.push(generateRoomObj(roomItem));

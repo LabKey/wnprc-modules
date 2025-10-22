@@ -159,4 +159,18 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="cage_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="rack_group"/>
+            <column columnName="cage"/>
+            <column columnName="mod_historyid"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

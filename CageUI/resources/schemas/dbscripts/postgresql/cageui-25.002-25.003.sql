@@ -186,6 +186,22 @@ CREATE TABLE cageui.cage_modifications
 );
 
 
+DROP TABLE IF EXISTS cageui.cage_history;
+CREATE TABLE cageui.cage_history
+(
+    rowid SERIAL NOT NULL,
+    historyid VARCHAR NOT NULL,
+    rack_group INTEGER NOT NULL,
+    cage INTEGER NOT NULL,
+    mod_historyid VARCHAR,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_cage_history PRIMARY KEY (rowid),
+    CONSTRAINT FK_cage_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
 
 /*
 Example on difference between direction and position.

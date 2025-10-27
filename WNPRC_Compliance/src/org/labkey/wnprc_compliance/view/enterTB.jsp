@@ -455,14 +455,14 @@
         (function() {
             measlesForm.clear = function() {
                 measlesForm.notes('');
-                measlesForm.date('');
+                measlesForm.date(moment());
                 measlesForm.disabled(true);
             };
             measlesForm.$element.collapse({toggle: true});
             measlesForm.disabled.subscribe(function(val) {
                 if (val) {
                     measlesForm.notes('');
-                    measlesForm.date('');
+                    measlesForm.date(moment());
                 }
                 measlesForm.$element.collapse(val ? 'hide' : 'show');
             });

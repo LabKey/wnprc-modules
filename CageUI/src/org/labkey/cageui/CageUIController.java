@@ -85,7 +85,7 @@ public class CageUIController extends SpringActionController
 
     // todo fix this method to use array of cage ids to end. currently does not
     // todo move helper functions to CageUIManager
-    private static List<Map<String, Object>> getModsToEnd(int[] cages, Date newEndDate, User user, Container container)
+/*    private static List<Map<String, Object>> getModsToEnd(int[] cages, Date newEndDate, User user, Container container)
     {
         UserSchema cageuiSchema = QueryService.get().getUserSchema(user, container, "cageui");
         TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
@@ -101,7 +101,7 @@ public class CageUIController extends SpringActionController
         }
         List<Map<String, Object>> oldModRowsToUpdate = JsonUtil.toMapList(modJsonData);
         return oldModRowsToUpdate;
-    }
+    }*/
 
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
@@ -264,7 +264,7 @@ public class CageUIController extends SpringActionController
 
             // Generate ids for linking history tables together
             String roomHistoryId = CageUIManager.get().checkRoomHistoryChanges(room.getName(), room.getLayoutData());
-            String taskId = UUID.randomUUID().toString();
+            String layoutHistoryId = CageUIManager.get().checkRoomLayoutChanges(room.getName(), isTemplateSave, room.getRackGroups(), room.getObjects());
 
 
 

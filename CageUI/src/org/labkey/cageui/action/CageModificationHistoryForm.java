@@ -1,5 +1,6 @@
 package org.labkey.cageui.action;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -7,18 +8,16 @@ import java.util.Date;
 public class CageModificationHistoryForm
 {
     private int _rowid;
-    private int _cage;
+    @JsonProperty("historyid")
+    private String _historyId;
+    @JsonProperty("modid")
+    private String _modId;
+    @JsonProperty("parent_modid")
+    private String _parentModId;
+    private String _modification;
+    @JsonProperty("subid")
     private int _subId;
     private int _location;
-    private String _modification;
-    private String _modId;
-    private String _parentModId;
-    private Date _startDate;
-    private Date _endDate;
-
-    public int getCage() {return _cage;}
-
-    public void setCage(int cage) {_cage = cage;}
 
     public int getSubId() {return _subId;}
 
@@ -36,14 +35,6 @@ public class CageModificationHistoryForm
 
     public void setModId(String modId) {_modId = modId;}
 
-    public Date getStartDate() {return _startDate;}
-
-    public void setStartDate(Date startDate) {_startDate = startDate;}
-
-    public Date getEndDate() {return _endDate;}
-
-    public void setEndDate(Date endDate) {_endDate = endDate;}
-
     public int getRowid() {return _rowid;}
 
     public void setRowid(int rowid) {_rowid = rowid;}
@@ -52,20 +43,13 @@ public class CageModificationHistoryForm
 
     public void setParentModId(String parentModId) {_parentModId = parentModId;}
 
-    public JSONObject toJSON()
+    public String getHistoryId()
     {
-        JSONObject json = new JSONObject();
+        return _historyId;
+    }
 
-        json.put("rowid", getRowid());
-        json.put("cage", getCage());
-        json.put("subId", getSubId());
-        json.put("location", getLocation());
-        json.put("modification", getModification());
-        json.put("modId", getModId());
-        json.put("parentModId",getParentModId());
-        json.put("startDate", getStartDate());
-        json.put("endDate", getEndDate());
-
-        return json;
+    public void setHistoryId(String historyId)
+    {
+        _historyId = historyId;
     }
 }

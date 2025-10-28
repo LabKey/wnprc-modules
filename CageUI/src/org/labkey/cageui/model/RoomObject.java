@@ -1,5 +1,7 @@
 package org.labkey.cageui.model;
 
+import java.util.Map;
+
 public class RoomObject
 {
     private String _itemId;
@@ -8,7 +10,7 @@ public class RoomObject
     private int _x;
     private int _y;
     private int _scale;
-    private String _extraContext;
+    private Map<String, Object> _extraContext;
 
     public String getItemId()
     {
@@ -70,12 +72,12 @@ public class RoomObject
         _scale = scale;
     }
 
-    public String getExtraContext()
+    public Map<String, Object> getExtraContext()
     {
         return _extraContext;
     }
 
-    public void setExtraContext(String extraContext)
+    public void setExtraContext(Map<String, Object> extraContext)
     {
         _extraContext = extraContext;
     }

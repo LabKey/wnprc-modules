@@ -7,28 +7,28 @@ import java.util.Date;
 
 public class TemplateLayoutHistoryForm
 {
-    private int _rowid;
+    private Integer _rowid;
     @JsonProperty("historyid")
     private String _historyId;
     @JsonProperty("rack_group")
-    private int _rackGroup;
-    private int _rack;
-    private String _cage;
+    private Integer _rackGroup;
+    private Integer _rack;
+    private Integer _cage;
     @JsonProperty("object_type")
     private int _objectType;
     @JsonProperty("extra_context")
     private String _extraContext;
     @JsonProperty("x_coord")
-    private String _xCoord;
+    private int _xCoord;
     @JsonProperty("y_coord")
-    private String _yCoord;
+    private int _yCoord;
 
-    public int getRowid()
+    public Integer getRowid()
     {
         return _rowid;
     }
 
-    public void setRowid(int rowid)
+    public void setRowid(Integer rowid)
     {
         _rowid = rowid;
     }
@@ -43,32 +43,32 @@ public class TemplateLayoutHistoryForm
         _historyId = historyId;
     }
 
-    public int getRackGroup()
+    public Integer getRackGroup()
     {
         return _rackGroup;
     }
 
-    public void setRackGroup(int rackGroup)
+    public void setRackGroup(Integer rackGroup)
     {
         _rackGroup = rackGroup;
     }
 
-    public int getRack()
+    public Integer getRack()
     {
         return _rack;
     }
 
-    public void setRack(int rack)
+    public void setRack(Integer rack)
     {
         _rack = rack;
     }
 
-    public String getCage()
+    public Integer getCage()
     {
         return _cage;
     }
 
-    public void setCage(String cage)
+    public void setCage(Integer cage)
     {
         _cage = cage;
     }
@@ -93,22 +93,22 @@ public class TemplateLayoutHistoryForm
         _extraContext = extraContext;
     }
 
-    public String getxCoord()
+    public int getxCoord()
     {
         return _xCoord;
     }
 
-    public void setxCoord(String xCoord)
+    public void setxCoord(int xCoord)
     {
         _xCoord = xCoord;
     }
 
-    public String getyCoord()
+    public int getyCoord()
     {
         return _yCoord;
     }
 
-    public void setyCoord(String yCoord)
+    public void setyCoord(int yCoord)
     {
         _yCoord = yCoord;
     }

@@ -60,6 +60,27 @@ public class CageUIManager
         return _cache;
     }
 
+    public int findLastNumberAfterDash(String input) {
+        if (input == null || input.isEmpty()) {
+            throw new IllegalArgumentException("Input string cannot be null or empty");
+        }
+
+        int lastDashIndex = input.lastIndexOf('-');
+
+        if (lastDashIndex == -1) {
+            throw new IllegalArgumentException("No '-' found in the string");
+        }
+
+        String afterLastDash = input.substring(lastDashIndex + 1);
+
+        // Parse the entire number
+        try {
+            return Integer.parseInt(afterLastDash);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("No valid number found after the last '-'");
+        }
+    }
+
     public AllHistoryForm getAllHistory(String room)
     {
         TableInfo table = CageUISchema.getInstance().getAllHistoryTable();

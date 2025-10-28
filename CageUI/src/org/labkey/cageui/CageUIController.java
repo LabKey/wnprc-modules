@@ -47,13 +47,17 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.AllHistoryForm;
+import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
+import org.labkey.cageui.action.RoomHistoryForm;
+import org.labkey.cageui.action.TemplateLayoutHistoryForm;
 import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
+import org.labkey.cageui.model.RoomObject;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -72,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CageUIController extends SpringActionController
 {
@@ -255,6 +260,8 @@ public class CageUIController extends SpringActionController
 
             Cache<String, Map<String, Map<String, Map<String, Object>>>> _cache = CageUIManager.get().getCache();
 
+            BundledForms newSubmissionForms = new BundledForms();
+
             // 1. get row in allHistory to end the current room.
 
             AllHistoryForm allHistoryToEnd = CageUIManager.get().endPreviousAllHistory(prevRoomName, newEndAndStartDate);
@@ -265,6 +272,76 @@ public class CageUIController extends SpringActionController
             // Generate ids for linking history tables together
             String roomHistoryId = CageUIManager.get().checkRoomHistoryChanges(room.getName(), room.getLayoutData());
             String layoutHistoryId = CageUIManager.get().checkRoomLayoutChanges(room.getName(), isTemplateSave, room.getRackGroups(), room.getObjects());
+
+            // Populate new all history with correct IDs
+            allHistoryToStart.setRoomHistoryId(roomHistoryId);
+            if(isTemplateSave){
+                allHistoryToStart.setTemplateHistoryId(layoutHistoryId);
+            }else{
+                allHistoryToStart.setRealHistoryId(layoutHistoryId);
+            }
+            newSubmissionForms.setAllHistoryForm(allHistoryToStart);
+
+            // If no previous room exists OR room history changed, create new room history
+            if (allHistoryToEnd == null || !allHistoryToEnd.getRoomHistoryId().equals(roomHistoryId))
+            {
+                RoomHistoryForm newRoomHistory = new RoomHistoryForm();
+                newRoomHistory.setHistoryId(roomHistoryId);
+                newRoomHistory.setScale(room.getLayoutData().getScale());
+                newRoomHistory.setBorderHeight(room.getLayoutData().getBorderHeight());
+                newRoomHistory.setBorderWidth(room.getLayoutData().getBorderWidth());
+
+                newSubmissionForms.setRoomHistoryForm(newRoomHistory);
+            }
+
+            if(isTemplateSave){
+                ArrayList<TemplateLayoutHistoryForm> newTemplateLayoutHistoryData = new ArrayList<>();
+                // loop through rack groups -> racks -> cages, adding each cage to the template layout history table.
+                for (int i = 0; i < room.getRackGroups().size(); i++)
+                {
+                    RackGroup rackGroup = room.getRackGroups().get(i);
+                    for (int j = 0; j < rackGroup.getRacks().size(); j++)
+                    {
+                        Rack rack = rackGroup.getRacks().get(j);
+                        for (int k = 0; k < rack.getCages().size(); k++)
+                        {
+                            TemplateLayoutHistoryForm currRowData = new TemplateLayoutHistoryForm();
+                            Cage cage = rack.getCages().get(k);
+
+                            currRowData.setHistoryId(layoutHistoryId);
+                            currRowData.setCage(CageUIManager.get().findLastNumberAfterDash(cage.getCageNum()));
+                            currRowData.setRackGroup(CageUIManager.get().findLastNumberAfterDash(rackGroup.getGroupId()));
+                            currRowData.setRack(CageUIManager.get().findLastNumberAfterDash(rack.getItemId()));
+                            if(cage.getExtraContext() != null){
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                String extraContextJson = objectMapper.writeValueAsString(cage.getExtraContext());
+                                currRowData.setExtraContext(extraContextJson);
+                            }
+                            currRowData.setxCoord(rackGroup.getX() + rack.getX() + cage.getX());
+                            currRowData.setyCoord(rackGroup.getY() + rack.getY() + cage.getY());
+                            currRowData.setObjectType(rack.getType().getEffectiveRackType().getNumericValue());
+                            newTemplateLayoutHistoryData.add(currRowData);
+                        }
+                    }
+                }
+
+                // loop through room objects adding each object to the template layout history table.
+                for (int i = 0; i < room.getObjects().size(); i++){
+                    TemplateLayoutHistoryForm currRowData = new TemplateLayoutHistoryForm();
+                    RoomObject roomObject = room.getObjects().get(i);
+                    currRowData.setHistoryId(layoutHistoryId);
+                    currRowData.setObjectType(roomObject.getType().getNumericValue());
+                    if(roomObject.getExtraContext() != null){
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String extraContextJson = objectMapper.writeValueAsString(roomObject.getExtraContext());
+                        currRowData.setExtraContext(extraContextJson);
+                    }
+                    currRowData.setxCoord(roomObject.getX());
+                    currRowData.setyCoord(roomObject.getY());
+                    newTemplateLayoutHistoryData.add(currRowData);
+                }
+                newSubmissionForms.setTemplateLayoutHistoryForm(newTemplateLayoutHistoryData);
+            }
 
 
 

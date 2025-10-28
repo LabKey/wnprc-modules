@@ -133,6 +133,20 @@ public class Rack
             this.sides = sides;
         }
 
+        public RackTypes getEffectiveRackType() {
+            if (isDefault()) {
+                switch (type) {
+                    case CAGE: return RackTypes.DEFAULTCAGE;
+                    case PEN: return RackTypes.DEFAULTPEN;
+                    case TEMPCAGE: return RackTypes.DEFAULTTEMPCAGE;
+                    case PLAYCAGE: return RackTypes.DEFAULTPLAYCAGE;
+                    default: return type; // fallback, though shouldn't happen
+                }
+            } else {
+                return type;
+            }
+        }
+
         public Map<ModLocations, Object> getSides()
         {
             return sides;

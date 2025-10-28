@@ -117,7 +117,7 @@ CREATE TABLE cageui.template_layout_history
     historyid VARCHAR NOT NULL,
     rack_group INTEGER,
     rack INTEGER,
-    cage VARCHAR(50),
+    cage INTEGER,
     object_type INTEGER,
     extra_context VARCHAR,
     x_coord INTEGER NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE cageui.cages
 (
     rowid SERIAL NOT NULL,
     rack INTEGER NOT NULL,
-    cage_number VARCHAR(20) NOT NULL,
+    cage_number INTEGER NOT NULL,
     length INTEGER,
     width INTEGER,
     height INTEGER,

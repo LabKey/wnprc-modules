@@ -4,20 +4,31 @@ import java.util.ArrayList;
 
 public class BundledForms
 {
-    AllHistoryForm _allHistoryForm;
+    AllHistoryForm _newAllHistoryForm;
+    AllHistoryForm _prevAllHistoryForm;
     RoomHistoryForm _roomHistoryForm;
     ArrayList<CageModificationHistoryForm> _cageModificationHistoryForm;
     ArrayList<TemplateLayoutHistoryForm> _templateLayoutHistoryForm;
     ArrayList<LayoutHistoryForm> _layoutHistoryForm;
 
-    public AllHistoryForm getAllHistoryForm()
+    public AllHistoryForm getNewAllHistoryForm()
     {
-        return _allHistoryForm;
+        return _newAllHistoryForm;
     }
 
-    public void setAllHistoryForm(AllHistoryForm allHistoryForm)
+    public void setNewAllHistoryForm(AllHistoryForm allHistoryForm)
     {
-        _allHistoryForm = allHistoryForm;
+        _newAllHistoryForm = allHistoryForm;
+    }
+
+    public AllHistoryForm getPrevAllHistoryForm()
+    {
+        return _prevAllHistoryForm;
+    }
+
+    public void setPrevAllHistoryForm(AllHistoryForm allHistoryForm)
+    {
+        _prevAllHistoryForm = allHistoryForm;
     }
 
     public RoomHistoryForm getRoomHistoryForm(){

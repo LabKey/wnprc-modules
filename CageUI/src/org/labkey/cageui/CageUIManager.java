@@ -18,21 +18,38 @@
 
 package org.labkey.cageui;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.cageui.action.AllHistoryForm;
+import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.RoomHistoryForm;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RoomObject;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +75,154 @@ public class CageUIManager
     public Cache<String, Map<String, Map<String, Map<String, Object>>>> getCache()
     {
         return _cache;
+    }
+
+    // Helper function to wrap arraylist to labkeys List<Map<String, Object>> for data submission
+    public <E> List<Map<String, Object>> convertToMapList(ArrayList<E> objects)
+    {
+        if (objects == null)
+        {
+            return new ArrayList<>();
+        }
+
+        try
+        {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<Map<String, Object>> result = new ArrayList<>();
+
+            for (E object : objects)
+            {
+                if (object != null)
+                {
+                    Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>()
+                    {
+                    });
+                    result.add(map);
+                }
+                else
+                {
+                    result.add(null);
+                }
+            }
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error converting objects to map list", e);
+        }
+    }
+
+    // Helper function to wrap class object to labkeys List<Map<String, Object>> for data submission
+    public <E> List<Map<String, Object>> convertToMapList(E object) {
+        if (object == null) {
+            return Arrays.asList((Map<String, Object>) null);
+        }
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>() {});
+            return Arrays.asList(map);
+        } catch (Exception e) {
+            throw new RuntimeException("Error converting object to map list", e);
+        }
+    }
+
+    /*
+        Helper function that takes the bundled forms and submits them to the appropriate tables
+
+        @param newForms the bundled forms to submit
+        @param user the user submitting the forms
+        @param container the container the forms are being submitted in
+        @return ApiSimpleResponse with success or failure
+     */
+    public ApiSimpleResponse submitLayoutHistory(BundledForms newForms, User user, Container container) throws Exception
+    {
+        BatchValidationException batchErrors = new BatchValidationException();
+        ApiSimpleResponse response = new ApiSimpleResponse();
+        UserSchema cageUISchema = QueryService.get().getUserSchema(user, container, "cageui");
+
+        TableInfo templateLayoutHistoryTable = cageUISchema.getTable("template_layout_history");
+        QueryUpdateService templateQus = templateLayoutHistoryTable.getUpdateService();
+        if (templateQus == null)
+        {
+            throw new IllegalStateException(templateLayoutHistoryTable.getName() + " query update service");
+        }
+
+        TableInfo allHistoryTable = cageUISchema.getTable("all_history");
+        QueryUpdateService allHistoryQus = allHistoryTable.getUpdateService();
+        if (allHistoryQus == null)
+        {
+            throw new IllegalStateException(allHistoryTable.getName() + " query update service");
+        }
+
+        TableInfo layoutHistoryTable = cageUISchema.getTable("layout_history");
+        QueryUpdateService layoutHistoryQus = layoutHistoryTable.getUpdateService();
+        if (layoutHistoryQus == null)
+        {
+            throw new IllegalStateException(layoutHistoryTable.getName() + " query update service");
+        }
+
+        TableInfo roomHistoryTable = cageUISchema.getTable("room_history");
+        QueryUpdateService roomHistoryQus = roomHistoryTable.getUpdateService();
+        if (roomHistoryQus == null)
+        {
+            throw new IllegalStateException(roomHistoryTable.getName() + " query update service");
+        }
+
+        TableInfo cageModHistoryTable = cageUISchema.getTable("cage_modifications_history");
+        QueryUpdateService cageModHistoryQus = cageModHistoryTable.getUpdateService();
+        if (cageModHistoryQus == null)
+        {
+            throw new IllegalStateException(cageModHistoryTable.getName() + " query update service");
+        }
+
+        try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+        {
+
+
+            if (!newForms.getTemplateLayoutHistoryForm().isEmpty())
+            {
+                templateQus.insertRows(user, container, convertToMapList(newForms.getTemplateLayoutHistoryForm()), batchErrors, null, null);
+            }
+
+            if (newForms.getNewAllHistoryForm() != null)
+            {
+                allHistoryQus.insertRows(user, container, convertToMapList(newForms.getNewAllHistoryForm()), batchErrors, null, null);
+            }
+
+            if (newForms.getPrevAllHistoryForm() != null)
+            {
+                allHistoryQus.updateRows(user, container, convertToMapList(newForms.getPrevAllHistoryForm()),null, batchErrors, null, null);
+            }
+
+            if(!newForms.getLayoutHistoryForm().isEmpty()){
+                layoutHistoryQus.insertRows(user, container, convertToMapList(newForms.getLayoutHistoryForm()), batchErrors, null, null);
+            }
+
+            if(newForms.getRoomHistoryForm() != null){
+                roomHistoryQus.insertRows(user, container, convertToMapList(newForms.getRoomHistoryForm()), batchErrors, null, null);
+            }
+
+            if(!newForms.getCageModificationHistoryForm().isEmpty()){
+                cageModHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageModificationHistoryForm()), batchErrors, null, null);
+            }
+
+            if (batchErrors.hasErrors())
+            {
+                response.put("success", false);
+                response.put("errors", batchErrors);
+                return response;
+            }
+            tx.commit();
+            response.put("success", true);
+        }
+        catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
+               SQLException e)
+        {
+            throw new ValidationException(e.getMessage());
+        }
+        return response;
     }
 
     public int findLastNumberAfterDash(String input) {

@@ -240,7 +240,6 @@ public class CageUIController extends SpringActionController
         {
             BatchValidationException batchErrors = new BatchValidationException();
             JSONObject json = form.getJsonObject();
-            ApiSimpleResponse response = new ApiSimpleResponse();
 
             JSONArray jsonModsArray = json.getJSONArray("mods");
             JSONObject jsonRoom = json.getJSONObject("room");
@@ -280,7 +279,11 @@ public class CageUIController extends SpringActionController
             }else{
                 allHistoryToStart.setRealHistoryId(layoutHistoryId);
             }
-            newSubmissionForms.setAllHistoryForm(allHistoryToStart);
+            newSubmissionForms.setNewAllHistoryForm(allHistoryToStart);
+
+            if(allHistoryToEnd != null){
+                newSubmissionForms.setPrevAllHistoryForm(allHistoryToEnd);
+            }
 
             // If no previous room exists OR room history changed, create new room history
             if (allHistoryToEnd == null || !allHistoryToEnd.getRoomHistoryId().equals(roomHistoryId))
@@ -457,7 +460,7 @@ public class CageUIController extends SpringActionController
             }
 */
 
-            return response;
+            return CageUIManager.get().submitLayoutHistory(newSubmissionForms, getUser(), getContainer());
         }
     }
 

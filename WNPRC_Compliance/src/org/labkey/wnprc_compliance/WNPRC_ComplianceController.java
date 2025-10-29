@@ -292,7 +292,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
             try {
 
                 AccessReportService service = new AccessReportService(getUser(), getContainer());
-                service.importReport(input);
+                service.importReport(input, filename);
                 writer.write("Handled file: " + filename);
             }
             catch (Throwable e) {

@@ -25,14 +25,13 @@ import java.util.regex.Pattern;
  */
 public class AccessReportRowParser {
     enum ColumnName {
-        FIRST_NAME      (false, "Name (Last, First, Middle)"),
-        LAST_NAME       (false, "Name (Last, First, Middle)"),
-        MIDDLE_NAME     (false, "Name (Last, First, Middle)"),
-        CARD_NUMBER     (true,  "Badge ID(Issue)"),
+        FIRST_NAME      (false, "First Name"),
+        LAST_NAME       (false, "Last Name"),
+        MIDDLE_NAME     (false, "Middle Name"),
+        CARD_NUMBER     (true,  "Badge ID"),
         CARD_ISSUED     (false,  "Badge Active"),
         CARD_EXPIRE     (false,  "Badge Deactive"),
         BADGE_TYPE (false,  "Badge Type"),
-        CARD_ISSUE_CODE (false,  "Badge Id(Issue)"),
         ;
 
         boolean required;
@@ -137,11 +136,10 @@ public class AccessReportRowParser {
 
                     if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty())
                     {
-                        Matcher matcher = Pattern.compile("(\\d+)\\s*\\((\\d+)\\)").matcher(cell.getStringCellValue());
+                        Matcher matcher = Pattern.compile("(\\d+)").matcher(cell.getStringCellValue());
                         if (matcher.find())
                         {
                             values.put(ColumnName.CARD_NUMBER, matcher.group(1));
-                            values.put(ColumnName.CARD_ISSUE_CODE, matcher.group(2));
                         }
                     }
                 }
@@ -187,9 +185,6 @@ public class AccessReportRowParser {
         public Date getCardExpire() {
             return (Date) this.values.get(ColumnName.CARD_EXPIRE);
         }
-        public String getIssueCode() {
-            return (String) this.values.get(ColumnName.CARD_ISSUE_CODE);
-        }
         public String getCardType() {
             return (String) this.values.get(ColumnName.BADGE_TYPE);
         }
@@ -216,8 +211,9 @@ public class AccessReportRowParser {
     }
 
     public static Date parseDate(String dateString) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ssa");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd.yy");
         SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat fullDateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ssa");
 
         Date date;
 
@@ -229,7 +225,12 @@ public class AccessReportRowParser {
                 date = shortDateFormat.parse(dateString);
             }
             catch(ParseException e2) {
-                throw new ApiUsageException("Unrecognized Date format: " + dateString);
+                try {
+                    date = fullDateFormat.parse(dateString);
+                }
+                catch(ParseException e3) {
+                    throw new ApiUsageException("Unrecognized Date format: " + dateString);
+                }
             }
         }
 

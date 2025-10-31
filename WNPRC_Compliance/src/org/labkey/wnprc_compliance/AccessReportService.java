@@ -94,77 +94,19 @@ public class AccessReportService {
         }
 
         Map<String, JSONObject> cardInfos = new HashMap<>();
-        List<Map<String, Object>> accessData = new ArrayList<>();
-
-
-        //if the cell contains Prim and Barrier
-        //Pattern accessLevelPattern = Pattern.compile("Access Level:\\s*");
-
         Iterator<Row> rows = sheet.rowIterator();
         AccessReportRowParser rowParser = new AccessReportRowParser(columnHeaderRow);
-        String accessLevel = "";
-        outer:
         while (rows.hasNext()) {
             Row currentRow = rows.next();
             // Skip header row
             if(currentRow.getRowNum() == 0){
                 continue;
             }
-            /*Row currentRow = rows.next();
-            //don't parse items until we reach the main block
-            if (currentRow.getRowNum() < 8)
-            {
-                continue;
-            }
-            if (currentRow.getCell(4) == null)
-            {
-                continue;
-            }
-            String firstCellText = currentRow.getCell(0).getStringCellValue();
 
-            //Matcher accessLevelMatcher = accessLevelPattern.matcher(firstCellText);
-            //we've encountered an access level block of text
-            //we can grab the header and skip a row
-            if (accessLevelMatcher.matches())
-            {
-                accessLevel = currentRow.getCell(4).getStringCellValue();
-
-                // We are about to go into a block of values.  First, eat the blank line
-                rows.next();
-
-                // Now eat the header line
-                Row headerRow = rows.next();
-                //sets up the column names from the header row?
-
-                //
-                rowParser = new AccessReportRowParser(headerRow);
-
-                currentRow = rows.next();
-            }
-            if (rowParser == null)
-            {
-                continue;
-            }*/
-            Pair<AccessReportRowParser.CardInfo, AccessReportRowParser.AccessInfo> results = rowParser.parseRow(reportid, currentRow, container);
-            AccessReportRowParser.CardInfo cardInfo = results.first;
-            AccessReportRowParser.AccessInfo accessInfo = results.second;
+            AccessReportRowParser.CardInfo cardInfo = rowParser.parseRow(currentRow);
 
             if (cardInfo.getValues().isEmpty())
                 continue;
-
-
-            //end of spreadsheet pattern
-            Pattern endOfSheetPattern = Pattern.compile("Total Badges Required for Download:");
-            if (endOfSheetPattern.matcher(cardInfo.getFirstName()).matches())
-            {
-                int getNumCards = (int) currentRow.getCell(10).getNumericCellValue();
-                if (cardInfos.size() != getNumCards)
-                {
-                    throw new RuntimeException("Card number does not equal total badge count in sheet, upload failed.");
-                }
-                break;
-            }
-
 
             String cardNumber = cardInfo.getCardNumber();
             if (cardNumber == null || cardNumber.equals(""))
@@ -186,14 +128,6 @@ public class AccessReportService {
             cardInfoJSON.put("container", container.getId());
 
             cardInfos.put(cardNumber, cardInfoJSON);
-
-            JSONObject accessInfoJSON = new JSONObject();
-            accessInfoJSON.put("report_id", reportid);
-            accessInfoJSON.put("access_level", accessLevel);
-            accessInfoJSON.put("card_id",   cardNumber);
-            accessInfoJSON.put("container", container.getId());
-
-            accessData.add(accessInfoJSON.toMap());
         }
 
         try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
@@ -213,9 +147,6 @@ public class AccessReportService {
                 cardsList.add(json.toMap());
             }
             cardsUpdater.upsert(cardsList);
-
-            SimpleQueryUpdater dataUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "access_report_data");
-            dataUpdater.upsert(accessData);
 
             List<Map<String, Object>> cardInfoList = new ArrayList<>(cardInfos.values().stream().map(JSONObject::toMap).toList());
             SimpleQueryUpdater cardInfoUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "card_info");

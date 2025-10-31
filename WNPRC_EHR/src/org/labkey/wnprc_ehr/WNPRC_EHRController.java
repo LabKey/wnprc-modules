@@ -2486,7 +2486,12 @@ public class WNPRC_EHRController extends SpringActionController
                 SimpleFilter demographicsFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
                 String[] demographicsTargetColumns = new String[]{"Id", "calculated_status"};
                 ArrayList<HashMap<String, String>> demographicsRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", demographicsFilter, null, demographicsTargetColumns);
-                if (!demographicsRows.isEmpty()) {
+                if (demographicsRows.isEmpty()) {
+                    response.put("detailedResponse", "Animal " + recordId + " does not currently exist at the center.");
+                    response.put("success", false);
+                    return response;
+                }
+                else {
                     if (!demographicsRows.get(0).get("calculated_status").equals("Alive")) {
                         response.put("detailedResponse", "Animal " + recordId + " is not currently alive at the center.");
                         response.put("success", false);

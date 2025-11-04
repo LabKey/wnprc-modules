@@ -21,6 +21,8 @@ import { FC, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { Button } from 'react-bootstrap';
+import { CreateRackPopup } from './CreateRackPopup';
 
 
 interface ChangeRackProps {
@@ -30,9 +32,11 @@ interface ChangeRackProps {
 export const ChangeRack: FC<ChangeRackProps> = (props) => {
     const {onSubmit} = props;
 
-    const [options, setOptions] = useState<{value: string, label: string}[]>(null);
+    const [options, setOptions] = useState<{value: number, label: string}[]>([]);
+    const [showCreateRackPopup, setShowCreateRackPopup] = useState<boolean>(false);
 
     const handleChange = (newVal) => {
+        console.log("newVal", newVal);
         onSubmit(newVal);
     };
 
@@ -70,15 +74,32 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
     }, [options]);
 
     return (
-        <div className="context-menu-row">
-            <div className="context-menu-input">
-                <Select
-                    options={options}
-                    className={"select-menu"}
-                    classNamePrefix={"select"}
-                    onChange={handleChange}
-                />
+        <>
+            <div className="context-menu-row">
+                <div className="context-menu-input menu-item">
+                    <Select
+                        options={options}
+                        className={"select-menu"}
+                        classNamePrefix={"select"}
+                        onChange={handleChange}
+                    />
+                </div>
+                <Button
+                    variant="secondary"
+                    className={"menu-item"}
+                    onClick={() => setShowCreateRackPopup(true)}
+                >
+                    Create Rack
+                </Button>
             </div>
-        </div>
+            {showCreateRackPopup &&
+                <CreateRackPopup
+                        showCreateRackPopup={setShowCreateRackPopup}
+                        currentRackOptions={options}
+                        setRackOptions={setOptions}
+                />
+            }
+        </>
+
     );
 }

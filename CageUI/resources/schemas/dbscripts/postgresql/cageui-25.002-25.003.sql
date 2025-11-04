@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS cageui.racks;
 CREATE TABLE cageui.racks
 (
     rowid SERIAL NOT NULL,
-    room VARCHAR NOT NULL,
+    room VARCHAR,
     rackid INTEGER NOT NULL,
     rack_type varchar(50) NOT NULL,
     container         entityid NOT NULL,

@@ -35,6 +35,7 @@ public class CageUIUserSchema extends SimpleUserSchema
     public static final String ROOM_HISTORY_TABLE = "room_history";
     public static final String ALL_HISTORY_TABLE = "all_history";
     public static final String TEMPLATE_LAYOUT_HISTORY_TABLE = "template_layout_history";
+    public static final String CAGE_HISTORY_TABLE = "cage_history";
     public static final String RACK_TYPES_TABLE = "rack_types";
     public static final String CAGES_TABLE = "cages";
     public static final String RACKS_TABLE = "racks";
@@ -95,6 +96,19 @@ public class CageUIUserSchema extends SimpleUserSchema
                         if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
                         {
                             return new TemplateLayoutHistoryTable(schema, CageUISchema.getInstance().getTemplateLayoutHistoryTable(), cf).init();
+                        }
+
+                        return null;
+                    }
+                },
+        cage_history
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
+                        {
+                            return new CageHistoryTable(schema, CageUISchema.getInstance().getCageHistoryTable(), cf).init();
                         }
 
                         return null;

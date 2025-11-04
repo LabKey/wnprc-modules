@@ -71,6 +71,11 @@ public class CageUISchema {
         return getSchema().getTable(CageUIUserSchema.TEMPLATE_LAYOUT_HISTORY_TABLE);
     }
 
+    public TableInfo getCageHistoryTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.CAGE_HISTORY_TABLE);
+    }
+
     public TableInfo getRackTypesTable()
     {
         return getSchema().getTable(CageUIUserSchema.RACK_TYPES_TABLE);

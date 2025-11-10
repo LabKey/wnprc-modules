@@ -96,21 +96,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
-    // TODO: Remove this action? exemptCards.jsp is empty!
-    @ActionNames("exemptCards")
-    @RequiresPermission(ComplianceAdminPermission.class)
-    public class ExemptCardsPage extends HRJspPageAction {
-        @Override
-        public String getPathToJsp() {
-            return "/org/labkey/wnprc_compliance/view/exemptCards.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Exempt Cards";
-        }
-    }
-
     @ActionNames("enterTBPage")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class NewUserPage extends HRJspPageAction {
@@ -333,23 +318,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
             return "Upload Access Report";
         }
     }
-
-
-    // TODO: Delete this action? personSearch.jsp does not exist!
-    @ActionNames("personSearchPage")
-    @RequiresPermission(ComplianceAdminPermission.class)
-    public class PersonSearchPage extends HRJspPageAction {
-        @Override
-        public String getPathToJsp() {
-            return "/org/labkey/wnprc_compliance/view/personSearch.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Unidentified Cards";
-        }
-    }
-
 
     @ActionNames("personSearch")
     @RequiresPermission(ComplianceAdminPermission.class)

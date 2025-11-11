@@ -66,19 +66,19 @@ export const fetchCageHistory = async (historyid: string): Promise<CageHistoryDa
     }
 }
 
-export const fetchCage = async (rowid: number): Promise<CageData> => {
+export const fetchCage = async (objectId: string): Promise<CageData> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cages',
-        filterArray: [Filter.create('rowid', rowid, Filter.Types.EQUAL)]
+        filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]
     }
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-
         if(res.rows.length === 1){
             return {
                 rowid: res.rows[0].rowid,
+                objectId: res.rows[0].objectid,
                 rack: res.rows[0].rack,
                 cageNum: res.rows[0].cage_number,
                 width: res.rows[0].width,
@@ -93,11 +93,11 @@ export const fetchCage = async (rowid: number): Promise<CageData> => {
     }
 }
 
-export const fetchRack = async (rowid: number): Promise<RackData> => {
+export const fetchRack = async (objectId: string): Promise<RackData> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'racks',
-        filterArray: [Filter.create('rowid', rowid, Filter.Types.EQUAL)]
+        filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]
     }
 
     try {
@@ -106,7 +106,8 @@ export const fetchRack = async (rowid: number): Promise<RackData> => {
         if(res.rows.length === 1){
             return {
                 rowid: res.rows[0].rowid,
-                rackid: res.rows[0].rackid,
+                objectId: res.rows[0].objectid,
+                rackId: res.rows[0].rackid,
                 room: res.rows[0].room,
                 rackType: res.rows[0].rack_type,
             };

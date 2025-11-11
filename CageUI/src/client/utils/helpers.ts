@@ -543,7 +543,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 schemaName: 'cageui',
                 queryName: 'racks',
                 filterArray: [
-                    Filter.create('rowid', rackItem.rack, Filter.Types.EQUALS)
+                    Filter.create('objectid', rackItem.rack, Filter.Types.EQUALS)
                 ]
             };
             rackData = await labkeyActionSelectWithPromise(optConfig);
@@ -557,7 +557,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             rack = rackGroup.racks.find(r => `default-rack-${rackIdNum}` === r.itemId);
         }
 
-        console.log('rack', rack);
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
@@ -1061,6 +1060,5 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
             areRacksConnected(currRack, group.racks[i]);
         }
     }
-    console.log(`XXX Rack: ${currRack}`, connections)
     return connections;
 }

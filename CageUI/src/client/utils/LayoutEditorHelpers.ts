@@ -85,7 +85,7 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
                 xCoord: item.xCoord,
                 yCoord: item.yCoord,
                 rackGroup: cageHistory.rackGroup,
-                rack: rackData.rackid,
+                rack: rackData.objectId,
                 cage: cageData.cageNum
             }
         }

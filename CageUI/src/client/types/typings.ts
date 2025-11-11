@@ -240,14 +240,17 @@ export interface CageHistoryData {
     historyId: string;
     modHistoryId?: string;
     animalHistoryId?: string;
-    cage: number; // rowid of cage in cages table
+    // objectid of cage in cages table
+    cage: string;
     rackGroup: number;
 }
 
 // interface for cageui.cages table
 export interface CageData {
     rowid: number;
-    rack: number;
+    objectId: string;
+    // objectid of rack in racks table
+    rack: string;
     cageNum: string;
     length: number;
     width: number;
@@ -257,8 +260,9 @@ export interface CageData {
 // interface for cageui.racks table
 export interface RackData {
     rowid: number;
+    objectId: string;
     room: string;
-    rackid: number;
+    rackId: number;
     rackType: number;
 }
 
@@ -266,7 +270,8 @@ export interface FullObjectHistoryData {
     objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
     extraContext: string | null;
     rackGroup?: number;
-    rack?: number; // row id of rack in racks table
+    // objectid of rack in racks table
+    rack?: string;
     cage?: string;
     xCoord: number;
     yCoord: number;

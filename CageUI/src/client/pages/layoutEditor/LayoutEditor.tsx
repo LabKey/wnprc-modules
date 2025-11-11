@@ -115,7 +115,6 @@ export const LayoutEditor: FC<any> = () => {
             }
             const allHistRes = await labkeyActionSelectWithPromise(allHistoryCfg);
             if (allHistRes.rowCount === 1) {
-                console.log(allHistRes)
                 const allHistObj = allHistRes.rows[0];
                 if (allHistObj.history_type === "template") {
                     historyTable = "template_layout_history"
@@ -206,7 +205,6 @@ export const LayoutEditor: FC<any> = () => {
     // Converts data from ehr into layout editor objects for use seen in typings
     useEffect(() => {
         if(prevRoomData.name !== null){
-            console.log("prevRoom: ", prevRoomData);
             let newLocalRoom: Room;
             let isTemplate: boolean; // this template is a real template room, not a room saved with defaults
             let newUnitLocs: UnitLocations;

@@ -31,8 +31,8 @@
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>cages</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="mod_historyid"/>

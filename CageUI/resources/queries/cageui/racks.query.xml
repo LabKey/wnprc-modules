@@ -25,6 +25,7 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
+                    <column columnName="objectid"/>
                     <column columnName="room">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>

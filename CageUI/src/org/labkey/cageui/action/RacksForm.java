@@ -1,14 +1,19 @@
 package org.labkey.cageui.action;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.json.JSONObject;
 import org.labkey.cageui.model.RackTypes;
 
 public class RacksForm
 {
     private int _rowid;
-    private int _rackid;
+    @JsonProperty("objectid")
+    private String _objectId;
+    @JsonProperty("rackid")
+    private int _rackId;
     private String _room;
-    private RackTypes _rack_type;
+    @JsonProperty("rack_type")
+    private int _rackType; // rowid of racktype
 
     public int getRowid()
     {
@@ -20,14 +25,24 @@ public class RacksForm
         _rowid = rowid;
     }
 
-    public int getRackid()
+    public String getObjectId()
     {
-        return _rackid;
+        return _objectId;
     }
 
-    public void setRackid(int rackid)
+    public void setObjectId(String objectId)
     {
-        _rackid = rackid;
+        _objectId = objectId;
+    }
+
+    public int getRackId()
+    {
+        return _rackId;
+    }
+
+    public void setRackId(int rackId)
+    {
+        _rackId = rackId;
     }
 
     public String getRoom()
@@ -40,14 +55,14 @@ public class RacksForm
         _room = room;
     }
 
-    public RackTypes getRack_type()
+    public int getRackType()
     {
-        return _rack_type;
+        return _rackType;
     }
 
-    public void setRack_type(RackTypes rack_type)
+    public void setRackType(int rackType)
     {
-        _rack_type = rack_type;
+        _rackType = rackType;
     }
 
     public JSONObject toJSON()
@@ -55,9 +70,10 @@ public class RacksForm
         JSONObject json = new JSONObject();
 
         json.put("rowid", getRowid());
-        json.put("rackid", getRackid());
+        json.put("objectid", getObjectId());
+        json.put("rackid", getRackId());
         json.put("room", getRoom());
-        json.put("rack_type", getRack_type().toString());
+        json.put("rack_type", getRackType());
 
         return json;
     }

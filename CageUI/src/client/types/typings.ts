@@ -149,7 +149,7 @@ export type CageModification = {
 }
 
 export interface Cage {
-    id: CageSvgId; // unique id
+    id: CageSvgId; // unique id for svg
     localRackId: number; // Id local to rack
     selectionType: SelectionType;
     cageNum: CageNumber; // Id local to room

@@ -43,13 +43,19 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.cageui.action.AllHistoryForm;
 import org.labkey.cageui.action.BundledForms;
+import org.labkey.cageui.action.CageHistoryForm;
+import org.labkey.cageui.action.CagesForm;
+import org.labkey.cageui.action.LayoutHistoryForm;
+import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RoomHistoryForm;
+import org.labkey.cageui.action.TemplateLayoutHistoryForm;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RoomObject;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -177,11 +183,32 @@ public class CageUIManager
             throw new IllegalStateException(cageModHistoryTable.getName() + " query update service");
         }
 
+        TableInfo cageHistoryTable = cageUISchema.getTable("cage_history");
+        QueryUpdateService cageHistoryQus = cageHistoryTable.getUpdateService();
+        if (cageHistoryQus == null)
+        {
+            throw new IllegalStateException(cageHistoryTable.getName() + " query update service");
+        }
+
+        TableInfo cagesTable = cageUISchema.getTable("cages");
+        QueryUpdateService cagesQus = cagesTable.getUpdateService();
+        if (cagesQus == null)
+        {
+            throw new IllegalStateException(cagesTable.getName() + " query update service");
+        }
+
+        TableInfo racksTable = cageUISchema.getTable("racks");
+        QueryUpdateService racksQus = racksTable.getUpdateService();
+        if (racksQus == null)
+        {
+            throw new IllegalStateException(racksTable.getName() + " query update service");
+        }
+
         try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
         {
 
 
-            if (!newForms.getTemplateLayoutHistoryForm().isEmpty())
+            if (newForms.getTemplateLayoutHistoryForm() != null)
             {
                 templateQus.insertRows(user, container, convertToMapList(newForms.getTemplateLayoutHistoryForm()), batchErrors, null, null);
             }
@@ -196,7 +223,7 @@ public class CageUIManager
                 allHistoryQus.updateRows(user, container, convertToMapList(newForms.getPrevAllHistoryForm()),null, batchErrors, null, null);
             }
 
-            if(!newForms.getLayoutHistoryForm().isEmpty()){
+            if(newForms.getLayoutHistoryForm() != null){
                 layoutHistoryQus.insertRows(user, container, convertToMapList(newForms.getLayoutHistoryForm()), batchErrors, null, null);
             }
 
@@ -204,8 +231,20 @@ public class CageUIManager
                 roomHistoryQus.insertRows(user, container, convertToMapList(newForms.getRoomHistoryForm()), batchErrors, null, null);
             }
 
-            if(!newForms.getCageModificationHistoryForm().isEmpty()){
+            if(newForms.getCageModificationHistoryForm() != null){
                 cageModHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageModificationHistoryForm()), batchErrors, null, null);
+            }
+
+            if(newForms.getCagesForm() != null){
+                cagesQus.insertRows(user, container, convertToMapList(newForms.getCagesForm()), batchErrors, null, null);
+            }
+
+            if(newForms.getRacksForm() != null){
+                racksQus.insertRows(user, container, convertToMapList(newForms.getRacksForm()), batchErrors, null, null);
+            }
+
+            if(newForms.getCageHistoryForm() != null){
+                cageHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageHistoryForm()), batchErrors, null, null);
             }
 
             if (batchErrors.hasErrors())
@@ -246,6 +285,20 @@ public class CageUIManager
         }
     }
 
+    public ArrayList<TemplateLayoutHistoryForm> getTemplateLayoutHistory(String historyId)
+    {
+        TableInfo table = CageUISchema.getInstance().getTemplateLayoutHistoryTable();
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
+        TableSelector selector = new TableSelector(table, filter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        TypeReference<ArrayList<TemplateLayoutHistoryForm>> typeRef = new TypeReference<ArrayList<TemplateLayoutHistoryForm>>() {};
+        ArrayList<TemplateLayoutHistoryForm> history = mapper.convertValue(selector.getMapArray(), typeRef);
+        return history;
+    }
+
     public AllHistoryForm getAllHistory(String room)
     {
         TableInfo table = CageUISchema.getInstance().getAllHistoryTable();
@@ -260,17 +313,75 @@ public class CageUIManager
         return allHistory;
     }
 
-    public RoomHistoryForm getRoomHistory(String historyid)
+    public RoomHistoryForm getRoomHistory(String historyId)
     {
         TableInfo table = CageUISchema.getInstance().getRoomHistoryTable();
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("historyid"), historyid, CompareType.EQUAL);
+        filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
         TableSelector selector = new TableSelector(table, filter, null);
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         RoomHistoryForm roomHistory = mapper.convertValue(selector.getMap(), RoomHistoryForm.class);
         return roomHistory;
+    }
+
+    public RackTypesForm getRackType(int rowid)
+    {
+        TableInfo table = CageUISchema.getInstance().getRackTypesTable();
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("rowid"), rowid, CompareType.EQUAL);
+        TableSelector selector = new TableSelector(table, filter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        RackTypesForm rackType = mapper.convertValue(selector.getMap(), RackTypesForm.class);
+        return rackType;
+    }
+
+    public CagesForm getCageForm(String rackObjectId)
+    {
+        TableInfo table = CageUISchema.getInstance().getRackTypesTable();
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("rack"), rackObjectId, CompareType.EQUAL);
+        TableSelector selector = new TableSelector(table, filter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        CagesForm cage = mapper.convertValue(selector.getMap(), CagesForm.class);
+        return cage;
+    }
+
+    // Gets all the cage history for a real layout given that layouts historyId
+    public ArrayList<CageHistoryForm> getCageHistory(String historyId)
+    {
+        // First, find all cages within the layout history table given the historyId
+        TableInfo layoutHistoryTable = CageUISchema.getInstance().getLayoutHistoryTable();
+        SimpleFilter layoutHistoryFilter = new SimpleFilter();
+        layoutHistoryFilter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
+        layoutHistoryFilter.addCondition(FieldKey.fromString("cage_historyid"), null, CompareType.NONBLANK);
+        TableSelector layoutHistorySelector = new TableSelector(layoutHistoryTable, layoutHistoryFilter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        TypeReference<ArrayList<LayoutHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<LayoutHistoryForm>>() {};
+        ArrayList<LayoutHistoryForm> layoutHistory = mapper.convertValue(layoutHistorySelector.getMapArray(), layoutHistoryTypeRef);
+
+        ArrayList<String> cageHistoryIds = new ArrayList<>();
+        for (int i = 0; i < layoutHistory.size(); i++)
+        {
+            cageHistoryIds.add(layoutHistory.get(i).getCageHistoryId());
+        }
+
+
+        TableInfo cageHistoryTable = CageUISchema.getInstance().getCageHistoryTable();
+        SimpleFilter cageHistoryFilter = new SimpleFilter();
+        cageHistoryFilter.addCondition(FieldKey.fromString("historyid"), cageHistoryIds, CompareType.IN);
+        TableSelector cageHistorySelector = new TableSelector(cageHistoryTable, cageHistoryFilter, null);
+        TypeReference<ArrayList<CageHistoryForm>> cageHistoryTypeRef = new TypeReference<ArrayList<CageHistoryForm>>() {};
+        ArrayList<CageHistoryForm> cageHistory = mapper.convertValue(cageHistorySelector.getMapArray(), cageHistoryTypeRef);
+
+        return cageHistory;
     }
 
     // ends an all history row
@@ -292,6 +403,8 @@ public class CageUIManager
         {
             allHistoryToStart.setValid(false);
             allHistoryToStart.setHistoryType("template");
+        }else{
+            allHistoryToStart.setHistoryType("real");
         }
         return allHistoryToStart;
     }
@@ -348,7 +461,9 @@ public class CageUIManager
             boolean isPrevRoomTemplate = allHistory.getHistoryType().equals("template");
             // Saving new room as template from a previous template room
             if(isNewRoomTemplate && isPrevRoomTemplate){
+                ArrayList<TemplateLayoutHistoryForm> templateHistory = getTemplateLayoutHistory(allHistory.getTemplateHistoryId());
                 System.out.println("Saving new room as template from a previous template room");
+                //TODO determine if changes were made, if not then reuse old historyid, otherwise use new historyid
             }else if(!isNewRoomTemplate && isPrevRoomTemplate){ // Saving new room as real room from previous template room
                 System.out.println("Saving new room as real room from previous template room");
             }else if(isNewRoomTemplate && !isPrevRoomTemplate){ // Saving new room as template from previous real room

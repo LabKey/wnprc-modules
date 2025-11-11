@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS cageui.racks;
 CREATE TABLE cageui.racks
 (
     rowid SERIAL NOT NULL,
+    objectid VARCHAR NOT NULL,
     room VARCHAR,
     rackid INTEGER NOT NULL,
     rack_type varchar(50) NOT NULL,
@@ -135,7 +136,8 @@ DROP TABLE IF EXISTS cageui.cages;
 CREATE TABLE cageui.cages
 (
     rowid SERIAL NOT NULL,
-    rack INTEGER NOT NULL,
+    objectid VARCHAR NOT NULL,
+    rack VARCHAR NOT NULL,
     cage_number INTEGER NOT NULL,
     length INTEGER,
     width INTEGER,
@@ -192,7 +194,7 @@ CREATE TABLE cageui.cage_history
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
     rack_group INTEGER NOT NULL,
-    cage INTEGER NOT NULL,
+    cage VARCHAR NOT NULL,
     mod_historyid VARCHAR,
     container         entityid NOT NULL,
     createdby         userid,

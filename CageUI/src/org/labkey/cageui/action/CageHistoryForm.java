@@ -9,7 +9,7 @@ public class CageHistoryForm
     private String _historyId;
     @JsonProperty("rack_group")
     private int _rackGroup;
-    private int _cage;
+    private String _cage;
     @JsonProperty("mod_historyid")
     private String _modHistoryId;
 
@@ -43,12 +43,12 @@ public class CageHistoryForm
         _rackGroup = rackGroup;
     }
 
-    public int getCage()
+    public String getCage()
     {
         return _cage;
     }
 
-    public void setCage(int cage)
+    public void setCage(String cage)
     {
         _cage = cage;
     }

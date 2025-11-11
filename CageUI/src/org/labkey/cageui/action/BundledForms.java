@@ -10,6 +10,9 @@ public class BundledForms
     ArrayList<CageModificationHistoryForm> _cageModificationHistoryForm;
     ArrayList<TemplateLayoutHistoryForm> _templateLayoutHistoryForm;
     ArrayList<LayoutHistoryForm> _layoutHistoryForm;
+    ArrayList<CageHistoryForm> _cageHistoryForm;
+    ArrayList<RacksForm> _racksForm;
+    ArrayList<CagesForm> _cagesForm;
 
     public AllHistoryForm getNewAllHistoryForm()
     {
@@ -68,5 +71,33 @@ public class BundledForms
     public void setLayoutHistoryForm(ArrayList<LayoutHistoryForm> layoutHistoryForm)
     {
         _layoutHistoryForm = layoutHistoryForm;
+    }
+
+    public ArrayList<CageHistoryForm> getCageHistoryForm()
+    {
+        return _cageHistoryForm;
+    }
+
+    public void setCageHistoryForm(ArrayList<CageHistoryForm> cageHistoryForm)
+    {
+        _cageHistoryForm = cageHistoryForm;
+    }
+
+    public ArrayList<RacksForm> getRacksForm(){
+        return _racksForm;
+    }
+
+    public void setRacksForm(ArrayList<RacksForm> racksForm)
+    {
+        _racksForm = racksForm;
+    }
+
+    public ArrayList<CagesForm> getCagesForm()
+    {
+        return _cagesForm;
+    }
+
+    public void setCagesForm(ArrayList<CagesForm> cagesForm){
+        _cagesForm = cagesForm;
     }
 }

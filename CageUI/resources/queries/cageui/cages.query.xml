@@ -25,11 +25,12 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
+                    <column columnName="objectid"/>
                     <column columnName="rack">
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>racks</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
+                            <fkColumnName>objectid</fkColumnName>
                             <fkDisplayColumnName>rackid</fkDisplayColumnName>
                         </fk>
                     </column>

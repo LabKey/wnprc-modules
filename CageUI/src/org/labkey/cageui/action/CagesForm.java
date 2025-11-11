@@ -1,11 +1,19 @@
 package org.labkey.cageui.action;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.json.JSONObject;
+
 public class CagesForm
 {
     private int _rowid;
-    private int _rack;
-    private String _cageNum;
-    private boolean _isDefault;
+    @JsonProperty("objectid")
+    private String _objectId;
+    private String _rack;
+    @JsonProperty("cage_number")
+    private int _cageNumber;
+    private Integer _length;
+    private Integer _width;
+    private Integer _height;
 
     public int getRowid()
     {
@@ -17,33 +25,79 @@ public class CagesForm
         _rowid = rowid;
     }
 
-    public int getRack()
+    public String getObjectId()
+    {
+        return _objectId;
+    }
+
+    public void setObjectId(String objectId)
+    {
+        _objectId = objectId;
+    }
+
+    public String getRack()
     {
         return _rack;
     }
 
-    public void setRack(int rack)
+    public void setRack(String rack)
     {
         _rack = rack;
     }
 
-    public String getCageNum()
+    public int getCageNumber()
     {
-        return _cageNum;
+        return _cageNumber;
     }
 
-    public void setCageNum(String cageNum)
+    public void setCageNumber(int cageNumber)
     {
-        _cageNum = cageNum;
+        _cageNumber = cageNumber;
     }
 
-    public boolean isDefault()
+    public Integer getLength()
     {
-        return _isDefault;
+        return _length;
     }
 
-    public void setDefault(boolean aDefault)
+    public void setLength(Integer length)
     {
-        _isDefault = aDefault;
+        _length = length;
+    }
+
+    public Integer getWidth()
+    {
+        return _width;
+    }
+
+    public void setWidth(Integer width)
+    {
+        _width = width;
+    }
+
+    public Integer getHeight()
+    {
+        return _height;
+    }
+
+    public void setHeight(Integer height)
+    {
+        _height = height;
+    }
+
+    public JSONObject toJSON()
+    {
+        JSONObject json = new JSONObject();
+
+        json.put("rowid", getRowid());
+        json.put("objectid", getObjectId());
+        json.put("rack", getRack());
+        json.put("cage_number", getCageNumber());
+        json.put("length", getLength());
+        json.put("width", getWidth());
+        json.put("height", getHeight());
+
+        return json;
     }
 }
+

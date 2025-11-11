@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class AllHistoryForm
 {
-    private int _rowid;
+    private Integer _rowid;
     private String _room;
     private boolean _valid;
     @JsonProperty("history_type")
@@ -35,12 +35,12 @@ public class AllHistoryForm
         _room = room;
     }
 
-    public int getRowid()
+    public Integer getRowid()
     {
         return _rowid;
     }
 
-    public void setRowid(int rowid)
+    public void setRowid(Integer rowid)
     {
         _rowid = rowid;
     }

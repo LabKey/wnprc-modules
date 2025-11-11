@@ -36,6 +36,7 @@
     <table tableName="racks" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
+            <column columnName="objectid"/>
             <column columnName="room"/>
             <column columnName="rackid"/>
             <column columnName="rack_type"/>
@@ -97,6 +98,7 @@
     <table tableName="cages" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
+            <column columnName="objectid"/>
             <column columnName="rack"/>
             <column columnName="cage_number"/>
             <column columnName="length"/>

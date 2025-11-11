@@ -19,9 +19,9 @@ public class LayoutHistoryForm
     @JsonProperty("extra_context")
     private String _extraContext;
     @JsonProperty("x_coord")
-    private String _xCoord;
+    private int _xCoord;
     @JsonProperty("y_coord")
-    private String _yCoord;
+    private int _yCoord;
 
 
     public int getRowid()
@@ -54,22 +54,22 @@ public class LayoutHistoryForm
         _extraContext = extraContext;
     }
 
-    public String getxCoord()
+    public int getxCoord()
     {
         return _xCoord;
     }
 
-    public void setxCoord(String xCoord)
+    public void setxCoord(int xCoord)
     {
         _xCoord = xCoord;
     }
 
-    public String getyCoord()
+    public int getyCoord()
     {
         return _yCoord;
     }
 
-    public void setyCoord(String yCoord)
+    public void setyCoord(int yCoord)
     {
         _yCoord = yCoord;
     }

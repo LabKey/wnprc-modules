@@ -25,7 +25,7 @@ import {
     DefaultRackId,
     GroupId,
     LayoutHistoryData,
-    LocationCoords, ModHistoryData, ModLocations,
+    LocationCoords, ModData, ModLocations,
     Rack,
     RackGroup,
     RackStringType,
@@ -48,6 +48,7 @@ import {
     SelectedObj
 } from '../types/layoutEditorTypes';
 import {
+    addModEntries, areAllRacksNonDefault,
     convertCageNumToNum,
     createEmptyUnitLoc,
     findCageInGroup,
@@ -56,7 +57,7 @@ import {
     getNextGroupId,
     getTranslation,
     isRackDefault,
-    isRackEnum,
+    isRackEnum, isRoomHomogeneousDefault,
     showLayoutEditorError,
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
@@ -1108,7 +1109,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        const newModData: ModHistoryData[] = [];
+        const newModData: ModData[] = [];
 
         const roomName = localRoom.name;
         const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
@@ -1286,6 +1287,38 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 })
             }
         }*/
+
+        const isRoomNonDefault = areAllRacksNonDefault(localRoom);
+        const isRoomValid = isRoomHomogeneousDefault(localRoom);
+
+        // Check if we have a mix of null and non-null rack values
+        if (!isRoomValid){
+            return { success: false, roomName: roomName, reason: ['Cannot save room with mix of default racks and real racks']};;
+        }
+
+        // Default rooms don't carry mods
+        if(isRoomNonDefault) {
+
+            const usedMap = new Map<string, boolean>();
+
+            localRoom.rackGroups.forEach((group) => {
+                group.racks.forEach((r) => {
+                    const connectedCages = findConnectedCages(r);
+                    Object.entries(connectedCages).forEach(([direction, connections]) => {
+                        if (connections.length === 0) return;
+                        const locDir = parseInt(direction) as ModLocations;
+                        addModEntries(connections, locDir, r, false, newModData, usedMap);
+                    });
+
+                    const connectedRacks = findConnectedRacks(group, r);
+                    Object.entries(connectedRacks).forEach(([direction, connections]) => {
+                        if (connections.length === 0) return;
+                        const locDir = parseInt(direction) as ModLocations;
+                        addModEntries(connections, locDir, r, true, newModData, usedMap);
+                    });
+                });
+            });
+        }
 
         let result: LayoutSaveResult;
         try {

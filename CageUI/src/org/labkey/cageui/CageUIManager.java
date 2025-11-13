@@ -49,7 +49,9 @@ import org.labkey.cageui.action.LayoutHistoryForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RoomHistoryForm;
 import org.labkey.cageui.action.TemplateLayoutHistoryForm;
+import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackGroup;
+import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
 
 import java.sql.SQLException;

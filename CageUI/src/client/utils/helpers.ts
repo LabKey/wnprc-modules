@@ -641,7 +641,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             const modReturnData = await cageModLookup([],[]);
             const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
 
-            const prevMods = prevRoom.modData.filter((mod) => mod.rack === rack.rowid && mod.cage === cageNum);
+            const prevMods = prevRoom.modData.filter((mod) => mod.rack === rack.itemId && mod.cage === rackItem.cage);
             prevMods.forEach((mod) => {
                 // If Mod id exists in newMods we can skip adding it to newMods
                 if(!Object.keys(newMods).find(key => key === mod.modId)){

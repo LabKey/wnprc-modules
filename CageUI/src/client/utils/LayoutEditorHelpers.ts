@@ -19,14 +19,21 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
-import { getTypeClassFromElement, parseRoomItemType, roomItemToString } from './helpers';
+import {
+    getAdjLocation,
+    getDefaultMod,
+    getTypeClassFromElement,
+    parseRoomItemNum,
+    parseRoomItemType,
+    roomItemToString
+} from './helpers';
 import {
     Cage, CageData,
     CageDirection, CageHistoryData,
     CageNumber, CageSvgId,
     DefaultRackTypes, FullObjectHistoryData,
     GroupId, LayoutHistoryData,
-    LocationCoords,
+    LocationCoords, ModData, ModLocations,
     Rack, RackData,
     RackGroup,
     RackStringType,
@@ -47,10 +54,11 @@ import {
 } from '../types/layoutEditorTypes';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
-import { Security } from '@labkey/api';
+import { Security, Utils } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
 import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
+import { ConnectedCage, ConnectedCages, ConnectedRack, ConnectedRacks } from '../types/homeTypes';
 
 
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
@@ -993,4 +1001,90 @@ export const getNextGroupId = (groups: RackGroup[]): GroupId => {
     // Find the highest number and add 1
     const maxNumber = Math.max(...existingNumbers);
     return `rack-group-${maxNumber + 1}`;
+}
+
+export const  areAllRacksNonDefault = (room: Room): boolean => {
+    // Check if any rack in any rack group is default
+    for (const rackGroup of room.rackGroups) {
+        for (const rack of rackGroup.racks) {
+            // Check if the rack's type is default
+            if (rack.type.isDefault) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+export const isRoomHomogeneousDefault = (room: Room): boolean => {
+    let hasDefaultRack = false;
+    let hasNonDefaultRack = false;
+
+    // Check all racks in the room
+    for (const rackGroup of room.rackGroups) {
+        for (const rack of rackGroup.racks) {
+            if (rack.type.isDefault) {
+                hasDefaultRack = true;
+            } else {
+                hasNonDefaultRack = true;
+            }
+
+            // If we found both default and non-default racks, return false immediately
+            if (hasDefaultRack && hasNonDefaultRack) {
+                return false;
+            }
+        }
+    }
+
+    // Return true if all racks are default OR all racks are non-default
+    // This means either both flags are false (no racks) or only one flag is true
+    return true;
+}
+
+export const addModEntries = (
+    connections: ConnectedCage[] | ConnectedRack[],
+    locDir: ModLocations,
+    rack: Rack,
+    isRackConnection: boolean,
+    newModData: ModData[],
+    usedMap: Map<string, boolean>
+)=>  {
+    connections.forEach((connect) => {
+        const newMapKey = [
+            `${connect.currCage.cageNum}-${connect.currSubId}`,
+            `${connect.adjCage.cageNum}-${connect.adjSubId}`
+        ]
+            .sort()
+            .join('_');
+
+        if (usedMap.has(newMapKey)) return;
+
+        const modId = Utils.generateUUID();
+
+        // Add mod data for current cage
+        newModData.push({
+            cage: connect.currCage.cageNum,
+            location: locDir,
+            modId: modId,
+            parentModId: null,
+            modification: getDefaultMod(locDir),
+            rack: isRackConnection ? (connect as ConnectedRack).currRack.itemId : rack.itemId,
+            subId: connect.currSubId
+        });
+
+        // Add mod data for adjacent cage
+        const adjLocation = getAdjLocation(locDir);
+        newModData.push({
+            cage: connect.adjCage.cageNum,
+            location: adjLocation,
+            modId: Utils.generateUUID(),
+            parentModId: modId,
+            modification: getDefaultMod(adjLocation),
+            rack: isRackConnection ? (connect as ConnectedRack).adjRack.itemId : rack.itemId,
+            subId: connect.adjSubId
+        });
+
+        usedMap.set(newMapKey, true);
+    });
 }

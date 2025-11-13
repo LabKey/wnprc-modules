@@ -280,23 +280,19 @@ export interface FullObjectHistoryData {
 export interface PrevRoom {
     cagingData: FullObjectHistoryData[];
     layoutData: LayoutData;
-    modData?: ModHistoryData[];
+    modData?: ModData[];
     isDefault: boolean;
     name: string | null;
 }
 
-export interface ModHistoryData {
-    rowid?: number;
+export interface ModData {
     modId: string; // unique mod id
     parentModId: string | null; // this determines if the mod is the flipped perspective of the inserted mod or the original (null if original, or modId of the original mod if flipped perspective)
-    room: string;
-    rack: number; // rack row id
-    cage: number;
+    rack: string; // rack id
+    cage: CageNumber;// cage number
     modification: ModTypes;
     location: ModLocations;
     subId: number; // subsection of location where the mod is located
-    startDate: Date;
-    endDate: Date | null;
 }
 
 export interface RackGroup {

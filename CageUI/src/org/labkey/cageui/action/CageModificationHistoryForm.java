@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class CageModificationHistoryForm
 {
-    private int _rowid;
+    private Integer _rowid;
     @JsonProperty("historyid")
     private String _historyId;
     @JsonProperty("modid")
@@ -35,9 +35,9 @@ public class CageModificationHistoryForm
 
     public void setModId(String modId) {_modId = modId;}
 
-    public int getRowid() {return _rowid;}
+    public Integer getRowid() {return _rowid;}
 
-    public void setRowid(int rowid) {_rowid = rowid;}
+    public void setRowid(Integer rowid) {_rowid = rowid;}
 
     public String getParentModId() {return _parentModId;}
 

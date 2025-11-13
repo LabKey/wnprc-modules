@@ -6,7 +6,7 @@ import {
     CageModificationsType,
     CageNumber, CageSvgId,
     CurrCageMods,
-    ModHistoryData,
+    ModData,
     ModLocations,
     ModTypes,
     PrevRoom,
@@ -147,10 +147,10 @@ export const HomeContextProvider = ({children}) => {
         Promise.all([modReturnPromise, layoutReturnPromise]).then(([modResult, historyResult]) => {
             let tempNewRoom: Room = loadedRooms[selectedPage.room].room;
             if(historyResult.rowCount > 0) {
-                const tempModData: ModHistoryData[] = [];
+                const tempModData: ModData[] = [];
                 if(modResult.rowCount > 0){
                     modResult.rows.forEach((row) => {
-                        const newRow: ModHistoryData = {
+                        const newRow: ModData = {
                             location: row.location,
                             modId: row.modId,
                             parentModId: row.parentModId,
@@ -158,10 +158,6 @@ export const HomeContextProvider = ({children}) => {
                             cage: row.cage,
                             modification: row.modification,
                             rack: row.rack,
-                            room: row.room,
-                            rowid: row.rowid,
-                            startDate: row.startDate,
-                            endDate: row.endDate
                         };
                         tempModData.push(newRow);
                     });

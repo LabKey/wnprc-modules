@@ -1,0 +1,21 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="runId"/>
+        <column name="Project"/> <!--Grant -->
+        <column name="Amount"/>
+        <column name="Department"/> <!-- Cost Center -->
+        <column name="document_date"/>
+        <column name="memo"/>
+
+        <column name="costCenter"/>
+        <column name="Fund"/>
+        <column name="function"/>
+
+<!--        Internal Service Delivery Line Data    -->
+        <column name ="row_id"/>
+        <column name="internal_service_delivery"/>
+        <column name="Intercompany_Affiliate"/>
+        <column name="Description"/> <!-- Catalog_Item -->
+
+    </columns>
+</customView>

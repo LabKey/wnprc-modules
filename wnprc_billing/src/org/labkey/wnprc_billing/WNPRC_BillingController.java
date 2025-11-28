@@ -43,6 +43,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.pipeline.xml.impl.StringsImpl;
 import org.labkey.wnprc_billing.domain.Alias;
 import org.labkey.wnprc_billing.domain.Invoice;
 import org.labkey.wnprc_billing.domain.InvoiceRun;
@@ -317,7 +318,7 @@ public class WNPRC_BillingController extends SpringActionController
 
     private JetCSV getWorkdayCsv(int runId) throws IOException
     {
-        List<JetInvoiceItem> invoiceItems = getWorkItems(runId);
+        List<WorkDayInvoiceItem> invoiceItems = getWorkItems(runId);
         if (invoiceItems.isEmpty())
         {
             throw new NotFoundException("Unable to generate JET CSV. Invoiced Items not found for the selected invoice.");
@@ -332,50 +333,28 @@ public class WNPRC_BillingController extends SpringActionController
 
 
         CSVWriter csvWriter = new CSVWriter(writer,CSVWriter.DEFAULT_SEPARATOR,CSVWriter.NO_QUOTE_CHARACTER);
-        //csvWriter.writeNext(new String[]{"NSCT"});
-        csvWriter.writeNext(new String[]{"Submit Internal Service Delivery - v42.1"});
-        csvWriter.writeNext(new String[]{"Area", "All", "Internal Service Delivery Data", "Internal Service Delivery Line Data+"});
-        csvWriter.writeNext(new String[]{"Restrictions", "Required", "Optional", "Required","Required","Required",
-                "Optional", "Optional", "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",
-                "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Required",	"Required",
-                "Optional",	"Optional",	"Optional",	"Optional",	"Optional",	"Optional",	"Required",	"Optional",	"Optional",	"Optional. May have multiples",
-                "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples",
-                "Optional. May have multiples",	"Optional. May have multiples",	"Optional. May have multiples"});
-        csvWriter.writeNext(new String[]{"Format",	"Text",	"Y/N",	"Company_Reference_ID",	"Internal_Service_Provider_ID",	"YYYY-MM-DD", "YYYY-MM-DD",	"Text",	"Program_ID",
-                "Project_ID", "Gift_Reference_ID", "Cost_Center_Reference_ID",	"Fund_ID",	"Custom_Organization_Reference_ID",	"Custom_Organization_Reference_ID",	"Custom_Worktag_1_ID",
-                "Text",	"Number",	"Company_Reference_ID",	"Catalog_Item_ID",	"Revenue_Category_ID",	"Number (22,2)",	"UN_CEFACT_Common_Code_ID",	"Number (26,6)",	"Number (18,3)",
-                "YYYY-MM-DD", "Text", "Program_ID",	"Project_ID", "Grant_ID",	"Gift_Reference_ID", "Cost_Center_Reference_ID", "Fund_ID",	"Custom_Organization_Reference_ID",
-                "Custom_Organization_Reference_ID",	"Custom_Worktag_1_ID"});
+        csvWriter.writeNext(new String[]{"WorkDay Billing Export"});
+
+
 
         String[] emptyLine = {""};
         csvWriter.writeNext(emptyLine);
-        //csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
-        //        "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
-        csvWriter.writeNext(new String[]{"Fields",	"Spreadsheet Key*",	"Submit*",	"Company*",	"Internal Service Provider*",	"Document Date*",	"Delivery Date",	"Memo",
-                "Program",	"Project",	"Gift",	"Cost Center",	"Fund",	"Function",	"Activity",	"Additional Worktags",	"Row ID**",	"Internal Service Delivery Line Number*",
-                "Intercompany Affiliate", "Catalog Item",	"Revenue Category",	"Quantity*", "Unit of Measure*", "Unit Cost*", "Extended Amount*",	"Delivery Date", "Memo",
-                "Program",	"Project",	"Grant",	"Gift",	"Cost Center*",	"Fund*",	"Function*",	"Activity",	"Additional Worktags"});
+        csvWriter.writeNext(new String[]{"Grant", "Extended Amount", "Cost Center", "Document Date", "Memo", "Fund"});
 
         double sum = 0.0;
-        for (JetInvoiceItem invoiceItem : invoiceItems)
+        for (WorkDayInvoiceItem invoiceItem : invoiceItems)
         {
             csvWriter.writeNext(emptyLine);
             csvWriter.writeNext(new String[]{
-                    invoiceItem.Department, //column 32
+                    invoiceItem.project, //column 32
+                    String.valueOf(invoiceItem.amount != null ? decimalFormat.format(invoiceItem.amount.doubleValue()) : 0.00),
+                    invoiceItem.department,
+                    invoiceItem.document_date,
+                    invoiceItem.memo,
                     invoiceItem.Fund,
-                    invoiceItem.Program,
-                    invoiceItem.Project,
-                    invoiceItem.ActivityID,
-                    String.valueOf(invoiceItem.Account != null ? invoiceItem.Account.intValue() : 0),
-                    invoiceItem.Class,
-                    String.valueOf(invoiceItem.Amount != null ? decimalFormat.format(invoiceItem.Amount.doubleValue()) : 0.00),
-                    invoiceItem.Description,
-                    (invoiceItem.billingPeriodMMyy + invoiceItem.Project), //Jnl_Ln_Ref
-                    invoiceItem.PurchRefNo,
-                    invoiceItem.VoucherNo,
-                    invoiceItem.InvoiceNo
+                    invoiceItem.description
             });
-            sum += invoiceItem.Amount != null ? invoiceItem.Amount.doubleValue() : 0;
+            sum += invoiceItem.amount != null ? invoiceItem.amount.doubleValue() : 0;
         }
 
         csvWriter.writeNext(emptyLine);
@@ -389,8 +368,8 @@ public class WNPRC_BillingController extends SpringActionController
                 jetSettings[4], //Account,
                 null, //Class
                 String.valueOf(decimalFormat.format(sum * -1.0)), //Amount
-                invoiceItems.get(0).Description, //Description, which is same for all the rows
-                (invoiceItems.get(0).billingPeriodMMyy + jetSettings[3]), //Jnl_Ln_Ref. billingPeriodMMyy is same for all the rows
+                invoiceItems.get(0).description, //Description, which is same for all the rows
+                (invoiceItems.get(0).document_date + jetSettings[3]), //Jnl_Ln_Ref. billingPeriodMMyy is same for all the rows
                 null, //PurchRefNo
                 null, //VoucherNo
                 null //InvoiceNo
@@ -399,7 +378,7 @@ public class WNPRC_BillingController extends SpringActionController
         csvWriter.close();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yy");
-        String fileName = "JET_" + dateFormat.format(invoiceRun.getBillingPeriodStart()) + "_" +
+        String fileName = "WorkDay_" + dateFormat.format(invoiceRun.getBillingPeriodStart()) + "_" +
                 dateFormat.format(invoiceRun.getBillingPeriodEnd());
         return new JetCSV(fileName,writer.toString());
     }
@@ -434,14 +413,14 @@ public class WNPRC_BillingController extends SpringActionController
         TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
         return tableSelector.getArrayList(JetInvoiceItem.class);    }
 
-    private List<JetInvoiceItem> getWorkItems(int runId)
+    private List<WorkDayInvoiceItem> getWorkItems(int runId)
     {
         UserSchema wnprc_billing = QueryService.get().getUserSchema(getUser(), getContainer(), WNPRC_BillingSchema.NAME);
         TableInfo tableInfo = wnprc_billing.getTable(WNPRC_BillingSchema.TABLE_WORKDAY_INVOICE_ITEMS);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("runId"), runId);
         TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
-        return tableSelector.getArrayList(JetInvoiceItem.class);    }
+        return tableSelector.getArrayList(WorkDayInvoiceItem.class);    }
 
     public static class InvoiceRunForm
     {
@@ -614,6 +593,91 @@ public class WNPRC_BillingController extends SpringActionController
         {
             ActivityID = activityID;
         }
+    }
+
+    public static class WorkDayInvoiceItem
+    {
+        int _runId;
+        String project;
+        Double amount;
+        String department;
+        String document_date;
+        String memo;
+        String Fund;
+        String description;
+
+        public String getDepartment()
+        {
+            return department;
+        }
+
+        public void setDepartment(String department)
+        {
+            this.department = department;
+        }
+
+        public String getDocument_date()
+        {
+            return document_date;
+        }
+
+        public void setDocument_date(String document_date)
+        {
+            this.document_date = document_date;
+        }
+
+        public String getMemo()
+        {
+            return memo;
+        }
+
+        public void setMemo(String memo)
+        {
+            this.memo = memo;
+        }
+
+        public String getFund()
+        {
+            return Fund;
+        }
+
+        public void setFund(String fund)
+        {
+            Fund = fund;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public void setDescription(String description)
+        {
+            this.description = description;
+        }
+
+        public Double getAmount()
+        {
+            return amount;
+        }
+
+        public void setAmount(Double amount)
+        {
+            this.amount = amount;
+        }
+
+        public String getProject()
+        {
+            return project;
+        }
+
+        public void setProject(String project)
+        {
+            this.project = project;
+        }
+
+
+
     }
 
     @RequiresPermission(ReadPermission.class)

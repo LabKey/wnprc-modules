@@ -16,7 +16,7 @@ SELECT
     al.contact_name AS contact_name,
     al.contact_phone AS contact_phone,
     al.contact_email AS contact_email,
-    al.institution AS institution,
+    --al.institution AS institution,
     al.address AS address,
     al.city AS city,
     al.state AS state,

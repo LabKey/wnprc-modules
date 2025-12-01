@@ -114,6 +114,10 @@
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>500</dat:scale>
                 </dat:column>
+                <dat:column columnName="spend_category">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>500</dat:scale>
+                </dat:column>
             </dat:columns>
         </table>
     </template>

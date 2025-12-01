@@ -23,12 +23,13 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../../cageui.scss';
 import { ActionURL, Filter } from '@labkey/api';
 import {
+    AllHistoryData,
     FullObjectHistoryData,
     LayoutData,
     LayoutHistoryData,
     LayoutObjectData,
     PrevRoom,
-    Room,
+    Room, TemplateHistoryData,
     UnitLocations
 } from '../../types/typings';
 import { LayoutEditorContextProvider } from '../../context/LayoutEditorContextManager';
@@ -99,10 +100,6 @@ export const LayoutEditor: FC<any> = () => {
                 setIsLoading(false);
                 return;
             }
-            let historyTable: string;
-            let roomHistoryId: string;
-            let layoutHistoryId: string;
-            let isDefaultRoom: boolean;
             // Make call to all_history for room and determine if template or not.
             const allHistoryCfg: SelectRowsOptions = {
                 schemaName: 'cageui',
@@ -115,88 +112,96 @@ export const LayoutEditor: FC<any> = () => {
             }
             const allHistRes = await labkeyActionSelectWithPromise(allHistoryCfg);
             if (allHistRes.rowCount === 1) {
-                const allHistObj = allHistRes.rows[0];
-                if (allHistObj.history_type === "template") {
-                    historyTable = "template_layout_history"
-                    layoutHistoryId = allHistObj.template_historyid;
-                } else {
-                    historyTable = "layout_history"
-                    layoutHistoryId = allHistObj.real_historyid;
-                }
-                roomHistoryId = allHistObj.room_historyid
-                isDefaultRoom = allHistObj.history_type === "template";
-            }
 
-            const prevRoomConfig: SelectRowsOptions = {
-                schemaName: 'cageui',
-                queryName: historyTable,
-                columns: [],
-                filterArray: [
-                    Filter.create('historyid', layoutHistoryId, Filter.Types.EQUALS),
-                    Filter.create('end_date', null, Filter.Types.ISBLANK)
-                ]
-            }
+                const allHistObj: AllHistoryData = {
+                    endDate: allHistRes.rows[0].end_date,
+                    historyId: allHistRes.rows[0].historyid,
+                    historyType: allHistRes.rows[0].history_type,
+                    room: allHistRes.rows[0].room,
+                    rowid: allHistRes.rows[0].rowid,
+                    startDate: allHistRes.rows[0].start_date,
+                    valid: allHistRes.rows[0].valid
+                };
+                let historyTable: string = allHistObj.historyType === "template" ? "template_layout_history" : "layout_history";
+                const isDefaultRoom: boolean = allHistObj.historyType === "template";
 
-            const prevRoomBorderConfig: SelectRowsOptions = {
-                schemaName: 'cageui',
-                queryName: 'room_history',
-                columns: ['scale', 'border_width', 'border_height'],
-                filterArray: [
-                    Filter.create('historyid', roomHistoryId, Filter.Types.EQUALS)
-                ]
-            }
-            const prevRoomPromise = labkeyActionSelectWithPromise(prevRoomConfig);
-            const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
-
-            Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(async ([prevRoomResult, borderResult]) => {
-                let borderObj: LayoutData;
-                let cagingData: FullObjectHistoryData[] = [];
-                if (borderResult.rowCount === 0) {
-                    throw new Error(`No room found in EHR for ${roomName}`);
-                } else {
-
-                    borderObj = {
-                        scale: borderResult.rows[0].scale || 1,
-                        borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
-                        borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
-                    };
-                    setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
-                    setShowSelectionPopup(false);
+                const prevRoomConfig: SelectRowsOptions = {
+                    schemaName: 'cageui',
+                    queryName: historyTable,
+                    columns: [],
+                    filterArray: [
+                        Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS),
+                        Filter.create('end_date', null, Filter.Types.ISBLANK)
+                    ]
                 }
 
-                if(prevRoomResult.rowCount > 0){
-                    if(isDefaultRoom){
-                        cagingData = prevRoomResult.rows.map(row => ({
-                            objectType: row.object_type,
-                            extraContext: row.extra_context,
-                            rackGroup: row.rack_group,
-                            rack: row.rack,
-                            cage: row.cage,
-                            xCoord: row.x_coord,
-                            yCoord: row.y_coord,
-                        }));
-                    }else{
-                        const layoutHistoryData: LayoutHistoryData[] = prevRoomResult.rows.map(row => ({
-                            historyId: row.historyid,
-                            cageHistoryId: row.cage_historyid,
-                            objectType: row.object_type,
-                            extraContext: row.extra_context,
-                            xCoord: row.x_coord,
-                            yCoord: row.y_coord,
-                            rowid: row.rowid,
-                        }))
-                        const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
-                        if(layoutHistoryResults.rejected.length > 0){
-                            throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`)
-                        }else{
-                            cagingData = layoutHistoryResults.fulfilled;
+                const prevRoomBorderConfig: SelectRowsOptions = {
+                    schemaName: 'cageui',
+                    queryName: 'room_history',
+                    columns: ['scale', 'border_width', 'border_height'],
+                    filterArray: [
+                        Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS)
+                    ]
+                }
+                const prevRoomPromise = labkeyActionSelectWithPromise(prevRoomConfig);
+                const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
+
+                Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(async ([prevRoomResult, borderResult]) => {
+                    let borderObj: LayoutData;
+                    let cagingData: FullObjectHistoryData[] = [];
+                    if (borderResult.rowCount === 0) {
+                        throw new Error(`No room found in EHR for ${roomName}`);
+                    } else {
+
+                        borderObj = {
+                            scale: borderResult.rows[0].scale || 1,
+                            borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
+                            borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
+                        };
+                        setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
+                        setShowSelectionPopup(false);
+                    }
+
+                    if (prevRoomResult.rowCount > 0) {
+                        if (isDefaultRoom) {
+                            cagingData = prevRoomResult.rows.map((row: TemplateHistoryData) => ({
+                                objectType: row.object_type,
+                                extraContext: row.extra_context,
+                                rackGroup: row.rack_group,
+                                rack: row.rack.toString(),
+                                cage: row.cage,
+                                xCoord: row.x_coord,
+                                yCoord: row.y_coord,
+                            }));
+                        } else {
+                            const layoutHistoryData: LayoutHistoryData[] = prevRoomResult.rows.map(row => ({
+                                historyId: row.historyid,
+                                cage: row.cage,
+                                objectType: row.object_type,
+                                extraContext: row.extra_context,
+                                xCoord: row.x_coord,
+                                yCoord: row.y_coord,
+                                rowid: row.rowid,
+                            }))
+                            const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
+                            console.log("Layout history results", layoutHistoryResults);
+                            if (layoutHistoryResults.rejected.length > 0) {
+                                throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`)
+                            } else {
+                                cagingData = layoutHistoryResults.fulfilled;
+                            }
                         }
                     }
-                }
-                setPrevRoomData({name: roomName, cagingData: cagingData, layoutData: borderObj, isDefault: isDefaultRoom});
-            }).catch(err => {
-                setErrorPopup(err.toString());
-            });
+                    setPrevRoomData({
+                        name: roomName,
+                        cagingData: cagingData,
+                        layoutData: borderObj,
+                        isDefault: isDefaultRoom
+                    });
+                }).catch(err => {
+                    setErrorPopup(err.toString());
+                });
+            }
         };
 
         fetchData();

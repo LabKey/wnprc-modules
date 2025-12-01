@@ -2,19 +2,17 @@ package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class Cage
 {
-    private String _id;
-    private int _localRackId;
+    private String _svgId;
+    private String _objectId;
+    private int _positionId;
     private SelectionType _selectionType;
     private String _cageNum;
     private int _x;
@@ -22,6 +20,7 @@ public class Cage
     private int _size;
     private Map<String, Object> _extraContext;
     private CageModKeyMap _mods;
+
 
 
 
@@ -123,24 +122,33 @@ public class Cage
         _mods = mods;
     }
 
-    public String getId()
+    public String getObjectId()
     {
-        return _id;
+        return _objectId;
     }
 
-    public void setId(String id)
+    public void setObjectId(String objectId)
     {
-        _id = id;
+        _objectId = objectId;
+    }
+    public String getSvgId()
+    {
+        return _svgId;
     }
 
-    public int getLocalRackId()
+    public void setSvgId(String svgId)
     {
-        return _localRackId;
+        _svgId = svgId;
     }
 
-    public void setLocalRackId(int localRackId)
+    public int getPositionId()
     {
-        _localRackId = localRackId;
+        return _positionId;
+    }
+
+    public void setPositionId(int positionId)
+    {
+        _positionId = positionId;
     }
     public SelectionType getSelectionType()
     {

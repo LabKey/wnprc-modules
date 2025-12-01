@@ -591,21 +591,21 @@ export const findDetails = (clickedCage, cageDetails, rack) => {
         if(key === "rightDivider"){
             if(clickedCage.cageState.rightDivider.modData.mod.mod === ModTypes.NoDivider){
                 newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.rightCage.id);
-                if(cageDetails.find(cage => cage.id === newCage.localRackId)) return;
+                if(cageDetails.find(cage => cage.id === newCage.positionId)) return;
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
         }else if(key === "leftDivider") {
             if(clickedCage.cageState.leftDivider.modData.mod.mod === ModTypes.NoDivider){
                 newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.leftCage.id);
-                if(cageDetails.find(cage => cage.id === newCage.localRackId)) return;
+                if(cageDetails.find(cage => cage.id === newCage.positionId)) return;
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
         }else if(key === "floor") {
             if (clickedCage.cageState.floor.modData.mod.mod === ModTypes.NoFloor) {
                 newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.floorCage.id);
-                if (cageDetails.find(cage => cage.id === newCage.localRackId)) return;
+                if (cageDetails.find(cage => cage.id === newCage.positionId)) return;
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }

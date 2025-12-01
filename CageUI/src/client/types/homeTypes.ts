@@ -2,13 +2,11 @@ import {
     Cage,
     CageMapKey,
     CageNumber, CageSvgId,
-    DefaultRackId,
     ModDirections,
     ModLocations,
     ModStyle,
     ModTypes,
     Rack,
-    RealRackId,
     Room
 } from './typings';
 import { Option } from '@labkey/components';
@@ -45,7 +43,7 @@ export type EHRCageMods = {
 export interface SelectedPage {
     selected: SelectedViews
     room?: string;
-    rack?: DefaultRackId | RealRackId;
+    rack?: number;
     cage?: CageSvgId;
 }
 
@@ -55,7 +53,7 @@ export interface ListCage {
 }
 
 export interface ListRack {
-    id: DefaultRackId | RealRackId;
+    id: number;
     cages: ListCage[];
 }
 

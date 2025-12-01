@@ -4,7 +4,7 @@ import '../../cageui.scss';
 import { useHomeContext } from '../../context/HomeContextManager';
 import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
-import { Filter } from '@labkey/api';
+import { Filter, Utils } from '@labkey/api';
 import {
     convertToTitleCase,
     defaultTypeToRackType,
@@ -13,7 +13,7 @@ import {
     parseRoomItemType,
     roomItemToString
 } from '../../utils/helpers';
-import { CageNumber, DefaultRackId, DefaultRackTypes, RackTypes, RealRackId } from '../../types/typings';
+import { CageNumber, DefaultRackTypes, RackTypes } from '../../types/typings';
 
 export const RoomList: FC = () => {
     const {setSelectedPage, loadedRooms } = useHomeContext();
@@ -77,8 +77,10 @@ export const RoomList: FC = () => {
                     if(room.name === roomId){
                         const tempRacks: ListRack[] = [];
                         racks.rows.forEach((row) => {
-                            const rackId: DefaultRackId | RealRackId = row.rack ? `rack-${row.rack}` : `default-rack-${JSON.parse(row.extra_context).rack.rackId}`;
+                            // TODO Fix rackiD
+                            const rackId: number = 0;//row.rack ? `rack-${row.rack}` : `default-rack-${JSON.parse(row.extra_context).rack.rackId}`;
                             const rackIdx = tempRacks.findIndex((rack) => rack.id === rackId);
+                            const cageObjId = Utils.generateUUID().toUpperCase();
                             const cageType = row.rack ? roomItemToString(row.object_type as RackTypes) : roomItemToString(defaultTypeToRackType(row.object_type as DefaultRackTypes));
                             // if rack was already added, just add cage, otherwise add rack and cage
                             if(rackIdx !== -1){
@@ -86,7 +88,7 @@ export const RoomList: FC = () => {
                                     ...tempRacks[rackIdx],
                                     cages: [...tempRacks[rackIdx].cages, {
                                         name: `${cageType}-${parseInt(row.cage)}` as CageNumber,
-                                        id: generateCageId(),
+                                        id: generateCageId(cageObjId),
                                     }]
                                 }
                             }else{
@@ -94,7 +96,7 @@ export const RoomList: FC = () => {
                                     id: rackId,
                                     cages: [{
                                         name: `${cageType}-${parseInt(row.cage)}` as CageNumber,
-                                        id: generateCageId()
+                                        id: generateCageId(cageObjId)
                                     }],
                                 });
                             }
@@ -175,7 +177,7 @@ export const RoomList: FC = () => {
                                             onClick={() => handleRackClick(room, rack)}
                                             className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
                                         >
-                                            {formatRackId(rack.id)}
+                                            {formatRackId(rack.id.toString())}
                                             <span className="arrow" onClick={() => toggleExpandRack(room.name, rack.id)}></span>
                                         </div>
                                         {expandedRacks[`${room.name}_${rack.id}`] && (

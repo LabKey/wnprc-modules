@@ -8,6 +8,8 @@ public class CagesForm
     private int _rowid;
     @JsonProperty("objectid")
     private String _objectId;
+    @JsonProperty("positionid")
+    private String _positionId;
     private String _rack;
     @JsonProperty("cage_number")
     private int _cageNumber;
@@ -83,6 +85,16 @@ public class CagesForm
     public void setHeight(Integer height)
     {
         _height = height;
+    }
+
+    public String getPositionId()
+    {
+        return _positionId;
+    }
+
+    public void setPositionId(String positionId)
+    {
+        _positionId = positionId;
     }
 
     public JSONObject toJSON()

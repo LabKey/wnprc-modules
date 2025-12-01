@@ -53,7 +53,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     useEffect(() => {
         const tempCage = selectedObj as Cage;
         if(tempCage){
-            const cageRack = findCageInGroup(tempCage.id, selectedRoom.rackGroups).rack;
+            const cageRack = findCageInGroup(tempCage.svgId, selectedRoom.rackGroups).rack;
             setCurrCage(tempCage);
             setCurrRack(cageRack);
         }

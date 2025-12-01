@@ -8,6 +8,14 @@
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="historyid" />
+                    <column columnName="cage">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cages</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="modid" />
                     <column columnName="parent_modid" />
                     <column columnName="modification">

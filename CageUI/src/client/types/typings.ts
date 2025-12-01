@@ -104,9 +104,9 @@ export enum CageDirection {
 export type RackStringType = string & { __brand: "RackStringType" };
 export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
 export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
-export type DefaultRackId = `default-rack-${number}`;
-export type RealRackId = `rack-${number}`;
-export type CageSvgId = `cageSVG-${number}`;
+export type CageSvgId = `cageSVG_${string}`;
+export type RackSvgId = `rack_${string}`;
+export type FullCageHistory = {cageHistory: CageHistoryData, cageData: CageData};
 
 export type GroupId = `rack-group-${number}`
 export type CageNumber = `${RackStringType}-${number}`
@@ -121,6 +121,7 @@ export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
 
 // Classification of the objects, caging is for racks/cages/rack groups, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
+export type historyType = 'real' | 'template';
 
 /* svgIds is an array of ids to apply the style to.
     Each id is a string to the following these rules to match the id in the svg file.
@@ -149,8 +150,9 @@ export type CageModification = {
 }
 
 export interface Cage {
-    id: CageSvgId; // unique id for svg
-    localRackId: number; // Id local to rack
+    objectId: string; //object id of cage in cages table, if it was loaded in from previous room.
+    svgId: CageSvgId; // unique id for svg
+    positionId: number; // Id local to rack
     selectionType: SelectionType;
     cageNum: CageNumber; // Id local to room
     x: number; // x coordinate of cage in rack coordinate plane
@@ -214,20 +216,20 @@ export interface LayoutData {
 export type LayoutObjectData = TemplateHistoryData | LayoutHistoryData;
 
 export interface TemplateHistoryData {
-    objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
-    historyId?: string;
-    extraContext: string | null;
-    rackGroup: number;
-    rack: number; // row id of rack in racks table
+    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    historyid?: string;
+    extra_context: string | null;
+    rack_group: number;
+    rack: number;
     cage: string;
-    xCoord: number;
-    yCoord: number;
-    rowid?: number;
+    x_coord: number;
+    y_coord: number;
+    rowid: number;
 }
 
 export interface LayoutHistoryData {
     historyId: string;
-    cageHistoryId: string;
+    cage: string;
     objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
     extraContext: string | null;
     xCoord: number;
@@ -238,16 +240,18 @@ export interface LayoutHistoryData {
 export interface CageHistoryData {
     rowid?: number;
     historyId: string;
-    modHistoryId?: string;
-    animalHistoryId?: string;
-    // objectid of cage in cages table
     cage: string;
     rackGroup: number;
+    cageNum: number;
+    length: number;
+    width: number;
+    height: number;
 }
 
 // interface for cageui.cages table
 export interface CageData {
     rowid: number;
+    positionId: number; // id of position in rack
     objectId: string;
     // objectid of rack in racks table
     rack: string;
@@ -266,13 +270,24 @@ export interface RackData {
     rackType: number;
 }
 
+// interface for cageui.all_history table
+export interface AllHistoryData {
+    rowid: number;
+    room: string;
+    valid: boolean;
+    historyId: string;
+    historyType: historyType;
+    startDate: number;
+    endDate: number;
+}
+
 export interface FullObjectHistoryData {
     objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
     extraContext: string | null;
     rackGroup?: number;
     // objectid of rack in racks table
-    rack?: string;
-    cage?: string;
+    rack?: RackData | string;
+    cage?:  FullCageHistory | string;
     xCoord: number;
     yCoord: number;
 }
@@ -288,7 +303,7 @@ export interface PrevRoom {
 export interface ModData {
     modId: string; // unique mod id
     parentModId: string | null; // this determines if the mod is the flipped perspective of the inserted mod or the original (null if original, or modId of the original mod if flipped perspective)
-    rack: string; // rack id
+    rack: string; // todo rack objectid
     cage: CageNumber;// cage number
     modification: ModTypes;
     location: ModLocations;
@@ -305,8 +320,9 @@ export interface RackGroup {
 }
 
 export interface Rack {
-    itemId: DefaultRackId | RealRackId; // rack id
-    rowid?: number; // if real rack this will have a rowid
+    itemId: number; // rack id
+    svgId: RackSvgId;
+    objectId: string;
     selectionType: SelectionType;
     type: UnitType;
     cages: Cage[];
@@ -314,6 +330,7 @@ export interface Rack {
     y: number; // y coordinate of rack relative to the rack group
     isActive?: boolean; // Determines if rack is "in use or active"
     extraContext?: {[key: string]: any};
+    isNew: boolean; // if true this rack was created during the current session and not loaded from the database
 }
 
 export interface RoomObject {

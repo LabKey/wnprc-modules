@@ -10,8 +10,11 @@ public class CageHistoryForm
     @JsonProperty("rack_group")
     private int _rackGroup;
     private String _cage;
-    @JsonProperty("mod_historyid")
-    private String _modHistoryId;
+    @JsonProperty("cage_number")
+    private int _cageNumber;
+    private int _length;
+    private int _width;
+    private int _height;
 
     public Integer getRowid()
     {
@@ -53,13 +56,43 @@ public class CageHistoryForm
         _cage = cage;
     }
 
-    public String getModHistoryId()
+    public int getCageNumber()
     {
-        return _modHistoryId;
+        return _cageNumber;
     }
 
-    public void setModHistoryId(String modHistoryId)
+    public void setCageNumber(int cageNumber)
     {
-        _modHistoryId = modHistoryId;
+        _cageNumber = cageNumber;
+    }
+
+    public int getLength()
+    {
+        return _length;
+    }
+
+    public void setLength(int length)
+    {
+        _length = length;
+    }
+
+    public int getWidth()
+    {
+        return _width;
+    }
+
+    public void setWidth(int width)
+    {
+        _width = width;
+    }
+
+    public int getHeight()
+    {
+        return _height;
+    }
+
+    public void setHeight(int height)
+    {
+        _height = height;
     }
 }

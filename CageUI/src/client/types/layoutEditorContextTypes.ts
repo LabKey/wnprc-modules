@@ -50,7 +50,7 @@ export interface LayoutContextType {
     unitLocs: UnitLocations;
     localRoom: Room;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
-    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => Promise<Cage | RoomObject | null>;
+    addRoomItem: (itemType: RoomItemType, itemId: number, x: number, y: number, scale: number) => Promise<Rack | RoomObject | null>;
     changeCageNum: (numBefore: number, numAfter: number) => void;
     cageNumChange: {before: number, after: number};
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
@@ -62,7 +62,7 @@ export interface LayoutContextType {
     delObject: (objId: string) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
-    changeRack: (newType: {value: number, label: string}) => Promise<string>;
+    changeRack: (newType: {value: string, label: string}, isNew: boolean) => Promise<string>;
     clearGrid: () => void;
     user: GetUserPermissionsResponse;
     getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];

@@ -12,8 +12,7 @@ public class LayoutHistoryForm
     private int _rowid;
     @JsonProperty("historyid")
     private String _historyId;
-    @JsonProperty("cage_historyid")
-    private String _cageHistoryId;
+    private String _cage;
     @JsonProperty("object_type")
     private int _objectType;
     @JsonProperty("extra_context")
@@ -84,13 +83,13 @@ public class LayoutHistoryForm
         _historyId = historyId;
     }
 
-    public String getCageHistoryId()
+    public String getCage()
     {
-        return _cageHistoryId;
+        return _cage;
     }
 
-    public void setCageHistoryId(String cageHistoryId)
+    public void setCage(String cage)
     {
-        _cageHistoryId = cageHistoryId;
+        _cage = cage;
     }
 }

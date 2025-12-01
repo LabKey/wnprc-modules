@@ -17,22 +17,20 @@
  */
 
 import {
-    Cage,
+    Cage, CageData, CageHistoryData,
     CageModificationsType,
     CageNumber, CageSvgId, CurrCageMods,
-    DefaultRackId,
     DefaultRackStringType,
-    DefaultRackTypes, FullObjectHistoryData,
+    DefaultRackTypes, FullCageHistory, FullObjectHistoryData,
     GroupId,
     LayoutHistoryData,
     ModLocations,
     ModTypes,
     PrevRoom,
-    Rack,
+    Rack, RackData,
     RackGroup,
     RackStringType,
     RackTypes,
-    RealRackId,
     Room,
     RoomItemStringType,
     RoomItemType,
@@ -66,8 +64,9 @@ import { Utils } from '@labkey/api';
 
 export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
 
-export const generateCageId = (): CageSvgId => {
-    return generateId('cageSVG-') as CageSvgId;
+export const generateCageId = (objectId: string): CageSvgId => {
+
+    return `cageSVG_${objectId}` as CageSvgId;
 }
 
 // Changes stroke color of svg element nodes keeping the other styles.
@@ -165,12 +164,6 @@ export const parseLongId = (input: string) => {
     return;
 }
 
-export const parseLongDefaultId = (id: string): number => {
-    if (!id.startsWith("default-rack-")) return 0; // Skip non-default IDs
-    const numberPart = id.split('-')[2]; // Extract the number part
-    return parseInt(numberPart, 10) || 0; // Fallback to 0 if invalid
-}
-
 export const formatRackId= (str: string) => {
     // Split the string by hyphens
     try {// if the rack is default split and correctly display it
@@ -195,12 +188,12 @@ export const formatRackId= (str: string) => {
 }
 
 
-export const getNextDefaultRackId = (groups: RackGroup[]): string => {
+export const getNextDefaultRackId = (groups: RackGroup[]): number => {
     // Extract & parse only "default-rack-*" IDs
     const allRackNumbers = groups
         .flatMap(group =>
             group.racks
-                .map(rack => parseLongDefaultId(rack.itemId))
+                .map(rack => rack.type.isDefault ? rack.itemId : 0)
                 .filter(num => num > 0) // Only keep valid default-rack numbers
         )
         .sort((a, b) => a - b); // Sort ascending
@@ -210,13 +203,13 @@ export const getNextDefaultRackId = (groups: RackGroup[]): string => {
     for (const num of allRackNumbers) {
         if (num > expectedNumber) {
             // Gap found! Use the missing number
-            return `default-rack-${expectedNumber}`;
+            return expectedNumber;
         }
         expectedNumber = num + 1;
     }
 
     // No gaps? Use the next number after the max
-    return `default-rack-${expectedNumber}`;
+    return expectedNumber;
 }
 export const convertToTitleCase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -347,7 +340,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
-            .attr('id', rack.itemId)
+            .attr('id', rack.objectId)
             .attr('class', `rack type-${rackTypeString}`)
             .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');
@@ -355,7 +348,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         // This is where the cage svg group is created.
         rack.cages.forEach(async (cage) => {
             const cageGroup = rackGroup.append('g')
-                .attr('id', cage.id)
+                .attr('id', cage.svgId)
                 .attr('name', cage.cageNum)
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
@@ -397,7 +390,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         const isSingleRack = group.racks.length === 1;
         const parentGroup = isSingleRack
             ? layoutSvg.append('g')
-                .attr('id', group.racks[0].itemId)
+                .attr('id', group.racks[0].svgId)
                 .attr('class', `draggable rack type-${roomItemToString(group.racks[0].type.type)}`)
                 .style('pointer-events', 'bounding-box')
             : layoutSvg.append('g')
@@ -490,7 +483,7 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
             rackType = roomItemToString(roomItem.objectType);
         }
         newUnitLocs[rackType].push({
-            cageId: generateCageId(),
+            cageId: generateCageId(Utils.generateUUID().toUpperCase()),
             cellX: roomItem.xCoord,
             cellY: roomItem.yCoord
         });
@@ -533,42 +526,28 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: FullObjectHistoryData): Promise<Rack> => {
         let rackIdNum;
-        let rowId;
+        let rackObjectId;
         let extraContext: ExtraContext;
-        let rackData;
+        let rackData = rackItem.rack as RackData;
         let rack: Rack;
 
         if (!prevRoom.isDefault) {
-            const optConfig: SelectRowsOptions = {
-                schemaName: 'cageui',
-                queryName: 'racks',
-                filterArray: [
-                    Filter.create('objectid', rackItem.rack, Filter.Types.EQUALS)
-                ]
-            };
-            rackData = await labkeyActionSelectWithPromise(optConfig);
-            if (rackData.rowCount > 0) {
-                rackIdNum = rackData.rows[0].rackid;
-                rowId = rackData.rows[0].rowid;
-                rack = rackGroup.racks.find(r => rowId === r.rowid);
-            }
+            rackIdNum = rackData.rackId;
+            rackObjectId = rackData.objectId;
         }else{
             rackIdNum = rackItem.rack;
-            rack = rackGroup.racks.find(r => `default-rack-${rackIdNum}` === r.itemId);
+            rackObjectId = `default-rack-${rackIdNum}`;
         }
+        rack = rackGroup.racks.find(r => rackObjectId === r.objectId);
 
         if (!rack) {
             //create new rack if it doesn't exist
             let type: UnitType;
-            let rackId: DefaultRackId | RealRackId;
             let typeRowId;
             const rackPrefix = prevRoom.isDefault ? 'default-rack' : 'rack';
 
             if (!prevRoom.isDefault) {
-                typeRowId = rackData.rows[0].rack_type;
-                rackId = `${rackPrefix}-${rackIdNum}` as RealRackId;
-            } else {
-                rackId = `${rackPrefix}-${rackIdNum}` as DefaultRackId;
+                typeRowId = rackData.rackType;
             }
 
 
@@ -591,16 +570,18 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             type = {
                 rowid: rackTypesData.rows[0].rowid as number,
                 name: rackTypesData.rows[0].name as string,
-                type: (prevRoom.isDefault ? defaultTypeToRackType(rackTypesData.rows[0].type) : rackTypesData.rows[0].type) as RackTypes,
+                type: rackTypesData.rows[0].type,
                 isDefault: prevRoom.isDefault,
             };
 
             rack = {
-                rowid: rowId,
+                isNew: prevRoom.isDefault,
+                objectId: rackObjectId,
+                svgId: `rack_${rackObjectId}`,
                 selectionType: 'rack',
                 cages: [],
                 isActive: !prevRoom.isDefault,
-                itemId: rackId,
+                itemId: rackIdNum,
                 type: type,
                 x: rackItem.xCoord - rackGroup.x, // subtract group coords from layout coords to get rack coords
                 y: rackItem.yCoord - rackGroup.y,
@@ -613,10 +594,22 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
     const addCageToRack = async (rack: Rack, rackItem: FullObjectHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
-        let cageNumType: RoomItemStringType;
+        let cageNumType: RoomItemStringType = roomItemToString(rackItem.objectType);
         let extraContext: ExtraContext;
-        let cageNum = parseInt(rackItem.cage);
-
+        let cageHistoryData = (rackItem.cage as FullCageHistory).cageHistory;
+        let cageData = (rackItem.cage as FullCageHistory).cageData;
+        let cageObjId: string;
+        let cageNum;
+        let cagePositionId;
+        if(!prevRoom.isDefault){
+            cageNum = cageHistoryData.cageNum;
+            cageObjId = cageHistoryData.cage;
+            cagePositionId = cageData.positionId;
+        }else{
+            cageNum = parseInt(rackItem.cage as string);
+            cageObjId = Utils.generateUUID().toUpperCase();
+            cagePositionId = rack.cages.length + 1;
+        }
 
         let cageMods: CageModificationsType = {
             [ModLocations.Top]: [],
@@ -625,11 +618,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             [ModLocations.Right]: [],
             [ModLocations.Direct]: []
         };
-        if (rack.type.isDefault) {
-            cageNumType = roomItemToString(defaultTypeToRackType(rackItem.objectType as DefaultRackTypes));
-        } else {
-            cageNumType = roomItemToString(rackItem.objectType);
-        }
         if (rackItem.extraContext) {
             extraContext = JSON.parse(rackItem.extraContext);
         }
@@ -641,7 +629,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             const modReturnData = await cageModLookup([],[]);
             const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
 
-            const prevMods = prevRoom.modData.filter((mod) => mod.rack === rack.itemId && mod.cage === rackItem.cage);
+            const prevMods = prevRoom.modData.filter((mod) => mod.rack === rack.objectId && mod.cage === rackItem.cage);
             prevMods.forEach((mod) => {
                 // If Mod id exists in newMods we can skip adding it to newMods
                 if(!Object.keys(newMods).find(key => key === mod.modId)){
@@ -672,13 +660,14 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 }
             })
         }
-        const newCageId = generateCageId();
+        const newCageId = generateCageId(cageObjId);
         const cage: Cage = {
-            id: newCageId,
+            objectId: cageObjId,
+            svgId: newCageId,
             cageNum: `${cageNumType}-${cageNum}` as CageNumber,
             extraContext: extraContext?.cage,
             selectionType: 'cage',
-            localRackId: rack.cages.length + 1,
+            positionId: cagePositionId,
             x: rackItem.xCoord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.yCoord - rack.y - group.y,
             size: svgSize,
@@ -1033,7 +1022,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
 
                 const adj = areAdjacent(currCage, cRack, adjCage, adjRack, group);
                 // skip racks that arent connected to the current rack
-                if(cRack.rowid !== currRack.rowid && adjRack.rowid !== currRack.rowid){
+                if(cRack.objectId !== currRack.objectId && adjRack.objectId !== currRack.objectId){
                     continue;
                 }
                 if(adj.location !== null){
@@ -1056,7 +1045,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     }
 
     for (let i = 0; i < group.racks.length; i++) {
-        if(group.racks[i].rowid !== currRack.rowid){
+        if(group.racks[i].objectId !== currRack.objectId){
             areRacksConnected(currRack, group.racks[i]);
         }
     }

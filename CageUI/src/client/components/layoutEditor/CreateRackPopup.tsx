@@ -5,11 +5,12 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import Select from 'react-select';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
+import { Utils } from '@labkey/api';
 
 interface CreateRackPopupProps {
     showCreateRackPopup: React.Dispatch<React.SetStateAction<boolean>>;
-    currentRackOptions: {value: number; label: string}[];
-    setRackOptions: React.Dispatch<React.SetStateAction<{value: number; label: string}[]>>;
+    currentRackOptions: {value: string; label: string}[];
+    setRackOptions: React.Dispatch<React.SetStateAction<{value: string; label: string}[]>>;
 }
 
 export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
@@ -129,7 +130,7 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
             const newOptions = [...prev];
             if(selectedRackType && rackIdValue){
                 newOptions.push({
-                    value: 0,// rowid in table of racks will need to be added later, 0 for now
+                    value: 'new',
                     label: `${rackIdValue} - ${selectedRackType.label}`
                 });
             }

@@ -1,9 +1,11 @@
 package org.labkey.cageui.action;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class BundledForms
 {
+    Map<String, Object> _ehrRoomsForm;
     AllHistoryForm _newAllHistoryForm;
     AllHistoryForm _prevAllHistoryForm;
     RoomHistoryForm _roomHistoryForm;
@@ -11,8 +13,10 @@ public class BundledForms
     ArrayList<TemplateLayoutHistoryForm> _templateLayoutHistoryForm;
     ArrayList<LayoutHistoryForm> _layoutHistoryForm;
     ArrayList<CageHistoryForm> _cageHistoryForm;
-    ArrayList<RacksForm> _racksForm;
-    ArrayList<CagesForm> _cagesForm;
+    ArrayList<RacksForm> _newRacksForm;
+    ArrayList<RacksForm> _prevRacksForm;
+    ArrayList<CagesForm> _newCagesForm;
+    ArrayList<CagesForm> _prevCagesForm;
 
     public AllHistoryForm getNewAllHistoryForm()
     {
@@ -83,21 +87,48 @@ public class BundledForms
         _cageHistoryForm = cageHistoryForm;
     }
 
-    public ArrayList<RacksForm> getRacksForm(){
-        return _racksForm;
+    public ArrayList<RacksForm> getNewRacksForm(){
+        return _newRacksForm;
     }
 
-    public void setRacksForm(ArrayList<RacksForm> racksForm)
+    public void setNewRacksForm(ArrayList<RacksForm> newRacksForm)
     {
-        _racksForm = racksForm;
+        _newRacksForm = newRacksForm;
     }
 
-    public ArrayList<CagesForm> getCagesForm()
+    public ArrayList<RacksForm> getPrevRacksForm(){
+        return _prevRacksForm;
+    }
+
+    public void setPrevRacksForm(ArrayList<RacksForm> prevRacksForm)
     {
-        return _cagesForm;
+        _prevRacksForm = prevRacksForm;
     }
 
-    public void setCagesForm(ArrayList<CagesForm> cagesForm){
-        _cagesForm = cagesForm;
+    public ArrayList<CagesForm> getNewCagesForm()
+    {
+        return _newCagesForm;
+    }
+
+    public void setNewCagesForm(ArrayList<CagesForm> newCagesForm){
+        _newCagesForm = newCagesForm;
+    }
+
+    public ArrayList<CagesForm> getPrevCagesForm()
+    {
+        return _prevCagesForm;
+    }
+
+    public void setPrevCagesForm(ArrayList<CagesForm> prevCagesForm){
+        _prevCagesForm = prevCagesForm;
+    }
+
+    public Map<String, Object> getEhrRoomsForm()
+    {
+        return _ehrRoomsForm;
+    }
+
+    public void setEhrRoomsForm(Map<String, Object> ehrRoomsForm){
+        _ehrRoomsForm = ehrRoomsForm;
     }
 }

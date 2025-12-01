@@ -56,7 +56,7 @@ export interface PendingRoomUpdate {
     updateItemType: RoomItemType;
     cellX: number;
     cellY: number;
-    itemId: string;
+    itemId: number;
 }
 
 export interface CageActionProps {

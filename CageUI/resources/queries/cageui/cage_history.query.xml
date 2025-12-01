@@ -35,7 +35,10 @@
                             <fkDisplayColumnName>cage_number</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="mod_historyid"/>
+                    <column columnName="cage_number"/>
+                    <column columnName="length"/>
+                    <column columnName="width"/>
+                    <column columnName="height"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

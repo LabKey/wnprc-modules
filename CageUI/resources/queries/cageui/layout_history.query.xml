@@ -26,7 +26,14 @@
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="historyid"/>
-                    <column columnName="cage_historyid"/>
+                    <column columnName="cage">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cages</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="extra_context"/>
                     <column columnName="object_type">
                         <datatype>integer</datatype>

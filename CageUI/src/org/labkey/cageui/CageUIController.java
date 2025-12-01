@@ -29,21 +29,14 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.cache.Cache;
-import org.labkey.api.data.CompareType;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.BatchValidationException;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
@@ -62,30 +55,21 @@ import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackGroup;
-import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
-import org.labkey.pipeline.xml.Option;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class CageUIController extends SpringActionController
 {
@@ -173,14 +157,6 @@ public class CageUIController extends SpringActionController
                     }
                 }
             }
-
-
-
-
-
-
-
-
 
             QueryUpdateService modQus = modHistoryTable.getUpdateService();
             if (modQus == null){
@@ -303,49 +279,45 @@ public class CageUIController extends SpringActionController
             String prevRoomName = json.get("prevRoomName").toString();
             boolean isDefaultSave = json.get("isDefault").toString().equals("true");
             boolean isTemplateSave = savingTemplate || isDefaultSave;
+
+            CageUIManager.RoomSubmissionService submissionService = new CageUIManager.RoomSubmissionService(
+                    getContainer(),
+                    getUser(),
+                    isTemplateSave,
+                    prevRoomName,
+                    getRoom(),
+                    getRoomDefaultMods()
+            );
+            BundledForms newSubmissionForms = submissionService.submitRoom();
+
+            /*
+
             Date newEndAndStartDate = new Date();
 
             UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_lookups");
-            TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
+            TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");*/
 
-            BundledForms newSubmissionForms = new BundledForms();
 
-            // 1. get row in allHistory to end the current room.
-
+            /*// 1. get row in allHistory to end the current room.
             AllHistoryForm allHistoryToEnd = CageUIManager.get().endPreviousAllHistory(prevRoomName, newEndAndStartDate);
 
             // 2. Create new all history record
             AllHistoryForm allHistoryToStart = CageUIManager.get().startNewAllHistory(getRoom().getName(), isTemplateSave, newEndAndStartDate);
-
-            // Generate ids for linking history tables together
-            String roomHistoryId = CageUIManager.get().checkRoomHistoryChanges(getRoom().getName(), getRoom().getLayoutData());
-            // layout history id will always change between submissions.
-            String layoutHistoryId = UUID.randomUUID().toString();//CageUIManager.get().checkRoomLayoutChanges(room.getName(), isTemplateSave, room.getRackGroups(), room.getObjects());
-
-            // Populate new all history with correct IDs
-            allHistoryToStart.setRoomHistoryId(roomHistoryId);
-            if(isTemplateSave){
-                allHistoryToStart.setTemplateHistoryId(layoutHistoryId);
-            }else{
-                allHistoryToStart.setRealHistoryId(layoutHistoryId);
-            }
+            String newHistoryId = allHistoryToStart.getHistoryId();
             newSubmissionForms.setNewAllHistoryForm(allHistoryToStart);
 
             if(allHistoryToEnd != null){
                 newSubmissionForms.setPrevAllHistoryForm(allHistoryToEnd);
             }
 
-            // If no previous room exists OR room history changed, create new room history
-            if (allHistoryToEnd == null || !allHistoryToEnd.getRoomHistoryId().equals(roomHistoryId))
-            {
-                RoomHistoryForm newRoomHistory = new RoomHistoryForm();
-                newRoomHistory.setHistoryId(roomHistoryId);
-                newRoomHistory.setScale(getRoom().getLayoutData().getScale());
-                newRoomHistory.setBorderHeight(getRoom().getLayoutData().getBorderHeight());
-                newRoomHistory.setBorderWidth(getRoom().getLayoutData().getBorderWidth());
+            // Create new room history form
+            RoomHistoryForm newRoomHistory = new RoomHistoryForm();
+            newRoomHistory.setHistoryId(newHistoryId);
+            newRoomHistory.setScale(getRoom().getLayoutData().getScale());
+            newRoomHistory.setBorderHeight(getRoom().getLayoutData().getBorderHeight());
+            newRoomHistory.setBorderWidth(getRoom().getLayoutData().getBorderWidth());
 
-                newSubmissionForms.setRoomHistoryForm(newRoomHistory);
-            }
+            newSubmissionForms.setRoomHistoryForm(newRoomHistory);
 
             if(isTemplateSave){
                 ArrayList<TemplateLayoutHistoryForm> newTemplateLayoutHistoryData = new ArrayList<>();
@@ -361,10 +333,10 @@ public class CageUIController extends SpringActionController
                             TemplateLayoutHistoryForm currRowData = new TemplateLayoutHistoryForm();
                             Cage cage = rack.getCages().get(k);
 
-                            currRowData.setHistoryId(layoutHistoryId);
+                            currRowData.setHistoryId(newHistoryId);
                             currRowData.setCage(CageUIManager.get().findLastNumberAfterDash(cage.getCageNum()));
                             currRowData.setRackGroup(CageUIManager.get().findLastNumberAfterDash(rackGroup.getGroupId()));
-                            currRowData.setRack(CageUIManager.get().findLastNumberAfterDash(rack.getItemId()));
+                            currRowData.setRack(rack.getItemId());
                             if(cage.getExtraContext() != null){
                                 ObjectMapper objectMapper = new ObjectMapper();
                                 String extraContextJson = objectMapper.writeValueAsString(cage.getExtraContext());
@@ -382,7 +354,7 @@ public class CageUIController extends SpringActionController
                 for (int i = 0; i < getRoom().getObjects().size(); i++){
                     TemplateLayoutHistoryForm currRowData = new TemplateLayoutHistoryForm();
                     RoomObject roomObject = getRoom().getObjects().get(i);
-                    currRowData.setHistoryId(layoutHistoryId);
+                    currRowData.setHistoryId(newHistoryId);
                     currRowData.setObjectType(roomObject.getType().getNumericValue());
                     if(roomObject.getExtraContext() != null){
                         ObjectMapper objectMapper = new ObjectMapper();
@@ -396,14 +368,19 @@ public class CageUIController extends SpringActionController
                 newSubmissionForms.setTemplateLayoutHistoryForm(newTemplateLayoutHistoryData);
             }else{
                 ArrayList<LayoutHistoryForm> newLayoutHistoryData = new ArrayList<>();
+                ArrayList<LayoutHistoryForm> prevLayoutHistoryData = new ArrayList<>();
                 ArrayList<CageHistoryForm> newCageHistoryData = new ArrayList<>();
                 ArrayList<CageHistoryForm> prevCageHistoryData = new ArrayList<>();
+                ArrayList<CageModificationHistoryForm> newModHistoryData = new ArrayList<>();
+                ArrayList<CageModificationHistoryForm> prevModHistoryData = new ArrayList<>();
                 ArrayList<RacksForm> newRacksData = new ArrayList<>();
                 ArrayList<CagesForm> newCagesData = new ArrayList<>();
-                ArrayList<CageModificationHistoryForm> newModHistoryData = new ArrayList<>();
-                if(allHistoryToEnd != null && allHistoryToEnd.getRealHistoryId() != null){
-                    prevCageHistoryData = CageUIManager.get().getCageHistory(allHistoryToEnd.getRealHistoryId());
+                ArrayList<CagesForm> updatedCagesData = new ArrayList<>();
+                if(allHistoryToEnd != null && allHistoryToEnd.getHistoryType().equals("real")){
+                    prevCageHistoryData = CageUIManager.get().getCageHistory(allHistoryToEnd.getHistoryId());
+                    prevLayoutHistoryData = CageUIManager.get().getRealLayoutHistory(allHistoryToEnd.getHistoryId());
                 }
+                // create new history forms
                 for (int i = 0; i < getRoom().getRackGroups().size(); i++)
                 {
                     RackGroup rackGroup = getRoom().getRackGroups().get(i);
@@ -412,11 +389,11 @@ public class CageUIController extends SpringActionController
                         Rack rack = rackGroup.getRacks().get(j);
                         RacksForm newRackToSubmit = new RacksForm();
                         RackTypesForm rackType = CageUIManager.get().getRackType(rack.getType().getRowId());
-                        if(rack.getRowid() == 0){ // rack is new
-                            newRackToSubmit.setRackId(CageUIManager.get().findLastNumberAfterDash(rack.getItemId()));
+                        if(rack.getIsNew()){
+                            newRackToSubmit.setRackId(rack.getItemId());
                             newRackToSubmit.setRackType(rack.getType().getRowId());
                             newRackToSubmit.setRoom(getRoom().getName());
-                            newRackToSubmit.setObjectId(UUID.randomUUID().toString());
+                            newRackToSubmit.setObjectId(UUID.randomUUID().toString().toUpperCase());
                             newRacksData.add(newRackToSubmit);
                         }else{
                             //todo add racks previous objectid here
@@ -425,32 +402,44 @@ public class CageUIController extends SpringActionController
                         {
                             LayoutHistoryForm newLayoutHistoryRow = new LayoutHistoryForm();
                             CageHistoryForm newCageHistoryRow = new CageHistoryForm();
+                            CageModificationHistoryForm prevModHistoryRow = new CageModificationHistoryForm();
                             Cage cage = rack.getCages().get(k);
+                            Optional<CageHistoryForm> prevCageHistoryRow = prevCageHistoryData.stream()
+                                    .filter(p -> p.getCage().equals(cage.getObjectId()))
+                                    .findFirst();
+                            boolean wasCageChanged = false;
+                            boolean wasLayoutChanged = false;
                             // if rack is new then also add new cages to the cages table.
                             CagesForm newCageForNewRack = new CagesForm();
-                            if(rack.getRowid() == 0){
+                            if(rack.getIsNew()){
+                                wasCageChanged = true;
+                                wasLayoutChanged = true;
                                 //create new cage for new rack
                                 newCageForNewRack.setRack(newRackToSubmit.getObjectId());
                                 newCageForNewRack.setCageNumber(CageUIManager.get().findLastNumberAfterDash(cage.getCageNum()));
-                                newCageForNewRack.setObjectId(UUID.randomUUID().toString());
+                                newCageForNewRack.setObjectId(cage.getObjectId());
                                 newCageForNewRack.setWidth(rackType.getWidth());
                                 newCageForNewRack.setHeight(rackType.getHeight());
                                 newCageForNewRack.setLength(rackType.getLength());
                                 newCagesData.add(newCageForNewRack);
                                 // add new cage to cage history
                                 newCageHistoryRow.setCage(newCageForNewRack.getObjectId());
+                                newCageHistoryRow.setCageNumber(newCageForNewRack.getCageNumber());
+                                newCageHistoryRow.setHeight(newCageForNewRack.getHeight());
+                                newCageHistoryRow.setLength(newCageForNewRack.getLength());
+                                newCageHistoryRow.setWidth(newCageForNewRack.getWidth());
                                 // add new default mods for new cage if required
                                 List<ModData> cageMod = getRoomDefaultMods().stream()
                                         .filter(mod ->
                                                 mod.getCage().equals(cage.getCageNum())
-                                                && mod.getRack().equals(rack.getItemId()))
+                                                && mod.getRack().equals(rack.getObjectId()))
                                         .toList();
                                 if(!cageMod.isEmpty()){
-                                    String modHistoryId = UUID.randomUUID().toString();
                                     cageMod.forEach(mod -> {
                                         CageModificationHistoryForm newModHistoryRow = new CageModificationHistoryForm();
-                                        newModHistoryRow.setHistoryId(modHistoryId);
+                                        newModHistoryRow.setHistoryId(newHistoryId);
                                         newModHistoryRow.setModId(mod.getModId());
+                                        newModHistoryRow.setCage(cage.getObjectId());
                                         newModHistoryRow.setParentModId(mod.getParentModId());
                                         newModHistoryRow.setModification(mod.getModification().toString());
                                         newModHistoryRow.setLocation(mod.getLocation().toInt());
@@ -460,34 +449,105 @@ public class CageUIController extends SpringActionController
                                     });
                                 }
                             }else{
-                                //todo like racks, add cages objectid here from previous one
+
+                                if(prevCageHistoryRow.isPresent()){
+                                    CagesForm updatedPrevCage = CageUIManager.get().getCageForm(prevCageHistoryRow.get().getCage());
+                                    RacksForm prevRack = CageUIManager.get().getRackFromCage(prevCageHistoryRow.get().getCage());
+                                    RackTypesForm prevRackType = CageUIManager.get().getRackType(prevRack.getRackType());
+                                    int cageNum = CageUIManager.get().findLastNumberAfterDash(cage.getCageNum());
+
+                                    // TODO this might need to be edited in the future to carry over the mods from previous rack and update to correct dims
+                                    // Rack changed between previous and current cage.
+                                    if(!rack.getObjectId().equals(prevRack.getObjectId()))
+                                    {
+                                        newCageHistoryRow.setWidth(rackType.getWidth());
+                                        newCageHistoryRow.setLength(rackType.getLength());
+                                        newCageHistoryRow.setHeight(rackType.getHeight());
+
+                                        // add mods for new cage in rack
+                                        List<ModData> cageMod = getRoomDefaultMods().stream()
+                                                .filter(mod ->
+                                                        mod.getCage().equals(cage.getCageNum())
+                                                                && mod.getRack().equals(rack.getObjectId()))
+                                                .toList();
+
+                                        if(!cageMod.isEmpty()){
+                                            cageMod.forEach(mod -> {
+                                                CageModificationHistoryForm newModHistoryRow = new CageModificationHistoryForm();
+                                                newModHistoryRow.setHistoryId(newHistoryId);
+                                                newModHistoryRow.setModId(mod.getModId());
+                                                newModHistoryRow.setParentModId(mod.getParentModId());
+                                                newModHistoryRow.setModification(mod.getModification().toString());
+                                                newModHistoryRow.setLocation(mod.getLocation().toInt());
+                                                newModHistoryRow.setSubId(mod.getSubId());
+                                                newModHistoryRow.setCage(cage.getObjectId());
+                                                // Add data to cage modifications history
+                                                newModHistoryData.add(newModHistoryRow);
+                                            });
+                                        }
+                                        wasCageChanged = true;
+                                    }
+                                    // TODO Might be better to be in a trigger script for the cage history table to updates in cages table
+                                    // if the cage number changed then update it here, add new number to history and update in cages table.
+                                    if(cageNum != prevCageHistoryRow.get().getCageNumber()){
+                                        newCageHistoryRow.setCageNumber(CageUIManager.get().findLastNumberAfterDash(cage.getCageNum()));
+                                        cageNum = newCageHistoryRow.getCageNumber();
+                                        updatedCagesData.add(updatedPrevCage);
+                                        wasCageChanged = true;
+                                    }
+                                    newCageHistoryRow.setCage(prevCageHistoryRow.get().getCage());
+                                    newCageHistoryRow.setCageNumber(cageNum);
+                                }
+
                             }
 
                             // Add data to cage history
-                            newCageHistoryRow.setHistoryId(UUID.randomUUID().toString());
-                            newCageHistoryRow.setRackGroup(CageUIManager.get().findLastNumberAfterDash(rackGroup.getGroupId()));
-                            newCageHistoryData.add(newCageHistoryRow);
+                            if(wasCageChanged){
+                                wasLayoutChanged = true;
+                                newCageHistoryRow.setHistoryId(newHistoryId);
+                                newCageHistoryRow.setRackGroup(CageUIManager.get().findLastNumberAfterDash(rackGroup.getGroupId()));
+                                newCageHistoryData.add(newCageHistoryRow);
+
+                            }
+
+                            // determine if the layout has changed for this row.
+                            if(prevLayoutHistoryData != null && !prevLayoutHistoryData.isEmpty() && prevCageHistoryRow.isPresent()){
+                                Optional<LayoutHistoryForm> prevLayoutHistoryRow = prevLayoutHistoryData.stream()
+                                    .filter(p -> p.getHistoryId().equals(prevCageHistoryRow.get().getHistoryId()))
+                                    .findFirst();
+                                if(prevLayoutHistoryRow.isPresent()){
+                                    int newX = rackGroup.getX() + rack.getX() + cage.getX();
+                                    int newY = rackGroup.getY() + rack.getY() + cage.getY();
+                                    if(newX != prevLayoutHistoryRow.get().getxCoord() || newY != prevLayoutHistoryRow.get().getyCoord()){
+                                        wasLayoutChanged = true;
+                                    }
+                                }
+                            }
 
                             // Add data to layout history
-                            newLayoutHistoryRow.setHistoryId(layoutHistoryId);
-                            newLayoutHistoryRow.setCageHistoryId(newCageHistoryRow.getHistoryId());
-                            newLayoutHistoryRow.setObjectType(rack.getType().getEffectiveRackType().getNumericValue());
-                            newLayoutHistoryRow.setxCoord(rackGroup.getX() + rack.getX() + cage.getX());
-                            newLayoutHistoryRow.setyCoord(rackGroup.getY() + rack.getY() + cage.getY());
-                            if(cage.getExtraContext() != null){
-                                ObjectMapper objectMapper = new ObjectMapper();
-                                String extraContextJson = objectMapper.writeValueAsString(cage.getExtraContext());
-                                newLayoutHistoryRow.setExtraContext(extraContextJson);
+                            if(wasLayoutChanged){
+                                newLayoutHistoryRow.setHistoryId(newHistoryId);
+                                newLayoutHistoryRow.setCage(cage.getObjectId());
+                                newLayoutHistoryRow.setObjectType(rack.getType().getEffectiveRackType().getNumericValue());
+                                newLayoutHistoryRow.setxCoord(rackGroup.getX() + rack.getX() + cage.getX());
+                                newLayoutHistoryRow.setyCoord(rackGroup.getY() + rack.getY() + cage.getY());
+                                if(cage.getExtraContext() != null){
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    String extraContextJson = objectMapper.writeValueAsString(cage.getExtraContext());
+                                    newLayoutHistoryRow.setExtraContext(extraContextJson);
+                                }
+                                newLayoutHistoryData.add(newLayoutHistoryRow);
                             }
-                            newLayoutHistoryData.add(newLayoutHistoryRow);
-
                         }
                     }
                 }
+
+
+
                 for (int i = 0; i < getRoom().getObjects().size(); i++){
                     LayoutHistoryForm currRowData = new LayoutHistoryForm();
                     RoomObject roomObject = getRoom().getObjects().get(i);
-                    currRowData.setHistoryId(layoutHistoryId);
+                    currRowData.setHistoryId(newHistoryId);
                     currRowData.setObjectType(roomObject.getType().getNumericValue());
                     if(roomObject.getExtraContext() != null){
                         ObjectMapper objectMapper = new ObjectMapper();
@@ -501,130 +561,15 @@ public class CageUIController extends SpringActionController
 
                 newSubmissionForms.setLayoutHistoryForm(newLayoutHistoryData);
                 newSubmissionForms.setCageHistoryForm(newCageHistoryData);
-                newSubmissionForms.setCagesForm(newCagesData);
+                newSubmissionForms.setNewCagesForm(newCagesData);
+                newSubmissionForms.setPrevCagesForm(updatedCagesData);
                 newSubmissionForms.setRacksForm(newRacksData);
                 newSubmissionForms.setCageModificationHistoryForm(newModHistoryData);
 
-            }
+            }*/
 
-
-
-
-           /* // Determine which history table to use
-            TableInfo prevLayoutHistoryTable;
-            if (isDefaultSave) {
-                prevLayoutHistoryTable = CageUISchema.getInstance().getTemplateLayoutHistoryTable();
-            }else{
-                prevLayoutHistoryTable = CageUISchema.getInstance().getLayoutHistoryTable();
-            }
-
-            SimpleFilter prevRoomFilter = new SimpleFilter();
-            prevRoomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
-            prevRoomFilter.addCondition(FieldKey.fromString("end_date"),null, CompareType.ISBLANK);
-            TableSelector prevRoomSelector = new TableSelector(prevLayoutHistoryTable, prevRoomFilter, null);
-
-            List<LayoutHistoryForm> layoutHistoryFormData = prevRoomSelector.getArrayList(LayoutHistoryForm.class);
-            JSONArray oldLayoutHistoryJsonData = new JSONArray();
-            for (LayoutHistoryForm data : layoutHistoryFormData)
-            {
-                data.setEnd_date(newEndDate);
-                oldLayoutHistoryJsonData.put(data.toJSON());
-            }
-            List<Map<String, Object>> oldlayoutHistoryRowsToUpdate = JsonUtil.toMapList(oldLayoutHistoryJsonData);
-
-            // Save layout data to ehr_lookups.rooms
-            List<Map<String, Object>> oldRoomToUpdate = new ArrayList<>();
-            SimpleFilter roomFilter = new SimpleFilter();
-            roomFilter.addCondition(FieldKey.fromString("room"), prevRoomName, CompareType.EQUAL);
-            TableSelector roomSelector = new TableSelector(roomsTable, roomFilter, null);
-            Map<String, Object> result = roomSelector.getMap();
-
-            // update old name with new name if it changed
-            if(savingTemplate && !prevRoomName.equals(room.getName())){
-                result.put("room", room.getName());
-            }
-            result.put("border_width", room.getLayoutData().getBorderWidth());
-            result.put("border_height", room.getLayoutData().getBorderHeight());
-            result.put("layout_scale", room.getLayoutData().getScale());
-            result.put("status", room.getLayoutData().getStatus());
-            oldRoomToUpdate.add(result);
-            QueryUpdateService roomQus = roomsTable.getUpdateService();
-            if (roomQus == null)
-            {
-                throw new IllegalStateException(roomsTable.getName() + " query update service");
-            }
-            List<Map<String, Object>> modsToInsert = JsonUtil.toMapList(jsonModsArray);
-            //List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(, newEndDate, getUser(), getContainer());
-            TableInfo modHistoryTable = CageUISchema.getInstance().getCageModificationsHistoryTable();
-
-            TableSelector modSelector = new TableSelector(modHistoryTable, null);
-
-            List<CageModificationHistoryForm> modHistoryFormData = modSelector.getArrayList(CageModificationHistoryForm.class);
-*/
-            /*
-            // Get previous room data
-
-
-
-
-
-            // table info/filters/selectors for cage_modifications_history
-
-            QueryUpdateService modQus = modHistoryTable.getUpdateService();
-            if (modQus == null)
-            {
-                throw new IllegalStateException(modHistoryTable.getName() + " query update service");
-            }
-
-            // table info/filters/selectors for layout_history
-            QueryUpdateService layoutHistoryQus = layoutHistoryTable.getUpdateService();
-            if (layoutHistoryQus == null)
-            {
-                throw new IllegalStateException(layoutHistoryTable.getName() + " query update service");
-            }
-
-            // End previous data forms for prev room name, if any.
-
-
-
-            try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction())
-            {
-                // closes out previous mods and inserts new mods for the room
-                */
-/*if(!oldModRowsToUpdate.isEmpty()){
-                    modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
-                }*//*
-
-                modQus.insertRows(getUser(), getContainer(), modsToInsert, batchErrors, null, null);
-
-                // update ehr_lookups.rooms with new layout data and possible template name change.
-                if(!oldRoomToUpdate.isEmpty()){
-                    roomQus.updateRows(getUser(), getContainer(), oldRoomToUpdate, null, batchErrors, null, null);
-                }
-                // close out previous layout data and submit new layout data for room.
-                if(!oldlayoutHistoryRowsToUpdate.isEmpty()){
-                    layoutHistoryQus.updateRows(getUser(), getContainer(), oldlayoutHistoryRowsToUpdate, null, batchErrors, null, null);
-                }
-                layoutHistoryQus.insertRows(getUser(), getContainer(), newLayoutHistoryData,  batchErrors, null, null);
-
-                if(batchErrors.hasErrors()){
-                    response.put("success", false);
-                    response.put("errors", batchErrors);
-                    return response;
-                }
-                tx.commit();
-                response.put("success", true);
-            }
-            catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | SQLException e)
-            {
-                throw new ValidationException(e.getMessage());
-            }
-*/
             //return new ApiSimpleResponse();
             return CageUIManager.get().submitLayoutHistory(newSubmissionForms, getUser(), getContainer());
         }
-
-
     }
-
 }

@@ -26,6 +26,7 @@
                         <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="objectid"/>
+                    <column columnName="positionid"/>
                     <column columnName="rack">
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>

@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS cageui.racks;
 CREATE TABLE cageui.racks
 (
     rowid SERIAL NOT NULL,
-    objectid VARCHAR NOT NULL,
+    objectid VARCHAR,
     room VARCHAR,
     rackid INTEGER NOT NULL,
     rack_type varchar(50) NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE cageui.layout_history
 (
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
-    cage_historyid VARCHAR,
+    cage VARCHAR,
     object_type INTEGER,
     extra_context VARCHAR,
     x_coord INTEGER NOT NULL,
@@ -70,18 +70,12 @@ CREATE TABLE cageui.all_history
     valid BOOLEAN NOT NULL,
     start_date DATE NOT NULL,
     end_date Date,
-    room_historyid VARCHAR NOT NULL,
-    real_historyid VARCHAR,
-    template_historyid VARCHAR,
+    historyid VARCHAR NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
     modifiedby        userid,
     modified          TIMESTAMP,
-    CONSTRAINT single_layout CHECK (
-        (history_type = 'template' AND template_historyid IS NOT NULL AND real_historyid IS NULL) OR
-        (history_type = 'real' AND real_historyid IS NOT NULL AND template_historyid IS NULL)
-        ),
     CONSTRAINT PK_all_history PRIMARY KEY (rowid),
     CONSTRAINT FK_all_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 
@@ -136,7 +130,8 @@ DROP TABLE IF EXISTS cageui.cages;
 CREATE TABLE cageui.cages
 (
     rowid SERIAL NOT NULL,
-    objectid VARCHAR NOT NULL,
+    objectid VARCHAR,
+    positionid INTEGER,
     rack VARCHAR NOT NULL,
     cage_number INTEGER NOT NULL,
     length INTEGER,
@@ -156,6 +151,7 @@ CREATE TABLE cageui.cage_modifications_history
 (
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
+    cage varchar NOT NULL,
     modid varchar NOT NULL,
     parent_modid varchar,
     modification varchar,
@@ -195,7 +191,10 @@ CREATE TABLE cageui.cage_history
     historyid VARCHAR NOT NULL,
     rack_group INTEGER NOT NULL,
     cage VARCHAR NOT NULL,
-    mod_historyid VARCHAR,
+    cage_number INTEGER NOT NULL,
+    length INTEGER NOT NULL,
+    width INTEGER NOT NULL,
+    height INTEGER NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,

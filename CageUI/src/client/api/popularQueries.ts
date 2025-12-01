@@ -39,24 +39,29 @@ export const cageModLookup = async (columns: string[], filterArray:  Filter.IFil
     }
 }
 
-export const fetchCageHistory = async (historyid: string): Promise<CageHistoryData> => {
+export const fetchCageHistory = async (historyid: string, cage: string): Promise<CageHistoryData> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_history',
-        filterArray: [Filter.create('historyid', historyid, Filter.Types.EQUAL)]
+        filterArray: [
+            Filter.create('historyid', historyid, Filter.Types.EQUAL),
+            Filter.create('cage', cage, Filter.Types.EQUAL)
+        ]
     }
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-
+        console.log(res, historyid, cage);
         if(res.rows.length === 1){
             return {
                 rowid: res.rows[0].rowid,
                 historyId: res.rows[0].historyid,
-                modHistoryId: res.rows[0].mod_historyid,
-                animalHistoryId: res.rows[0].animal_historyid,
                 cage: res.rows[0].cage,
                 rackGroup: res.rows[0].rack_group,
+                cageNum: res.rows[0].cage_number,
+                height: res.rows[0].height,
+                length: res.rows[0].length,
+                width: res.rows[0].width,
             };
         } else {
             throw new Error("Error fetching cage history data");
@@ -78,6 +83,7 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
         if(res.rows.length === 1){
             return {
                 rowid: res.rows[0].rowid,
+                positionId: res.rows[0].positionid,
                 objectId: res.rows[0].objectid,
                 rack: res.rows[0].rack,
                 cageNum: res.rows[0].cage_number,

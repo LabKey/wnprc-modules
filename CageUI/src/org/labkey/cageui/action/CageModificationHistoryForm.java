@@ -10,6 +10,7 @@ public class CageModificationHistoryForm
     private Integer _rowid;
     @JsonProperty("historyid")
     private String _historyId;
+    private String _cage;
     @JsonProperty("modid")
     private String _modId;
     @JsonProperty("parent_modid")
@@ -51,5 +52,15 @@ public class CageModificationHistoryForm
     public void setHistoryId(String historyId)
     {
         _historyId = historyId;
+    }
+
+    public String getCage()
+    {
+        return _cage;
+    }
+
+    public void setCage(String cage)
+    {
+        _cage = cage;
     }
 }

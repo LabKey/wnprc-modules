@@ -17,13 +17,8 @@ public class AllHistoryForm
     @JsonProperty("end_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date _endDate;
-    @JsonProperty("room_historyid")
-    private String _roomHistoryId;
-    @JsonProperty("real_historyid")
-    private String _realHistoryId;
-    @JsonProperty("template_historyid")
-    private String _templateHistoryId;
-
+    @JsonProperty("historyid")
+    private String _historyId;
 
     public String getRoom()
     {
@@ -85,33 +80,13 @@ public class AllHistoryForm
         _endDate = endDate;
     }
 
-    public String getRoomHistoryId()
+    public String getHistoryId()
     {
-        return _roomHistoryId;
+        return _historyId;
     }
 
-    public void setRoomHistoryId(String roomHistoryId)
+    public void setHistoryId(String historyId)
     {
-        _roomHistoryId = roomHistoryId;
-    }
-
-    public String getRealHistoryId()
-    {
-        return _realHistoryId;
-    }
-
-    public void setRealHistoryId(String realHistoryId)
-    {
-        _realHistoryId = realHistoryId;
-    }
-
-    public String getTemplateHistoryId()
-    {
-        return _templateHistoryId;
-    }
-
-    public void setTemplateHistoryId(String templateHistoryId)
-    {
-        _templateHistoryId = templateHistoryId;
+        _historyId = historyId;
     }
 }

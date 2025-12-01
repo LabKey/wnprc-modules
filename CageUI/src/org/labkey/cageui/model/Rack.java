@@ -9,34 +9,36 @@ import java.util.Optional;
 
 public class Rack
 {
-    private String _itemId;
-    private int _rowid;
+    private int _itemId;
+    private String _svgId;
+    private String _objectId;
     private SelectionType _selectionType;
     private List<Cage> _cages;
     private UnitType _type;
     private int _x;
     private int _y;
+    private boolean _isNew;
     private boolean _isActive; // nullable
     private Map<String, Object> _extraContext; // nullable
 
-    public String getItemId()
+    public int getItemId()
     {
         return _itemId;
     }
 
-    public void setItemId(String itemId)
+    public void setItemId(int itemId)
     {
         _itemId = itemId;
     }
 
-    public int getRowid()
+    public String getObjectId()
     {
-        return _rowid;
+        return _objectId;
     }
 
-    public void setRowid(int rowid)
+    public void setObjectId(String objectId)
     {
-        _rowid = rowid;
+        _objectId = objectId;
     }
 
     public SelectionType getSelectionType()
@@ -109,6 +111,25 @@ public class Rack
         _extraContext = extraContext;
     }
 
+    public boolean getIsNew()
+    {
+        return _isNew;
+    }
+
+    public void setIsNew(boolean isNew)
+    {
+        _isNew = isNew;
+    }
+
+    public String getSvgId()
+    {
+        return _svgId;
+    }
+
+    public void setSvgId(String svgId)
+    {
+        _svgId = svgId;
+    }
 
 
     public static final class UnitType {
@@ -206,6 +227,4 @@ public class Rack
             return Optional.empty();
         }
     }
-
-
 }

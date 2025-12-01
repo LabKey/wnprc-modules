@@ -23,32 +23,35 @@ import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Button } from 'react-bootstrap';
 import { CreateRackPopup } from './CreateRackPopup';
+import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 
 
 interface ChangeRackProps {
-    onSubmit: (newType: {value: string, label: string}) => void;
+    onSubmit: (newType: {value: string, label: string}, isNew: boolean) => void;
+
 }
 
 export const ChangeRack: FC<ChangeRackProps> = (props) => {
     const {onSubmit} = props;
+    const {localRoom} = useLayoutEditorContext();
 
-    const [options, setOptions] = useState<{value: number, label: string}[]>([]);
+    const [options, setOptions] = useState<{value: string, label: string}[]>([]);
     const [showCreateRackPopup, setShowCreateRackPopup] = useState<boolean>(false);
 
-    const handleChange = (newVal) => {
+    const handleChange = (newVal: {value: string, label: string}) => {
         console.log("newVal", newVal);
-        onSubmit(newVal);
+        onSubmit(newVal, newVal.value === "new");
     };
 
 
     useEffect(() => {
-        if(options){
+        if(options.length > 0){
             setOptions(options)
         }else{
             const optConfig: SelectRowsOptions = {
                 schemaName: "cageui",
                 queryName: "racks",
-                columns: ['rackid', 'rack_type', 'rowid']
+                columns: ['rackid', 'rack_type', 'rowid', 'objectid']
             }
             const rackTypesConfig: SelectRowsOptions = {
                 schemaName: "cageui",
@@ -59,18 +62,31 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             const rackTypesPromise = labkeyActionSelectWithPromise(rackTypesConfig);
 
             Promise.all([rackPromise, rackTypesPromise]).then(([rackResult, rackTypesResult]) => {
-
+                const tmp = [];
                 if(rackResult.rows.length > 0){
-                    const tmp = [];
 
                     for (const row of rackResult.rows) {
-                        const rackTypeName = rackTypesResult.rows.find(r => r.rowid === parseInt(row.rack_type)).name;
-                        tmp.push({label: `${row.rackid} - ${rackTypeName}`, value: row.rowid});
+                        const rackTypeName = rackTypesResult.rows.find(r => r.rowid === parseInt(row.rack_type)).name
+                        tmp.push({label: `${row.rackid} - ${rackTypeName}`, value: row.objectid});
                     }
-                    setOptions(tmp);
+
                 }
+
+                const localRack = localRoom.rackGroups.flatMap(group =>  group.racks);
+
+                if(localRack.length > 0){
+                    localRack.forEach((r) => {
+                        if(!tmp.find((lbl) => lbl.label === `${r.itemId} - ${r.type.name}`)){
+                            tmp.push({label: `${r.itemId} - ${r.type.name}`, value: r.objectId});
+                        }
+                    })
+                }
+                setOptions(tmp);
             })
         }
+
+
+
     }, [options]);
 
     return (

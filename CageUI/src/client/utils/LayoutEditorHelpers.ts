@@ -76,7 +76,7 @@ export const isRoomModifier = (user: GetUserPermissionsResponse) => {
 export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{fulfilled: FullObjectHistoryData[]; rejected: PromiseRejectedResult[]}> => {
 
     const processItem = async (item: LayoutHistoryData): Promise<FullObjectHistoryData> => {
-        if(item.cageHistoryId === null){
+        if(item.cage === null){
             return {
                 extraContext: item.extraContext,
                 objectType: item.objectType,
@@ -84,7 +84,7 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
                 yCoord: item.yCoord
             }
         }else{
-            const cageHistory: CageHistoryData = await fetchCageHistory(item.cageHistoryId);
+            const cageHistory: CageHistoryData = await fetchCageHistory(item.historyId, item.cage);
             const cageData: CageData = await fetchCage(cageHistory.cage);
             const rackData: RackData = await fetchRack(cageData.rack);
             return {
@@ -93,8 +93,8 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
                 xCoord: item.xCoord,
                 yCoord: item.yCoord,
                 rackGroup: cageHistory.rackGroup,
-                rack: rackData.objectId,
-                cage: cageData.cageNum
+                rack: rackData,
+                cage: {cageHistory: cageHistory, cageData: cageData}
             }
         }
     }
@@ -370,8 +370,8 @@ export function setupEditCageEvent(
         if(d3.select(element).classed('room-obj')){
             tempObj = localRoom.objects.find((obj) => obj.itemId === element.id);
         }else{
-            const cageGroupElement = element.closest(`[id^="cageSVG-"]`) as SVGGElement | null;
-            const cageObj = localRoom.rackGroups.flatMap(g => g.racks).flatMap(r => r.cages).find(c => c.id === cageGroupElement.id);
+            const cageGroupElement = element.closest(`[id^="cageSVG_"]`) as SVGGElement | null;
+            const cageObj = localRoom.rackGroups.flatMap(g => g.racks).flatMap(r => r.cages).find(c => c.svgId === cageGroupElement.id);
             tempObj = cageObj;
         }
         setSelectedObj(tempObj);
@@ -490,10 +490,10 @@ export async function mergeRacks(props: MergeProps) {
     }
     if (action !== 'cancel') {
         let targetRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
-            = layoutSvg.select(`[id=${targetRack.itemId}]`);
+            = layoutSvg.select(`[id=${targetRack.svgId}]`);
 
         let draggedRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
-            = layoutSvg.select(`[id=${draggedRack.itemId}]`);
+            = layoutSvg.select(`[id=${draggedRack.svgId}]`);
 
         let newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>;
 
@@ -501,16 +501,12 @@ export async function mergeRacks(props: MergeProps) {
         let clonedTargetShape = targetRackShape.node().cloneNode(true) as Element;
         let clonedDraggedShape = draggedRackShape.node().cloneNode(true) as Element;
 
-        let targetRackId = clonedTargetShape.id;
-        let draggedRackId = clonedDraggedShape.id;
+        let targetRackSvgId = clonedTargetShape.id;
+        let draggedRackSvgId = clonedDraggedShape.id;
 
         if(action === 'merge'){
             if(isConnected(draggedRackShape.node()) || isConnected(targetRackShape.node())){
                 await showLayoutEditorError("Invalid Configuration: Please do not merge connected racks");
-                return;
-            }
-            if(draggedRack.type.type !== targetRack.type.type){
-                await showLayoutEditorError("Invalid Configuration: Please do not merge cages of different types, use connection instead");
                 return;
             }
             newGroup = layoutSvg.append('g')
@@ -574,7 +570,7 @@ export async function mergeRacks(props: MergeProps) {
 
         newGroup.call(layoutDrag);
 
-        doRackAction(action,targetRackId, draggedRackId, targetCageId, dragCageId, newGroup);
+        doRackAction(action,targetRackSvgId, draggedRackSvgId, targetCageId, dragCageId, newGroup);
 
         // Remove the original shapes from the DOM
         targetRackShape.remove();
@@ -746,7 +742,7 @@ export function createStartDragInLayout(startDragProps: StartDragProps) {
                         foundObj = group;
                         return;
                     }
-                    foundObj = group.racks.find((rack) => rack.itemId === id)
+                    foundObj = group.racks.find((rack) => rack.svgId === id)
                 })
                 if(foundObj){
                     setSelectedObj(foundObj);
@@ -824,7 +820,7 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
         return false;
     }
 
-    const nums = rack.cages.map(item => item.id);
+    const nums = rack.cages.map(item => item.svgId);
     return nums.includes(cage1.cageId) && nums.includes(cage2.cageId);
 }
 
@@ -848,7 +844,7 @@ export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
 // finds a rack in room/groups of racks if it exists and return the rack and rack group it is apart of
 export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: Rack, rackGroup: RackGroup} | undefined => {
     for (const group of groups) {
-        const targetRack = group.racks.find(rack => rack.itemId === targetId);
+        const targetRack = group.racks.find(rack => rack.svgId === targetId);
         if (targetRack) {
             return { rack: targetRack, rackGroup: group };
         }
@@ -861,7 +857,7 @@ export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: R
 export const findCageInGroup = (targetId: CageSvgId, groups: RackGroup[]): {cage: Cage, rack: Rack, rackGroup: RackGroup} | undefined => {
     for (const group of groups) {
         for (const rack of group.racks) {
-            const targetCage = rack.cages.find(cage => cage.id === targetId);
+            const targetCage = rack.cages.find(cage => cage.svgId === targetId);
             if (targetCage) {
                 return { cage: targetCage, rack: rack, rackGroup: group };
             }
@@ -1060,7 +1056,7 @@ export const addModEntries = (
 
         if (usedMap.has(newMapKey)) return;
 
-        const modId = Utils.generateUUID();
+        const modId = Utils.generateUUID().toUpperCase();
 
         // Add mod data for current cage
         newModData.push({
@@ -1069,7 +1065,7 @@ export const addModEntries = (
             modId: modId,
             parentModId: null,
             modification: getDefaultMod(locDir),
-            rack: isRackConnection ? (connect as ConnectedRack).currRack.itemId : rack.itemId,
+            rack: isRackConnection ? (connect as ConnectedRack).currRack.objectId : rack.objectId,
             subId: connect.currSubId
         });
 
@@ -1078,10 +1074,10 @@ export const addModEntries = (
         newModData.push({
             cage: connect.adjCage.cageNum,
             location: adjLocation,
-            modId: Utils.generateUUID(),
+            modId: Utils.generateUUID().toUpperCase(),
             parentModId: modId,
             modification: getDefaultMod(adjLocation),
-            rack: isRackConnection ? (connect as ConnectedRack).adjRack.itemId : rack.itemId,
+            rack: isRackConnection ? (connect as ConnectedRack).adjRack.objectId : rack.objectId,
             subId: connect.adjSubId
         });
 

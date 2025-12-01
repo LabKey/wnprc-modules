@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';

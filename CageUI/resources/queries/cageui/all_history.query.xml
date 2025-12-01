@@ -36,16 +36,7 @@
                     <column columnName="valid"/>
                     <column columnName="start_date"/>
                     <column columnName="end_date"/>
-                    <column columnName="room_historyid">
-                        <fk>
-                            <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>room_history</fkTable>
-                            <fkColumnName>historyid</fkColumnName>
-                            <fkDisplayColumnName>historyid</fkDisplayColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="real_historyid"/>
-                    <column columnName="template_historyid"/>
+                    <column columnName="historyid"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

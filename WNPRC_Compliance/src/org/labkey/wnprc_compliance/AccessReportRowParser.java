@@ -25,14 +25,13 @@ import java.util.regex.Pattern;
  */
 public class AccessReportRowParser {
     enum ColumnName {
-        FIRST_NAME      (false, "Name (Last, First, Middle)"),
-        LAST_NAME       (false, "Name (Last, First, Middle)"),
-        MIDDLE_NAME     (false, "Name (Last, First, Middle)"),
-        CARD_NUMBER     (true,  "Badge ID(Issue)"),
-        CARD_ISSUED     (false,  "Badge Active"),
-        CARD_EXPIRE     (false,  "Badge Deactive"),
+        FIRST_NAME      (false, "First Name"),
+        LAST_NAME       (false, "Last Name"),
+        MIDDLE_NAME     (false, "Middle Name"),
+        CARD_NUMBER     (true,  "Badge ID"),
+        CARD_ISSUED     (false,  "Badge Activate"),
+        CARD_EXPIRE     (false,  "Badge Deactivate"),
         BADGE_TYPE (false,  "Badge Type"),
-        CARD_ISSUE_CODE (false,  "Badge Id(Issue)"),
         ;
 
         boolean required;
@@ -87,7 +86,7 @@ public class AccessReportRowParser {
         }
     }
 
-    public Pair<CardInfo, AccessInfo> parseRow(String reportId, Row row, Container container) throws ParseException
+    public CardInfo parseRow(Row row) throws ParseException
     {
         Map<ColumnName, Object> values = new HashMap<>();
 
@@ -96,23 +95,16 @@ public class AccessReportRowParser {
         for (ColumnName columnName : cellIndexLookup.keySet()) {
             Cell cell = row.getCell(cellIndexLookup.get(columnName));
             if (cell != null ) {
-                if (columnName.headerText.equals(ColumnName.FIRST_NAME.headerText))
-                {
-                    if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty())
-                    {
-                        Matcher matcher = Pattern.compile("^(.*?),\\s+(\\w+)(?:\\s+(\\w+))?$").matcher(cell.getStringCellValue());
-
-                        if (matcher.find())
-                        {
-                            values.put(ColumnName.FIRST_NAME, matcher.group(2));
-                            values.put(ColumnName.LAST_NAME, matcher.group(1));
-                            values.put(ColumnName.MIDDLE_NAME, matcher.group(3));
-                        }
-                    }
-
+                if(columnName == ColumnName.FIRST_NAME){
+                    values.put(ColumnName.FIRST_NAME, cell.getStringCellValue());
                 }
-
-                if (columnName.headerText.equals(ColumnName.CARD_ISSUED.headerText))
+                else if (columnName == ColumnName.MIDDLE_NAME){
+                    values.put(ColumnName.MIDDLE_NAME, cell.getStringCellValue());
+                }else if (columnName == ColumnName.LAST_NAME){
+                    values.put(ColumnName.LAST_NAME, cell.getStringCellValue());
+                }else if (columnName == ColumnName.BADGE_TYPE){
+                    values.put(ColumnName.BADGE_TYPE, cell.getStringCellValue());
+                }else if (columnName == ColumnName.CARD_ISSUED)
                 {
                     if (!cell.toString().isEmpty())
                     {
@@ -121,8 +113,7 @@ public class AccessReportRowParser {
                         values.put(ColumnName.CARD_ISSUED, d);
 
                     }
-                }
-                if (columnName.headerText.equals(ColumnName.CARD_EXPIRE.headerText))
+                }else if (columnName == ColumnName.CARD_EXPIRE)
                 {
                     if (!cell.toString().isEmpty())
                     {
@@ -130,21 +121,12 @@ public class AccessReportRowParser {
                         Date d = df.parse(cell.toString());
                         values.put(ColumnName.CARD_EXPIRE, d);
                     }
-                }
-
-                if (columnName.headerText.equals(ColumnName.CARD_NUMBER.headerText))
+                }else if (columnName == ColumnName.CARD_NUMBER)
                 {
-
-                    if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty())
-                    {
-                        Matcher matcher = Pattern.compile("(\\d+)\\s*\\((\\d+)\\)").matcher(cell.getStringCellValue());
-                        if (matcher.find())
-                        {
-                            values.put(ColumnName.CARD_NUMBER, matcher.group(1));
-                            values.put(ColumnName.CARD_ISSUE_CODE, matcher.group(2));
-                        }
-                    }
+                    values.put(ColumnName.CARD_NUMBER, cell.getStringCellValue());
                 }
+
+
 
                 String value = "";
                 if (cell.getCellType() == CellType.STRING) {
@@ -152,11 +134,11 @@ public class AccessReportRowParser {
                 }
                 if (!values.containsKey(columnName))
                     values.put(columnName, value);
+
             }
         }
 
-       Pair<CardInfo, AccessInfo> pair = new Pair<>(new CardInfo(values), new AccessInfo(values));
-        return pair;
+        return new CardInfo(values);
     }
 
     public static class CardInfo {
@@ -187,24 +169,12 @@ public class AccessReportRowParser {
         public Date getCardExpire() {
             return (Date) this.values.get(ColumnName.CARD_EXPIRE);
         }
-        public String getIssueCode() {
-            return (String) this.values.get(ColumnName.CARD_ISSUE_CODE);
-        }
         public String getCardType() {
             return (String) this.values.get(ColumnName.BADGE_TYPE);
         }
 
         public Map<ColumnName, Object> getValues() {
             return this.values;
-        }
-
-    }
-
-    public static class AccessInfo {
-        private Map<ColumnName, Object> values;
-
-        public AccessInfo(Map<ColumnName, Object> values) {
-            this.values = values;
         }
 
     }
@@ -216,8 +186,9 @@ public class AccessReportRowParser {
     }
 
     public static Date parseDate(String dateString) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ssa");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd.yy");
         SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat fullDateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ssa");
 
         Date date;
 
@@ -229,7 +200,12 @@ public class AccessReportRowParser {
                 date = shortDateFormat.parse(dateString);
             }
             catch(ParseException e2) {
-                throw new ApiUsageException("Unrecognized Date format: " + dateString);
+                try {
+                    date = fullDateFormat.parse(dateString);
+                }
+                catch(ParseException e3) {
+                    throw new ApiUsageException("Unrecognized Date format: " + dateString);
+                }
             }
         }
 

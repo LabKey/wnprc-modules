@@ -1,0 +1,31 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="jetInvoiceItems" tableDbType="NOT_IN_DB">
+                <tableTitle>CSV to Workday Preview</tableTitle>
+                <columns>
+                    <column columnName="Department">
+                        <columnTitle>Cost Center</columnTitle>
+
+                    </column>
+                    <column columnName="Program">
+                        <columnTitle>Function</columnTitle>
+                    </column>
+                    <column columnName="Project">
+                        <columnTitle>Grant</columnTitle>
+                    </column>
+                    <column columnName="Account">
+                        <columnTitle>Ledge Account</columnTitle>
+                    </column>
+                    <column columnName="Amount">
+                        <columnTitle>Extended Amount</columnTitle>
+                        <formatString>0.00</formatString>
+                    </column>
+                    <column columnName="Description">
+                        <columnTitle>Catalog Item</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

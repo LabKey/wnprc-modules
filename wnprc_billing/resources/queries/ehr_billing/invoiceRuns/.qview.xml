@@ -16,6 +16,16 @@
             <property name="columnTitle" value="CSV Download"/>
         </properties>
     </column>
+    <column name="viewWorkdayInvoice">
+        <properties>
+            <property name="columnTitle" value="Workday Preview"/>
+        </properties>
+    </column>
+    <column name="downloadWorkdayCsv">
+        <properties>
+            <property name="columnTitle" value="WorkDay Download"/>
+        </properties>
+    </column>
 </columns>
 <sorts>
     <sort column="billingPeriodEnd" descending="true" />

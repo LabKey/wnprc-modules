@@ -27,6 +27,8 @@
         <column name="charge_grant_accounts_id"/>
         <column name="uw_fund"/>
         <column name="uw_account"/>
+        <column name="program"/>
+        <column name="spend_category"/>
         <column name="uw_udds"/>
         <column name="uw_class_code"/>
         <column name="grant_period_end"/>

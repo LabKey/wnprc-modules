@@ -54,19 +54,25 @@ public class AccessReportService {
         this.container = container;
     }
 
-    public void importReport(InputStream stream) throws IOException, AccessReportRowParser.MalformedReportException, ParseException
+    public void importReport(InputStream stream, String filename) throws IOException, AccessReportRowParser.MalformedReportException, ParseException
     {
         String reportid = UUID.randomUUID().toString().toUpperCase();
         Sheet sheet = new ExcelLoader(stream,false, null).getSheet();
 
-        Row titleRow = sheet.getRow(1);
-        if (!titleRow.getCell(0).getStringCellValue().equalsIgnoreCase("Access Level Assignments to Cardholders")) {
+        // Ensure all necessary columns are present in an uploaded report
+        Row columnHeaderRow = sheet.getRow(0);
+        if(!columnHeaderRow.getCell(3).getStringCellValue().equalsIgnoreCase("Last Name")
+            || !columnHeaderRow.getCell(5).getStringCellValue().equalsIgnoreCase("First Name")
+            || !columnHeaderRow.getCell(7).getStringCellValue().equalsIgnoreCase("Middle Name")
+            || !columnHeaderRow.getCell(23).getStringCellValue().equalsIgnoreCase("Badge Type")
+            || !columnHeaderRow.getCell(25).getStringCellValue().equalsIgnoreCase("Badge ID")
+            || !columnHeaderRow.getCell(30).getStringCellValue().equalsIgnoreCase("Badge Activate")
+            || !columnHeaderRow.getCell(32).getStringCellValue().equalsIgnoreCase("Badge Deactivate")){
             throw new ApiUsageException("You can only upload area rights reports here.");
         }
 
-        Row dateRow = sheet.getRow(6);
-        //the report created date is the 13th column over
-        Matcher matcher = Pattern.compile("Report\\s+Date:\\s*(\\d{2}/\\d{2}/\\d{4}\\s+\\d{1,2}:\\d{2}:\\d{2}[AP]M)").matcher(dateRow.getCell(14).getStringCellValue());
+        //the report created is in the file name
+        Matcher matcher = Pattern.compile("(\\d{1,2}\\.\\d{1,2}\\.\\d{2})").matcher(filename);
         String reportDateTime;
         Date generatedOn;
         if (matcher.find())
@@ -88,72 +94,19 @@ public class AccessReportService {
         }
 
         Map<String, JSONObject> cardInfos = new HashMap<>();
-        List<Map<String, Object>> accessData = new ArrayList<>();
-
-
-        //if the cell contains Prim and Barrier
-        Pattern accessLevelPattern = Pattern.compile("Access Level:\\s*");
-
         Iterator<Row> rows = sheet.rowIterator();
-        AccessReportRowParser rowParser = null;
-        String accessLevel = "";
-        outer:
+        AccessReportRowParser rowParser = new AccessReportRowParser(columnHeaderRow);
         while (rows.hasNext()) {
             Row currentRow = rows.next();
-            //don't parse items until we reach the main block
-            if (currentRow.getRowNum() < 8)
-            {
+            // Skip header row
+            if(currentRow.getRowNum() == 0){
                 continue;
             }
-            if (currentRow.getCell(4) == null)
-            {
-                continue;
-            }
-            String firstCellText = currentRow.getCell(0).getStringCellValue();
 
-            Matcher accessLevelMatcher = accessLevelPattern.matcher(firstCellText);
-            //we've encountered an access level block of text
-            //we can grab the header and skip a row
-            if (accessLevelMatcher.matches())
-            {
-                accessLevel = currentRow.getCell(4).getStringCellValue();
-
-                // We are about to go into a block of values.  First, eat the blank line
-                rows.next();
-
-                // Now eat the header line
-                Row headerRow = rows.next();
-                //sets up the column names from the header row?
-
-                //
-                rowParser = new AccessReportRowParser(headerRow);
-
-                currentRow = rows.next();
-            }
-            if (rowParser == null)
-            {
-                continue;
-            }
-            Pair<AccessReportRowParser.CardInfo, AccessReportRowParser.AccessInfo> results = rowParser.parseRow(reportid, currentRow, container);
-            AccessReportRowParser.CardInfo cardInfo = results.first;
-            AccessReportRowParser.AccessInfo accessInfo = results.second;
+            AccessReportRowParser.CardInfo cardInfo = rowParser.parseRow(currentRow);
 
             if (cardInfo.getValues().isEmpty())
                 continue;
-
-
-            //end of spreadsheet pattern
-            Pattern endOfSheetPattern = Pattern.compile("Total Badges Required for Download:");
-            if (endOfSheetPattern.matcher(cardInfo.getFirstName()).matches())
-            {
-                int getNumCards = (int) currentRow.getCell(10).getNumericCellValue();
-                if (cardInfos.size() != getNumCards)
-                {
-                    throw new RuntimeException("Card number does not equal total badge count in sheet, upload failed.");
-                }
-                break;
-            }
-
 
             String cardNumber = cardInfo.getCardNumber();
             if (cardNumber == null || cardNumber.equals(""))
@@ -171,19 +124,10 @@ public class AccessReportService {
             cardInfoJSON.put("middle_name", cardInfo.getMiddleName());
             cardInfoJSON.put("date_issued", cardInfo.getCardIssued());
             cardInfoJSON.put("date_expire", cardInfo.getCardExpire());
-            cardInfoJSON.put("issue_code", cardInfo.getIssueCode());
             cardInfoJSON.put("card_type", cardInfo.getCardType());
             cardInfoJSON.put("container", container.getId());
 
             cardInfos.put(cardNumber, cardInfoJSON);
-
-            JSONObject accessInfoJSON = new JSONObject();
-            accessInfoJSON.put("report_id", reportid);
-            accessInfoJSON.put("access_level", accessLevel);
-            accessInfoJSON.put("card_id",   cardNumber);
-            accessInfoJSON.put("container", container.getId());
-
-            accessData.add(accessInfoJSON.toMap());
         }
 
         try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
@@ -203,9 +147,6 @@ public class AccessReportService {
                 cardsList.add(json.toMap());
             }
             cardsUpdater.upsert(cardsList);
-
-            SimpleQueryUpdater dataUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "access_report_data");
-            dataUpdater.upsert(accessData);
 
             List<Map<String, Object>> cardInfoList = new ArrayList<>(cardInfos.values().stream().map(JSONObject::toMap).toList());
             SimpleQueryUpdater cardInfoUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "card_info");

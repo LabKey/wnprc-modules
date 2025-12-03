@@ -23,13 +23,13 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.vfs.FileLike;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.wnprc_compliance.form.NewUserForm;
 import org.labkey.wnprc_compliance.form.RequirementForm;
 import org.labkey.wnprc_compliance.security.ComplianceAdminPermission;
 import org.springframework.validation.BindException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -273,7 +273,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     public class UploadAccessReportAPI extends AbstractFileUploadAction {
         @Override
-        protected File handleFile(String filename, InputStream input, Writer writer) throws IOException {
+        protected FileLike handleFile(String filename, InputStream input, Writer writer) throws IOException {
             try {
 
                 AccessReportService service = new AccessReportService(getUser(), getContainer());
@@ -291,7 +291,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
 
         @Override
-        protected File getTargetFile(String filename) throws IOException {
+        protected FileLike getTargetFile(String filename) throws IOException {
             // We'll be intercepting the stream, and we override handleFile(), so we don't need
             // to implement this.  If that ever changes, look at using /dev/null ("NUL" for Windows)
             // to truly give a data sink.

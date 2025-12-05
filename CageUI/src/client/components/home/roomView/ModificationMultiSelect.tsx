@@ -22,7 +22,6 @@ import { Cage, ModDirections, ModTypes, RoomMods } from '../../../types/typings'
 import { Filter, Utils } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
-import { useHomeContext } from '../../../context/HomeContextManager';
 
 interface ModificationMultiSelectProps {
     handleChange: (selectedItems: ConnectedModType[]) => void;
@@ -32,7 +31,6 @@ interface ModificationMultiSelectProps {
 
 export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props) => {
     const {directionCategory, handleChange, prevItems} = props;
-    const {setPrevRoomMods} = useHomeContext();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedItems, setSelectedItems] = useState<ConnectedModType[]>(prevItems || []);
     const [searchTerm, setSearchTerm] = useState('');
@@ -127,7 +125,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         if (!newItems.find(items => items.value === item.value)) {
             setSelectedItems([...newItems, {
                 ...item,
-                id: Utils.generateUUID(),
+                id: Utils.generateUUID().toUpperCase(),
             }]);
         }
         setSearchTerm('');

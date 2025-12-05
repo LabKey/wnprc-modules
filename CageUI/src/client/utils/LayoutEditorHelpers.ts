@@ -33,7 +33,7 @@ import {
     CageNumber, CageSvgId,
     DefaultRackTypes, FullObjectHistoryData,
     GroupId, LayoutHistoryData,
-    LocationCoords, ModData, ModLocations,
+    LocationCoords, CageMods, ModLocations,
     Rack, RackData,
     RackGroup,
     RackStringType,
@@ -1043,7 +1043,7 @@ export const addModEntries = (
     locDir: ModLocations,
     rack: Rack,
     isRackConnection: boolean,
-    newModData: ModData[],
+    newModData: CageMods[],
     usedMap: Map<string, boolean>
 )=>  {
     connections.forEach((connect) => {
@@ -1060,7 +1060,7 @@ export const addModEntries = (
 
         // Add mod data for current cage
         newModData.push({
-            cage: connect.currCage.cageNum,
+            cage: connect.currCage.objectId,
             location: locDir,
             modId: modId,
             parentModId: null,
@@ -1072,7 +1072,7 @@ export const addModEntries = (
         // Add mod data for adjacent cage
         const adjLocation = getAdjLocation(locDir);
         newModData.push({
-            cage: connect.adjCage.cageNum,
+            cage: connect.adjCage.objectId,
             location: adjLocation,
             modId: Utils.generateUUID().toUpperCase(),
             parentModId: modId,

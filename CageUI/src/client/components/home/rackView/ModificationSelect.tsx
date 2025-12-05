@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
-import { useHomeContext } from '../../../context/HomeContextManager';
 import Select from 'react-select';
 import { Option } from '@labkey/components';
 import { Filter } from '@labkey/api';
 import { ModDirections, ModTypes } from '../../../types/typings';
-import { Simulate } from 'react-dom/test-utils';
 import { cageModLookup } from '../../../api/popularQueries';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface ModificationSelectProps {
     removeMod: () => void;
@@ -18,7 +17,7 @@ interface ModificationSelectProps {
 
 export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
     const {directionCategory, defaultValue, removeMod, changeMod} = props;
-    const {selectedRoom} = useHomeContext();
+    const {selectedRoom} = useRoomContext();
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
 
     useEffect(() => {

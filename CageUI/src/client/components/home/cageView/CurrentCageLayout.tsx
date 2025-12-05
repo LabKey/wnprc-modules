@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FC, useEffect, useRef } from 'react';
 import '../../../cageui.scss';
-import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
 import { Cage } from '../../../types/typings';
 import { CELL_SIZE } from '../../../utils/constants';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface CurrentCageLayoutProps {
     cage: Cage;
@@ -13,7 +13,7 @@ interface CurrentCageLayoutProps {
 
 export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
     const {cage} = props;
-    const {selectedRoom} = useHomeContext();
+    const {selectedRoom} = useRoomContext();
 
     const cageRef = useRef<SVGSVGElement>(null);
 

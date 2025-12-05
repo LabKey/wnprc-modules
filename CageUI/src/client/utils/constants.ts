@@ -22,6 +22,28 @@ export const CELL_SIZE = 30; // number of pixels of a cell for length/width
 export const SVG_WIDTH = 810; // width of the layout svg
 export const SVG_HEIGHT = 1290; // height of the layout svg
 
+// These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
+export const roomSizeOptions = [
+    {
+        id: 1,
+        scale: 1.0,
+        title: "Small",
+        description: "Small room size fitting up to 10x5 cages"
+    },
+    {
+        id: 2,
+        scale: 0.8,
+        title: "Medium",
+        description: "Medium room size fitting up to 12x6 cages"
+    },
+    {
+        id: 3,
+        scale: 0.4,
+        title: "Large",
+        description: "Large room size fitting up to 17x8 cages"
+    }
+];
+
 //TODO finish styles
 export const Modifications: ModRecord = {
     [ModTypes.StandardFloor]: {

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
-import { useHomeContext } from '../../context/HomeContextManager';
 import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Filter, Utils } from '@labkey/api';
@@ -14,10 +13,12 @@ import {
     roomItemToString
 } from '../../utils/helpers';
 import { CageNumber, DefaultRackTypes, RackTypes } from '../../types/typings';
+import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
+import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomList: FC = () => {
-    const {setSelectedPage, loadedRooms } = useHomeContext();
-
+    const {navigateTo, navigateToRoom} = useHomeNavigationContext();
+    const {switchToRoom} = useRoomContext();
     // keeps track of which rooms have already been fetched from layout_history
     const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
     const [expandedRacks, setExpandedRacks] = useState<ListRack[]>([]);
@@ -46,16 +47,19 @@ export const RoomList: FC = () => {
     // Runs once after loadedRooms is filled with the rooms, adds to a list for easier display
     useEffect(() => {
         if(allRooms.length !== 0) return;
-        const roomList: ListRoom[] = [];
-
-        for (const [key,value] of Object.entries(loadedRooms)){
-            roomList.push({
-                name: key,
-                racks: null
-            })
-        }
-        setAllRooms(roomList);
-    }, [loadedRooms]);
+        labkeyActionSelectWithPromise({schemaName: "ehr_lookups", queryName: "rooms", columns: ["room"]}).then((res) => {
+            if(res.rowCount > 0){
+                const roomList: ListRoom[] = [];
+                res.rows.forEach((row) => {
+                    roomList.push({
+                        name: row.room,
+                        racks: null
+                    })
+                })
+                setAllRooms(roomList);
+            }
+        });
+    }, []);
 
     const toggleExpandRoom = async (roomId) => {
 
@@ -126,28 +130,17 @@ export const RoomList: FC = () => {
     };
 
     const handleRoomClick = (room: ListRoom) => {
-        setSelectedPage({
-            selected: "Room",
-            room: room.name
-        });
+        console.log("Click: ", room)
+        navigateToRoom(room.name, switchToRoom);
     }
 
     const handleRackClick = (room: ListRoom, rack: ListRack) => {
         console.log("Click: ", room, rack)
-        setSelectedPage({
-            selected: "Rack",
-            room: room.name,
-            rack: rack.id,
-        });
+        navigateTo("Rack", {room: room.name, rack: rack.id});
     }
 
     const handleCageClick = (room: ListRoom, rack: ListRack, cage: ListCage) => {
-        setSelectedPage({
-            selected: "Cage",
-            room: room.name,
-            rack: rack.id,
-            cage: cage.id
-        });
+        navigateTo("Cage", {room: room.name, rack: rack.id, cage: cage.id});
     }
 
     return (

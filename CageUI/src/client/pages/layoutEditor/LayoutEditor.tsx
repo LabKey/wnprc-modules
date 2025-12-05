@@ -39,8 +39,8 @@ import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
 import { isTemplateCreator, processRealLayoutHistory } from '../../utils/LayoutEditorHelpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
-import { buildNewLocalRoom, buildNewLocs } from '../../utils/helpers';
+import { roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
+import { buildNewLocalRoom, buildNewLocs, fetchRoomData } from '../../utils/helpers';
 
 export const LayoutEditor: FC<any> = () => {
     const roomName = ActionURL.getParameter("room");
@@ -54,27 +54,7 @@ export const LayoutEditor: FC<any> = () => {
     const [access, setAccess] = useState<boolean>(false);
 
 
-    // These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
-    const roomSizeOptions = [
-        {
-            id: 1,
-            scale: 1.0,
-            title: "Small",
-            description: "Small room size fitting up to 10x5 cages"
-        },
-        {
-            id: 2,
-            scale: 0.8,
-            title: "Medium",
-            description: "Medium room size fitting up to 12x6 cages"
-        },
-        {
-            id: 3,
-            scale: 0.4,
-            title: "Large",
-            description: "Large room size fitting up to 17x8 cages"
-        }
-    ];
+
 
     useEffect(() => {
         const userProfile = labkeyGetUserPermissions();
@@ -95,116 +75,17 @@ export const LayoutEditor: FC<any> = () => {
 
     // Loads prev room into memory if it exists
     useEffect(() => {
-        const fetchData = async () => {
-            if (!roomName) {
-                setIsLoading(false);
-                return;
-            }
-            // Make call to all_history for room and determine if template or not.
-            const allHistoryCfg: SelectRowsOptions = {
-                schemaName: 'cageui',
-                queryName: 'all_history',
-                columns: [],
-                filterArray: [
-                    Filter.create('room', roomName, Filter.Types.EQUALS),
-                    Filter.create('end_date', null, Filter.Types.ISBLANK)
-                ]
-            }
-            const allHistRes = await labkeyActionSelectWithPromise(allHistoryCfg);
-            if (allHistRes.rowCount === 1) {
-
-                const allHistObj: AllHistoryData = {
-                    endDate: allHistRes.rows[0].end_date,
-                    historyId: allHistRes.rows[0].historyid,
-                    historyType: allHistRes.rows[0].history_type,
-                    room: allHistRes.rows[0].room,
-                    rowid: allHistRes.rows[0].rowid,
-                    startDate: allHistRes.rows[0].start_date,
-                    valid: allHistRes.rows[0].valid
-                };
-                let historyTable: string = allHistObj.historyType === "template" ? "template_layout_history" : "layout_history";
-                const isDefaultRoom: boolean = allHistObj.historyType === "template";
-
-                const prevRoomConfig: SelectRowsOptions = {
-                    schemaName: 'cageui',
-                    queryName: historyTable,
-                    columns: [],
-                    filterArray: [
-                        Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS),
-                        Filter.create('end_date', null, Filter.Types.ISBLANK)
-                    ]
-                }
-
-                const prevRoomBorderConfig: SelectRowsOptions = {
-                    schemaName: 'cageui',
-                    queryName: 'room_history',
-                    columns: ['scale', 'border_width', 'border_height'],
-                    filterArray: [
-                        Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS)
-                    ]
-                }
-                const prevRoomPromise = labkeyActionSelectWithPromise(prevRoomConfig);
-                const prevRoomBorderPromise = labkeyActionSelectWithPromise(prevRoomBorderConfig);
-
-                Promise.all([prevRoomPromise, prevRoomBorderPromise]).then(async ([prevRoomResult, borderResult]) => {
-                    let borderObj: LayoutData;
-                    let cagingData: FullObjectHistoryData[] = [];
-                    if (borderResult.rowCount === 0) {
-                        throw new Error(`No room found in EHR for ${roomName}`);
-                    } else {
-
-                        borderObj = {
-                            scale: borderResult.rows[0].scale || 1,
-                            borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
-                            borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
-                        };
-                        setSelectedSize(roomSizeOptions.find(opt => opt.scale === borderObj.scale));
-                        setShowSelectionPopup(false);
-                    }
-
-                    if (prevRoomResult.rowCount > 0) {
-                        if (isDefaultRoom) {
-                            cagingData = prevRoomResult.rows.map((row: TemplateHistoryData) => ({
-                                objectType: row.object_type,
-                                extraContext: row.extra_context,
-                                rackGroup: row.rack_group,
-                                rack: row.rack.toString(),
-                                cage: row.cage,
-                                xCoord: row.x_coord,
-                                yCoord: row.y_coord,
-                            }));
-                        } else {
-                            const layoutHistoryData: LayoutHistoryData[] = prevRoomResult.rows.map(row => ({
-                                historyId: row.historyid,
-                                cage: row.cage,
-                                objectType: row.object_type,
-                                extraContext: row.extra_context,
-                                xCoord: row.x_coord,
-                                yCoord: row.y_coord,
-                                rowid: row.rowid,
-                            }))
-                            const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
-                            console.log("Layout history results", layoutHistoryResults);
-                            if (layoutHistoryResults.rejected.length > 0) {
-                                throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`)
-                            } else {
-                                cagingData = layoutHistoryResults.fulfilled;
-                            }
-                        }
-                    }
-                    setPrevRoomData({
-                        name: roomName,
-                        cagingData: cagingData,
-                        layoutData: borderObj,
-                        isDefault: isDefaultRoom
-                    });
-                }).catch(err => {
-                    setErrorPopup(err.toString());
-                });
-            }
-        };
-
-        fetchData();
+        if(!roomName){
+            setIsLoading(false);
+        }else{
+            fetchRoomData(roomName).then(prevRoomData => {
+                console.log("prev room data", prevRoomData);
+                setPrevRoomData(prevRoomData.prevRoomData);
+                setErrorPopup(prevRoomData?.error);
+                setShowSelectionPopup(prevRoomData.showSelectionPopup);
+                setSelectedSize(prevRoomData?.selectedSize);
+            });
+        }
     }, []);
 
     // Converts data from ehr into layout editor objects for use seen in typings

@@ -1,46 +1,30 @@
 import * as React from 'react';
 import { FC } from 'react';
 import '../../cageui.scss';
-import { useHomeContext } from '../../context/HomeContextManager';
+import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
 
 export const RoomNavbar: FC = () => {
-    const {selectedPage, setSelectedPage} = useHomeContext();
-
-    const handleHomeClick = () => {
-        console.log("Home clicked");
-        setSelectedPage(prevState => ({
-            selected: "Home"
-        }));
-    }
+    const {selectedPage, goToHome, navigateTo } = useHomeNavigationContext();
 
     const handleRoomClick = () => {
         console.log("Room clicked");
-        setSelectedPage(prevState => ({
-            room: prevState.room,
-            selected: "Room"
-        }));
+        navigateTo("Room", {room: selectedPage.room});
     }
 
     const handleRackClick = () => {
         console.log("Rack clicked");
-        setSelectedPage(prevState => ({
-            room: prevState.room,
-            rack: prevState.rack,
-            selected: "Rack"
-        }));
+        navigateTo("Rack", {room: selectedPage.room, rack: selectedPage.rack});
     }
     const handleCageClick = () => {
         console.log("Cage clicked");
-        setSelectedPage(prevState => ({
-            ...prevState,
-            selected: "Cage"
-        }));
+        navigateTo("Room", {room: selectedPage.room, rack: selectedPage.rack, cage: selectedPage.cage});
     }
+
     // TODO add cage type for cage instead of 'Cage'
     return (
         <div className="page-map">
             <div className={"page-map-url"}>
-                <span className={'page-map-link'} onClick={handleHomeClick}> Home </span>
+                <span className={'page-map-link'} onClick={goToHome}> Home </span>
                 {selectedPage.room && <div>/</div>}
                 {selectedPage.room &&
                     <span

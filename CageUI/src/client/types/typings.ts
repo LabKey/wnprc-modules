@@ -19,6 +19,7 @@
 import { GateContext } from './layoutEditorTypes';
 import { ConnectedCages, ConnectedModType, ConnectedRacks } from './homeTypes';
 import { Option } from '@labkey/components';
+import { SelectorOptions } from '../components/layoutEditor/RoomSizeSelector';
 
 /*
    **IMPORTANT**
@@ -123,6 +124,14 @@ export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
 export type RoomItemClass = 'caging' | 'roomObj';
 export type historyType = 'real' | 'template';
 
+export type ModIdKey = string;
+export type ModKeyMap = { modId: ModIdKey, parentModId: ModIdKey | null}
+export type CageModification = {
+    modKeys: ModKeyMap[];
+    subId: number; // subsection id
+}
+
+
 /* svgIds is an array of ids to apply the style to.
     Each id is a string to the following these rules to match the id in the svg file.
     1. The first string before an optional '-' is always the first id or only id to find. The location id always follows this first string.
@@ -144,9 +153,12 @@ export type Modification = {
 
 export type ModRecord = Record<ModTypes, Modification>;
 
-export type CageModification = {
-    id: number; // id for duplicate mods in the same location, imagine 2 cages on one side of a pen
-    mod: ModTypes; // Use mod in the Modifications constant to get styles for mod
+
+export interface FetchRoomData {
+    selectedSize: SelectorOptions;
+    showSelectionPopup: boolean;
+    prevRoomData: PrevRoom;
+    error?: string;
 }
 
 export interface Cage {
@@ -163,10 +175,8 @@ export interface Cage {
 }
 
 
-export type CageMapKey = string;
-
 export interface RoomMods {
-    [key: CageMapKey]: Option<ModTypes>;
+    [key: ModIdKey]: Option<ModTypes>;
 }
 
 export interface CurrCageMods {
@@ -176,26 +186,11 @@ export interface CurrCageMods {
 }
 
 export interface CageModificationsType {
-    [ModLocations.Top]: {
-        modKeys: CageMapKey[];
-        subId: number; // subsection id
-    }[];
-    [ModLocations.Bottom]: {
-        modKeys: CageMapKey[];
-        subId: number;
-    }[];
-    [ModLocations.Left]: {
-        modKeys: CageMapKey[];
-        subId: number;
-    }[];
-    [ModLocations.Right]: {
-        modKeys: CageMapKey[];
-        subId: number;
-    }[];
-    [ModLocations.Direct]: {
-        modKeys: CageMapKey[];
-        subId: number;
-    }[];
+    [ModLocations.Top]: CageModification[];
+    [ModLocations.Bottom]: CageModification[];
+    [ModLocations.Left]: CageModification[];
+    [ModLocations.Right]: CageModification[];
+    [ModLocations.Direct]: CageModification[];
 }
 
 export interface Room {
@@ -292,6 +287,16 @@ export interface FullObjectHistoryData {
     yCoord: number;
 }
 
+export interface ModData {
+    historyId: string;
+    cage: string;
+    modId: string;
+    parentModId: string | null;
+    modification: ModTypes;
+    location: ModLocations;
+    subId: number;
+}
+
 export interface PrevRoom {
     cagingData: FullObjectHistoryData[];
     layoutData: LayoutData;
@@ -300,11 +305,11 @@ export interface PrevRoom {
     name: string | null;
 }
 
-export interface ModData {
+export interface CageMods {
     modId: string; // unique mod id
     parentModId: string | null; // this determines if the mod is the flipped perspective of the inserted mod or the original (null if original, or modId of the original mod if flipped perspective)
-    rack: string; // todo rack objectid
-    cage: CageNumber;// cage number
+    rack: string; // rack objectid
+    cage: string;// cage objectid
     modification: ModTypes;
     location: ModLocations;
     subId: number; // subsection of location where the mod is located

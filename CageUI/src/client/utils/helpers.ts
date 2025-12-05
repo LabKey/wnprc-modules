@@ -17,13 +17,14 @@
  */
 
 import {
+    AllHistoryData,
     Cage, CageData, CageHistoryData,
     CageModificationsType,
     CageNumber, CageSvgId, CurrCageMods,
     DefaultRackStringType,
-    DefaultRackTypes, FullCageHistory, FullObjectHistoryData,
-    GroupId,
-    LayoutHistoryData,
+    DefaultRackTypes, FetchRoomData, FullCageHistory, FullObjectHistoryData,
+    GroupId, LayoutData,
+    LayoutHistoryData, CageMods,
     ModLocations,
     ModTypes,
     PrevRoom,
@@ -37,9 +38,9 @@ import {
     RoomMods,
     RoomObject,
     RoomObjectStringType,
-    RoomObjectTypes,
+    RoomObjectTypes, TemplateHistoryData,
     UnitLocations,
-    UnitType
+    UnitType, ModData, CageModification
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
@@ -49,12 +50,12 @@ import {
     createEmptyUnitLoc,
     isRackDefault,
     isRackEnum,
-    placeAndScaleGroup,
+    placeAndScaleGroup, processRealLayoutHistory,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { generateId, selectDistinctRows } from '@labkey/components';
-import { CELL_SIZE, Modifications } from './constants';
+import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
@@ -292,6 +293,150 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
     return rackItem || defaultRackItem || objItem;
 }
 
+export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal): Promise<FetchRoomData> => {
+    const prevRoomData: FetchRoomData = {
+        prevRoomData: undefined,
+        selectedSize: undefined,
+        showSelectionPopup: false,
+        error: undefined
+    };
+
+    // Make call to all_history for room and determine if template or not.
+    const allHistoryCfg: SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'all_history',
+        columns: [],
+        filterArray: [
+            Filter.create('room', roomName, Filter.Types.EQUALS),
+            Filter.create('end_date', null, Filter.Types.ISBLANK)
+        ]
+    };
+
+    const allHistRes = await labkeyActionSelectWithPromise(allHistoryCfg, abortSignal);
+
+    if (allHistRes.rowCount === 1) {
+        const allHistObj: AllHistoryData = {
+            endDate: allHistRes.rows[0].end_date,
+            historyId: allHistRes.rows[0].historyid,
+            historyType: allHistRes.rows[0].history_type,
+            room: allHistRes.rows[0].room,
+            rowid: allHistRes.rows[0].rowid,
+            startDate: allHistRes.rows[0].start_date,
+            valid: allHistRes.rows[0].valid
+        };
+
+        let historyTable: string = allHistObj.historyType === "template" ? "template_layout_history" : "layout_history";
+        const isDefaultRoom: boolean = allHistObj.historyType === "template";
+
+        const prevRoomConfig: SelectRowsOptions = {
+            schemaName: 'cageui',
+            queryName: historyTable,
+            columns: [],
+            filterArray: [
+                Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS),
+                Filter.create('end_date', null, Filter.Types.ISBLANK)
+            ]
+        };
+
+        const prevRoomBorderConfig: SelectRowsOptions = {
+            schemaName: 'cageui',
+            queryName: 'room_history',
+            columns: ['scale', 'border_width', 'border_height'],
+            filterArray: [
+                Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS)
+            ]
+        };
+
+        const modHistoryConfig = {
+            schemaName: 'cageui',
+            queryName: 'cage_modifications_history',
+            columns: [],
+            filterArray: [
+                Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS),
+            ]
+        }
+
+        const [prevRoomResult, borderResult, modResult] = await Promise.all([
+            labkeyActionSelectWithPromise(prevRoomConfig, abortSignal),
+            labkeyActionSelectWithPromise(prevRoomBorderConfig, abortSignal),
+            labkeyActionSelectWithPromise(modHistoryConfig, abortSignal)
+        ]);
+
+        let borderObj: LayoutData;
+        let cagingData: FullObjectHistoryData[] = [];
+        let modData: ModData[];
+
+        if (borderResult.rowCount === 0) {
+            throw new Error(`No room found in EHR for ${roomName}`);
+        } else {
+            borderObj = {
+                scale: borderResult.rows[0].scale || 1,
+                borderHeight: borderResult.rows[0].border_height || SVG_HEIGHT - 1,
+                borderWidth: borderResult.rows[0].border_width || SVG_WIDTH - 1,
+            };
+            prevRoomData.selectedSize = roomSizeOptions.find(opt => opt.scale === borderObj.scale);
+            prevRoomData.showSelectionPopup = false;
+        }
+
+        if (prevRoomResult.rowCount > 0) {
+            if (isDefaultRoom) {
+                cagingData = prevRoomResult.rows.map((row: TemplateHistoryData) => ({
+                    objectType: row.object_type,
+                    extraContext: row.extra_context,
+                    rackGroup: row.rack_group,
+                    rack: row.rack.toString(),
+                    cage: row.cage,
+                    xCoord: row.x_coord,
+                    yCoord: row.y_coord,
+                }));
+            } else {
+                const layoutHistoryData: LayoutHistoryData[] = prevRoomResult.rows.map(row => ({
+                    historyId: row.historyid,
+                    cage: row.cage,
+                    objectType: row.object_type,
+                    extraContext: row.extra_context,
+                    xCoord: row.x_coord,
+                    yCoord: row.y_coord,
+                    rowid: row.rowid,
+                }));
+
+                const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
+                console.log("Layout history results", layoutHistoryResults);
+
+                if (layoutHistoryResults.rejected.length > 0) {
+                    throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`);
+                } else {
+                    cagingData = layoutHistoryResults.fulfilled;
+                }
+            }
+        }
+
+        if (modResult.rowCount > 0) {
+            modData = modResult.rows.map(row => ({
+                location: row.location,
+                modId: row.modid,
+                parentModId: row.parent_modid,
+                subId: row.subid,
+                cage: row.cage,
+                modification: row.modification,
+                historyId: row.historyid
+            }))
+        }
+
+        prevRoomData.prevRoomData = {
+            name: roomName,
+            cagingData: cagingData,
+            layoutData: borderObj,
+            isDefault: isDefaultRoom,
+            modData: modData
+        };
+
+        return prevRoomData;
+    }
+    return prevRoomData;
+};
+
+
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
 export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
@@ -310,12 +455,12 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     // Loads modifications from constant styles and ids to inject into the svgs
     const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
         if(!cageToLoad.mods) return;
-        Object.entries(cageToLoad.mods).forEach(([loc,modSubList]) => {
+        Object.entries(cageToLoad.mods).forEach(([loc,modSubList]: [string,  CageModification[]]) => {
             const modLoc = parseInt(loc) as ModLocations;
             modSubList.forEach((modList) => {
                 const subId = modList.subId;
-                modList.modKeys.forEach(modId => {
-                    const currMod = modsToLoad[modId];
+                modList.modKeys.forEach(modMap => {
+                    const currMod = modsToLoad[modMap.modId];
                     const modObj = Modifications[currMod.value];// find mod in mod constants array
                     // for each id in the location map the style if it exists
                     modObj.svgIds[modLoc].forEach((svgId, idx) => {
@@ -629,7 +774,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             const modReturnData = await cageModLookup([],[]);
             const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
 
-            const prevMods = prevRoom.modData.filter((mod) => mod.rack === rack.objectId && mod.cage === rackItem.cage);
+            const prevMods = prevRoom.modData.filter((mod) => mod.cage === cageData.objectId);
             prevMods.forEach((mod) => {
                 // If Mod id exists in newMods we can skip adding it to newMods
                 if(!Object.keys(newMods).find(key => key === mod.modId)){
@@ -639,24 +784,14 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 if(cageMods[mod.location].find(m => m.subId === mod.subId)){
                     cageMods[mod.location] = cageMods[mod.location].map(mods => {
                         if(mods.subId === mod.subId){
-                            if(mod.parentModId !== null){
-                                return {
-                                    ...mods,
-                                    modKeys: [...mods.modKeys, mod.parentModId]
-                                }
-                            }
                             return {
                                 ...mods,
-                                modKeys: [...mods.modKeys, mod.modId]
+                                modKeys: [...mods.modKeys, {modId: mod.modId, parentModId: mod.parentModId}]
                             }
                         }
                     });
                 }else{
-                    if(mod.parentModId !== null){
-                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, modKeys: [mod.parentModId]}];
-                    }else{
-                        cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, modKeys: [mod.modId]}];
-                    }
+                    cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, modKeys: [{modId: mod.modId, parentModId: mod.parentModId}]}];
                 }
             })
         }

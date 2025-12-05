@@ -19,8 +19,7 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
-import { useHomeContext } from '../../../context/HomeContextManager';
-import { Cage, CurrCageMods, ModLocations, Rack, RackGroup } from '../../../types/typings';
+import { Cage, CageModification, CurrCageMods, ModKeyMap, ModLocations, Rack, RackGroup } from '../../../types/typings';
 import { findDirStr, getLocationDirection } from '../../../utils/homeHelpers';
 import {findConnectedCages, findConnectedRacks} from '../../../utils/helpers';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
@@ -32,6 +31,7 @@ import {
     ConnectedRacks
 } from '../../../types/homeTypes';
 import { ModificationMultiSelect } from './ModificationMultiSelect';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface CageModificationsProps {
     cage: Cage;
@@ -41,7 +41,7 @@ interface CageModificationsProps {
 }
 export const CageModifications: FC<CageModificationsProps> = (props) => {
     const {cage, rack, currCageMods, setCurrCageMods} = props;
-    const { selectedRoom} = useHomeContext();
+    const { selectedRoom} = useRoomContext();
     const [rackGroup, setRackGroup] = useState<RackGroup>(null);
     const [connectedCages, setConnectedCages] = useState<ConnectedCages>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
@@ -56,9 +56,15 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
         Object.entries(connectionsObj).forEach(([direction,connections]) => {
             connections.forEach((connection) => {
                 if(cage.mods[direction].length > 0 ){
-                    cage.mods[direction].forEach((modKeysInLoc) => {
+                    cage.mods[direction].forEach((modKeysInLoc: {modKeys:  ModKeyMap[], subId: number}) => {
                         if(modKeysInLoc.subId === connection.currSubId){
-                            connection.mods = modKeysInLoc.mods.map(key => ({label: selectedRoom.mods[key].label, value: selectedRoom.mods[key].value, id: key}));
+                            connection.mods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
+                                return {
+                                    label: selectedRoom.mods[key.modId].label,
+                                    value: selectedRoom.mods[key.modId].value,
+                                    id: key.modId
+                                }
+                            });
                         }
                     })
                 }
@@ -196,7 +202,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                             <ModificationMultiSelect
                                 handleChange={(selectedItems) =>  handleChange(ModLocations.Direct, cage, selectedItems)}
                                 prevItems={cage.mods[ModLocations.Direct].flatMap(subMods => {
-                                    return subMods.modKeys.map(key => ({label: selectedRoom.mods[key].label, value: selectedRoom.mods[key].value, id: key}))
+                                    return subMods.modKeys.map(key => ({label: selectedRoom.mods[key.modId].label, value: selectedRoom.mods[key.modId].value, id: key.modId}))
                                 })}
                             />
                         </ul>

@@ -6,7 +6,7 @@ import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
 
 export const CurrentRackLayout: FC = () => {
-    const {selectedPage, selectedRoom, selectedRack, selectedRackGroup} = useHomeContext();
+    const {selectedRack, selectedRackGroup} = useHomeContext();
     const rackRef = useRef<SVGSVGElement>(null);
     useEffect(() => {
         if(!selectedRack || !rackRef.current) return;

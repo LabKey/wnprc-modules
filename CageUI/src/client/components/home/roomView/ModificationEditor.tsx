@@ -5,10 +5,11 @@ import { SelectedObj } from '../../../types/layoutEditorTypes';
 import { Cage, CurrCageMods, ModLocations, Rack } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
-import { useHomeContext } from '../../../context/HomeContextManager';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import { RackModifications } from '../rackView/RackModifications';
 import { CageModifications } from './CageModifications';
+import { useRoomContext } from '../../../context/RoomContextManager';
+import { Button } from 'react-bootstrap';
 
 interface ModificationEditorProps {
     showEditor: boolean;
@@ -27,7 +28,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         selectedObj,
     } = props;
 
-    const {saveCageMods, selectedRoom} = useHomeContext();
+    const {selectedRoom, saveCageMods} = useRoomContext();
 
     const [currCage, setCurrCage] = useState<Cage>(null);
     const [currRack, setCurrRack] = useState<Rack>(null);
@@ -44,9 +45,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
             [ModLocations.Bottom]: [],
             [ModLocations.Direct]: []
         }, currCage: []});
-    const [showErrorPopup, setShowErrorPopup] = useState<string>(null);
-    const [showSavePopup, setShowSavePopup] = useState<string>(null); // if save is successful
-
+    const [showError, setShowError] = useState<string>(null);
 
     const menuRef = useRef(null);
 
@@ -69,7 +68,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
             if(event.target.tagName.toLowerCase() === "button") return;
             // if the target is outside the modification editor menu ref close the editor
             if (menuRef.current && !menuRef.current.contains(event.target)){
-                setShowErrorPopup(null);
+                setShowError(null);
                 setCurrCage(null);
                 setCurrRack(null);
                 setCurrCageMods({currCage: [], adjRacks: {
@@ -106,12 +105,11 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
 
        if(result){
             if(result.status === "Success"){
-                setShowSavePopup("Success");
+                closeMenu();
             }else{
-                setShowErrorPopup(result.reason.map((err, index) => `${index + 1}. ${err}`).join("\n"));
+                setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join("\n"));
             }
         }
-        closeMenu();
     }
 
     return (
@@ -133,17 +131,16 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                                 setCurrCageMods={setCurrCageMods}
                         />
                     </div>
-                    <div className="modification-editor-popup-actions">
-                        <button className="modification-editor-popup-button modification-editor-popup-cancel" onClick={closeMenu}>Cancel</button>
-                        <button className="modification-editor-popup-button modification-editor-popup-save" onClick={handleSubmit}>Save</button>
+                    <div className="modification-editor-popup-content" style={{alignItems: "flex-end"}}>
+                        <div className="modification-editor-popup-error">
+                            {showError}
+                        </div>
+                        <div className="modification-editor-popup-actions">
+                            <Button className="modification-editor-popup-button modification-editor-popup-cancel" onClick={closeMenu}>Cancel</Button>
+                            <Button className="modification-editor-popup-button modification-editor-popup-save" onClick={handleSubmit}>Save</Button>
+                        </div>
                     </div>
                 </div>
-                {showErrorPopup &&
-                    <ConfirmationPopup message={showErrorPopup} onClose={() => setShowErrorPopup(null)} />
-                }
-                {showSavePopup &&
-                    <ConfirmationPopup message={showSavePopup} onClose={() => {setShowSavePopup(null); closeMenu();}} />
-                }
             </div>
     );
 };

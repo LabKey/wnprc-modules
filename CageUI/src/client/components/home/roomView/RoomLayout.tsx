@@ -4,7 +4,6 @@ import * as d3 from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
 import { Cage, RoomMods } from '../../../types/typings';
-import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import { findCageInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
 import { ChangeRack } from '../../layoutEditor/ChangeRack';
@@ -15,13 +14,15 @@ import { ConfirmationPopup } from '../../ConfirmationPopup';
 import _ from 'lodash';
 import { ModificationSaveResult } from '../../../types/homeTypes';
 import { LayoutErrors } from '../../LayoutErrors';
-import { LayoutSaveResult } from '../../../types/layoutEditorTypes';
+import { LayoutSaveResult, SelectedObj } from '../../../types/layoutEditorTypes';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
-    const {selectedRoom, selectedContextObj, setSelectedContextObj, prevRoomMods, submitLayoutMods} = useHomeContext();
+    const {selectedRoom, selectedRoomMods, submitLayoutMods} = useRoomContext();
+    const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
     const [errorPopup, setErrorPopup] = useState<string>(null);
@@ -29,6 +30,10 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
+
+    useEffect(() => {
+        console.log("Room Layout Selected Room: ", selectedRoom)
+    }, [selectedRoom]);
 
     // Loads room into the svg
     useEffect(() => {
@@ -60,15 +65,15 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     }, [showCageContextMenu]);
 
     useEffect(() => {
-        if(!selectedRoom.mods || !prevRoomMods) return;
-        setShowChangesMenu(!(_.isEqual(prevRoomMods, selectedRoom.mods)));
+        if(!selectedRoom.mods || !selectedRoomMods) return;
+        setShowChangesMenu(!(_.isEqual(selectedRoomMods, selectedRoom.mods)));
     }, [selectedRoom.mods]);
 
 
     const saveLayout = async () => {
 
         console.log("Room Mods: ", selectedRoom.mods);
-        const res: LayoutSaveResult = await submitLayoutMods();
+        let res: LayoutSaveResult = await submitLayoutMods();
         console.log("Save Layout Result: ", res);
 
         if(res.success){

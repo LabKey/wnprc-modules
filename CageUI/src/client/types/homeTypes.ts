@@ -1,6 +1,6 @@
 import {
     Cage,
-    CageMapKey,
+    ModIdKey,
     CageNumber, CageSvgId,
     ModDirections,
     ModLocations,
@@ -12,14 +12,15 @@ import {
 import { Option } from '@labkey/components';
 
 
-type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
 type UpdatedMod = {
     cage: Cage,
     mod: { label: string, value: string }
 }
 
-export type ConnectedModType = Option<ModTypes> & {id: CageMapKey};
+export type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
+
+export type ConnectedModType = Option<ModTypes> & {id: ModIdKey};
 
 export type UpdatedMods = UpdatedMod[];
 

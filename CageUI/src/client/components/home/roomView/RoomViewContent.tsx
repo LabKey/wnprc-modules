@@ -1,17 +1,30 @@
 import * as React from 'react';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import '../../../cageui.scss';
-import { ActionURL } from '@labkey/api';
-import { useHomeContext } from '../../../context/HomeContextManager';
+import { ActionURL, Filter } from '@labkey/api';
 import { SubViewContent } from '../SubViewContent';
 import { RoomDetails } from './RoomDetails';
 import { RoomLayout } from './RoomLayout';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
+import {
+    AllHistoryData,
+    FullObjectHistoryData,
+    LayoutData,
+    LayoutHistoryData,
+    TemplateHistoryData
+} from '../../../types/typings';
+import { SVG_HEIGHT, SVG_WIDTH } from '../../../utils/constants';
+import { processRealLayoutHistory } from '../../../utils/LayoutEditorHelpers';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface RoomViewContentProps {
 }
 
 export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
-    const {selectedPage, selectedRoom} = useHomeContext();
+    const {selectedPage} = useHomeNavigationContext();
+    const {selectedRoom} = useRoomContext();
     const roomName = selectedPage?.room;
 
     const handleLayoutEdit = () => {
@@ -21,10 +34,9 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
         });
     };
 
-
     return (
-        selectedRoom &&
-            <div className={"room-view-container"} key={'layout-' + selectedRoom}>
+        selectedPage &&
+            <div className={"room-view-container"} key={'layout-' + roomName}>
                 <div className={'room-view-title'}>
                     <input
                         type="checkbox"
@@ -40,7 +52,12 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
                     tabs={[{
                         name: 'Layout',
                         children:
-                            <RoomLayout />
+                            selectedRoom ?
+                                <RoomLayout />
+                                :
+                                <div className={"labkey-error"}>
+                                    {roomName} does not have an existing layout.
+                                </div>
                     },{
                         name: 'Details',
                         children: <RoomDetails />

@@ -21,7 +21,7 @@ import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { LayoutHistoryData, ModData, Room, RoomMods } from '../types/typings';
+import { LayoutHistoryData, CageMods, Room, RoomMods } from '../types/typings';
 import { buildURL } from '@labkey/components';
 
 export function labkeyActionSelectWithPromise(
@@ -117,7 +117,7 @@ export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => 
     })
 }
 
-export function saveRoomLayout(room: Room, mods: ModData[], prevRoomName: string): Promise<{ success: boolean, errors: any[] }> {
+export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string): Promise<{ success: boolean, errors: any[] }> {
     const newPrevRoomName = prevRoomName || room.name;
     let isDefault = false;
     room.rackGroups.forEach((g) => {

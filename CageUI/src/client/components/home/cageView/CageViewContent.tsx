@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { FC } from 'react';
 import '../../../cageui.scss';
-import { useHomeContext } from '../../../context/HomeContextManager';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const CageViewContent: FC = () => {
-    const {selectedPage} = useHomeContext();
+    const {selectedPage} = useHomeNavigationContext();
 
     return (
         <div>

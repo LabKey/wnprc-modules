@@ -24,7 +24,7 @@ import {
     CageNumber, CageSvgId,
     GroupId,
     LayoutHistoryData,
-    LocationCoords, ModData, ModLocations,
+    LocationCoords, CageMods, ModLocations,
     Rack,
     RackGroup,
     RackStringType,
@@ -1152,7 +1152,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     }
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        const newModData: ModData[] = [];
+        const newModData: CageMods[] = [];
 
         const roomName = localRoom.name;
         const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');

@@ -1407,6 +1407,7 @@ margin-bottom: 10px;
 .modification-editor-popup-content {
   margin-bottom: 20px;
   display: flex;
+  gap: 10px;
   flex-direction: row;
 }
 
@@ -1420,7 +1421,7 @@ margin-bottom: 10px;
 
 .modification-editor-popup-actions {
   display: flex;
-  justify-content: flex-end;
+  height: fit-content;
   gap: 10px;
 }
 
@@ -1428,21 +1429,26 @@ margin-bottom: 10px;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .modification-editor-popup-save {
-  background-color: #4CAF50;
+  background: #4CAF50;
   color: white;
   border: none;
+
+}
+
+.modification-editor-popup-error {
+  color: red;
+  flex: 1;
 }
 
 .modification-editor-popup-save:hover {
-  background-color: #45a049;
+  color: #45a049;
 }
 
 .modification-editor-popup-cancel {
-  background-color: #f1f1f1;
   border: 1px solid #ddd;
   color: #333;
 }
@@ -1450,6 +1456,8 @@ margin-bottom: 10px;
 .modification-editor-popup-cancel:hover {
   background-color: #e7e7e7;
 }
+
+
 
 @keyframes fadeIn {
   from {

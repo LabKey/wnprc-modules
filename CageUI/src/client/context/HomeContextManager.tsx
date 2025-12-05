@@ -1,28 +1,28 @@
-// @ts-nocheck
+
 
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
     Cage,
-    CageMapKey,
+    ModIdKey,
     CageModificationsType,
     CageNumber, CageSvgId,
-    CurrCageMods,
-    ModData,
+    CurrCageMods, LayoutHistoryData,
+    CageMods,
     ModLocations,
     ModTypes,
     PrevRoom,
     Rack,
     RackGroup,
     Room,
-    RoomMods
+    RoomMods, ModData
 } from '../types/typings';
 import { HomeContextType } from '../types/homeContextTypes';
 import { LoadedRooms, ModificationSaveResult, SelectedPage } from '../types/homeTypes';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise, labkeySaveRows, saveModLayout } from '../api/labkeyActions';
-import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
-import { buildNewLocalRoom, parseRoomItemNum, getAdjLocation } from '../utils/helpers';
+import { findCageInGroup, findRackInGroup, processRealLayoutHistory } from '../utils/LayoutEditorHelpers';
+import { buildNewLocalRoom, parseRoomItemNum, getAdjLocation, fetchRoomData } from '../utils/helpers';
 import { LayoutSaveResult, SelectedObj } from '../types/layoutEditorTypes';
 import { Command } from '@labkey/api/dist/labkey/query/Rows';
 import { compareMods  } from '../utils/homeHelpers';
@@ -159,7 +159,7 @@ export const HomeContextProvider = ({children}) => {
                             subId: row.subId,
                             cage: row.cage,
                             modification: row.modification,
-                            rack: row.rack,
+                            historyId: row.historyid
                         };
                         tempModData.push(newRow);
                     });
@@ -205,7 +205,7 @@ export const HomeContextProvider = ({children}) => {
         })
     }, [selectedPage.room, roomRefresh]);
 
-    useEffect(() => {
+    /*useEffect(() => {
         if(!selectedPage?.rack) return;
         //TODO Fetch mods for rack here as well and then set the rack and rack mods
         const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
@@ -220,7 +220,7 @@ export const HomeContextProvider = ({children}) => {
         setSelectedRackGroup(currGroup)
         setSelectedRack(currRack)
         setSelectedCage(currCage)
-    }, [selectedPage.cage]);
+    }, [selectedPage.cage]);*/
 
     // Refactored saveCageMods: clearer helpers, less duplication, and includes the missing state updates
     const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
@@ -228,7 +228,7 @@ export const HomeContextProvider = ({children}) => {
         const cageModsByCage: { [key in CageSvgId]: CageModificationsType } = {};
         const roomModsAccumulator: RoomMods = {};
         let newRoomMods: RoomMods = {};
-        const usedModKeys: CageMapKey[] = [];
+        const usedModKeys: ModIdKey[] = [];
 
         // Helpers
         const emptyCageMods = (): CageModificationsType => ({
@@ -250,22 +250,22 @@ export const HomeContextProvider = ({children}) => {
             cageId: CageSvgId,
             location: ModLocations,
             subsectionId: number,
-            modId: CageMapKey
+            modId: ModIdKey
         ) => {
             const cageEntry = ensureCageEntry(cageId);
             const subsections = cageEntry[location];
 
             const existing = subsections.find(s => s.subId === subsectionId);
-            if (!existing) {
+            /*if (!existing) {
                 cageEntry[location] = [...subsections, { subId: subsectionId, modKeys: [modId] }];
             } else {
                 cageEntry[location] = subsections.map(s =>
                     s.subId === subsectionId ? { ...s, modKeys: [...s.modKeys, modId] } : s
                 );
-            }
+            }*/
         };
 
-        const recordRoomMod = (id: CageMapKey, label: string, value: ModTypes) => {
+        const recordRoomMod = (id: ModIdKey, label: string, value: ModTypes) => {
             roomModsAccumulator[id] = { label, value };
             usedModKeys.push(id);
         };

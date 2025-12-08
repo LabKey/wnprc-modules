@@ -60,6 +60,10 @@
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>10</dat:scale>
                 </dat:column>
+                <dat:column columnName="billing_contact_info">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>10</dat:scale>
+                </dat:column>
                 <dat:column columnName="comments">
                     <dat:rangeURI>string</dat:rangeURI>
                 </dat:column>

@@ -1843,6 +1843,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "contact_name",
                 "contact_phone",
                 "contact_email",
+                "institution",
                 "address",
                 "city",
                 "state",

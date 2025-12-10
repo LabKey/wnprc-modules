@@ -175,17 +175,22 @@ export const RoomContextProvider = ({children}) => {
             console.log("dir: ", dir, "allDirMods: ", allDirMods);
             allDirMods.forEach(modSubsection => {
                 modSubsection.mods.forEach(mod => {
-                    const modId = mod.id;
+                    // Check if this mod already exists in roomModsAccumulator
+                    const existingMod = roomModsAccumulator[mod.id];
                     const parentModId = Utils.generateUUID().toUpperCase();
-                    recordRoomMod(modId, mod.label, mod.value);
-                    recordRoomMod(parentModId, mod.label, mod.value);
 
-                    // Update current cage in given direction
-                    addOrAppendSubsectionMod(modSubsection.currCage.svgId, dir, modSubsection.currSubId, modId, null);
+                    if (!existingMod) {
+                        // Only record new mods
+                        recordRoomMod(mod.id, mod.label, mod.value);
+                        recordRoomMod(parentModId, mod.label, mod.value);
 
-                    // Update adjacent cage in opposite direction
-                    const adjDir = getAdjLocation(dir);
-                    addOrAppendSubsectionMod(modSubsection.adjCage.svgId, adjDir, modSubsection.adjSubId, parentModId, modId);
+                        // Update current cage in given direction
+                        addOrAppendSubsectionMod(modSubsection.currCage.svgId, dir, modSubsection.currSubId, mod.id, null);
+
+                        // Update adjacent cage in opposite direction
+                        const adjDir = getAdjLocation(dir);
+                        addOrAppendSubsectionMod(modSubsection.adjCage.svgId, adjDir, modSubsection.adjSubId, parentModId, mod.id);
+                    }
                 });
             });
         });
@@ -215,7 +220,13 @@ export const RoomContextProvider = ({children}) => {
                 }
 
                 modSubsection.mods.forEach(mod => {
-                    recordRoomMod(mod.id, mod.label, mod.value);
+                    // Check if this mod already exists in roomModsAccumulator
+                    const existingMod = roomModsAccumulator[mod.id];
+
+                    if (!existingMod) {
+                        // Only record new mods
+                        recordRoomMod(mod.id, mod.label, mod.value);
+                    }
 
                     // Update current cage at dir
                     addOrAppendSubsectionMod(modSubsection.currCage.svgId, dir, modSubsection.currSubId, mod.id, null);
@@ -266,6 +277,7 @@ export const RoomContextProvider = ({children}) => {
 
         return { status: "Success" };
     };
+
 
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {

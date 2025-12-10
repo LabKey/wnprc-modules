@@ -50,6 +50,10 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     const menuRef = useRef(null);
 
     useEffect(() => {
+        console.log("currCageMods: ", currCageMods);
+    }, [currCageMods]);
+
+    useEffect(() => {
         const tempCage = selectedObj as Cage;
         if(tempCage){
             const cageRack = findCageInGroup(tempCage.svgId, selectedRoom.rackGroups).rack;
@@ -68,23 +72,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
             if(event.target.tagName.toLowerCase() === "button") return;
             // if the target is outside the modification editor menu ref close the editor
             if (menuRef.current && !menuRef.current.contains(event.target)){
-                setShowError(null);
-                setCurrCage(null);
-                setCurrRack(null);
-                setCurrCageMods({currCage: [], adjRacks: {
-                        [ModLocations.Left]: [],
-                        [ModLocations.Right]: [],
-                        [ModLocations.Top]: [],
-                        [ModLocations.Bottom]: [],
-                        [ModLocations.Direct]: []
-                    }, adjCages: {
-                        [ModLocations.Left]: [],
-                        [ModLocations.Right]: [],
-                        [ModLocations.Top]: [],
-                        [ModLocations.Bottom]: [],
-                        [ModLocations.Direct]: []
-                    }})
-                closeMenu();
+                handleCleanup();
             }
         };
 
@@ -97,6 +85,25 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         };
     }, [menuRef]);
 
+    const handleCleanup = () => {
+        setShowError(null);
+        setCurrCage(null);
+        setCurrRack(null);
+        setCurrCageMods({currCage: [], adjRacks: {
+                [ModLocations.Left]: [],
+                [ModLocations.Right]: [],
+                [ModLocations.Top]: [],
+                [ModLocations.Bottom]: [],
+                [ModLocations.Direct]: []
+            }, adjCages: {
+                [ModLocations.Left]: [],
+                [ModLocations.Right]: [],
+                [ModLocations.Top]: [],
+                [ModLocations.Bottom]: [],
+                [ModLocations.Direct]: []
+            }})
+        closeMenu();
+    }
 
     // This submission updates the room mods with the current selections.
     const handleSubmit = () => {
@@ -105,7 +112,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
 
        if(result){
             if(result.status === "Success"){
-                closeMenu();
+                handleCleanup();
             }else{
                 setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join("\n"));
             }
@@ -118,7 +125,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                 <div className="modification-editor-popup" ref={menuRef}>
                     <div className="modification-editor-popup-header">
                         <h3 className="modification-editor-popup-title">{currCage.cageNum}</h3>
-                        <button className="modification-editor-popup-close" onClick={closeMenu}>&times;</button>
+                        <button className="modification-editor-popup-close" onClick={handleCleanup}>&times;</button>
                     </div>
                     <div className="modification-editor-popup-content">
                         <CurrentCageLayout
@@ -136,7 +143,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                             {showError}
                         </div>
                         <div className="modification-editor-popup-actions">
-                            <Button className="modification-editor-popup-button modification-editor-popup-cancel" onClick={closeMenu}>Cancel</Button>
+                            <Button className="modification-editor-popup-button modification-editor-popup-cancel" onClick={handleCleanup}>Cancel</Button>
                             <Button className="modification-editor-popup-button modification-editor-popup-save" onClick={handleSubmit}>Save</Button>
                         </div>
                     </div>

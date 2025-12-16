@@ -2,7 +2,7 @@ import * as React from 'react';
 import { createContext, useContext, useState } from 'react';
 
 import { RoomContextType } from '../types/roomContextTypes';
-import { buildNewLocalRoom, fetchRoomData, getAdjLocation } from '../utils/helpers';
+import { buildNewLocalRoom, fetchRoomData, getAdjLocation, saveRoomHelper } from '../utils/helpers';
 import {
     Cage,
     CageModification,
@@ -111,8 +111,19 @@ export const RoomContextProvider = ({children}) => {
         Object.entries(currCageMods.adjCages).forEach(([dirKey, allDirMods]) => {
             allDirMods.forEach(modSubsection => {
                 const { currMods, adjMods } = modSubsection;
+                const newCurrMods = [...currMods];
+                const newAdjMods = [...adjMods];
+
+                if(!cageModsByCage[modSubsection.currCage.objectId]){
+                    cageModsByCage[modSubsection.currCage.objectId] = {...modSubsection.currCage.mods};
+                }
+
+                if(!cageModsByCage[modSubsection.adjCage.objectId]){
+                    cageModsByCage[modSubsection.adjCage.objectId] = {...modSubsection.adjCage.mods};
+                }
+
                 // 1. go through connected cage mods and add them to the cagesModsByCage object.
-                [...currMods, ...adjMods].forEach(mod => {
+                [...newCurrMods, ...newAdjMods].forEach(mod => {
                     newRoomMods[mod.id] = { label: mod.label, value: mod.value };
                     console.log("Add mod: ", mod.id, " value: ", mod.value, " label: ", mod.label);
                 });
@@ -130,42 +141,37 @@ export const RoomContextProvider = ({children}) => {
                 oldModIds.forEach(modId => idsToRemove.set(modId, true));
                 // Go through all cage mods in direction dirKey, remove the old mods by adding to idsToRemove,
                 // and add the new mods from modSubsection.currMods, do the same thing for adjCages.
-                cageModsByCage[modSubsection.currCage.objectId] = {
-                    ...modSubsection.currCage.mods,
-                    [dirKey]: modSubsection.currCage.mods[dirKey].map((cm: CageModification) => {
-                        if(cm.subId === modSubsection.currSubId){
-                            return {
-                                ...cm,
-                                modKeys: [...currMods.map(m => {
-                                    if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
-                                        idsToRemove.delete(m.id);
-                                    }
-                                    return {modId: m.id, parentModId: m.parentModId}
-                                })]
-                            }
-                        }else{
-                            return cm;
+                cageModsByCage[modSubsection.currCage.objectId][dirKey] = cageModsByCage[modSubsection.currCage.objectId][dirKey].map((cm: CageModification) => {
+                    if(cm.subId === modSubsection.currSubId){
+                        return {
+                            ...cm,
+                            modKeys: [...newCurrMods.map(m => {
+                                if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
+                                    idsToRemove.delete(m.id);
+                                }
+                                return {modId: m.id, parentModId: m.parentModId}
+                            })]
                         }
-                    })
-                }
-                cageModsByCage[modSubsection.adjCage.objectId] = {
-                    ...modSubsection.adjCage.mods,
-                    [getAdjLocation(parseInt(dirKey))]: modSubsection.adjCage.mods[getAdjLocation(parseInt(dirKey))].map((cm: CageModification) => {
-                        if(cm.subId === modSubsection.adjSubId){
-                            return {
-                                ...cm,
-                                modKeys: [...adjMods.map(m => {
-                                    if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
-                                        idsToRemove.delete(m.id);
-                                    }
-                                    return {modId: m.id, parentModId: m.parentModId}
-                                })]
-                            }
-                        }else{
-                            return cm;
+                    }else{
+                        return cm;
+                    }
+                })
+
+                cageModsByCage[modSubsection.adjCage.objectId][getAdjLocation(parseInt(dirKey))] = cageModsByCage[modSubsection.adjCage.objectId][getAdjLocation(parseInt(dirKey))].map((cm: CageModification) => {
+                    if(cm.subId === modSubsection.adjSubId){
+                        return {
+                            ...cm,
+                            modKeys: [...newAdjMods.map(m => {
+                                if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
+                                    idsToRemove.delete(m.id);
+                                }
+                                return {modId: m.id, parentModId: m.parentModId}
+                            })]
                         }
-                    })
-                }
+                    }else{
+                        return cm;
+                    }
+                })
             })
         });
 
@@ -176,19 +182,16 @@ export const RoomContextProvider = ({children}) => {
             })
         }
         // Add direct cage mods new mods
+        const newDirectMods = currCageMods.currCage.map(m => {
+            newRoomMods[m.id] = {label: m.label, value: m.value};
+            if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
+                idsToRemove.delete(m.id);
+            }
+            return {modId: m.id, parentModId: null}
+        });
         cageModsByCage[currCage.objectId] = {
-            ...currCage.mods,
-            [ModLocations.Direct]: [
-                {
-                    subId: 1,
-                    modKeys: currCageMods.currCage.map(m => {
-                        newRoomMods[m.id] = {label: m.label, value: m.value};
-                        if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
-                            idsToRemove.delete(m.id);
-                        }
-                        return {modId: m.id, parentModId: null}
-                    })
-                }]
+            ...cageModsByCage[currCage.objectId],
+            [ModLocations.Direct]: newDirectMods.length > 0 ? [{subId: 1, modKeys: newDirectMods}] : []
         };
 
         idsToRemove.forEach((value, key) => {
@@ -221,93 +224,7 @@ export const RoomContextProvider = ({children}) => {
     };
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
-
-
-
-        /*const {rack: currRack} = findCageInGroup(currCage.id, selectedRoom.rackGroups);
-        const commands: Command[] = [];
-        const modsToSave: ModHistoryData[] = [];
-        const modsToUpdate: ModHistoryData[] = [];
-        const modChanges = compareMods(prevRoomMods, currCageMods);
-        console.log("Mod Changes: ", modChanges);
-        const newTimestamp = new Date();
-        modChanges.forEach((change) => {
-            const modLoc = parseInt(change.direction);
-            // new mod data if adding or modifying
-            const newModData: ModHistoryData = {
-                location: undefined,
-                subId: 0,
-                modId: '',
-                parentModId: null,
-                cage: parseRoomItemNum(currCage.cageNum),
-                endDate: null,
-                modification: change.mod as ModTypes,
-                rack: currRack.rowid,
-                room: selectedRoom.name,
-                startDate: newTimestamp
-            };
-            if(change.type === 'added'){
-                // Add new mod
-                modsToSave.push(newModData);
-            }else {
-                // Set old mod date end date
-                /!*const modToEnd = prevRoomMods.find((mod) => {
-                    // Finding the correct mod in the desired location that is currently active
-                    // Uses rack (rowid), cage num, location, location id and endDate to determine correct mod.
-                    return mod.rackRowId === currRack.rowid && mod.cage === parseRoomItemNum(currCage.cageNum) && mod.endDate === null;
-                });
-                modsToUpdate.push({...modToEnd, endDate: newTimestamp});
-                if (change.type === 'modified') { // add new mod if modified
-                    modsToSave.push(newModData);
-                }*!/
-            }
-        })
-
-        if(modsToUpdate.length > 0){
-            commands.push({
-                command: "update",
-                schemaName: "cageui",
-                queryName: "cage_modifications_history",
-                rows: modsToUpdate
-            });
-        }
-
-        if(modsToSave){
-            commands.push({
-                command: "insert",
-                schemaName: "cageui",
-                queryName: "cage_modifications_history",
-                rows: modsToSave
-            });
-        }
-        console.log("Commands: ", commands);
-        return;
-        const result = await labkeySaveRows(commands);
-        // Determine success or failure
-        if(result.errorCount === 0){
-            // On success refresh the current room and ensure that it fetches new data by changing loaded to false.
-            setRoomRefresh(true);
-            setLoadedRooms((prevRooms) => {
-                if(prevRooms[selectedRoom.name]){
-                    return {
-                        ...prevRooms,
-                       [selectedRoom.name]: {
-                            ...prevRooms[selectedRoom.name],
-                            loaded: false
-                        }
-                    }
-                }else{
-                    return prevRooms;
-                }
-            });
-            return { status: 'Success'};
-        }else{
-            return {
-                status: 'Failure',
-                reason: ["failures"] // Return an array of failure reasons
-            };
-        }*/
-
+        return saveRoomHelper(selectedRoom);
 
         let result: LayoutSaveResult;
         try {

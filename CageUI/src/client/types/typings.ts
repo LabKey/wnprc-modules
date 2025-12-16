@@ -180,8 +180,7 @@ export interface RoomMods {
 }
 
 export interface CurrCageMods {
-    adjCages: ConnectedCages;
-    adjRacks: ConnectedRacks;
+    adjCages: ConnectedCages | ConnectedRacks;
     currCage: ConnectedModType[];
 }
 

@@ -41,10 +41,10 @@
                   d="M120.5,100.5c11.03,0,20,8.97,20,20s-8.97,20-20,20-20-8.97-20-20,8.97-20,20-20ZM120.5,96.5c-13.26,0-24,10.75-24,24s10.75,24,24,24,24-10.75,24-24-10.75-24-24-24ZM132.5,122.5h-24v-4h24v4Z"
                   style="fill:none; stroke-width:0px;"/>
         </g>
-        <g id="top">
-            <polyline id="top-1" points=".5 .5 61.11 .5 120.5 .5"
+        <g id="ceiling">
+            <polyline id="ceiling-1" points=".5 .5 61.11 .5 120.5 .5"
                       style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
-            <polyline id="top-2" points="120.5 .5 181.11 .5 240.5 .5"
+            <polyline id="ceiling-2" points="120.5 .5 181.11 .5 240.5 .5"
                       style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
         </g>
         <g id="right">
@@ -53,10 +53,10 @@
             <polyline id="right-1" points="240.5 120.5 240.5 92.24 240.5 .5"
                       style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
         </g>
-        <g id="bottom">
-            <polyline id="bottom-1" points=".5 240.5 61.11 240.5 120.5 240.5"
+        <g id="floor">
+            <polyline id="floor-1" points=".5 240.5 61.11 240.5 120.5 240.5"
                       style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
-            <polyline id="bottom-2" points="120.5 240.5 181.11 240.5 240.5 240.5"
+            <polyline id="floor-2" points="120.5 240.5 181.11 240.5 240.5 240.5"
                       style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
         </g>
         <g id="left">

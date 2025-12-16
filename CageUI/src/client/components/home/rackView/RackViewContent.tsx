@@ -2,18 +2,16 @@ import * as React from 'react';
 import { FC } from 'react';
 import '../../../cageui.scss';
 import { SubViewContent } from '../SubViewContent';
-import { RoomLayout } from '../roomView/RoomLayout';
-import { RoomDetails } from '../roomView/RoomDetails';
 import { RackModifications } from './RackModifications';
 import { RackDetails } from './RackDetails';
 import { CurrentRackLayout } from './CurrentRackLayout';
 import { useRoomContext } from '../../../context/RoomContextManager';
-import { useHomeContext } from '../../../context/HomeContextManager';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const RackViewContent: FC = () => {
     const {selectedRoom} = useRoomContext();
 
-    const {selectedRack} = useHomeContext();
+    const {selectedRack} = useHomeNavigationContext();
 
     return (
         selectedRack &&

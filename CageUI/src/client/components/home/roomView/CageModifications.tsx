@@ -32,6 +32,7 @@ import {
 } from '../../../types/homeTypes';
 import { ModificationMultiSelect } from './ModificationMultiSelect';
 import { useRoomContext } from '../../../context/RoomContextManager';
+import { Utils } from '@labkey/api';
 
 interface CageModificationsProps {
     cage: Cage;
@@ -55,14 +56,29 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
         // connect prev cages
         Object.entries(connectionsObj).forEach(([direction,connections]) => {
             connections.forEach((connection) => {
-                if(cage.mods[direction].length > 0 ){
-                    cage.mods[direction].forEach((modKeysInLoc: {modKeys:  ModKeyMap[], subId: number}) => {
+                if(connection.currCage.mods[direction].length > 0 ){
+                    connection.currCage.mods[direction].forEach((modKeysInLoc: {modKeys:  ModKeyMap[], subId: number}) => {
                         if(modKeysInLoc.subId === connection.currSubId){
-                            connection.mods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
+                            connection.currMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
                                 return {
                                     label: selectedRoom.mods[key.modId].label,
                                     value: selectedRoom.mods[key.modId].value,
-                                    id: key.modId
+                                    id: key.modId,
+                                    parentModId: key.parentModId
+                                }
+                            });
+                        }
+                    })
+                }
+                if(connection.adjCage.mods[direction].length > 0 ){
+                    connection.adjCage.mods[direction].forEach((modKeysInLoc: {modKeys:  ModKeyMap[], subId: number}) => {
+                        if(modKeysInLoc.subId === connection.currSubId){
+                            connection.adjMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
+                                return {
+                                    label: selectedRoom.mods[key.modId].label,
+                                    value: selectedRoom.mods[key.modId].value,
+                                    id: key.modId,
+                                    parentModId: key.parentModId
                                 }
                             });
                         }
@@ -82,10 +98,31 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
         Object.entries(connectionsObj).forEach(([direction,connections]) => {
             connections.forEach(connection => {
-                if(cage.mods[direction].length > 0 ){
-                    cage.mods[direction].forEach((modKeysInLoc) => {
+                if(connection.currCage.mods[direction].length > 0 ){
+                    connection.currCage.mods[direction].forEach((modKeysInLoc: {modKeys:  ModKeyMap[], subId: number}) => {
                         if(modKeysInLoc.subId === connection.currSubId){
-                            connection.mods = modKeysInLoc.modKeys.map(key => ({label: selectedRoom.mods[key].label, value: selectedRoom.mods[key].value, id: key}));
+                            connection.currMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
+                                return {
+                                    label: selectedRoom.mods[key.modId].label,
+                                    value: selectedRoom.mods[key.modId].value,
+                                    id: key.modId,
+                                    parentModId: key.parentModId
+                                }
+                            });
+                        }
+                    })
+                }
+                if(connection.adjCage.mods[direction].length > 0 ){
+                    connection.adjCage.mods[direction].forEach((modKeysInLoc: {modKeys:  ModKeyMap[], subId: number}) => {
+                        if(modKeysInLoc.subId === connection.currSubId){
+                            connection.adjMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
+                                return {
+                                    label: selectedRoom.mods[key.modId].label,
+                                    value: selectedRoom.mods[key.modId].value,
+                                    id: key.modId,
+                                    parentModId: key.parentModId
+                                }
+                            });
                         }
                     })
                 }
@@ -116,54 +153,30 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
     const handleChange = (location: ModLocations, pairs: ConnectedRack | ConnectedCage | Cage, selectedItems: ConnectedModType[]) => {
 
-        if((pairs as ConnectedRack).adjRack){
-            const newPairs = pairs as ConnectedRack;
-            // edit if pair already exists
-            if(currCageMods.adjRacks[location].find(c => {
-                return newPairs.currCage.svgId === c.currCage.svgId
-                    && newPairs.currRack.itemId === c.currRack.itemId
-            })){
-                setCurrCageMods(prevState => ({
-                    ...prevState,
-                    adjRacks: {
-                        ...prevState.adjRacks,
-                        [location]: prevState.adjRacks[location].map((c) => {
-                            if(c.currSubId === newPairs.currSubId){
-                                return ({
-                                    ...c,
-                                    mods: selectedItems
-                                })
-                            }else{
-                                return c;
-                            }
-                        })
-                    }
-                }))
-            }else{
-                setCurrCageMods(prevState => ({
-                    ...prevState,
-                    adjRacks: {
-                        ...prevState.adjRacks,
-                        [location]: [...prevState.adjRacks[location], { ...newPairs, mods: selectedItems } ]
-                    }
-                }))
-            }
-        }else if((pairs as ConnectedCage).adjCage){// changing adjacent cages
-            const newPairs = pairs as ConnectedCage;
+        //TODO fix connected rack change handling
+
+
+        if((pairs as ConnectedRack).adjRack || (pairs as ConnectedCage).currCage){// changing adjacent mods (rack or cage)
+            const newPairs = pairs as ConnectedCage | ConnectedRack;
 
             // edit if pair already exists
             if(currCageMods.adjCages[location].find(c => {
-                return newPairs.currCage.svgId === c.currCage.svgId
+                return newPairs.currCage.objectId === c.currCage.objectId
             })){
                 setCurrCageMods(prevState => ({
                     ...prevState,
                     adjCages: {
                         ...prevState.adjCages,
                         [location]: prevState.adjCages[location].map((c) => {
-                            if(c.adjCage.svgId === newPairs.adjCage.svgId && c.currCage.svgId === newPairs.currCage.svgId){
+                            if(c.adjCage.objectId === newPairs.adjCage.objectId && c.currCage.objectId === newPairs.currCage.objectId){
                                 return ({
                                     ...c,
-                                    mods: selectedItems
+                                    currMods: selectedItems,
+                                    adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
+                                        ...m,
+                                        parentModId: m.id,
+                                        id: Utils.generateUUID().toUpperCase()
+                                    }))
                                 })
                             }else{
                                 return c;
@@ -176,7 +189,17 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                     ...prevState,
                     adjCages: {
                         ...prevState.adjCages,
-                        [location]: [...prevState.adjCages[location], {...newPairs, mods: selectedItems}]
+                        [location]: [
+                            ...prevState.adjCages[location], {
+                                ...newPairs,
+                                currMods: selectedItems,
+                                adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
+                                    ...m,
+                                    parentModId: m.id,
+                                    id: Utils.generateUUID().toUpperCase()
+                                }))
+                            }
+                        ]
                     }
                 }))
             }
@@ -233,7 +256,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                                 <ModificationMultiSelect
                                                     handleChange={(selectedItems) =>  handleChange(loc, c, selectedItems)}
                                                     directionCategory={getLocationDirection(loc)}
-                                                    prevItems={c.mods}
+                                                    prevItems={c.currMods}
                                                 />
                                             </div>
                                         </li>
@@ -277,7 +300,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                                 <ModificationMultiSelect
                                                     handleChange={(selectedItems) =>  handleChange(loc, r, selectedItems)}
                                                     directionCategory={getLocationDirection(loc)}
-                                                    prevItems={r.mods}
+                                                    prevItems={r.currMods}
                                                 />
                                             </div>
 

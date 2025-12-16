@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
-import { useHomeContext } from '../../../context/HomeContextManager';
 import { findRackInGroup } from '../../../utils/LayoutEditorHelpers';
 import { Cage, CageDirection, Rack, RackGroup } from '../../../types/typings';
 import { getLocationDirection } from '../../../utils/homeHelpers';
@@ -11,9 +10,12 @@ import {findConnectedCages, findConnectedRacks} from '../../../utils/helpers';
 import { ModificationSelect } from './ModificationSelect';
 import { Button } from 'react-bootstrap';
 import { CurrentRackLayout } from './CurrentRackLayout';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 export const RackModifications: FC = () => {
-    const {selectedPage, selectedRoom, selectedRack} = useHomeContext();
+    const {selectedPage, selectedRack} = useHomeNavigationContext();
+    const {selectedRoom} = useRoomContext();
     const [rackGroup, setRackGroup] = useState<RackGroup>(null);
     const [connectedCages, setConnectedCages] = useState<[Cage, CageDirection, Cage][]>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);

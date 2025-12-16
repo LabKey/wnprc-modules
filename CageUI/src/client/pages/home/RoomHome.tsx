@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { FC } from 'react';
 import '../../cageui.scss';
-import { Cage } from '../../types/typings';
-import { HomeContextProvider } from '../../context/HomeContextManager';
 import { RoomList } from '../../components/home/RoomList';
 import { RoomNavbar } from '../../components/home/RoomNavbar';
 import { RoomContent } from '../../components/home/RoomContent';

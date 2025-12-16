@@ -661,7 +661,7 @@ public class CageUIManager
                                 CagesForm cagesForm = new CagesForm();
                                 cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
                                 cagesForm.setRack(racksForm.getObjectId());
-                                cagesForm.setObjectId(UUID.randomUUID().toString());
+                                cagesForm.setObjectId(cage.getObjectId());
                                 cagesForm.setLength(rackType.getLength());
                                 cagesForm.setWidth(rackType.getWidth());
                                 cagesForm.setHeight(rackType.getHeight());
@@ -778,7 +778,7 @@ public class CageUIManager
                         {
                             List<ModData> cageMod = this.roomMods.stream()
                                     .filter(mod ->
-                                            mod.getCage().equals(cage.getCageNum())
+                                            mod.getCage().equals(cage.getObjectId())
                                                     && mod.getRack().equals(rack.getObjectId()))
                                     .toList();
 

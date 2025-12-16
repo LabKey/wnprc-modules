@@ -1095,7 +1095,13 @@ function areAdjacent(
 // If cage is passed then it only finds the connections with that cage.
 export const findConnectedCages = (rack: Rack, cage?: Cage) => {
 
-    const connections: ConnectedCages = {[ModLocations.Top]: [], [ModLocations.Bottom]: [], [ModLocations.Right]: [], [ModLocations.Left]: [], [ModLocations.Direct]: []};
+    const connections: ConnectedCages = {
+        [ModLocations.Top]: [],
+        [ModLocations.Bottom]: [],
+        [ModLocations.Right]: [],
+        [ModLocations.Left]: [],
+        [ModLocations.Direct]: []
+    };
     if(cage){
         for (let i = 0; i < rack.cages.length; i++) {
             if(rack.cages[i].cageNum !== cage.cageNum){

@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { FC, useEffect, useRef } from 'react';
 import '../../../cageui.scss';
-import { useHomeContext } from '../../../context/HomeContextManager';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const CurrentRackLayout: FC = () => {
-    const {selectedRack, selectedRackGroup} = useHomeContext();
+    const {selectedRack, selectedRackGroup} = useHomeNavigationContext();
     const rackRef = useRef<SVGSVGElement>(null);
     useEffect(() => {
         if(!selectedRack || !rackRef.current) return;

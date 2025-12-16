@@ -38,12 +38,6 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
             [ModLocations.Top]: [],
             [ModLocations.Bottom]: [],
             [ModLocations.Direct]: []
-        }, adjRacks: {
-            [ModLocations.Left]: [],
-            [ModLocations.Right]: [],
-            [ModLocations.Top]: [],
-            [ModLocations.Bottom]: [],
-            [ModLocations.Direct]: []
         }, currCage: []});
     const [showError, setShowError] = useState<string>(null);
 
@@ -89,13 +83,7 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         setShowError(null);
         setCurrCage(null);
         setCurrRack(null);
-        setCurrCageMods({currCage: [], adjRacks: {
-                [ModLocations.Left]: [],
-                [ModLocations.Right]: [],
-                [ModLocations.Top]: [],
-                [ModLocations.Bottom]: [],
-                [ModLocations.Direct]: []
-            }, adjCages: {
+        setCurrCageMods({currCage: [], adjCages: {
                 [ModLocations.Left]: [],
                 [ModLocations.Right]: [],
                 [ModLocations.Top]: [],

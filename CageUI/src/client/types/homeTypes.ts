@@ -20,7 +20,7 @@ type UpdatedMod = {
 
 export type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
-export type ConnectedModType = Option<ModTypes> & {id: ModIdKey};
+export type ConnectedModType = Option<ModTypes> & {id: ModIdKey, parentModId?: ModIdKey};
 
 export type UpdatedMods = UpdatedMod[];
 
@@ -70,7 +70,8 @@ export interface ConnectedRack {
     adjCage: Cage;
     currSubId: number;
     adjSubId: number;
-    mods?: ConnectedModType[];
+    currMods?: ConnectedModType[];
+    adjMods?: ConnectedModType[];
 }
 
 export type ConnectedRacks = {
@@ -80,9 +81,10 @@ export type ConnectedRacks = {
 export interface ConnectedCage {
     currSubId: number;
     currCage: Cage;
+    currMods?: ConnectedModType[];
+    adjMods?: ConnectedModType[];
     adjCage: Cage;
     adjSubId: number;
-    mods?: ConnectedModType[];
 }
 
 export type ConnectedCages = {

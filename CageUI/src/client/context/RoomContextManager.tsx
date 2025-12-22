@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 import { RoomContextType } from '../types/roomContextTypes';
 import { buildNewLocalRoom, fetchRoomData, getAdjLocation, saveRoomHelper } from '../utils/helpers';
@@ -8,7 +8,7 @@ import {
     CageModification,
     CageModificationsType,
     CurrCageMods,
-    ModLocations,
+    ModLocations, Rack, RackGroup,
     Room,
     RoomMods
 } from '../types/typings';
@@ -16,6 +16,8 @@ import { ConnectedCage, ConnectedCages, ConnectedRacks, ModificationSaveResult }
 import _ from 'lodash';
 import { LayoutSaveResult } from '../types/layoutEditorTypes';
 import { saveModLayout } from '../api/labkeyActions';
+import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
+import { useHomeNavigationContext } from './HomeNavigationContextManager';
 
 
 const RoomContext = createContext<RoomContextType>({} as RoomContextType);
@@ -33,9 +35,32 @@ export const useRoomContext = () => {
 };
 
 export const RoomContextProvider = ({children}) => {
+    const {selectedPage} = useHomeNavigationContext();
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
     const [selectedRoomMods, setSelectedRoomMods] = useState<RoomMods>({});
     const [roomLoading, setRoomLoading] = useState<boolean>(false);
+
+    const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
+    const [selectedRack, setSelectedRack] = useState<Rack>(null);
+    const [selectedCage, setSelectedCage] = useState<Cage>(null);
+
+
+    useEffect(() => {
+        if(!selectedPage?.rack) return;
+        //TODO Fetch mods for rack here as well and then set the rack and rack mods
+        const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
+        setSelectedRack(currRack);
+        setSelectedRackGroup(currGroup);
+    }, [selectedPage.rack]);
+
+    useEffect(() => {
+        if(!selectedPage?.cage) return;
+
+        const {cage: currCage, rack: currRack, rackGroup: currGroup} = findCageInGroup(selectedPage.cage, selectedRoom.rackGroups);
+        setSelectedRackGroup(currGroup);
+        setSelectedRack(currRack);
+        setSelectedCage(currCage);
+    }, [selectedPage.cage]);
 
     const [abortController, setAbortController] = useState(null);
 
@@ -73,7 +98,6 @@ export const RoomContextProvider = ({children}) => {
                 setSelectedRoom(null);
                 setSelectedRoomMods({});
             }
-
         } catch (err) {
             if (err.name !== 'AbortError') {
                 console.error('Error loading room:', err);
@@ -124,8 +148,8 @@ export const RoomContextProvider = ({children}) => {
 
                 // 1. go through connected cage mods and add them to the cagesModsByCage object.
                 [...newCurrMods, ...newAdjMods].forEach(mod => {
-                    newRoomMods[mod.id] = { label: mod.label, value: mod.value };
-                    console.log("Add mod: ", mod.id, " value: ", mod.value, " label: ", mod.label);
+                    newRoomMods[mod.modId] = { label: mod.label, value: mod.value };
+                    console.log("Add mod: ", mod.modId, " value: ", mod.value, " label: ", mod.label);
                 });
 
                 // Track old mod IDs to remove (from previous cage modKeys)
@@ -146,10 +170,10 @@ export const RoomContextProvider = ({children}) => {
                         return {
                             ...cm,
                             modKeys: [...newCurrMods.map(m => {
-                                if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
-                                    idsToRemove.delete(m.id);
+                                if(idsToRemove.has(m.modId)){ // this happens when a mod is saved again without changing it.
+                                    idsToRemove.delete(m.modId);
                                 }
-                                return {modId: m.id, parentModId: m.parentModId}
+                                return {modId: m.modId, parentModId: m.parentModId}
                             })]
                         }
                     }else{
@@ -162,10 +186,10 @@ export const RoomContextProvider = ({children}) => {
                         return {
                             ...cm,
                             modKeys: [...newAdjMods.map(m => {
-                                if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
-                                    idsToRemove.delete(m.id);
+                                if(idsToRemove.has(m.modId)){ // this happens when a mod is saved again without changing it.
+                                    idsToRemove.delete(m.modId);
                                 }
-                                return {modId: m.id, parentModId: m.parentModId}
+                                return {modId: m.modId, parentModId: m.parentModId}
                             })]
                         }
                     }else{
@@ -183,11 +207,11 @@ export const RoomContextProvider = ({children}) => {
         }
         // Add direct cage mods new mods
         const newDirectMods = currCageMods.currCage.map(m => {
-            newRoomMods[m.id] = {label: m.label, value: m.value};
-            if(idsToRemove.has(m.id)){ // this happens when a mod is saved again without changing it.
-                idsToRemove.delete(m.id);
+            newRoomMods[m.modId] = {label: m.label, value: m.value};
+            if(idsToRemove.has(m.modId)){ // this happens when a mod is saved again without changing it.
+                idsToRemove.delete(m.modId);
             }
-            return {modId: m.id, parentModId: null}
+            return {modId: m.modId, parentModId: null}
         });
         cageModsByCage[currCage.objectId] = {
             ...cageModsByCage[currCage.objectId],
@@ -243,7 +267,10 @@ export const RoomContextProvider = ({children}) => {
             selectedRoom,
             selectedRoomMods,
             saveCageMods,
-            submitLayoutMods
+            submitLayoutMods,
+            selectedRackGroup,
+            selectedRack,
+            selectedCage
         }}>
             {children}
         </RoomContext.Provider>

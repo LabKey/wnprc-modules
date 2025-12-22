@@ -2,9 +2,11 @@ import * as React from 'react';
 import { FC } from 'react';
 import '../../cageui.scss';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
+import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomNavbar: FC = () => {
     const {selectedPage, goToHome, navigateTo } = useHomeNavigationContext();
+    const {selectedRack, selectedCage} = useRoomContext();
 
     const handleRoomClick = () => {
         console.log("Room clicked");
@@ -40,7 +42,7 @@ export const RoomNavbar: FC = () => {
                                 className={'page-map-link'}
                                 onClick={handleRackClick}
                         >
-                        {`Rack ${selectedPage.rack}`}
+                        {`Rack ${selectedRack?.itemId}`}
                     </span>
                 }
                 {selectedPage.cage && <div>/</div>}
@@ -49,7 +51,7 @@ export const RoomNavbar: FC = () => {
                                 className={'page-map-link'}
                                 onClick={handleCageClick}
                         >
-                        {`Cage ${selectedPage.cage}`}
+                        {`${selectedCage?.cageNum}`}
                     </span>
                 }
             </div>

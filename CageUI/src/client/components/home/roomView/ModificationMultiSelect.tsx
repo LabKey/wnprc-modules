@@ -125,7 +125,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         if (!newItems.find(items => items.value === item.value)) {
             setSelectedItems([...newItems, {
                 ...item,
-                id: Utils.generateUUID().toUpperCase(),
+                modId: Utils.generateUUID().toUpperCase(),
             }]);
         }
         setSearchTerm('');

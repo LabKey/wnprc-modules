@@ -16,12 +16,13 @@ import { ModificationSaveResult } from '../../../types/homeTypes';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LayoutSaveResult, SelectedObj } from '../../../types/layoutEditorTypes';
 import { useRoomContext } from '../../../context/RoomContextManager';
+import { LoadingScreen } from '../../LoadingScreen';
 
 interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
-    const {selectedRoom, selectedRoomMods, submitLayoutMods} = useRoomContext();
+    const {selectedRoom, selectedRoomMods, submitLayoutMods, switchToRoom} = useRoomContext();
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
@@ -72,27 +73,29 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
 
     const saveLayout = async () => {
 
-        console.log("Room Mods: ", selectedRoom.mods);
         let res: LayoutSaveResult = await submitLayoutMods();
         console.log("Save Layout Result: ", res);
 
         if(res.success){
             // succssesful save
-            //TODO refresh current room.
+            setIsSaving(false);
+            switchToRoom(selectedRoom.name);
         }else{
             if(res?.reason){
                 setShowLayoutErrors(res.reason);
             }else{
                 setShowLayoutErrors(["Unknown error occurred. Please try again or submit a ticket."]);
             }
-
+            setIsSaving(false);
         }
-        setIsSaving(false);
 
     }
 
     return (
-        <div className={'room-layout'}>
+        <div className={'room-layout'} id={'room-layout-container'}>
+            {isSaving && <LoadingScreen isVisible={isSaving}
+                                        targetElement={document.getElementById('room-layout-container')}
+            />}
             <div className={'room-layout-toolbar'}>
             {showChangesMenu &&
                 <div className={'room-changes-toolbar'}>
@@ -100,9 +103,9 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                         Changes have been made to this room. Please save before continuing.
                     </div>
                     <button className={'room-layout-save-btn'}
-                        onClick={() => {
+                        onClick={async () => {
                             setIsSaving(true);
-                            saveLayout();
+                            await saveLayout();
                         }}
                         disabled={isSaving}
                     >

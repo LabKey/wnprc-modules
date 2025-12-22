@@ -20,7 +20,7 @@ type UpdatedMod = {
 
 export type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
 
-export type ConnectedModType = Option<ModTypes> & {id: ModIdKey, parentModId?: ModIdKey};
+export type ConnectedModType = Partial<Option<ModTypes>> & {modId: ModIdKey, parentModId?: ModIdKey};
 
 export type UpdatedMods = UpdatedMod[];
 
@@ -43,9 +43,9 @@ export type EHRCageMods = {
 
 export interface SelectedPage {
     selected: SelectedViews
-    room?: string;
-    rack?: number;
-    cage?: CageSvgId;
+    room?: string; // room name
+    rack?: string; // rack object ids
+    cage?: CageSvgId; // cage object ids
 }
 
 export interface ListCage {
@@ -54,7 +54,8 @@ export interface ListCage {
 }
 
 export interface ListRack {
-    id: number;
+    id: string;
+    name: string;
     cages: ListCage[];
 }
 

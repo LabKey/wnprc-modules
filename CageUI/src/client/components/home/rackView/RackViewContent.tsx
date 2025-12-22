@@ -6,12 +6,9 @@ import { RackModifications } from './RackModifications';
 import { RackDetails } from './RackDetails';
 import { CurrentRackLayout } from './CurrentRackLayout';
 import { useRoomContext } from '../../../context/RoomContextManager';
-import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const RackViewContent: FC = () => {
-    const {selectedRoom} = useRoomContext();
-
-    const {selectedRack} = useHomeNavigationContext();
+    const {selectedRoom, selectedRack} = useRoomContext();
 
     return (
         selectedRack &&

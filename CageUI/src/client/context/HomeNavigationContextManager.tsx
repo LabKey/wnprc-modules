@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { HomeNavigationContextType } from '../types/homeNavigationContextTypes';
 import { SelectedPage } from '../types/homeTypes';
 import { Cage, Rack, RackGroup } from '../types/typings';
+import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 
 
 const HomeNavigationContext = createContext<HomeNavigationContextType>({} as HomeNavigationContextType);
@@ -21,27 +22,7 @@ export const useHomeNavigationContext = () => {
 
 export const HomeNavigationContextProvider = ({ children }) => {
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: "Home"});
-    const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
-    const [selectedRack, setSelectedRack] = useState<Rack>(null);
-    const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
-
-    /*useEffect(() => {
-    if(!selectedPage?.rack) return;
-    //TODO Fetch mods for rack here as well and then set the rack and rack mods
-    const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
-    setSelectedRack(currRack);
-    setSelectedRackGroup(currGroup);
-}, [selectedPage.rack]);
-
-useEffect(() => {
-    if(!selectedPage?.cage) return;
-
-    const {cage: currCage, rack: currRack, rackGroup: currGroup} = findCageInGroup(selectedPage.cage, selectedRoom.rackGroups);
-    setSelectedRackGroup(currGroup)
-    setSelectedRack(currRack)
-    setSelectedCage(currCage)
-}, [selectedPage.cage]);*/
 
     // Navigation functions
     const navigateTo = (page, data = null) => {
@@ -76,10 +57,7 @@ useEffect(() => {
             selectedPage,
             navigateTo,
             goToHome,
-            navigateToRoom,
-            selectedRackGroup,
-            selectedRack,
-            selectedCage
+            navigateToRoom
         }}>
             {children}
         </HomeNavigationContext.Provider>

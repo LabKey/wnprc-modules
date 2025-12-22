@@ -11,7 +11,7 @@ public class Room
     private List<RackGroup> _rackGroups;
     private List<RoomObject> _objects;
     private RoomHistoryForm _roomHistoryForm;
-    private Map<String, Object> _mods;
+    private Map<String, ModEntry> _mods;
 
     public String getName()
     {
@@ -53,12 +53,12 @@ public class Room
         _roomHistoryForm = roomHistoryForm;
     }
 
-    public Map<String, Object>  getMods()
+    public Map<String, ModEntry>  getMods()
     {
         return _mods;
     }
 
-    public void setMods(Map<String, Object>  mods)
+    public void setMods(Map<String, ModEntry>  mods)
     {
         _mods = mods;
     }

@@ -47,18 +47,20 @@ import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
 import { ActionURL, Filter } from '@labkey/api';
 import {
+    addModEntries,
+    areAllRacksNonDefault,
     createEmptyUnitLoc,
     isRackDefault,
-    isRackEnum,
+    isRackEnum, isRoomHomogeneousDefault,
     placeAndScaleGroup, processRealLayoutHistory,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { generateId, selectDistinctRows } from '@labkey/components';
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
-import { ExtraContext } from '../types/layoutEditorTypes';
+import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
+import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 import { Utils } from '@labkey/api';
@@ -1113,6 +1115,8 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
                         connections[adj.location].push({
                             currSubId: currSubId,
                             adjSubId: adjSubId,
+                            currMods: cage.mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === currSubId)?.modKeys || [],
+                            adjMods: rack.cages[i].mods[adj.location].find((subMods) => subMods.subId === adjSubId)?.modKeys || [],
                             currCage: cage,
                             adjCage: rack.cages[i]
                         });
@@ -1131,6 +1135,8 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
                         connections[adj.location].push({
                             currSubId: currSubId,
                             adjSubId: adjSubId,
+                            currMods: rack.cages[i].mods[adj.location].find((subMods) => subMods.subId === currSubId)?.modKeys || [],
+                            adjMods: rack.cages[j].mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === adjSubId)?.modKeys || [],
                             currCage: rack.cages[i],
                             adjCage: rack.cages[j]
                         });
@@ -1178,6 +1184,8 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
                             currCage: currCage,
                             adjRack: adjRack,
                             adjCage: adjCage,
+                            currMods: currCage.mods[adj.location].find((subMods) => subMods.subId === currSubId)?.modKeys || [],
+                            adjMods: adjCage.mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === adjSubId)?.modKeys || [],
                         });
                     });
                 }
@@ -1191,4 +1199,82 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
         }
     }
     return connections;
+}
+
+export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Promise<LayoutSaveResult> => {
+    const newModData: CageMods[] = [];
+
+    const roomName = room.name;
+    const oldRoomName: string = oldTemplateName ? oldTemplateName : ActionURL.getParameter('room');
+
+    const isRoomNonDefault = areAllRacksNonDefault(room);
+    const isRoomValid = isRoomHomogeneousDefault(room);
+
+    // Check if we have a mix of null and non-null rack values
+    if (!isRoomValid){
+        return { success: false, roomName: roomName, reason: ['Cannot save room with mix of default racks and real racks']};;
+    }
+
+    // Create default mods for new rooms.
+    if(isRoomNonDefault && room.mods === undefined) {
+
+        const usedMap = new Map<string, boolean>();
+
+        room.rackGroups.forEach((group) => {
+            group.racks.forEach((r) => {
+                const connectedCages = findConnectedCages(r);
+                Object.entries(connectedCages).forEach(([direction, connections]) => {
+                    if (connections.length === 0) return;
+                    const locDir = parseInt(direction) as ModLocations;
+                    addModEntries(connections, locDir, r, false, newModData, usedMap);
+                });
+
+                const connectedRacks = findConnectedRacks(group, r);
+                Object.entries(connectedRacks).forEach(([direction, connections]) => {
+                    if (connections.length === 0) return;
+                    const locDir = parseInt(direction) as ModLocations;
+                    addModEntries(connections, locDir, r, true, newModData, usedMap);
+                });
+            });
+        });
+    }else if(isRoomNonDefault && room.mods){
+        room.rackGroups.forEach((group) => {
+            group.racks.forEach((r) => {
+                r.cages.forEach(c => {
+                    Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
+                        modSubsections.forEach(section => {
+                            section.modKeys.forEach(key => {
+                                newModData.push({
+                                    cage: c.objectId,
+                                    location: parseInt(direction),
+                                    modId: key.modId,
+                                    modification: room.mods[key.modId].value,
+                                    parentModId: key.parentModId,
+                                    rack: r.objectId,
+                                    subId: section.subId,
+                                });
+                            })
+                        })
+                    });
+                })
+            });
+        });
+    }
+
+    console.log("Saving Room With Mods: ", newModData);
+    let result: LayoutSaveResult;
+    try {
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName);
+        let errors;
+        if(layoutSave.success === false){
+            errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];
+        }
+        result = {success: layoutSave.success, roomName: roomName, reason: errors};
+    } catch (e){
+        const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
+        result = {success: e.success, roomName: roomName, reason: errors.map(err => err.message || err)};
+        console.log(result)
+    }
+    // Determine success or failure
+    return result;
 }

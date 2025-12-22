@@ -3,10 +3,10 @@ import { FC, useEffect, useRef } from 'react';
 import '../../../cageui.scss';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
-import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 export const CurrentRackLayout: FC = () => {
-    const {selectedRack, selectedRackGroup} = useHomeNavigationContext();
+    const {selectedRack, selectedRackGroup, selectedRoom} = useRoomContext();
     const rackRef = useRef<SVGSVGElement>(null);
     useEffect(() => {
         if(!selectedRack || !rackRef.current) return;
@@ -21,7 +21,7 @@ export const CurrentRackLayout: FC = () => {
                 element.remove();
             }
         })
-        addPrevRoomSvgs('view', selectedRackGroup, rackSvg);
+        addPrevRoomSvgs('view', selectedRackGroup, rackSvg, selectedRoom.mods);
     }, [selectedRack]);
 
     return (

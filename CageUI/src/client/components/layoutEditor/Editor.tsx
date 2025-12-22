@@ -782,6 +782,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const handleSave = async () => {
 
 
+
         const result = await saveRoom(templateRename);
         setStartSaving(false);
         setShowSaveResult(result);

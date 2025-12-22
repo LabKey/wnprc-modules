@@ -63,7 +63,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 return {
                                     label: selectedRoom.mods[key.modId].label,
                                     value: selectedRoom.mods[key.modId].value,
-                                    id: key.modId,
+                                    modId: key.modId,
                                     parentModId: key.parentModId
                                 }
                             });
@@ -77,7 +77,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 return {
                                     label: selectedRoom.mods[key.modId].label,
                                     value: selectedRoom.mods[key.modId].value,
-                                    id: key.modId,
+                                    modId: key.modId,
                                     parentModId: key.parentModId
                                 }
                             });
@@ -105,7 +105,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 return {
                                     label: selectedRoom.mods[key.modId].label,
                                     value: selectedRoom.mods[key.modId].value,
-                                    id: key.modId,
+                                    modId: key.modId,
                                     parentModId: key.parentModId
                                 }
                             });
@@ -119,7 +119,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 return {
                                     label: selectedRoom.mods[key.modId].label,
                                     value: selectedRoom.mods[key.modId].value,
-                                    id: key.modId,
+                                    modId: key.modId,
                                     parentModId: key.parentModId
                                 }
                             });
@@ -152,10 +152,6 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
 
     const handleChange = (location: ModLocations, pairs: ConnectedRack | ConnectedCage | Cage, selectedItems: ConnectedModType[]) => {
-
-        //TODO fix connected rack change handling
-
-
         if((pairs as ConnectedRack).adjRack || (pairs as ConnectedCage).currCage){// changing adjacent mods (rack or cage)
             const newPairs = pairs as ConnectedCage | ConnectedRack;
 
@@ -174,7 +170,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                     currMods: selectedItems,
                                     adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
                                         ...m,
-                                        parentModId: m.id,
+                                        parentModId: m.modId,
                                         id: Utils.generateUUID().toUpperCase()
                                     }))
                                 })
@@ -195,7 +191,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 currMods: selectedItems,
                                 adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
                                     ...m,
-                                    parentModId: m.id,
+                                    parentModId: m.modId,
                                     id: Utils.generateUUID().toUpperCase()
                                 }))
                             }
@@ -225,7 +221,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                             <ModificationMultiSelect
                                 handleChange={(selectedItems) =>  handleChange(ModLocations.Direct, cage, selectedItems)}
                                 prevItems={cage.mods[ModLocations.Direct].flatMap(subMods => {
-                                    return subMods.modKeys.map(key => ({label: selectedRoom.mods[key.modId].label, value: selectedRoom.mods[key.modId].value, id: key.modId}))
+                                    return subMods.modKeys.map(key => ({label: selectedRoom.mods[key.modId].label, value: selectedRoom.mods[key.modId].value, modId: key.modId}))
                                 })}
                             />
                         </ul>
@@ -264,7 +260,6 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 })
                             )}
                         </ul>
-
                         <h2>Adjacent Racks</h2>
                         <ul className={"mod-table"}>
                             <li className={"mod-table-row mod-table-header"}>

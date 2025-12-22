@@ -9,7 +9,7 @@ public class CagesForm
     @JsonProperty("objectid")
     private String _objectId;
     @JsonProperty("positionid")
-    private String _positionId;
+    private int _positionId;
     private String _rack;
     @JsonProperty("cage_number")
     private int _cageNumber;
@@ -87,12 +87,12 @@ public class CagesForm
         _height = height;
     }
 
-    public String getPositionId()
+    public int getPositionId()
     {
         return _positionId;
     }
 
-    public void setPositionId(String positionId)
+    public void setPositionId(int positionId)
     {
         _positionId = positionId;
     }
@@ -103,6 +103,7 @@ public class CagesForm
 
         json.put("rowid", getRowid());
         json.put("objectid", getObjectId());
+        json.put("positionid", getPositionId());
         json.put("rack", getRack());
         json.put("cage_number", getCageNumber());
         json.put("length", getLength());

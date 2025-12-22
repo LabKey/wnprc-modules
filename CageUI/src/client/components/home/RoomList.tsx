@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
+import {Room} from '../../types/typings';
 import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Filter, Utils } from '@labkey/api';
 import {
+    buildNewLocalRoom,
     convertToTitleCase,
-    defaultTypeToRackType,
+    defaultTypeToRackType, fetchRoomData,
     formatRackId, generateCageId,
     parseRoomItemNum,
     parseRoomItemType,
@@ -61,62 +63,63 @@ export const RoomList: FC = () => {
         });
     }, []);
 
-    const toggleExpandRoom = async (roomId) => {
+    const toggleExpandRoom = async (roomName) => {
 
         // Check if room has been expanded yet, if not, fetch rack data for that room
-        if(!(roomId in expandedRooms)){
-            const racks = await labkeyActionSelectWithPromise({
-                schemaName: "cageui",
-                queryName: "layout_history",
-                filterArray: [
-                    Filter.create('room', roomId, Filter.Types.EQUALS),
-                    Filter.create('end_date', null, Filter.Types.ISBLANK),
-                    Filter.create('cage', null, Filter.Types.NONBLANK)],
-                sort: "rack_group"
-            });
+        if(!(roomName in expandedRooms)){
+            const roomData = await fetchRoomData(roomName);
+            let newRoom: Room;
+            // room exists
+            if(roomData.prevRoomData){
+                const [newLocalRoom, locs] = await buildNewLocalRoom(roomData.prevRoomData);
+                if(newLocalRoom) {
+                    newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
+                    newRoom = {...newLocalRoom};
+                }
+            }
 
-            if(racks.rowCount > 0){
-                setAllRooms((prevRooms) => prevRooms.map((room) => {
+            if(newRoom){
+                console.log("New Room: ", newRoom)
+                setAllRooms((prevRooms) => prevRooms.map((prevRoom) => {
                     // add racks to room state, only once when first clicked
-                    if(room.name === roomId){
+                    if(prevRoom.name === roomName){
                         const tempRacks: ListRack[] = [];
-                        racks.rows.forEach((row) => {
-                            // TODO Fix rackiD
-                            const rackId: number = 0;//row.rack ? `rack-${row.rack}` : `default-rack-${JSON.parse(row.extra_context).rack.rackId}`;
-                            const rackIdx = tempRacks.findIndex((rack) => rack.id === rackId);
-                            const cageObjId = Utils.generateUUID().toUpperCase();
-                            const cageType = row.rack ? roomItemToString(row.object_type as RackTypes) : roomItemToString(defaultTypeToRackType(row.object_type as DefaultRackTypes));
-                            // if rack was already added, just add cage, otherwise add rack and cage
-                            if(rackIdx !== -1){
-                                tempRacks[rackIdx] = {
-                                    ...tempRacks[rackIdx],
-                                    cages: [...tempRacks[rackIdx].cages, {
-                                        name: `${cageType}-${parseInt(row.cage)}` as CageNumber,
-                                        id: generateCageId(cageObjId),
-                                    }]
-                                }
-                            }else{
-                                tempRacks.push({
-                                    id: rackId,
-                                    cages: [{
-                                        name: `${cageType}-${parseInt(row.cage)}` as CageNumber,
-                                        id: generateCageId(cageObjId)
-                                    }],
-                                });
-                            }
+                        newRoom.rackGroups.forEach((rg) => {
+                            rg.racks.forEach(r => {
+                                r.cages.forEach(c => {
+                                    const existingRack = tempRacks.find((rack) => rack.id === r.svgId);
+                                    if (existingRack) {
+                                        existingRack.cages.push({
+                                            name: c.cageNum,
+                                            id: c.svgId,
+                                        });
+                                    } else {
+                                        tempRacks.push({
+                                            id: r.svgId,
+                                            name: `Rack-${r.itemId}`,
+                                            cages: [{
+                                                name: c.cageNum,
+                                                id: c.svgId
+                                            }],
+                                        });
+                                    }
+
+                                })
+                            })
                         })
+                        console.log("List: ", tempRacks)
                         return {
-                            ...room,
+                            ...prevRoom,
                             racks: tempRacks,
                         }
                     }
-                    return room;
+                    return prevRoom;
                 }))
             }
         }
         setExpandedRooms((prevExpandedRooms) => ({
             ...prevExpandedRooms,
-            [roomId]: !prevExpandedRooms[roomId],
+            [roomName]: !prevExpandedRooms[roomName],
         }));
 
     };
@@ -170,7 +173,7 @@ export const RoomList: FC = () => {
                                             onClick={() => handleRackClick(room, rack)}
                                             className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
                                         >
-                                            {formatRackId(rack.id.toString())}
+                                            {rack.name}
                                             <span className="arrow" onClick={() => toggleExpandRack(room.name, rack.id)}></span>
                                         </div>
                                         {expandedRacks[`${room.name}_${rack.id}`] && (
@@ -181,7 +184,7 @@ export const RoomList: FC = () => {
                                                             onClick={() => handleCageClick(room, rack, cage)}
                                                             className={"room-dir-cage-obj"}
                                                         >
-                                                            {convertToTitleCase(parseRoomItemType(cage.id))} {parseRoomItemNum(cage.id)}
+                                                            {cage.name}
                                                         </div>
                                                     </li>
                                                 ))}

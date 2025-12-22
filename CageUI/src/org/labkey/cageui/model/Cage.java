@@ -79,11 +79,11 @@ public class Cage
 
         // Modification class
         public static final class CageModification {
-            private final List<String> modKeys;
+            private final List<Modkeys> modKeys;
             private final int subId;
 
             @JsonCreator
-            public CageModification(@JsonProperty("modKeys") List<String> modKeys, @JsonProperty("subId") int subId)
+            public CageModification(@JsonProperty("modKeys") List<Modkeys> modKeys, @JsonProperty("subId") int subId)
             {
                 this.modKeys = modKeys != null ? modKeys : new ArrayList<>();
                 this.subId = subId;
@@ -93,12 +93,8 @@ public class Cage
                 return subId;
             }
 
-            public List<String> getModKeys() {
+            public List<Modkeys> getModKeys() {
                 return modKeys;
-            }
-
-            public String[] getModKeysArray() {
-                return modKeys.toArray(new String[0]);
             }
         }
     }

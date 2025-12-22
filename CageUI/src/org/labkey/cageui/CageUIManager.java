@@ -662,6 +662,7 @@ public class CageUIManager
                                 cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
                                 cagesForm.setRack(racksForm.getObjectId());
                                 cagesForm.setObjectId(cage.getObjectId());
+                                cagesForm.setPositionId(cage.getPositionId());
                                 cagesForm.setLength(rackType.getLength());
                                 cagesForm.setWidth(rackType.getWidth());
                                 cagesForm.setHeight(rackType.getHeight());

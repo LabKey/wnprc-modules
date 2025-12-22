@@ -1,16 +1,5 @@
 import { convertToTitleCase } from './helpers';
-import {
-    Cage,
-    CageDirection,
-    CurrCageMods,
-    ModDirections,
-    ModLocations,
-    ModTypes,
-    Rack,
-    RackGroup,
-    RoomMods
-} from '../types/typings';
-import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
+import { Cage, CageDirection, CurrCageMods, ModDirections, ModLocations, ModTypes, RoomMods } from '../types/typings';
 import { Option } from '@labkey/components';
 import { cageModLookup } from '../api/popularQueries';
 
@@ -305,18 +294,15 @@ export const loadRoom = (name: string): Rack[] => {
 }*/
 
 // Helper function to convert object keys into location names
-export const convertLocationName = (keyName: string) => {
+export const getDirectionString = (dir: CageDirection) => {
     // Special cases
-    if (keyName.toLowerCase() === 'floor') {
-        return 'Floor';
-    } else if (keyName.toLowerCase().includes('mods')) {
-        return 'Extra Mod';
+    if(dir === CageDirection.Left || dir === CageDirection.Right){
+        return `${CageDirection[dir]} of`;
+    }else if(dir === CageDirection.Top){
+        return "Above";
+    }else{
+        return "Below";
     }
-
-    // Default case
-    const words = keyName.split(/(?=[A-Z])/);
-    const convertedWords = words.map((word) => convertToTitleCase(word));
-    return convertedWords.join(' ');
 }
 //
 // // Helper function to get the correct mods for the dropdowns in cage details

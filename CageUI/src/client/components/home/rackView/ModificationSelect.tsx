@@ -19,6 +19,7 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
     const {directionCategory, defaultValue, removeMod, changeMod} = props;
     const {selectedRoom} = useRoomContext();
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
+    const [selectedMod, setSelectedMod] = useState<Option<ModTypes>>(defaultValue);
 
     useEffect(() => {
         // the filter here assigns vertical to above and below, horizontal to left and right, and if no direction given then it is direct
@@ -41,8 +42,10 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
         // If dropdown is cleared remove it.
         if(!option){
             removeMod()
+            setSelectedMod(null);
         }else{
             changeMod(option.value as ModTypes);
+            setSelectedMod(option);
         }
     }
 
@@ -51,17 +54,20 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
             options={options}
             placeholder={"Select a mod"}
             isClearable={true}
-            value={defaultValue}
+            value={selectedMod}
             onChange={(option) =>  handleChange(option)}
             styles={{
                 container: (baseStyles, state) => ({
                     ...baseStyles,
                     overflow: 'visible',
+                    width: 'max-content',
+                    minWidth: '100%',
                 }),
                 menu: (baseStyles, state) => ({
                     ...baseStyles,
                     zIndex: '9999',
-                    minWidth: 'fit-content',
+                    width: 'max-content',
+                    minWidth: '100%',
                  }),
                 option: (baseStyles, state) => ({
                 ...baseStyles,

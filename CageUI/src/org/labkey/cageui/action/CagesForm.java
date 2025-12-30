@@ -13,9 +13,10 @@ public class CagesForm
     private String _rack;
     @JsonProperty("cage_number")
     private int _cageNumber;
-    private Integer _length;
-    private Integer _width;
-    private Integer _height;
+    private Double _length;
+    private Double _width;
+    private Double _height;
+    private Double _sqft;
 
     public int getRowid()
     {
@@ -57,32 +58,32 @@ public class CagesForm
         _cageNumber = cageNumber;
     }
 
-    public Integer getLength()
+    public Double getLength()
     {
         return _length;
     }
 
-    public void setLength(Integer length)
+    public void setLength(Double length)
     {
         _length = length;
     }
 
-    public Integer getWidth()
+    public Double getWidth()
     {
         return _width;
     }
 
-    public void setWidth(Integer width)
+    public void setWidth(Double width)
     {
         _width = width;
     }
 
-    public Integer getHeight()
+    public Double getHeight()
     {
         return _height;
     }
 
-    public void setHeight(Integer height)
+    public void setHeight(Double height)
     {
         _height = height;
     }
@@ -111,6 +112,16 @@ public class CagesForm
         json.put("height", getHeight());
 
         return json;
+    }
+
+    public Double getSqft()
+    {
+        return _sqft;
+    }
+
+    public void setSqft(Double sqft)
+    {
+        _sqft = sqft;
     }
 }
 

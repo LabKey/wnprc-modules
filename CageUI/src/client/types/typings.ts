@@ -174,6 +174,12 @@ export interface Cage {
     mods?: CageModificationsType;
 }
 
+export interface CageDimensions {
+    length: number;
+    width: number;
+    height: number;
+    sqft: number;
+}
 
 export interface RoomMods {
     [key: ModIdKey]: Option<ModTypes>;
@@ -240,6 +246,7 @@ export interface CageHistoryData {
     length: number;
     width: number;
     height: number;
+    sqft: number;
 }
 
 // interface for cageui.cages table
@@ -253,6 +260,7 @@ export interface CageData {
     length: number;
     width: number;
     height: number;
+    sqft: number;
 }
 
 // interface for cageui.racks table
@@ -352,6 +360,7 @@ export interface UnitType {
     name: string; // naming convention is 'type-manufacturer-sqft'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
+    manufacturer: string;
 }
 
 export interface LocationCoords {

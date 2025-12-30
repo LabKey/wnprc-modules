@@ -47,8 +47,8 @@ CREATE TABLE cageui.layout_history
     cage VARCHAR,
     object_type INTEGER,
     extra_context VARCHAR,
-    x_coord INTEGER NOT NULL,
-    y_coord INTEGER NOT NULL,
+    x_coord numeric NOT NULL,
+    y_coord numeric NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -90,9 +90,9 @@ CREATE TABLE cageui.room_history
 (
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
-    scale INTEGER,
-    border_width INTEGER,
-    border_height INTEGER,
+    scale numeric,
+    border_width numeric,
+    border_height numeric,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -106,8 +106,7 @@ CREATE TABLE cageui.room_history
  This table is for room defaults/template histories
  */
 DROP TABLE IF EXISTS cageui.template_layout_history;
-CREATE TABLE cageui.template_layout_history
-(
+CREATE TABLE cageui.template_layout_history (
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
     rack_group INTEGER,
@@ -115,8 +114,8 @@ CREATE TABLE cageui.template_layout_history
     cage INTEGER,
     object_type INTEGER,
     extra_context VARCHAR,
-    x_coord INTEGER NOT NULL,
-    y_coord INTEGER NOT NULL,
+    x_coord numeric NOT NULL,
+    y_coord numeric NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -134,9 +133,10 @@ CREATE TABLE cageui.cages
     positionid INTEGER,
     rack VARCHAR NOT NULL,
     cage_number INTEGER NOT NULL,
-    length INTEGER,
-    width INTEGER,
-    height INTEGER,
+    length numeric,
+    width numeric,
+    height numeric,
+    sqft numeric,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -192,9 +192,10 @@ CREATE TABLE cageui.cage_history
     rack_group INTEGER NOT NULL,
     cage VARCHAR NOT NULL,
     cage_number INTEGER NOT NULL,
-    length INTEGER NOT NULL,
-    width INTEGER NOT NULL,
-    height INTEGER NOT NULL,
+    length numeric NOT NULL,
+    width numeric NOT NULL,
+    height numeric NOT NULL,
+    sqft numeric NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -202,6 +203,27 @@ CREATE TABLE cageui.cage_history
     modified          TIMESTAMP,
     CONSTRAINT PK_cage_history PRIMARY KEY (rowid),
     CONSTRAINT FK_cage_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
+
+DROP TABLE IF EXISTS cageui.rack_types;
+CREATE TABLE cageui.rack_types
+(
+    rowid SERIAL NOT NULL,
+    name VARCHAR(50) UNIQUE,
+    type INTEGER NOT NULL,
+    manufacturer VARCHAR(50) NOT NULL,
+    length NUMERIC,
+    width NUMERIC,
+    height NUMERIC,
+    supportsTunnel BOOLEAN,
+    description VARCHAR(100),
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_rack_types PRIMARY KEY (rowid),
+    CONSTRAINT FK_rack_types_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 
 /*

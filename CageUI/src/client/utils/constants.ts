@@ -105,7 +105,8 @@ export const Modifications: ModRecord = {
                 property: "stroke",
                 value: "none"
             }
-        ]
+        ],
+
     },
     [ModTypes.SolidDivider]: {
         name: "Solid Divider",

@@ -8,9 +8,9 @@ public class RackTypesForm
     private String _name;
     private int _type;
     private String _manufacturer;
-    private Integer _length;
-    private Integer _width;
-    private Integer _height;
+    private Double _length;
+    private Double _width;
+    private Double _height;
     private Boolean _supportsTunnel;
     private String _description;
 
@@ -54,32 +54,32 @@ public class RackTypesForm
         _manufacturer = manufacturer;
     }
 
-    public Integer getLength()
+    public Double getLength()
     {
         return _length;
     }
 
-    public void setLength(Integer length)
+    public void setLength(Double length)
     {
         _length = length;
     }
 
-    public Integer getWidth()
+    public Double getWidth()
     {
         return _width;
     }
 
-    public void setWidth(Integer width)
+    public void setWidth(Double width)
     {
         _width = width;
     }
 
-    public Integer getHeight()
+    public Double getHeight()
     {
         return _height;
     }
 
-    public void setHeight(Integer height)
+    public void setHeight(Double height)
     {
         _height = height;
     }

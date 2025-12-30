@@ -12,9 +12,10 @@ public class CageHistoryForm
     private String _cage;
     @JsonProperty("cage_number")
     private int _cageNumber;
-    private int _length;
-    private int _width;
-    private int _height;
+    private Double _length;
+    private Double _width;
+    private Double _height;
+    private Double _sqft;
 
     public Integer getRowid()
     {
@@ -66,33 +67,43 @@ public class CageHistoryForm
         _cageNumber = cageNumber;
     }
 
-    public int getLength()
+    public double getLength()
     {
         return _length;
     }
 
-    public void setLength(int length)
+    public void setLength(double length)
     {
         _length = length;
     }
 
-    public int getWidth()
+    public Double getWidth()
     {
         return _width;
     }
 
-    public void setWidth(int width)
+    public void setWidth(Double width)
     {
         _width = width;
     }
 
-    public int getHeight()
+    public Double getHeight()
     {
         return _height;
     }
 
-    public void setHeight(int height)
+    public void setHeight(Double height)
     {
         _height = height;
+    }
+
+    public Double getSqft()
+    {
+        return _sqft;
+    }
+
+    public void setSqft(Double sqft)
+    {
+        _sqft = sqft;
     }
 }

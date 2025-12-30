@@ -718,6 +718,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 rowid: rackTypesData.rows[0].rowid as number,
                 name: rackTypesData.rows[0].name as string,
                 type: rackTypesData.rows[0].type,
+                manufacturer: rackTypesData.rows[0].manufacturer,
                 isDefault: prevRoom.isDefault,
             };
 
@@ -1241,21 +1242,23 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
         room.rackGroups.forEach((group) => {
             group.racks.forEach((r) => {
                 r.cages.forEach(c => {
-                    Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
-                        modSubsections.forEach(section => {
-                            section.modKeys.forEach(key => {
-                                newModData.push({
-                                    cage: c.objectId,
-                                    location: parseInt(direction),
-                                    modId: key.modId,
-                                    modification: room.mods[key.modId].value,
-                                    parentModId: key.parentModId,
-                                    rack: r.objectId,
-                                    subId: section.subId,
-                                });
+                    if(c.mods){
+                        Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
+                            modSubsections.forEach(section => {
+                                section.modKeys.forEach(key => {
+                                    newModData.push({
+                                        cage: c.objectId,
+                                        location: parseInt(direction),
+                                        modId: key.modId,
+                                        modification: room.mods[key.modId].value,
+                                        parentModId: key.parentModId,
+                                        rack: r.objectId,
+                                        subId: section.subId,
+                                    });
+                                })
                             })
-                        })
-                    });
+                        });
+                    }
                 })
             });
         });

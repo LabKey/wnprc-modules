@@ -990,29 +990,109 @@ margin-bottom: 10px;
 }
 
 .page-map {
-  height: 3vh; /* Adjust height as needed */
-  border-bottom: 1px solid lightgray;
-  border-top: 1px solid lightgray;
+  height: 50px;
+  border-bottom: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: left;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 0 20px;
 }
 
 .page-map-url {
-  text-align: center;
-  padding: 2px;
-  font-size: large;
   display: flex;
-  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .page-map-link {
-  padding-right: 10px;
-  padding-left: 10px;
   color: #007bff;
-  pointer-events: auto;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
   cursor: pointer;
+  font-weight: 500;
 }
+
+.page-map-link:hover {
+  background-color: #e9f7fe;
+  color: #0056b3;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.page-map-link:active {
+  transform: translateY(1px);
+}
+
+.page-map-divider {
+  color: #6c757d;
+  padding: 0 8px;
+  font-weight: normal;
+}
+
+.page-map-home {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.page-map-home:hover {
+  color: #1e7e34;
+  background-color: #d4edda;
+}
+
+.page-map-current {
+  color: #343a40;
+  font-weight: 600;
+  background-color: #e9ecef;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-map {
+    height: 40px;
+    padding: 0 15px;
+  }
+
+  .page-map-url {
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .page-map-link {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  .page-map-divider {
+    padding: 0 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-map {
+    height: 35px;
+    padding: 0 10px;
+  }
+
+  .page-map-url {
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .page-map-link {
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+}
+
 
 // END CSS FOR HOME
 
@@ -1624,3 +1704,84 @@ Multi Dropdown Css
   box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
   outline: 0;
 }
+
+
+// Cage Details/Dimensions layout
+
+.cage-main-display {
+  padding-left: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  margin: 1rem auto;
+  font-family: Arial, sans-serif;
+}
+
+.cage-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  padding: 0.5rem 0;
+  width: fit-content;
+}
+
+
+.dimension-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 2px solid #f0f0f0;
+  gap: 4rem;
+}
+
+.dimension-item:last-child {
+  border-bottom: none;
+}
+
+.dimension-label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  min-width: 100px;
+  letter-spacing: 0.3px;
+  margin-right: 1rem;
+}
+
+.dimension-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  min-width: 80px;
+  text-align: right;
+}
+
+.unit-with-squared::after {
+  content: "²";
+  font-size: 1.2em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .cage-header {
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .cage-main-display {
+    padding: 1.2rem;
+    margin: 0.5rem;
+    max-width: 90%;
+  }
+
+  .dimension-label {
+    font-size: 1rem;
+    min-width: 90px;
+  }
+
+  .dimension-value {
+    font-size: 1.1rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+

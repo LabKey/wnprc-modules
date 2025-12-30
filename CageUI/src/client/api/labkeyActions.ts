@@ -138,15 +138,3 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
         });
     });
 }
-
-export function saveModLayout(room: Room, prevMods: RoomMods): Promise<{ success: boolean, errors: any[] }> {
-    return new Promise((resolve, reject) => {
-        Ajax.request({
-            url: buildURL('cageui', 'saveCageModification.api'),
-            method: 'POST',
-            success: (res) => resolve(JSON.parse(res.response)),
-            failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {room: room, prevMods: prevMods},
-        });
-    });
-}

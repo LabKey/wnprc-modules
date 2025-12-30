@@ -15,7 +15,6 @@ import {
 import { ConnectedCage, ConnectedCages, ConnectedRacks, ModificationSaveResult } from '../types/homeTypes';
 import _ from 'lodash';
 import { LayoutSaveResult } from '../types/layoutEditorTypes';
-import { saveModLayout } from '../api/labkeyActions';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { useHomeNavigationContext } from './HomeNavigationContextManager';
 
@@ -249,16 +248,6 @@ export const RoomContextProvider = ({children}) => {
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
         return saveRoomHelper(selectedRoom);
-
-        let result: LayoutSaveResult;
-        try {
-            const layoutSave = await saveModLayout(selectedRoom, selectedRoomMods);
-            result = {success: layoutSave.success, roomName: selectedRoom.name};
-        } catch (e){
-            result = {success: e.success, roomName: selectedRoom.name, reason: e.errors};
-        }
-        // Determine success or failure
-        return result;
     }
 
     return (

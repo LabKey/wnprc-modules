@@ -48,7 +48,7 @@ public class CageUICustomizer extends AbstractTableCustomizer
 
     private void customizeRackTypesTable(AbstractTableInfo ti)
     {
-        SQLFragment sql = new SQLFragment("(SELECT (length * width) as sqft)");
+        SQLFragment sql = new SQLFragment("(SELECT ROUND((length / 12 * width / 12), 2) as sqft)");
         ExprColumn newCol = new ExprColumn(ti, "sqft", sql, JdbcType.VARCHAR);
         newCol.setLabel("Square Feet");
         newCol.setDescription("Square footage of the cages in the rack type");

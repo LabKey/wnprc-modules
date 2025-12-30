@@ -62,6 +62,7 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
                 height: res.rows[0].height,
                 length: res.rows[0].length,
                 width: res.rows[0].width,
+                sqft: res.rows[0].sqft,
             };
         } else {
             throw new Error("Error fetching cage history data");
@@ -90,6 +91,7 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
                 width: res.rows[0].width,
                 height: res.rows[0].height,
                 length: res.rows[0].length,
+                sqft: res.rows[0].sqft,
             };
         } else {
             throw new Error("Error fetching cage history data");

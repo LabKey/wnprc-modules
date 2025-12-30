@@ -113,72 +113,7 @@ public class CageUIController extends SpringActionController
     }
 
 
-    //APIs here
-
-    // This api action saves the modifications for a given room.
-    // Completely saves a new room by closing it out and re-opening it with new modifications, even ones that didn't change.?
-    @RequiresPermission(CageUIModificationEditorPermission.class)
-    public static class SaveCageModificationAction extends MutatingApiAction<SimpleApiJsonForm>
-    {
-        @Override
-        public void validateForm(SimpleApiJsonForm form, Errors errors)
-        {
-            JSONObject json = form.getJsonObject();
-
-            if (json == null)
-            {
-                errors.reject(ERROR_MSG, "Missing json parameter.");
-            }
-        }
-
-        @Override
-        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
-        {
-            ApiSimpleResponse response = new ApiSimpleResponse();
-            BatchValidationException batchErrors = new BatchValidationException();
-            JSONObject json = form.getJsonObject();
-
-            ObjectMapper mapper = JsonUtil.createDefaultMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            Room room = mapper.readValue(json.get("room").toString(), mapper.getTypeFactory().constructType(Room.class));
-            Object prevRoomMods = json.get("prevMods");
-            Date newEndDate = new Date();
-
-            UserSchema cageuiSchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
-            TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
-            //List<Map<String, Object>> oldModRowsToUpdate = getModsToEnd(room.getName(), newEndDate, getUser(), getContainer());
-
-
-            for (RackGroup rackGroup : room.getRackGroups()){
-                for(Rack rack : rackGroup.getRacks()){
-                    for (Cage cage : rack.getCages()){
-                        Cage.CageModKeyMap currCageMods = cage.getMods();
-
-                    }
-                }
-            }
-
-            QueryUpdateService modQus = modHistoryTable.getUpdateService();
-            if (modQus == null){
-                throw new IllegalStateException(modHistoryTable.getName() + " query update service");
-            }
-
-            try (DbScope.Transaction tx = modHistoryTable.getSchema().getScope().ensureTransaction()){
-               /* if(!oldModRowsToUpdate.isEmpty()){
-                    //modQus.updateRows(getUser(), getContainer(), oldModRowsToUpdate, null, batchErrors, null, null);
-                }*/
-
-                if(batchErrors.hasErrors()){
-                    response.put("success", false);
-                    response.put("errors", batchErrors);
-                    return response;
-                }
-            }
-
-            response.put("success", false);
-            return response;
-        }
-    }
+    //APIS Here
 
 
     // this api action saves the layout for a given room

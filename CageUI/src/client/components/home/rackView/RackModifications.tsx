@@ -15,6 +15,7 @@ import { useRoomContext } from '../../../context/RoomContextManager';
 import { ConnectedCages, ConnectedRacks } from '../../../types/homeTypes';
 import { Option } from '@labkey/components';
 
+//TODO fix this component. Needs to save modifications and handle their state for racks.
 export const RackModifications: FC = () => {
     const {selectedPage} = useHomeNavigationContext();
     const {selectedRoom, selectedRack} = useRoomContext();

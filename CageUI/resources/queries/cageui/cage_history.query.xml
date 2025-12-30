@@ -39,6 +39,7 @@
                     <column columnName="length"/>
                     <column columnName="width"/>
                     <column columnName="height"/>
+                    <column columnName="sqft"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

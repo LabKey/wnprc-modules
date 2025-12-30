@@ -15,7 +15,7 @@ export const RackViewContent: FC = () => {
         <div className={"room-view-container"} key={'layout-' + selectedRoom + '-rack-' + selectedRack}>
             <div className={'room-view-title'}>
                 <label>
-                    {selectedRack.itemId}
+                    Rack {selectedRack.itemId}
                 </label>
             </div>
             <SubViewContent

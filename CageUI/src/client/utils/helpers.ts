@@ -1109,6 +1109,7 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
         for (let i = 0; i < rack.cages.length; i++) {
             if(rack.cages[i].cageNum !== cage.cageNum){
                 const adj = areAdjacent(cage, rack, rack.cages[i], rack);
+                console.log("Adjacent: ", adj);
                 if (adj.location !== null) {
                     adj.currLines.forEach(((line,idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
@@ -1116,8 +1117,8 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
                         connections[adj.location].push({
                             currSubId: currSubId,
                             adjSubId: adjSubId,
-                            currMods: cage.mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === currSubId)?.modKeys || [],
-                            adjMods: rack.cages[i].mods[adj.location].find((subMods) => subMods.subId === adjSubId)?.modKeys || [],
+                            currMods: cage.mods ? cage.mods[getAdjLocation(adj.location)]?.find((subMods) => subMods.subId === currSubId)?.modKeys : [],
+                            adjMods: rack.cages[i].mods ? rack.cages[i].mods[adj.location]?.find((subMods) => subMods.subId === adjSubId)?.modKeys : [],
                             currCage: cage,
                             adjCage: rack.cages[i]
                         });
@@ -1136,8 +1137,8 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
                         connections[adj.location].push({
                             currSubId: currSubId,
                             adjSubId: adjSubId,
-                            currMods: rack.cages[i].mods[adj.location].find((subMods) => subMods.subId === currSubId)?.modKeys || [],
-                            adjMods: rack.cages[j].mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === adjSubId)?.modKeys || [],
+                            currMods: rack.cages[i]?.mods ? rack.cages[i]?.mods[adj.location]?.find((subMods) => subMods.subId === currSubId)?.modKeys : [],
+                            adjMods: rack.cages[j]?.mods ? rack.cages[j]?.mods[getAdjLocation(adj.location)]?.find((subMods) => subMods.subId === adjSubId)?.modKeys : [],
                             currCage: rack.cages[i],
                             adjCage: rack.cages[j]
                         });
@@ -1217,32 +1218,28 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
     }
 
     // Create default mods for new rooms.
-    if(isRoomNonDefault && room.mods === undefined) {
+    if(isRoomNonDefault) {
 
         const usedMap = new Map<string, boolean>();
 
         room.rackGroups.forEach((group) => {
             group.racks.forEach((r) => {
-                const connectedCages = findConnectedCages(r);
-                Object.entries(connectedCages).forEach(([direction, connections]) => {
-                    if (connections.length === 0) return;
-                    const locDir = parseInt(direction) as ModLocations;
-                    addModEntries(connections, locDir, r, false, newModData, usedMap);
-                });
+                r.cages.forEach((c) => {
+                    if(c.mods === undefined){
+                        const connectedCages = findConnectedCages(r, c);
+                        Object.entries(connectedCages).forEach(([direction, connections]) => {
+                            if (connections.length === 0) return;
+                            const locDir = parseInt(direction) as ModLocations;
+                            addModEntries(connections, locDir, r, false, newModData, usedMap);
+                        });
 
-                const connectedRacks = findConnectedRacks(group, r);
-                Object.entries(connectedRacks).forEach(([direction, connections]) => {
-                    if (connections.length === 0) return;
-                    const locDir = parseInt(direction) as ModLocations;
-                    addModEntries(connections, locDir, r, true, newModData, usedMap);
-                });
-            });
-        });
-    }else if(isRoomNonDefault && room.mods){
-        room.rackGroups.forEach((group) => {
-            group.racks.forEach((r) => {
-                r.cages.forEach(c => {
-                    if(c.mods){
+                        const connectedRacks = findConnectedRacks(group, r, c);
+                        Object.entries(connectedRacks).forEach(([direction, connections]) => {
+                            if (connections.length === 0) return;
+                            const locDir = parseInt(direction) as ModLocations;
+                            addModEntries(connections, locDir, r, true, newModData, usedMap);
+                        });
+                    }else{
                         Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
                             modSubsections.forEach(section => {
                                 section.modKeys.forEach(key => {
@@ -1266,6 +1263,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
 
     console.log("Saving Room With Mods: ", newModData);
     let result: LayoutSaveResult;
+
     try {
         const layoutSave = await saveRoomLayout(room, newModData, oldRoomName);
         let errors;

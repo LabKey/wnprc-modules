@@ -1110,6 +1110,7 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
             if(rack.cages[i].cageNum !== cage.cageNum){
                 const adj = areAdjacent(cage, rack, rack.cages[i], rack);
                 console.log("Adjacent: ", adj);
+                // adj.location is the location of cage adj to current cage meaning if 1 is left of 2 then adj.location = right.
                 if (adj.location !== null) {
                     adj.currLines.forEach(((line,idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
@@ -1117,8 +1118,8 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
                         connections[adj.location].push({
                             currSubId: currSubId,
                             adjSubId: adjSubId,
-                            currMods: cage.mods ? cage.mods[getAdjLocation(adj.location)]?.find((subMods) => subMods.subId === currSubId)?.modKeys : [],
-                            adjMods: rack.cages[i].mods ? rack.cages[i].mods[adj.location]?.find((subMods) => subMods.subId === adjSubId)?.modKeys : [],
+                            currMods: cage.mods ? cage.mods[adj.location]?.find((subMods) => subMods.subId === currSubId)?.modKeys : [],
+                            adjMods: rack.cages[i].mods ? rack.cages[i].mods[getAdjLocation(adj.location)]?.find((subMods) => subMods.subId === adjSubId)?.modKeys : [],
                             currCage: cage,
                             adjCage: rack.cages[i]
                         });
@@ -1186,8 +1187,8 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
                             currCage: currCage,
                             adjRack: adjRack,
                             adjCage: adjCage,
-                            currMods: currCage.mods[adj.location].find((subMods) => subMods.subId === currSubId)?.modKeys || [],
-                            adjMods: adjCage.mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === adjSubId)?.modKeys || [],
+                            currMods: currCage?.mods ? currCage.mods[adj.location].find((subMods) => subMods.subId === currSubId)?.modKeys : [],
+                            adjMods: adjCage?.mods ? adjCage.mods[getAdjLocation(adj.location)].find((subMods) => subMods.subId === adjSubId)?.modKeys : [],
                         });
                     });
                 }
@@ -1243,6 +1244,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
                         Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
                             modSubsections.forEach(section => {
                                 section.modKeys.forEach(key => {
+                                    console.log("Mod Key: ", key);
                                     newModData.push({
                                         cage: c.objectId,
                                         location: parseInt(direction),
@@ -1263,7 +1265,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
 
     console.log("Saving Room With Mods: ", newModData);
     let result: LayoutSaveResult;
-
+    return;
     try {
         const layoutSave = await saveRoomLayout(room, newModData, oldRoomName);
         let errors;

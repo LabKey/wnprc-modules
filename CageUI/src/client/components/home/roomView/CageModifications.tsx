@@ -171,7 +171,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                     adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
                                         ...m,
                                         parentModId: m.modId,
-                                        id: Utils.generateUUID().toUpperCase()
+                                        modId: Utils.generateUUID().toUpperCase()
                                     }))
                                 })
                             }else{
@@ -192,7 +192,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
                                     ...m,
                                     parentModId: m.modId,
-                                    id: Utils.generateUUID().toUpperCase()
+                                    modId: Utils.generateUUID().toUpperCase()
                                 }))
                             }
                         ]

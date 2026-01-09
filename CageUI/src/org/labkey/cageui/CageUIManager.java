@@ -55,6 +55,7 @@ import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.ModTypes;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackGroup;
+import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
 
@@ -62,11 +63,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CageUIManager
 {
@@ -313,6 +322,22 @@ public class CageUIManager
         }
     }
 
+    // Helper method to get all cages in the same rack group
+    public static List<Cage> getAllCagesInRackGroup(RackGroup rackGroup) {
+        List<Cage> allCages = new ArrayList<>();
+
+        if (rackGroup != null && rackGroup.getRacks() != null) {
+            for (Rack rack : rackGroup.getRacks()) {
+                if (rack != null && rack.getCages() != null) {
+                    allCages.addAll(rack.getCages());
+                }
+            }
+        }
+
+        return allCages;
+    }
+
+
     public ArrayList<TemplateLayoutHistoryForm> getTemplateLayoutHistory(String historyId)
     {
         TableInfo table = CageUISchema.getInstance().getTemplateLayoutHistoryTable();
@@ -491,6 +516,7 @@ public class CageUIManager
         private final boolean isTemplate;
         private final String prevRoomName;
         private ArrayList<ModData> roomMods;
+        private Map<String, Map<String, Double>> cageDims;
 
 
         public RoomSubmissionService(Container containerId, User userId, boolean isTemplate, String prevRoomName, Room room, ArrayList<ModData> roomMods)
@@ -501,37 +527,274 @@ public class CageUIManager
             this.isTemplate = isTemplate;
             this.prevRoomName = prevRoomName;
             this.roomMods = roomMods;
+            this.cageDims = new HashMap<>();
         }
 
-        private Map<String, Double> getCageDims (Cage cage, Rack rack, RackTypesForm rackType) {
-            List<ModData> cageMod = new ArrayList<>();
-            double additionalSqft = 0;
-            Map<String, Double> cageDims = new HashMap<>();
-            if(this.roomMods != null){
-                cageMod = this.roomMods.stream()
-                        .filter(mod ->
-                                mod.getCage().equals(cage.getObjectId())
-                                        && mod.getRack().equals(rack.getObjectId()))
-                        .toList();
-            }
-
-            // Check with mods to determine accurate dimensions
-            if(!cageMod.isEmpty()){
-                boolean hasExtension = cageMod.stream()
-                        .anyMatch(mod -> mod.getModification().equals(ModTypes.Extension));
-
-                if(hasExtension){
-                    additionalSqft = additionalSqft + 2;
+        private void getCageDims() {
+            // First, build a map of all cages with their modifications
+            Map<String, List<ModData>> cageModsMap = new HashMap<>();
+            if (this.roomMods != null) {
+                for (ModData mod : this.roomMods) {
+                    cageModsMap.computeIfAbsent(mod.getCage(), k -> new ArrayList<>()).add(mod);
                 }
             }
 
-            cageDims.put("length", rackType.getLength());
-            cageDims.put("width", rackType.getWidth());
-            cageDims.put("height", rackType.getHeight());
-            cageDims.put("sqft", (Math.round((rackType.getLength() / 12) * (rackType.getWidth() / 12) * 100.00) / 100.00) + additionalSqft);
+            // Find all connected components across racks
+            Set<Set<String>> connectedComponents = findConnectedComponents(this.room, cageModsMap);
 
-            return cageDims;
+            // Process each connected component
+            for (Set<String> component : connectedComponents) {
+                // Find the first cage in this component (lowest position ID)
+                String firstCageId = findFirstCageInComponent(component, this.room);
+
+                // Calculate combined dimensions for the first cage
+                CombinedDimensionsResult combinedResult = calculateComponentDimensions(component, this.room, cageModsMap, firstCageId);
+
+                // Set dimensions for all cages in this component
+                for (String cageId : component) {
+                    Cage cage = findCageById(cageId, this.room);
+                    if (cage != null) {
+                        double length = cageId.equals(firstCageId) ? combinedResult.length : 0;
+                        double width = cageId.equals(firstCageId) ? combinedResult.width : 0;
+                        double height = cageId.equals(firstCageId) ? combinedResult.height : 0;
+                        double sqft = cageId.equals(firstCageId) ? combinedResult.sqft : 0;
+
+                        this.cageDims.put(cage.getCageNum(), Map.ofEntries(
+                                Map.entry("length", length),
+                                Map.entry("width", width),
+                                Map.entry("height", height),
+                                Map.entry("sqft", sqft)
+                        ));
+                    }
+                }
+            }
+
+            // Handle cages that are not part of any connected component (set to base dimensions)
+            room.getRackGroups().forEach(rackGroup ->
+                    rackGroup.getRacks().forEach(rack ->
+                            rack.getCages().forEach(cage -> {
+                                if (!this.cageDims.containsKey(cage.getCageNum())) {
+                                    RackTypesForm rackType = getRackType(rack.getType().getRowId());
+                                    double baseLength = rackType.getLength();
+                                    double baseWidth = rackType.getWidth();
+                                    double baseHeight = rackType.getHeight();
+                                    double baseSqft = (baseLength / 12) * (baseWidth / 12);
+
+                                    this.cageDims.put(cage.getCageNum(), Map.ofEntries(
+                                            Map.entry("length", baseLength),
+                                            Map.entry("width", baseWidth),
+                                            Map.entry("height", baseHeight),
+                                            Map.entry("sqft", Math.round(baseSqft * 100.0) / 100.0)
+                                    ));
+                                }
+                            })
+                    )
+            );
         }
+
+        private Set<Set<String>> findConnectedComponents(Room room, Map<String, List<ModData>> cageModsMap) {
+            Set<Set<String>> components = new HashSet<>();
+            Set<String> visited = new HashSet<>();
+
+            room.getRackGroups().forEach(rackGroup ->
+                    rackGroup.getRacks().forEach(rack ->
+                            rack.getCages().forEach(cage -> {
+                                if (!visited.contains(cage.getObjectId())) {
+                                    Set<String> component = new HashSet<>();
+                                    bfsFindComponent(cage.getObjectId(), room, cageModsMap, component, visited);
+                                    if (!component.isEmpty()) {
+                                        components.add(component);
+                                    }
+                                }
+                            })
+                    )
+            );
+
+            return components;
+        }
+
+        private void bfsFindComponent(String startCageId, Room room, Map<String, List<ModData>> cageModsMap,
+                                      Set<String> component, Set<String> visited) {
+            Queue<String> queue = new LinkedList<>();
+            queue.offer(startCageId);
+            visited.add(startCageId);
+            component.add(startCageId);
+
+            while (!queue.isEmpty()) {
+                String currentCageId = queue.poll();
+                List<ModData> currentMods = cageModsMap.getOrDefault(currentCageId, new ArrayList<>());
+
+                // Find all connected cages based on modifications
+                Set<String> connectedCages = findCagesConnectedTo(currentCageId, room, currentMods);
+
+                for (String connectedCageId : connectedCages) {
+                    if (!visited.contains(connectedCageId)) {
+                        visited.add(connectedCageId);
+                        component.add(connectedCageId);
+                        queue.offer(connectedCageId);
+                    }
+                }
+            }
+        }
+
+        private Set<String> findCagesConnectedTo(String cageId, Room room,
+                                                 List<ModData> currentMods) {
+            Set<String> connectedCages = new HashSet<>();
+            Cage currentCage = findCageById(cageId, room);
+
+            if (currentCage == null) return connectedCages;
+
+            // Get all modifications that can create connections (NoDivider, CTunnel, NoFloor)
+            List<ModData> connectionMods = currentMods.stream()
+                    .filter(mod -> mod.getModification() == ModTypes.NoDivider ||
+                            mod.getModification() == ModTypes.CTunnel ||
+                            mod.getModification() == ModTypes.NoFloor)
+                    .collect(Collectors.toList());
+
+            // For each connection-modifying modification on this cage, find connected cages
+            for (ModData mod : connectionMods) {
+                // These mods are shared across cages via parentModId
+                String parentModId = mod.getParentModId();
+                Optional<ModData> adjModData;
+                // If the current mod has a parentModId, find the corresponding adj cage via parentModId = adj cage modId
+                if (parentModId != null && !parentModId.isEmpty()) {
+                    adjModData = this.roomMods.stream().filter(mod2 -> mod2.getModId() != null && mod2.getModId().equals(parentModId)).findFirst();
+                }else{
+                    // If the current mod does not have a parentModId, find the corresponding adj cage via parentModId = current cage modId
+                    adjModData = this.roomMods.stream().filter(mod2 -> mod2.getParentModId() != null && mod2.getParentModId().equals(mod.getModId())).findFirst();
+                }
+                adjModData.ifPresent(modData -> connectedCages.add(modData.getCage()));
+            }
+
+            return connectedCages;
+        }
+
+        private String findFirstCageInComponent(Set<String> component, Room room) {
+            String firstCageId = null;
+            int minPositionId = Integer.MAX_VALUE;
+
+            for (String cageId : component) {
+                Cage cage = findCageById(cageId, room);
+                if (cage != null && cage.getPositionId() < minPositionId) {
+                    minPositionId = cage.getPositionId();
+                    firstCageId = cageId;
+                }
+            }
+
+            return firstCageId;
+        }
+
+        private Cage findCageById(String cageId, Room room) {
+            for (RackGroup rackGroup : room.getRackGroups()) {
+                for (Rack rack : rackGroup.getRacks()) {
+                    for (Cage cage : rack.getCages()) {
+                        if (cage.getObjectId().equals(cageId)) {
+                            return cage;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private CombinedDimensionsResult calculateComponentDimensions(Set<String> component, Room room,
+                                                                      Map<String, List<ModData>> cageModsMap, String firstCageId)
+        {
+            double totalLength = 0;
+            double totalWidth = 0;
+            double totalHeight = 0;
+            double totalSqft = 0;
+
+
+            // Collect all cages in component with their mods
+            List<Cage> cagesInComponent = component.stream()
+                    .map(cageId -> findCageById(cageId, room))
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            // Calculate total dimensions
+            for (Cage cage : cagesInComponent)
+            {
+                List<ModData> mods = cageModsMap.getOrDefault(cage.getObjectId(), new ArrayList<>());
+                Rack rack = findRackByCageId(cage.getObjectId(), room);
+                RackTypesForm rackType = getRackType(rack.getType().getRowId());
+
+
+                // Initialize with base dimensions
+                double baseLength = rackType.getLength();
+                double baseWidth = rackType.getWidth();
+                double baseHeight = rackType.getHeight();
+
+
+                // Get base dimensions for this cage
+                double cageLength = baseLength;
+                double cageWidth = baseWidth;
+                double cageHeight = baseHeight;
+
+                // Apply extensions
+                boolean hasExtension = mods.stream().anyMatch(mod -> mod.getModification().equals(ModTypes.Extension));
+                if (hasExtension)
+                {
+                    totalSqft += 2;
+                }
+
+                // first cage in sequence should add its cage dimensions and ignore width + height + length modifiers between other cages
+                if (firstCageId.equals(cage.getObjectId()))
+                {
+                    totalLength += cageLength;
+                    totalWidth += cageWidth;
+                    totalHeight += cageHeight;
+                    continue;
+                }
+
+                // add other cages dimensions to the first cage total.
+                boolean hasCTunnelOrNoDivider = mods.stream().anyMatch(mod -> mod.getModification().equals(ModTypes.CTunnel) || mod.getModification().equals(ModTypes.NoDivider));
+                if (hasCTunnelOrNoDivider)
+                {
+                    totalWidth += cageWidth;
+                }
+
+                boolean hasNoFloor = mods.stream().anyMatch(mod -> mod.getModification().equals(ModTypes.NoFloor));
+                if (hasNoFloor)
+                {
+                    totalHeight += cageHeight;
+                }
+            }
+            // calculate square foot at the end after all cages in the group are scanned. we add to the sqft from extensions.
+            totalSqft += (totalLength / 12) * (totalWidth / 12);
+
+            return new CombinedDimensionsResult(
+                    totalLength,
+                    totalWidth,
+                    totalHeight,
+                    totalSqft
+            );
+        }
+
+        private Rack findRackByCageId(String cageId, Room room) {
+            for (RackGroup rackGroup : room.getRackGroups()) {
+                for (Rack rack : rackGroup.getRacks()) {
+                    for (Cage cage : rack.getCages()) {
+                        if (cage.getObjectId().equals(cageId)) {
+                            return rack;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static class CombinedDimensionsResult {
+            double length, width, height, sqft;
+
+            CombinedDimensionsResult(double length, double width, double height, double sqft) {
+                this.length = length;
+                this.width = width;
+                this.height = height;
+                this.sqft = sqft;
+            }
+        }
+
 
         public BundledForms submitRoom() {
             BundledForms bundledForms = new BundledForms();
@@ -548,6 +811,7 @@ public class CageUIManager
                 submitTemplateLayout(this.room, historyId, bundledForms);
             } else {
                 // Handle real room
+                getCageDims();
                 submitRealRoom(this.room, historyId, bundledForms);
             }
 
@@ -691,7 +955,7 @@ public class CageUIManager
                             // Add cages to cages table
                             for (Cage cage : rack.getCages()) {
                                 CagesForm cagesForm = new CagesForm();
-                                Map<String, Double> cageDims = getCageDims(cage, rack, rackType);
+                                Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
                                 cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
                                 cagesForm.setRack(racksForm.getObjectId());
                                 cagesForm.setObjectId(cage.getObjectId());
@@ -718,7 +982,13 @@ public class CageUIManager
                             // Update existing cages with new data
                             for (Cage cage : rack.getCages()) {
                                 CagesForm prevCagesForm = getCageForm(cage.getObjectId());
+                                Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
+
                                 prevCagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
+                                prevCagesForm.setHeight(cageDims.get("height"));
+                                prevCagesForm.setWidth(cageDims.get("width"));
+                                prevCagesForm.setLength(cageDims.get("length"));
+                                prevCagesForm.setSqft(cageDims.get("sqft"));
 
                                 prevCagesFormList.add(prevCagesForm);
                             }
@@ -785,7 +1055,7 @@ public class CageUIManager
                         for (Cage cage : rack.getCages()) {
 
                             CageHistoryForm form = new CageHistoryForm();
-                            Map<String, Double> cageDims = getCageDims(cage, rack, rackType);
+                            Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
                             form.setHistoryId(historyId);
                             form.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
                             form.setCage(cage.getObjectId());

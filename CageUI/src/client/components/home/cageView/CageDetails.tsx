@@ -47,9 +47,9 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Sqft:</span>
-                            <div className="dimension-value" data-unit={"in"}>
-                                {cageDimensions.sqft}
-                                <span className="unit-with-squared"> in</span>
+                            <div className="dimension-value" data-unit={"ft"}>
+                                {Math.round((cageDimensions.sqft) * 100) / 100}
+                                <span className="unit-with-squared"> ft</span>
                             </div>
                         </div>
                     </div>

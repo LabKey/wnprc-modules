@@ -1265,7 +1265,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
 
     console.log("Saving Room With Mods: ", newModData);
     let result: LayoutSaveResult;
-    return;
+
     try {
         const layoutSave = await saveRoomLayout(room, newModData, oldRoomName);
         let errors;

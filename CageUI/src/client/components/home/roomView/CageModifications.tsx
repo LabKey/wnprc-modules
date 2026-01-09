@@ -168,11 +168,21 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 return ({
                                     ...c,
                                     currMods: selectedItems,
-                                    adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
-                                        ...m,
-                                        parentModId: m.modId,
-                                        modId: Utils.generateUUID().toUpperCase()
-                                    }))
+                                    adjMods: selectedItems.map(m => {
+                                        if(m.parentModId){
+                                            return({
+                                                ...m,
+                                                modId: m.parentModId,
+                                                parentModId: null,
+                                            })
+                                        }else{
+                                            return({
+                                                ...m,
+                                                parentModId: m.modId,
+                                                modId: Utils.generateUUID().toUpperCase()
+                                            })
+                                        }
+                                    })
                                 })
                             }else{
                                 return c;
@@ -189,11 +199,21 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                             ...prevState.adjCages[location], {
                                 ...newPairs,
                                 currMods: selectedItems,
-                                adjMods: selectedItems.map(m => ({ // for adj mods add mods to other cage as well.
-                                    ...m,
-                                    parentModId: m.modId,
-                                    modId: Utils.generateUUID().toUpperCase()
-                                }))
+                                adjMods: selectedItems.map(m => {
+                                    if(m.parentModId){
+                                        return({
+                                            ...m,
+                                            modId: m.parentModId,
+                                            parentModId: null,
+                                        })
+                                    }else{
+                                        return({
+                                            ...m,
+                                            parentModId: m.modId,
+                                            modId: Utils.generateUUID().toUpperCase()
+                                        })
+                                    }
+                                })
                             }
                         ]
                     }

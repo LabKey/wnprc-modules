@@ -2792,8 +2792,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable auditTable =  new DataRegionTable("query", this);
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
         Assertions.assertThat(auditLog).as("Audit entry for ehr_billing.invoice")
-                .contains("paymentamountreceived:  \u00BB 1028.95")
-                .contains("balancedue:  \u00BB 0.0");
+                .contains("paymentAmountReceived:  \u00BB 1028.95")
+                .contains("balanceDue:  \u00BB 0.0");
     }
 
     @Test

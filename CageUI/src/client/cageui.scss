@@ -21,22 +21,32 @@
   //background-color: lightgreen;
 }
 
-.legend-header-close {
-  //background-color: lightcoral;
-  flex: 0 1 auto; /* Takes only the space it needs */
-  padding: 20px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
-  position: relative;
-  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
+
+.room-legend-open, .room-legend-close {
+  flex: 0 0 auto;
+  padding-left: 140px;
+  display: flex;
+  flex-direction: column;
 
 }
-.room-legend-open {
-  flex: 0 1 auto; /* Takes only the space it needs */
-  padding: 20px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
-  position: relative;
-  border-radius: 10px; /* Adjust the value as needed for the desired roundness */
 
+
+.legend-header-open, .legend-header-close {
+  margin-bottom: 20px;
+  font-size: x-large;
+}
+
+.legend-header-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.room-layout {
+  display: flex;
+  flex-direction: row;
 }
 
 .room-toolbar {
@@ -85,7 +95,7 @@
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   margin-left: 5px;
 }
 
@@ -344,18 +354,6 @@ margin-bottom: 10px;
   background: #ddd;
 }
 
-.legend-header-open {
-  margin-bottom: 20px;
-}
-
-.legend-header-btn {
-  background-color: transparent;
-  background-repeat: no-repeat;
-  border: none;
-  cursor: pointer;
-  overflow: hidden;
-  outline: none;
-}
 
 /* CSS */
 .button-84 {

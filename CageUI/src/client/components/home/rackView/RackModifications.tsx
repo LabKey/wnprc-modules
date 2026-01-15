@@ -37,96 +37,62 @@ export const RackModifications: FC = () => {
         if(!selectedRack) return;
         const currGroup = findRackInGroup(selectedRack.svgId, selectedRoom.rackGroups).rackGroup;
         const connections = findConnectedCages(selectedRack,undefined);
-        const newRackMods: CurrCageMods = {...currRackMods};
+        const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
         console.log("Connections", connections);
         Object.entries(connections).forEach(([loc, connection]) => {
             if(parseInt(loc) === ModLocations.Direct) return;
             connection.forEach(c => {
                 newRackMods[c.currCage.objectId] = {
-                    adjCages: c,
+                    adjCages: {
+                        [loc]: {...c}
+                    } as ConnectedCage,
                     currCage: c.currCage.mods[ModLocations.Direct].flatMap(m => m.modKeys)
                 };
                 newRackMods[c.adjCage.objectId] = {
                     adjCages: {
-                        ...c,
-                        [loc]: {
-                            currCage: c.adjCage,
-                            adjCage: c.currCage,
-                            currSubId: c.adjSubId,
-                            adjSubId: c.currSubId,
-                            currMods: c.adjMods,
-                            adjMods: c.currMods
+                        [getAdjLocation(loc)]: {
+                            ...c
                         } as ConnectedCage
                     } as ConnectedCages,
                     currCage: c.adjCage.mods[ModLocations.Direct].flatMap(m => m.modKeys)
                 };
             })
         })
+        console.log("New Rack Mods", newRackMods);
         setCurrRackMods(newRackMods);
         setConnectedCages(connections);
-        /*const newConnectedCages: [Cage, CageDirection, Cage][] = [];
-        Object.entries(connections).forEach(([loc, connectedCagesInLoc]) => {
-            if(parseInt(loc) === ModLocations.Direct) return;
-            connectedCagesInLoc.forEach(connection => {
-                newConnectedCages.push([connection.currCage, parseInt(loc), connection.adjCage]);
-            })
-        });
-        setConnectedCages(newConnectedCages);*/
         setRackGroup(currGroup);
     }, [selectedRack]);
 
     useEffect(() => {
         if(!rackGroup) return;
         const connectedRacks = findConnectedRacks(rackGroup, selectedRack);
-        const newRackMods: CurrCageMods = {...currRackMods};
+        console.log("Connected Racks #1: ", connectedRacks);
+        const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
         Object.entries(connectedRacks).forEach(([loc, connection]) => {
             if(parseInt(loc) === ModLocations.Direct) return;
             connection.forEach(c => {
                 newRackMods[c.currCage.objectId] = {
-                    adjCages: c,
+                    adjCages: {
+                        [loc]: {...c}
+                    } as ConnectedCage,
                     currCage: c.currCage.mods[ModLocations.Direct].flatMap(m => m.modKeys)
                 };
                 newRackMods[c.adjCage.objectId] = {
                     adjCages: {
-                        ...c,
-                        [loc]: {
-                            currRack: c.adjRack,
-                            currCage: c.adjCage,
-                            adjRack: c.currRack,
-                            adjCage: c.currCage,
-                            currSubId: c.adjSubId,
-                            adjSubId: c.currSubId,
-                            currMods: c.adjMods,
-                            adjMods: c.currMods
+                        [getAdjLocation(parseInt(loc))]: {
+                            ...c,
                         } as ConnectedRack
                     } as ConnectedRacks,
                     currCage: c.adjCage.mods[ModLocations.Direct].flatMap(m => m.modKeys)
                 };
             })
         })
+        console.log("New Rack Mods", newRackMods);
+
         setCurrRackMods(newRackMods);
         setConnectedRacks(connectedRacks);
-        /*const newConnectedRacks: [[Rack, Cage], CageDirection, [Rack, Cage]][] = [];
-        let tempAloneCages: Cage[] = rackGroup.racks.flatMap(r => r.cages);
-        // filter out cages that are in rack connections
-        Object.entries(connectedRacks).forEach(([loc, connectedRacksInLoc]) => {
-            if(parseInt(loc) === ModLocations.Direct) return;
-            connectedRacksInLoc.forEach(connectedRack => {
-                newConnectedRacks.push([[connectedRack.currRack, connectedRack.currCage], parseInt(loc), [connectedRack.adjRack, connectedRack.adjCage]])
-                tempAloneCages = tempAloneCages.filter(c => c.objectId !== connectedRack.currCage.objectId);
-                tempAloneCages = tempAloneCages.filter(c => c.objectId !== connectedRack.adjCage.objectId);
-            })
-        });
-        // filter out cages that are in cage connections
-        connectedCages.forEach(group => {
-            tempAloneCages = tempAloneCages.filter(c => c.objectId !== group[0].objectId);
-            tempAloneCages = tempAloneCages.filter(c => c.objectId !== group[2].objectId);
-        });
-        // filter out cages that are in the same rack group as a result from rack connections, but aren't in the current rack
-        tempAloneCages = tempAloneCages.filter(c => selectedRack.cages.some(tc => tc.objectId === c.objectId));
-        setConnectedRacks(newConnectedRacks);
-        setAloneCages(tempAloneCages)*/
-    }, [rackGroup, selectedRack, connectedCages]);
+    }, [rackGroup]);
 
     const handleModSave = () => {
         console.log("Saving Mods");

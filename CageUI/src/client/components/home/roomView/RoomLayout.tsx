@@ -17,6 +17,7 @@ import { LayoutErrors } from '../../LayoutErrors';
 import { LayoutSaveResult, SelectedObj } from '../../../types/layoutEditorTypes';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { LoadingScreen } from '../../LoadingScreen';
+import { RoomLegend } from './RoomLegend';
 
 interface RoomLayoutProps {
 }
@@ -157,6 +158,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
             {errorPopup &&
                     <ConfirmationPopup message={errorPopup} onClose={() => setErrorPopup(null)} />
             }
+            <RoomLegend />
         </div>
     );
 }

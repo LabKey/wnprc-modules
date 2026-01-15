@@ -20,6 +20,9 @@ export const RackViewContent: FC = () => {
             </div>
             <SubViewContent
                     tabs={[{
+                        name: 'Details',
+                        children: <RackDetails />
+                    },{
                         name: 'Modifications',
                         children:
                             <>
@@ -27,9 +30,6 @@ export const RackViewContent: FC = () => {
                                 <CurrentRackLayout />
                             </>
 
-                    },{
-                        name: 'Details',
-                        children: <RackDetails />
                     }
                     ]}
             />

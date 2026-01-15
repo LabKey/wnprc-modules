@@ -4794,7 +4794,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         // Puts a cage on the layout and ensures it exists
         getDriver().findElement(By.id("cage_template_wrapper")).click();
-        WebElement cage = waitForElement(Locator.id("default-rack-1"), 10000);
+        WebElement cage = waitForElement(Locator.name("cage-1"), 10000);
         assertTrue(cage.isDisplayed());
 
         // Puts a door on the layout and ensures it exists

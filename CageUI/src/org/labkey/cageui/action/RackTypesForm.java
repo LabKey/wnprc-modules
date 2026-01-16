@@ -11,7 +11,6 @@ public class RackTypesForm
     private Double _length;
     private Double _width;
     private Double _height;
-    private Boolean _supportsTunnel;
     private String _description;
 
     public int getRowid()
@@ -84,16 +83,6 @@ public class RackTypesForm
         _height = height;
     }
 
-    public Boolean getSupportsTunnel()
-    {
-        return _supportsTunnel;
-    }
-
-    public void setSupportsTunnel(Boolean supportsTunnel)
-    {
-        _supportsTunnel = supportsTunnel;
-    }
-
     public String getDescription()
     {
         return _description;
@@ -115,7 +104,6 @@ public class RackTypesForm
         json.put("length", getLength());
         json.put("width", getWidth());
         json.put("height", getHeight());
-        json.put("supportsTunnel", getSupportsTunnel());
         json.put("description", getDescription());
 
         return json;

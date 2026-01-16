@@ -52,7 +52,6 @@
                     <column columnName="width"/>
                     <column columnName="height"/>
                     <column columnName="sqft"/>
-                    <column columnName="supportsTunnel"/>
                     <column columnName="description"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>

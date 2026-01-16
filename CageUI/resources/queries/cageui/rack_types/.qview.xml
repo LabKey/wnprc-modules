@@ -26,7 +26,6 @@
             <column name="width"/>
             <column name="height"/>
             <column name="sqft"/>
-            <column name="supportsTunnel"/>
             <column name="description"/>
             <column name="container"/>
             <column name="createdby"/>

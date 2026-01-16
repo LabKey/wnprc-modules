@@ -56,7 +56,6 @@
             <column columnName="length"/>
             <column columnName="width"/>
             <column columnName="height"/>
-            <column columnName="supportsTunnel"/>
             <column columnName="description"/>
             <column columnName="container"/>
             <column columnName="createdby"/>

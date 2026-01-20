@@ -2,7 +2,6 @@ package org.labkey.cageui.action;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.json.JSONObject;
-import org.labkey.cageui.model.RackTypes;
 
 public class RacksForm
 {

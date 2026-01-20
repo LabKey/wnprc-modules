@@ -35,7 +35,7 @@ interface PopupProps {
 }
 
 // Popup window for selecting the side of the room in the layout editor
-export const RoomSizeSelector: React.FC<PopupProps> = ({ options, onClose, onSelect }) => {
+export const RoomSizeSelector: React.FC<PopupProps> = ({options, onClose, onSelect}) => {
     const [selectedOption, setSelectedOption] = useState<SelectorOptions | null>(null);
 
     // Handle the card click event
@@ -67,7 +67,8 @@ export const RoomSizeSelector: React.FC<PopupProps> = ({ options, onClose, onSel
                     ))}
                 </div>
                 <div className="room-size-selector-actions">
-                    <button onClick={handleSelectClick} className="room-size-selector-select-btn" disabled={!selectedOption}>
+                    <button onClick={handleSelectClick} className="room-size-selector-select-btn"
+                            disabled={!selectedOption}>
                         Select
                     </button>
                 </div>

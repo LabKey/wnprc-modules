@@ -27,179 +27,179 @@ export const roomSizeOptions = [
     {
         id: 1,
         scale: 1.0,
-        title: "Small",
-        description: "Small room size fitting up to 10x5 cages"
+        title: 'Small',
+        description: 'Small room size fitting up to 10x5 cages'
     },
     {
         id: 2,
         scale: 0.8,
-        title: "Medium",
-        description: "Medium room size fitting up to 12x6 cages"
+        title: 'Medium',
+        description: 'Medium room size fitting up to 12x6 cages'
     },
     {
         id: 3,
         scale: 0.4,
-        title: "Large",
-        description: "Large room size fitting up to 17x8 cages"
+        title: 'Large',
+        description: 'Large room size fitting up to 17x8 cages'
     }
 ];
 
 //TODO finish styles
 export const Modifications: ModRecord = {
     [ModTypes.StandardFloor]: {
-        name: "Standard Floor",
+        name: 'Standard Floor',
         svgIds: {
             [ModLocations.Bottom]: ['floor'],
             [ModLocations.Top]: ['ceiling']
         },
         styles: [{
-            property: "stroke",
-            value: "black"
+            property: 'stroke',
+            value: 'black'
         }]
     },
     [ModTypes.MeshFloor]: {
-        name: "Mesh Floor",
+        name: 'Mesh Floor',
         svgIds: {
             [ModLocations.Bottom]: ['floor'],
             [ModLocations.Top]: ['ceiling']
         },
         styles: [
             {
-                property: "stroke",
-                value: "black"
+                property: 'stroke',
+                value: 'black'
             },
             {
-                property: "stroke-dasharray",
-                value: "10"
+                property: 'stroke-dasharray',
+                value: '10'
             }
         ]
     },
     [ModTypes.MeshFloorX2]: {
-        name: "Mesh Floor x2",
+        name: 'Mesh Floor x2',
         svgIds: {
             [ModLocations.Bottom]: ['floor'],
             [ModLocations.Top]: ['ceiling']
         },
         styles: [
             {
-                property: "stroke",
-                value: "black"
+                property: 'stroke',
+                value: 'black'
             },
             {
-                property: "stroke-dasharray",
-                value: "10 5 10"
-            },{
-                property: "stroke-width",
-                value: "2"
+                property: 'stroke-dasharray',
+                value: '10 5 10'
+            }, {
+                property: 'stroke-width',
+                value: '2'
             }
         ]
     },
     [ModTypes.NoFloor]: {
-        name: "No Floor",
+        name: 'No Floor',
         svgIds: {
             [ModLocations.Bottom]: ['floor'],
             [ModLocations.Top]: ['ceiling']
         },
         styles: [
             {
-                property: "stroke",
-                value: "none"
+                property: 'stroke',
+                value: 'none'
             }
         ],
 
     },
     [ModTypes.SolidDivider]: {
-        name: "Solid Divider",
+        name: 'Solid Divider',
         svgIds: {
             [ModLocations.Left]: ['left'],
             [ModLocations.Right]: ['right']
         },
         styles: [{
-            property: "stroke",
-            value: "black"
+            property: 'stroke',
+            value: 'black'
         }]
     },
     [ModTypes.PCDivider]: {
-        name: "Protected Contact Divider",
+        name: 'Protected Contact Divider',
         svgIds: {
             [ModLocations.Left]: ['left'],
             [ModLocations.Right]: ['right']
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "2 5 2"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '2 5 2'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.SPDivider]: {
-        name: "Social Panel Divider",
+        name: 'Social Panel Divider',
         svgIds: {
             [ModLocations.Left]: ['left'],
             [ModLocations.Right]: ['right']
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "2 5 2 5"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '2 5 2 5'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.VCDivider]: {
-        name: "Visual Contact Divider",
+        name: 'Visual Contact Divider',
         svgIds: {
             [ModLocations.Left]: ['left'],
             [ModLocations.Right]: ['right']
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "5 10 5 10 5 10"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '5 10 5 10 5 10'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.PrivacyDivider]: {
-        name: "Privacy Divider",
+        name: 'Privacy Divider',
         svgIds: {
             [ModLocations.Left]: ['left'],
             [ModLocations.Right]: ['right']
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "1 1 1 1 1 1"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '1 1 1 1 1 1'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.NoDivider]: {
-        name: "No Divider",
+        name: 'No Divider',
         svgIds: {
             [ModLocations.Left]: ['left'],
             [ModLocations.Right]: ['right']
         },
         styles: [{
-            property: "stroke",
-            value: "none"
+            property: 'stroke',
+            value: 'none'
         }]
     },
     [ModTypes.CTunnel]: {
-        name: "C-Tunnel",
+        name: 'C-Tunnel',
         svgIds: {
             [ModLocations.Top]: ['cTunnel-circle', 'cTunnel-top'],
             [ModLocations.Bottom]: ['cTunnel-circle', 'cTunnel-bottom'],
@@ -207,28 +207,28 @@ export const Modifications: ModRecord = {
             [ModLocations.Right]: ['cTunnel-circle', 'cTunnel-right'],
         },
         styles: [{
-            property: "stroke",
-            value: "black",
-        },{
-            property: "stroke-width",
-            value: "1px",
+            property: 'stroke',
+            value: 'black',
+        }, {
+            property: 'stroke-width',
+            value: '1px',
         }
         ]
     },
     [ModTypes.Extension]: {
-        name: "Extension",
+        name: 'Extension',
         svgIds: {
             [ModLocations.Direct]: ['extension'],
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-width",
-            value: "1px"
-        },{
-            property: "fill",
-            value: "#FCB017"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-width',
+            value: '1px'
+        }, {
+            property: 'fill',
+            value: '#FCB017'
         }]
     }
-}
+};

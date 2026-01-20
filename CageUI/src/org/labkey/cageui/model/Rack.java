@@ -132,7 +132,8 @@ public class Rack
     }
 
 
-    public static final class UnitType {
+    public static final class UnitType
+    {
         private final int rowid;
         private final String name;
         private final RackTypes type;
@@ -141,11 +142,11 @@ public class Rack
 
         @JsonCreator
         public UnitType(
-            @JsonProperty("rowid") int rowid,
-            @JsonProperty("name") String name,
-            @JsonProperty("type") RackTypes type,
-            @JsonProperty("isDefault") boolean isDefault,
-            @JsonProperty("sides") Map<ModLocations, Object> sides)
+                @JsonProperty("rowid") int rowid,
+                @JsonProperty("name") String name,
+                @JsonProperty("type") RackTypes type,
+                @JsonProperty("isDefault") boolean isDefault,
+                @JsonProperty("sides") Map<ModLocations, Object> sides)
         {
             this.rowid = rowid;
             this.name = name;
@@ -154,16 +155,26 @@ public class Rack
             this.sides = sides;
         }
 
-        public RackTypes getEffectiveRackType() {
-            if (isDefault()) {
-                switch (type) {
-                    case CAGE: return RackTypes.DEFAULTCAGE;
-                    case PEN: return RackTypes.DEFAULTPEN;
-                    case TEMPCAGE: return RackTypes.DEFAULTTEMPCAGE;
-                    case PLAYCAGE: return RackTypes.DEFAULTPLAYCAGE;
-                    default: return type; // fallback, though shouldn't happen
+        public RackTypes getEffectiveRackType()
+        {
+            if (isDefault())
+            {
+                switch (type)
+                {
+                    case CAGE:
+                        return RackTypes.DEFAULTCAGE;
+                    case PEN:
+                        return RackTypes.DEFAULTPEN;
+                    case TEMPCAGE:
+                        return RackTypes.DEFAULTTEMPCAGE;
+                    case PLAYCAGE:
+                        return RackTypes.DEFAULTPLAYCAGE;
+                    default:
+                        return type; // fallback, though shouldn't happen
                 }
-            } else {
+            }
+            else
+            {
                 return type;
             }
         }

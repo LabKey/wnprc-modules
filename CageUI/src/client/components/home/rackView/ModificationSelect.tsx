@@ -26,36 +26,36 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
         cageModLookup([], [Filter.create('category',
             directionCategory ? directionCategory : ModDirections.Direct,
             Filter.Types.EQUALS)]).then(result => {
-            if(result.length !== 0){
+            if (result.length !== 0) {
                 const rowOptions: Option<ModTypes>[] = [];
                 result.forEach(row => {
                     rowOptions.push({label: row.title, value: row.value as ModTypes});
-                })
+                });
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log("Error fetching prev room mods", err);
+            console.log('Error fetching prev room mods', err);
         });
     }, []);
 
     const handleChange = (option: Option<ModTypes>) => {
         // If dropdown is cleared remove it.
-        if(!option){
-            removeMod()
+        if (!option) {
+            removeMod();
             setSelectedMod(null);
-        }else{
+        } else {
             changeMod(option.value as ModTypes);
             setSelectedMod(option);
         }
-    }
+    };
 
     return (
         <Select
             options={options}
-            placeholder={"Select a mod"}
+            placeholder={'Select a mod'}
             isClearable={true}
             value={selectedMod}
-            onChange={(option) =>  handleChange(option)}
+            onChange={(option) => handleChange(option)}
             styles={{
                 container: (baseStyles, state) => ({
                     ...baseStyles,
@@ -68,12 +68,12 @@ export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
                     zIndex: '9999',
                     width: 'max-content',
                     minWidth: '100%',
-                 }),
+                }),
                 option: (baseStyles, state) => ({
-                ...baseStyles,
-                whiteSpace: 'nowrap'
-            })
+                    ...baseStyles,
+                    whiteSpace: 'nowrap'
+                })
             }}
         />
     );
-}
+};

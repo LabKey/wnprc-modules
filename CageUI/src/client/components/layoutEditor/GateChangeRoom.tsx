@@ -42,11 +42,14 @@ export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
 
     useEffect(() => {
         let initalRoom: Option<number>;
-        if(selectedObj && (selectedObj as RoomObject).extraContext?.room){
-            initalRoom = {label: (selectedObj as RoomObject).extraContext.room, value: (selectedObj as RoomObject).extraContext.roomId};
+        if (selectedObj && (selectedObj as RoomObject).extraContext?.room) {
+            initalRoom = {
+                label: (selectedObj as RoomObject).extraContext.room,
+                value: (selectedObj as RoomObject).extraContext.roomId
+            };
             setSelectedRoom(initalRoom);
             setLoading(false);
-        }else{
+        } else {
             setLoading(false);
         }
     }, []);
@@ -55,44 +58,49 @@ export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
             columns: ['room', 'rowid'],
-        }
+        };
         labkeyActionSelectWithPromise(roomsConfig).then(result => {
             if (result.rows.length !== 0) {
                 const rowOptions: Option<number>[] = [];
                 result.rows.forEach(row => {
                     rowOptions.push({label: row.room, value: row.rowid});
-                })
+                });
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log("Error fetching prev room", err);
+            console.log('Error fetching prev room', err);
         });
     }, []);
 
     useEffect(() => {
-        if(!selectedRoom || loading) return;
+        if (!selectedRoom || loading) {
+            return;
+        }
 
         setLocalRoom(prevState => ({
             ...prevState,
             objects: prevState.objects.map((obj, index) => {
-                if(obj.itemId === (selectedObj as RoomObject).itemId){
-                    return {...obj, extraContext: {...obj.extraContext, room: selectedRoom.label, roomId: selectedRoom.value}};
+                if (obj.itemId === (selectedObj as RoomObject).itemId) {
+                    return {
+                        ...obj,
+                        extraContext: {...obj.extraContext, room: selectedRoom.label, roomId: selectedRoom.value}
+                    };
                 }
                 return obj;
 
             })
-        }))
+        }));
     }, [selectedRoom]);
 
     const handleChange = (option) => {
         setSelectedRoom(option);
-    }
+    };
     return (
-        <div className={"menu-item"}>
+        <div className={'menu-item'}>
             <Select
                 options={options}
                 value={selectedRoom}
-                placeholder={"Select a room"}
+                placeholder={'Select a room'}
                 onChange={(option) => handleChange(option)}
             />
         </div>

@@ -22,9 +22,9 @@ import { createRoot } from 'react-dom/client';
 import { LayoutEditor } from './LayoutEditor';
 
 const render = () => {
-    createRoot(document.getElementById("app")).render(
+    createRoot(document.getElementById('app')).render(
         <AppContainer>
-            <LayoutEditor />
+            <LayoutEditor/>
         </AppContainer>
     );
 };

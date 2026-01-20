@@ -12,7 +12,8 @@ public enum SelectionType
 
     private final String value;
 
-    SelectionType(String value) {
+    SelectionType(String value)
+    {
         this.value = value;
     }
 
@@ -37,9 +38,12 @@ public enum SelectionType
     }
 
     // Optional: Check if a string is valid
-    public static boolean isValid(String value) {
-        for (SelectionType type : values()) {
-            if (type.value.equals(value)) {
+    public static boolean isValid(String value)
+    {
+        for (SelectionType type : values())
+        {
+            if (type.value.equals(value))
+            {
                 return true;
             }
         }

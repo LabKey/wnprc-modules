@@ -1,8 +1,9 @@
 import {
     Cage,
-    ModIdKey,
-    CageNumber, CageSvgId,
+    CageNumber,
+    CageSvgId,
     ModDirections,
+    ModIdKey,
     ModLocations,
     ModStyle,
     ModTypes,
@@ -12,15 +13,14 @@ import {
 import { Option } from '@labkey/components';
 
 
-
 type UpdatedMod = {
     cage: Cage,
     mod: { label: string, value: string }
 }
 
-export type SelectedViews = "Home"| "Room" | "Rack" | "Cage";
+export type SelectedViews = 'Home' | 'Room' | 'Rack' | 'Cage';
 
-export type ConnectedModType = Partial<Option<ModTypes>> & {modId: ModIdKey, parentModId?: ModIdKey};
+export type ConnectedModType = Partial<Option<ModTypes>> & { modId: ModIdKey, parentModId?: ModIdKey };
 
 export type UpdatedMods = UpdatedMod[];
 
@@ -42,7 +42,7 @@ export type EHRCageMods = {
 }
 
 export interface SelectedPage {
-    selected: SelectedViews
+    selected: SelectedViews;
     room?: string; // room name
     rack?: string; // rack object ids
     cage?: CageSvgId; // cage object ids
@@ -112,6 +112,6 @@ export type ConnectedCages = {
 }*/
 
 export interface ModificationSaveResult {
-    status: "Success" | "Failure";
+    status: 'Success' | 'Failure';
     reason?: string[];
 }

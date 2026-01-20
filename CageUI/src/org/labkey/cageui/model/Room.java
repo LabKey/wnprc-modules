@@ -53,12 +53,12 @@ public class Room
         _roomHistoryForm = roomHistoryForm;
     }
 
-    public Map<String, ModEntry>  getMods()
+    public Map<String, ModEntry> getMods()
     {
         return _mods;
     }
 
-    public void setMods(Map<String, ModEntry>  mods)
+    public void setMods(Map<String, ModEntry> mods)
     {
         _mods = mods;
     }

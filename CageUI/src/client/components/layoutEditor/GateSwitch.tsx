@@ -31,15 +31,15 @@ interface GateSwitchProps {
 
 export const GateSwitch: FC<GateSwitchProps> = (props) => {
     const {layoutSvg, selectedObj, setLocalRoom, closeMenu} = props;
-    console.log("Gate: ", selectedObj);
+    console.log('Gate: ', selectedObj);
 
     // For each open or close, remove gate svg template of the opposite and replace with new version. Also switch id name version keeping id number
     const handleClick = () => {
         const gateSvg = layoutSvg.select(`#${selectedObj.itemId}`);
         let newGateIdPrefix;
-        if(selectedObj.type === RoomObjectTypes.GateOpen){
+        if (selectedObj.type === RoomObjectTypes.GateOpen) {
             newGateIdPrefix = 'gateClosed';
-        }else{
+        } else {
             newGateIdPrefix = 'gateOpen';
         }
 
@@ -52,22 +52,23 @@ export const GateSwitch: FC<GateSwitchProps> = (props) => {
             return {
                 ...prevState,
                 objects: prevState.objects.map((obj) => {
-                    if(obj.itemId === selectedObj.itemId){
+                    if (obj.itemId === selectedObj.itemId) {
                         return {
                             ...obj,
                             itemId: `${newGateIdPrefix}-${parseRoomItemNum((selectedObj as RoomObject).itemId)}`,
                             type: selectedObj.type === RoomObjectTypes.GateOpen ? RoomObjectTypes.GateClosed : RoomObjectTypes.GateOpen
-                        }
+                        };
                     }
                     return obj;
                 })
-            }
-        })
+            };
+        });
         closeMenu();
-    }
+    };
     return (
-        <div className={"menu-item"}>
-            <button className={"menu-item-button"} onClick={handleClick}>{selectedObj.type === RoomObjectTypes.GateOpen ? 'Close' : 'Open'}</button>
+        <div className={'menu-item'}>
+            <button className={'menu-item-button'}
+                    onClick={handleClick}>{selectedObj.type === RoomObjectTypes.GateOpen ? 'Close' : 'Open'}</button>
         </div>
     );
-}
+};

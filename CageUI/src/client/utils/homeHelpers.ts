@@ -1,4 +1,3 @@
-import { convertToTitleCase } from './helpers';
 import { Cage, CageDirection, CurrCageMods, ModDirections, ModLocations, ModTypes, RoomMods } from '../types/typings';
 import { Option } from '@labkey/components';
 import { cageModLookup } from '../api/popularQueries';
@@ -7,14 +6,16 @@ import { cageModLookup } from '../api/popularQueries';
 export const findDirStr = (dir: ModLocations) => {
     return dir === ModLocations.Bottom ? 'Above'
         : dir === ModLocations.Top ? 'Below'
-        : dir === ModLocations.Right ? `${ModLocations[ModLocations.Left]} of`
-            : `${ModLocations[ModLocations.Right]} of`;
-}
+            : dir === ModLocations.Right ? `${ModLocations[ModLocations.Left]} of`
+                : `${ModLocations[ModLocations.Right]} of`;
+};
 
 export const getLocationDirection = (location: CageDirection | ModLocations): ModDirections => {
     // Check for ModLocations enum values
     if (Object.values(ModLocations).includes(location as ModLocations)) {
-        if (location === ModLocations.Direct) return ModDirections.Direct;
+        if (location === ModLocations.Direct) {
+            return ModDirections.Direct;
+        }
         return location === ModLocations.Top || location === ModLocations.Bottom
             ? ModDirections.Vertical
             : ModDirections.Horizontal;
@@ -24,7 +25,7 @@ export const getLocationDirection = (location: CageDirection | ModLocations): Mo
     return location === CageDirection.Top || location === CageDirection.Bottom
         ? ModDirections.Vertical
         : ModDirections.Horizontal;
-}
+};
 
 /*
 export const findNextModId = (mods: CageModification[]) => {
@@ -47,7 +48,7 @@ export const fixModIds = (mods: CageModification[]) => {
 }
 */
 
-export const compareMods = (oldModData: RoomMods, newModData: CurrCageMods)=> {
+export const compareMods = (oldModData: RoomMods, newModData: CurrCageMods) => {
 
     //TODO Fix this or make sure it works in all cases
     // Deep comparison helper (simplified - you might want to use lodash's isEqual in real code)
@@ -64,81 +65,81 @@ export const compareMods = (oldModData: RoomMods, newModData: CurrCageMods)=> {
 
     newModData.currCage.forEach((directMod) => {
 
-    })
-/*
-    const oldModObj: CurrRoomMods = {
-        currCage: [],
-        adjCages: [],
-        adjRacks: []
-    }
+    });
+    /*
+        const oldModObj: CurrRoomMods = {
+            currCage: [],
+            adjCages: [],
+            adjRacks: []
+        }
 
-    if(oldModData){
-        oldModData.forEach((oldMod, idx) => {
-            oldModObj.mods[oldMod.location].push({
-                mods: [{
-                    id: oldMod.locationId,
-                    mod: oldMod.modification
-                }],
-                subId: idx
+        if(oldModData){
+            oldModData.forEach((oldMod, idx) => {
+                oldModObj.mods[oldMod.location].push({
+                    mods: [{
+                        id: oldMod.locationId,
+                        mod: oldMod.modification
+                    }],
+                    subId: idx
+                })
             })
-        })
-    }
+        }
 
 
-    Object.keys(ModLocations)
-        .filter(key => !isNaN(Number(key)))
-        .forEach(direction => {
-            // Flatten all mods from all subsections for this direction
-            const oldMods = (oldModObj.mods[direction] || [])
-                .flatMap(sub => sub.mods.map(mod => ({ ...mod, subId: sub.subId})));
+        Object.keys(ModLocations)
+            .filter(key => !isNaN(Number(key)))
+            .forEach(direction => {
+                // Flatten all mods from all subsections for this direction
+                const oldMods = (oldModObj.mods[direction] || [])
+                    .flatMap(sub => sub.mods.map(mod => ({ ...mod, subId: sub.subId})));
 
-            const newMods = (newModObj.mods[direction] || [])
-                .flatMap(sub => sub.mods.map(mod => ({ ...mod, subId: sub.subId})));
+                const newMods = (newModObj.mods[direction] || [])
+                    .flatMap(sub => sub.mods.map(mod => ({ ...mod, subId: sub.subId})));
 
-            // Create maps for easier lookup
-            const oldModsMap = new Map<string, CageModification>(oldMods.map(mod => [`${mod.subId}-${mod.id}`, mod]));
-            const newModsMap = new Map<string, CageModification>(newMods.map(mod => [`${mod.subId}-${mod.id}`, mod]));
+                // Create maps for easier lookup
+                const oldModsMap = new Map<string, CageModification>(oldMods.map(mod => [`${mod.subId}-${mod.id}`, mod]));
+                const newModsMap = new Map<string, CageModification>(newMods.map(mod => [`${mod.subId}-${mod.id}`, mod]));
 
-            // Check for removed mods (in old but not in new)
-            oldMods.forEach(oldMod => {
-                const compositeKey = `${oldMod.subId}-${oldMod.id}`;
-                if (!newModsMap.has(compositeKey)) {
-                    changes.push({
-                        direction,
-                        type: 'removed',
-                        mod: oldMod,
-                        subsectionId: oldMod.subId
-                    });
-                }
-            });
-
-            // Check for added and modified mods
-            newMods.forEach(newMod => {
-                const compositeKey = `${newMod.subId}-${newMod.id}`;
-                if (!oldModsMap.has(compositeKey)) {
-                    changes.push({
-                        direction,
-                        type: 'added',
-                        mod: newMod,
-                        subsectionId: newMod.subId
-                    });
-                } else {
-                    const oldMod = oldModsMap.get(compositeKey)!;
-                    if (!isEqual(oldMod, newMod)) {
+                // Check for removed mods (in old but not in new)
+                oldMods.forEach(oldMod => {
+                    const compositeKey = `${oldMod.subId}-${oldMod.id}`;
+                    if (!newModsMap.has(compositeKey)) {
                         changes.push({
                             direction,
-                            type: 'modified',
-                            mod: newMod,
-                            oldMod: oldMod,
-                            subsectionId: newMod.subId
+                            type: 'removed',
+                            mod: oldMod,
+                            subsectionId: oldMod.subId
                         });
                     }
-                }
-            });
-        });*/
+                });
+
+                // Check for added and modified mods
+                newMods.forEach(newMod => {
+                    const compositeKey = `${newMod.subId}-${newMod.id}`;
+                    if (!oldModsMap.has(compositeKey)) {
+                        changes.push({
+                            direction,
+                            type: 'added',
+                            mod: newMod,
+                            subsectionId: newMod.subId
+                        });
+                    } else {
+                        const oldMod = oldModsMap.get(compositeKey)!;
+                        if (!isEqual(oldMod, newMod)) {
+                            changes.push({
+                                direction,
+                                type: 'modified',
+                                mod: newMod,
+                                oldMod: oldMod,
+                                subsectionId: newMod.subId
+                            });
+                        }
+                    }
+                });
+            });*/
 
     return changes;
-}
+};
 
 export const getRackFromClass = (classString: string) => {
     let rackClass = classString.match(/rack-\d+/);
@@ -147,7 +148,7 @@ export const getRackFromClass = (classString: string) => {
         let rackId = rackClass[0].split('-')[1];
         return rackId;
     }
-}
+};
 
 export const parseEditRect = (input: string) => {
     const regex = /blur-(\d+)/;
@@ -156,7 +157,7 @@ export const parseEditRect = (input: string) => {
         return match[1];
     }
     return;
-}
+};
 export const parseCageMod = (input: string) => {
     const regex = /.*?-(\d+)/;
     const match = input.match(regex);
@@ -164,7 +165,7 @@ export const parseCageMod = (input: string) => {
         return parseInt(match[1]);
     }
     return;
-}
+};
 /*
 export const genCages = (cnt: number, rackType: RackTypes, cageTypes: CageBuilder[], cageSizes: CageSizeWithKey[], rackId: number, rackConfigs, cageNum): Cage[] => {
     const cages: Cage[] = [];
@@ -296,14 +297,14 @@ export const loadRoom = (name: string): Rack[] => {
 // Helper function to convert object keys into location names
 export const getDirectionString = (dir: CageDirection) => {
     // Special cases
-    if(dir === CageDirection.Left || dir === CageDirection.Right){
+    if (dir === CageDirection.Left || dir === CageDirection.Right) {
         return `${CageDirection[dir]} of`;
-    }else if(dir === CageDirection.Top){
-        return "Above";
-    }else{
-        return "Below";
+    } else if (dir === CageDirection.Top) {
+        return 'Above';
+    } else {
+        return 'Below';
     }
-}
+};
 //
 // // Helper function to get the correct mods for the dropdowns in cage details
 // export const getModOptions = (key) => {
@@ -335,38 +336,38 @@ const getCageDividers = (totalCages, position, cageId, direction) => {
     if (groupCageId < 1 || groupCageId > totalCages) {
         throw new Error('Invalid cage ID');
     }
-    if (position !== "top" && position !== "bottom") {
+    if (position !== 'top' && position !== 'bottom') {
         throw new Error('Invalid position');
     }
-    if (direction !== "left" && direction !== "right") {
+    if (direction !== 'left' && direction !== 'right') {
         throw new Error('Invalid direction');
     }
 
-    const isTop = position === "top";
-    const isBottom = position === "bottom";
+    const isTop = position === 'top';
+    const isBottom = position === 'bottom';
 
     let line = null;
 
     // Determine the line for the top cages
     if (isTop && groupCageId <= cagesPerRow) {
-        if (direction === "left" && groupCageId > 1) {
+        if (direction === 'left' && groupCageId > 1) {
             line = groupCageId - 1;
-        } else if (direction === "right" && groupCageId < cagesPerRow) {
+        } else if (direction === 'right' && groupCageId < cagesPerRow) {
             line = groupCageId;
         }
     }
 
     // Determine the line for the bottom cages
     if (isBottom && groupCageId > cagesPerRow) {
-        if (direction === "left" && (groupCageId - cagesPerRow) > 1) {
+        if (direction === 'left' && (groupCageId - cagesPerRow) > 1) {
             line = groupCageId - cagesPerRow - 1;
-        } else if (direction === "right" && (groupCageId - cagesPerRow) < cagesPerRow) {
+        } else if (direction === 'right' && (groupCageId - cagesPerRow) < cagesPerRow) {
             line = groupCageId - cagesPerRow;
         }
     }
 
     return line;
-}
+};
 
 // Function to find the cage underneath given a cage ID on top
 export const getCageAboveOrBelow = (totalCages, cageId, rackConfigurations) => {
@@ -376,7 +377,7 @@ export const getCageAboveOrBelow = (totalCages, cageId, rackConfigurations) => {
 
     let cumulativeCages = 0;
 
-    for (const { cagesPerRow, rackHeight } of rackConfigurations) {
+    for (const {cagesPerRow, rackHeight} of rackConfigurations) {
         const cagesPerRack = cagesPerRow * rackHeight;
         cumulativeCages += cagesPerRack;
 
@@ -400,12 +401,12 @@ export const getCageAboveOrBelow = (totalCages, cageId, rackConfigurations) => {
                 cageAboveId = cageAboveId > cumulativeCages - cagesPerRack ? cageAboveId : null;
             }
 
-            return { cageAboveId, cageUnderneathId };
+            return {cageAboveId, cageUnderneathId};
         }
     }
 
     throw new Error('Cage ID does not fit within the provided rack configurations');
-}
+};
 
 
 /*
@@ -421,7 +422,7 @@ const removeDuplicatesByPosition = (arr) => {
     });
 
     return Array.from(uniquePositions.values());
-}
+};
 
 /*
 Finds the separator modifications that should be mapped to the svg
@@ -478,7 +479,7 @@ export const getTotalCagesInRoom = (room) => {
     return room.reduce((total, current) => {
         return total + current.cages.length;
     }, 0);
-}
+};
 
 /*
 // Finds the cages that are affected by the modification/separator
@@ -571,33 +572,39 @@ Recursive helper function to find all the modifications attached to a cage.
 It is recursive because if a cage has no divider/floor, it should combine and repeat.
  */
 export const findDetails = (clickedCage, cageDetails, rack) => {
-    let newCage: Cage
+    let newCage: Cage;
 
     Object.keys(clickedCage.cageState).forEach((key) => {
-        if(key === "rightDivider"){
-            if(clickedCage.cageState.rightDivider.modData.mod.mod === ModTypes.NoDivider){
+        if (key === 'rightDivider') {
+            if (clickedCage.cageState.rightDivider.modData.mod.mod === ModTypes.NoDivider) {
                 newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.rightCage.id);
-                if(cageDetails.find(cage => cage.id === newCage.positionId)) return;
+                if (cageDetails.find(cage => cage.id === newCage.positionId)) {
+                    return;
+                }
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
-        }else if(key === "leftDivider") {
-            if(clickedCage.cageState.leftDivider.modData.mod.mod === ModTypes.NoDivider){
+        } else if (key === 'leftDivider') {
+            if (clickedCage.cageState.leftDivider.modData.mod.mod === ModTypes.NoDivider) {
                 newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.leftCage.id);
-                if(cageDetails.find(cage => cage.id === newCage.positionId)) return;
+                if (cageDetails.find(cage => cage.id === newCage.positionId)) {
+                    return;
+                }
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
-        }else if(key === "floor") {
+        } else if (key === 'floor') {
             if (clickedCage.cageState.floor.modData.mod.mod === ModTypes.NoFloor) {
                 newCage = rack.cages.find(cage => cage.id === clickedCage.adjCages.floorCage.id);
-                if (cageDetails.find(cage => cage.id === newCage.positionId)) return;
+                if (cageDetails.find(cage => cage.id === newCage.positionId)) {
+                    return;
+                }
                 cageDetails.push(newCage);
                 findDetails(newCage, cageDetails, rack);
             }
         }
-    })
-}
+    });
+};
 
 export const removeCircularReferences = (obj) => {
     const seen = new WeakSet();
@@ -610,17 +617,16 @@ export const removeCircularReferences = (obj) => {
         }
         return value;
     }));
-}
+};
 
 
-
-export const resetMod = async  (value: ModTypes):  Promise<Option<ModTypes>> => {
+export const resetMod = async (value: ModTypes): Promise<Option<ModTypes>> => {
     // todo perform async lookup to determine what type the mod is.
 
-    const newVal: Option<ModTypes> = {label: '', value: value}
+    const newVal: Option<ModTypes> = {label: '', value: value};
 
-    const rows = await cageModLookup([],[]);
-    if(rows.length > 0){
+    const rows = await cageModLookup([], []);
+    if (rows.length > 0) {
         console.log("Mod Lookup: ", rows);
     }
 

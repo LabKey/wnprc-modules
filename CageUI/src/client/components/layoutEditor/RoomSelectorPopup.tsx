@@ -37,7 +37,7 @@ interface RoomSelectorPopup {
 
 // For saving and loading in the layout editor, this is a room selector component
 export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
-    const { onConfirm, onCancel, setRoom, template,templateLoad, templateRename } = props;
+    const {onConfirm, onCancel, setRoom, template, templateLoad, templateRename} = props;
     const [selectedRoom, setSelectedRoom] = useState<string>(null);
     const [options, setOptions] = useState<Option<number>[]>(null);
     const [templateName, setTemplateName] = useState<string>('');
@@ -49,31 +49,31 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
             queryName: 'rooms',
             columns: ['room', 'rowid'],
             filterArray: template ? [Filter.create('room', 'template', Filter.Types.CONTAINS)] : [Filter.create('room', 'template', Filter.Types.DOES_NOT_CONTAIN)]
-        }
+        };
 
         labkeyActionSelectWithPromise(roomsConfig).then(result => {
-            if(result.rows.length !== 0){
+            if (result.rows.length !== 0) {
                 const rowOptions: Option<number>[] = [];
                 result.rows.forEach(row => {
                     rowOptions.push({label: row.room, value: row.rowid});
-                })
+                });
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log("Error fetching prev room", err);
+            console.log('Error fetching prev room', err);
         });
     }, []);
 
     // Determines and updates if a template was renamed then saves room/template
     const handleSaveRoom = () => {
-        if(selectedRoom === null){
+        if (selectedRoom === null) {
             onCancel();
             return;
         }
 
-        if(templateName.length > 0){
+        if (templateName.length > 0) {
             //return if new name doesn't have word template in it
-            if(!templateName.includes("template")){
+            if (!templateName.includes('template')) {
                 onCancel();
                 return;
             }
@@ -83,35 +83,35 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
                 name: templateName
             }));
             templateRename(selectedRoom);
-        }else{
+        } else {
             setRoom(prevState => ({
                 ...prevState,
                 name: selectedRoom
             }));
         }
         onConfirm();
-    }
+    };
 
     return (
         <div className="popup-overlay">
             <div className="popup">
-                <div className={"popup-row"}>
+                <div className={'popup-row'}>
                     <Select
                         options={options}
-                        placeholder={"Select a room"}
+                        placeholder={'Select a room'}
                         onChange={(option) => setSelectedRoom(option.label)}
                     />
                 </div>
                 {(template && !templateLoad) &&
-                    <div className={"popup-row"}>
-                        <label>
-                            Rename template? (Please include the word "template" in new name)
-                        </label>
-                        <input
-                            value={templateName}
-                            onChange={(e) => setTemplateName(e.target.value)}
-                        />
-                    </div>
+                        <div className={'popup-row'}>
+                            <label>
+                                Rename template? (Please include the word "template" in new name)
+                            </label>
+                            <input
+                                    value={templateName}
+                                    onChange={(e) => setTemplateName(e.target.value)}
+                            />
+                        </div>
                 }
                 <div className="popup-buttons">
                     <button onClick={handleSaveRoom}>Confirm</button>
@@ -121,4 +121,4 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
             </div>
         </div>
     );
-}
+};

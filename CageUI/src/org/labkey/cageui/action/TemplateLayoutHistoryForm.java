@@ -1,9 +1,6 @@
 package org.labkey.cageui.action;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Date;
 
 public class TemplateLayoutHistoryForm
 {

@@ -4,9 +4,9 @@ import { createRoot } from 'react-dom/client';
 import { RoomHome } from './RoomHome';
 
 const render = () => {
-    createRoot(document.getElementById("app")).render(
+    createRoot(document.getElementById('app')).render(
         <AppContainer>
-            <RoomHome />
+            <RoomHome/>
         </AppContainer>
     );
 };

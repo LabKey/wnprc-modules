@@ -12,7 +12,7 @@ export const RackViewContent: FC = () => {
 
     return (
         selectedRack &&
-        <div className={"room-view-container"} key={'layout-' + selectedRoom + '-rack-' + selectedRack}>
+        <div className={'room-view-container'} key={'layout-' + selectedRoom + '-rack-' + selectedRack}>
             <div className={'room-view-title'}>
                 <label>
                     Rack {selectedRack.itemId}
@@ -21,13 +21,13 @@ export const RackViewContent: FC = () => {
             <SubViewContent
                     tabs={[{
                         name: 'Details',
-                        children: <RackDetails />
-                    },{
+                        children: <RackDetails/>
+                    }, {
                         name: 'Modifications',
                         children:
                             <>
-                                <RackModifications />
-                                <CurrentRackLayout />
+                                <RackModifications/>
+                                <CurrentRackLayout/>
                             </>
 
                     }
@@ -35,4 +35,4 @@ export const RackViewContent: FC = () => {
             />
         </div>
     );
-}
+};

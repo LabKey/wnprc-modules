@@ -43,11 +43,11 @@ interface EditorContextMenuProps {
         top: string;
         left: string;
     };
-    type: "object" | 'caging'; // context menu for caging or room objects
+    type: 'object' | 'caging'; // context menu for caging or room objects
     selectedObj: SelectedObj;
     closeMenu: () => void;
     onClickDelete?: (type?: string) => void;
-    menuItems?: {element: ReactElement, types: RoomItemType[], title: string}[]; // for types, an array of types to render this element for. If empty it will render the component for all types.
+    menuItems?: { element: ReactElement, types: RoomItemType[], title: string }[]; // for types, an array of types to render this element for. If empty it will render the component for all types.
 }
 
 /*
@@ -75,17 +75,17 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     // Delete cage and rack for caging units
     const handleDeleteCage = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        onClickDelete("cage");
+        onClickDelete('cage');
     };
     const handleDeleteRack = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        onClickDelete("rack");
+        onClickDelete('rack');
     };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
             // Check if the click was outside the menu
-            if (menuRef.current && !menuRef.current.contains(event.target)){
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
                 closeMenu();
             }
         };
@@ -110,16 +110,16 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         }}>
             {menuItems && menuItems.map((item, index) => {
                 let selectedObjType = selectedObj.selectionType === 'obj' ? (selectedObj as RoomObject).type : stringToRoomItem(parseRoomItemType((selectedObj as Cage).cageNum) as RackStringType);
-                if(item.types.length === 0){// if no types were given render, otherwise only render elements for that type
-                    return(
+                if (item.types.length === 0) {// if no types were given render, otherwise only render elements for that type
+                    return (
                         <div className={'menu-item'} key={`context-menu-item-${index}`}>
                             <label>{item.title}</label>
                             {item.element}
                         </div>
                     );
                 }
-                if(item.types.includes(selectedObjType as RackTypes | RoomObjectTypes | DefaultRackTypes)){
-                    return(
+                if (item.types.includes(selectedObjType as RackTypes | RoomObjectTypes | DefaultRackTypes)) {
+                    return (
                         <div className={'menu-item'} key={`context-menu-item-${index}`}>
                             <label>{item.title}</label>
                             {item.element}
@@ -136,7 +136,7 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                         Delete Object
                     </Button>
                     :
-                    <div className={"menu-item-group"}>
+                    <div className={'menu-item-group'}>
                         <Button
                             variant={'primary'}
                             onClick={handleDeleteCage}

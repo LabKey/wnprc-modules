@@ -1,20 +1,10 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
-import {Room} from '../../types/typings';
+import { Room } from '../../types/typings';
 import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
-import { Filter, Utils } from '@labkey/api';
-import {
-    buildNewLocalRoom,
-    convertToTitleCase,
-    defaultTypeToRackType, fetchRoomData,
-    formatRackId, generateCageId,
-    parseRoomItemNum,
-    parseRoomItemType,
-    roomItemToString
-} from '../../utils/helpers';
-import { CageNumber, DefaultRackTypes, RackTypes } from '../../types/typings';
+import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
 import { useRoomContext } from '../../context/RoomContextManager';
 
@@ -48,16 +38,22 @@ export const RoomList: FC = () => {
 
     // Runs once after loadedRooms is filled with the rooms, adds to a list for easier display
     useEffect(() => {
-        if(allRooms.length !== 0) return;
-        labkeyActionSelectWithPromise({schemaName: "ehr_lookups", queryName: "rooms", columns: ["room"]}).then((res) => {
-            if(res.rowCount > 0){
+        if (allRooms.length !== 0) {
+            return;
+        }
+        labkeyActionSelectWithPromise({
+            schemaName: 'ehr_lookups',
+            queryName: 'rooms',
+            columns: ['room']
+        }).then((res) => {
+            if (res.rowCount > 0) {
                 const roomList: ListRoom[] = [];
                 res.rows.forEach((row) => {
                     roomList.push({
                         name: row.room,
                         racks: null
-                    })
-                })
+                    });
+                });
                 setAllRooms(roomList);
             }
         });
@@ -66,23 +62,23 @@ export const RoomList: FC = () => {
     const toggleExpandRoom = async (roomName) => {
 
         // Check if room has been expanded yet, if not, fetch rack data for that room
-        if(!(roomName in expandedRooms)){
+        if (!(roomName in expandedRooms)) {
             const roomData = await fetchRoomData(roomName);
             let newRoom: Room;
             // room exists
-            if(roomData.prevRoomData){
+            if (roomData.prevRoomData) {
                 const [newLocalRoom, locs] = await buildNewLocalRoom(roomData.prevRoomData);
-                if(newLocalRoom) {
+                if (newLocalRoom) {
                     newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
                     newRoom = {...newLocalRoom};
                 }
             }
 
-            if(newRoom){
-                console.log("New Room: ", newRoom)
+            if (newRoom) {
+                console.log('New Room: ', newRoom);
                 setAllRooms((prevRooms) => prevRooms.map((prevRoom) => {
                     // add racks to room state, only once when first clicked
-                    if(prevRoom.name === roomName){
+                    if (prevRoom.name === roomName) {
                         const tempRacks: ListRack[] = [];
                         newRoom.rackGroups.forEach((rg) => {
                             rg.racks.forEach(r => {
@@ -104,17 +100,17 @@ export const RoomList: FC = () => {
                                         });
                                     }
 
-                                })
-                            })
-                        })
-                        console.log("List: ", tempRacks)
+                                });
+                            });
+                        });
+                        console.log('List: ', tempRacks);
                         return {
                             ...prevRoom,
                             racks: tempRacks,
-                        }
+                        };
                     }
                     return prevRoom;
-                }))
+                }));
             }
         }
         setExpandedRooms((prevExpandedRooms) => ({
@@ -133,18 +129,18 @@ export const RoomList: FC = () => {
     };
 
     const handleRoomClick = (room: ListRoom) => {
-        console.log("Click: ", room)
+        console.log('Click: ', room);
         navigateToRoom(room.name, switchToRoom);
-    }
+    };
 
     const handleRackClick = (room: ListRoom, rack: ListRack) => {
-        console.log("Click: ", room, rack)
-        navigateTo("Rack", {room: room.name, rack: rack.id});
-    }
+        console.log('Click: ', room, rack);
+        navigateTo('Rack', {room: room.name, rack: rack.id});
+    };
 
     const handleCageClick = (room: ListRoom, rack: ListRack, cage: ListCage) => {
-        navigateTo("Cage", {room: room.name, rack: rack.id, cage: cage.id});
-    }
+        navigateTo('Cage', {room: room.name, rack: rack.id, cage: cage.id});
+    };
 
     return (
         <div className={'room-list'}>
@@ -157,7 +153,7 @@ export const RoomList: FC = () => {
             />
             <ul className={'room-list-items'}>
                 {visibleRooms.map((room, index) => (
-                    <div key={room.name} className={"room-dir-room-obj"}>
+                    <div key={room.name} className={'room-dir-room-obj'}>
                         <div
                             onClick={() => handleRoomClick(room)}
                             className={`room-dir-header ${expandedRooms[room.name] ? 'open' : ''}`}
@@ -174,7 +170,8 @@ export const RoomList: FC = () => {
                                             className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
                                         >
                                             {rack.name}
-                                            <span className="arrow" onClick={() => toggleExpandRack(room.name, rack.id)}></span>
+                                            <span className="arrow"
+                                                  onClick={() => toggleExpandRack(room.name, rack.id)}></span>
                                         </div>
                                         {expandedRacks[`${room.name}_${rack.id}`] && (
                                             <ul>
@@ -182,7 +179,7 @@ export const RoomList: FC = () => {
                                                     <li key={`${room.name}_${rack.id}_${cage.id}`}>
                                                         <div
                                                             onClick={() => handleCageClick(room, rack, cage)}
-                                                            className={"room-dir-cage-obj"}
+                                                            className={'room-dir-cage-obj'}
                                                         >
                                                             {cage.name}
                                                         </div>

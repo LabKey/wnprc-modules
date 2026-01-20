@@ -1,12 +1,8 @@
 import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import '../../../cageui.scss';
-import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 import { useRoomContext } from '../../../context/RoomContextManager';
-import { CageDimensions, ModLocations, RackTypes } from '../../../types/typings';
-import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { Filter } from '@labkey/api';
-import { parseRoomItemNum } from '../../../utils/helpers';
+import { CageDimensions, RackTypes } from '../../../types/typings';
 import { RackModifications } from '../rackView/RackModifications';
 import { CurrentRackLayout } from '../rackView/CurrentRackLayout';
 import { RackDetails } from '../rackView/RackDetails';
@@ -47,7 +43,7 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Sqft:</span>
-                            <div className="dimension-value" data-unit={"ft"}>
+                            <div className="dimension-value" data-unit={'ft'}>
                                 {Math.round((cageDimensions.sqft) * 100) / 100}
                                 <span className="unit-with-squared"> ft</span>
                             </div>
@@ -57,4 +53,4 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
             </div>
         </div>
     );
-}
+};

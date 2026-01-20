@@ -31,6 +31,7 @@ public class CageUICustomizer extends AbstractTableCustomizer
 {
 
     protected static final Logger _log = LogManager.getLogger(CageUICustomizer.class);
+
     public CageUICustomizer()
     {
 
@@ -43,8 +44,8 @@ public class CageUICustomizer extends AbstractTableCustomizer
         {
             if (table.getName().equalsIgnoreCase("rack_types") && table.getSchema().getName().equalsIgnoreCase("cageui"))
                 customizeRackTypesTable((AbstractTableInfo) table);
-            }
         }
+    }
 
     private void customizeRackTypesTable(AbstractTableInfo ti)
     {

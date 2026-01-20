@@ -36,12 +36,9 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
-import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +69,8 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
             boolean hasPermission = super.hasPermission(user, perm);
             boolean isEditPerm = perm == InsertPermission.class || perm == UpdatePermission.class || perm == DeletePermission.class;
 
-            if (isEditPerm){
+            if (isEditPerm)
+            {
                 return super.hasPermission(user, CageUIRoomCreatorPermission.class); // Besides normal folder permissions check for CageUILayoutEditorPermission
             }
 
@@ -83,7 +81,8 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUIRoomCreatorPermission.class)){
+            if (hasPermission(user, CageUIRoomCreatorPermission.class))
+            {
                 result = super._insertRowsUsingDIB(user, container, rows, getDataIteratorContext(errors, InsertOption.INSERT, configParameters), extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -96,7 +95,8 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
                 throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUIRoomCreatorPermission.class)){
+            if (hasPermission(user, CageUIRoomCreatorPermission.class))
+            {
                 result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -107,7 +107,8 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
         public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
                 throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            if(hasPermission(user, CageUIRoomCreatorPermission.class)){
+            if (hasPermission(user, CageUIRoomCreatorPermission.class))
+            {
                 return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }
             return null;

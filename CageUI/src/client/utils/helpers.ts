@@ -18,17 +18,26 @@
 
 import {
     AllHistoryData,
-    Cage, CageData, CageHistoryData,
+    Cage,
+    CageModification,
     CageModificationsType,
-    CageNumber, CageSvgId, CurrCageMods,
+    CageMods,
+    CageNumber,
+    CageSvgId,
     DefaultRackStringType,
-    DefaultRackTypes, FetchRoomData, FullCageHistory, FullObjectHistoryData,
-    GroupId, LayoutData,
-    LayoutHistoryData, CageMods,
+    DefaultRackTypes,
+    FetchRoomData,
+    FullCageHistory,
+    FullObjectHistoryData,
+    GroupId,
+    LayoutData,
+    LayoutHistoryData,
+    ModData,
     ModLocations,
     ModTypes,
     PrevRoom,
-    Rack, RackData,
+    Rack,
+    RackData,
     RackGroup,
     RackStringType,
     RackTypes,
@@ -38,48 +47,52 @@ import {
     RoomMods,
     RoomObject,
     RoomObjectStringType,
-    RoomObjectTypes, TemplateHistoryData,
+    RoomObjectTypes,
+    TemplateHistoryData,
     UnitLocations,
-    UnitType, ModData, CageModification
+    UnitType
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
-import { ActionURL, Filter } from '@labkey/api';
+import { ActionURL, Filter, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault,
     createEmptyUnitLoc,
     isRackDefault,
-    isRackEnum, isRoomHomogeneousDefault,
-    placeAndScaleGroup, processRealLayoutHistory,
+    isRackEnum,
+    isRoomHomogeneousDefault,
+    placeAndScaleGroup,
+    processRealLayoutHistory,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { generateId, selectDistinctRows } from '@labkey/components';
+import { selectDistinctRows } from '@labkey/components';
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
-import { Utils } from '@labkey/api';
 
-export const zeroPadName = (num, places) => {return(String(num).padStart(places, '0'))};
+export const zeroPadName = (num, places) => {
+    return (String(num).padStart(places, '0'));
+};
 
 export const generateCageId = (objectId: string): CageSvgId => {
 
     return `cageSVG_${objectId}` as CageSvgId;
-}
+};
 
 // Changes stroke color of svg element nodes keeping the other styles.
-export const changeStyleProperty  = (element: Element, property: string, newValue: string): void => {
+export const changeStyleProperty = (element: Element, property: string, newValue: string): void => {
     const styleAttr = element.getAttribute('style');
     if (styleAttr) {
-        const styles = styleAttr.split(';').map(style => style.trim()).filter(style => style !== "");
+        const styles = styleAttr.split(';').map(style => style.trim()).filter(style => style !== '');
         let updated = false;
         const updatedStyles = styles.map(style => {
-            const [prop, value] = style.split(':').map(prop => prop.trim()).filter(prop => prop !== "");
+            const [prop, value] = style.split(':').map(prop => prop.trim()).filter(prop => prop !== '');
             if (prop.toLowerCase() === property.toLowerCase()) {
                 updated = true;
                 return `${property}: ${newValue}`;
@@ -95,24 +108,24 @@ export const changeStyleProperty  = (element: Element, property: string, newValu
     } else {
         element.setAttribute('style', `${property}: ${newValue}`);
     }
-}
+};
 
 export const getSvgSize = async (type: RackTypes) => {
     const config: SelectDistinctOptions = {
-        schemaName: "ehr_lookups",
-        queryName: "cageui_item_types",
+        schemaName: 'ehr_lookups',
+        queryName: 'cageui_item_types',
         column: 'description',
-        filterArray: [ Filter.create('value', type, Filter.Types.EQUAL)]
-    }
+        filterArray: [Filter.create('value', type, Filter.Types.EQUAL)]
+    };
 
     const res = await selectDistinctRows(config);
 
-    if(res.values.length === 1){
+    if (res.values.length === 1) {
         return res.values[0];
     }
 
     return;
-}
+};
 
 // matches "string-number", if a match return the number
 export const parseRoomItemNum = (input: string): number => {
@@ -123,7 +136,7 @@ export const parseRoomItemNum = (input: string): number => {
         return parseInt(match[1]);
     }
     return;
-}
+};
 
 // matches "string-number", if a match return the type/string
 export const parseRoomItemType = (input: string): string => {
@@ -134,10 +147,10 @@ export const parseRoomItemType = (input: string): string => {
         return match[1];
     }
     return;
-}
+};
 export const extractNumbers = (input: string): number => {
     return parseInt(input.replace(/\D/g, ''));
-}
+};
 
 export const getTypeClassFromElement = (element) => {
     const classes: string[] = Array.from(element.classList);
@@ -154,7 +167,7 @@ export const getTypeClassFromElement = (element) => {
     }
 
     return null;
-}
+};
 
 
 export const parseLongId = (input: string) => {
@@ -165,9 +178,9 @@ export const parseLongId = (input: string) => {
         return parseInt(match[1]);
     }
     return;
-}
+};
 
-export const formatRackId= (str: string) => {
+export const formatRackId = (str: string) => {
     // Split the string by hyphens
     try {// if the rack is default split and correctly display it
         const parts = str.split('-');
@@ -187,8 +200,7 @@ export const formatRackId= (str: string) => {
     }
 
 
-
-}
+};
 
 
 export const getNextDefaultRackId = (groups: RackGroup[]): number => {
@@ -213,16 +225,15 @@ export const getNextDefaultRackId = (groups: RackGroup[]): number => {
 
     // No gaps? Use the next number after the max
     return expectedNumber;
-}
+};
 export const convertToTitleCase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
+};
 
 
 export const cleanString = (name: string) => {
     return name.toLowerCase().replace(/[\s-]/g, '');
-}
+};
 
 const generateTypeMaps = () => {
     const rackTypeToDefaultTypeMap: { [key in RackTypes]?: DefaultRackTypes } = {};
@@ -245,19 +256,19 @@ const generateTypeMaps = () => {
             }
         });
 
-    return { rackTypeToDefaultTypeMap, defaultTypeToRackTypeMap };
-}
+    return {rackTypeToDefaultTypeMap, defaultTypeToRackTypeMap};
+};
 
 // These two maps can be imported and used to convert between the string and number of the rack type enum
-const { rackTypeToDefaultTypeMap, defaultTypeToRackTypeMap } = generateTypeMaps();
+const {rackTypeToDefaultTypeMap, defaultTypeToRackTypeMap} = generateTypeMaps();
 
 export const rackTypeToDefaultType = (type: RackTypes) => {
     return rackTypeToDefaultTypeMap[type];
-}
+};
 
 export const defaultTypeToRackType = (type: DefaultRackTypes) => {
     return defaultTypeToRackTypeMap[type];
-}
+};
 
 /*
    parse a room iteam to a string
@@ -269,16 +280,16 @@ export const roomItemToString = (item: RoomItemType): RoomItemStringType => {
     const roomObjString = RoomObjectTypes[item];
     const defaultRackString = DefaultRackTypes[item];
 
-    if(rackString){
+    if (rackString) {
         itemString = rackString.charAt(0).toLowerCase() + rackString.slice(1) as RackStringType;
-    }else if (defaultRackString){
+    } else if (defaultRackString) {
         itemString = defaultRackString.charAt(0).toLowerCase() + defaultRackString.slice(1) as DefaultRackStringType;
 
-    }else{
+    } else {
         itemString = roomObjString.charAt(0).toLowerCase() + roomObjString.slice(1) as RoomObjectStringType;
     }
     return itemString;
-}
+};
 
 /*
  Extract the item type from a string
@@ -293,9 +304,9 @@ export const stringToRoomItem = (formattedString: RoomItemStringType): RoomItemT
 
     // Use the EnumType object to look up the value
     return rackItem || defaultRackItem || objItem;
-}
+};
 
-export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal): Promise<FetchRoomData> => {
+export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal): Promise<FetchRoomData> => {
     const prevRoomData: FetchRoomData = {
         prevRoomData: undefined,
         selectedSize: undefined,
@@ -327,8 +338,8 @@ export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal
             valid: allHistRes.rows[0].valid
         };
 
-        let historyTable: string = allHistObj.historyType === "template" ? "template_layout_history" : "layout_history";
-        const isDefaultRoom: boolean = allHistObj.historyType === "template";
+        let historyTable: string = allHistObj.historyType === 'template' ? 'template_layout_history' : 'layout_history';
+        const isDefaultRoom: boolean = allHistObj.historyType === 'template';
 
         const prevRoomConfig: SelectRowsOptions = {
             schemaName: 'cageui',
@@ -356,7 +367,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal
             filterArray: [
                 Filter.create('historyid', allHistObj.historyId, Filter.Types.EQUALS),
             ]
-        }
+        };
 
         const [prevRoomResult, borderResult, modResult] = await Promise.all([
             labkeyActionSelectWithPromise(prevRoomConfig, abortSignal),
@@ -403,7 +414,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal
                 }));
 
                 const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
-                console.log("Layout history results", layoutHistoryResults);
+                console.log('Layout history results', layoutHistoryResults);
 
                 if (layoutHistoryResults.rejected.length > 0) {
                     throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`);
@@ -422,7 +433,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal
                 cage: row.cage,
                 modification: row.modification,
                 historyId: row.historyid
-            }))
+            }));
         }
 
         prevRoomData.prevRoomData = {
@@ -444,20 +455,22 @@ export const fetchRoomData = async (roomName: string, abortSignal?:  AbortSignal
 export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
 
-    if((unitsToRender as Room)?.rackGroups){
+    if ((unitsToRender as Room)?.rackGroups) {
         renderType = 'room';
-    } else if((unitsToRender as RackGroup)?.racks){ // we are rendering a single rack group
+    } else if ((unitsToRender as RackGroup)?.racks) { // we are rendering a single rack group
         renderType = 'group';
-    }else if((unitsToRender as Rack)?.cages) { // we are rendering a single rack
+    } else if ((unitsToRender as Rack)?.cages) { // we are rendering a single rack
         renderType = 'rack';
-    }else{ // we are rendering a single cage
+    } else { // we are rendering a single cage
         renderType = 'cage';
     }
 
     // Loads modifications from constant styles and ids to inject into the svgs
     const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
-        if(!cageToLoad.mods) return;
-        Object.entries(cageToLoad.mods).forEach(([loc,modSubList]: [string,  CageModification[]]) => {
+        if (!cageToLoad.mods) {
+            return;
+        }
+        Object.entries(cageToLoad.mods).forEach(([loc, modSubList]: [string, CageModification[]]) => {
             const modLoc = parseInt(loc) as ModLocations;
             modSubList.forEach((modList) => {
                 const subId = modList.subId;
@@ -470,17 +483,17 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                         const svgIdSplit = svgId.split('-');
                         let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id=${svgIdSplit[0]}-${subId}]`);
                         for (let i = 1; i < svgIdSplit.length; i++) {
-                            currentSelection = currentSelection.select(`#${svgIdSplit[i]}`)
+                            currentSelection = currentSelection.select(`#${svgIdSplit[i]}`);
                         }
                         modObj.styles.forEach((style) => {
-                            changeStyleProperty(currentSelection.node() as SVGElement, style.property, style.value)
-                        })
-                    })
-                })
-            })
-        })
+                            changeStyleProperty(currentSelection.node() as SVGElement, style.property, style.value);
+                        });
+                    });
+                });
+            });
+        });
 
-    }
+    };
 
     // this function renders the actual visible svg in some groups
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack) => {
@@ -519,10 +532,10 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
             const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
             // in order to set the event pass in the context menu ref and styles to show/hide it
-            setupEditCageEvent( cageGroupContext, setSelectedObj, contextMenuRef,mode,setCtxMenuStyle);
+            setupEditCageEvent(cageGroupContext, setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
-            if(mode ==='view'){
+            if (mode === 'view') {
                 loadCageMods(cage, shape);
             }
 
@@ -557,7 +570,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     };
 
     // We are loading an entire room into the svg
-    if(renderType === 'room'){
+    if (renderType === 'room') {
         (unitsToRender as Room).rackGroups.forEach((group) => {
             createGroup(group);
         });
@@ -567,7 +580,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                 .data([{x: roomObj.x, y: roomObj.y}])
                 .attr('id', roomObj.itemId)
                 .attr('class', 'draggable room-obj')
-                .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === "edit" ? roomObj.scale : 1})`)
+                .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === 'edit' ? roomObj.scale : 1})`)
                 .style('pointer-events', 'bounding-box');
 
             let objSvg: SVGElement;
@@ -591,11 +604,11 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, contextMenuRef, setCtxMenuStyle);
             roomObjGroup.call(closeMenuThenDrag);
         });
-    } else if(renderType === 'group'){ // we are rendering a single rack group
+    } else if (renderType === 'group') { // we are rendering a single rack group
         createGroup(unitsToRender as RackGroup);
 
-    }else if(renderType === 'rack'){ // we are rendering a single rack
-    }else{ // we are rendering a single cage
+    } else if (renderType === 'rack') { // we are rendering a single rack
+    } else { // we are rendering a single cage
         const cage: Cage = unitsToRender as Cage;
         const cageGroup = layoutSvg.append('g')
             .attr('id', cage.cageNum)
@@ -607,7 +620,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             const shape = d3.select(unitSvg);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum((unitsToRender as Cage).cageNum)}`;
 
-            if(mode ==='view'){
+            if (mode === 'view') {
                 loadCageMods(cage, shape);
             }
             cageGroup.append(() => shape.node());
@@ -681,7 +694,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         if (!prevRoom.isDefault) {
             rackIdNum = rackData.rackId;
             rackObjectId = rackData.objectId;
-        }else{
+        } else {
             rackIdNum = rackItem.rack;
             rackObjectId = `default-rack-${rackIdNum}`;
         }
@@ -708,7 +721,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             };
 
             const rackTypesData = await labkeyActionSelectWithPromise(optConfig);
-            if(rackTypesData.rowCount === 0){
+            if (rackTypesData.rowCount === 0) {
                 return;
             }
             const svgSize = await getSvgSize(rackTypesData.rows[0].type);
@@ -749,11 +762,11 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         let cageObjId: string;
         let cageNum;
         let cagePositionId;
-        if(!prevRoom.isDefault){
+        if (!prevRoom.isDefault) {
             cageNum = cageHistoryData.cageNum;
             cageObjId = cageHistoryData.cage;
             cagePositionId = cageData.positionId;
-        }else{
+        } else {
             cageNum = parseInt(rackItem.cage as string);
             cageObjId = Utils.generateUUID().toUpperCase();
             cagePositionId = rack.cages.length + 1;
@@ -774,29 +787,32 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         // This is where mods are loaded into state for the room
         if (loadMods && !rack.type.isDefault) {
 
-            const modReturnData = await cageModLookup([],[]);
+            const modReturnData = await cageModLookup([], []);
             const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
 
             const prevMods = prevRoom.modData.filter((mod) => mod.cage === cageData.objectId);
             prevMods.forEach((mod) => {
                 // If Mod id exists in newMods we can skip adding it to newMods
-                if(!Object.keys(newMods).find(key => key === mod.modId)){
+                if (!Object.keys(newMods).find(key => key === mod.modId)) {
                     newMods[mod.modId] = availMods.find(am => am.value === mod.modification);
                 }
                 // if subId already exists add the mod to that subsection
-                if(cageMods[mod.location].find(m => m.subId === mod.subId)){
+                if (cageMods[mod.location].find(m => m.subId === mod.subId)) {
                     cageMods[mod.location] = cageMods[mod.location].map(mods => {
-                        if(mods.subId === mod.subId){
+                        if (mods.subId === mod.subId) {
                             return {
                                 ...mods,
                                 modKeys: [...mods.modKeys, {modId: mod.modId, parentModId: mod.parentModId}]
-                            }
+                            };
                         }
                     });
-                }else{
-                    cageMods[mod.location] = [...cageMods[mod.location], {subId: mod.subId, modKeys: [{modId: mod.modId, parentModId: mod.parentModId}]}];
+                } else {
+                    cageMods[mod.location] = [...cageMods[mod.location], {
+                        subId: mod.subId,
+                        modKeys: [{modId: mod.modId, parentModId: mod.parentModId}]
+                    }];
                 }
-            })
+            });
         }
         const newCageId = generateCageId(cageObjId);
         const cage: Cage = {
@@ -814,8 +830,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
         newUnitLocs[cageNumType].push({
             cageId: newCageId,
-            cellX:  group.x + rack.x + cage.x, // global coords
-            cellY:  group.y + rack.y + cage.y
+            cellX: group.x + rack.x + cage.x, // global coords
+            cellY: group.y + rack.y + cage.y
         });
 
         rack.cages.push(cage);
@@ -854,7 +870,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     }
     newLocalRoom.mods = newMods;
     return ([newLocalRoom, newUnitLocs]);
-}
+};
 
 // Sadly we kind of have to hard code this function.
 export const getAdjLocation = (loc: ModLocations): ModLocations => {
@@ -870,26 +886,26 @@ export const getAdjLocation = (loc: ModLocations): ModLocations => {
         default:
             return ModLocations.Direct;
     }
-}
+};
 
 export const getDefaultMod = (loc: ModLocations): ModTypes | null => {
-    if(loc === ModLocations.Top || loc === ModLocations.Bottom){
+    if (loc === ModLocations.Top || loc === ModLocations.Bottom) {
         return ModTypes.StandardFloor;
     }
-    if(loc === ModLocations.Left || loc === ModLocations.Right){
+    if (loc === ModLocations.Left || loc === ModLocations.Right) {
         return ModTypes.SolidDivider;
     }
     return null;
-}
+};
 
 function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: number; y: number } {
     // Calculate the global position of the box
     let x;
     let y;
-    if(group){
+    if (group) {
         x = group.x + rack.x + box.x;
         y = group.y + rack.y + box.y;
-    }else{
+    } else {
         x = rack.x + box.x;
         y = rack.y + box.y;
     }
@@ -903,10 +919,13 @@ function getGlobalPosition(box: Cage, rack: Rack, group?: RackGroup): { x: numbe
 const EPS = 0.0001;
 
 // Helper: clamp intersection range along one axis
-function getOverlapRange(aStart: number, aEnd: number, bStart: number, bEnd: number): { start: number; end: number } | null {
+function getOverlapRange(aStart: number, aEnd: number, bStart: number, bEnd: number): {
+    start: number;
+    end: number
+} | null {
     const start = Math.max(aStart, bStart);
     const end = Math.min(aEnd, bEnd);
-    return end - start > EPS ? { start, end } : null;
+    return end - start > EPS ? {start, end} : null;
 }
 
 // Helper: compute which segment indices intersect an overlap range.
@@ -919,8 +938,12 @@ function getIntersectingSectionIndices(
     localStartPx: number,
     localEndPx: number
 ): number[] {
-    if (numSections <= 0) return [];
-    if (sideLenPx <= 0) return [];
+    if (numSections <= 0) {
+        return [];
+    }
+    if (sideLenPx <= 0) {
+        return [];
+    }
 
     const segLen = sideLenPx / numSections;
     const indices: number[] = [];
@@ -988,7 +1011,7 @@ function areAdjacent(
 
     // Early guard
     if (!currSides || !adjSides) {
-        return { location: null, currLines: [], adjLines: [] };
+        return {location: null, currLines: [], adjLines: []};
     }
 
     // Horizontal adjacency: adj is directly to the left of curr (their vertical spans overlap)
@@ -1105,14 +1128,14 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
         [ModLocations.Left]: [],
         [ModLocations.Direct]: []
     };
-    if(cage){
+    if (cage) {
         for (let i = 0; i < rack.cages.length; i++) {
-            if(rack.cages[i].cageNum !== cage.cageNum){
+            if (rack.cages[i].cageNum !== cage.cageNum) {
                 const adj = areAdjacent(cage, rack, rack.cages[i], rack);
-                console.log("Adjacent: ", adj);
+                console.log('Adjacent: ', adj);
                 // adj.location is the location of cage adj to current cage meaning if 1 is left of 2 then adj.location = right.
                 if (adj.location !== null) {
-                    adj.currLines.forEach(((line,idx) => {
+                    adj.currLines.forEach(((line, idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
                         const adjSubId = parseInt(adj.adjLines[idx].split('-')[1]);
                         connections[adj.location].push({
@@ -1123,16 +1146,16 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
                             currCage: cage,
                             adjCage: rack.cages[i]
                         });
-                    }))
+                    }));
                 }
             }
         }
-    }else{
+    } else {
         for (let i = 0; i < rack.cages.length; i++) {
             for (let j = i + 1; j < rack.cages.length; j++) {
                 const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack);
                 if (adj.location !== null) {
-                    adj.currLines.forEach((line,idx) => {
+                    adj.currLines.forEach((line, idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
                         const adjSubId = parseInt(adj.adjLines[idx].split('-')[1]);
                         connections[adj.location].push({
@@ -1151,12 +1174,18 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
 
 
     return connections;
-}
+};
 
 // This can be done by "guessing" the what other cage coords would be if they were adjacent, if they dont exist then they are not
 // If cage is passed then it will only include connections with that cage
 export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage) => {
-    const connections: ConnectedRacks = {[ModLocations.Top]: [], [ModLocations.Bottom]: [], [ModLocations.Right]: [], [ModLocations.Left]: [], [ModLocations.Direct]: []};
+    const connections: ConnectedRacks = {
+        [ModLocations.Top]: [],
+        [ModLocations.Bottom]: [],
+        [ModLocations.Right]: [],
+        [ModLocations.Left]: [],
+        [ModLocations.Direct]: []
+    };
 
     const areRacksConnected = (cRack: Rack, adjRack: Rack) => {
         for (const currCage of cRack.cages) {
@@ -1164,20 +1193,20 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
             for (const adjCage of adjRack.cages) {
 
                 // If cage is passed then determine if either cage is included and skip if not.
-                if(cage){
-                    if(cage.cageNum !== currCage.cageNum && cage.cageNum !== adjCage.cageNum){
+                if (cage) {
+                    if (cage.cageNum !== currCage.cageNum && cage.cageNum !== adjCage.cageNum) {
                         continue;
                     }
                 }
 
                 const adj = areAdjacent(currCage, cRack, adjCage, adjRack, group);
                 // skip racks that arent connected to the current rack
-                if(cRack.objectId !== currRack.objectId && adjRack.objectId !== currRack.objectId){
+                if (cRack.objectId !== currRack.objectId && adjRack.objectId !== currRack.objectId) {
                     continue;
                 }
-                if(adj.location !== null){
+                if (adj.location !== null) {
                     //[[rack1,cage1], adj, [rack2,cage2]]
-                    adj.currLines.forEach((line,idx) => {
+                    adj.currLines.forEach((line, idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
                         const adjSubId = parseInt(adj.adjLines[idx].split('-')[1]);
                         connections[adj.location].push({
@@ -1194,15 +1223,15 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
                 }
             }
         }
-    }
+    };
 
     for (let i = 0; i < group.racks.length; i++) {
-        if(group.racks[i].objectId !== currRack.objectId){
+        if (group.racks[i].objectId !== currRack.objectId) {
             areRacksConnected(currRack, group.racks[i]);
         }
     }
     return connections;
-}
+};
 
 export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
@@ -1214,37 +1243,46 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
     const isRoomValid = isRoomHomogeneousDefault(room);
 
     // Check if we have a mix of null and non-null rack values
-    if (!isRoomValid){
-        return { success: false, roomName: roomName, reason: ['Cannot save room with mix of default racks and real racks']};;
+    if (!isRoomValid) {
+        return {
+            success: false,
+            roomName: roomName,
+            reason: ['Cannot save room with mix of default racks and real racks']
+        };
+        ;
     }
 
     // Create default mods for new rooms.
-    if(isRoomNonDefault) {
+    if (isRoomNonDefault) {
 
         const usedMap = new Map<string, boolean>();
 
         room.rackGroups.forEach((group) => {
             group.racks.forEach((r) => {
                 r.cages.forEach((c) => {
-                    if(c.mods === undefined){
+                    if (c.mods === undefined) {
                         const connectedCages = findConnectedCages(r, c);
                         Object.entries(connectedCages).forEach(([direction, connections]) => {
-                            if (connections.length === 0) return;
+                            if (connections.length === 0) {
+                                return;
+                            }
                             const locDir = parseInt(direction) as ModLocations;
                             addModEntries(connections, locDir, r, false, newModData, usedMap);
                         });
 
                         const connectedRacks = findConnectedRacks(group, r, c);
                         Object.entries(connectedRacks).forEach(([direction, connections]) => {
-                            if (connections.length === 0) return;
+                            if (connections.length === 0) {
+                                return;
+                            }
                             const locDir = parseInt(direction) as ModLocations;
                             addModEntries(connections, locDir, r, true, newModData, usedMap);
                         });
-                    }else{
+                    } else {
                         Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
                             modSubsections.forEach(section => {
                                 section.modKeys.forEach(key => {
-                                    console.log("Mod Key: ", key);
+                                    console.log('Mod Key: ', key);
                                     newModData.push({
                                         cage: c.objectId,
                                         location: parseInt(direction),
@@ -1254,26 +1292,27 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
                                         rack: r.objectId,
                                         subId: section.subId,
                                     });
-                                })
-                            })
+                                });
+                            });
                         });
                     }
-                })
+                });
             });
         });
     }
 
-    console.log("Saving Room With Mods: ", newModData);
+    console.log('Saving Room With Mods: ', newModData);
     let result: LayoutSaveResult;
 
     try {
         const layoutSave = await saveRoomLayout(room, newModData, oldRoomName);
         let errors;
-        if(layoutSave.success === false){
+        if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];
         }
         result = {success: layoutSave.success, roomName: roomName, reason: errors};
-    } catch (e){
+    }
+    catch (e) {
         const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
         result = {success: e.success, roomName: roomName, reason: errors.map(err => err.message || err)};
         console.log(result)

@@ -38,7 +38,8 @@ public class BundledForms
         _prevAllHistoryForm = allHistoryForm;
     }
 
-    public RoomHistoryForm getRoomHistoryForm(){
+    public RoomHistoryForm getRoomHistoryForm()
+    {
         return _roomHistoryForm;
     }
 
@@ -87,7 +88,8 @@ public class BundledForms
         _cageHistoryForm = cageHistoryForm;
     }
 
-    public ArrayList<RacksForm> getNewRacksForm(){
+    public ArrayList<RacksForm> getNewRacksForm()
+    {
         return _newRacksForm;
     }
 
@@ -96,7 +98,8 @@ public class BundledForms
         _newRacksForm = newRacksForm;
     }
 
-    public ArrayList<RacksForm> getPrevRacksForm(){
+    public ArrayList<RacksForm> getPrevRacksForm()
+    {
         return _prevRacksForm;
     }
 
@@ -110,7 +113,8 @@ public class BundledForms
         return _newCagesForm;
     }
 
-    public void setNewCagesForm(ArrayList<CagesForm> newCagesForm){
+    public void setNewCagesForm(ArrayList<CagesForm> newCagesForm)
+    {
         _newCagesForm = newCagesForm;
     }
 
@@ -119,7 +123,8 @@ public class BundledForms
         return _prevCagesForm;
     }
 
-    public void setPrevCagesForm(ArrayList<CagesForm> prevCagesForm){
+    public void setPrevCagesForm(ArrayList<CagesForm> prevCagesForm)
+    {
         _prevCagesForm = prevCagesForm;
     }
 
@@ -128,7 +133,8 @@ public class BundledForms
         return _ehrRoomsForm;
     }
 
-    public void setEhrRoomsForm(Map<String, Object> ehrRoomsForm){
+    public void setEhrRoomsForm(Map<String, Object> ehrRoomsForm)
+    {
         _ehrRoomsForm = ehrRoomsForm;
     }
 }

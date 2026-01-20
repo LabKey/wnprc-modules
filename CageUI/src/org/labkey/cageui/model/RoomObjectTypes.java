@@ -13,19 +13,24 @@ public enum RoomObjectTypes
 
     private final int numericValue;
 
-    RoomObjectTypes(int numericValue) {
+    RoomObjectTypes(int numericValue)
+    {
         this.numericValue = numericValue;
     }
 
     @JsonValue  // Serialize using this value
-    public int getNumericValue() {
+    public int getNumericValue()
+    {
         return numericValue;
     }
 
     @JsonCreator  // Deserialize using this method
-    public static RoomObjectTypes fromNumericValue(int value) {
-        for (RoomObjectTypes type : values()) {
-            if (type.numericValue == value) {
+    public static RoomObjectTypes fromNumericValue(int value)
+    {
+        for (RoomObjectTypes type : values())
+        {
+            if (type.numericValue == value)
+            {
                 return type;
             }
         }

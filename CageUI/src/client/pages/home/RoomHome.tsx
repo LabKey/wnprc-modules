@@ -12,16 +12,16 @@ export const RoomHome: FC = () => {
     return (
         <HomeNavigationContextProvider>
             <RoomContextProvider>
-                <div className={"home-container"}>
-                    <RoomList />
+                <div className={'home-container'}>
+                    <RoomList/>
                     <div className="page-content-wrapper">
-                        <RoomNavbar />
+                        <RoomNavbar/>
                         <div className="page-content">
-                            <RoomContent />
+                            <RoomContent/>
                         </div>
                     </div>
                 </div>
             </RoomContextProvider>
         </HomeNavigationContextProvider>
     );
-}
+};

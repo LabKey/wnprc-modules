@@ -13,19 +13,19 @@ export const RoomContent: FC = () => {
     const renderContent = () => {
         switch (selectedPage?.selected) {
             case 'Room':
-                return <RoomViewContent />;
+                return <RoomViewContent/>;
             case 'Rack':
-                return <RackViewContent />;
+                return <RackViewContent/>;
             case 'Cage':
-                return <CageViewContent />;
+                return <CageViewContent/>;
             default:
-                return <HomeViewContent />;
+                return <HomeViewContent/>;
         }
-    }
+    };
 
     return (
-        <div className={"view-content"}>
+        <div className={'view-content'}>
             {renderContent()}
         </div>
     );
-}
+};

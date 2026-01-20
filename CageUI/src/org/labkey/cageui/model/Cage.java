@@ -22,9 +22,8 @@ public class Cage
     private CageModKeyMap _mods;
 
 
-
-
-    public static final class CageModKeyMap {
+    public static final class CageModKeyMap
+    {
         private final Map<ModLocations, List<CageModification>> mods;
 
         public CageModKeyMap()
@@ -60,25 +59,30 @@ public class Cage
             }
         }
 
-        public Map<ModLocations, List<CageModification>> getMods() {
+        public Map<ModLocations, List<CageModification>> getMods()
+        {
             return mods;
         }
 
         // Helper methods for easier access
-        public List<CageModification> getModificationsForLocation(ModLocations location) {
+        public List<CageModification> getModificationsForLocation(ModLocations location)
+        {
             return mods.getOrDefault(location, new ArrayList<>());
         }
 
-        public void addModification(ModLocations location, CageModification modification) {
+        public void addModification(ModLocations location, CageModification modification)
+        {
             mods.computeIfAbsent(location, k -> new ArrayList<>()).add(modification);
         }
 
-        public boolean hasModificationsForLocation(ModLocations location) {
+        public boolean hasModificationsForLocation(ModLocations location)
+        {
             return !getModificationsForLocation(location).isEmpty();
         }
 
         // Modification class
-        public static final class CageModification {
+        public static final class CageModification
+        {
             private final List<Modkeys> modKeys;
             private final int subId;
 
@@ -89,21 +93,25 @@ public class Cage
                 this.subId = subId;
             }
 
-            public int getSubId() {
+            public int getSubId()
+            {
                 return subId;
             }
 
-            public List<Modkeys> getModKeys() {
+            public List<Modkeys> getModKeys()
+            {
                 return modKeys;
             }
         }
     }
 
-    public boolean hasMods() {
+    public boolean hasMods()
+    {
         return _mods != null;
     }
 
-    public CageModKeyMap getModsOrDefault() {
+    public CageModKeyMap getModsOrDefault()
+    {
         return _mods != null ? _mods : new CageModKeyMap(new HashMap<>());
     }
 
@@ -127,6 +135,7 @@ public class Cage
     {
         _objectId = objectId;
     }
+
     public String getSvgId()
     {
         return _svgId;
@@ -146,6 +155,7 @@ public class Cage
     {
         _positionId = positionId;
     }
+
     public SelectionType getSelectionType()
     {
         return _selectionType;

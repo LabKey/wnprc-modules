@@ -29,7 +29,8 @@ import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
 
 public class CageUIRoomModifierRole extends AbstractRole
 {
-    public CageUIRoomModifierRole(){
+    public CageUIRoomModifierRole()
+    {
         this("Cage UI Room Modifier Role",
                 "Room modifier role for Cage UI",
                 CageUIRoomModifierPermission.class,
@@ -40,7 +41,8 @@ public class CageUIRoomModifierRole extends AbstractRole
         );
     }
 
-    protected CageUIRoomModifierRole(String name, String description, Class<? extends Permission>... perms) {
+    protected CageUIRoomModifierRole(String name, String description, Class<? extends Permission>... perms)
+    {
         super(name, description, CageUIModule.class, perms);
     }
 

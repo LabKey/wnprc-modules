@@ -3,7 +3,8 @@ package org.labkey.cageui.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ModTypes {
+public enum ModTypes
+{
     StandardFloor("sf"),
     MeshFloor("mf"),
     MeshFloorX2("dmf"),
@@ -19,19 +20,24 @@ public enum ModTypes {
 
     private final String value;
 
-    ModTypes(String value) {
+    ModTypes(String value)
+    {
         this.value = value;
     }
 
     @JsonValue
-    public String getValue() {
+    public String getValue()
+    {
         return value;
     }
 
     @JsonCreator
-    public static ModTypes fromValue(String value) {
-        for (ModTypes modType : ModTypes.values()) {
-            if (modType.value.equals(value)) {
+    public static ModTypes fromValue(String value)
+    {
+        for (ModTypes modType : ModTypes.values())
+        {
+            if (modType.value.equals(value))
+            {
                 return modType;
             }
         }
@@ -39,7 +45,8 @@ public enum ModTypes {
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return value;
     }
 }

@@ -9,4 +9,4 @@ export const RoomDetails: FC = () => {
             Room Details
         </div>
     );
-}
+};

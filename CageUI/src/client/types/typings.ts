@@ -62,17 +62,17 @@ export enum RoomObjectTypes {
 
 // value in the cage modifications table in EHR
 export enum ModTypes {
-    StandardFloor='sf',
-    MeshFloor='mf',
-    MeshFloorX2='dmf',
-    NoFloor='nf',
-    SolidDivider='sd',
-    PCDivider='pcd', // protected contact
-    VCDivider='vcd', // visual contact
-    PrivacyDivider='pd',
-    NoDivider='nd',
-    CTunnel='ct',
-    Extension='ex',
+    StandardFloor = 'sf',
+    MeshFloor = 'mf',
+    MeshFloorX2 = 'dmf',
+    NoFloor = 'nf',
+    SolidDivider = 'sd',
+    PCDivider = 'pcd', // protected contact
+    VCDivider = 'vcd', // visual contact
+    PrivacyDivider = 'pd',
+    NoDivider = 'nd',
+    CTunnel = 'ct',
+    Extension = 'ex',
     SPDivider = 'spd' // Social Panel
 }
 
@@ -102,12 +102,12 @@ export enum CageDirection {
     Bottom,
 }
 
-export type RackStringType = string & { __brand: "RackStringType" };
-export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
-export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
+export type RackStringType = string & { __brand: 'RackStringType' };
+export type DefaultRackStringType = string & { __brand: 'DefaultRackStringType' };
+export type RoomObjectStringType = string & { __brand: 'RoomObjectStringType' };
 export type CageSvgId = `cageSVG_${string}`;
 export type RackSvgId = `rack_${string}`;
-export type FullCageHistory = {cageHistory: CageHistoryData, cageData: CageData};
+export type FullCageHistory = { cageHistory: CageHistoryData, cageData: CageData };
 
 export type GroupId = `rack-group-${number}`
 export type CageNumber = `${RackStringType}-${number}`
@@ -118,14 +118,14 @@ export type RoomItemType = RackTypes | RoomObjectTypes | DefaultRackTypes;
 
 export type RoomItem = Rack | RoomObject;
 //client side to determine which object type is currently selected
-export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
+export type SelectionType = 'rack' | 'cage' | 'obj' | 'rackGroup';
 
 // Classification of the objects, caging is for racks/cages/rack groups, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
 export type historyType = 'real' | 'template';
 
 export type ModIdKey = string;
-export type ModKeyMap = { modId: ModIdKey, parentModId: ModIdKey | null}
+export type ModKeyMap = { modId: ModIdKey, parentModId: ModIdKey | null }
 export type CageModification = {
     modKeys: ModKeyMap[];
     subId: number; // subsection id
@@ -170,7 +170,7 @@ export interface Cage {
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
     size: number; // length in cells of cage square of svg image
-    extraContext?:  {[key: string]: any}; // extra context if needed for cage
+    extraContext?: { [key: string]: any }; // extra context if needed for cage
     mods?: CageModificationsType;
 }
 
@@ -289,7 +289,7 @@ export interface FullObjectHistoryData {
     rackGroup?: number;
     // objectid of rack in racks table
     rack?: RackData | string;
-    cage?:  FullCageHistory | string;
+    cage?: FullCageHistory | string;
     xCoord: number;
     yCoord: number;
 }
@@ -328,7 +328,7 @@ export interface RackGroup {
     groupId: GroupId;
     x: number; // x coords relative to group of connected racks
     y: number; // y coords relative to group of connected racks
-    scale: number // scale relative to group of connected racks
+    scale: number; // scale relative to group of connected racks
 }
 
 export interface Rack {
@@ -341,14 +341,14 @@ export interface Rack {
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
     isActive?: boolean; // Determines if rack is "in use or active"
-    extraContext?: {[key: string]: any};
+    extraContext?: { [key: string]: any };
     isNew: boolean; // if true this rack was created during the current session and not loaded from the database
 }
 
 export interface RoomObject {
     itemId: string; // object id
     selectionType: SelectionType;
-    type: RoomObjectTypes
+    type: RoomObjectTypes;
     x: number;
     y: number;
     scale: number;

@@ -19,22 +19,23 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
+import { getAdjLocation, getDefaultMod, getTypeClassFromElement, parseRoomItemType, roomItemToString } from './helpers';
 import {
-    getAdjLocation,
-    getDefaultMod,
-    getTypeClassFromElement,
-    parseRoomItemNum,
-    parseRoomItemType,
-    roomItemToString
-} from './helpers';
-import {
-    Cage, CageData,
-    CageDirection, CageHistoryData,
-    CageNumber, CageSvgId,
-    DefaultRackTypes, FullObjectHistoryData,
-    GroupId, LayoutHistoryData,
-    LocationCoords, CageMods, ModLocations,
-    Rack, RackData,
+    Cage,
+    CageData,
+    CageDirection,
+    CageHistoryData,
+    CageMods,
+    CageNumber,
+    CageSvgId,
+    DefaultRackTypes,
+    FullObjectHistoryData,
+    GroupId,
+    LayoutHistoryData,
+    LocationCoords,
+    ModLocations,
+    Rack,
+    RackData,
     RackGroup,
     RackStringType,
     RackTypes,
@@ -58,32 +59,35 @@ import { Security, Utils } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
 import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
-import { ConnectedCage, ConnectedCages, ConnectedRack, ConnectedRacks } from '../types/homeTypes';
+import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
 
 
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
-}
+};
 
 export const isRoomCreator = (user: GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
-}
+};
 
 export const isRoomModifier = (user: GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
-}
+};
 
-export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{fulfilled: FullObjectHistoryData[]; rejected: PromiseRejectedResult[]}> => {
+export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{
+    fulfilled: FullObjectHistoryData[];
+    rejected: PromiseRejectedResult[]
+}> => {
 
     const processItem = async (item: LayoutHistoryData): Promise<FullObjectHistoryData> => {
-        if(item.cage === null){
+        if (item.cage === null) {
             return {
                 extraContext: item.extraContext,
                 objectType: item.objectType,
                 xCoord: item.xCoord,
                 yCoord: item.yCoord
-            }
-        }else{
+            };
+        } else {
             const cageHistory: CageHistoryData = await fetchCageHistory(item.historyId, item.cage);
             const cageData: CageData = await fetchCage(cageHistory.cage);
             const rackData: RackData = await fetchRack(cageData.rack);
@@ -95,9 +99,9 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
                 rackGroup: cageHistory.rackGroup,
                 rack: rackData,
                 cage: {cageHistory: cageHistory, cageData: cageData}
-            }
+            };
         }
-    }
+    };
 
     const promises = data.map(async (item) => processItem(item));
     const results = await Promise.allSettled(promises);
@@ -113,8 +117,8 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
         }
     });
 
-    return { fulfilled, rejected };
-}
+    return {fulfilled, rejected};
+};
 
 
 export const getTranslation = (transform) => {
@@ -122,29 +126,29 @@ export const getTranslation = (transform) => {
     const translate = transform.match(/translate\(([^)]+)\)/);
     if (translate) {
         const [x, y] = translate[1].split(',').map(Number);
-        return { x, y };
+        return {x, y};
     }
-    return { x: 0, y: 0 }; // Default to (0, 0) if no translation is found
-}
+    return {x: 0, y: 0}; // Default to (0, 0) if no translation is found
+};
 
 export const convertCageNumToNum = (num: CageNumber) => {
     const parts = num.split('-');
     const cageNum = parts[1];
     return parseInt(cageNum);
-}
+};
 
 export const createEmptyUnitLoc = (): UnitLocations => {
     return (
         Object.fromEntries(
             Object.values(RackTypes)
-                .filter((value) => typeof value === "number") // Filter out the numeric values from enum
+                .filter((value) => typeof value === 'number') // Filter out the numeric values from enum
                 .map((rackType) => [
                     roomItemToString(rackType as RackTypes),
                     [] as LocationCoords[],
                 ])
         ) as UnitLocations
     );
-}
+};
 
 export const parseWrapperId = (input: string): RoomItemStringType => {
     const regex = /^[a-zA-Z]+/; // matches "x_template_wrapper"
@@ -154,24 +158,24 @@ export const parseWrapperId = (input: string): RoomItemStringType => {
         return match[0] as RoomItemStringType;
     }
     return;
-}
+};
 
 
 export const drawGrid = (layoutSvg: d3.Selection<SVGElement, unknown, any, any>, updateGridProps) => {
     const transform = zoomTransform(layoutSvg.node());
     layoutSvg.select('.grid').remove();
-    layoutSvg.append("g")
-        .attr("class", "grid")
-        .attr("id", "layout-grid")
-        .attr("width", updateGridProps.width)
+    layoutSvg.append('g')
+        .attr('class', 'grid')
+        .attr('id', 'layout-grid')
+        .attr('width', updateGridProps.width)
         .attr('height', updateGridProps.height)
         .attr('transform', `translate(0,0) scale(${transform.k})`);
     updateGrid(zoomTransform(layoutSvg.node()), updateGridProps.width, updateGridProps.height, updateGridProps.gridSize); // Draw grid with the initial view
-}
+};
 
 export const updateGrid = (transform, width, height, gridSize) => {
-    const g = d3.select("g.grid");
-    g.selectAll(".cell").remove(); // Clear existing grid
+    const g = d3.select('g.grid');
+    g.selectAll('.cell').remove(); // Clear existing grid
 
     // Calculate grid bounds (starting and ending points) based on transform
     const xMin = Math.floor(-transform.x / transform.k / gridSize) * gridSize;
@@ -182,17 +186,17 @@ export const updateGrid = (transform, width, height, gridSize) => {
     // Draw the grid within the current visible area
     for (let x = xMin; x < xMax; x += gridSize) {
         for (let y = yMin; y < yMax; y += gridSize) {
-            g.append("rect")
-                .attr("x", x)
-                .attr("y", y)
-                .attr("class", "cell")
-                .attr("width", gridSize)
-                .attr("height", gridSize)
-                .attr("fill", "none")
-                .attr("stroke", "lightgray");
+            g.append('rect')
+                .attr('x', x)
+                .attr('y', y)
+                .attr('class', 'cell')
+                .attr('width', gridSize)
+                .attr('height', gridSize)
+                .attr('fill', 'none')
+                .attr('stroke', 'lightgray');
         }
     }
-}
+};
 
 // Confirmation popup for merging two racks, built using d3 svg manipulation.
 function showConfirmationPopup(): Promise<RackActions> {
@@ -347,35 +351,35 @@ function resetNodeTranslationsWithZoom(targetNode, draggedNode, layoutSvg) {
     const distanceY = (translateY2 - translateY1) / layoutTransform.k;  // Correct Y in case there's any Y translation
 
     // Reset the first node to (0, 0) in the new group
-    targetNode.setAttribute("transform", `translate(0, 0)`);
+    targetNode.setAttribute('transform', `translate(0, 0)`);
 
     // Set the second node to be exactly at the dynamic distance relative to the first node
-    draggedNode.setAttribute("transform", `translate(${distanceX}, ${distanceY})`);
+    draggedNode.setAttribute('transform', `translate(${distanceX}, ${distanceY})`);
 }
 
 export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
     localRoomRef: MutableRefObject<Room>,
-    eventType: "view" | "edit",
+    eventType: 'view' | 'edit',
     setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
 ): () => void {
-    const handleContextMenu = (event: MouseEvent)=> {
+    const handleContextMenu = (event: MouseEvent) => {
         event.preventDefault();
         const localRoom = localRoomRef.current;
         let tempObj: SelectedObj;
         const element = event.currentTarget as SVGGElement;
 
         //set selected object to either room object or cage
-        if(d3.select(element).classed('room-obj')){
+        if (d3.select(element).classed('room-obj')) {
             tempObj = localRoom.objects.find((obj) => obj.itemId === element.id);
-        }else{
+        } else {
             const cageGroupElement = element.closest(`[id^="cageSVG_"]`) as SVGGElement | null;
             const cageObj = localRoom.rackGroups.flatMap(g => g.racks).flatMap(r => r.cages).find(c => c.svgId === cageGroupElement.id);
             tempObj = cageObj;
         }
         setSelectedObj(tempObj);
-        if(setCtxMenuStyle){
+        if (setCtxMenuStyle) {
             setCtxMenuStyle((prevState) => ({
                 ...prevState,
                 display: 'block',
@@ -388,16 +392,16 @@ export function setupEditCageEvent(
 
     // Attach context menu to the lowest level group for that cage.
     cageGroupElement.style.pointerEvents = 'bounding-box';
-    if(eventType === "edit"){
+    if (eventType === 'edit') {
         cageGroupElement.addEventListener('contextmenu', handleContextMenu);
-    }else{
+    } else {
         cageGroupElement.addEventListener('click', handleContextMenu);
     }
 
     return () => {
-        if(eventType === "edit"){
+        if (eventType === 'edit') {
             cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
-        }else{
+        } else {
             cageGroupElement.removeEventListener('click', handleContextMenu);
         }
     };
@@ -423,34 +427,36 @@ export async function mergeRacks(props: MergeProps) {
         dragCageId,
         targetCageId
     } = props;
-    if(!d3.select('.popup').empty()) return false;
+    if (!d3.select('.popup').empty()) {
+        return false;
+    }
     const action: RackActions = await showConfirmationPopup();
     const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
 
-    function isConnected(selectionNode){
+    function isConnected(selectionNode) {
         return !!selectionNode.closest(`[id*='group']`);
     }
 
     // Make sure cages don't have the wrong styles, give merged cages a grouped class
     function resetElementProperties(element: SVGGElement, shapeType, action) {
-        if(action === 'merge'){
-            element.setAttribute('class',`grouped-${shapeType}`);
-            element.setAttribute('style', "");
+        if (action === 'merge') {
+            element.setAttribute('class', `grouped-${shapeType}`);
+            element.setAttribute('style', '');
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, "edit", cageActionProps.setCtxMenuStyle);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, 'edit', cageActionProps.setCtxMenuStyle);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
     // Example: 2 nodes, 0,0 and 120,0 start at 0,0 add 120,0
     // second 2 nodes, 0,0 and 120,0 start at 240,0 add 0,0 and 120,0. etc
     function processChildNodes(element: SVGGElement, mergedGroup, action: RackActions) {
-        const {x: startX, y: startY} = getTranslation(element.getAttribute('transform'))
+        const {x: startX, y: startY} = getTranslation(element.getAttribute('transform'));
         d3.select(element).selectAll(':scope > g').each(function () {
             const targetShape = d3.select(this);
             let shapeType: RackStringType;
-            if(action === 'merge'){
+            if (action === 'merge') {
                 shapeType = parseRoomItemType(targetShape.attr('id')) as RackStringType;
-            }else{
+            } else {
                 shapeType = getTypeClassFromElement(targetShape.node()) as RackStringType;
             }
             const {x: localX, y: localY} = getTranslation(targetShape.attr('transform'));
@@ -461,11 +467,11 @@ export async function mergeRacks(props: MergeProps) {
             // When connecting merged groups that have been connected before make sure to reset each cage but
             // add the rack shape instead of cage shape
             const mergedChildren = d3.select(this).selectAll(':scope > g');
-            if(!mergedChildren.empty()){
+            if (!mergedChildren.empty()) {
                 mergedChildren.each(function () {
                     resetElementProperties(this as SVGGElement, shapeType, action);
-                })
-            }else{
+                });
+            } else {
                 resetElementProperties(this as SVGGElement, shapeType, action);
             }
             mergedGroup.node().appendChild(this);
@@ -473,12 +479,12 @@ export async function mergeRacks(props: MergeProps) {
     }
 
     function processShape(shape, action, mergedGroup) {
-        if(action === 'merge'){
+        if (action === 'merge') {
             processChildNodes(shape, mergedGroup, action);
-        }else{
-            if(shape.getAttribute('class').includes('rack-group')){
+        } else {
+            if (shape.getAttribute('class').includes('rack-group')) {
                 processChildNodes(shape, mergedGroup, action);
-            }else{// When connecting racks for the first time
+            } else {// When connecting racks for the first time
                 // this iteration is for connecting a merged rack, have to reset each cage in the rack but add the rack shape not the cage shape
                 d3.select(shape).selectAll(':scope > g').each(function () {
                     resetElementProperties(this as SVGGElement, getTypeClassFromElement(shape), action);
@@ -488,6 +494,7 @@ export async function mergeRacks(props: MergeProps) {
             }
         }
     }
+
     if (action !== 'cancel') {
         let targetRackShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
             = layoutSvg.select(`[id=${targetRack.svgId}]`);
@@ -504,9 +511,9 @@ export async function mergeRacks(props: MergeProps) {
         let targetRackSvgId = clonedTargetShape.id;
         let draggedRackSvgId = clonedDraggedShape.id;
 
-        if(action === 'merge'){
-            if(isConnected(draggedRackShape.node()) || isConnected(targetRackShape.node())){
-                await showLayoutEditorError("Invalid Configuration: Please do not merge connected racks");
+        if (action === 'merge') {
+            if (isConnected(draggedRackShape.node()) || isConnected(targetRackShape.node())) {
+                await showLayoutEditorError('Invalid Configuration: Please do not merge connected racks');
                 return;
             }
             newGroup = layoutSvg.append('g')
@@ -523,8 +530,7 @@ export async function mergeRacks(props: MergeProps) {
             if (styleAttr) {
                 newGroup.attr('style', styleAttr);
             }
-        }
-        else{ // action = connect
+        } else { // action = connect
 
             // If connecting already connected groups these will be populated
             const connectedTargetGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
@@ -533,12 +539,12 @@ export async function mergeRacks(props: MergeProps) {
             const connectedDragGroupShape: d3.Selection<SVGGElement, {}, HTMLElement, any>
                 = layoutSvg.select(`#${dragRackGroup.groupId}`);
 
-            if(!connectedTargetGroupShape.empty()){
+            if (!connectedTargetGroupShape.empty()) {
                 clonedTargetShape = connectedTargetGroupShape.node().cloneNode(true) as Element;
                 targetRackShape = connectedTargetGroupShape;
             }
 
-            if(!connectedDragGroupShape.empty()){
+            if (!connectedDragGroupShape.empty()) {
                 clonedDraggedShape = connectedDragGroupShape.node().cloneNode(true) as Element;
                 draggedRackShape = connectedDragGroupShape;
             }
@@ -553,7 +559,7 @@ export async function mergeRacks(props: MergeProps) {
             d3.select(clonedDraggedShape).classed('draggable', false);
 
             processShape(clonedTargetShape, action, newGroup);
-            processShape(clonedDraggedShape,action, newGroup);
+            processShape(clonedDraggedShape, action, newGroup);
         }
 
         // Copy the transform attribute from the targetShape to the merged group
@@ -564,20 +570,20 @@ export async function mergeRacks(props: MergeProps) {
 
         //Attach data from target to new shape
         const targetData = targetRackShape.datum() as { x: number; y: number };
-        if(targetData) {
-            newGroup.data([{x: targetData.x, y: targetData.y}])
+        if (targetData) {
+            newGroup.data([{x: targetData.x, y: targetData.y}]);
         }
 
         newGroup.call(layoutDrag);
 
-        doRackAction(action,targetRackSvgId, draggedRackSvgId, targetCageId, dragCageId, newGroup);
+        doRackAction(action, targetRackSvgId, draggedRackSvgId, targetCageId, dragCageId, newGroup);
 
         // Remove the original shapes from the DOM
         targetRackShape.remove();
         draggedRackShape.remove();
 
         return true;
-    }else{
+    } else {
         return false;
     }
 }
@@ -612,14 +618,14 @@ export const getAdjDirection = (
     if (draggedY === targetY + targetHeight) {
         return CageDirection.Top;
     }
-}
+};
 
 // This checks the adjacency of two racks to determine if they can be merged
 export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationCoords, draggedSize: number, targetSize: number) {
 
     const targetX = targetCage.cellX;
     const targetY = targetCage.cellY;
-    const draggedX  = draggedCage.cellX;
+    const draggedX = draggedCage.cellX;
     const draggedY = draggedCage.cellY;
 
     // Calculate widths and heights in pixels
@@ -630,18 +636,18 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
 
     // Calculate corners of the dragged square
     const draggedCorners = [
-        { x: draggedX, y: draggedY }, // Top-left
-        { x: draggedX + draggedWidth, y: draggedY }, // Top-right
-        { x: draggedX, y: draggedY + draggedHeight }, // Bottom-left
-        { x: draggedX + draggedWidth, y: draggedY + draggedHeight }, // Bottom-right
+        {x: draggedX, y: draggedY}, // Top-left
+        {x: draggedX + draggedWidth, y: draggedY}, // Top-right
+        {x: draggedX, y: draggedY + draggedHeight}, // Bottom-left
+        {x: draggedX + draggedWidth, y: draggedY + draggedHeight}, // Bottom-right
     ];
 
     // Calculate corners of the target square
     const targetCorners = [
-        { x: targetX, y: targetY }, // Top-left
-        { x: targetX + targetWidth, y: targetY }, // Top-right
-        { x: targetX, y: targetY + targetHeight }, // Bottom-left
-        { x: targetX + targetWidth, y: targetY + targetHeight }, // Bottom-right
+        {x: targetX, y: targetY}, // Top-left
+        {x: targetX + targetWidth, y: targetY}, // Top-right
+        {x: targetX, y: targetY + targetHeight}, // Bottom-left
+        {x: targetX + targetWidth, y: targetY + targetHeight}, // Bottom-right
     ];
 
     /* True if valid bounds exist. In short this fixes the issue with the corner checking where corners
@@ -651,33 +657,33 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
     const checkBounds = (corner) => {
         let valid = false;
 
-        if(corner === 0){ // top left corner match of drag cage
-            if(draggedCorners[corner].x === targetCorners[3].x && draggedCorners[corner].y === targetCorners[3].y){
+        if (corner === 0) { // top left corner match of drag cage
+            if (draggedCorners[corner].x === targetCorners[3].x && draggedCorners[corner].y === targetCorners[3].y) {
                 valid = true;
             }
 
-        }else if(corner === 1){ // top right corner match of drag cage
-            if(draggedCorners[corner].x === targetCorners[2].x && draggedCorners[corner].y === targetCorners[2].y){
+        } else if (corner === 1) { // top right corner match of drag cage
+            if (draggedCorners[corner].x === targetCorners[2].x && draggedCorners[corner].y === targetCorners[2].y) {
                 valid = true;
             }
-        }else if(corner === 2){ // bottom left corner match of drag cage
-            if(draggedCorners[corner].x === targetCorners[1].x && draggedCorners[corner].y === targetCorners[1].y){
+        } else if (corner === 2) { // bottom left corner match of drag cage
+            if (draggedCorners[corner].x === targetCorners[1].x && draggedCorners[corner].y === targetCorners[1].y) {
                 valid = true;
             }
-        }else if(corner === 3){ // bottom right corner match of drag cage
-            if(draggedCorners[corner].x === targetCorners[0].x && draggedCorners[corner].y === targetCorners[0].y){
+        } else if (corner === 3) { // bottom right corner match of drag cage
+            if (draggedCorners[corner].x === targetCorners[0].x && draggedCorners[corner].y === targetCorners[0].y) {
                 valid = true;
             }
         }
 
         return valid;
-    }
+    };
 
     // Check if any corner of the dragged square matches any corner of the target square with a matching side.
     for (let i = 0; i < draggedCorners.length; i++) {
         for (let j = 0; j < targetCorners.length; j++) {
             if (draggedCorners[i].x === targetCorners[j].x && draggedCorners[i].y === targetCorners[j].y) {
-                if(checkBounds(i)){
+                if (checkBounds(i)) {
                     continue;
                 }
                 const direction = getAdjDirection(draggedX, draggedY, targetX, targetY, draggedWidth, draggedHeight, targetWidth, targetHeight);
@@ -696,7 +702,7 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
         }
     }
 
-    return {isAdjacent: false, direction: "0"};
+    return {isAdjacent: false, direction: '0'};
 }
 
 //Offset for the top left corner of the layout, without doing this objects will randomly jump when dragging and placing
@@ -706,9 +712,9 @@ export const getLayoutOffset = (props: OffsetProps) => {
     const x = clientX - svgRect.left;
     const y = clientY - svgRect.top;
     return {x: x, y: y};
-}
+};
 
-export const getTargetRect =(x, y, gridSize, transform) => {
+export const getTargetRect = (x, y, gridSize, transform) => {
 
     // Adjust the coordinates based on the current zoom and pan transform
     const adjustedX = transform.invertX(x);
@@ -722,29 +728,31 @@ export const getTargetRect =(x, y, gridSize, transform) => {
         x: col * gridSize,
         y: row * gridSize,
     };
-}
+};
 
 // Layout Drag Helpers
 export function createStartDragInLayout(startDragProps: StartDragProps) {
-    return(
+    return (
         function startDragInLayout(event) {
             const {setSelectedObj, localRoomRef} = startDragProps;
             const localRoom = localRoomRef.current;
 
             const id = d3.select(this).attr('id');
             let foundObj: SelectedObj = localRoom.objects.find(obj => obj.itemId === id);
-            if(foundObj){
+            if (foundObj) {
                 setSelectedObj(foundObj);
-            }else{
+            } else {
                 localRoom.rackGroups.forEach((group) => {
-                    if(foundObj) return;
-                    if(group.groupId === id){
+                    if (foundObj) {
+                        return;
+                    }
+                    if (group.groupId === id) {
                         foundObj = group;
                         return;
                     }
-                    foundObj = group.racks.find((rack) => rack.svgId === id)
-                })
-                if(foundObj){
+                    foundObj = group.racks.find((rack) => rack.svgId === id);
+                });
+                if (foundObj) {
                     setSelectedObj(foundObj);
                 }
             }
@@ -756,7 +764,7 @@ export function createStartDragInLayout(startDragProps: StartDragProps) {
 }
 
 export function createDragInLayout() {
-    return(
+    return (
         function dragInLayout(event) {
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
             const element = d3.select(this);
@@ -766,7 +774,7 @@ export function createDragInLayout() {
 
             element.attr('transform', `translate(${newX},${newY}) scale(${scale})`);
         }
-    )
+    );
 }
 
 export function createEndDragInLayout(props: LayoutDragProps) {
@@ -781,11 +789,12 @@ export function createEndDragInLayout(props: LayoutDragProps) {
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
 
             const transform = d3.zoomTransform(layoutSvg.node());
-            const [pointerX,pointerY] = d3.pointer(event, layoutSvg.node()); // mouse position with respect to layout svg
-            const {x,y} = getLayoutOffset({
+            const [pointerX, pointerY] = d3.pointer(event, layoutSvg.node()); // mouse position with respect to layout svg
+            const {x, y} = getLayoutOffset({
                 clientX: pointerX,
                 clientY: pointerY,
-                layoutSvg: layoutSvg});
+                layoutSvg: layoutSvg
+            });
 
             const targetCell = getTargetRect(pointerX, pointerY, gridSize, transform);
             if (targetCell) {
@@ -794,10 +803,10 @@ export function createEndDragInLayout(props: LayoutDragProps) {
                 const shapeType: RoomItemClass = shape.classed('room-obj') ? 'roomObj' : 'caging';
                 placeAndScaleGroup(shape, cellX, cellY, transform);
                 // make sure border template is below all other shapes on the layout
-                if(shape.attr('id') === 'layout-border'){
+                if (shape.attr('id') === 'layout-border') {
                     shape.lower();
                 }
-                moveItem(shape.attr('id'),shapeType, cellX, cellY, transform.k);
+                moveItem(shape.attr('id'), shapeType, cellX, cellY, transform.k);
             }
         }
     );
@@ -811,9 +820,9 @@ export const placeAndScaleGroup = (group, x, y, transform) => {
     const newX = transform.applyX(x);
     const newY = transform.applyY(y);
     // Apply the transform (translate to snap to the grid, and scale)
-    group.attr("transform", `translate(${newX}, ${newY}) scale(${scale})`)
+    group.attr('transform', `translate(${newX}, ${newY}) scale(${scale})`)
         .data([{x: x, y: y}]); // keep data x and y because these are pre transform coords
-}
+};
 
 export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: LocationCoords) => {
     if (!rack.cages || !Array.isArray(rack.cages)) {
@@ -822,7 +831,7 @@ export const areCagesInSameRack = (rack: Rack, cage1: LocationCoords, cage2: Loc
 
     const nums = rack.cages.map(item => item.svgId);
     return nums.includes(cage1.cageId) && nums.includes(cage2.cageId);
-}
+};
 
 
 // input is the enum number for rack, default rack, or room obj type. Return true if it is in Rack or Default rack types
@@ -837,16 +846,19 @@ export const isRackDefault = (itemType: RoomItemType): itemType is DefaultRackTy
 // finds a cage by cageNum in group of racks if it exists
 export const findSelectObjRack = (racks: Rack[], obj: string): Rack => {
     return racks.find(rack => {
-        return rack.cages.find((cage) => cage.cageNum === obj)
+        return rack.cages.find((cage) => cage.cageNum === obj);
     });
-}
+};
 
 // finds a rack in room/groups of racks if it exists and return the rack and rack group it is apart of
-export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: Rack, rackGroup: RackGroup} | undefined => {
+export const findRackInGroup = (targetId: string, groups: RackGroup[]): {
+    rack: Rack,
+    rackGroup: RackGroup
+} | undefined => {
     for (const group of groups) {
         const targetRack = group.racks.find(rack => rack.svgId === targetId);
         if (targetRack) {
-            return { rack: targetRack, rackGroup: group };
+            return {rack: targetRack, rackGroup: group};
         }
     }
     return undefined;
@@ -854,19 +866,23 @@ export const findRackInGroup = (targetId: string, groups: RackGroup[]): {rack: R
 
 
 // finds a cage in room/groups of racks if it exists and return the rack, rack group and cage state
-export const findCageInGroup = (targetId: CageSvgId, groups: RackGroup[]): {cage: Cage, rack: Rack, rackGroup: RackGroup} | undefined => {
+export const findCageInGroup = (targetId: CageSvgId, groups: RackGroup[]): {
+    cage: Cage,
+    rack: Rack,
+    rackGroup: RackGroup
+} | undefined => {
     for (const group of groups) {
         for (const rack of group.racks) {
             const targetCage = rack.cages.find(cage => cage.svgId === targetId);
             if (targetCage) {
-                return { cage: targetCage, rack: rack, rackGroup: group };
+                return {cage: targetCage, rack: rack, rackGroup: group};
             }
         }
     }
     return undefined;
 };
 
-export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, newWidth: number, newHeight: number ){
+export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>, newWidth: number, newHeight: number) {
     const currentRect = d3.select('#border-rect');
     const resizeHandler = borderGroup.selectAll('#resize-handle');
 
@@ -875,25 +891,26 @@ export function updateBorderSize(borderGroup: d3.Selection<SVGGElement, {}, HTML
         const resizeSvg = borderGroup.select(`#${svgId}`);
 
         // Update the SVG's viewBox to accommodate the new size, + 1 to add a pixel of distance between the svg and everything inside
-        resizeSvg.attr("viewBox", `0 0 ${newSvgWidth + 1} ${newSvgHeight + 1}`);
-        resizeSvg.attr("width", newSvgWidth + 1);
-        resizeSvg.attr("height", newSvgHeight + 1);
+        resizeSvg.attr('viewBox', `0 0 ${newSvgWidth + 1} ${newSvgHeight + 1}`);
+        resizeSvg.attr('width', newSvgWidth + 1);
+        resizeSvg.attr('height', newSvgHeight + 1);
     }
+
     // Update rect dimensions and position
     currentRect
         .attr('width', newWidth)
         .attr('height', newHeight);
 
     //update resize rect handler
-    resizeHandler.attr("x", newWidth - 15)
-        .attr("y", newHeight - 15);
+    resizeHandler.attr('x', newWidth - 15)
+        .attr('y', newHeight - 15);
 
     updateSvgBounds(newWidth, newHeight, 'border_template');
     updateSvgBounds(newWidth, newHeight, 'border_template_wrapper');
 }
 
 const createStartResizeDrag = () => {
-    return(
+    return (
         function startResizeDrag(event) {
             event.sourceEvent.stopPropagation();
             const borderRect = d3.select('#border-rect');
@@ -901,7 +918,7 @@ const createStartResizeDrag = () => {
 
 
             this.startWidth = parseFloat(borderRect.attr('width'));
-            this.startHeight =  parseFloat(borderRect.attr('height'));
+            this.startHeight = parseFloat(borderRect.attr('height'));
 
             // start x and y with respect to the layout svg
             const [x, y] = d3.pointer(event.sourceEvent, layoutSvg.node());
@@ -909,12 +926,11 @@ const createStartResizeDrag = () => {
             this.startY = y;
         }
     );
-}
-
+};
 
 
 const createDragResizeDrag = (gridSize: number, borderGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => {
-    return(
+    return (
         function dragResizeDrag(event) {
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('#layout-svg');
 
@@ -930,13 +946,13 @@ const createDragResizeDrag = (gridSize: number, borderGroup: d3.Selection<SVGGEl
             const newLockedHeight: number = this.startHeight + (dy * gridSize);
 
 
-            updateBorderSize(borderGroup, newLockedWidth, newLockedHeight)
+            updateBorderSize(borderGroup, newLockedWidth, newLockedHeight);
 
         }
     );
-}
+};
 const createEndResizeDrag = (setLocalRoom) => {
-    return(
+    return (
         function startResizeDrag(event) {
             const currentRect = d3.select('#border-rect');
             setLocalRoom(prevState => ({
@@ -946,15 +962,15 @@ const createEndResizeDrag = (setLocalRoom) => {
                     borderWidth: parseInt(currentRect.attr('width')),
                     borderHeight: parseInt(currentRect.attr('height'))
                 }
-            }))
+            }));
         }
     );
-}
+};
 // functionality to drag/resize the border. closeMenu is a function that sets state of both context menus
 export const dragBorder = (closeMenu, gridSize, borderGroup, setLocalRoom) => {
     let targetId: string;
     return d3.drag()
-        .on('start', function(event) {
+        .on('start', function (event) {
             // store target element to prevent switching
             const targetElement = d3.select(event.sourceEvent.target);
             // store target id, either resize handle id or room border group id
@@ -965,20 +981,20 @@ export const dragBorder = (closeMenu, gridSize, borderGroup, setLocalRoom) => {
                 createStartResizeDrag().call(this, event);
             }
         })
-        .on('drag', function(event) {
+        .on('drag', function (event) {
             // Retrieve the stored target element
-            const targetElement = d3.select(`#${targetId}`) as  d3.Selection<any, unknown, null, undefined>;
+            const targetElement = d3.select(`#${targetId}`) as d3.Selection<any, unknown, null, undefined>;
             if (targetElement.node().tagName === 'rect') {
                 createDragResizeDrag(gridSize, borderGroup).call(this, event);
             }
         })
-        .on('end', function(event) {
-            const targetElement = d3.select(`#${targetId}`) as  d3.Selection<any, unknown, null, undefined>;
+        .on('end', function (event) {
+            const targetElement = d3.select(`#${targetId}`) as d3.Selection<any, unknown, null, undefined>;
             if (targetElement.node().tagName === 'rect') {
                 createEndResizeDrag(setLocalRoom).call(this, event);
             }
-        })
-}
+        });
+};
 
 export const getNextGroupId = (groups: RackGroup[]): GroupId => {
     // Extract all numbers from existing groupIds
@@ -997,9 +1013,9 @@ export const getNextGroupId = (groups: RackGroup[]): GroupId => {
     // Find the highest number and add 1
     const maxNumber = Math.max(...existingNumbers);
     return `rack-group-${maxNumber + 1}`;
-}
+};
 
-export const  areAllRacksNonDefault = (room: Room): boolean => {
+export const areAllRacksNonDefault = (room: Room): boolean => {
     // Check if any rack in any rack group is default
     for (const rackGroup of room.rackGroups) {
         for (const rack of rackGroup.racks) {
@@ -1011,7 +1027,7 @@ export const  areAllRacksNonDefault = (room: Room): boolean => {
     }
 
     return true;
-}
+};
 
 export const isRoomHomogeneousDefault = (room: Room): boolean => {
     let hasDefaultRack = false;
@@ -1036,7 +1052,7 @@ export const isRoomHomogeneousDefault = (room: Room): boolean => {
     // Return true if all racks are default OR all racks are non-default
     // This means either both flags are false (no racks) or only one flag is true
     return true;
-}
+};
 
 export const addModEntries = (
     connections: ConnectedCage[] | ConnectedRack[],
@@ -1045,7 +1061,7 @@ export const addModEntries = (
     isRackConnection: boolean,
     newModData: CageMods[],
     usedMap: Map<string, boolean>
-)=>  {
+) => {
     connections.forEach((connect) => {
         const newMapKey = [
             `${connect.currCage.cageNum}-${connect.currSubId}`,
@@ -1054,7 +1070,9 @@ export const addModEntries = (
             .sort()
             .join('_');
 
-        if (usedMap.has(newMapKey)) return;
+        if (usedMap.has(newMapKey)) {
+            return;
+        }
 
         const modId = Utils.generateUUID().toUpperCase();
 

@@ -81,6 +81,7 @@
   padding: 20px; /* Adds some padding inside the card */
   box-sizing: border-box;
 }
+
 /* SVG Styling */
 
 .room-svg {
@@ -135,10 +136,10 @@
   display: inline-block;
   margin-left: 20px;
 }
+
 .room-header-text {
   display: inline-block;
 }
-
 
 
 .rack-container {
@@ -279,7 +280,7 @@
   width: auto;
 }
 
-.details-table thead{
+.details-table thead {
   font-size: large;
 }
 
@@ -319,7 +320,7 @@
 }
 
 .popup-row {
-margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .popup-row input {
@@ -331,7 +332,7 @@ margin-bottom: 10px;
 }
 
 .popup-row label {
-  display: block;  /* Make the label block-level so it appears above the input */
+  display: block; /* Make the label block-level so it appears above the input */
   margin-bottom: 5px; /* Space between label and input */
 }
 
@@ -362,13 +363,13 @@ margin-bottom: 10px;
   background-image: linear-gradient(#464d55, #25292e);
   border-radius: 8px;
   border-width: 0;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, .1),0 3px 6px rgba(0, 0, 0, .05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, .1), 0 3px 6px rgba(0, 0, 0, .05);
   box-sizing: border-box;
   color: #fff;
   cursor: pointer;
   display: inline-flex;
   flex-direction: column;
-  font-family: expo-brand-demi,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-family: expo-brand-demi, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 18px;
   height: 52px;
   justify-content: center;
@@ -408,9 +409,9 @@ margin-bottom: 10px;
 }
 
 // Checkbox button css
- .checkbox-wrapper-10 .tgl {
-   display: none;
- }
+.checkbox-wrapper-10 .tgl {
+  display: none;
+}
 
 .checkbox-wrapper-10:not(:last-child) {
   margin-right: 10px; /* Adjust the spacing as needed */
@@ -425,6 +426,7 @@ margin-bottom: 10px;
 .checkbox-wrapper-10 .tgl + .tgl-btn {
   box-sizing: border-box;
 }
+
 .checkbox-wrapper-10 .tgl::-moz-selection,
 .checkbox-wrapper-10 .tgl:after::-moz-selection,
 .checkbox-wrapper-10 .tgl:before::-moz-selection,
@@ -441,6 +443,7 @@ margin-bottom: 10px;
 .checkbox-wrapper-10 .tgl + .tgl-btn::selection {
   background: none;
 }
+
 .checkbox-wrapper-10 .tgl + .tgl-btn {
   outline: 0;
   display: block;
@@ -453,6 +456,7 @@ margin-bottom: 10px;
   -ms-user-select: none;
   user-select: none;
 }
+
 .checkbox-wrapper-10 .tgl + .tgl-btn:after,
 .checkbox-wrapper-10 .tgl + .tgl-btn:before {
   position: relative;
@@ -461,12 +465,15 @@ margin-bottom: 10px;
   width: 50%;
   height: 100%;
 }
+
 .checkbox-wrapper-10 .tgl + .tgl-btn:after {
   left: 0;
 }
+
 .checkbox-wrapper-10 .tgl + .tgl-btn:before {
   display: none;
 }
+
 .checkbox-wrapper-10 .tgl:checked + .tgl-btn:after {
   left: 50%;
 }
@@ -477,6 +484,7 @@ margin-bottom: 10px;
   font-family: sans-serif;
   perspective: 100px;
 }
+
 .checkbox-wrapper-10 .tgl-flip + .tgl-btn:after,
 .checkbox-wrapper-10 .tgl-flip + .tgl-btn:before {
   display: inline-block;
@@ -494,26 +502,32 @@ margin-bottom: 10px;
   backface-visibility: hidden;
   border-radius: 4px;
 }
+
 .checkbox-wrapper-10 .tgl-flip + .tgl-btn:after {
   content: attr(data-tg-on);
   background: #02C66F;
   transform: rotateY(-180deg);
 }
+
 .checkbox-wrapper-10 .tgl-flip + .tgl-btn:before {
   background: #FF3A19;
   content: attr(data-tg-off);
 }
+
 .checkbox-wrapper-10 .tgl-flip + .tgl-btn:active:before {
   transform: rotateY(-20deg);
 }
+
 .checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:before {
   transform: rotateY(180deg);
 }
+
 .checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:after {
   transform: rotateY(0);
   left: 0;
   background: #7FC6A6;
 }
+
 .checkbox-wrapper-10 .tgl-flip:checked + .tgl-btn:active:after {
   transform: rotateY(20deg);
 }
@@ -554,7 +568,7 @@ margin-bottom: 10px;
   border-radius: 4px;
   white-space: nowrap;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   font-size: 14px;
 }
 
@@ -626,7 +640,7 @@ margin-bottom: 10px;
 }
 
 
-   /* CSS */
+/* CSS */
 .layout-toolbar-btn {
   background-color: dimgray;
   border-radius: 8px;
@@ -703,8 +717,12 @@ margin-bottom: 10px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Optional: Dark mode support */
@@ -724,9 +742,10 @@ margin-bottom: 10px;
 <label class="tgl-btn" data-tg-off="OFF" data-tg-on="ON" for="cb3-8"></label>
 </div>*/
 
- .checkbox-wrapper-8 .tgl {
-   display: none;
- }
+.checkbox-wrapper-8 .tgl {
+  display: none;
+}
+
 .checkbox-wrapper-8 .tgl,
 .checkbox-wrapper-8 .tgl:after,
 .checkbox-wrapper-8 .tgl:before,
@@ -736,6 +755,7 @@ margin-bottom: 10px;
 .checkbox-wrapper-8 .tgl + .tgl-btn {
   box-sizing: border-box;
 }
+
 .checkbox-wrapper-8 .tgl::-moz-selection,
 .checkbox-wrapper-8 .tgl:after::-moz-selection,
 .checkbox-wrapper-8 .tgl:before::-moz-selection,
@@ -752,6 +772,7 @@ margin-bottom: 10px;
 .checkbox-wrapper-8 .tgl + .tgl-btn::selection {
   background: none;
 }
+
 .checkbox-wrapper-8 .tgl + .tgl-btn {
   outline: 0;
   display: block;
@@ -764,6 +785,7 @@ margin-bottom: 10px;
   -ms-user-select: none;
   user-select: none;
 }
+
 .checkbox-wrapper-8 .tgl + .tgl-btn:after,
 .checkbox-wrapper-8 .tgl + .tgl-btn:before {
   position: relative;
@@ -772,12 +794,15 @@ margin-bottom: 10px;
   width: 50%;
   height: 100%;
 }
+
 .checkbox-wrapper-8 .tgl + .tgl-btn:after {
   left: 0;
 }
+
 .checkbox-wrapper-8 .tgl + .tgl-btn:before {
   display: none;
 }
+
 .checkbox-wrapper-8 .tgl:checked + .tgl-btn:after {
   left: 50%;
 }
@@ -790,6 +815,7 @@ margin-bottom: 10px;
   font-family: sans-serif;
   background: indianred;
 }
+
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
   display: inline-block;
@@ -802,29 +828,37 @@ margin-bottom: 10px;
   color: #fff;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
+
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {
   left: 100%;
   content: attr(data-tg-on);
 }
+
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
   left: 0;
   content: attr(data-tg-off);
 }
+
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active {
   background: #888;
 }
+
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active:before {
   left: -10%;
 }
+
 .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn {
   background: #86d993;
 }
+
 .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:before {
   left: -100%;
 }
+
 .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:after {
   left: 0;
 }
+
 .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:active:after {
   left: 10%;
 }
@@ -835,6 +869,7 @@ margin-bottom: 10px;
   width: 100%; /* Full viewport width */
   align-items: flex-start;
 }
+
 // Editor Context menu
 
 
@@ -866,9 +901,9 @@ margin-bottom: 10px;
 }
 
 .menu-item-group {
-  display: flex;               /* Aligns buttons in a row */
-  justify-content: center;      /* Centers the buttons horizontally */
-  gap: 5px;                    /* Space between buttons */
+  display: flex; /* Aligns buttons in a row */
+  justify-content: center; /* Centers the buttons horizontally */
+  gap: 5px; /* Space between buttons */
   margin-top: 20px;
   text-align: center;
 }
@@ -889,7 +924,7 @@ margin-bottom: 10px;
 }
 
 /* Highlight selected option */
-.select-menu  .select__option:hover {
+.select-menu .select__option:hover {
   background-color: lightgray;
   opacity: 0.8;
 }
@@ -898,6 +933,7 @@ margin-bottom: 10px;
 .context-menu-input {
   overflow-y: visible;
 }
+
 // End Editor Context menu styles
 
 // Room Size Selector styles
@@ -983,6 +1019,7 @@ margin-bottom: 10px;
   border: 1px solid lightgray;
   width: 90%; /* Adjust width as needed */
 }
+
 .page-content {
   flex-grow: 1;
 }
@@ -995,7 +1032,7 @@ margin-bottom: 10px;
   align-items: center;
   justify-content: left;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   padding: 0 20px;
 }
 
@@ -1021,7 +1058,7 @@ margin-bottom: 10px;
   background-color: #e9f7fe;
   color: #0056b3;
   text-decoration: none;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .page-map-link:active {
@@ -1150,6 +1187,7 @@ margin-bottom: 10px;
   align-items: center;
   justify-content: space-between;
 }
+
 .room-dir-cage-obj {
   cursor: pointer;
   display: flex;
@@ -1175,9 +1213,10 @@ margin-bottom: 10px;
   outline: none;
 }
 
-.room-search:focus{
+.room-search:focus {
   border-color: #00B4CC;
 }
+
 // END CSS FOR ROOM LIST
 
 .view-content {
@@ -1236,8 +1275,6 @@ margin-bottom: 10px;
 }
 
 
-
-
 .page-tab-container {
   font-family: Arial, sans-serif;
   width: 100%;
@@ -1245,11 +1282,13 @@ margin-bottom: 10px;
   display: flex;
   flex-direction: column;
 }
+
 .tab-content {
   flex: 1;
   width: fit-content;
   height: fit-content;
 }
+
 .tab-buttons {
   display: flex;
   gap: 20px; /* Space between buttons */
@@ -1370,6 +1409,7 @@ margin-bottom: 10px;
 .small-svg svg {
   overflow: scroll;
 }
+
 .small-svg g {
   overflow: scroll;
 }
@@ -1536,7 +1576,6 @@ margin-bottom: 10px;
 }
 
 
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1657,7 +1696,7 @@ Multi Dropdown Css
   flex-direction: column;
 }
 
-.room-changes-toolbar{
+.room-changes-toolbar {
   padding: 10px;
   background: rgba(135, 206, 250, 0.3);
   border-radius: 5px;
@@ -1666,31 +1705,32 @@ Multi Dropdown Css
   justify-content: space-between;
   align-items: center;
 }
+
 .room-layout-message {
   text-align: start;
 }
 
 .room-layout-save-btn {
- background-color: #fff;
- border: 1px solid #d5d9d9;
- border-radius: 8px;
- box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
- box-sizing: border-box;
- color: #0f1111;
- cursor: pointer;
- display: inline-block;
- font-family: "Amazon Ember",sans-serif;
- font-size: 13px;
- line-height: 29px;
- padding: 0 10px 0 11px;
- position: relative;
- text-align: center;
- text-decoration: none;
- user-select: none;
- -webkit-user-select: none;
- touch-action: manipulation;
- vertical-align: middle;
- width: 100px;
+  background-color: #fff;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+  box-sizing: border-box;
+  color: #0f1111;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Amazon Ember", sans-serif;
+  font-size: 13px;
+  line-height: 29px;
+  padding: 0 10px 0 11px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  width: 100px;
 }
 
 .room-layout-save-btn:hover {

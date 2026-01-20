@@ -2,7 +2,8 @@ package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public enum ModLocations {
+public enum ModLocations
+{
     LEFT("0"),
     RIGHT("1"),
     TOP("2"),
@@ -11,15 +12,18 @@ public enum ModLocations {
 
     private final String numericString;
 
-    ModLocations(String numericString) {
+    ModLocations(String numericString)
+    {
         this.numericString = numericString;
     }
 
-    public String getNumericString() {
+    public String getNumericString()
+    {
         return numericString;
     }
 
-    public int toInt() {
+    public int toInt()
+    {
         return Integer.parseInt(numericString);
     }
 
@@ -45,9 +49,12 @@ public enum ModLocations {
         }
     }
 
-    public static ModLocations fromInt(int value) {
-        for (ModLocations location : values()) {
-            if (location.toInt() == value) {
+    public static ModLocations fromInt(int value)
+    {
+        for (ModLocations location : values())
+        {
+            if (location.toInt() == value)
+            {
                 return location;
             }
         }

@@ -10,4 +10,4 @@ export const RackDetails: FC = () => {
             Rack Details
         </div>
     );
-}
+};

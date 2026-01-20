@@ -26,12 +26,13 @@ interface ConfirmationPopupProps {
     onCancel?: () => void; // if cancel exists, run function before closing popup Ex (resetting states)
     onClose: () => void; // function to close popup, usually a boolean state going to false
 }
+
 export const ConfirmationPopup: FC<ConfirmationPopupProps> = (props) => {
-    const { message, onConfirm, onCancel, onClose } = props
+    const {message, onConfirm, onCancel, onClose} = props;
     return (
         <div className="popup-overlay">
             <div className="popup">
-                <p className={"popup-paragraph"} dangerouslySetInnerHTML={{ __html: message.replace(/\n/g, '<br />')}}/>
+                <p className={'popup-paragraph'} dangerouslySetInnerHTML={{__html: message.replace(/\n/g, '<br />')}}/>
                 {!onConfirm &&
                         <div className="popup-buttons">
                             <button onClick={onClose}>Close</button>
@@ -45,14 +46,15 @@ export const ConfirmationPopup: FC<ConfirmationPopupProps> = (props) => {
                             }}>Yes
                             </button>
                             <button onClick={() => {
-                                if(onCancel) {
+                                if (onCancel) {
                                     onCancel();
                                 }
                                 onClose();
-                            }}>No</button>
+                            }}>No
+                            </button>
                         </div>
                 }
             </div>
         </div>
     );
-}
+};

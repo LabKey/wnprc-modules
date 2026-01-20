@@ -16,12 +16,12 @@
  *
  */
 
-import { Cage, CageNumber, CageSvgId, Rack, RackGroup, Room, RoomItem, RoomItemClass, RoomItemType } from './typings';
+import { Cage, CageSvgId, Rack, RackGroup, Room, RoomItem, RoomItemClass, RoomItemType } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
 
-export type GateContext = {room: string, roomId: number}; // extra context for Gate Object, describes target room and status
+export type GateContext = { room: string, roomId: number }; // extra context for Gate Object, describes target room and status
 
 export type RackActions = 'merge' | 'connect' | 'cancel';
 
@@ -35,13 +35,13 @@ export type SelectedObj = RoomItem | RackGroup | Cage;
 
 
 export interface ExtraContext {
-    cage?: {[key: string]: any};
-    rack?: {[key: string]: any};
+    cage?: { [key: string]: any };
+    rack?: { [key: string]: any };
 }
 
 export interface LayoutSaveResult {
     success: boolean;
-    roomName: string // redirect room
+    roomName: string; // redirect room
     reason?: string[];
 }
 

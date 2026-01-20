@@ -22,10 +22,10 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
 import org.labkey.api.security.User;
-import java.util.Collections;
-import java.util.Collection;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Collection;
+import java.util.Collections;
 
 public class CageUIContainerListener implements ContainerListener
 {
@@ -49,7 +49,8 @@ public class CageUIContainerListener implements ContainerListener
     {
     }
 
-    @NotNull @Override
+    @NotNull
+    @Override
     public Collection<String> canMove(Container c, Container newParent, User user)
     {
         return Collections.emptyList();

@@ -19,33 +19,33 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import { RoomHeader } from '../../components/layoutEditor/RoomHeader';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import '../../cageui.scss';
-import { ActionURL, Filter } from '@labkey/api';
-import {
-    AllHistoryData,
-    FullObjectHistoryData,
-    LayoutData,
-    LayoutHistoryData,
-    LayoutObjectData,
-    PrevRoom,
-    Room, TemplateHistoryData,
-    UnitLocations
-} from '../../types/typings';
+import { ActionURL } from '@labkey/api';
+import { FullObjectHistoryData, PrevRoom, Room, UnitLocations } from '../../types/typings';
 import { LayoutEditorContextProvider } from '../../context/LayoutEditorContextManager';
 import Editor from '../../components/layoutEditor/Editor';
-import { labkeyActionSelectWithPromise, labkeyGetUserPermissions } from '../../api/labkeyActions';
+import { labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { isTemplateCreator, processRealLayoutHistory } from '../../utils/LayoutEditorHelpers';
+import { isTemplateCreator } from '../../utils/LayoutEditorHelpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
-import { buildNewLocalRoom, buildNewLocs, fetchRoomData } from '../../utils/helpers';
+import { roomSizeOptions } from '../../utils/constants';
+import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 
 export const LayoutEditor: FC<any> = () => {
-    const roomName = ActionURL.getParameter("room");
-    const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({name: null, cagingData: [], layoutData: null, isDefault: true});
-    const [prevRoom, setPrevRoom] = useState<{room: Room, locs: UnitLocations, data: FullObjectHistoryData[], isTemplate: boolean}>(null);
+    const roomName = ActionURL.getParameter('room');
+    const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({
+        name: null,
+        cagingData: [],
+        layoutData: null,
+        isDefault: true
+    });
+    const [prevRoom, setPrevRoom] = useState<{
+        room: Room,
+        locs: UnitLocations,
+        data: FullObjectHistoryData[],
+        isTemplate: boolean
+    }>(null);
     const [selectedSize, setSelectedSize] = useState<SelectorOptions>(null);
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
@@ -54,32 +54,30 @@ export const LayoutEditor: FC<any> = () => {
     const [access, setAccess] = useState<boolean>(false);
 
 
-
-
     useEffect(() => {
         const userProfile = labkeyGetUserPermissions();
         userProfile.then((profile: GetUserPermissionsResponse) => {
-            if(profile.user){
+            if (profile.user) {
                 setUserProfile(profile);
                 // if the user is a template creator grant access
-               if(!(!roomName && !isTemplateCreator(profile))){
-                   setAccess(true);
-               }else if(roomName) {
-                   setAccess(true);
-               }
+                if (!(!roomName && !isTemplateCreator(profile))) {
+                    setAccess(true);
+                } else if (roomName) {
+                    setAccess(true);
+                }
             }
         }).catch((e) => {
             console.error(e);
-        })
+        });
     }, []);
 
     // Loads prev room into memory if it exists
     useEffect(() => {
-        if(!roomName){
+        if (!roomName) {
             setIsLoading(false);
-        }else{
+        } else {
             fetchRoomData(roomName).then(prevRoomData => {
-                console.log("prev room data", prevRoomData);
+                console.log('prev room data', prevRoomData);
                 setPrevRoomData(prevRoomData.prevRoomData);
                 setErrorPopup(prevRoomData?.error);
                 setShowSelectionPopup(prevRoomData.showSelectionPopup);
@@ -90,22 +88,22 @@ export const LayoutEditor: FC<any> = () => {
 
     // Converts data from ehr into layout editor objects for use seen in typings
     useEffect(() => {
-        if(prevRoomData.name !== null){
+        if (prevRoomData.name !== null) {
             let newLocalRoom: Room;
             let isTemplate: boolean; // this template is a real template room, not a room saved with defaults
             let newUnitLocs: UnitLocations;
 
-            if(prevRoomData.cagingData.length !== 0){
+            if (prevRoomData.cagingData.length !== 0) {
                 //newUnitLocs = buildNewLocs(prevRoomData.cagingData);
                 buildNewLocalRoom(prevRoomData).then((d) => {
                     let newLocalRoom = d[0];
                     newUnitLocs = d[1];
-                    if(newLocalRoom){
-                        isTemplate = newLocalRoom.name.includes("template");
+                    if (newLocalRoom) {
+                        isTemplate = newLocalRoom.name.includes('template');
                         newLocalRoom = {
                             ...newLocalRoom,
                             name: isTemplate ? 'new-layout' : newLocalRoom.name
-                        }
+                        };
 
                         newLocalRoom = {
                             ...newLocalRoom,
@@ -114,13 +112,18 @@ export const LayoutEditor: FC<any> = () => {
                                 borderWidth: prevRoomData.layoutData.borderWidth,
                                 borderHeight: prevRoomData.layoutData.borderHeight,
                             }
-                        }
-                        setPrevRoom({room: newLocalRoom, locs: newUnitLocs, data: prevRoomData.cagingData, isTemplate: isTemplate});
+                        };
+                        setPrevRoom({
+                            room: newLocalRoom,
+                            locs: newUnitLocs,
+                            data: prevRoomData.cagingData,
+                            isTemplate: isTemplate
+                        });
                         setIsLoading(false);
                     }
                 });
-            }else{
-                isTemplate = prevRoomData.name.includes("template");
+            } else {
+                isTemplate = prevRoomData.name.includes('template');
                 // Don't use template name instead treat the template as an empty room with objects already placed
                 newLocalRoom = {
                     name: isTemplate ? 'new-layout' : prevRoomData.name,
@@ -128,7 +131,7 @@ export const LayoutEditor: FC<any> = () => {
                     valid: false,
                     objects: [],
                     layoutData: null
-                }
+                };
                 //Always set layoutData if a prev room exists, its been set before and will go to the current border in rooms
                 newLocalRoom = {
                     ...newLocalRoom,
@@ -137,7 +140,7 @@ export const LayoutEditor: FC<any> = () => {
                         borderWidth: prevRoomData.layoutData.borderWidth,
                         borderHeight: prevRoomData.layoutData.borderHeight,
                     }
-                }
+                };
                 setPrevRoom({room: newLocalRoom, locs: null, data: [], isTemplate: isTemplate});
                 setIsLoading(false);
             }
@@ -145,34 +148,34 @@ export const LayoutEditor: FC<any> = () => {
     }, [prevRoomData]);
 
     return (!isLoading && userProfile && access) ? (
-            <LayoutEditorContextProvider
-                prevRoom={prevRoom}
-                user={userProfile}
-                children={
-                    <div id={'layout-editor-container'} className={"room-container"}>
-                        <RoomHeader
-                            name={roomName}
-                        />
-                        <div className={"divider"}/>
-                        {selectedSize &&
+        <LayoutEditorContextProvider
+            prevRoom={prevRoom}
+            user={userProfile}
+            children={
+                <div id={'layout-editor-container'} className={'room-container'}>
+                    <RoomHeader
+                        name={roomName}
+                    />
+                    <div className={'divider'}/>
+                    {selectedSize &&
                             <Editor roomSize={selectedSize}/>
-                        }
-                        {showSelectionPopup &&
+                    }
+                    {showSelectionPopup &&
                             <RoomSizeSelector
-                                options={roomSizeOptions}
-                                onClose={() => setShowSelectionPopup(false)}
-                                onSelect={(selectedOption) => setSelectedSize(selectedOption)}
+                                    options={roomSizeOptions}
+                                    onClose={() => setShowSelectionPopup(false)}
+                                    onSelect={(selectedOption) => setSelectedSize(selectedOption)}
                             />
-                        }
-                        {errorPopup &&
+                    }
+                    {errorPopup &&
                             <ConfirmationPopup
                                     message={errorPopup}
                                     onClose={() => setErrorPopup(null)}
                             />
-                        }
-                    </div>
-                }
-            />
+                    }
+                </div>
+            }
+        />
     ) : <div>
         <h3>Error loading page. This could be due to a number of issues</h3>
         <ul>
@@ -181,4 +184,4 @@ export const LayoutEditor: FC<any> = () => {
             <li>New bugs on our end. If you believe this might be the issue please submit a ticket.</li>
         </ul>
     </div>;
-}
+};

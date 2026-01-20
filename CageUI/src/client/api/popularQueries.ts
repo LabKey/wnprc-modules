@@ -23,21 +23,21 @@ import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
 import { CageData, CageHistoryData, RackData } from '../types/typings';
 
-export const cageModLookup = async (columns: string[], filterArray:  Filter.IFilter[]): Promise<EHRCageMods[]> => {
+export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_modifications',
         columns: columns,
         filterArray: filterArray
-    }
+    };
     const res = await labkeyActionSelectWithPromise(config);
 
-    if(res.rows.length !== 0){
+    if (res.rows.length !== 0) {
         return res.rows as EHRCageMods[];
-    }else{
-        console.log("Error cageui modifications", res);
+    } else {
+        console.log('Error cageui modifications', res);
     }
-}
+};
 
 export const fetchCageHistory = async (historyid: string, cage: string): Promise<CageHistoryData> => {
     const config: SelectRowsOptions = {
@@ -47,12 +47,12 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
             Filter.create('historyid', historyid, Filter.Types.EQUAL),
             Filter.create('cage', cage, Filter.Types.EQUAL)
         ]
-    }
+    };
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
         console.log(res, historyid, cage);
-        if(res.rows.length === 1){
+        if (res.rows.length === 1) {
             return {
                 rowid: res.rows[0].rowid,
                 historyId: res.rows[0].historyid,
@@ -65,23 +65,24 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
                 sqft: res.rows[0].sqft,
             };
         } else {
-            throw new Error("Error fetching cage history data");
+            throw new Error('Error fetching cage history data');
         }
-    } catch (e) {
-        throw new Error("Error fetching cage history data: " + (e as Error).message);
     }
-}
+    catch (e) {
+        throw new Error('Error fetching cage history data: ' + (e as Error).message);
+    }
+};
 
 export const fetchCage = async (objectId: string): Promise<CageData> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cages',
         filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]
-    }
+    };
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        if(res.rows.length === 1){
+        if (res.rows.length === 1) {
             return {
                 rowid: res.rows[0].rowid,
                 positionId: res.rows[0].positionid,
@@ -94,24 +95,25 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
                 sqft: res.rows[0].sqft,
             };
         } else {
-            throw new Error("Error fetching cage history data");
+            throw new Error('Error fetching cage history data');
         }
-    } catch (e) {
-        throw new Error("Error fetching cage history data: " + (e as Error).message);
     }
-}
+    catch (e) {
+        throw new Error('Error fetching cage history data: ' + (e as Error).message);
+    }
+};
 
 export const fetchRack = async (objectId: string): Promise<RackData> => {
     const config: SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'racks',
         filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]
-    }
+    };
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
 
-        if(res.rows.length === 1){
+        if (res.rows.length === 1) {
             return {
                 rowid: res.rows[0].rowid,
                 objectId: res.rows[0].objectid,
@@ -120,9 +122,10 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
                 rackType: res.rows[0].rack_type,
             };
         } else {
-            throw new Error("Error fetching cage history data");
+            throw new Error('Error fetching cage history data');
         }
-    } catch (e) {
-        throw new Error("Error fetching cage history data: " + (e as Error).message);
     }
-}
+    catch (e) {
+        throw new Error('Error fetching cage history data: ' + (e as Error).message);
+    }
+};

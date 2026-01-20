@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Option } from '@labkey/components';
-import { Cage, ModDirections, ModTypes, RoomMods } from '../../../types/typings';
+import { ModDirections, ModTypes } from '../../../types/typings';
 import { Filter, Utils } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
@@ -40,15 +40,17 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const [availableMods, setAvailableMods] = useState<EHRCageMods[]>(null);
 
     useEffect(() => {
-        console.log("prev items", prevItems);
+        console.log('prev items', prevItems);
     }, [prevItems]);
 
     useEffect(() => {
-        if (!availableMods) return;
+        if (!availableMods) {
+            return;
+        }
 
         // If nothing is selected, reset to all available options
         if (!selectedItems || selectedItems.length === 0) {
-            setOptions(availableMods.map(m => ({ label: m.title, value: m.value })));
+            setOptions(availableMods.map(m => ({label: m.title, value: m.value})));
             return;
         }
 
@@ -66,12 +68,14 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         // Filter out any option whose (direction, type) matches a selected one,
         // except keep the currently selected values visible
         const allowedMods = availableMods.filter(m => {
-            if (selectedValueSet.has(m.value)) return true; // always keep selected
+            if (selectedValueSet.has(m.value)) {
+                return true;
+            } // always keep selected
             const key = `${m.direction}|${m.type}`;
             return !selectedDirTypePairs.has(key);
         });
 
-        setOptions(allowedMods.map(m => ({ label: m.title, value: m.value })));
+        setOptions(allowedMods.map(m => ({label: m.title, value: m.value})));
     }, [selectedItems, availableMods]);
 
     useEffect(() => {
@@ -81,20 +85,20 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
             Filter.Types.EQUALS);
 
         cageModLookup([], [directionFilter]).then(result => {
-            if(result.length !== 0){
+            if (result.length !== 0) {
                 const rowOptions: Option<ModTypes>[] = [];
                 const availMods: EHRCageMods[] = [];
                 result.forEach(row => {
                     rowOptions.push({label: row.title, value: row.value as ModTypes});
                     availMods.push({...row});
-                })
+                });
                 setAvailableMods(availMods);
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log("Error fetching prev room mods", err);
+            console.log('Error fetching prev room mods', err);
         });
-    }, [])
+    }, []);
 
 
     // Close dropdown when clicking outside
@@ -112,7 +116,9 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     }, []);
 
     useEffect(() => {
-        if(selectedItems === undefined) return;
+        if (selectedItems === undefined) {
+            return;
+        }
         handleChange(selectedItems);
     }, [selectedItems]);
 
@@ -121,7 +127,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const handleSelectItem = (item: Option<ModTypes>) => {
         const newItems = selectedItems || [];
 
-        console.log("Selected Items: ", newItems, item);
+        console.log('Selected Items: ', newItems, item);
         if (!newItems.find(items => items.value === item.value)) {
             setSelectedItems([...newItems, {
                 ...item,

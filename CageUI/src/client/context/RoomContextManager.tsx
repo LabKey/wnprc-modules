@@ -8,11 +8,13 @@ import {
     CageModification,
     CageModificationsType,
     CurrCageMods,
-    ModLocations, Rack, RackGroup,
+    ModLocations,
+    Rack,
+    RackGroup,
     Room,
     RoomMods
 } from '../types/typings';
-import { ConnectedCage, ConnectedCages, ConnectedRacks, ModificationSaveResult } from '../types/homeTypes';
+import { ModificationSaveResult } from '../types/homeTypes';
 import _ from 'lodash';
 import { LayoutSaveResult } from '../types/layoutEditorTypes';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
@@ -45,7 +47,9 @@ export const RoomContextProvider = ({children}) => {
 
 
     useEffect(() => {
-        if(!selectedPage?.rack) return;
+        if (!selectedPage?.rack) {
+            return;
+        }
         //TODO Fetch mods for rack here as well and then set the rack and rack mods
         const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
         setSelectedRack(currRack);
@@ -53,9 +57,15 @@ export const RoomContextProvider = ({children}) => {
     }, [selectedPage.rack]);
 
     useEffect(() => {
-        if(!selectedPage?.cage) return;
+        if (!selectedPage?.cage) {
+            return;
+        }
 
-        const {cage: currCage, rack: currRack, rackGroup: currGroup} = findCageInGroup(selectedPage.cage, selectedRoom.rackGroups);
+        const {
+            cage: currCage,
+            rack: currRack,
+            rackGroup: currGroup
+        } = findCageInGroup(selectedPage.cage, selectedRoom.rackGroups);
         setSelectedRackGroup(currGroup);
         setSelectedRack(currRack);
         setSelectedCage(currCage);
@@ -81,28 +91,30 @@ export const RoomContextProvider = ({children}) => {
             // Your existing room loading logic here
             const roomData = await fetchRoomData(roomName, controller.signal);
             //setLoadedRooms(prev => ({ ...prev, [roomName]: roomData }));
-            console.log("Set new room: ", roomData);
+            console.log('Set new room: ', roomData);
             // room exists
-            if(roomData.prevRoomData){
+            if (roomData.prevRoomData) {
                 buildNewLocalRoom(roomData.prevRoomData).then((d) => {
                     const newLocalRoom = d[0];
-                    if(newLocalRoom){
+                    if (newLocalRoom) {
                         newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
                         // Ensure they don't share the same reference (using lodash to clone)
                         setSelectedRoomMods(_.cloneDeep(newLocalRoom.mods));
                         setSelectedRoom(newLocalRoom);
                     }
-                })
-            }else{
+                });
+            } else {
                 setSelectedRoom(null);
                 setSelectedRoomMods({});
             }
-        } catch (err) {
+        }
+        catch (err) {
             if (err.name !== 'AbortError') {
                 console.error('Error loading room:', err);
             }
             throw err;
-        } finally {
+        }
+        finally {
             setRoomLoading(false);
             setAbortController(null);
         }
@@ -112,7 +124,8 @@ export const RoomContextProvider = ({children}) => {
     const switchToRoom = async (roomName: string) => {
         try {
             await loadRoomData(roomName, true); // Force reload
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Failed to switch to room:', error);
         }
     };
@@ -133,22 +146,22 @@ export const RoomContextProvider = ({children}) => {
         // Add adjacent cage mods
         Object.entries(currCageMods.adjCages).forEach(([dirKey, allDirMods]) => {
             allDirMods.forEach(modSubsection => {
-                const { currMods, adjMods } = modSubsection;
+                const {currMods, adjMods} = modSubsection;
                 const newCurrMods = [...currMods];
                 const newAdjMods = [...adjMods];
 
-                if(!cageModsByCage[modSubsection.currCage.objectId]){
+                if (!cageModsByCage[modSubsection.currCage.objectId]) {
                     cageModsByCage[modSubsection.currCage.objectId] = {...modSubsection.currCage.mods};
                 }
 
-                if(!cageModsByCage[modSubsection.adjCage.objectId]){
+                if (!cageModsByCage[modSubsection.adjCage.objectId]) {
                     cageModsByCage[modSubsection.adjCage.objectId] = {...modSubsection.adjCage.mods};
                 }
 
                 // 1. go through connected cage mods and add them to the cagesModsByCage object.
                 [...newCurrMods, ...newAdjMods].forEach(mod => {
-                    newRoomMods[mod.modId] = { label: mod.label, value: mod.value };
-                    console.log("Add mod: ", mod.modId, " value: ", mod.value, " label: ", mod.label);
+                    newRoomMods[mod.modId] = {label: mod.label, value: mod.value};
+                    console.log('Add mod: ', mod.modId, ' value: ', mod.value, ' label: ', mod.label);
                 });
 
                 // Track old mod IDs to remove (from previous cage modKeys)
@@ -165,52 +178,52 @@ export const RoomContextProvider = ({children}) => {
                 // Go through all cage mods in direction dirKey, remove the old mods by adding to idsToRemove,
                 // and add the new mods from modSubsection.currMods, do the same thing for adjCages.
                 cageModsByCage[modSubsection.currCage.objectId][dirKey] = cageModsByCage[modSubsection.currCage.objectId][dirKey].map((cm: CageModification) => {
-                    if(cm.subId === modSubsection.currSubId){
+                    if (cm.subId === modSubsection.currSubId) {
                         return {
                             ...cm,
                             modKeys: [...newCurrMods.map(m => {
-                                if(idsToRemove.has(m.modId)){ // this happens when a mod is saved again without changing it.
+                                if (idsToRemove.has(m.modId)) { // this happens when a mod is saved again without changing it.
                                     idsToRemove.delete(m.modId);
                                 }
-                                return {modId: m.modId, parentModId: m.parentModId}
+                                return {modId: m.modId, parentModId: m.parentModId};
                             })]
-                        }
-                    }else{
+                        };
+                    } else {
                         return cm;
                     }
-                })
+                });
 
                 cageModsByCage[modSubsection.adjCage.objectId][getAdjLocation(parseInt(dirKey))] = cageModsByCage[modSubsection.adjCage.objectId][getAdjLocation(parseInt(dirKey))].map((cm: CageModification) => {
-                    if(cm.subId === modSubsection.adjSubId){
+                    if (cm.subId === modSubsection.adjSubId) {
                         return {
                             ...cm,
                             modKeys: [...newAdjMods.map(m => {
-                                if(idsToRemove.has(m.modId)){ // this happens when a mod is saved again without changing it.
+                                if (idsToRemove.has(m.modId)) { // this happens when a mod is saved again without changing it.
                                     idsToRemove.delete(m.modId);
                                 }
-                                return {modId: m.modId, parentModId: m.parentModId}
+                                return {modId: m.modId, parentModId: m.parentModId};
                             })]
-                        }
-                    }else{
+                        };
+                    } else {
                         return cm;
                     }
-                })
-            })
+                });
+            });
         });
 
         // Remove direct cage old mods.
-        if(currCage.mods[ModLocations.Direct]?.length > 0){
+        if (currCage.mods[ModLocations.Direct]?.length > 0) {
             currCage.mods[ModLocations.Direct][0].modKeys.forEach(mod => {
                 idsToRemove.set(mod.modId, true);
-            })
+            });
         }
         // Add direct cage mods new mods
         const newDirectMods = currCageMods.currCage.map(m => {
             newRoomMods[m.modId] = {label: m.label, value: m.value};
-            if(idsToRemove.has(m.modId)){ // this happens when a mod is saved again without changing it.
+            if (idsToRemove.has(m.modId)) { // this happens when a mod is saved again without changing it.
                 idsToRemove.delete(m.modId);
             }
-            return {modId: m.modId, parentModId: null}
+            return {modId: m.modId, parentModId: null};
         });
         cageModsByCage[currCage.objectId] = {
             ...cageModsByCage[currCage.objectId],
@@ -218,10 +231,10 @@ export const RoomContextProvider = ({children}) => {
         };
 
         idsToRemove.forEach((value, key) => {
-            if(value){
+            if (value) {
                 delete newRoomMods[key];
             }
-        })
+        });
 
         setSelectedRoom(
             prevState => ({
@@ -232,7 +245,7 @@ export const RoomContextProvider = ({children}) => {
                         ...r,
                         cages: r.cages.map(c => {
                             if (cageModsByCage[c.objectId]) {
-                                return { ...c, mods: cageModsByCage[c.objectId]};
+                                return {...c, mods: cageModsByCage[c.objectId]};
                             } else {
                                 return c;
                             }
@@ -241,14 +254,14 @@ export const RoomContextProvider = ({children}) => {
                 })),
                 mods: newRoomMods
             })
-        )
+        );
 
-        return { status: "Success" };
+        return {status: 'Success'};
     };
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
         return saveRoomHelper(selectedRoom);
-    }
+    };
 
     return (
         <RoomContext.Provider value={{

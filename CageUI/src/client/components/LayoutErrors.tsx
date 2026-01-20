@@ -17,10 +17,7 @@
  */
 
 import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
-import Select from 'react-select';
-import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { FC } from 'react';
 
 
 interface LayoutErrorsProps {
@@ -31,10 +28,10 @@ export const LayoutErrors: FC<LayoutErrorsProps> = (props) => {
     const {errors} = props;
 
     return (
-        <div className={"layout-editor-errors"}>
-            <ul className={"layout-editor-errors-list"}>
+        <div className={'layout-editor-errors'}>
+            <ul className={'layout-editor-errors-list'}>
                 {errors.map(((error, idx) => <li key={idx}>{error}</li>))}
             </ul>
         </div>
     );
-}
+};

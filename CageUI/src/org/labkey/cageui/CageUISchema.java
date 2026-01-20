@@ -26,7 +26,8 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.cageui.query.CageUIUserSchema;
 
 
-public class CageUISchema {
+public class CageUISchema
+{
     private static final CageUISchema _instance = new CageUISchema();
     private static Logger _log = LogManager.getLogger(CageUISchema.class);
     public static final String NAME = "cageui";
@@ -96,7 +97,10 @@ public class CageUISchema {
         return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_TABLE);
     }
 
-    public TableInfo getCageModificationsHistoryTable() {return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_HISTORY_TABLE);}
+    public TableInfo getCageModificationsHistoryTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_HISTORY_TABLE);
+    }
 
 
 }

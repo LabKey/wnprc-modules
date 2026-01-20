@@ -7,28 +7,28 @@ import { ReactSVG } from 'react-svg';
 export const RoomLegend: FC<any> = () => {
     const [showLegend, setShowLegend] = useState<boolean>(true);
 
-    const [legendStyle, setLegendStyle] = useState("room-legend-open");
+    const [legendStyle, setLegendStyle] = useState('room-legend-open');
     useEffect(() => {
-        if(showLegend){
-            setLegendStyle("room-legend-open");
-        }else{
-            setLegendStyle("room-legend-close");
+        if (showLegend) {
+            setLegendStyle('room-legend-open');
+        } else {
+            setLegendStyle('room-legend-close');
         }
     }, [showLegend]);
 
 
     return (
         <div className={legendStyle}>
-            <button className={"legend-header-btn"} onClick={() => setShowLegend(!showLegend)}>
+            <button className={'legend-header-btn'} onClick={() => setShowLegend(!showLegend)}>
                 <span className={showLegend ? 'legend-header-open' : 'legend-header-close'}>Legend</span>
             </button>
             {showLegend && (
                 <ReactSVG
                     src={`${ActionURL.getContextPath()}/cageui/static/legend.svg`}
-                    wrapper={"div"}
-                    className={"legend-svg"}
+                    wrapper={'div'}
+                    className={'legend-svg'}
                 />
             )}
         </div>
     );
-}
+};

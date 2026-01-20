@@ -55,7 +55,6 @@ import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.ModTypes;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackGroup;
-import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
 
@@ -63,7 +62,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -136,16 +134,23 @@ public class CageUIManager
     }
 
     // Helper function to wrap class object to labkeys List<Map<String, Object>> for data submission
-    public <E> List<Map<String, Object>> convertToMapList(E object) {
-        if (object == null) {
+    public <E> List<Map<String, Object>> convertToMapList(E object)
+    {
+        if (object == null)
+        {
             return Arrays.asList((Map<String, Object>) null);
         }
 
-        try {
+        try
+        {
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>()
+            {
+            });
             return Arrays.asList(map);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new RuntimeException("Error converting object to map list", e);
         }
     }
@@ -233,7 +238,8 @@ public class CageUIManager
         {
 
 
-            if(newForms.getEhrRoomsForm() != null){
+            if (newForms.getEhrRoomsForm() != null)
+            {
                 ehrLookupsRoomsQus.updateRows(user, container, Collections.singletonList(newForms.getEhrRoomsForm()), null, batchErrors, null, null);
             }
 
@@ -249,38 +255,46 @@ public class CageUIManager
 
             if (newForms.getPrevAllHistoryForm() != null)
             {
-                allHistoryQus.updateRows(user, container, convertToMapList(newForms.getPrevAllHistoryForm()),null, batchErrors, null, null);
+                allHistoryQus.updateRows(user, container, convertToMapList(newForms.getPrevAllHistoryForm()), null, batchErrors, null, null);
             }
 
-            if(newForms.getLayoutHistoryForm() != null){
+            if (newForms.getLayoutHistoryForm() != null)
+            {
                 layoutHistoryQus.insertRows(user, container, convertToMapList(newForms.getLayoutHistoryForm()), batchErrors, null, null);
             }
 
-            if(newForms.getRoomHistoryForm() != null){
+            if (newForms.getRoomHistoryForm() != null)
+            {
                 roomHistoryQus.insertRows(user, container, convertToMapList(newForms.getRoomHistoryForm()), batchErrors, null, null);
             }
 
-            if(newForms.getCageModificationHistoryForm() != null){
+            if (newForms.getCageModificationHistoryForm() != null)
+            {
                 cageModHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageModificationHistoryForm()), batchErrors, null, null);
             }
 
-            if(newForms.getNewCagesForm() != null){
+            if (newForms.getNewCagesForm() != null)
+            {
                 cagesQus.insertRows(user, container, convertToMapList(newForms.getNewCagesForm()), batchErrors, null, null);
             }
 
-            if(newForms.getPrevCagesForm() != null){
+            if (newForms.getPrevCagesForm() != null)
+            {
                 cagesQus.updateRows(user, container, convertToMapList(newForms.getPrevCagesForm()), null, batchErrors, null, null);
             }
 
-            if(newForms.getNewRacksForm() != null){
+            if (newForms.getNewRacksForm() != null)
+            {
                 racksQus.insertRows(user, container, convertToMapList(newForms.getNewRacksForm()), batchErrors, null, null);
             }
 
-            if(newForms.getPrevRacksForm() != null){
+            if (newForms.getPrevRacksForm() != null)
+            {
                 racksQus.updateRows(user, container, convertToMapList(newForms.getPrevRacksForm()), null, batchErrors, null, null);
             }
 
-            if(newForms.getCageHistoryForm() != null){
+            if (newForms.getCageHistoryForm() != null)
+            {
                 cageHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageHistoryForm()), batchErrors, null, null);
             }
 
@@ -301,34 +315,44 @@ public class CageUIManager
         return response;
     }
 
-    public static int findLastNumberAfterDash(String input) {
-        if (input == null || input.isEmpty()) {
+    public static int findLastNumberAfterDash(String input)
+    {
+        if (input == null || input.isEmpty())
+        {
             throw new IllegalArgumentException("Input string cannot be null or empty");
         }
 
         int lastDashIndex = input.lastIndexOf('-');
 
-        if (lastDashIndex == -1) {
+        if (lastDashIndex == -1)
+        {
             throw new IllegalArgumentException("No '-' found in the string");
         }
 
         String afterLastDash = input.substring(lastDashIndex + 1);
 
         // Parse the entire number
-        try {
+        try
+        {
             return Integer.parseInt(afterLastDash);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             throw new IllegalArgumentException("No valid number found after the last '-'");
         }
     }
 
     // Helper method to get all cages in the same rack group
-    public static List<Cage> getAllCagesInRackGroup(RackGroup rackGroup) {
+    public static List<Cage> getAllCagesInRackGroup(RackGroup rackGroup)
+    {
         List<Cage> allCages = new ArrayList<>();
 
-        if (rackGroup != null && rackGroup.getRacks() != null) {
-            for (Rack rack : rackGroup.getRacks()) {
-                if (rack != null && rack.getCages() != null) {
+        if (rackGroup != null && rackGroup.getRacks() != null)
+        {
+            for (Rack rack : rackGroup.getRacks())
+            {
+                if (rack != null && rack.getCages() != null)
+                {
                     allCages.addAll(rack.getCages());
                 }
             }
@@ -347,7 +371,9 @@ public class CageUIManager
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TypeReference<ArrayList<TemplateLayoutHistoryForm>> typeRef = new TypeReference<ArrayList<TemplateLayoutHistoryForm>>() {};
+        TypeReference<ArrayList<TemplateLayoutHistoryForm>> typeRef = new TypeReference<ArrayList<TemplateLayoutHistoryForm>>()
+        {
+        };
         ArrayList<TemplateLayoutHistoryForm> history = mapper.convertValue(selector.getMapArray(), typeRef);
         return history;
     }
@@ -389,7 +415,9 @@ public class CageUIManager
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TypeReference<ArrayList<LayoutHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<LayoutHistoryForm>>(){};
+        TypeReference<ArrayList<LayoutHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<LayoutHistoryForm>>()
+        {
+        };
         ArrayList<LayoutHistoryForm> layoutHistory = mapper.convertValue(layoutHistorySelector.getMapArray(), layoutHistoryTypeRef);
         return layoutHistory;
     }
@@ -404,7 +432,9 @@ public class CageUIManager
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TypeReference<ArrayList<CageModificationHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<CageModificationHistoryForm>>(){};
+        TypeReference<ArrayList<CageModificationHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<CageModificationHistoryForm>>()
+        {
+        };
         ArrayList<CageModificationHistoryForm> history = mapper.convertValue(selector.getMapArray(), layoutHistoryTypeRef);
         return history;
     }
@@ -425,7 +455,7 @@ public class CageUIManager
     public RacksForm getRackFromCage(String cageObjId)
     {
 
-        CagesForm cage = getCageForm( cageObjId);
+        CagesForm cage = getCageForm(cageObjId);
 
         TableInfo table = CageUISchema.getInstance().getRacksTable();
         SimpleFilter filter = new SimpleFilter();
@@ -476,7 +506,9 @@ public class CageUIManager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
         TableSelector selector = new TableSelector(table, filter, null);
-        TypeReference<ArrayList<CageHistoryForm>> cageHistoryTypeRef = new TypeReference<ArrayList<CageHistoryForm>>() {};
+        TypeReference<ArrayList<CageHistoryForm>> cageHistoryTypeRef = new TypeReference<ArrayList<CageHistoryForm>>()
+        {
+        };
         ArrayList<CageHistoryForm> cageHistory = mapper.convertValue(selector.getMapArray(), cageHistoryTypeRef);
 
         return cageHistory;
@@ -486,7 +518,7 @@ public class CageUIManager
     public static AllHistoryForm endPreviousAllHistory(String room, Date endDate)
     {
         AllHistoryForm allHistory = getAllHistory(room);
-        if(allHistory == null) return null;
+        if (allHistory == null) return null;
         allHistory.setEndDate(endDate);
         return allHistory;
     }
@@ -502,13 +534,16 @@ public class CageUIManager
         {
             allHistoryToStart.setValid(false);
             allHistoryToStart.setHistoryType("template");
-        }else{
+        }
+        else
+        {
             allHistoryToStart.setHistoryType("real");
         }
         return allHistoryToStart;
     }
 
-    public static class RoomSubmissionService {
+    public static class RoomSubmissionService
+    {
 
         private final Container containerId;
         private final User userId;
@@ -530,11 +565,14 @@ public class CageUIManager
             this.cageDims = new HashMap<>();
         }
 
-        private void getCageDims() {
+        private void getCageDims()
+        {
             // First, build a map of all cages with their modifications
             Map<String, List<ModData>> cageModsMap = new HashMap<>();
-            if (this.roomMods != null) {
-                for (ModData mod : this.roomMods) {
+            if (this.roomMods != null)
+            {
+                for (ModData mod : this.roomMods)
+                {
                     cageModsMap.computeIfAbsent(mod.getCage(), k -> new ArrayList<>()).add(mod);
                 }
             }
@@ -543,7 +581,8 @@ public class CageUIManager
             Set<Set<String>> connectedComponents = findConnectedComponents(this.room, cageModsMap);
 
             // Process each connected component
-            for (Set<String> component : connectedComponents) {
+            for (Set<String> component : connectedComponents)
+            {
                 // Find the first cage in this component (lowest position ID)
                 String firstCageId = findFirstCageInComponent(component, this.room);
 
@@ -551,9 +590,11 @@ public class CageUIManager
                 CombinedDimensionsResult combinedResult = calculateComponentDimensions(component, this.room, cageModsMap, firstCageId);
 
                 // Set dimensions for all cages in this component
-                for (String cageId : component) {
+                for (String cageId : component)
+                {
                     Cage cage = findCageById(cageId, this.room);
-                    if (cage != null) {
+                    if (cage != null)
+                    {
                         double length = cageId.equals(firstCageId) ? combinedResult.length : 0;
                         double width = cageId.equals(firstCageId) ? combinedResult.width : 0;
                         double height = cageId.equals(firstCageId) ? combinedResult.height : 0;
@@ -573,7 +614,8 @@ public class CageUIManager
             room.getRackGroups().forEach(rackGroup ->
                     rackGroup.getRacks().forEach(rack ->
                             rack.getCages().forEach(cage -> {
-                                if (!this.cageDims.containsKey(cage.getCageNum())) {
+                                if (!this.cageDims.containsKey(cage.getCageNum()))
+                                {
                                     RackTypesForm rackType = getRackType(rack.getType().getRowId());
                                     double baseLength = rackType.getLength();
                                     double baseWidth = rackType.getWidth();
@@ -592,17 +634,20 @@ public class CageUIManager
             );
         }
 
-        private Set<Set<String>> findConnectedComponents(Room room, Map<String, List<ModData>> cageModsMap) {
+        private Set<Set<String>> findConnectedComponents(Room room, Map<String, List<ModData>> cageModsMap)
+        {
             Set<Set<String>> components = new HashSet<>();
             Set<String> visited = new HashSet<>();
 
             room.getRackGroups().forEach(rackGroup ->
                     rackGroup.getRacks().forEach(rack ->
                             rack.getCages().forEach(cage -> {
-                                if (!visited.contains(cage.getObjectId())) {
+                                if (!visited.contains(cage.getObjectId()))
+                                {
                                     Set<String> component = new HashSet<>();
                                     bfsFindComponent(cage.getObjectId(), room, cageModsMap, component, visited);
-                                    if (!component.isEmpty()) {
+                                    if (!component.isEmpty())
+                                    {
                                         components.add(component);
                                     }
                                 }
@@ -614,21 +659,25 @@ public class CageUIManager
         }
 
         private void bfsFindComponent(String startCageId, Room room, Map<String, List<ModData>> cageModsMap,
-                                      Set<String> component, Set<String> visited) {
+                                      Set<String> component, Set<String> visited)
+        {
             Queue<String> queue = new LinkedList<>();
             queue.offer(startCageId);
             visited.add(startCageId);
             component.add(startCageId);
 
-            while (!queue.isEmpty()) {
+            while (!queue.isEmpty())
+            {
                 String currentCageId = queue.poll();
                 List<ModData> currentMods = cageModsMap.getOrDefault(currentCageId, new ArrayList<>());
 
                 // Find all connected cages based on modifications
                 Set<String> connectedCages = findCagesConnectedTo(currentCageId, room, currentMods);
 
-                for (String connectedCageId : connectedCages) {
-                    if (!visited.contains(connectedCageId)) {
+                for (String connectedCageId : connectedCages)
+                {
+                    if (!visited.contains(connectedCageId))
+                    {
                         visited.add(connectedCageId);
                         component.add(connectedCageId);
                         queue.offer(connectedCageId);
@@ -638,7 +687,8 @@ public class CageUIManager
         }
 
         private Set<String> findCagesConnectedTo(String cageId, Room room,
-                                                 List<ModData> currentMods) {
+                                                 List<ModData> currentMods)
+        {
             Set<String> connectedCages = new HashSet<>();
             Cage currentCage = findCageById(cageId, room);
 
@@ -652,14 +702,18 @@ public class CageUIManager
                     .collect(Collectors.toList());
 
             // For each connection-modifying modification on this cage, find connected cages
-            for (ModData mod : connectionMods) {
+            for (ModData mod : connectionMods)
+            {
                 // These mods are shared across cages via parentModId
                 String parentModId = mod.getParentModId();
                 Optional<ModData> adjModData;
                 // If the current mod has a parentModId, find the corresponding adj cage via parentModId = adj cage modId
-                if (parentModId != null && !parentModId.isEmpty()) {
+                if (parentModId != null && !parentModId.isEmpty())
+                {
                     adjModData = this.roomMods.stream().filter(mod2 -> mod2.getModId() != null && mod2.getModId().equals(parentModId)).findFirst();
-                }else{
+                }
+                else
+                {
                     // If the current mod does not have a parentModId, find the corresponding adj cage via parentModId = current cage modId
                     adjModData = this.roomMods.stream().filter(mod2 -> mod2.getParentModId() != null && mod2.getParentModId().equals(mod.getModId())).findFirst();
                 }
@@ -669,13 +723,16 @@ public class CageUIManager
             return connectedCages;
         }
 
-        private String findFirstCageInComponent(Set<String> component, Room room) {
+        private String findFirstCageInComponent(Set<String> component, Room room)
+        {
             String firstCageId = null;
             int minPositionId = Integer.MAX_VALUE;
 
-            for (String cageId : component) {
+            for (String cageId : component)
+            {
                 Cage cage = findCageById(cageId, room);
-                if (cage != null && cage.getPositionId() < minPositionId) {
+                if (cage != null && cage.getPositionId() < minPositionId)
+                {
                     minPositionId = cage.getPositionId();
                     firstCageId = cageId;
                 }
@@ -684,11 +741,16 @@ public class CageUIManager
             return firstCageId;
         }
 
-        private Cage findCageById(String cageId, Room room) {
-            for (RackGroup rackGroup : room.getRackGroups()) {
-                for (Rack rack : rackGroup.getRacks()) {
-                    for (Cage cage : rack.getCages()) {
-                        if (cage.getObjectId().equals(cageId)) {
+        private Cage findCageById(String cageId, Room room)
+        {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
+                for (Rack rack : rackGroup.getRacks())
+                {
+                    for (Cage cage : rack.getCages())
+                    {
+                        if (cage.getObjectId().equals(cageId))
+                        {
                             return cage;
                         }
                     }
@@ -771,11 +833,16 @@ public class CageUIManager
             );
         }
 
-        private Rack findRackByCageId(String cageId, Room room) {
-            for (RackGroup rackGroup : room.getRackGroups()) {
-                for (Rack rack : rackGroup.getRacks()) {
-                    for (Cage cage : rack.getCages()) {
-                        if (cage.getObjectId().equals(cageId)) {
+        private Rack findRackByCageId(String cageId, Room room)
+        {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
+                for (Rack rack : rackGroup.getRacks())
+                {
+                    for (Cage cage : rack.getCages())
+                    {
+                        if (cage.getObjectId().equals(cageId))
+                        {
                             return rack;
                         }
                     }
@@ -784,10 +851,12 @@ public class CageUIManager
             return null;
         }
 
-        private static class CombinedDimensionsResult {
+        private static class CombinedDimensionsResult
+        {
             double length, width, height, sqft;
 
-            CombinedDimensionsResult(double length, double width, double height, double sqft) {
+            CombinedDimensionsResult(double length, double width, double height, double sqft)
+            {
                 this.length = length;
                 this.width = width;
                 this.height = height;
@@ -796,7 +865,8 @@ public class CageUIManager
         }
 
 
-        public BundledForms submitRoom() {
+        public BundledForms submitRoom()
+        {
             BundledForms bundledForms = new BundledForms();
 
             // Generate new history ID
@@ -806,16 +876,20 @@ public class CageUIManager
             // Handle room history
             submitRoomHistory(this.room, historyId, this.isTemplate, bundledForms, newEndAndStartDate);
 
-            if (this.isTemplate) {
+            if (this.isTemplate)
+            {
                 // Handle template layout
                 submitTemplateLayout(this.room, historyId, bundledForms);
-            } else {
+            }
+            else
+            {
                 // Handle real room
                 getCageDims();
                 submitRealRoom(this.room, historyId, bundledForms);
             }
 
-            if(!this.room.getName().equals(prevRoomName) && this.isTemplate){
+            if (!this.room.getName().equals(prevRoomName) && this.isTemplate)
+            {
                 submitRoomNameChange(bundledForms);
             }
 
@@ -837,7 +911,8 @@ public class CageUIManager
             bundledForms.setEhrRoomsForm(result);
         }
 
-        private void submitRoomHistory(Room room, String historyId, boolean isTemplate, BundledForms bundledForms, Date newEndAndStartDate) {
+        private void submitRoomHistory(Room room, String historyId, boolean isTemplate, BundledForms bundledForms, Date newEndAndStartDate)
+        {
 
             // 1. get row in allHistory to end the current room.
             AllHistoryForm allHistoryToEnd = endPreviousAllHistory(room.getName(), newEndAndStartDate);
@@ -845,7 +920,8 @@ public class CageUIManager
             // 2. Create new all history record
             AllHistoryForm allHistoryToStart = startNewAllHistory(room.getName(), isTemplate, newEndAndStartDate, historyId);
             bundledForms.setNewAllHistoryForm(allHistoryToStart);
-            if(allHistoryToEnd != null){
+            if (allHistoryToEnd != null)
+            {
                 bundledForms.setPrevAllHistoryForm(allHistoryToEnd);
             }
 
@@ -858,22 +934,27 @@ public class CageUIManager
             bundledForms.setRoomHistoryForm(roomHistoryForm);
         }
 
-        private void submitTemplateLayout(Room room, String historyId, BundledForms bundledForms) {
+        private void submitTemplateLayout(Room room, String historyId, BundledForms bundledForms)
+        {
             ArrayList<TemplateLayoutHistoryForm> templateForms = new ArrayList<>();
 
             // Process rack groups
             int rackGroupIndex = 0;
-            for (RackGroup rackGroup : room.getRackGroups()) {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
                 rackGroupIndex++;
 
                 // Process racks in this group
                 int rackIndex = 0;
-                for (Rack rack : rackGroup.getRacks()) {
+                for (Rack rack : rackGroup.getRacks())
+                {
                     rackIndex++;
 
                     // Process cages in this rack
-                    if (rack.getCages() != null) {
-                        for (Cage cage : rack.getCages()) {
+                    if (rack.getCages() != null)
+                    {
+                        for (Cage cage : rack.getCages())
+                        {
                             TemplateLayoutHistoryForm form = new TemplateLayoutHistoryForm();
                             form.setHistoryId(historyId);
                             form.setRackGroup(rackGroupIndex);
@@ -904,8 +985,10 @@ public class CageUIManager
             }
 
             // Process room objects
-            if (room.getObjects() != null) {
-                for (RoomObject object : room.getObjects()) {
+            if (room.getObjects() != null)
+            {
+                for (RoomObject object : room.getObjects())
+                {
                     TemplateLayoutHistoryForm form = new TemplateLayoutHistoryForm();
                     form.setHistoryId(historyId);
                     form.setRackGroup(null); // rack_group is null for objects
@@ -923,7 +1006,8 @@ public class CageUIManager
             bundledForms.setTemplateLayoutHistoryForm(templateForms);
         }
 
-        private void submitRealRoom(Room room, String historyId, BundledForms bundledForms) {
+        private void submitRealRoom(Room room, String historyId, BundledForms bundledForms)
+        {
             // Handle cage history first
             submitCageHistory(room, historyId, bundledForms);
 
@@ -935,11 +1019,14 @@ public class CageUIManager
             ArrayList<CagesForm> prevCagesFormList = new ArrayList<>();
 
             // Process rack groups
-            for (RackGroup rackGroup : room.getRackGroups()) {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
                 // Process racks in this group
-                for (Rack rack : rackGroup.getRacks()) {
+                for (Rack rack : rackGroup.getRacks())
+                {
                     // Check if this is a new real rack that needs to be added to racks table
-                    if (rack.getIsNew() && !rack.getType().isDefault()) {
+                    if (rack.getIsNew() && !rack.getType().isDefault())
+                    {
                         // This is a new real rack - add to racks table
                         RacksForm racksForm = new RacksForm();
                         racksForm.setRackId(rack.getItemId());
@@ -951,9 +1038,11 @@ public class CageUIManager
 
                         // Get cage dimensions from rack_types table
                         RackTypesForm rackType = getRackType(rack.getType().getRowId());
-                        if (rackType != null && rack.getCages() != null) {
+                        if (rackType != null && rack.getCages() != null)
+                        {
                             // Add cages to cages table
-                            for (Cage cage : rack.getCages()) {
+                            for (Cage cage : rack.getCages())
+                            {
                                 CagesForm cagesForm = new CagesForm();
                                 Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
                                 cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
@@ -967,7 +1056,9 @@ public class CageUIManager
                                 cagesFormList.add(cagesForm);
                             }
                         }
-                    } else if (!rack.getIsNew() && !rack.getType().isDefault()) {
+                    }
+                    else if (!rack.getIsNew() && !rack.getType().isDefault())
+                    {
                         // This is an existing real rack that needs to be updated
                         // Fetch previous rack data
                         RacksForm prevRacksForm = getRackForm(rack.getObjectId());
@@ -978,9 +1069,11 @@ public class CageUIManager
 
                         // Get cage dimensions from rack_types table for existing rack
                         RackTypesForm rackType = getRackType(rack.getType().getRowId());
-                        if (rackType != null && rack.getCages() != null) {
+                        if (rackType != null && rack.getCages() != null)
+                        {
                             // Update existing cages with new data
-                            for (Cage cage : rack.getCages()) {
+                            for (Cage cage : rack.getCages())
+                            {
                                 CagesForm prevCagesForm = getCageForm(cage.getObjectId());
                                 Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
 
@@ -998,10 +1091,14 @@ public class CageUIManager
             }
 
             // Process cages in this rack for layout history
-            for (RackGroup rackGroup : room.getRackGroups()) {
-                for (Rack rack : rackGroup.getRacks()) {
-                    if (rack.getCages() != null) {
-                        for (Cage cage : rack.getCages()) {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
+                for (Rack rack : rackGroup.getRacks())
+                {
+                    if (rack.getCages() != null)
+                    {
+                        for (Cage cage : rack.getCages())
+                        {
                             LayoutHistoryForm form = new LayoutHistoryForm();
                             form.setHistoryId(historyId);
                             form.setCage(cage.getObjectId()); // cage ID
@@ -1017,8 +1114,10 @@ public class CageUIManager
             }
 
             // Process room objects
-            if (room.getObjects() != null) {
-                for (RoomObject object : room.getObjects()) {
+            if (room.getObjects() != null)
+            {
+                for (RoomObject object : room.getObjects())
+                {
                     LayoutHistoryForm form = new LayoutHistoryForm();
                     form.setHistoryId(historyId);
                     form.setCage(null); // cage is null for objects
@@ -1043,16 +1142,21 @@ public class CageUIManager
         }
 
 
-        private void submitCageHistory(Room room, String historyId, BundledForms bundledForms) {
+        private void submitCageHistory(Room room, String historyId, BundledForms bundledForms)
+        {
             ArrayList<CageHistoryForm> cageForms = new ArrayList<>();
 
-            for (RackGroup rackGroup : room.getRackGroups()) {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
 
-                for (Rack rack : rackGroup.getRacks()) {
+                for (Rack rack : rackGroup.getRacks())
+                {
                     RackTypesForm rackType = CageUIManager.get().getRackType(rack.getType().getRowId());
 
-                    if (rack.getCages() != null) {
-                        for (Cage cage : rack.getCages()) {
+                    if (rack.getCages() != null)
+                    {
+                        for (Cage cage : rack.getCages())
+                        {
 
                             CageHistoryForm form = new CageHistoryForm();
                             Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
@@ -1075,21 +1179,26 @@ public class CageUIManager
             bundledForms.setCageHistoryForm(cageForms);
         }
 
-        private void submitCageModificationsHistory(Room room, String historyId, BundledForms bundledForms) {
+        private void submitCageModificationsHistory(Room room, String historyId, BundledForms bundledForms)
+        {
             ArrayList<CageModificationHistoryForm> cageModForms = new ArrayList<>();
 
-            for (RackGroup rackGroup : room.getRackGroups()) {
-                for (Rack rack : rackGroup.getRacks()) {
-                    if (rack.getCages() != null) {
+            for (RackGroup rackGroup : room.getRackGroups())
+            {
+                for (Rack rack : rackGroup.getRacks())
+                {
+                    if (rack.getCages() != null)
+                    {
                         for (Cage cage : rack.getCages())
                         {
                             List<ModData> cageMod = new ArrayList<>();
-                            if (this.roomMods != null) {
+                            if (this.roomMods != null)
+                            {
                                 cageMod = this.roomMods.stream()
-                                    .filter(mod ->
-                                            mod.getCage().equals(cage.getObjectId())
-                                                    && mod.getRack().equals(rack.getObjectId()))
-                                    .toList();
+                                        .filter(mod ->
+                                                mod.getCage().equals(cage.getObjectId())
+                                                        && mod.getRack().equals(rack.getObjectId()))
+                                        .toList();
                             }
 
                             if (!cageMod.isEmpty())
@@ -1115,11 +1224,15 @@ public class CageUIManager
             bundledForms.setCageModificationHistoryForm(cageModForms);
         }
 
-        private String toJson(Map<String, Object> map) {
-            try {
+        private String toJson(Map<String, Object> map)
+        {
+            try
+            {
                 ObjectMapper mapper = new ObjectMapper();
                 return mapper.writeValueAsString(map);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new RuntimeException("Failed to convert map to JSON", e);
             }
         }

@@ -9,4 +9,4 @@ export const HomeViewContent: FC = () => {
             Home Content
         </div>
     );
-}
+};

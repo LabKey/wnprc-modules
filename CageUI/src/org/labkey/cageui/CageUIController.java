@@ -24,41 +24,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.DbScope;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.BatchValidationException;
-import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
-import org.labkey.cageui.action.AllHistoryForm;
 import org.labkey.cageui.action.BundledForms;
-import org.labkey.cageui.action.CageHistoryForm;
-import org.labkey.cageui.action.CageModificationHistoryForm;
-import org.labkey.cageui.action.CagesForm;
-import org.labkey.cageui.action.LayoutHistoryForm;
-import org.labkey.cageui.action.RackTypesForm;
-import org.labkey.cageui.action.RacksForm;
-import org.labkey.cageui.action.RoomHistoryForm;
-import org.labkey.cageui.action.TemplateLayoutHistoryForm;
-import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.ModData;
-import org.labkey.cageui.model.Rack;
-import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.Room;
-import org.labkey.cageui.model.RoomObject;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
-import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 import org.springframework.validation.BindException;
@@ -66,10 +46,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 public class CageUIController extends SpringActionController
 {
@@ -109,7 +85,9 @@ public class CageUIController extends SpringActionController
             return new JspView("/org/labkey/cageui/view/hello.jsp");
         }
 
-        public void addNavTrail(NavTree root) { }
+        public void addNavTrail(NavTree root)
+        {
+        }
     }
 
 
@@ -150,7 +128,8 @@ public class CageUIController extends SpringActionController
         public void validateForm(SimpleApiJsonForm form, Errors errors)
         {
             JSONObject json = form.getJsonObject();
-            if(json == null){
+            if (json == null)
+            {
                 errors.reject(ERROR_MSG, "Missing json parameter.");
                 return;
             }
@@ -159,25 +138,36 @@ public class CageUIController extends SpringActionController
             String prevRoomName = json.get("prevRoomName").toString();
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            try {
+            try
+            {
                 Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
-                if(room != null){
+                if (room != null)
+                {
                     setRoom(room);
                 }
-                else{
+                else
+                {
                     errors.reject(ERROR_MSG, "Missing room parameter.");
                 }
-            } catch (JsonProcessingException e) {
+            }
+            catch (JsonProcessingException e)
+            {
                 errors.reject(ERROR_MSG, e.getMessage());
             }
 
-            try {
-                TypeReference<ArrayList<ModData>> typeRef = new TypeReference<ArrayList<ModData>>() {};
+            try
+            {
+                TypeReference<ArrayList<ModData>> typeRef = new TypeReference<ArrayList<ModData>>()
+                {
+                };
                 ArrayList<ModData> defaultMods = mapper.readValue(jsonModsArray.toString(), typeRef);
-                if(defaultMods != null && !defaultMods.isEmpty()){
+                if (defaultMods != null && !defaultMods.isEmpty())
+                {
                     setRoomDefaultMods(defaultMods);
                 }
-            } catch (JsonProcessingException e) {
+            }
+            catch (JsonProcessingException e)
+            {
                 errors.reject(ERROR_MSG, e.getMessage());
             }
 

@@ -42,16 +42,26 @@ public enum RackTypes
 
     public static String getName(RackTypes value)
     {
-        switch (value) {
-            case DEFAULTCAGE: return "Default Cage";
-            case DEFAULTPEN: return "Default Pen";
-            case DEFAULTTEMPCAGE: return "Default Temp Cage";
-            case DEFAULTPLAYCAGE: return "Default Play Cage";
-            case CAGE: return "Cage";
-            case PEN: return "Pen";
-            case TEMPCAGE: return "Temp Cage";
-            case PLAYCAGE: return "Play Cage";
-            default: throw new IllegalArgumentException("Invalid status value: " + value);
+        switch (value)
+        {
+            case DEFAULTCAGE:
+                return "Default Cage";
+            case DEFAULTPEN:
+                return "Default Pen";
+            case DEFAULTTEMPCAGE:
+                return "Default Temp Cage";
+            case DEFAULTPLAYCAGE:
+                return "Default Play Cage";
+            case CAGE:
+                return "Cage";
+            case PEN:
+                return "Pen";
+            case TEMPCAGE:
+                return "Temp Cage";
+            case PLAYCAGE:
+                return "Play Cage";
+            default:
+                throw new IllegalArgumentException("Invalid status value: " + value);
         }
     }
 

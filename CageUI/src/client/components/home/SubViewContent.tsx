@@ -6,8 +6,9 @@ interface SubViewContentProps {
     tabs?: {
         name: string;
         children?: React.ReactNode;
-    }[]
+    }[];
 }
+
 export const SubViewContent: FC<SubViewContentProps> = (props) => {
     const [activeTab, setActiveTab] = useState(0); // State to track the active tab
     const {tabs} = props;
@@ -20,7 +21,7 @@ export const SubViewContent: FC<SubViewContentProps> = (props) => {
                     <button
                         key={index}
                         onClick={() => setActiveTab(index)}
-                        className={index === activeTab ? "active" : ""}
+                        className={index === activeTab ? 'active' : ''}
                     >
                         {view.name}
                     </button>
@@ -31,4 +32,4 @@ export const SubViewContent: FC<SubViewContentProps> = (props) => {
             </div>
         </div>
     );
-}
+};

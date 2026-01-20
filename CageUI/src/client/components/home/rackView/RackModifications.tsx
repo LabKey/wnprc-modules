@@ -4,7 +4,7 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
 import { findRackInGroup } from '../../../utils/LayoutEditorHelpers';
-import { Cage, CageDirection, CurrCageMods, ModLocations, ModTypes, Rack, RackGroup } from '../../../types/typings';
+import { Cage, CurrCageMods, ModLocations, ModTypes, RackGroup } from '../../../types/typings';
 import { getDirectionString, getLocationDirection } from '../../../utils/homeHelpers';
 import { findConnectedCages, findConnectedRacks, getAdjLocation } from '../../../utils/helpers';
 import { ModificationSelect } from './ModificationSelect';
@@ -23,24 +23,28 @@ export const RackModifications: FC = () => {
     const [connectedCages, setConnectedCages] = useState<ConnectedCages>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
     const [connectedRacks, setConnectedRacks] = useState<ConnectedRacks>(null);
-    const [currRackMods, setCurrRackMods] = useState<{[key in string]: CurrCageMods}>(null);
+    const [currRackMods, setCurrRackMods] = useState<{ [key in string]: CurrCageMods }>(null);
 
     useEffect(() => {
-        console.log("Connected Cages", connectedCages);
-        console.log("Connected Racks", connectedRacks);
+        console.log('Connected Cages', connectedCages);
+        console.log('Connected Racks', connectedRacks);
     }, [connectedRacks, connectedCages]);
     useEffect(() => {
-        console.log("Current Rack Mods", currRackMods);
+        console.log('Current Rack Mods', currRackMods);
     }, [currRackMods]);
     // Find possible connects
     useEffect(() => {
-        if(!selectedRack) return;
+        if (!selectedRack) {
+            return;
+        }
         const currGroup = findRackInGroup(selectedRack.svgId, selectedRoom.rackGroups).rackGroup;
-        const connections = findConnectedCages(selectedRack,undefined);
+        const connections = findConnectedCages(selectedRack, undefined);
         const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
-        console.log("Connections", connections);
+        console.log('Connections', connections);
         Object.entries(connections).forEach(([loc, connection]) => {
-            if(parseInt(loc) === ModLocations.Direct) return;
+            if (parseInt(loc) === ModLocations.Direct) {
+                return;
+            }
             connection.forEach(c => {
                 newRackMods[c.currCage.objectId] = {
                     adjCages: {
@@ -56,21 +60,25 @@ export const RackModifications: FC = () => {
                     } as ConnectedCages,
                     currCage: c.adjCage.mods[ModLocations.Direct].flatMap(m => m.modKeys)
                 };
-            })
-        })
-        console.log("New Rack Mods", newRackMods);
+            });
+        });
+        console.log('New Rack Mods', newRackMods);
         setCurrRackMods(newRackMods);
         setConnectedCages(connections);
         setRackGroup(currGroup);
     }, [selectedRack]);
 
     useEffect(() => {
-        if(!rackGroup) return;
+        if (!rackGroup) {
+            return;
+        }
         const connectedRacks = findConnectedRacks(rackGroup, selectedRack);
-        console.log("Connected Racks #1: ", connectedRacks);
+        console.log('Connected Racks #1: ', connectedRacks);
         const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
         Object.entries(connectedRacks).forEach(([loc, connection]) => {
-            if(parseInt(loc) === ModLocations.Direct) return;
+            if (parseInt(loc) === ModLocations.Direct) {
+                return;
+            }
             connection.forEach(c => {
                 newRackMods[c.currCage.objectId] = {
                     adjCages: {
@@ -86,21 +94,23 @@ export const RackModifications: FC = () => {
                     } as ConnectedRacks,
                     currCage: c.adjCage.mods[ModLocations.Direct].flatMap(m => m.modKeys)
                 };
-            })
-        })
-        console.log("New Rack Mods", newRackMods);
+            });
+        });
+        console.log('New Rack Mods', newRackMods);
 
         setCurrRackMods(newRackMods);
         setConnectedRacks(connectedRacks);
     }, [rackGroup]);
 
     const handleModSave = () => {
-        console.log("Saving Mods");
-    }
+        console.log('Saving Mods');
+    };
 
     const handleChangeMod = (location: ModLocations, cage: Cage, selectedMod: Option<ModTypes>) => {
         setCurrRackMods(prevState => {
-            if (!prevState) return prevState;
+            if (!prevState) {
+                return prevState;
+            }
 
             const newCageModsArray = {...prevState};
 
@@ -111,7 +121,7 @@ export const RackModifications: FC = () => {
             );
 
             if (cageModsIndex !== -1) {
-                const newCageMods = { ...newCageModsArray[cageModsIndex] };
+                const newCageMods = {...newCageModsArray[cageModsIndex]};
 
                 // Handle adjacent cages
                 if (newCageMods.adjCages[location]) {
@@ -152,7 +162,9 @@ export const RackModifications: FC = () => {
 
     const handleRemoveMod = (location: ModLocations, cage: Cage) => {
         setCurrRackMods(prevState => {
-            if (!prevState) return prevState;
+            if (!prevState) {
+                return prevState;
+            }
 
             const newCageModsArray = {...prevState};
 
@@ -163,7 +175,7 @@ export const RackModifications: FC = () => {
             );
 
             if (cageModsIndex !== -1) {
-                const newCageMods = { ...newCageModsArray[cageModsIndex] };
+                const newCageMods = {...newCageModsArray[cageModsIndex]};
 
                 // Handle adjacent cages
                 if (newCageMods.adjCages[location]) {
@@ -194,23 +206,23 @@ export const RackModifications: FC = () => {
 
 
     return (
-        <div className={"mod-container"}>
-            <div className={"mod-container-columns"}>
-                <div className={"mod-container-column"}>
-                    <div className={"mod-table-container"}>
+        <div className={'mod-container'}>
+            <div className={'mod-container-columns'}>
+                <div className={'mod-container-column'}>
+                    <div className={'mod-table-container'}>
                         <h2>Unconnected cages</h2>
-                        <ul className={"mod-table"}>
-                            <li className={"mod-table-row mod-table-header"}>
-                                <div className={"mod-table-column"}>Cage</div>
-                                <div className={"mod-table-column"}>Modification</div>
+                        <ul className={'mod-table'}>
+                            <li className={'mod-table-row mod-table-header'}>
+                                <div className={'mod-table-column'}>Cage</div>
+                                <div className={'mod-table-column'}>Modification</div>
                             </li>
                             {aloneCages && aloneCages.map((cage, idx) => {
                                 return (
-                                    <li className={"mod-table-row"} key={`alone-row-${idx}`} >
-                                        <div className={"mod-table-column"} key={`alone-${cage.cageNum}-${idx}`}>
+                                    <li className={'mod-table-row'} key={`alone-row-${idx}`}>
+                                        <div className={'mod-table-column'} key={`alone-${cage.cageNum}-${idx}`}>
                                             {cage.cageNum}
                                         </div>
-                                        <div className={"mod-table-column"} key={`alone-mod-${idx}`}>
+                                        <div className={'mod-table-column'} key={`alone-mod-${idx}`}>
                                             <ModificationSelect
                                                 removeMod={handleRemoveMod}
                                                 changeMod={handleChangeMod}
@@ -222,17 +234,17 @@ export const RackModifications: FC = () => {
                         </ul>
 
                         <h2>Adjacent cages inside current rack</h2>
-                        <ul className={"mod-table"}>
-                            <li className={"mod-table-row mod-table-header"}>
-                                <div className={"mod-table-column"}>Cage</div>
-                                <div className={"mod-table-column"}>Modification</div>
-                                <div className={"mod-table-column"}>Direction</div>
-                                <div className={"mod-table-column"}>Cage</div>
-                                <div className={"mod-table-column"}>Modification</div>
+                        <ul className={'mod-table'}>
+                            <li className={'mod-table-row mod-table-header'}>
+                                <div className={'mod-table-column'}>Cage</div>
+                                <div className={'mod-table-column'}>Modification</div>
+                                <div className={'mod-table-column'}>Direction</div>
+                                <div className={'mod-table-column'}>Cage</div>
+                                <div className={'mod-table-column'}>Modification</div>
                             </li>
                             {connectedCages && Object.entries(connectedCages).map(([loc, locConnections], idx) => {
                                 return locConnections.map((connection, connIdx) => {
-                                    const { currCage, adjCage, currMods, adjMods } = connection;
+                                    const {currCage, adjCage, currMods, adjMods} = connection;
                                     let modRows = [];
 
                                     currMods.forEach((currMod, i) => {
@@ -246,12 +258,13 @@ export const RackModifications: FC = () => {
                                             return false;
                                         });
                                         modRows.push(
-                                            <li className={"mod-table-row"} key={`connection-${idx}-${connIdx}-mod-${i}`}>
+                                            <li className={'mod-table-row'}
+                                                key={`connection-${idx}-${connIdx}-mod-${i}`}>
                                                 {/* Current Cage Column */}
-                                                <div className={"mod-table-column"}>
+                                                <div className={'mod-table-column'}>
                                                     {currCage.cageNum}
                                                 </div>
-                                                <div className={"mod-table-column"}>
+                                                <div className={'mod-table-column'}>
                                                     <ModificationSelect
                                                         defaultValue={selectedRoom.mods[currMod.modId]}
                                                         directionCategory={getLocationDirection(loc as ModLocations)}
@@ -264,15 +277,15 @@ export const RackModifications: FC = () => {
                                                 </div>
 
                                                 {/* Direction Column */}
-                                                <div className={"mod-table-column"}>
+                                                <div className={'mod-table-column'}>
                                                     {getDirectionString(loc as ModLocations)}
                                                 </div>
 
                                                 {/* Adjacent Cage Column */}
-                                                <div className={"mod-table-column"}>
+                                                <div className={'mod-table-column'}>
                                                     {adjCage.cageNum}
                                                 </div>
-                                                <div className={"mod-table-column"}>
+                                                <div className={'mod-table-column'}>
                                                     <ModificationSelect
                                                         defaultValue={selectedRoom.mods[adjMod.modId]}
                                                         directionCategory={getLocationDirection(loc as ModLocations)}
@@ -285,7 +298,7 @@ export const RackModifications: FC = () => {
                                                 </div>
                                             </li>
                                         );
-                                    })
+                                    });
 
                                     return modRows;
                                 });
@@ -295,20 +308,20 @@ export const RackModifications: FC = () => {
                         <h2>
                             Adjacent cages outside current rack
                         </h2>
-                        <ul className={"mod-table"}>
-                            <li className={"mod-table-row mod-table-header"}>
-                                <div className={"mod-table-column"}>Rack</div>
-                                <div className={"mod-table-column"}>Cage</div>
-                                <div className={"mod-table-column"}>Modification</div>
-                                <div className={"mod-table-column"}>Direction</div>
-                                <div className={"mod-table-column"}>Rack</div>
-                                <div className={"mod-table-column"}>Cage</div>
-                                <div className={"mod-table-column"}>Modification</div>
+                        <ul className={'mod-table'}>
+                            <li className={'mod-table-row mod-table-header'}>
+                                <div className={'mod-table-column'}>Rack</div>
+                                <div className={'mod-table-column'}>Cage</div>
+                                <div className={'mod-table-column'}>Modification</div>
+                                <div className={'mod-table-column'}>Direction</div>
+                                <div className={'mod-table-column'}>Rack</div>
+                                <div className={'mod-table-column'}>Cage</div>
+                                <div className={'mod-table-column'}>Modification</div>
                             </li>
                             {connectedRacks && Object.entries(connectedRacks).map(([loc, rackConnections], idx) => {
                                 return rackConnections.map((connection, connIdx) => {
-                                    const { currRack, currCage, adjRack, adjCage, currMods, adjMods } = connection;
-                                    console.log("currMod", currMods);
+                                    const {currRack, currCage, adjRack, adjCage, currMods, adjMods} = connection;
+                                    console.log('currMod', currMods);
                                     // Create rows for each mod pairing
                                     const modRows = [];
 
@@ -330,15 +343,19 @@ export const RackModifications: FC = () => {
                                         }
 
                                         modRows.push(
-                                            <li className={"mod-table-row"} key={`rack-connection-${idx}-${connIdx}-mod-${i}`}>
+                                            <li className={'mod-table-row'}
+                                                key={`rack-connection-${idx}-${connIdx}-mod-${i}`}>
                                                 {/* Current Rack and Cage */}
-                                                <div className={"mod-table-column"} key={`curr-rack-${currRack.itemId}-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`curr-rack-${currRack.itemId}-${idx}-${connIdx}-${i}`}>
                                                     {currRack.itemId}
                                                 </div>
-                                                <div className={"mod-table-column"} key={`curr-cage-${currCage.cageNum}-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`curr-cage-${currCage.cageNum}-${idx}-${connIdx}-${i}`}>
                                                     {currCage.cageNum}
                                                 </div>
-                                                <div className={"mod-table-column"} key={`curr-mod-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`curr-mod-${idx}-${connIdx}-${i}`}>
                                                     <ModificationSelect
                                                         defaultValue={selectedRoom.mods[currMod.modId]}
                                                         directionCategory={getLocationDirection(loc as ModLocations)}
@@ -351,18 +368,22 @@ export const RackModifications: FC = () => {
                                                 </div>
 
                                                 {/* Direction */}
-                                                <div className={"mod-table-column"} key={`direction-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`direction-${idx}-${connIdx}-${i}`}>
                                                     {getDirectionString(loc as ModLocations)}
                                                 </div>
 
                                                 {/* Adjacent Rack and Cage */}
-                                                <div className={"mod-table-column"} key={`adj-rack-${adjRack.itemId}-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`adj-rack-${adjRack.itemId}-${idx}-${connIdx}-${i}`}>
                                                     {adjRack.itemId}
                                                 </div>
-                                                <div className={"mod-table-column"} key={`adj-cage-${adjCage.cageNum}-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`adj-cage-${adjCage.cageNum}-${idx}-${connIdx}-${i}`}>
                                                     {adjCage.cageNum}
                                                 </div>
-                                                <div className={"mod-table-column"} key={`adj-mod-${idx}-${connIdx}-${i}`}>
+                                                <div className={'mod-table-column'}
+                                                     key={`adj-mod-${idx}-${connIdx}-${i}`}>
                                                     <ModificationSelect
                                                         defaultValue={selectedRoom.mods[adjMod.modId]}
                                                         directionCategory={getLocationDirection(loc as ModLocations)}
@@ -375,7 +396,7 @@ export const RackModifications: FC = () => {
                                                 </div>
                                             </li>
                                         );
-                                    })
+                                    });
 
                                     return modRows;
                                 });
@@ -384,14 +405,14 @@ export const RackModifications: FC = () => {
                         </ul>
                     </div>
                 </div>
-                <div className={"mod-container-column"}>
+                <div className={'mod-container-column'}>
                 </div>
             </div>
 
-            <div className={"mod-container-row"}>
+            <div className={'mod-container-row'}>
                 <Button
-                    as={"input"}
-                    type={"button"}
+                    as={'input'}
+                    type={'button'}
                     value={"Save"}
                     disabled={false}
                     onClick={handleModSave}

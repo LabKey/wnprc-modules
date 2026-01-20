@@ -33,7 +33,8 @@ import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 public class CageUIAdminRole extends AbstractRole
 {
 
-    public CageUIAdminRole(){
+    public CageUIAdminRole()
+    {
         this("Cage UI Admin",
                 "Administrator role for Cage UI",
                 CageUITemplateCreatorPermission.class,
@@ -47,7 +48,8 @@ public class CageUIAdminRole extends AbstractRole
         );
     }
 
-    protected CageUIAdminRole(String name, String description, Class<? extends Permission>... perms) {
+    protected CageUIAdminRole(String name, String description, Class<? extends Permission>... perms)
+    {
         super(name, description, CageUIModule.class, perms);
     }
 

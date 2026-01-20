@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { HomeNavigationContextType } from '../types/homeNavigationContextTypes';
 import { SelectedPage } from '../types/homeTypes';
-import { Cage, Rack, RackGroup } from '../types/typings';
-import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 
 
 const HomeNavigationContext = createContext<HomeNavigationContextType>({} as HomeNavigationContextType);
@@ -20,32 +18,33 @@ export const useHomeNavigationContext = () => {
     return context;
 };
 
-export const HomeNavigationContextProvider = ({ children }) => {
-    const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: "Home"});
+export const HomeNavigationContextProvider = ({children}) => {
+    const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: 'Home'});
 
 
     // Navigation functions
     const navigateTo = (page, data = null) => {
-        setSelectedPage({ selected: page, ...data });
+        setSelectedPage({selected: page, ...data});
     };
 
     const goToHome = () => {
-        console.log("Home clicked");
+        console.log('Home clicked');
         setSelectedPage(prevState => ({
-            selected: "Home"
+            selected: 'Home'
         }));
-    }
+    };
 
     const navigateToRoom = async (roomName, switchRoom) => {
         // First navigate to the room page
-        navigateTo("Room", { room: roomName });
+        navigateTo('Room', {room: roomName});
 
         // Then load the room data if needed
         if (switchRoom) {
             try {
                 // This is the switchToRoom function from the RoomContextProvider instance
                 await switchRoom(roomName);
-            } catch (error) {
+            }
+            catch (error) {
                 console.error('Failed to load room data:', error);
             }
         }

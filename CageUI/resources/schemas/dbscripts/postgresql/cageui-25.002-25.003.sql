@@ -33,7 +33,7 @@ CREATE TABLE cageui.racks
     created           TIMESTAMP,
     modifiedby        userid,
     modified          TIMESTAMP,
-    CONSTRAINT PK_racks PRIMARY KEY (rowid),
+    CONSTRAINT PK_racks PRIMARY KEY (objectid),
     CONSTRAINT FK_racks_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 
@@ -142,7 +142,7 @@ CREATE TABLE cageui.cages
     created           TIMESTAMP,
     modifiedby        userid,
     modified          TIMESTAMP,
-    CONSTRAINT PK_cages PRIMARY KEY (rowid),
+    CONSTRAINT PK_cages PRIMARY KEY (objectid),
     CONSTRAINT FK_cages_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 

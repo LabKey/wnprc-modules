@@ -968,19 +968,6 @@ public class CageUIManager
                             templateForms.add(form);
                         }
                     }
-
-                    // Process rack itself (as object)
-                    TemplateLayoutHistoryForm form = new TemplateLayoutHistoryForm();
-                    form.setHistoryId(historyId);
-                    form.setRackGroup(rackGroupIndex);
-                    form.setRack(rackIndex);
-                    form.setCage(null); // cage is null for racks
-                    form.setObjectType(1); // object_type for rack
-                    form.setExtraContext(rack.getExtraContext() != null ?
-                            toJson(rack.getExtraContext()) : null);
-                    form.setxCoord(rack.getX());
-                    form.setyCoord(rack.getY());
-                    templateForms.add(form);
                 }
             }
 

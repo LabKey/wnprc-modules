@@ -757,8 +757,8 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
         let cageNumType: RoomItemStringType = roomItemToString(rackItem.objectType);
         let extraContext: ExtraContext;
-        let cageHistoryData = (rackItem.cage as FullCageHistory).cageHistory;
-        let cageData = (rackItem.cage as FullCageHistory).cageData;
+        let cageHistoryData = (rackItem.cage as FullCageHistory)?.cageHistory;
+        let cageData = (rackItem.cage as FullCageHistory)?.cageData;
         let cageObjId: string;
         let cageNum;
         let cagePositionId;

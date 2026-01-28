@@ -29,7 +29,7 @@ import {
     FetchRoomData,
     FullCageHistory,
     FullObjectHistoryData,
-    GroupId,
+    GroupId, GroupRotation,
     LayoutData,
     LayoutHistoryData,
     ModData,
@@ -201,6 +201,17 @@ export const formatRackId = (str: string) => {
 
 
 };
+
+export const rotatePoint = (x: number, y: number, angle: number): { x: number, y: number } => {
+    const radians = (angle * 90) * (Math.PI / 180);
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+
+    return {
+        x: x * cos - y * sin,
+        y: x * sin + y * cos
+    };
+}
 
 
 export const getNextDefaultRackId = (groups: RackGroup[]): number => {
@@ -397,6 +408,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
                     objectType: row.object_type,
                     extraContext: row.extra_context,
                     rackGroup: row.rack_group,
+                    groupRotation: row.group_rotation,
                     rack: row.rack.toString(),
                     cage: row.cage,
                     xCoord: row.x_coord,
@@ -674,6 +686,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 groupId: `rack-group-${rackItem.rackGroup}` as GroupId,
                 selectionType: 'rackGroup',
                 scale: prevRoom.layoutData.scale,
+                rotation: rackItem.groupRotation,
                 x: rackItem.xCoord,
                 y: rackItem.yCoord,
                 racks: []
@@ -975,6 +988,7 @@ function areAdjacent(
     currRack: Rack,
     adjCage: Cage,
     adjRack: Rack,
+    rotation: GroupRotation,
     group?: RackGroup
 ): {
     location: ModLocations | null,
@@ -1014,6 +1028,16 @@ function areAdjacent(
         return {location: null, currLines: [], adjLines: []};
     }
 
+    // For determining the actual location in the current perspective
+    const locationMap = {
+        [GroupRotation.Origin]: { left: ModLocations.Left, right: ModLocations.Right, top: ModLocations.Top, bottom: ModLocations.Bottom },
+        [GroupRotation.Quarter]: { left: ModLocations.Bottom, right: ModLocations.Top, top: ModLocations.Left, bottom: ModLocations.Right },
+        [GroupRotation.Half]: { left: ModLocations.Right, right: ModLocations.Left, top: ModLocations.Bottom, bottom: ModLocations.Top },
+        [GroupRotation.ThreeQuarter]: { left: ModLocations.Top, right: ModLocations.Bottom, top: ModLocations.Right, bottom: ModLocations.Left }
+    };
+
+    const locMap = locationMap[rotation];
+
     // Horizontal adjacency: adj is directly to the left of curr (their vertical spans overlap)
     if (Math.abs(left1 - right2) < EPS) {
         const yOverlap = getOverlapRange(top1, bottom1, top2, bottom2);
@@ -1031,7 +1055,7 @@ function areAdjacent(
             const adjIdx = getIntersectingSectionIndices(height2, adjSides, adjLocalStart, adjLocalEnd);
 
             return {
-                location: ModLocations.Left,
+                location: locMap.left,
                 currLines: buildSideIds('left', currIdx),
                 adjLines: buildSideIds('right', adjIdx)
             };
@@ -1054,7 +1078,7 @@ function areAdjacent(
             const adjIdx = getIntersectingSectionIndices(height2, adjSides, adjLocalStart, adjLocalEnd);
 
             return {
-                location: ModLocations.Right,
+                location: locMap.right,
                 currLines: buildSideIds('right', currIdx),
                 adjLines: buildSideIds('left', adjIdx)
             };
@@ -1078,7 +1102,7 @@ function areAdjacent(
             const adjIdx = getIntersectingSectionIndices(width2, adjSides, adjLocalStart, adjLocalEnd);
 
             return {
-                location: ModLocations.Top,
+                location: locMap.top,
                 currLines: buildSideIds('top', currIdx),
                 adjLines: buildSideIds('bottom', adjIdx)
             };
@@ -1101,7 +1125,7 @@ function areAdjacent(
             const adjIdx = getIntersectingSectionIndices(width2, adjSides, adjLocalStart, adjLocalEnd);
 
             return {
-                location: ModLocations.Bottom,
+                location: locMap.bottom,
                 currLines: buildSideIds('bottom', currIdx),
                 adjLines: buildSideIds('top', adjIdx)
             };
@@ -1119,7 +1143,7 @@ function areAdjacent(
 // Finds the cage connections in a rack.
 //
 // If cage is passed then it only finds the connections with that cage.
-export const findConnectedCages = (rack: Rack, cage?: Cage) => {
+export const findConnectedCages = (rack: Rack, rotation: GroupRotation, cage?: Cage) => {
 
     const connections: ConnectedCages = {
         [ModLocations.Top]: [],
@@ -1131,9 +1155,9 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
     if (cage) {
         for (let i = 0; i < rack.cages.length; i++) {
             if (rack.cages[i].cageNum !== cage.cageNum) {
-                const adj = areAdjacent(cage, rack, rack.cages[i], rack);
-                console.log('Adjacent: ', adj);
-                // adj.location is the location of cage adj to current cage meaning if 1 is left of 2 then adj.location = right.
+                const adj = areAdjacent(cage, rack, rack.cages[i], rack, rotation);
+                console.log(`${rack.cages[i].cageNum} is ${ModLocations[adj.location]} of ${cage.cageNum} `);
+                // adj.location is the location of adj cage to current cage meaning if 1 is curr and is left of 2 then adj.location = right. (adj is right of curr)
                 if (adj.location !== null) {
                     adj.currLines.forEach(((line, idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
@@ -1153,7 +1177,7 @@ export const findConnectedCages = (rack: Rack, cage?: Cage) => {
     } else {
         for (let i = 0; i < rack.cages.length; i++) {
             for (let j = i + 1; j < rack.cages.length; j++) {
-                const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack);
+                const adj = areAdjacent(rack.cages[i], rack, rack.cages[j], rack, rotation);
                 if (adj.location !== null) {
                     adj.currLines.forEach((line, idx) => {
                         const currSubId = parseInt(line.split('-')[1]);
@@ -1199,7 +1223,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
                     }
                 }
 
-                const adj = areAdjacent(currCage, cRack, adjCage, adjRack, group);
+                const adj = areAdjacent(currCage, cRack, adjCage, adjRack, group.rotation, group);
                 // skip racks that arent connected to the current rack
                 if (cRack.objectId !== currRack.objectId && adjRack.objectId !== currRack.objectId) {
                     continue;
@@ -1261,7 +1285,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
             group.racks.forEach((r) => {
                 r.cages.forEach((c) => {
                     if (c.mods === undefined) {
-                        const connectedCages = findConnectedCages(r, c);
+                        const connectedCages = findConnectedCages(r, group.rotation, c);
                         Object.entries(connectedCages).forEach(([direction, connections]) => {
                             if (connections.length === 0) {
                                 return;

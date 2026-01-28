@@ -9,6 +9,8 @@ public class CageHistoryForm
     private String _historyId;
     @JsonProperty("rack_group")
     private int _rackGroup;
+    @JsonProperty("group_rotation")
+    private int _groupRotation;
     private String _cage;
     @JsonProperty("cage_number")
     private int _cageNumber;
@@ -105,5 +107,15 @@ public class CageHistoryForm
     public void setSqft(Double sqft)
     {
         _sqft = sqft;
+    }
+
+    public int getGroupRotation()
+    {
+        return _groupRotation;
+    }
+
+    public void setGroupRotation(int groupRotation)
+    {
+        _groupRotation = groupRotation;
     }
 }

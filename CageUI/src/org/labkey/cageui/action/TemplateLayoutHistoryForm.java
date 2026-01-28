@@ -9,6 +9,8 @@ public class TemplateLayoutHistoryForm
     private String _historyId;
     @JsonProperty("rack_group")
     private Integer _rackGroup;
+    @JsonProperty("group_rotation")
+    private int _groupRotation;
     private Integer _rack;
     private Integer _cage;
     @JsonProperty("object_type")
@@ -108,5 +110,15 @@ public class TemplateLayoutHistoryForm
     public void setyCoord(int yCoord)
     {
         _yCoord = yCoord;
+    }
+
+    public int getGroupRotation()
+    {
+        return _groupRotation;
+    }
+
+    public void setGroupRotation(int groupRotation)
+    {
+        _groupRotation = groupRotation;
     }
 }

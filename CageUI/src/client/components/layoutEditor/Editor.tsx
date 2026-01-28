@@ -87,6 +87,7 @@ import { GateSwitch } from './GateSwitch';
 import { CELL_SIZE, SVG_HEIGHT, SVG_WIDTH } from '../../utils/constants';
 import { LayoutErrors } from '../LayoutErrors';
 import { LoadingScreen } from '../LoadingScreen';
+import { RotateRackGroup } from './RotateRackGroup';
 
 interface EditorProps {
     roomSize: SelectorOptions;
@@ -148,6 +149,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     useEffect(() => {
         console.log('room', localRoom);
     }, [localRoom]);
+    useEffect(() => {
+        console.log('unitLocs: ', unitLocs);
+    }, [unitLocs]);
 
     const contextMenuRef = useRef(localRoom);
     contextMenuRef.current = localRoom;
@@ -1089,6 +1093,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                         />,
                                     types: [],
                                     title: 'Change Cage Number'
+                                },
+                                {
+                                    element:
+                                        <RotateRackGroup />,
+                                    types: [],
+                                    title: 'Rotate Rack Group'
                                 }
                             ]}
                     />

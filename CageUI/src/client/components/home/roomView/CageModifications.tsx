@@ -52,7 +52,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
     // Find possible connects
     useEffect(() => {
         const {rackGroup: currGroup, rack: currRack} = findCageInGroup(cage.svgId, selectedRoom.rackGroups);
-        const connectionsObj = findConnectedCages(currRack, cage);
+        const connectionsObj = findConnectedCages(currRack, currGroup.rotation, cage);
 
         // connect prev cages
         Object.entries(connectionsObj).forEach(([direction, connections]) => {

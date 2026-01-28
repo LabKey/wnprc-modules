@@ -38,7 +38,7 @@ export const RackModifications: FC = () => {
             return;
         }
         const currGroup = findRackInGroup(selectedRack.svgId, selectedRoom.rackGroups).rackGroup;
-        const connections = findConnectedCages(selectedRack, undefined);
+        const connections = findConnectedCages(selectedRack, currGroup.rotation, undefined);
         const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
         console.log('Connections', connections);
         Object.entries(connections).forEach(([loc, connection]) => {

@@ -342,42 +342,6 @@ public class CageUIManager
         }
     }
 
-    // Helper method to get all cages in the same rack group
-    public static List<Cage> getAllCagesInRackGroup(RackGroup rackGroup)
-    {
-        List<Cage> allCages = new ArrayList<>();
-
-        if (rackGroup != null && rackGroup.getRacks() != null)
-        {
-            for (Rack rack : rackGroup.getRacks())
-            {
-                if (rack != null && rack.getCages() != null)
-                {
-                    allCages.addAll(rack.getCages());
-                }
-            }
-        }
-
-        return allCages;
-    }
-
-
-    public ArrayList<TemplateLayoutHistoryForm> getTemplateLayoutHistory(String historyId)
-    {
-        TableInfo table = CageUISchema.getInstance().getTemplateLayoutHistoryTable();
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
-        TableSelector selector = new TableSelector(table, filter, null);
-
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TypeReference<ArrayList<TemplateLayoutHistoryForm>> typeRef = new TypeReference<ArrayList<TemplateLayoutHistoryForm>>()
-        {
-        };
-        ArrayList<TemplateLayoutHistoryForm> history = mapper.convertValue(selector.getMapArray(), typeRef);
-        return history;
-    }
-
     public static AllHistoryForm getAllHistory(String room)
     {
         TableInfo table = CageUISchema.getInstance().getAllHistoryTable();
@@ -392,53 +356,6 @@ public class CageUIManager
         return allHistory;
     }
 
-    public RoomHistoryForm getRoomHistory(String historyId)
-    {
-        TableInfo table = CageUISchema.getInstance().getRoomHistoryTable();
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
-        TableSelector selector = new TableSelector(table, filter, null);
-
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        RoomHistoryForm roomHistory = mapper.convertValue(selector.getMap(), RoomHistoryForm.class);
-        return roomHistory;
-    }
-
-    // Gets all the layout history for a real layout given that layouts historyId
-    public ArrayList<LayoutHistoryForm> getRealLayoutHistory(String historyId)
-    {
-        TableInfo layoutHistoryTable = CageUISchema.getInstance().getLayoutHistoryTable();
-        SimpleFilter layoutHistoryFilter = new SimpleFilter();
-        layoutHistoryFilter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
-        TableSelector layoutHistorySelector = new TableSelector(layoutHistoryTable, layoutHistoryFilter, null);
-
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TypeReference<ArrayList<LayoutHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<LayoutHistoryForm>>()
-        {
-        };
-        ArrayList<LayoutHistoryForm> layoutHistory = mapper.convertValue(layoutHistorySelector.getMapArray(), layoutHistoryTypeRef);
-        return layoutHistory;
-    }
-
-    // Gets all the cage modifications history for a cage given that cages mod history id
-    public ArrayList<CageModificationHistoryForm> getCageModificationHistory(String historyId)
-    {
-        TableInfo table = CageUISchema.getInstance().getCageModificationsHistoryTable();
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
-        TableSelector selector = new TableSelector(table, filter, null);
-
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TypeReference<ArrayList<CageModificationHistoryForm>> layoutHistoryTypeRef = new TypeReference<ArrayList<CageModificationHistoryForm>>()
-        {
-        };
-        ArrayList<CageModificationHistoryForm> history = mapper.convertValue(selector.getMapArray(), layoutHistoryTypeRef);
-        return history;
-    }
-
     public static RackTypesForm getRackType(int rowid)
     {
         TableInfo table = CageUISchema.getInstance().getRackTypesTable();
@@ -450,22 +367,6 @@ public class CageUIManager
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         RackTypesForm rackType = mapper.convertValue(selector.getMap(), RackTypesForm.class);
         return rackType;
-    }
-
-    public RacksForm getRackFromCage(String cageObjId)
-    {
-
-        CagesForm cage = getCageForm(cageObjId);
-
-        TableInfo table = CageUISchema.getInstance().getRacksTable();
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("objectid"), cage.getRack(), CompareType.EQUAL);
-        TableSelector selector = new TableSelector(table, filter, null);
-
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        RacksForm rack = mapper.convertValue(selector.getMap(), RacksForm.class);
-        return rack;
     }
 
     public static CagesForm getCageForm(String cageObjectId)
@@ -494,25 +395,6 @@ public class CageUIManager
         return rack;
     }
 
-    // Gets all the cage history for a real layout given that layouts historyId
-    public ArrayList<CageHistoryForm> getCageHistory(String historyId)
-    {
-        // First, find all cages within the layout history table given the historyId
-
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        TableInfo table = CageUISchema.getInstance().getCageHistoryTable();
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("historyid"), historyId, CompareType.EQUAL);
-        TableSelector selector = new TableSelector(table, filter, null);
-        TypeReference<ArrayList<CageHistoryForm>> cageHistoryTypeRef = new TypeReference<ArrayList<CageHistoryForm>>()
-        {
-        };
-        ArrayList<CageHistoryForm> cageHistory = mapper.convertValue(selector.getMapArray(), cageHistoryTypeRef);
-
-        return cageHistory;
-    }
 
     // ends an all history row
     public static AllHistoryForm endPreviousAllHistory(String room, Date endDate)
@@ -900,7 +782,6 @@ public class CageUIManager
         {
             UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(this.userId, this.containerId, "ehr_lookups");
 
-            List<Map<String, Object>> newEhrRoom = new ArrayList<>();
             TableInfo roomsTable = ehrLookupsSchema.getTable("rooms");
             SimpleFilter roomFilter = new SimpleFilter();
             roomFilter.addCondition(FieldKey.fromString("room"), this.prevRoomName, CompareType.EQUAL);
@@ -958,6 +839,7 @@ public class CageUIManager
                             TemplateLayoutHistoryForm form = new TemplateLayoutHistoryForm();
                             form.setHistoryId(historyId);
                             form.setRackGroup(rackGroupIndex);
+                            form.setGroupRotation(rackGroup.getRotation());
                             form.setRack(rackIndex);
                             form.setCage(findLastNumberAfterDash(cage.getCageNum()));
                             form.setObjectType(rack.getType().getRackType().getNumericValue()); // object_type is null for cages
@@ -1149,6 +1031,7 @@ public class CageUIManager
                             Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
                             form.setHistoryId(historyId);
                             form.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
+                            form.setGroupRotation(rackGroup.getRotation());
                             form.setCage(cage.getObjectId());
                             form.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
 

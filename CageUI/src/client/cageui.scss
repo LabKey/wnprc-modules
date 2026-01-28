@@ -293,6 +293,18 @@
   background-color: #dddddd;
 }
 
+.rotate-rack-group{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.rotate-rack-group span {
+  min-width: 40px; /* Ensures consistent width */
+  padding: 8px 12px;
+  font-weight: 500;
+}
+
 // Confirmation pop up
 .popup-overlay {
   position: fixed;

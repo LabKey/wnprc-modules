@@ -58,6 +58,7 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
                 historyId: res.rows[0].historyid,
                 cage: res.rows[0].cage,
                 rackGroup: res.rows[0].rack_group,
+                groupRotation: res.rows[0].group_rotation,
                 cageNum: res.rows[0].cage_number,
                 height: res.rows[0].height,
                 length: res.rows[0].length,

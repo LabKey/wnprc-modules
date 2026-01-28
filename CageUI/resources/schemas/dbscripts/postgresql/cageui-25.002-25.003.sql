@@ -37,8 +37,7 @@ CREATE TABLE cageui.racks
     CONSTRAINT FK_racks_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 
--- Table for storing layout history data, either room object or (rack_group, rack, cage) must exist
--- If end_date is null, that is the current layout for the room
+-- Table for storing layout history data
 DROP TABLE IF EXISTS cageui.layout_history;
 CREATE TABLE cageui.layout_history
 (
@@ -110,6 +109,7 @@ CREATE TABLE cageui.template_layout_history (
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
     rack_group INTEGER,
+    group_rotation INTEGER,
     rack INTEGER,
     cage INTEGER,
     object_type INTEGER,
@@ -190,6 +190,7 @@ CREATE TABLE cageui.cage_history
     rowid SERIAL NOT NULL,
     historyid VARCHAR NOT NULL,
     rack_group INTEGER NOT NULL,
+    group_rotation INTEGER NOT NULL,
     cage VARCHAR NOT NULL,
     cage_number INTEGER NOT NULL,
     length numeric NOT NULL,
@@ -288,4 +289,3 @@ select setname, container, 3 as value, 'Bottom' as title from ehr_lookups.lookup
 
 insert into ehr_lookups.lookups (set_name,container,value,title)
 select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
-

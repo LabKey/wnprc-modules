@@ -25,6 +25,7 @@ import {
     CageNumber,
     CageSvgId,
     GroupId,
+    GroupRotation,
     LocationCoords,
     Rack,
     RackGroup,
@@ -349,6 +350,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             selectionType: 'rackGroup',
             groupId: nextAvailGroup,
             racks: [newRack],
+            rotation: GroupRotation.Origin,
             x: x,
             y: y,
             scale: newScale,
@@ -428,6 +430,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             const mergedRackGroup: RackGroup = {
                 groupId: targetGroup.groupId,
                 selectionType: 'rackGroup',
+                rotation: targetGroup.rotation,
                 x: targetGroup.x,
                 y: targetGroup.y,
                 scale: targetGroup.scale,
@@ -1090,6 +1093,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                             : group
                     )
                 };
+                setReloadRoom(roomToUpdate);
                 return roomToUpdate;
             });
             return `rack_${rackObjId}`;

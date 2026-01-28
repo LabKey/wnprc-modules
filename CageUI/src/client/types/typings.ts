@@ -102,6 +102,13 @@ export enum CageDirection {
     Bottom,
 }
 
+export enum GroupRotation {
+    Origin = 0,
+    Quarter = 90,
+    Half = 180,
+    ThreeQuarter = 270,
+}
+
 export type RackStringType = string & { __brand: 'RackStringType' };
 export type DefaultRackStringType = string & { __brand: 'DefaultRackStringType' };
 export type RoomObjectStringType = string & { __brand: 'RoomObjectStringType' };
@@ -220,6 +227,7 @@ export interface TemplateHistoryData {
     historyid?: string;
     extra_context: string | null;
     rack_group: number;
+    group_rotation: GroupRotation;
     rack: number;
     cage: string;
     x_coord: number;
@@ -242,6 +250,7 @@ export interface CageHistoryData {
     historyId: string;
     cage: string;
     rackGroup: number;
+    groupRotation: GroupRotation;
     cageNum: number;
     length: number;
     width: number;
@@ -287,6 +296,7 @@ export interface FullObjectHistoryData {
     objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
     extraContext: string | null;
     rackGroup?: number;
+    groupRotation?: GroupRotation;
     // objectid of rack in racks table
     rack?: RackData | string;
     cage?: FullCageHistory | string;
@@ -326,6 +336,7 @@ export interface RackGroup {
     racks: Rack[];
     selectionType: SelectionType;
     groupId: GroupId;
+    rotation: GroupRotation;
     x: number; // x coords relative to group of connected racks
     y: number; // y coords relative to group of connected racks
     scale: number; // scale relative to group of connected racks

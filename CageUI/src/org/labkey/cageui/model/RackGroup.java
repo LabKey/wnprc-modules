@@ -8,6 +8,7 @@ public class RackGroup
     private List<Rack> _racks;
     private SelectionType _selectionType;
     private String _groupId;
+    private int _rotation;
     private int _x;
     private int _y;
     private int _scale;
@@ -70,5 +71,15 @@ public class RackGroup
     public void setScale(int scale)
     {
         _scale = scale;
+    }
+
+    public int getRotation()
+    {
+        return _rotation;
+    }
+
+    public void setRotation(int rotation)
+    {
+        _rotation = rotation;
     }
 }

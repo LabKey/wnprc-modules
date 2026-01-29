@@ -48,6 +48,7 @@
                             <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="stationary"/>
                     <column columnName="length"/>
                     <column columnName="width"/>
                     <column columnName="height"/>

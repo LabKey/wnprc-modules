@@ -13,6 +13,7 @@ public class RacksForm
     private String _room;
     @JsonProperty("rack_type")
     private int _rackType; // rowid of racktype
+    private int _condition;
 
     public int getRowid()
     {
@@ -75,5 +76,15 @@ public class RacksForm
         json.put("rack_type", getRackType());
 
         return json;
+    }
+
+    public int getCondition()
+    {
+        return _condition;
+    }
+
+    public void setCondition(int condition)
+    {
+        _condition = condition;
     }
 }

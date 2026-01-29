@@ -746,6 +746,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 type: rackTypesData.rows[0].type,
                 manufacturer: rackTypesData.rows[0].manufacturer,
                 isDefault: prevRoom.isDefault,
+                stationary: rackTypesData.rows[0].stationary,
             };
 
             rack = {

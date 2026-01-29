@@ -40,6 +40,7 @@
             <column columnName="room"/>
             <column columnName="rackid"/>
             <column columnName="rack_type"/>
+            <column columnName="condition"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>
@@ -53,6 +54,7 @@
             <column columnName="name"/>
             <column columnName="type"/>
             <column columnName="manufacturer"/>
+            <column columnName="stationary"/>
             <column columnName="length"/>
             <column columnName="width"/>
             <column columnName="height"/>
@@ -152,6 +154,7 @@
             <column columnName="cage"/>
             <column columnName="extra_context"/>
             <column columnName="object_type"/>
+            <column columnName="group_rotation"/>
             <column columnName="x_coord"/>
             <column columnName="y_coord"/>
             <column columnName="container"/>
@@ -168,6 +171,7 @@
             <column columnName="rack_group"/>
             <column columnName="cage"/>
             <column columnName="cage_number"/>
+            <column columnName="group_rotation"/>
             <column columnName="length"/>
             <column columnName="width"/>
             <column columnName="height"/>

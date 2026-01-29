@@ -36,6 +36,7 @@
                         </fk>
                     </column>
                     <column columnName="cage_number"/>
+                    <column columnName="group_rotation"/>
                     <column columnName="length"/>
                     <column columnName="width"/>
                     <column columnName="height"/>

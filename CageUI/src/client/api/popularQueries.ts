@@ -121,6 +121,7 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
                 rackId: res.rows[0].rackid,
                 room: res.rows[0].room,
                 rackType: res.rows[0].rack_type,
+                condition: res.rows[0].condition,
             };
         } else {
             throw new Error('Error fetching cage history data');

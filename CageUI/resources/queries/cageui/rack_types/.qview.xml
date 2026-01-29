@@ -22,6 +22,7 @@
             <column name="name"/>
             <column name="type"/>
             <column name="manufacturer"/>
+            <column name="stationary"/>
             <column name="length"/>
             <column name="width"/>
             <column name="height"/>

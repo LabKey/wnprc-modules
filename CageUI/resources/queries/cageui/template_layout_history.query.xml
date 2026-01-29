@@ -39,6 +39,7 @@
                             <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="group_rotation"/>
                     <column columnName="x_coord"/>
                     <column columnName="y_coord"/>
                     <column columnName="container"/>

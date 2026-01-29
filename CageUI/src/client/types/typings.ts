@@ -109,6 +109,12 @@ export enum GroupRotation {
     ThreeQuarter = 270,
 }
 
+export enum RackConditions {
+    Operational,
+    Damaged,
+    Repairing,
+}
+
 export type RackStringType = string & { __brand: 'RackStringType' };
 export type DefaultRackStringType = string & { __brand: 'DefaultRackStringType' };
 export type RoomObjectStringType = string & { __brand: 'RoomObjectStringType' };
@@ -279,6 +285,7 @@ export interface RackData {
     room: string;
     rackId: number;
     rackType: number;
+    condition: RackConditions;
 }
 
 // interface for cageui.all_history table
@@ -372,6 +379,7 @@ export interface UnitType {
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
     manufacturer: string;
+    stationary: boolean;
 }
 
 export interface LocationCoords {

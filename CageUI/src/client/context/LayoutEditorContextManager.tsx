@@ -328,7 +328,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             name: rackTypeData.rows[0].name,
             type: rackType,
             isDefault: true,
-            manufacturer: 'Unknown'
+            manufacturer: 'Unknown',
+            stationary: false,
         };
 
         const objId = Utils.generateUUID().toUpperCase();

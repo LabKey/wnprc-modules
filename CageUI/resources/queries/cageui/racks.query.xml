@@ -43,6 +43,14 @@
                             <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="condition">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

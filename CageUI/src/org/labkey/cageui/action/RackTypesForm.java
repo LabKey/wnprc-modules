@@ -8,6 +8,7 @@ public class RackTypesForm
     private String _name;
     private int _type;
     private String _manufacturer;
+    private boolean _stationary;
     private Double _length;
     private Double _width;
     private Double _height;
@@ -107,6 +108,16 @@ public class RackTypesForm
         json.put("description", getDescription());
 
         return json;
+    }
+
+    public boolean isStationary()
+    {
+        return _stationary;
+    }
+
+    public void setStationary(boolean stationary)
+    {
+        _stationary = stationary;
     }
 }
 

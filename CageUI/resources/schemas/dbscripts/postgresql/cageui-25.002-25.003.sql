@@ -27,7 +27,8 @@ CREATE TABLE cageui.racks
     objectid VARCHAR,
     room VARCHAR,
     rackid INTEGER NOT NULL,
-    rack_type varchar(50) NOT NULL,
+    rack_type VARCHAR(50) NOT NULL,
+    condition INTEGER NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
@@ -213,6 +214,7 @@ CREATE TABLE cageui.rack_types
     name VARCHAR(50) UNIQUE,
     type INTEGER NOT NULL,
     manufacturer VARCHAR(50) NOT NULL,
+    stationary boolean NOT NULL,
     length NUMERIC,
     width NUMERIC,
     height NUMERIC,
@@ -289,3 +291,19 @@ select setname, container, 3 as value, 'Bottom' as title from ehr_lookups.lookup
 
 insert into ehr_lookups.lookups (set_name,container,value,title)
 select setname, container, 4 as value, 'Direct' as title from ehr_lookups.lookup_sets where setname='cageui_modification_locations';
+
+INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
+select 'cageui_condition_codes' as setname,
+       'Cage Condition Field Values' as label,
+       'Lists condition codes for cages' as description,
+       'value' as keyField,
+       container from ehr_lookups.lookup_sets where setname='ancestry';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 0 as value, 'Operational' as title from ehr_lookups.lookup_sets where setname='cageui_condition_codes';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 1 as value, 'Damaged' as title from ehr_lookups.lookup_sets where setname='cageui_condition_codes';
+
+insert into ehr_lookups.lookups (set_name,container,value,title)
+select setname, container, 2 as value, 'Repairing' as title from ehr_lookups.lookup_sets where setname='cageui_condition_codes';

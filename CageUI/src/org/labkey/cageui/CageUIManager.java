@@ -845,8 +845,8 @@ public class CageUIManager
                             form.setObjectType(rack.getType().getRackType().getNumericValue()); // object_type is null for cages
                             form.setExtraContext(cage.getExtraContext() != null ?
                                     toJson(cage.getExtraContext()) : null);
-                            form.setxCoord(cage.getX());
-                            form.setyCoord(cage.getY());
+                            form.setxCoord(rackGroup.getX() + rack.getX() + cage.getX());
+                            form.setyCoord(rackGroup.getY() + rack.getY() + cage.getY());
                             templateForms.add(form);
                         }
                     }

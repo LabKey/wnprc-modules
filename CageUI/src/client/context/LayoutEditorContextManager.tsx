@@ -351,7 +351,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             selectionType: 'rackGroup',
             groupId: nextAvailGroup,
             racks: [newRack],
-            rotation: GroupRotation.Origin,
+            rotation: GroupRotation.Quarter,
             x: x,
             y: y,
             scale: newScale,

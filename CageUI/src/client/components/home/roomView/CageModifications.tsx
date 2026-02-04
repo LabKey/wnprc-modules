@@ -21,7 +21,7 @@ import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
 import { Cage, CurrCageMods, ModKeyMap, ModLocations, Rack, RackGroup } from '../../../types/typings';
 import { findDirStr, getLocationDirection } from '../../../utils/homeHelpers';
-import { findConnectedCages, findConnectedRacks } from '../../../utils/helpers';
+import { findConnectedCages, findConnectedRacks, generateUUID } from '../../../utils/helpers';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import {
     ConnectedCage,
@@ -194,7 +194,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                             return ({
                                                 ...m,
                                                 parentModId: m.modId,
-                                                modId: Utils.generateUUID().toUpperCase()
+                                                modId: generateUUID()
                                             });
                                         }
                                     })
@@ -225,7 +225,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                         return ({
                                             ...m,
                                             parentModId: m.modId,
-                                            modId: Utils.generateUUID().toUpperCase()
+                                            modId: generateUUID()
                                         });
                                     }
                                 })

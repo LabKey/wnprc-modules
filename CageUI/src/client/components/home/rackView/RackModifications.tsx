@@ -135,7 +135,7 @@ export const RackModifications: FC = () => {
                             const updatedAdjMods = [selectedMod].map(m => ({
                                 ...m,
                                 parentModId: m.modId,
-                                modId: Utils.generateUUID().toUpperCase()
+                                modId: generateUUID()
                             }));
 
                             return {

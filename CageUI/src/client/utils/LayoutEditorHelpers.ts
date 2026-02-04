@@ -19,7 +19,14 @@
 // Layout Editor Helpers
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
-import { getAdjLocation, getDefaultMod, getTypeClassFromElement, parseRoomItemType, roomItemToString } from './helpers';
+import {
+    generateUUID,
+    getAdjLocation,
+    getDefaultMod,
+    getTypeClassFromElement,
+    parseRoomItemType,
+    roomItemToString
+} from './helpers';
 import {
     Cage,
     CageData,
@@ -1075,7 +1082,7 @@ export const addModEntries = (
             return;
         }
 
-        const modId = Utils.generateUUID().toUpperCase();
+        const modId = generateUUID();
 
         // Add mod data for current cage
         newModData.push({
@@ -1093,7 +1100,7 @@ export const addModEntries = (
         newModData.push({
             cage: connect.adjCage.objectId,
             location: adjLocation,
-            modId: Utils.generateUUID().toUpperCase(),
+            modId: generateUUID(),
             parentModId: modId,
             modification: getDefaultMod(adjLocation),
             rack: isRackConnection ? (connect as ConnectedRack).adjRack.objectId : rack.objectId,

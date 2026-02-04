@@ -15,8 +15,8 @@ public class BundledForms
     ArrayList<CageHistoryForm> _cageHistoryForm;
     ArrayList<RacksForm> _newRacksForm;
     ArrayList<RacksForm> _prevRacksForm;
-    ArrayList<CagesForm> _newCagesForm;
-    ArrayList<CagesForm> _prevCagesForm;
+    CagesFormWithContext _newCagesForm;
+    CagesFormWithContext _prevCagesForm;
 
     public AllHistoryForm getNewAllHistoryForm()
     {
@@ -108,22 +108,22 @@ public class BundledForms
         _prevRacksForm = prevRacksForm;
     }
 
-    public ArrayList<CagesForm> getNewCagesForm()
+    public CagesFormWithContext getNewCagesForm()
     {
         return _newCagesForm;
     }
 
-    public void setNewCagesForm(ArrayList<CagesForm> newCagesForm)
+    public void setNewCagesForm(CagesFormWithContext newCagesForm)
     {
         _newCagesForm = newCagesForm;
     }
 
-    public ArrayList<CagesForm> getPrevCagesForm()
+    public CagesFormWithContext getPrevCagesForm()
     {
         return _prevCagesForm;
     }
 
-    public void setPrevCagesForm(ArrayList<CagesForm> prevCagesForm)
+    public void setPrevCagesForm(CagesFormWithContext prevCagesForm)
     {
         _prevCagesForm = prevCagesForm;
     }

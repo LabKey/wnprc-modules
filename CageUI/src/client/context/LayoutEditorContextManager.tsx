@@ -54,7 +54,7 @@ import {
 import * as d3 from 'd3';
 import {
     defaultTypeToRackType,
-    generateCageId,
+    generateCageId, generateUUID,
     getNextDefaultRackId,
     getSvgSize,
     parseLongId,
@@ -286,7 +286,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             return null;
         }
 
-        const cageObjId = Utils.generateUUID().toUpperCase();
+        const cageObjId = generateUUID();
         const newCageId = generateCageId(cageObjId);
         const newCage: Cage = {
             svgId: newCageId,
@@ -332,7 +332,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             stationary: false,
         };
 
-        const objId = Utils.generateUUID().toUpperCase();
+        const objId = generateUUID();
 
         const newRack: Rack = {
             isNew: true,
@@ -1037,7 +1037,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         if (rackTypeData.rowCount === 1) {
             const newRackType = rackTypeData.rows[0];
             const isDefault = isRackDefault(newRackType.type);
-            rackObjId = isNew ? Utils.generateUUID().toUpperCase() : rackObjId;
+            rackObjId = isNew ? generateUUID() : rackObjId;
             if (isDefault) {
                 newRackType.type = defaultTypeToRackType(newRackType.type);
             }

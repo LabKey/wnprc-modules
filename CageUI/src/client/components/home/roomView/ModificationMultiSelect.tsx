@@ -22,6 +22,7 @@ import { ModDirections, ModTypes } from '../../../types/typings';
 import { Filter, Utils } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
+import { generateUUID } from '../../../utils/helpers';
 
 interface ModificationMultiSelectProps {
     handleChange: (selectedItems: ConnectedModType[]) => void;
@@ -131,7 +132,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         if (!newItems.find(items => items.value === item.value)) {
             setSelectedItems([...newItems, {
                 ...item,
-                modId: Utils.generateUUID().toUpperCase(),
+                modId: generateUUID(),
             }]);
         }
         setSearchTerm('');

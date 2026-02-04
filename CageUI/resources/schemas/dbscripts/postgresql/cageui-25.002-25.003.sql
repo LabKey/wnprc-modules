@@ -38,6 +38,25 @@ CREATE TABLE cageui.racks
     CONSTRAINT FK_racks_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 
+DROP TABLE IF EXISTS cageui.rack_history;
+CREATE TABLE cageui.rack_history
+(
+    rowid SERIAL NOT NULL,
+    historyid VARCHAR NOT NULL,
+    objectid VARCHAR,
+    room VARCHAR,
+    condition INTEGER,
+    notes VARCHAR,
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+    CONSTRAINT PK_rack_history PRIMARY KEY (rowid),
+    CONSTRAINT FK_rack_history_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+);
+
+
 -- Table for storing layout history data
 DROP TABLE IF EXISTS cageui.layout_history;
 CREATE TABLE cageui.layout_history

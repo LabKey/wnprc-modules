@@ -21,26 +21,25 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="racks" tableDbType="TABLE">
                 <javaCustomizer class="org.labkey.cageui.table.CageUICustomizer" />
-                <tableTitle>Racks</tableTitle>
+                <tableTitle>Rack History</tableTitle>
                 <columns>
-                    <column columnName="rowid" />
+                    <column columnName="rowid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="historyid"/>
                     <column columnName="objectid">
-                        <shownInInsertView>false</shownInInsertView>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>racks</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
+                        </fk>
                     </column>
                     <column columnName="room">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>rooms</fkTable>
                             <fkColumnName>room</fkColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="rackid"/>
-                    <column columnName="rack_type">
-                        <fk>
-                            <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>rack_types</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="condition">
@@ -51,6 +50,7 @@
                             <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="notes"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

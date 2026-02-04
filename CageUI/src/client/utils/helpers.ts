@@ -85,6 +85,10 @@ export const generateCageId = (objectId: string): CageSvgId => {
     return `cageSVG_${objectId}` as CageSvgId;
 };
 
+export const generateUUID = (): string => {
+    return Utils.generateUUID().toUpperCase();
+}
+
 // Changes stroke color of svg element nodes keeping the other styles.
 export const changeStyleProperty = (element: Element, property: string, newValue: string): void => {
     const styleAttr = element.getAttribute('style');
@@ -655,7 +659,7 @@ export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations =
             rackType = roomItemToString(roomItem.objectType);
         }
         newUnitLocs[rackType].push({
-            cageId: generateCageId(Utils.generateUUID().toUpperCase()),
+            cageId: generateCageId(generateUUID()),
             cellX: roomItem.xCoord,
             cellY: roomItem.yCoord
         });
@@ -782,7 +786,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             cagePositionId = cageData.positionId;
         } else {
             cageNum = parseInt(rackItem.cage as string);
-            cageObjId = Utils.generateUUID().toUpperCase();
+            cageObjId = generateUUID();
             cagePositionId = rack.cages.length + 1;
         }
 

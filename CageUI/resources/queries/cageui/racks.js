@@ -17,7 +17,24 @@
  */
 
 require("ehr/triggers").initScript(this);
+var console = require('console');
+var CageUI = require("cageui/CageUI").CageUI;
 
-function onInsert(helper, scriptErrors, row){
-    row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase()
+function onUpsert(helper, scriptErrors, row){
+    row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
+
+    if (this.extraContext['history_id'] != null) {
+        console.log("extraContext: ", this.extraContext);
+
+        //add any errors that are returned to the page
+        let javaErrors = CageUI.Utils.getJavaHelper().updateRackHistory(row, this.extraContext['history_id']);
+        if (javaErrors) {
+            for (let i = 0; i < javaErrors.length; i++) {
+                let error = javaErrors[i];
+                console.log('Field: ' + error.field + ', Message: ' + error.message + ', Severity: ' + error.severity);
+                EHR.Server.Utils.addError(scriptErrors, error.field, error.message, error.severity);
+            }
+        }
+    }
+
 }

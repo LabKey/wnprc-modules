@@ -48,6 +48,21 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="rack_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="objectid"/>
+            <column columnName="room"/>
+            <column columnName="condition"/>
+            <column columnName="notes"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
     <table tableName="rack_types" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>

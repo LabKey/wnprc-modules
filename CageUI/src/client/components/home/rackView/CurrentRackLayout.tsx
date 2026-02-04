@@ -23,7 +23,7 @@ export const CurrentRackLayout: FC = () => {
                 element.remove();
             }
         });
-        addPrevRoomSvgs('view', selectedRackGroup, rackSvg, selectedRoom.mods);
+        addPrevRoomSvgs('view', selectedRackGroup, rackSvg, undefined, selectedRoom.mods);
     }, [selectedRack]);
 
     return (

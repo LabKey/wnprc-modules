@@ -28,7 +28,7 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
             const element = d3.select(this) as d3.Selection<SVGGElement, {}, null, undefined>;
             element.remove();
         });
-        addPrevRoomSvgs('view', cage, cageSvg, selectedRoom.mods);
+        addPrevRoomSvgs('view', cage, cageSvg, selectedRoom, selectedRoom.mods);
     }, [cage]);
 
     // adding 1 to the width/height helps make sure the lines don't get cut off in the image

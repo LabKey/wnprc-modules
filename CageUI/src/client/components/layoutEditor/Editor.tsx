@@ -692,7 +692,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
         });
         // loads grid with new room
-        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
+        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
         setReloadRoom(null);
     }, [reloadRoom]);
 

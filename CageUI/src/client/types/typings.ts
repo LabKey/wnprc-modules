@@ -109,6 +109,19 @@ export enum GroupRotation {
     ThreeQuarter = 270,
 }
 
+export enum ModSvgLocId {
+    Left = 'left',
+    Right = 'right',
+    Top = 'ceiling',
+    Bottom = 'floor',
+    Extension = 'extension',
+    CTunnelCircle = 'cTunnel-circle',
+    CTunnelLeft = 'cTunnel-left',
+    CTunnelRight = 'cTunnel-right',
+    CTunnelTop = 'cTunnel-top',
+    CTunnelBottom = 'cTunnel-bottom',
+}
+
 export enum RackConditions {
     Operational,
     Damaged,
@@ -156,7 +169,9 @@ export type CageModification = {
 export type Modification = {
     name: string;
     svgIds: {
-        [key in ModLocations]?: string[];
+        [key in ModLocations]?: {
+            [key in GroupRotation]?: ModSvgLocId[]
+        };
     };
     styles: {
         property: string;

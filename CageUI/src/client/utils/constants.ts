@@ -16,7 +16,7 @@
  *
  */
 
-import { ModLocations, ModRecord, ModTypes } from '../types/typings';
+import { GroupRotation, ModLocations, ModRecord, ModSvgLocId, ModTypes } from '../types/typings';
 
 export const CELL_SIZE = 30; // number of pixels of a cell for length/width
 export const SVG_WIDTH = 810; // width of the layout svg
@@ -44,13 +44,40 @@ export const roomSizeOptions = [
     }
 ];
 
+const LocationWithRotationMap = {
+    [ModLocations.Bottom]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Bottom],
+        [GroupRotation.Quarter]: [ModSvgLocId.Left],
+        [GroupRotation.Half]: [ModSvgLocId.Top],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Right],
+    },
+    [ModLocations.Top]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Top],
+        [GroupRotation.Quarter]: [ModSvgLocId.Right],
+        [GroupRotation.Half]: [ModSvgLocId.Bottom],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Left],
+    },
+    [ModLocations.Left]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Left],
+        [GroupRotation.Quarter]: [ModSvgLocId.Top],
+        [GroupRotation.Half]: [ModSvgLocId.Right],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Bottom],
+    },
+    [ModLocations.Right]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Right],
+        [GroupRotation.Quarter]: [ModSvgLocId.Bottom],
+        [GroupRotation.Half]: [ModSvgLocId.Left],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Top],
+    },
+}
+
 //TODO finish styles
 export const Modifications: ModRecord = {
     [ModTypes.StandardFloor]: {
         name: 'Standard Floor',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [{
             property: 'stroke',
@@ -60,8 +87,8 @@ export const Modifications: ModRecord = {
     [ModTypes.MeshFloor]: {
         name: 'Mesh Floor',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [
             {
@@ -77,8 +104,8 @@ export const Modifications: ModRecord = {
     [ModTypes.MeshFloorX2]: {
         name: 'Mesh Floor x2',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [
             {
@@ -97,8 +124,8 @@ export const Modifications: ModRecord = {
     [ModTypes.NoFloor]: {
         name: 'No Floor',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [
             {
@@ -111,8 +138,8 @@ export const Modifications: ModRecord = {
     [ModTypes.SolidDivider]: {
         name: 'Solid Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
             property: 'stroke',
@@ -122,8 +149,8 @@ export const Modifications: ModRecord = {
     [ModTypes.PCDivider]: {
         name: 'Protected Contact Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
             property: 'stroke',
@@ -139,8 +166,8 @@ export const Modifications: ModRecord = {
     [ModTypes.SPDivider]: {
         name: 'Social Panel Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
             property: 'stroke',
@@ -156,8 +183,8 @@ export const Modifications: ModRecord = {
     [ModTypes.VCDivider]: {
         name: 'Visual Contact Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
             property: 'stroke',
@@ -173,8 +200,8 @@ export const Modifications: ModRecord = {
     [ModTypes.PrivacyDivider]: {
         name: 'Privacy Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
             property: 'stroke',
@@ -190,8 +217,8 @@ export const Modifications: ModRecord = {
     [ModTypes.NoDivider]: {
         name: 'No Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
             property: 'stroke',
@@ -201,10 +228,30 @@ export const Modifications: ModRecord = {
     [ModTypes.CTunnel]: {
         name: 'C-Tunnel',
         svgIds: {
-            [ModLocations.Top]: ['cTunnel-circle', 'cTunnel-top'],
-            [ModLocations.Bottom]: ['cTunnel-circle', 'cTunnel-bottom'],
-            [ModLocations.Left]: ['cTunnel-circle', 'cTunnel-left'],
-            [ModLocations.Right]: ['cTunnel-circle', 'cTunnel-right'],
+            [ModLocations.Top]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+            },
+            [ModLocations.Bottom]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+            },
+            [ModLocations.Left]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+            },
+            [ModLocations.Right]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+            },
         },
         styles: [{
             property: 'stroke',
@@ -218,7 +265,12 @@ export const Modifications: ModRecord = {
     [ModTypes.Extension]: {
         name: 'Extension',
         svgIds: {
-            [ModLocations.Direct]: ['extension'],
+            [ModLocations.Direct]: {
+                [GroupRotation.Origin]: [ModSvgLocId.Extension],
+                [GroupRotation.Quarter]: [ModSvgLocId.Extension],
+                [GroupRotation.Half]: [ModSvgLocId.Extension],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.Extension]
+            },
         },
         styles: [{
             property: 'stroke',

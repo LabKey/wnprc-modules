@@ -47,7 +47,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         d3.select('#layout-svg').selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select('#layout-svg') as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg, selectedRoom.mods, setSelectedContextObj, contextRef);
+        addPrevRoomSvgs('view', selectedRoom, layoutSvg,undefined, selectedRoom.mods, setSelectedContextObj, contextRef);
     }, [selectedRoom.name, showCageContextMenu]);
 
 

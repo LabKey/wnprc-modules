@@ -33,7 +33,7 @@ import {
     LayoutData,
     LayoutHistoryData,
     ModData,
-    ModLocations,
+    ModLocations, ModSvgLocId,
     ModTypes,
     PrevRoom,
     Rack,
@@ -59,7 +59,7 @@ import { ActionURL, Filter, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault,
-    createEmptyUnitLoc,
+    createEmptyUnitLoc, findCageInGroup,
     isRackDefault,
     isRackEnum,
     isRoomHomogeneousDefault,
@@ -468,7 +468,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
-export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
 
     if ((unitsToRender as Room)?.rackGroups) {
@@ -482,10 +482,11 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     }
 
     // Loads modifications from constant styles and ids to inject into the svgs
-    const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>) => {
+    const loadCageMods = (cageToLoad: Cage, shape: d3.Selection<SVGElement, unknown, null, undefined>, rotation: GroupRotation) => {
         if (!cageToLoad.mods) {
             return;
         }
+
         Object.entries(cageToLoad.mods).forEach(([loc, modSubList]: [string, CageModification[]]) => {
             const modLoc = parseInt(loc) as ModLocations;
             modSubList.forEach((modList) => {
@@ -494,7 +495,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                     const currMod = modsToLoad[modMap.modId];
                     const modObj = Modifications[currMod.value];// find mod in mod constants array
                     // for each id in the location map the style if it exists
-                    modObj.svgIds[modLoc].forEach((svgId, idx) => {
+                    modObj.svgIds[modLoc][rotation].forEach((svgId, idx) => {
                         // If ids contain "-" they are split and searched left to right, helpful for listing parent-child ids
                         const svgIdSplit = svgId.split('-');
                         let currentSelection: d3.Selection<SVGElement, unknown, null, undefined> = shape.select(`[id=${svgIdSplit[0]}-${subId}]`);
@@ -512,7 +513,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     };
 
     // this function renders the actual visible svg in some groups
-    const createRackGroup = (parentGroup, rack: Rack, isSingleRack) => {
+    const createRackGroup = (parentGroup, rack: Rack, isSingleRack, groupRotation: GroupRotation) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
@@ -552,7 +553,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             if (mode === 'view') {
-                loadCageMods(cage, shape);
+                loadCageMods(cage, shape, groupRotation);
             }
 
             cageGroup.append(() => shape.node());
@@ -575,7 +576,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
         group.racks.forEach(async rack => {
             // Use parent group as rackGroup if only 1 rack, otherwise create a new rack group
-            await createRackGroup(parentGroup, rack, isSingleRack);
+            await createRackGroup(parentGroup, rack, isSingleRack, group.rotation);
         });
         let groupX = renderType === 'room' ? group.x : group.racks[0].x;
         let groupY = renderType === 'room' ? group.y : group.racks[0].y;
@@ -626,6 +627,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
     } else if (renderType === 'rack') { // we are rendering a single rack
     } else { // we are rendering a single cage
         const cage: Cage = unitsToRender as Cage;
+        const rackGroup = findCageInGroup(cage.svgId, currRoom.rackGroups).rackGroup;
         const cageGroup = layoutSvg.append('g')
             .attr('id', cage.cageNum)
             .attr('transform', `translate(0,0)`);
@@ -637,7 +639,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum((unitsToRender as Cage).cageNum)}`;
 
             if (mode === 'view') {
-                loadCageMods(cage, shape);
+                loadCageMods(cage, shape, rackGroup.rotation);
             }
             cageGroup.append(() => shape.node());
         });

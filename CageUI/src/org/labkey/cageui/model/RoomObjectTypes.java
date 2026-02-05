@@ -9,7 +9,9 @@ public enum RoomObjectTypes
     DRAIN(101),
     DOOR(102),
     GATECLOSED(103),
-    GATEOPEN(104);
+    GATEOPEN(104),
+    TOP(105),
+    BOTTOM(106);
 
     private final int numericValue;
 

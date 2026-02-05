@@ -216,13 +216,6 @@ public class CageUIManager
             throw new IllegalStateException(cageModHistoryTable.getName() + " query update service");
         }
 
-        TableInfo cageHistoryTable = cageUISchema.getTable("cage_history");
-        QueryUpdateService cageHistoryQus = cageHistoryTable.getUpdateService();
-        if (cageHistoryQus == null)
-        {
-            throw new IllegalStateException(cageHistoryTable.getName() + " query update service");
-        }
-
         TableInfo cagesTable = cageUISchema.getTable("cages");
         QueryUpdateService cagesQus = cagesTable.getUpdateService();
         if (cagesQus == null)
@@ -297,11 +290,6 @@ public class CageUIManager
             {
                 racksQus.updateRows(user, container, convertToMapList(newForms.getPrevRacksForm()), null, batchErrors, null, extraContext);
             }
-
-            /*if (newForms.getCageHistoryForm() != null)
-            {
-                cageHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageHistoryForm()), batchErrors, null, null);
-            }*/
 
             if (batchErrors.hasErrors())
             {
@@ -964,16 +952,35 @@ public class CageUIManager
                                 CagesForm prevCagesForm = getCageForm(cage.getObjectId());
                                 Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
 
-                                prevCagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
-                                prevCagesForm.setHeight(cageDims.get("height"));
-                                prevCagesForm.setWidth(cageDims.get("width"));
-                                prevCagesForm.setLength(cageDims.get("length"));
-                                prevCagesForm.setSqft(cageDims.get("sqft"));
+                                if(prevCagesForm != null) {
+                                    prevCagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
+                                    prevCagesForm.setHeight(cageDims.get("height"));
+                                    prevCagesForm.setWidth(cageDims.get("width"));
+                                    prevCagesForm.setLength(cageDims.get("length"));
+                                    prevCagesForm.setSqft(cageDims.get("sqft"));
 
-                                extraContextMap.put("groupRotation", rackGroup.getRotation());
-                                extraContextMap.put("rackGroup", rackGroup.getGroupId());
-                                prevCagesExtraContextMap.put(cage.getObjectId(),extraContextMap);
-                                prevCagesFormList.add(prevCagesForm);
+                                    extraContextMap.put("groupRotation", rackGroup.getRotation());
+                                    extraContextMap.put("rackGroup", rackGroup.getGroupId());
+                                    prevCagesExtraContextMap.put(cage.getObjectId(),extraContextMap);
+                                    prevCagesFormList.add(prevCagesForm);
+                                }else{
+                                    // If rack was created in table without cages (creating rack outside of editor)
+                                    CagesForm cagesForm = new CagesForm();
+                                    cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
+                                    cagesForm.setRack(rack.getObjectId());
+                                    cagesForm.setObjectId(cage.getObjectId());
+                                    cagesForm.setPositionId(cage.getPositionId());
+                                    cagesForm.setLength(cageDims.get("length"));
+                                    cagesForm.setWidth(cageDims.get("width"));
+                                    cagesForm.setHeight(cageDims.get("height"));
+                                    cagesForm.setSqft(cageDims.get("sqft"));
+
+                                    extraContextMap.put("groupRotation", rackGroup.getRotation());
+                                    extraContextMap.put("rackGroup", rackGroup.getGroupId());
+
+                                    cagesFormList.add(cagesForm);
+                                    cagesExtraContextMap.put(cage.getObjectId(),extraContextMap);
+                                }
                             }
                         }
                     }
@@ -1033,45 +1040,6 @@ public class CageUIManager
 
             // Handle cage modifications history
             submitCageModificationsHistory(room, historyId, bundledForms);
-        }
-
-
-        private void submitCageHistory(Room room, String historyId, BundledForms bundledForms)
-        {
-            ArrayList<CageHistoryForm> cageForms = new ArrayList<>();
-
-            for (RackGroup rackGroup : room.getRackGroups())
-            {
-
-                for (Rack rack : rackGroup.getRacks())
-                {
-                    RackTypesForm rackType = CageUIManager.get().getRackType(rack.getType().getRowId());
-
-                    if (rack.getCages() != null)
-                    {
-                        for (Cage cage : rack.getCages())
-                        {
-
-                            CageHistoryForm form = new CageHistoryForm();
-                            Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
-                            form.setHistoryId(historyId);
-                            form.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
-                            form.setGroupRotation(rackGroup.getRotation());
-                            form.setCage(cage.getObjectId());
-                            form.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
-
-                            form.setLength(cageDims.get("length"));
-                            form.setWidth(cageDims.get("width"));
-                            form.setHeight(cageDims.get("height"));
-                            form.setSqft(cageDims.get("sqft"));
-
-                            cageForms.add(form);
-                        }
-                    }
-                }
-            }
-
-            bundledForms.setCageHistoryForm(cageForms);
         }
 
         private void submitCageModificationsHistory(Room room, String historyId, BundledForms bundledForms)

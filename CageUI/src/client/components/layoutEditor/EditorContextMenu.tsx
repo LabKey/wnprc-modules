@@ -102,7 +102,6 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     return (
         <div id="contextMenu" className="context-menu" ref={menuRef} style={{
             display: ctxMenuStyle.display,
-            position: 'absolute',
             left: ctxMenuStyle.left,
             top: ctxMenuStyle.top,
             width: 200,

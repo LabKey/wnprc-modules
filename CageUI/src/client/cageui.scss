@@ -887,7 +887,7 @@
 
 /* Custom context menu styling */
 .context-menu {
-  position: absolute;
+  position: fixed;
   display: none;
   background-color: white;
   border: 1px solid #ccc;

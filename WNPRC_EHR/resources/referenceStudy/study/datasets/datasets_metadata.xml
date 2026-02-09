@@ -12743,13 +12743,16 @@
         </fk>
         <scale>0</scale>
       </column>
-      <column columnName="cage">
+      <column columnName="cageOld">
         <datatype>varchar</datatype>
-        <columnTitle>Cage</columnTitle>
+        <columnTitle>Cage Old</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
         <scale>0</scale>
+      </column>
+      <column columnName="cage">
+        <datatype>varchar</datatype>
       </column>
       <column columnName="cond">
         <datatype>varchar</datatype>

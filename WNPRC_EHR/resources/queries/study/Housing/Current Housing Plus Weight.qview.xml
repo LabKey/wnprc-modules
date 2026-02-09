@@ -5,6 +5,7 @@
         <column name="enddate"/>
         <column name="room"/>
         <column name="cage"/>
+        <column name="cageOld"/>
         <column name="cond"/>
         <column name="reason"/>
         <!--<column name="isTemp"/>-->

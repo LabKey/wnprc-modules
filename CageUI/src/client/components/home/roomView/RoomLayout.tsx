@@ -17,6 +17,7 @@ import { LayoutSaveResult, SelectedObj } from '../../../types/layoutEditorTypes'
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { LoadingScreen } from '../../LoadingScreen';
 import { RoomLegend } from './RoomLegend';
+import { CagePopup } from './CagePopup';
 
 interface RoomLayoutProps {
 }
@@ -157,11 +158,17 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                     </g>
                 </svg>
             </div>
-            <ModificationEditor
+
+            <CagePopup
                 showEditor={showCageContextMenu}
                 selectedObj={selectedContextObj}
                 closeMenu={() => setShowCageContextMenu(false)}
             />
+            {/*<ModificationEditor
+                showEditor={showCageContextMenu}
+                selectedObj={selectedContextObj}
+                closeMenu={() => setShowCageContextMenu(false)}
+            />*/}
             {errorPopup &&
                     <ConfirmationPopup message={errorPopup} onClose={() => setErrorPopup(null)}/>
             }

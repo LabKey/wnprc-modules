@@ -1483,7 +1483,17 @@
   background-color: lightblue;
 }
 
-.modification-editor-popup {
+.cage-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.cage-popup {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1497,30 +1507,24 @@
   animation: fadeIn 0.2s ease-out;
 }
 
-.modification-editor-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+.modification-editor {
+
 }
 
-.modification-editor-popup-header {
+.cage-popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.modification-editor-popup-title {
+.cage-popup-title {
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
 }
 
-.modification-editor-popup-close {
+.cage-popup-close {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -1530,60 +1534,66 @@
   line-height: 1;
 }
 
-.modification-editor-popup-close:hover {
+.cage-popup-close:hover {
   color: #333;
 }
 
-.modification-editor-popup-content {
+.cage-popup-content {
   margin-bottom: 20px;
   display: flex;
   gap: 10px;
   flex-direction: row;
 }
 
-.modification-editor-popup-input {
+.modification-editor-input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
 }
+.modification-editor-content {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+}
 
-.modification-editor-popup-actions {
+.cage-popup-actions {
   display: flex;
   height: fit-content;
   gap: 10px;
 }
 
-.modification-editor-popup-button {
+.cage-popup-button {
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1.1rem;
 }
 
-.modification-editor-popup-save {
+.cage-popup-save {
   background: #4CAF50;
   color: white;
   border: none;
 
 }
 
-.modification-editor-popup-error {
+.cage-popup-error {
   color: red;
   flex: 1;
 }
 
-.modification-editor-popup-save:hover {
+.cage-popup-save:hover {
   color: #45a049;
 }
 
-.modification-editor-popup-cancel {
+.cage-popup-cancel {
   border: 1px solid #ddd;
   color: #333;
 }
 
-.modification-editor-popup-cancel:hover {
+.cage-popup-cancel:hover {
   background-color: #e7e7e7;
 }
 

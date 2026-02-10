@@ -27,7 +27,7 @@ CREATE TABLE cageui.racks
     objectid VARCHAR,
     room VARCHAR,
     rackid INTEGER NOT NULL,
-    rack_type VARCHAR(50) NOT NULL,
+    rack_type INTEGER NOT NULL,
     condition INTEGER NOT NULL,
     container         entityid NOT NULL,
     createdby         userid,

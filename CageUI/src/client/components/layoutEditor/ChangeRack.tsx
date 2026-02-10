@@ -24,25 +24,33 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Button } from 'react-bootstrap';
 import { CreateRackPopup } from './CreateRackPopup';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
+import { SelectedObj } from '../../types/layoutEditorTypes';
+import { Cage, Rack, UnitType } from '../../types/typings';
 
 
 interface ChangeRackProps {
     onSubmit: (newType: { value: string, label: string }, isNew: boolean) => void;
-
+    currRack: Rack;
 }
 
 export const ChangeRack: FC<ChangeRackProps> = (props) => {
-    const {onSubmit} = props;
+    const {onSubmit, currRack} = props;
     const {localRoom} = useLayoutEditorContext();
 
     const [options, setOptions] = useState<{ value: string, label: string }[]>([]);
     const [showCreateRackPopup, setShowCreateRackPopup] = useState<boolean>(false);
+    const [defaultOption, setDefaultOption] = useState<{ value: string, label: string }>({value: currRack.objectId, label: `${currRack.itemId} - ${currRack.type.name}`});
 
     const handleChange = (newVal: { value: string, label: string }) => {
         console.log('newVal', newVal);
         onSubmit(newVal, newVal.value === 'new');
     };
 
+    useEffect(() => {
+        if(defaultOption.value === "new"){
+            handleChange(defaultOption);
+        }
+    }, [defaultOption]);
 
     useEffect(() => {
         if (options.length > 0) {
@@ -94,6 +102,7 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
                 <div className="context-menu-input menu-item">
                     <Select
                         options={options}
+                        value={defaultOption}
                         className={'select-menu'}
                         classNamePrefix={'select'}
                         onChange={handleChange}
@@ -109,9 +118,10 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             </div>
             {showCreateRackPopup &&
                     <CreateRackPopup
-                            showCreateRackPopup={setShowCreateRackPopup}
-                            currentRackOptions={options}
-                            setRackOptions={setOptions}
+                        showCreateRackPopup={setShowCreateRackPopup}
+                        currentRackOptions={options}
+                        setRackOptions={setOptions}
+                        setDefaultOption={setDefaultOption}
                     />
             }
         </>

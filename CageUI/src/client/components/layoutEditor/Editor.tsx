@@ -1079,6 +1079,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                     element:
                                         <ChangeRack
                                             onSubmit={handleRackChange}
+                                            currRack={findCageInGroup((selectedObj as Cage).svgId, localRoom.rackGroups).rack}
                                         />,
                                     types: [],
                                     title: 'Change Rack'

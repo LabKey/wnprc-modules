@@ -10,10 +10,11 @@ interface CreateRackPopupProps {
     showCreateRackPopup: React.Dispatch<React.SetStateAction<boolean>>;
     currentRackOptions: { value: string; label: string }[];
     setRackOptions: React.Dispatch<React.SetStateAction<{ value: string; label: string }[]>>;
+    setDefaultOption: React.Dispatch<React.SetStateAction<{ value: string; label: string }>>;
 }
 
 export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
-    const {showCreateRackPopup, setRackOptions, currentRackOptions} = props;
+    const {showCreateRackPopup, setRackOptions, currentRackOptions, setDefaultOption} = props;
 
     const [centerRacks, setCenterRacks] = useState<Map<string, number[]>>(new Map());
 
@@ -129,10 +130,12 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
         setRackOptions(prev => {
             const newOptions = [...prev];
             if (selectedRackType && rackIdValue) {
-                newOptions.push({
+                const newOption = {
                     value: 'new',
                     label: `${rackIdValue} - ${selectedRackType.label}`
-                });
+                };
+                newOptions.push(newOption);
+                setDefaultOption(newOption)
             }
             return newOptions;
         });

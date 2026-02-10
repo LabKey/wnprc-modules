@@ -184,7 +184,7 @@ export const parseLongId = (input: string) => {
     return;
 };
 
-export const formatRackId = (str: string) => {
+export const formatCageNum = (str: string) => {
     // Split the string by hyphens
     try {// if the rack is default split and correctly display it
         const parts = str.split('-');

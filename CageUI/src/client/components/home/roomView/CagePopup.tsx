@@ -7,6 +7,8 @@ import { Cage, CurrCageMods, Rack } from '../../../types/typings';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { Button } from 'react-bootstrap';
+import { AnimalEditor } from './AnimalEditor';
+import { formatCageNum } from '../../../utils/helpers';
 
 interface CagePopupProps {
     showEditor: boolean;
@@ -73,7 +75,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
     };
 
     // This submission updates the room mods with the current selections.
-    const handleSubmit = () => {
+    const handleSaveMods = () => {
         const result = saveCageMods(currCage, currCageMods);
         console.log('Submit result: ', result);
 
@@ -91,13 +93,15 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
         <div className="cage-popup-overlay">
             <div className={"cage-popup"} ref={menuRef}>
                 <div className="cage-popup-header">
-                    <h3 className="cage-popup-title">{currCage.cageNum}</h3>
+                    <h1 className="cage-popup-title">{formatCageNum(currCage.cageNum)}</h1>
                     <button className="cage-popup-close" onClick={handleCleanup}>&times;</button>
                 </div>
                 <ModificationEditor
                     currCage={currCage}
                     currRack={currRack}
                     updateCageMods={(mods: CurrCageMods) => setCurrCageMods(mods)}
+                />
+                <AnimalEditor
                 />
                 <div className="cage-popup-content" style={{alignItems: 'flex-end'}}>
                     <div className="cage-popup-error">
@@ -107,7 +111,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
                         <Button className="cage-popup-button cage-popup-cancel"
                                 onClick={handleCleanup}>Cancel</Button>
                         <Button className="cage-popup-button cage-popup-save"
-                                onClick={handleSubmit}>Save</Button>
+                                onClick={handleSaveMods}>Save Mods</Button>
                     </div>
                 </div>
             </div>

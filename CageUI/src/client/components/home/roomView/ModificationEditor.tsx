@@ -46,14 +46,14 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         (currCage) &&
         <div className="modification-editor">
             <div className="modification-editor-content">
-                <CurrentCageLayout
-                    cage={currCage}
-                />
                 <CageModifications
                     cage={currCage}
                     rack={currRack}
                     currCageMods={currCageMods}
                     setCurrCageMods={setCurrCageMods}
+                />
+                <CurrentCageLayout
+                    cage={currCage}
                 />
             </div>
         </div>

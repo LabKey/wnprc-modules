@@ -1361,24 +1361,19 @@
 
 .mod-container-column {
   flex: 1;
-  padding: 20px;
-  background: #f0f0f0;
   box-sizing: border-box;
 }
 
 .mod-container-row {
   width: 100%;
   padding: 20px;
-  background: #e0e0e0; /* for visualization */
   box-sizing: border-box;
 }
 
 // Mod table css
 .mod-table-container {
   max-width: 3000px;
-  margin-left: auto;
   margin-right: auto;
-  padding-left: 10px;
   padding-right: 10px;
   overflow: visible;
 }
@@ -1396,24 +1391,28 @@
 .mod-table-row {
   display: table-row; /* Use table-row layout */
   width: 100%;
-  border-bottom: 1px solid #ccc; /* Optional: Add a border between rows */
 }
 
 /* Style for header row */
 .mod-table-header {
   font-weight: bold;
-  background-color: #f0f0f0; /* Optional: Add a background color for the header */
 }
 
 /* Style for each column */
 .mod-table-column {
   display: table-cell; /* Use table-cell layout */
-  padding: 10px 10px 10px 0; /* Adjust padding as needed */
+  padding: 10px 10px 10px 10px; /* Adjust padding as needed */
   white-space: nowrap; /* Prevent text wrapping */
   min-width: 100px; /* Set a minimum width for columns */
-  text-align: left;
+  text-align: center;
+}
+.mod-table-column:nth-child(even) {
+  background-color: #EBEDEF;
 }
 
+.mod-table-column:nth-child(odd) {
+  background-color: #f8f9fa;
+}
 .small-svg {
   margin-inside: 10px;
 }
@@ -1502,13 +1501,9 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 20px;
+  padding: 40px;
   width: auto;
   animation: fadeIn 0.2s ease-out;
-}
-
-.modification-editor {
-
 }
 
 .cage-popup-header {
@@ -1519,15 +1514,16 @@
 }
 
 .cage-popup-title {
-  font-size: 1.2rem;
-  font-weight: 600;
+  flex: 1;
+  font-weight: lighter;
+  text-align: center;
   margin: 0;
 }
 
 .cage-popup-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 4rem;
   cursor: pointer;
   color: #666;
   padding: 0;
@@ -1543,6 +1539,17 @@
   display: flex;
   gap: 10px;
   flex-direction: row;
+}
+
+
+.modification-editor {
+
+}
+
+.modification-editor-title {
+  padding-bottom: 5px;
+  padding-top: 5px;
+  border-bottom: lightgrey 5px solid;
 }
 
 .modification-editor-input {
@@ -1609,6 +1616,15 @@
   }
 }
 
+.animal-editor{
+
+}
+
+.animal-editor-title {
+  padding-top: 5px;
+  border-bottom: lightgrey 5px solid;
+}
+
 
 /*
 Multi Dropdown Css
@@ -1618,7 +1634,6 @@ Multi Dropdown Css
 .multi-select-container {
   position: relative; /* This is crucial */
   width: 100%;
-  max-width: 500px;
   font-family: Arial, sans-serif;
 }
 

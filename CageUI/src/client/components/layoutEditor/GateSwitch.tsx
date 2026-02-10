@@ -31,7 +31,6 @@ interface GateSwitchProps {
 
 export const GateSwitch: FC<GateSwitchProps> = (props) => {
     const {layoutSvg, selectedObj, setLocalRoom, closeMenu} = props;
-    console.log('Gate: ', selectedObj);
 
     // For each open or close, remove gate svg template of the opposite and replace with new version. Also switch id name version keeping id number
     const handleClick = () => {

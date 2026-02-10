@@ -42,7 +42,6 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
     const [defaultOption, setDefaultOption] = useState<{ value: string, label: string }>({value: currRack.objectId, label: `${currRack.itemId} - ${currRack.type.name}`});
 
     const handleChange = (newVal: { value: string, label: string }) => {
-        console.log('newVal', newVal);
         onSubmit(newVal, newVal.value === 'new');
     };
 

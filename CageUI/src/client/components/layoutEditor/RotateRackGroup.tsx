@@ -33,11 +33,6 @@ export const RotateRackGroup: FC<RotateRackGroupProps> = (props) => {
     const {selectedObj, setLocalRoom, localRoom} = useLayoutEditorContext();
     const currRackGroup = findCageInGroup((selectedObj as Cage).svgId, localRoom.rackGroups).rackGroup;
 
-
-    useEffect(() => {
-        console.log("Rotation: ", localRoom.rackGroups.find(g => g.groupId === currRackGroup.groupId).rotation)
-    }, [localRoom]);
-
     const rotateRack = () => {
         setLocalRoom(prevState => ({
             ...prevState,

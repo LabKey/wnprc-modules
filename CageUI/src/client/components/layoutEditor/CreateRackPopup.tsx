@@ -24,20 +24,12 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
     const [rackIdValue, setRackIdValue] = useState<string>('');
 
     useEffect(() => {
-        console.log('Center Racks: ', centerRacks);
-    }, [centerRacks]);
-    useEffect(() => {
-        console.log('Selected Type: ', selectedRackType);
-    }, [selectedRackType]);
-
-    useEffect(() => {
         const rackTypesConfig: SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'rack_types',
             columns: ['name', 'rowid', 'type']
         };
         labkeyActionSelectWithPromise(rackTypesConfig).then((rackTypesResult) => {
-            console.log(rackTypesResult);
             if (rackTypesResult.rowCount > 0) {
                 const options = rackTypesResult.rows.reduce((acc, row) => {
                     if (!isRackDefault(row.type)) {

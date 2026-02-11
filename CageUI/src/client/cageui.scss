@@ -22,32 +22,21 @@
 }
 
 
-.room-legend-open, .room-legend-close {
-  flex: 0 0 auto;
-  padding-left: 140px;
-  display: flex;
-  flex-direction: column;
-
+.room-legend {
+  grid-area: room-legend;
+  margin-left: 2rem;
 }
 
-
-.legend-header-open, .legend-header-close {
-  margin-bottom: 20px;
-  font-size: x-large;
-}
-
-.legend-header-btn {
+.legend-header {
   background: none;
   border: none;
   width: 100%;
-  margin-bottom: 10px;
-  padding: 10px;
+  margin-top: -0.313rem;
+  margin-bottom: 20px;
+  font-size: xx-large;
 }
 
-.room-layout {
-  display: flex;
-  flex-direction: row;
-}
+
 
 .room-toolbar {
   background-color: lightpink;
@@ -97,7 +86,6 @@
   height: 100%;
   display: flex;
   justify-content: left;
-  margin-left: 5px;
 }
 
 .room-svg svg {
@@ -111,7 +99,7 @@
   flex: 1 1 auto; /* Take up remaining space */
 }
 
-.room-header, .room-display, .room-legend {
+.room-header {
   padding: 10px;
 }
 
@@ -125,7 +113,7 @@
     flex-direction: column;
   }
 
-  .room-legend, .room-display {
+  .room-display {
     margin-right: 0;
     margin-bottom: 5px;
   }
@@ -1726,11 +1714,18 @@ Multi Dropdown Css
   word-wrap: break-word;
 }
 
+.room-layout {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+    "room-layout-toolbar room-layout-toolbar"
+    "layout-grid room-legend";
+}
 
 .room-layout-toolbar {
+  grid-area: room-layout-toolbar;
   margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
 }
 
 .room-changes-toolbar {

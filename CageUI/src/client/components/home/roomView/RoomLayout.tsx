@@ -128,7 +128,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                         />
                 }
             </div>
-            <div id={'layout-grid'}>
+            <div id={'layout-grid'} className={'room-layout-grid'}>
                 <svg // svg here is the size of the border (objects outside of border ignored), add 1 to viewbox to prevent visual cutting by a pixel
                     width={selectedRoom.layoutData.borderWidth + 1}
                     height={selectedRoom.layoutData.borderHeight + 1}
@@ -164,11 +164,6 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                 selectedObj={selectedContextObj}
                 closeMenu={() => setShowCageContextMenu(false)}
             />
-            {/*<ModificationEditor
-                showEditor={showCageContextMenu}
-                selectedObj={selectedContextObj}
-                closeMenu={() => setShowCageContextMenu(false)}
-            />*/}
             {errorPopup &&
                     <ConfirmationPopup message={errorPopup} onClose={() => setErrorPopup(null)}/>
             }

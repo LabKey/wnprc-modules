@@ -18,10 +18,8 @@ export const RoomLegend: FC<any> = () => {
 
 
     return (
-        <div className={legendStyle}>
-            <button className={'legend-header-btn'} onClick={() => setShowLegend(!showLegend)}>
-                <span className={showLegend ? 'legend-header-open' : 'legend-header-close'}>Legend</span>
-            </button>
+        <div className={"room-legend"}>
+            <h2 className={"legend-header"}>Legend</h2>
             {showLegend && (
                 <ReactSVG
                     src={`${ActionURL.getContextPath()}/cageui/static/legend.svg`}

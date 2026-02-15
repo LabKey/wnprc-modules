@@ -79,6 +79,7 @@ public class wnprc_u24Module extends DefaultModule
             final DbSchema dbSchema = DbSchema.get(schemaName, DbSchemaType.Module);
             DefaultSchema.registerProvider(dbSchema.getQuerySchemaName(), new DefaultSchema.SchemaProvider(this)
             {
+                @Override
                 public QuerySchema createSchema(final DefaultSchema schema, Module module)
                 {
                     DbSchema dbSchema = DbSchema.get(schemaName, DbSchemaType.Module);

@@ -5,6 +5,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
@@ -18,11 +19,6 @@ import java.util.Set;
 
 public class GoogleDriveModule extends ExtendedSimpleModule {
     @Override
-    public boolean hasScripts() {
-        return true;
-    }
-
-    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories() {
         return Collections.emptyList();
@@ -33,17 +29,23 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
         addController(GoogleDriveController.NAME, GoogleDriveController.class);
 
         GoogleDriveService.set(new GoogleDriveServiceImpl());
+    }
 
-        Module thisModule = ModuleLoader.getInstance().getModule(GoogleDriveModule.class);
+    @Override
+    protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
+    {
+        // We moved this from init() to startup() because init() is too early to be referencing active modules, which
+        // indirectly loads and stashes web parts. Some referenced modules might be removed after this module's init()
+        // runs (e.g., if dependencies are missing), which would then lead to memory leaks.
         Container home = ContainerManager.getHomeContainer();
 
         // Ensure that we're enabled in the home module, since we'll use that for our queries.
         if (ModuleLoader.getInstance().shouldInsertData())
         {
             Set<Module> homeModules = new HashSet<>(home.getActiveModules());
-            if (!homeModules.contains(thisModule))
+            if (!homeModules.contains(this))
             {
-                homeModules.add(thisModule);
+                homeModules.add(this);
                 home.setActiveModules(homeModules);
             }
         }
@@ -66,7 +68,7 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
         DefaultSchema.registerProvider(GoogleDriveSchema.NAME, new DefaultSchema.SchemaProvider(this) {
             @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return (QuerySchema) new GoogleDriveSchema(schema.getUser(), schema.getContainer());
+                return new GoogleDriveSchema(schema.getUser(), schema.getContainer());
             }
         });
     }

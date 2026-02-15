@@ -1,5 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" title="R24 ETL Module">
-    <requiresPermissions>
-        <permissionClass name="org.labkey.api.security.permissions.ReadPermission"/>
-    </requiresPermissions>
-</view>

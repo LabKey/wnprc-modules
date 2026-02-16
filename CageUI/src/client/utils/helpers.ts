@@ -413,7 +413,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
                     extraContext: row.extra_context,
                     rackGroup: row.rack_group,
                     groupRotation: row.group_rotation,
-                    rack: row.rack.toString(),
+                    rack: row.rack,
                     cage: row.cage,
                     xCoord: row.x_coord,
                     yCoord: row.y_coord,
@@ -729,7 +729,6 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 typeRowId = rackData.rackType;
             }
 
-
             // if default get base type, else get rack type from rack id
             const optConfig = {
                 schemaName: 'cageui',
@@ -743,13 +742,14 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             if (rackTypesData.rowCount === 0) {
                 return;
             }
-            const svgSize = await getSvgSize(rackTypesData.rows[0].type);
-            // determine sizes for sides, (how many different lines make a side in an svg that could each have their own mods)
-            // my current ratio is 4 meaning a square of 4x4 cells will have one section.
+            let rackEnumType: RackTypes = rackTypesData.rows[0].type;
+            if(prevRoom.isDefault) {
+                rackEnumType = defaultTypeToRackType(rackTypesData.rows[0].type);
+            }
             type = {
                 rowid: rackTypesData.rows[0].rowid as number,
                 name: rackTypesData.rows[0].name as string,
-                type: rackTypesData.rows[0].type,
+                type: rackEnumType,
                 manufacturer: rackTypesData.rows[0].manufacturer,
                 isDefault: prevRoom.isDefault,
                 stationary: rackTypesData.rows[0].stationary,
@@ -775,7 +775,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
     const addCageToRack = async (rack: Rack, rackItem: FullObjectHistoryData, group: RackGroup) => {
         // only string for RackTypes, not DefaultRackTypes, since cageNum is used for location tracking which uses RackTypes
-        let cageNumType: RoomItemStringType = roomItemToString(rackItem.objectType);
+        let cageNumType: RoomItemStringType;
         let extraContext: ExtraContext;
         let cageHistoryData = (rackItem.cage as FullCageHistory)?.cageHistory;
         let cageData = (rackItem.cage as FullCageHistory)?.cageData;
@@ -786,10 +786,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             cageNum = cageHistoryData.cageNum;
             cageObjId = cageHistoryData.cage;
             cagePositionId = cageData.positionId;
+            cageNumType = roomItemToString(rackItem.objectType);
         } else {
-            cageNum = parseInt(rackItem.cage as string);
+            cageNum = rackItem.cage;
             cageObjId = generateUUID();
             cagePositionId = rack.cages.length + 1;
+            cageNumType = roomItemToString(defaultTypeToRackType(rackItem.objectType as DefaultRackTypes));
         }
 
         let cageMods: CageModificationsType = {

@@ -32,7 +32,6 @@ import { SelectorOptions } from '../components/layoutEditor/RoomSizeSelector';
  */
 
 
-// used in ehr to determine if the rack is default (doesn't have a rackid)
 export enum DefaultRackTypes {
     DefaultCage = 0,
     DefaultPen = 1,
@@ -241,8 +240,6 @@ export interface LayoutData {
     borderHeight: number;
 }
 
-export type LayoutObjectData = TemplateHistoryData | LayoutHistoryData;
-
 export interface TemplateHistoryData {
     object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
     historyid?: string;
@@ -250,7 +247,7 @@ export interface TemplateHistoryData {
     rack_group: number;
     group_rotation: GroupRotation;
     rack: number;
-    cage: string;
+    cage: number;
     x_coord: number;
     y_coord: number;
     rowid: number;
@@ -320,8 +317,8 @@ export interface FullObjectHistoryData {
     rackGroup?: number;
     groupRotation?: GroupRotation;
     // objectid of rack in racks table
-    rack?: RackData | string;
-    cage?: FullCageHistory | string;
+    rack?: RackData | number;
+    cage?: FullCageHistory | number;
     xCoord: number;
     yCoord: number;
 }

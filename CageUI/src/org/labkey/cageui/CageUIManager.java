@@ -835,7 +835,7 @@ public class CageUIManager
                             form.setGroupRotation(rackGroup.getRotation());
                             form.setRack(rackIndex);
                             form.setCage(findLastNumberAfterDash(cage.getCageNum()));
-                            form.setObjectType(rack.getType().getRackType().getNumericValue()); // object_type is null for cages
+                            form.setObjectType(rack.getType().getEffectiveRackType().getNumericValue());
                             form.setExtraContext(cage.getExtraContext() != null ?
                                     toJson(cage.getExtraContext()) : null);
                             form.setxCoord(rackGroup.getX() + rack.getX() + cage.getX());
@@ -856,7 +856,7 @@ public class CageUIManager
                     form.setRackGroup(null); // rack_group is null for objects
                     form.setRack(null); // rack is null for objects
                     form.setCage(null); // cage is null for objects
-                    form.setObjectType(object.getType().ordinal()); // object_type
+                    form.setObjectType(object.getType().getNumericValue()); // object_type
                     form.setExtraContext(object.getExtraContext() != null ?
                             toJson(object.getExtraContext()) : null);
                     form.setxCoord(object.getX());
@@ -999,7 +999,7 @@ public class CageUIManager
                             LayoutHistoryForm form = new LayoutHistoryForm();
                             form.setHistoryId(historyId);
                             form.setCage(cage.getObjectId()); // cage ID
-                            form.setObjectType(rack.getType().getRackType().getNumericValue()); // object_type is null for cages
+                            form.setObjectType(rack.getType().getEffectiveRackType().getNumericValue());
                             form.setExtraContext(cage.getExtraContext() != null ?
                                     toJson(cage.getExtraContext()) : null);
                             form.setxCoord(rackGroup.getX() + rack.getX() + cage.getX());

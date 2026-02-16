@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleContext;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
@@ -17,11 +16,6 @@ import java.util.Collections;
 import java.util.Set;
 
 public class WNPRC_ComplianceModule extends ExtendedSimpleModule {
-    @Override
-    public boolean hasScripts() {
-        return true;
-    }
-
     @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories() {
@@ -52,7 +46,7 @@ public class WNPRC_ComplianceModule extends ExtendedSimpleModule {
         DefaultSchema.registerProvider(WNPRC_ComplianceSchema.NAME, new DefaultSchema.SchemaProvider(this) {
             @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return (QuerySchema) new WNPRC_ComplianceSchema(schema.getUser(), schema.getContainer());
+                return new WNPRC_ComplianceSchema(schema.getUser(), schema.getContainer());
             }
         });
     }

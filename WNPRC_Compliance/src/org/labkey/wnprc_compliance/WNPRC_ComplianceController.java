@@ -404,6 +404,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
     public class GetPersonFromCardAPI extends ReadOnlyApiAction<SearchPersonFromCardForm> {
+        @Override
         public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
             Map<String, List<JSONObject>> results = new HashMap<>();
@@ -443,6 +444,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @Marshal(Marshaller.Jackson)
     @CSRF(CSRF.Method.NONE)
     public class GetClearancesFromPerson extends ReadOnlyApiAction<SearchClearanceFromPersonForm> {
+        @Override
         public Object execute(SearchClearanceFromPersonForm form, BindException errors)
         {
 
@@ -526,6 +528,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @Marshal(Marshaller.Jackson)
     @CSRF(CSRF.Method.NONE)
     public class GetMeaslesClearanceFromPerson extends ReadOnlyApiAction<SearchPersonFromCardForm> {
+        @Override
         public Object execute(SearchPersonFromCardForm form, BindException errors)
         {
             JSONObject json = new JSONObject();

@@ -75,7 +75,6 @@ export const RoomList: FC = () => {
             }
 
             if (newRoom) {
-                console.log('New Room: ', newRoom);
                 setAllRooms((prevRooms) => prevRooms.map((prevRoom) => {
                     // add racks to room state, only once when first clicked
                     if (prevRoom.name === roomName) {
@@ -103,7 +102,6 @@ export const RoomList: FC = () => {
                                 });
                             });
                         });
-                        console.log('List: ', tempRacks);
                         return {
                             ...prevRoom,
                             racks: tempRacks,
@@ -129,12 +127,10 @@ export const RoomList: FC = () => {
     };
 
     const handleRoomClick = (room: ListRoom) => {
-        console.log('Click: ', room);
         navigateToRoom(room.name, switchToRoom);
     };
 
     const handleRackClick = (room: ListRoom, rack: ListRack) => {
-        console.log('Click: ', room, rack);
         navigateTo('Rack', {room: room.name, rack: rack.id});
     };
 

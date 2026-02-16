@@ -13,7 +13,6 @@ export const CurrentRackLayout: FC = () => {
             return;
         }
         const rackSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select(rackRef.current);
-        console.log('Load Rack Group: ', selectedRackGroup);
         rackSvg.selectAll(':scope > g').each(function (d, i) {
             // 'this' refers to the current DOM element
             const element = d3.select(this) as d3.Selection<SVGGElement, {}, null, undefined>;

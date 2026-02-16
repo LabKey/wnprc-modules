@@ -21,7 +21,6 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
         if (!cageRef.current) {
             return;
         }
-        console.log('Load Cage: ', cage);
         const cageSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select(cageRef.current);
         cageSvg.selectAll(':scope > g').each(function (d, i) {
             // 'this' refers to the current DOM element

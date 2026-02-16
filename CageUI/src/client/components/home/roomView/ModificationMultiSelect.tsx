@@ -41,10 +41,6 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const [availableMods, setAvailableMods] = useState<EHRCageMods[]>(null);
 
     useEffect(() => {
-        console.log('prev items', prevItems);
-    }, [prevItems]);
-
-    useEffect(() => {
         if (!availableMods) {
             return;
         }
@@ -128,7 +124,6 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const handleSelectItem = (item: Option<ModTypes>) => {
         const newItems = selectedItems || [];
 
-        console.log('Selected Items: ', newItems, item);
         if (!newItems.find(items => items.value === item.value)) {
             setSelectedItems([...newItems, {
                 ...item,

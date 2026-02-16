@@ -19,10 +19,6 @@ export const CageViewContent: FC = () => {
     const [cageDimensions, setCageDimensions] = useState<CageDimensions>(null);
 
     useEffect(() => {
-        console.log('Cage View: ', selectedCage);
-    }, [selectedCage]);
-
-    useEffect(() => {
         if (!selectedCage) {
             return;
         }

@@ -83,7 +83,6 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const saveLayout = async () => {
 
         let res: LayoutSaveResult = await submitLayoutMods();
-        console.log('Save Layout Result: ', res);
 
         if (res.success) {
             // succssesful save

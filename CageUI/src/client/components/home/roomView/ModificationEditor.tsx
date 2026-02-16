@@ -33,10 +33,6 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     });
 
     useEffect(() => {
-        console.log('currCageMods: ', currCageMods);
-    }, [currCageMods]);
-
-    useEffect(() => {
         if(currCageMods){
             updateCageMods(currCageMods);
         }

@@ -25,13 +25,6 @@ export const RackModifications: FC = () => {
     const [connectedRacks, setConnectedRacks] = useState<ConnectedRacks>(null);
     const [currRackMods, setCurrRackMods] = useState<{ [key in string]: CurrCageMods }>(null);
 
-    useEffect(() => {
-        console.log('Connected Cages', connectedCages);
-        console.log('Connected Racks', connectedRacks);
-    }, [connectedRacks, connectedCages]);
-    useEffect(() => {
-        console.log('Current Rack Mods', currRackMods);
-    }, [currRackMods]);
     // Find possible connects
     useEffect(() => {
         if (!selectedRack) {
@@ -40,7 +33,6 @@ export const RackModifications: FC = () => {
         const currGroup = findRackInGroup(selectedRack.svgId, selectedRoom.rackGroups).rackGroup;
         const connections = findConnectedCages(selectedRack, currGroup.rotation, undefined);
         const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
-        console.log('Connections', connections);
         Object.entries(connections).forEach(([loc, connection]) => {
             if (parseInt(loc) === ModLocations.Direct) {
                 return;
@@ -62,7 +54,6 @@ export const RackModifications: FC = () => {
                 };
             });
         });
-        console.log('New Rack Mods', newRackMods);
         setCurrRackMods(newRackMods);
         setConnectedCages(connections);
         setRackGroup(currGroup);
@@ -73,7 +64,6 @@ export const RackModifications: FC = () => {
             return;
         }
         const connectedRacks = findConnectedRacks(rackGroup, selectedRack);
-        console.log('Connected Racks #1: ', connectedRacks);
         const newRackMods: { [p: string]: CurrCageMods } = {...currRackMods};
         Object.entries(connectedRacks).forEach(([loc, connection]) => {
             if (parseInt(loc) === ModLocations.Direct) {
@@ -96,7 +86,6 @@ export const RackModifications: FC = () => {
                 };
             });
         });
-        console.log('New Rack Mods', newRackMods);
 
         setCurrRackMods(newRackMods);
         setConnectedRacks(connectedRacks);
@@ -321,7 +310,6 @@ export const RackModifications: FC = () => {
                             {connectedRacks && Object.entries(connectedRacks).map(([loc, rackConnections], idx) => {
                                 return rackConnections.map((connection, connIdx) => {
                                     const {currRack, currCage, adjRack, adjCage, currMods, adjMods} = connection;
-                                    console.log('currMod', currMods);
                                     // Create rows for each mod pairing
                                     const modRows = [];
 

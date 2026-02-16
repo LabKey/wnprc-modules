@@ -9,16 +9,13 @@ export const RoomNavbar: FC = () => {
     const {selectedRack, selectedCage} = useRoomContext();
 
     const handleRoomClick = () => {
-        console.log('Room clicked');
         navigateTo('Room', {room: selectedPage.room});
     };
 
     const handleRackClick = () => {
-        console.log('Rack clicked');
         navigateTo('Rack', {room: selectedPage.room, rack: selectedPage.rack});
     };
     const handleCageClick = () => {
-        console.log('Cage clicked');
         navigateTo('Room', {room: selectedPage.room, rack: selectedPage.rack, cage: selectedPage.cage});
     };
 

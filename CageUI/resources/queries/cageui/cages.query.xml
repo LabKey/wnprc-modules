@@ -35,7 +35,9 @@
                             <fkDisplayColumnName>rackid</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="cage_number"/>
+                    <column columnName="cage_number">
+                        <formatString>0000</formatString>
+                    </column>
                     <column columnName="length"/>
                     <column columnName="width"/>
                     <column columnName="height"/>

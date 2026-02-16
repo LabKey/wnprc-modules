@@ -5,7 +5,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
@@ -29,14 +28,7 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
         addController(GoogleDriveController.NAME, GoogleDriveController.class);
 
         GoogleDriveService.set(new GoogleDriveServiceImpl());
-    }
 
-    @Override
-    protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
-    {
-        // We moved this from init() to startup() because init() is too early to be referencing active modules, which
-        // indirectly loads and stashes web parts. Some referenced modules might be removed after this module's init()
-        // runs (e.g., if dependencies are missing), which would then lead to memory leaks.
         Container home = ContainerManager.getHomeContainer();
 
         // Ensure that we're enabled in the home module, since we'll use that for our queries.

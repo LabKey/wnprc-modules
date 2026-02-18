@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CageUI Layout Editor Rules</title>
+</head>
+<body>
+  <h3>Workflow</h3>
+  <ol>
+    <li>When initially loading the page select the grid size. For larger rooms with more cages you would want to select
+      a larger grid to ensure that all the items can be placed on the layout. This grid size cannot be changed later.
+    </li>
+    <li>Move items to the layout by dragging and dropping them in position</li>
+    <li>Open an items context menu by right-clicking the item.
+      <ol>
+        <li>
+          Different items have different context menus, but they are all accessed the same way.
+        </li>
+      </ol>
+    </li>
+    <li>Place cages next to each other to merge them into the same rack or connect the racks.
+      <ol>
+        <li>
+          Cages cannot be merged unless they share the same type.
+        </li>
+        <li>
+          Generally you should create your racks before assigning them a rack type.
+        </li>
+      </ol>
+    </li>
+  </ol>
+  <h3>Context Menus</h3>
+  <div>
+    <h4>Cage context menus support the following actions</h4>
+    <ol>
+      <li>
+        Removing the cage or rack from the layout.
+      </li>
+      <li>
+        Changing the rack.
+        <ul>
+          <li>
+            In this menu you can also create new racks. Open the menu and enter the rack type and rack id, and it
+            will be automatically assigned to that rack when you save.
+          </li>
+        </ul>
+      </li>
+      <li>
+        Changing the cage number.
+      </li>
+      <li>
+        Rotating the rack group.
+        <ul>
+          <li>
+            Rotations start at 90 degrees.
+          </li>
+          <li>
+            Rotations are done clockwise. For the starting rotation and position this means that the top of the rack group
+            is the right side of the group.
+          </li>
+          <li>
+            Rack groups are all the cages/racks that are connected to each other.
+          </li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+  <div>
+    <h4>Room Object context menus support the following actions</h4>
+    <ol>
+      <li>
+        Removing the room object from the layout.
+      </li>
+      <li>Gate objects have have two additonal actions.
+        <ol>
+          <li>
+            Set the room that the gate is connected to. This indicates that the two rooms have a connection that animals can go through.
+          </li>
+          <li>
+            Closing/opening the gate, indicating if the gate is open or closed and if animals are able to go between rooms.
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+
+  <h3>Creating Templates</h3>
+  <div>
+    <h4>Rules for creating templates</h4>
+    <ul>
+      <li>
+        All racks/cages in a room must have a default rack type. By default, this is what they are when placed in the room.
+        This ensures that real racks/cages are not placed in rooms that "do not exist."
+      </li>
+    </ul>
+  </div>
+  <h3>Creating Real Rooms</h3>
+  <div>
+    <h4>Rules for creating real room layouts</h4>
+    <ul>
+      <li>
+        All racks/cages in a room must have a real rack type.
+        This ensures that racks/cages that "do not exist" are not placed in rooms that are real.
+      </li>
+      <li>No duplicate cage numbers.</li>
+    </ul>
+  </div>
+  <h3>Additional Notes for Both Types of Layouts</h3>
+  <div>
+    Both real rooms and template rooms have a resizeable border that determines the border of the room.
+    This helps compact the size of the layout into a more realistic room size when working with different size starting
+    grids. Ensure that no room objects or cages are placed outside this border as they will not be shown when viewing the
+    room from the display page.
+  </div>
+  <div>
+    <h4>Additional Actions</h4>
+    <ol>
+      <li>The Grid Enabled button turns off the grid lines to show a better view of what the room will look like on
+      the display page.
+      </li>
+      <li>Clear Layout wipes all the items from the layout, allowing you to start over.</li>
+    </ol>
+  </div>
+</body>
+</html>

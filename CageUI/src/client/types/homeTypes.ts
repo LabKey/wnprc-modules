@@ -41,10 +41,6 @@ export type EHRCageMods = {
 
 }
 
-export interface AnimalInCage {
-    id: string;
-}
-
 export interface SelectedPage {
     selected: SelectedViews;
     room?: string; // room name

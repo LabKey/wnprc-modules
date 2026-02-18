@@ -248,7 +248,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
             <div className={'mod-container-columns'}>
                 <div className={'mod-container-column'}>
                     <div className={'mod-table-container'}>
-                        <h2 className={"mod-table-title"}>Current Cage</h2>
+                        <h2 className={"modification-editor-title"}>Current Cage</h2>
                         <ul className={'mod-table'}>
                             <li className={'mod-table-row mod-table-header'}>
                                 <div className={'mod-table-column'}>Direct Modifications</div>
@@ -264,7 +264,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 })}
                             />
                         </ul>
-                        <h2 className={"mod-table-title"}>Adjacent Cages</h2>
+                        <h2 className={"modification-editor-title"}>Adjacent Cages</h2>
                         <ul className={'mod-table'}>
                             <li className={'mod-table-row mod-table-header'}>
                                 <div className={'mod-table-column'}>Current Cage</div>
@@ -301,7 +301,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 })
                             )}
                         </ul>
-                        <h2 className={"mod-table-title"}>Adjacent Racks</h2>
+                        <h2 className={"modification-editor-title"}>Adjacent Racks</h2>
                         <ul className={'mod-table'}>
                             <li className={'mod-table-row mod-table-header'}>
                                 <div className={'mod-table-column'}>Current Rack</div>

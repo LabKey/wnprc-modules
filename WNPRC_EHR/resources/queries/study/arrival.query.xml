@@ -103,7 +103,7 @@
                         <nullable>true</nullable>
                         <isHidden>true</isHidden>
                         <columnTitle>Room</columnTitle>
-                        <!--<url>/wnprc_ehr/cageDetails.view?-->
+                        <!--<url>/EHR/cageDetails.view?-->
                         <!--room=${room}&amp;-->
                         <!--cage=${cage}&amp;-->
                         <!--</url>-->
@@ -117,7 +117,7 @@
                         <nullable>true</nullable>
                         <isHidden>true</isHidden>
                         <columnTitle>Cage</columnTitle>
-                        <url>/wnprc_ehr/cageDetails.view?
+                        <url>/EHR/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
                         </url>

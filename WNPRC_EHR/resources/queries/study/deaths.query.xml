@@ -64,7 +64,7 @@
                     </column>
                     <column columnName="roomattime">
                         <columnTitle>Room At Time</columnTitle>
-                        <!--<url>/wnprc_ehr/cageDetails.view?-->
+                        <!--<url>/EHR/cageDetails.view?-->
                         <!--room=${room}&amp;-->
                         <!--cage=${cage}&amp;-->
                         <!--</url>-->

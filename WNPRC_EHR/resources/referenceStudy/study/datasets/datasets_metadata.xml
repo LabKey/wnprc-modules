@@ -3193,7 +3193,7 @@
         <datatype>varchar</datatype>
         <columnTitle>Cage</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?
                             room=${room}&
                             cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
@@ -3341,7 +3341,7 @@
         <columnTitle>Birth Cage</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <shownInDetailsView>false</shownInDetailsView>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?
                             room=${room}&
                             cage=${cage}]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
@@ -4174,7 +4174,7 @@
         <columnTitle>Room At Time</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <dimension>false</dimension>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/ehr/cageDetails.view?
                           room=${RoomAtTime}&
                           cage=${CageAtTime}&]]></url>
         <fk>
@@ -4188,7 +4188,7 @@
         <datatype>varchar</datatype>
         <columnTitle>Cage At Time</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/ehr/cageDetails.view?
                           room=${RoomAtTime}&
                           cage=${CageAtTime}&]]></url>
         <scale>0</scale>
@@ -10789,7 +10789,7 @@
         <columnTitle>Cage</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <isHidden>true</isHidden>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?
                             room=${room}&
                             cage=${cage}&]]></url>
         <defaultValueType>FIXED_EDITABLE</defaultValueType>
@@ -12015,7 +12015,7 @@
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <isHidden>true</isHidden>
         <shownInInsertView>false</shownInInsertView>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/ehr/cageDetails.view?
                             room=${room}&]]></url>
         <fk>
           <fkDbSchema>ehr_lookups</fkDbSchema>
@@ -12030,7 +12030,7 @@
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <isHidden>true</isHidden>
         <shownInInsertView>false</shownInInsertView>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/ehr/cageDetails.view?
                             room=${room}&
                             cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
@@ -12735,7 +12735,7 @@
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <nullable>false</nullable>
         <dimension>false</dimension>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&]]></url>
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&]]></url>
         <fk>
           <fkDbSchema>ehr_lookups</fkDbSchema>
           <fkTable>rooms</fkTable>
@@ -12747,7 +12747,7 @@
         <datatype>varchar</datatype>
         <columnTitle>Cage Old</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&cage=${cage}&]]></url>
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
         <scale>0</scale>
       </column>
@@ -13866,7 +13866,7 @@
         <datatype>varchar</datatype>
         <columnTitle>Cage</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?
                             room=${room}&
                             cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>

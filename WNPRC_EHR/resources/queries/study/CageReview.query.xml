@@ -5,7 +5,7 @@
                 <columns>
                     <column columnName="Location">
                         <columnTitle>Location</columnTitle>
-                        <url>/wnprc_ehr/cageDetails.view?
+                        <url>/EHR/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
                         </url>

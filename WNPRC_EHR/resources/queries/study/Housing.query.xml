@@ -26,12 +26,12 @@
                     <column columnName="room">
                         <nullable>false</nullable>
                         <columnTitle>Room</columnTitle>
-                        <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;</url>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;</url>
                     </column>
                     <column columnName="cageOld">
                         <!--<nullable>false</nullable>-->
                         <columnTitle>Cage Old</columnTitle>
-                        <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;cage=${cageOld}&amp;</url>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cageOld}&amp;</url>
                     </column>
                     <column columnName="cage">
                         <!--<nullable>false</nullable>-->
@@ -42,7 +42,7 @@
                             <fkColumnName>objectid</fkColumnName>
                             <fkDisplayColumnName>cage_number</fkDisplayColumnName>
                         </fk>
-                        <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
                     </column>
                     <column columnName="cond">
                         <nullable>true</nullable>

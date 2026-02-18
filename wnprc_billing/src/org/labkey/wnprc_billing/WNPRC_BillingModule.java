@@ -31,7 +31,6 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.wnprc_billing.dataentry.ChargesFormType;
 import org.labkey.wnprc_billing.dataentry.NonAnimalChargesFormType;
@@ -39,9 +38,9 @@ import org.labkey.wnprc_billing.notification.WNPRCBillingNotificationProvider;
 import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
-import org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer;
 import org.labkey.wnprc_billing.security.permissions.EHRFinanceAdminPermission;
 import org.labkey.wnprc_billing.security.roles.EHRFinanceAdmin;
+import org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -70,12 +69,6 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     }
 
     @Override
-    public boolean hasScripts()
-    {
-        return true;
-    }
-
-    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
@@ -86,7 +79,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     protected void init()
     {
         addController(WNPRC_BillingController.NAME, WNPRC_BillingController.class);
-        ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, new InvoicedItemsProcessingServiceImpl());
+        InvoicedItemsProcessingService.register(this, new InvoicedItemsProcessingServiceImpl());
         BillingNotificationService.get().registerBillingNotificationProvider(WNPRCBillingNotificationProvider.get());
 
         registerRoles();
@@ -122,7 +115,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
             @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module)
             {
-                return new WNPRC_BillingUserSchema(WNPRC_BillingSchema.NAME, null, schema.getUser(), schema.getContainer(), WNPRC_BillingSchema.getInstance().getSchema());
+                return new WNPRC_BillingUserSchema(WNPRC_BillingSchema.NAME, null, schema.getUser(), schema.getContainer(), WNPRC_BillingSchema.getSchema());
             }
         });
     }

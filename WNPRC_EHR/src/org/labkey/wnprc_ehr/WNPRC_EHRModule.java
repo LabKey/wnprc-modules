@@ -175,6 +175,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
      */
     private boolean loadOnStart = false;
 
+    @Override
     public String getName()
     {
         return NAME;
@@ -183,11 +184,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     @Override
     public @Nullable Double getSchemaVersion() {
         return forceUpdate ? Double.POSITIVE_INFINITY : 22.010;
-    }
-
-    @Override
-    public boolean hasScripts() {
-        return true;
     }
 
     @Override
@@ -202,16 +198,16 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         registerPermissions();
     }
 
-        @Override
-        @NotNull
-        protected Collection<WebPartFactory> createWebPartFactories()
-        {
-            return new ArrayList<>(Arrays.asList(waterCalendarWebPart));
-        }
+    @Override
+    @NotNull
+    protected Collection<WebPartFactory> createWebPartFactories()
+    {
+        return new ArrayList<>(Arrays.asList(waterCalendarWebPart));
+    }
 
-        @Override
-        protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
-        {
+    @Override
+    protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
+    {
         ModuleUpdate.onStartup(moduleContext, this);
 
         EHRService.get().registerModule(this);

@@ -18,11 +18,6 @@ import java.util.Set;
 
 public class GoogleDriveModule extends ExtendedSimpleModule {
     @Override
-    public boolean hasScripts() {
-        return true;
-    }
-
-    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories() {
         return Collections.emptyList();
@@ -34,16 +29,15 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
 
         GoogleDriveService.set(new GoogleDriveServiceImpl());
 
-        Module thisModule = ModuleLoader.getInstance().getModule(GoogleDriveModule.class);
         Container home = ContainerManager.getHomeContainer();
 
         // Ensure that we're enabled in the home module, since we'll use that for our queries.
         if (ModuleLoader.getInstance().shouldInsertData())
         {
             Set<Module> homeModules = new HashSet<>(home.getActiveModules());
-            if (!homeModules.contains(thisModule))
+            if (!homeModules.contains(this))
             {
-                homeModules.add(thisModule);
+                homeModules.add(this);
                 home.setActiveModules(homeModules);
             }
         }
@@ -66,7 +60,7 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
         DefaultSchema.registerProvider(GoogleDriveSchema.NAME, new DefaultSchema.SchemaProvider(this) {
             @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return (QuerySchema) new GoogleDriveSchema(schema.getUser(), schema.getContainer());
+                return new GoogleDriveSchema(schema.getUser(), schema.getContainer());
             }
         });
     }

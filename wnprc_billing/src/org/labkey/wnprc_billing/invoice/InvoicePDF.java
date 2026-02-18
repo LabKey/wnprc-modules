@@ -584,10 +584,10 @@ public class InvoicePDF extends FPDF
         Line(new Coordinate(r1, mid), new Coordinate(r2, mid));
         setXY(r1 + (r2 - r1) / 2 - 5, y1 + 3);
         setFont("Helvetica", Collections.singleton(FontStyle.BOLD), 10);
-        Cell(10, 2, "FUND-ACCOUNT", Alignment.CENTER);
+        Cell(10, 2, "GRANT", Alignment.CENTER);
         setXY(r1 + (r2 - r1) / 2 - 5, y1 + 11);
         setFont("Helvetica", Collections.emptySet(), 10);
-        Cell(10, 2,   addItem(alias.getUw_fund()) + alias.getGrantNumber(), Alignment.CENTER);
+        Cell(10, 2,   alias.getGrantNumber(), Alignment.CENTER);
     }
 
     private void addPageNumber(int page) throws IOException

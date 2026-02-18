@@ -30,7 +30,7 @@
                         <shownInInsertView>true</shownInInsertView>
                         <shownInUpdateView>true</shownInUpdateView>
                         <isHidden>false</isHidden>
-                        <!--<url>/EHR/cageDetails.view?-->
+                        <!--<url>/wnprc_ehr/cageDetails.view?-->
                         <!--room=${room}&amp;-->
                         <!--cage=${cage}-->
                         <!--</url>-->
@@ -45,7 +45,7 @@
                         <shownInInsertView>true</shownInInsertView>
                         <shownInUpdateView>true</shownInUpdateView>
                         <isHidden>false</isHidden>
-                        <url>/EHR/cageDetails.view?
+                        <url>/wnprc_ehr/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}
                         </url>

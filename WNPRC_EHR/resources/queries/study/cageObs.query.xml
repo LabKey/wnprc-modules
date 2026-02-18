@@ -17,7 +17,7 @@
                     </column>
                     <column columnName="RoomAtTime">
                       <columnTitle>Room At Time</columnTitle>
-                      <url>/ehr/cageDetails.view?
+                      <url>/wnprc_ehr/cageDetails.view?
                           room=${RoomAtTime}&amp;
                           cage=${CageAtTime}&amp;
                       </url>
@@ -30,7 +30,7 @@
                     </column>
                     <column columnName="CageAtTime">
                       <columnTitle>Cage At Time</columnTitle>
-                      <url>/ehr/cageDetails.view?
+                      <url>/wnprc_ehr/cageDetails.view?
                           room=${RoomAtTime}&amp;
                           cage=${CageAtTime}&amp;
                       </url>

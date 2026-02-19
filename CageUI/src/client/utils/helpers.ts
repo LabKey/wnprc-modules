@@ -29,14 +29,16 @@ import {
     FetchRoomData,
     FullCageHistory,
     FullObjectHistoryData,
-    GroupId, GroupRotation,
+    GroupId,
+    GroupRotation,
     LayoutData,
     LayoutHistoryData,
     ModData,
-    ModLocations, ModSvgLocId,
+    ModLocations,
     ModTypes,
     PrevRoom,
     Rack,
+    RackConditions,
     RackData,
     RackGroup,
     RackStringType,
@@ -59,7 +61,8 @@ import { ActionURL, Filter, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault,
-    createEmptyUnitLoc, findCageInGroup,
+    createEmptyUnitLoc,
+    findCageInGroup,
     isRackDefault,
     isRackEnum,
     isRoomHomogeneousDefault,
@@ -709,10 +712,12 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         let extraContext: ExtraContext;
         let rackData = rackItem.rack as RackData;
         let rack: Rack;
+        let rackCondition: RackConditions = RackConditions.Operational;
 
         if (!prevRoom.isDefault) {
             rackIdNum = rackData.rackId;
             rackObjectId = rackData.objectId;
+            rackCondition = rackData.condition;
         } else {
             rackIdNum = rackItem.rack;
             rackObjectId = `default-rack-${rackIdNum}`;
@@ -761,6 +766,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 svgId: `rack_${rackObjectId}`,
                 selectionType: 'rack',
                 cages: [],
+                condition: rackCondition,
                 isActive: !prevRoom.isDefault,
                 itemId: rackIdNum,
                 type: type,

@@ -28,6 +28,7 @@ import {
     GroupRotation,
     LocationCoords,
     Rack,
+    RackConditions,
     RackGroup,
     RackStringType,
     RackTypes,
@@ -54,7 +55,8 @@ import {
 import * as d3 from 'd3';
 import {
     defaultTypeToRackType,
-    generateCageId, generateUUID,
+    generateCageId,
+    generateUUID,
     getNextDefaultRackId,
     getSvgSize,
     parseLongId,
@@ -65,7 +67,7 @@ import {
     saveRoomHelper
 } from '../utils/helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter, Utils } from '@labkey/api';
+import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise, } from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
 
@@ -337,6 +339,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         const newRack: Rack = {
             isNew: true,
             svgId: `rack_${objId}`,
+            condition: RackConditions.Operational,
             objectId: objId,
             selectionType: 'rack',
             cages: [newCage],
@@ -416,16 +419,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
             // Create new merged rack
             const mergedRack: Rack = {
-                objectId: targetRack.objectId,
-                svgId: targetRack.svgId,
-                isNew: targetRack.isNew,
-                itemId: targetRack.itemId, // Use the larger ID for the merged rack
+                ...targetRack,
                 selectionType: 'rack',
-                type: targetRack.type,
                 cages: updatedCages,
-                x: targetRack.x,
-                y: targetRack.y,
-                isActive: targetRack.isActive,
             };
 
             const mergedRackGroup: RackGroup = {

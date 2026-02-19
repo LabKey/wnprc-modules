@@ -23,29 +23,41 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                     <div>
                         <div className="dimension-item">
                             <span className="dimension-label">Type:</span>
-                            <div className="dimension-value">{RackTypes[selectedRack.type.type]}</div>
+                            <div className="dimension-value-container">
+                                <span className="dimension-value-text">{RackTypes[selectedRack.type.type]}</span>
+                            </div>
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Manufacturer:</span>
-                            <div className="dimension-value">{selectedRack.type.manufacturer}</div>
+                            <div className="dimension-value-container">
+                                <span className="dimension-value-text">{selectedRack.type.manufacturer}</span>
+                            </div>
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Length:</span>
-                            <div className="dimension-value">{cageDimensions.length} in</div>
+                            <div className="dimension-value-container">
+                                <span className="dimension-value-text">{cageDimensions.length} in</span>
+                            </div>
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Width:</span>
-                            <div className="dimension-value">{cageDimensions.width} in</div>
+                            <div className="dimension-value-container">
+                                <span className="dimension-value-text">{cageDimensions.width} in</span>
+                            </div>
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Height:</span>
-                            <div className="dimension-value">{cageDimensions.height} in</div>
+                            <div className="dimension-value-container">
+                                <span className="dimension-value-text">{cageDimensions.height} in</span>
+                            </div>
                         </div>
                         <div className="dimension-item">
                             <span className="dimension-label">Sqft:</span>
-                            <div className="dimension-value" data-unit={'ft'}>
-                                {Math.round((cageDimensions.sqft) * 100) / 100}
-                                <span className="unit-with-squared"> ft</span>
+                            <div className="dimension-value-container">
+                                <span className="dimension-value-text" data-unit={'ft'}>
+                                    {Math.round((cageDimensions.sqft) * 100) / 100}
+                                    <span className="unit-with-squared"> ft</span>
+                                </span>
                             </div>
                         </div>
                     </div>

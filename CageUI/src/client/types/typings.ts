@@ -121,6 +121,7 @@ export enum ModSvgLocId {
     CTunnelBottom = 'cTunnel-bottom',
 }
 
+// found in ehr_lookups.cageui_condition_codes
 export enum RackConditions {
     Operational,
     Damaged,
@@ -370,6 +371,7 @@ export interface Rack {
     cages: Cage[];
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
+    condition: RackConditions;
     isActive?: boolean; // Determines if rack is "in use or active"
     extraContext?: { [key: string]: any };
     isNew: boolean; // if true this rack was created during the current session and not loaded from the database

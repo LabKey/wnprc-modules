@@ -49,10 +49,16 @@ public class CageUICustomizer extends AbstractTableCustomizer
 
     private void customizeRackTypesTable(AbstractTableInfo ti)
     {
-        SQLFragment sql = new SQLFragment("(SELECT ROUND((length / 12 * width / 12), 2) as sqft)");
-        ExprColumn newCol = new ExprColumn(ti, "sqft", sql, JdbcType.VARCHAR);
-        newCol.setLabel("Square Feet");
-        newCol.setDescription("Square footage of the cages in the rack type");
-        ti.addColumn(newCol);
+        SQLFragment sqlSqft = new SQLFragment("(SELECT ROUND((length / 12 * width / 12), 2) as sqft)");
+        ExprColumn newColSqft = new ExprColumn(ti, "sqft", sqlSqft, JdbcType.VARCHAR);
+        newColSqft.setLabel("Square Feet");
+        newColSqft.setDescription("Square footage of the cages in the rack type");
+        ti.addColumn(newColSqft);
+
+        SQLFragment sqlName = new SQLFragment("(SELECT CAST(rack_types$type$.\"title\"  AS TEXT) || '-' || CAST(manufacturer AS TEXT) || '-' || CAST(size AS TEXT) || CASE WHEN stationary THEN '-stationary' ELSE '' END as name)");
+        ExprColumn newColName = new ExprColumn(ti, "name", sqlName, JdbcType.VARCHAR);
+        newColName.setLabel("Name");
+        newColName.setDescription("Name of the rack type combing several columns into a string so the users have a detailed view of what they are choosing");
+        ti.addColumn(newColName);
     }
 }

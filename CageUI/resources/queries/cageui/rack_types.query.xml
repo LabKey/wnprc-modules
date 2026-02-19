@@ -52,6 +52,7 @@
                     <column columnName="length"/>
                     <column columnName="width"/>
                     <column columnName="height"/>
+                    <column columnName="size"/>
                     <column columnName="sqft"/>
                     <column columnName="description"/>
                     <column columnName="container"/>

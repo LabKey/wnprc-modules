@@ -66,13 +66,13 @@
     <table tableName="rack_types" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
-            <column columnName="name"/>
             <column columnName="type"/>
             <column columnName="manufacturer"/>
             <column columnName="stationary"/>
             <column columnName="length"/>
             <column columnName="width"/>
             <column columnName="height"/>
+            <column columnName="size"/>
             <column columnName="description"/>
             <column columnName="container"/>
             <column columnName="createdby"/>

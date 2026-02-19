@@ -5,7 +5,7 @@ import org.json.JSONObject;
 public class RackTypesForm
 {
     private int _rowid;
-    private String _name;
+    private Double _size;
     private int _type;
     private String _manufacturer;
     private boolean _stationary;
@@ -24,14 +24,14 @@ public class RackTypesForm
         _rowid = rowid;
     }
 
-    public String getName()
+    public Double getSize()
     {
-        return _name;
+        return _size;
     }
 
-    public void setName(String name)
+    public void setSize(Double size)
     {
-        _name = name;
+        _size = size;
     }
 
     public int getType()
@@ -99,7 +99,7 @@ public class RackTypesForm
         JSONObject json = new JSONObject();
 
         json.put("rowid", getRowid());
-        json.put("name", getName());
+        json.put("name", getSize());
         json.put("type", getType());
         json.put("manufacturer", getManufacturer());
         json.put("length", getLength());

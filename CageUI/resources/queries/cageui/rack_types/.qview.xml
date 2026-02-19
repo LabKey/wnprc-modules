@@ -26,6 +26,7 @@
             <column name="length"/>
             <column name="width"/>
             <column name="height"/>
+            <column name="size"/>
             <column name="sqft"/>
             <column name="description"/>
             <column name="container"/>

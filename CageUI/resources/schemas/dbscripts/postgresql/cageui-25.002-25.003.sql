@@ -230,13 +230,13 @@ DROP TABLE IF EXISTS cageui.rack_types;
 CREATE TABLE cageui.rack_types
 (
     rowid SERIAL NOT NULL,
-    name VARCHAR(50) UNIQUE,
     type INTEGER NOT NULL,
     manufacturer VARCHAR(50) NOT NULL,
     stationary boolean NOT NULL,
     length NUMERIC,
     width NUMERIC,
     height NUMERIC,
+    size NUMERIC,
     description VARCHAR(100),
     container         entityid NOT NULL,
     createdby         userid,

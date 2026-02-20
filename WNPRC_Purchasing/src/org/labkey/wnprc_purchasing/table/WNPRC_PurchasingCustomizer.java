@@ -84,7 +84,7 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
         detailsUrl.addParameter("returnUrl", returnUrl.toString());
 
         MutableColumnInfo rowId = (MutableColumnInfo) ti.getColumn("rowId");
-        rowId.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));
+        rowId.setURL(DetailsURL.fromString(detailsUrl.toRelativeURL()));
     }
 
     private void addRequestUpdateLinks(AbstractTableInfo ti)
@@ -95,10 +95,10 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
         detailsUrl.addParameter("returnUrl", returnUrl.toString());
 
         MutableColumnInfo requestRowId = (MutableColumnInfo) ti.getColumn("requestRowId");
-        requestRowId.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));
+        requestRowId.setURL(DetailsURL.fromString(detailsUrl.toRelativeURL()));
 
         MutableColumnInfo quantityReceived = (MutableColumnInfo) ti.getColumn("quantityReceived");
-        quantityReceived.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));
+        quantityReceived.setURL(DetailsURL.fromString(detailsUrl.toRelativeURL()));
     }
 
     private void addAttachmentsCol(AbstractTableInfo purchasingRequestsTable)

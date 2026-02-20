@@ -389,9 +389,10 @@ export interface RoomObject {
 
 export interface UnitType {
     rowid: number;
-    name: string; // naming convention is 'type-manufacturer-sqft'
+    displayName: string; // naming convention is 'type-manufacturer-size-stationary'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
+    size: number;
     manufacturer: string;
     stationary: boolean;
 }
@@ -406,3 +407,15 @@ export interface LocationCoords {
 export type UnitLocations = {
     [key in RackStringType]: LocationCoords[];
 };
+
+export interface RackChangeValue {
+    rackType: UnitType;
+    rackId: number;
+    rackObjectId: string;
+    isNew: boolean;
+}
+
+export interface RackChangeOption {
+    value: RackChangeValue;
+    label: string;
+}

@@ -5,21 +5,24 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import Select from 'react-select';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
+import { RackChangeOption, RackChangeValue, UnitType } from '../../types/typings';
+import { Utils } from '@labkey/api';
+import { generateUUID } from '../../utils/helpers';
 
 interface CreateRackPopupProps {
     showCreateRackPopup: React.Dispatch<React.SetStateAction<boolean>>;
-    currentRackOptions: { value: string; label: string }[];
-    setRackOptions: React.Dispatch<React.SetStateAction<{ value: string; label: string }[]>>;
-    setDefaultOption: React.Dispatch<React.SetStateAction<{ value: string; label: string }>>;
+    currentRackOptions: RackChangeOption[];
+    setRackOptions: React.Dispatch<React.SetStateAction<RackChangeOption[]>>;
+    changeOption: (newVal: RackChangeOption) => void;
 }
 
 export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
-    const {showCreateRackPopup, setRackOptions, currentRackOptions, setDefaultOption} = props;
+    const {showCreateRackPopup, setRackOptions, currentRackOptions, changeOption} = props;
 
     const [centerRacks, setCenterRacks] = useState<Map<string, number[]>>(new Map());
 
-    const [rackTypeOptions, setRackTypeOptions] = useState<{ value: number, label: string }[]>(null);
-    const [selectedRackType, setSelectedRackType] = useState<{ value: number, label: string }>(null);
+    const [rackTypeOptions, setRackTypeOptions] = useState<{ value: UnitType, label: string }[]>(null);
+    const [selectedRackType, setSelectedRackType] = useState<{ value: UnitType, label: string }>(null);
     const [nextRackId, setNextRackId] = useState<number | null>(null);
     const [rackIdValue, setRackIdValue] = useState<string>('');
 
@@ -27,15 +30,18 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
         const rackTypesConfig: SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'rack_types',
-            columns: ['name', 'rowid', 'type']
+            columns: ['displayName', 'rowid', 'type', 'manufacturer', 'size', 'stationary'],
         };
         labkeyActionSelectWithPromise(rackTypesConfig).then((rackTypesResult) => {
             if (rackTypesResult.rowCount > 0) {
                 const options = rackTypesResult.rows.reduce((acc, row) => {
                     if (!isRackDefault(row.type)) {
                         acc.push({
-                            value: row.rowid,
-                            label: row.name
+                            value: {
+                                ...row,
+                                isDefault: false,
+                            },
+                            label: row.displayName
                         });
                     }
                     return acc;
@@ -100,7 +106,7 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
         return maxId + 1;
     };
 
-    const handleRackTypeChange = (selectedType: { value: number, label: string }) => {
+    const handleRackTypeChange = (selectedType: { value: UnitType, label: string }) => {
         setSelectedRackType(selectedType);
 
         // Generate next available ID when rack type is selected
@@ -122,12 +128,18 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
         setRackOptions(prev => {
             const newOptions = [...prev];
             if (selectedRackType && rackIdValue) {
-                const newOption = {
-                    value: 'new',
+                const newOption: RackChangeOption = {
+                    value: {
+                        isNew: true,
+                        rackId: parseInt(rackIdValue),
+                        rackObjectId: generateUUID(),
+                        rackType: selectedRackType.value
+                    },
                     label: `${rackIdValue} - ${selectedRackType.label}`
                 };
                 newOptions.push(newOption);
-                setDefaultOption(newOption)
+
+                changeOption(newOption);
             }
             return newOptions;
         });

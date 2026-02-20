@@ -23,7 +23,7 @@ import {
     CageSvgId,
     FullObjectHistoryData,
     LocationCoords,
-    Rack,
+    Rack, RackChangeOption, RackChangeValue,
     RackGroup,
     RackStringType,
     Room,
@@ -63,7 +63,7 @@ export interface LayoutContextType {
     delObject: (objId: string) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
-    changeRack: (newType: { value: string, label: string }, isNew: boolean) => Promise<string>;
+    changeRack: (newType: RackChangeOption) => Promise<string>;
     clearGrid: () => void;
     user: GetUserPermissionsResponse;
     getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];

@@ -753,8 +753,9 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             }
             type = {
                 rowid: rackTypesData.rows[0].rowid as number,
-                name: rackTypesData.rows[0].name as string,
+                displayName: rackTypesData.rows[0].displayName as string,
                 type: rackEnumType,
+                size: rackTypesData.rows[0].size,
                 manufacturer: rackTypesData.rows[0].manufacturer,
                 isDefault: prevRoom.isDefault,
                 stationary: rackTypesData.rows[0].stationary,

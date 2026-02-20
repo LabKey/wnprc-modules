@@ -27,7 +27,7 @@ import {
     GroupId,
     GroupRotation,
     LocationCoords,
-    Rack,
+    Rack, RackChangeOption, RackChangeValue,
     RackConditions,
     RackGroup,
     RackStringType,
@@ -327,7 +327,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         // make first rack type
         type = {
             rowid: rackTypeData.rows[0].rowid,
-            name: rackTypeData.rows[0].name,
+            displayName: rackTypeData.rows[0].displayName,
+            size: 0.0,
             type: rackType,
             isDefault: true,
             manufacturer: 'Unknown',
@@ -1000,24 +1001,16 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         fixGroupIds();
     };
 
-    const changeRack = async (newType: { value: string, label: string }, isNew: boolean): Promise<string | null> => {
-        let {value: rackObjId, label: rackLabel} = newType;
-        const rackType = rackLabel.split(' - ')[1];
-        const rackId = rackLabel.split(' - ')[0];
+    const changeRack = async (newType: RackChangeOption): Promise<string | null> => {
+        let {value: rackChangeValue, label: rackLabel} = newType;
+
         let prevCages: CageData[] = [];
-        const optConfig: SelectRowsOptions = {
-            schemaName: 'cageui',
-            queryName: 'rack_types',
-            filterArray: [
-                Filter.create('name', rackType, Filter.Types.EQUAL)
-            ]
-        };
-        if (!isNew) {
+        if (!rackChangeValue.isNew) {
             const cagesInRackConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'cages',
                 filterArray: [
-                    Filter.create('rack', rackObjId, Filter.Types.EQUAL)
+                    Filter.create('rack', rackChangeValue.rackObjectId, Filter.Types.EQUAL)
                 ]
             };
             const cageDataRes = await labkeyActionSelectWithPromise(cagesInRackConfig);
@@ -1028,76 +1021,63 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             }));
         }
 
-        const rackTypeData = await labkeyActionSelectWithPromise(optConfig);
-
-        if (rackTypeData.rowCount === 1) {
-            const newRackType = rackTypeData.rows[0];
-            const isDefault = isRackDefault(newRackType.type);
-            rackObjId = isNew ? generateUUID() : rackObjId;
-            if (isDefault) {
-                newRackType.type = defaultTypeToRackType(newRackType.type);
-            }
-            setLocalRoom(prevRoom => {
-                const {
-                    rackGroup,
-                    rack,
-                    cage
-                } = findCageInGroup((selectedObj as Cage).svgId as CageSvgId, prevRoom.rackGroups);
-                const roomToUpdate: Room = {
-                    ...prevRoom,
-                    rackGroups: prevRoom.rackGroups.map(group =>
-                        group.groupId === rackGroup.groupId
-                            ? {
-                                ...group,
-                                racks: group.racks.map((r) => r.objectId === rack.objectId ? {
-                                    ...r,
-                                    itemId: parseInt(rackId),
-                                    objectId: rackObjId,
-                                    svgId: `rack_${rackObjId}`,
-                                    isNew: isNew,
-                                    type: {
-                                        ...r.type,
-                                        rowid: newRackType.rowid,
-                                        name: newRackType.name,
-                                        type: newRackType.type,
-                                        isDefault: isDefault // not stored in db
-                                    },
-                                    cages: prevCages.length > 0 ? r.cages.map((c) => {
-                                        const prevCage = prevCages.find(pc => pc.positionId === c.positionId);
-                                        const key = roomItemToString(newRackType.type);
-                                        const newSvgId = `cageSVG_${prevCage.objectId}`;
-                                        setUnitLocs((prevState) => ({
-                                            ...prevState,
-                                            [key]: prevState[key].map((loc) => {
-                                                if (loc.cageId === c.svgId) {
-                                                    return {
-                                                        ...loc,
-                                                        cageId: newSvgId
-                                                    };
-                                                }
-                                                return loc;
-                                            })
-                                        }));
-                                        return {
-                                            ...c,
-                                            objectId: prevCage.objectId,
-                                            svgId: newSvgId,
-                                            positionId: prevCage.positionId,
-                                        };
-                                    }) : r.cages
-                                } as Rack : r)
-                            }
-                            : group
-                    )
-                };
-                setReloadRoom(roomToUpdate);
-                return roomToUpdate;
-            });
-            return `rack_${rackObjId}`;
-        } else {
-            console.log('Error fetching rack type');
-            return null;
-        }
+        setLocalRoom(prevRoom => {
+            const {
+                rackGroup,
+                rack,
+                cage
+            } = findCageInGroup((selectedObj as Cage).svgId as CageSvgId, prevRoom.rackGroups);
+            const roomToUpdate: Room = {
+                ...prevRoom,
+                rackGroups: prevRoom.rackGroups.map(group =>
+                    group.groupId === rackGroup.groupId
+                        ? {
+                            ...group,
+                            racks: group.racks.map((r) => r.objectId === rack.objectId ? {
+                                ...r,
+                                itemId: rackChangeValue.rackId,
+                                objectId: rackChangeValue.rackObjectId,
+                                svgId: `rack_${rackChangeValue.rackObjectId}`,
+                                isNew: rackChangeValue.isNew,
+                                type: {
+                                    ...r.type,
+                                    rowid: rackChangeValue.rackType.rowid,
+                                    displayName: rackChangeValue.rackType.displayName,
+                                    type: rackChangeValue.rackType.type,
+                                    isDefault: rackChangeValue.rackType.isDefault
+                                },
+                                cages: prevCages.length > 0 ? r.cages.map((c) => {
+                                    const prevCage = prevCages.find(pc => pc.positionId === c.positionId);
+                                    const key = roomItemToString(rackChangeValue.rackType.type);
+                                    const newSvgId = `cageSVG_${prevCage.objectId}`;
+                                    setUnitLocs((prevState) => ({
+                                        ...prevState,
+                                        [key]: prevState[key].map((loc) => {
+                                            if (loc.cageId === c.svgId) {
+                                                return {
+                                                    ...loc,
+                                                    cageId: newSvgId
+                                                };
+                                            }
+                                            return loc;
+                                        })
+                                    }));
+                                    return {
+                                        ...c,
+                                        objectId: prevCage.objectId,
+                                        svgId: newSvgId,
+                                        positionId: prevCage.positionId,
+                                    };
+                                }) : r.cages
+                            } as Rack : r)
+                        }
+                        : group
+                )
+            };
+            setReloadRoom(roomToUpdate);
+            return roomToUpdate;
+        });
+        return `rack_${rackChangeValue.rackObjectId}`;
     };
 
     const changeCageNum = (numBefore: number, numAfter: number) => {

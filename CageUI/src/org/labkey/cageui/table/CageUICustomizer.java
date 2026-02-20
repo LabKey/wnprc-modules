@@ -21,6 +21,8 @@ package org.labkey.cageui.table;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -55,10 +57,31 @@ public class CageUICustomizer extends AbstractTableCustomizer
         newColSqft.setDescription("Square footage of the cages in the rack type");
         ti.addColumn(newColSqft);
 
-        SQLFragment sqlName = new SQLFragment("(SELECT CAST(rack_types$type$.\"title\"  AS TEXT) || '-' || CAST(manufacturer AS TEXT) || '-' || CAST(size AS TEXT) || CASE WHEN stationary THEN '-stationary' ELSE '' END as name)");
-        ExprColumn newColName = new ExprColumn(ti, "name", sqlName, JdbcType.VARCHAR);
-        newColName.setLabel("Name");
-        newColName.setDescription("Name of the rack type combing several columns into a string so the users have a detailed view of what they are choosing");
-        ti.addColumn(newColName);
+        TableInfo lookupsTable = DbSchema.get("ehr_lookups", DbSchemaType.Module).getTable("lookups");
+
+        SQLFragment sqlName = new SQLFragment();
+        sqlName.append("(");
+        sqlName.append("COALESCE((SELECT CAST(l.title AS TEXT) FROM ");
+        sqlName.append(lookupsTable.getFromSQL("l"));
+        sqlName.append(" WHERE l.set_name = 'cageui_item_types'");
+        sqlName.append(" AND l.value = CAST(" + ExprColumn.STR_TABLE_ALIAS + ".type AS VARCHAR)), '')");
+        sqlName.append(" || '-' || ");
+        sqlName.append("COALESCE((SELECT CAST(l.title AS TEXT) FROM ");
+        sqlName.append(lookupsTable.getFromSQL("l"));
+        sqlName.append(" WHERE l.set_name = 'cageui_rack_manufacturers'");
+        sqlName.append(" AND l.value = " + ExprColumn.STR_TABLE_ALIAS + ".manufacturer), '')");
+        sqlName.append(" || '-' || ");
+        sqlName.append("COALESCE(CAST(" + ExprColumn.STR_TABLE_ALIAS + ".size AS TEXT), '')");
+        sqlName.append(" || CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".stationary");
+        sqlName.append(" THEN '-Stationary' ELSE '' END");
+        sqlName.append(")");
+
+        ExprColumn nameCol = new ExprColumn(ti, "displayName", sqlName, JdbcType.VARCHAR,
+                ti.getColumn("type"), ti.getColumn("manufacturer"),
+                ti.getColumn("size"), ti.getColumn("stationary"));
+        nameCol.setLabel("Display Name");
+        nameCol.setDescription("Name of the rack type combining several columns into a string so the users have a detailed view of what they are choosing");
+        ti.addColumn(nameCol);
     }
 }
+

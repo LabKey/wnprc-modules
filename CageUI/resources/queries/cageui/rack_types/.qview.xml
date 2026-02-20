@@ -19,7 +19,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
         <columns>
             <column name="rowid"/>
-            <column name="name"/>
+            <column name="displayName"/>
             <column name="type"/>
             <column name="manufacturer"/>
             <column name="stationary"/>

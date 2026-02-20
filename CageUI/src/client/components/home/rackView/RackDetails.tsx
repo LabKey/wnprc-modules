@@ -34,15 +34,15 @@ export const RackDetails: FC = () => {
                         </div>
                     </div>
                     <div className="dimension-item">
-                        <span className="dimension-label">Stationary:</span>
+                        <span className="dimension-label">Size:</span>
                         <div className="dimension-value-container">
-                            <span className="dimension-value-text">{selectedRack.type.stationary ? 'True' : 'False'}</span>
+                            <span className="dimension-value-text">{selectedRack.type.size.toFixed(1)}</span>
                         </div>
                     </div>
                     <div className="dimension-item">
-                        <span className="dimension-label">Size:</span>
+                        <span className="dimension-label">Stationary:</span>
                         <div className="dimension-value-container">
-                            <span className="dimension-value-text">{selectedRack.type.name}</span>
+                            <span className="dimension-value-text">{selectedRack.type.stationary ? 'True' : 'False'}</span>
                         </div>
                     </div>
                 </div>

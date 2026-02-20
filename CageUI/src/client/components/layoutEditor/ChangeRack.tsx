@@ -25,11 +25,12 @@ import { Button } from 'react-bootstrap';
 import { CreateRackPopup } from './CreateRackPopup';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { SelectedObj } from '../../types/layoutEditorTypes';
-import { Cage, Rack, UnitType } from '../../types/typings';
+import { Cage, Rack, RackChangeOption, RackChangeValue, UnitType } from '../../types/typings';
+import { isRackDefault } from '../../utils/LayoutEditorHelpers';
 
 
 interface ChangeRackProps {
-    onSubmit: (newType: { value: string, label: string }, isNew: boolean) => void;
+    onSubmit: (newType: RackChangeOption) => void;
     currRack: Rack;
 }
 
@@ -37,19 +38,27 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
     const {onSubmit, currRack} = props;
     const {localRoom} = useLayoutEditorContext();
 
-    const [options, setOptions] = useState<{ value: string, label: string }[]>([]);
+    const [options, setOptions] = useState<RackChangeOption[]>([]);
     const [showCreateRackPopup, setShowCreateRackPopup] = useState<boolean>(false);
-    const [defaultOption, setDefaultOption] = useState<{ value: string, label: string }>({value: currRack.objectId, label: `${currRack.itemId} - ${currRack.type.name}`});
+    const [defaultOption, setDefaultOption] = useState<RackChangeOption>({
+        value: {
+            rackId: currRack.itemId,
+            rackObjectId: currRack.objectId,
+            rackType: currRack.type,
+            isNew: currRack.isNew,
+        },
+        label: `${currRack.itemId} - ${currRack.type.displayName}`
+    });
 
-    const handleChange = (newVal: { value: string, label: string }) => {
-        onSubmit(newVal, newVal.value === 'new');
+    const handleChange = (newVal: RackChangeOption) => {
+        onSubmit(newVal);
     };
 
-    useEffect(() => {
-        if(defaultOption.value === "new"){
+    /*useEffect(() => {
+        if(defaultOption.value.isNew){
             handleChange(defaultOption);
         }
-    }, [defaultOption]);
+    }, [defaultOption]);*/
 
     useEffect(() => {
         if (options.length > 0) {
@@ -63,18 +72,29 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             const rackTypesConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'rack_types',
-                columns: ['name', 'rowid']
+                columns: ['displayName', 'rowid', 'type', 'manufacturer', 'size', 'stationary'],
             };
             const rackPromise = labkeyActionSelectWithPromise(optConfig);
             const rackTypesPromise = labkeyActionSelectWithPromise(rackTypesConfig);
 
             Promise.all([rackPromise, rackTypesPromise]).then(([rackResult, rackTypesResult]) => {
-                const tmp = [];
+                console.log(rackResult, rackTypesResult);
+                const tmp: RackChangeOption[] = [];
                 if (rackResult.rows.length > 0) {
-
                     for (const row of rackResult.rows) {
-                        const rackTypeName = rackTypesResult.rows.find(r => r.rowid === parseInt(row.rack_type)).name;
-                        tmp.push({label: `${row.rackid} - ${rackTypeName}`, value: row.objectid});
+                        const rackType: UnitType = rackTypesResult.rows.find(r => r.rowid === parseInt(row.rack_type));
+                        tmp.push({
+                            label: `${row.rackid} - ${rackType.displayName}`,
+                            value: {
+                                rackId:row.rackid,
+                                rackObjectId: row.objectid,
+                                isNew: false,
+                                rackType: {
+                                    ...rackType,
+                                    isDefault: isRackDefault(rackType.type)
+                                }
+                            }
+                        });
                     }
 
                 }
@@ -83,16 +103,24 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
 
                 if (localRack.length > 0) {
                     localRack.forEach((r) => {
-                        if (!tmp.find((lbl) => lbl.label === `${r.itemId} - ${r.type.name}`)) {
-                            tmp.push({label: `${r.itemId} - ${r.type.name}`, value: r.objectId});
+                        if (!tmp.find((lbl) => lbl.label === `${r.itemId} - ${r.type.displayName}`)) {
+                            tmp.push(
+                                {
+                                    label: `${r.itemId} - ${r.type.displayName}`,
+                                    value: {
+                                        rackId: r.itemId,
+                                        rackObjectId: r.objectId,
+                                        rackType: r.type,
+                                        isNew: r.isNew,
+                                    }
+                                }
+                            );
                         }
                     });
                 }
                 setOptions(tmp);
             });
         }
-
-
     }, [options]);
 
     return (
@@ -120,7 +148,7 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
                         showCreateRackPopup={setShowCreateRackPopup}
                         currentRackOptions={options}
                         setRackOptions={setOptions}
-                        setDefaultOption={setDefaultOption}
+                        changeOption={handleChange}
                     />
             }
         </>

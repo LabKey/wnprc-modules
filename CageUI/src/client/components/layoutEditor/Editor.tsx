@@ -28,7 +28,7 @@ import {
     Cage,
     CageDirection,
     CageSvgId,
-    Rack,
+    Rack, RackChangeValue,
     RackGroup,
     RackStringType,
     RoomItemType,
@@ -854,8 +854,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     };
 
     // Handles changing racks in the layout editor
-    const handleRackChange = async (newType: { value: string, label: string }, isNew: boolean) => {
-        const result: string = await changeRack(newType, isNew);
+    const handleRackChange = async (newType: { value: RackChangeValue, label: string }) => {
+        const result: string = await changeRack(newType);
         const {rack: currRack} = findCageInGroup((selectedObj as Cage).svgId, localRoom.rackGroups);
         const idToChange = currRack.svgId;
         if (result) {

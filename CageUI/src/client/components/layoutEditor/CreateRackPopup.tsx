@@ -30,7 +30,7 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
         const rackTypesConfig: SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'rack_types',
-            columns: ['displayName', 'rowid', 'type', 'manufacturer', 'size', 'stationary'],
+            columns: ['displayName', 'rowid', 'type', 'manufacturer/title', 'manufacturer/value', 'size', 'stationary'],
         };
         labkeyActionSelectWithPromise(rackTypesConfig).then((rackTypesResult) => {
             if (rackTypesResult.rowCount > 0) {
@@ -39,6 +39,10 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
                         acc.push({
                             value: {
                                 ...row,
+                                manufacturer: {
+                                    value: row['manufacturer/value'],
+                                    title: row['manufacturer/title'],
+                                },
                                 isDefault: false,
                             },
                             label: row.displayName

@@ -30,7 +30,7 @@ export const RackDetails: FC = () => {
                     <div className="dimension-item">
                         <span className="dimension-label">Manufacturer:</span>
                         <div className="dimension-value-container">
-                            <span className="dimension-value-text">{selectedRack.type.manufacturer}</span>
+                            <span className="dimension-value-text">{selectedRack.type.manufacturer.title}</span>
                         </div>
                     </div>
                     <div className="dimension-item">

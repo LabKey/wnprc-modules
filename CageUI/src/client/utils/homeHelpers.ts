@@ -1,6 +1,37 @@
-import { Cage, CageDirection, CurrCageMods, ModDirections, ModLocations, ModTypes, RoomMods } from '../types/typings';
+import {
+    Cage,
+    CageDirection,
+    CageNumber,
+    CurrCageMods,
+    ModDirections,
+    ModLocations,
+    ModTypes,
+    RoomMods
+} from '../types/typings';
 import { Option } from '@labkey/components';
 import { cageModLookup } from '../api/popularQueries';
+import { parseRoomItemNum, parseRoomItemType } from './helpers';
+
+
+// takes a cage number and returns it in a display friendly format, ex: cage-1 -> Cage 1
+export const getCageNumDisplay = (cageNum: CageNumber) => {
+    return `${parseRoomItemType(cageNum).charAt(0).toUpperCase() + parseRoomItemType(cageNum).slice(1)} ${parseRoomItemNum(cageNum)}`;
+}
+
+// sorts an array of cages by cage number for display purposes.
+export const sortCagesByCageNumber = (cages: Cage[]): Cage[] => {
+    return [...cages].sort((a, b) => {
+        const aParts = a.cageNum.split('-');
+        const bParts = b.cageNum.split('-');
+
+        // Compare string parts
+        const stringComparison = aParts[0].localeCompare(bParts[0]);
+        if (stringComparison !== 0) return stringComparison;
+
+        // Compare number parts
+        return Number(aParts[1]) - Number(bParts[1]);
+    });
+}
 
 // Returns a better formatted string for the modification directions shown to users
 export const findDirStr = (dir: ModLocations) => {

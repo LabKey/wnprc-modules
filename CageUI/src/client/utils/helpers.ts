@@ -738,6 +738,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             const optConfig = {
                 schemaName: 'cageui',
                 queryName: 'rack_types',
+                columns: ['rowid', 'type', 'displayName', 'size', 'manufacturer/value', 'manufacturer/title', 'stationary'],
                 filterArray: [
                     Filter.create(prevRoom.isDefault ? 'type' : 'rowid', prevRoom.isDefault ? rackItem.objectType : typeRowId, Filter.Types.EQUALS)
                 ]
@@ -756,7 +757,10 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 displayName: rackTypesData.rows[0].displayName as string,
                 type: rackEnumType,
                 size: rackTypesData.rows[0].size,
-                manufacturer: rackTypesData.rows[0].manufacturer,
+                manufacturer: {
+                    value: rackTypesData.rows[0]['manufacturer/value'],
+                    title: rackTypesData.rows[0]['manufacturer/title'],
+                },
                 isDefault: prevRoom.isDefault,
                 stationary: rackTypesData.rows[0].stationary,
             };

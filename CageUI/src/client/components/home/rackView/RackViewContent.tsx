@@ -6,6 +6,7 @@ import { RackModifications } from './RackModifications';
 import { RackDetails } from './RackDetails';
 import { CurrentRackLayout } from './CurrentRackLayout';
 import { useRoomContext } from '../../../context/RoomContextManager';
+import { CagesOverview } from './CagesOverview';
 
 export const RackViewContent: FC = () => {
     const {selectedRoom, selectedRack} = useRoomContext();
@@ -19,19 +20,22 @@ export const RackViewContent: FC = () => {
                 </label>
             </div>
             <SubViewContent
-                    tabs={[{
-                        name: 'Details',
-                        children: <RackDetails/>
-                    }, {
-                        name: 'Modifications',
-                        children:
-                            <>
-                                <RackModifications/>
-                                <CurrentRackLayout/>
-                            </>
+                tabs={[{
+                    name: 'Details',
+                    children: <RackDetails/>
+                },{
+                    name: 'Cages Overview',
+                    children: <CagesOverview/>
+                }, {
+                    name: 'Modifications',
+                    children:
+                        <>
+                            <RackModifications/>
+                            <CurrentRackLayout/>
+                        </>
 
-                    }
-                    ]}
+                }
+                ]}
             />
         </div>
     );

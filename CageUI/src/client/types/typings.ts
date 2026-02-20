@@ -393,7 +393,10 @@ export interface UnitType {
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
     size: number;
-    manufacturer: string;
+    manufacturer: {
+        value: string;
+        title: string;
+    };
     stationary: boolean;
 }
 

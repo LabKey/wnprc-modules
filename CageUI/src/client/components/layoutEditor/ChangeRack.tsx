@@ -72,7 +72,7 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             const rackTypesConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'rack_types',
-                columns: ['displayName', 'rowid', 'type', 'manufacturer', 'size', 'stationary'],
+                columns: ['displayName', 'rowid', 'type', 'manufacturer/title', 'manufacturer/value', 'size', 'stationary'],
             };
             const rackPromise = labkeyActionSelectWithPromise(optConfig);
             const rackTypesPromise = labkeyActionSelectWithPromise(rackTypesConfig);
@@ -91,6 +91,10 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
                                 isNew: false,
                                 rackType: {
                                     ...rackType,
+                                    manufacturer: {
+                                        value: rackType['manufacturer/value'],
+                                        title: rackType['manufacturer/title'],
+                                    },
                                     isDefault: isRackDefault(rackType.type)
                                 }
                             }

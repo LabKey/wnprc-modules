@@ -331,7 +331,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             size: 0.0,
             type: rackType,
             isDefault: true,
-            manufacturer: 'Unknown',
+            manufacturer: {
+                value: "uk",
+                title: "Unknown"
+            },
             stationary: false,
         };
 

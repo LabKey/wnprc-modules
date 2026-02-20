@@ -12,6 +12,7 @@ import { CurrentRackLayout } from '../rackView/CurrentRackLayout';
 import { RackDetails } from '../rackView/RackDetails';
 import { SubViewContent } from '../SubViewContent';
 import { CageDetails } from './CageDetails';
+import { getCageNumDisplay } from '../../../utils/homeHelpers';
 
 export const CageViewContent: FC = () => {
     const {selectedPage} = useHomeNavigationContext();
@@ -48,7 +49,7 @@ export const CageViewContent: FC = () => {
              key={'layout-' + selectedRoom + '-rack-' + selectedRack.itemId + '-' + selectedCage.cageNum}>
             <div className={'room-view-title'}>
                 <label>
-                    {parseRoomItemType(selectedCage.cageNum).charAt(0).toUpperCase() + parseRoomItemType(selectedCage.cageNum).slice(1)} {parseRoomItemNum(selectedCage.cageNum)}
+                    {getCageNumDisplay(selectedCage.cageNum)}
                 </label>
             </div>
             <SubViewContent

@@ -33,9 +33,9 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
                         disabled={true}
                         checked={selectedRoom?.valid ?? false}
                 />
-                <label>
+                <span>
                     {roomName}
-                </label>
+                </span>
             </div>
             <SubViewContent
                     tabs={[{

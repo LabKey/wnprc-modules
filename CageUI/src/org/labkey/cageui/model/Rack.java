@@ -132,35 +132,36 @@ public class Rack
     }
 
 
-    public static final class UnitType
-    {
+    public static final class UnitType {
         private final int rowid;
-        private final String name;
+        private final String displayName;
         private final RackTypes type;
         private final boolean isDefault;
-        private final Map<ModLocations, Object> sides;
+        private final Double size;
+        private final Manufacturer manufacturer;
+        private final boolean stationary;
 
         @JsonCreator
         public UnitType(
                 @JsonProperty("rowid") int rowid,
-                @JsonProperty("name") String name,
+                @JsonProperty("displayName") String displayName,
                 @JsonProperty("type") RackTypes type,
                 @JsonProperty("isDefault") boolean isDefault,
-                @JsonProperty("sides") Map<ModLocations, Object> sides)
-        {
+                @JsonProperty("size") Double size,
+                @JsonProperty("manufacturer") Manufacturer manufacturer,
+                @JsonProperty("stationary") boolean stationary) {
             this.rowid = rowid;
-            this.name = name;
+            this.displayName = displayName;
             this.type = type;
             this.isDefault = isDefault;
-            this.sides = sides;
+            this.size = size;
+            this.manufacturer = manufacturer;
+            this.stationary = stationary;
         }
 
-        public RackTypes getEffectiveRackType()
-        {
-            if (isDefault())
-            {
-                switch (type)
-                {
+        public RackTypes getEffectiveRackType() {
+            if (isDefault()) {
+                switch (type) {
                     case CAGE:
                         return RackTypes.DEFAULTCAGE;
                     case PEN:
@@ -172,38 +173,46 @@ public class Rack
                     default:
                         return type; // fallback, though shouldn't happen
                 }
-            }
-            else
-            {
+            } else {
                 return type;
             }
         }
 
-        public Map<ModLocations, Object> getSides()
-        {
-            return sides;
-        }
-
-        public boolean isDefault()
-        {
+        @JsonProperty("isDefault")
+        public boolean isDefault() {
             return isDefault;
         }
 
-        public RackTypes getRackType()
-        {
+        @JsonProperty("type")
+        public RackTypes getRackType() {
             return type;
         }
 
-        public String getName()
-        {
-            return name;
+        public String getDisplayName() {
+            return displayName;
         }
-
-        public int getRowId()
-        {
+        @JsonProperty("rowid")
+        public int getRowId() {
             return rowid;
         }
+
+        public Double getSize() {
+            return size;
+        }
+
+        public Manufacturer getManufacturer()
+        {
+            return manufacturer;
+        }
+
+        public boolean isStationary() {
+            return stationary;
+        }
+
+        // Inner class for Manufacturer
+
     }
+
 
     // Check if string matches either pattern
     public static boolean isValidItemId(String itemId)

@@ -1,10 +1,9 @@
 package org.labkey.cageui.action;
 
-import org.json.JSONObject;
-
 public class RackTypesForm
 {
     private int _rowid;
+    private String _displayName;
     private Double _size;
     private int _type;
     private String _manufacturer;
@@ -94,22 +93,6 @@ public class RackTypesForm
         _description = description;
     }
 
-    public JSONObject toJSON()
-    {
-        JSONObject json = new JSONObject();
-
-        json.put("rowid", getRowid());
-        json.put("name", getSize());
-        json.put("type", getType());
-        json.put("manufacturer", getManufacturer());
-        json.put("length", getLength());
-        json.put("width", getWidth());
-        json.put("height", getHeight());
-        json.put("description", getDescription());
-
-        return json;
-    }
-
     public boolean isStationary()
     {
         return _stationary;
@@ -118,6 +101,16 @@ public class RackTypesForm
     public void setStationary(boolean stationary)
     {
         _stationary = stationary;
+    }
+
+    public String getDisplayName()
+    {
+        return _displayName;
+    }
+
+    public void setDisplayName(String displayName)
+    {
+        _displayName = displayName;
     }
 }
 

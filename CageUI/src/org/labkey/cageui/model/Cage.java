@@ -1,6 +1,7 @@
 package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -19,22 +20,21 @@ public class Cage
     private int _y;
     private int _size;
     private Map<String, Object> _extraContext;
-    private CageModKeyMap _mods;
+    @JsonProperty("mods")
+    private Map<ModLocations, List<CageModKeyMap.CageModification>> _mods;
 
 
-    public static final class CageModKeyMap
+    public final class CageModKeyMap
     {
-        private final Map<ModLocations, List<CageModification>> mods;
-
         public CageModKeyMap()
         {
-            this.mods = new HashMap<>();
+            _mods = new HashMap<>();
         }
 
         @JsonCreator
         public CageModKeyMap(Map<String, List<CageModification>> modsMap)
         {
-            this.mods = new HashMap<>();
+            _mods = new HashMap<>();
 
             if (modsMap != null)
             {
@@ -42,12 +42,13 @@ public class Cage
                 {
                     try
                     {
-                        ModLocations location = ModLocations.valueOf(entry.getKey());
-                        this.mods.put(location, entry.getValue());
+                        ModLocations location = ModLocations.fromValue(entry.getKey());
+                        _mods.put(location, entry.getValue());
                     }
-                    catch (IllegalArgumentException e)
+                    catch (Exception e)
                     {
-                        // Ignore unknown locations or log warning
+                        // Log warning but don't fail completely
+                        System.err.println("Warning: Could not convert key '" + entry.getKey() + "' to ModLocations");
                     }
                 }
             }
@@ -55,24 +56,19 @@ public class Cage
             // Initialize all locations to avoid NPE
             for (ModLocations location : ModLocations.values())
             {
-                this.mods.putIfAbsent(location, new ArrayList<>());
+                _mods.putIfAbsent(location, new ArrayList<>());
             }
-        }
-
-        public Map<ModLocations, List<CageModification>> getMods()
-        {
-            return mods;
         }
 
         // Helper methods for easier access
         public List<CageModification> getModificationsForLocation(ModLocations location)
         {
-            return mods.getOrDefault(location, new ArrayList<>());
+            return _mods.get(location);
         }
 
         public void addModification(ModLocations location, CageModification modification)
         {
-            mods.computeIfAbsent(location, k -> new ArrayList<>()).add(modification);
+            _mods.computeIfAbsent(location, k -> new ArrayList<>()).add(modification);
         }
 
         public boolean hasModificationsForLocation(ModLocations location)
@@ -87,8 +83,10 @@ public class Cage
             private final int subId;
 
             @JsonCreator
-            public CageModification(@JsonProperty("modKeys") List<Modkeys> modKeys, @JsonProperty("subId") int subId)
-            {
+            public CageModification(
+                @JsonProperty("modKeys") List<Modkeys> modKeys,
+                @JsonProperty("subId") int subId
+            ){
                 this.modKeys = modKeys != null ? modKeys : new ArrayList<>();
                 this.subId = subId;
             }
@@ -110,18 +108,12 @@ public class Cage
         return _mods != null;
     }
 
-    public CageModKeyMap getModsOrDefault()
-    {
-        return _mods != null ? _mods : new CageModKeyMap(new HashMap<>());
-    }
-
-
-    public CageModKeyMap getMods()
+    public Map<ModLocations, List<CageModKeyMap.CageModification>> getMods()
     {
         return _mods;
     }
 
-    public void setMods(CageModKeyMap mods)
+    public void setMods(Map<ModLocations, List<CageModKeyMap.CageModification>> mods)
     {
         _mods = mods;
     }

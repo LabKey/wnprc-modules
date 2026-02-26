@@ -12,13 +12,17 @@ import {
     Rack,
     RackGroup,
     Room,
-    RoomMods
+    RoomMods,
+    UnitType
 } from '../types/typings';
-import { ModificationSaveResult } from '../types/homeTypes';
+import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
 import _ from 'lodash';
 import { LayoutSaveResult } from '../types/layoutEditorTypes';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { useHomeNavigationContext } from './HomeNavigationContextManager';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { Filter } from '@labkey/api';
+import { createNewRoomFromRackChange, labkeyActionSelectWithPromise } from '../api/labkeyActions';
 
 
 const RoomContext = createContext<RoomContextType>({} as RoomContextType);
@@ -45,12 +49,10 @@ export const RoomContextProvider = ({children}) => {
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
-
     useEffect(() => {
         if (!selectedPage?.rack) {
             return;
         }
-        //TODO Fetch mods for rack here as well and then set the rack and rack mods
         const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
         setSelectedRack(currRack);
         setSelectedRackGroup(currGroup);
@@ -263,6 +265,28 @@ export const RoomContextProvider = ({children}) => {
         return saveRoomHelper(selectedRoom);
     };
 
+    const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack): Promise<LayoutSaveResult> => {
+        // First pass it to java for validation and to create the room to submit to saveRoomHelper.
+        let result: LayoutSaveResult;
+        let newRoom: Room;
+        try {
+            const newRoomRes = await createNewRoomFromRackChange(selectedRoom, newRackOption, prevRack);
+            newRoom = newRoomRes.room;
+            let errors;
+            if (newRoomRes.errors) {
+                errors = Array.isArray(newRoomRes.errors) ? newRoomRes.errors : [newRoomRes.errors];
+                result = {success: false, roomName: selectedRoom.name, reason: errors};
+                return result;
+            }
+        }
+        catch (e) {
+            const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
+            result = {success: e.success, roomName: selectedRoom.name, reason: errors.map(err => err.message || err)};
+            return result;
+        }
+        return saveRoomHelper(newRoom);
+    }
+
     return (
         <RoomContext.Provider value={{
             switchToRoom,
@@ -272,7 +296,8 @@ export const RoomContextProvider = ({children}) => {
             submitLayoutMods,
             selectedRackGroup,
             selectedRack,
-            selectedCage
+            selectedCage,
+            submitRackChange
         }}>
             {children}
         </RoomContext.Provider>

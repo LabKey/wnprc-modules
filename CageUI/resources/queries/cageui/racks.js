@@ -24,7 +24,6 @@ function onUpsert(helper, scriptErrors, row){
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
 
     if (this.extraContext['history_id'] != null) {
-        console.log("extraContext: ", this.extraContext);
 
         //add any errors that are returned to the page
         let javaErrors = CageUI.Utils.getJavaHelper().updateRackHistory(row, this.extraContext['history_id']);

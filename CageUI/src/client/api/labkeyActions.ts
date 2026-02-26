@@ -21,8 +21,9 @@ import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { CageMods, Room } from '../types/typings';
+import { CageMods, Rack, Room } from '../types/typings';
 import { buildURL } from '@labkey/components';
+import { RackSwitchOption } from '../types/homeTypes';
 
 export function labkeyActionSelectWithPromise(
     options: SelectRowsOptions,
@@ -164,6 +165,21 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault},
+        });
+    });
+}
+
+export function createNewRoomFromRackChange(room: Room, newRackOption: RackSwitchOption, prevRack: Rack ): Promise<{
+    room: Room,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'createNewRoomFromRackChange.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {room: room, rackSwitchOption: newRackOption, prevRack: prevRack},
         });
     });
 }

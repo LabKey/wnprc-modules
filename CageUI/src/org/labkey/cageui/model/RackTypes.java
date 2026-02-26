@@ -65,4 +65,29 @@ public enum RackTypes
         }
     }
 
+    public static String getSvgName(RackTypes value)
+    {
+        switch (value)
+        {
+            case DEFAULTCAGE:
+                return "defaultCage";
+            case DEFAULTPEN:
+                return "defaultPen";
+            case DEFAULTTEMPCAGE:
+                return "defaultTempCage";
+            case DEFAULTPLAYCAGE:
+                return "defaultPlayCage";
+            case CAGE:
+                return "cage";
+            case PEN:
+                return "pen";
+            case TEMPCAGE:
+                return "tempCage";
+            case PLAYCAGE:
+                return "playCage";
+            default:
+                throw new IllegalArgumentException("Invalid status value: " + value);
+        }
+    }
+
 }

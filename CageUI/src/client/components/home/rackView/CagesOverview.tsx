@@ -9,7 +9,6 @@ export const CagesOverview: FC = () => {
     const {selectedRack} = useRoomContext();
     const [sortedCages, setSortedCages] = useState<Cage[]>([]);
 
-
     useEffect(() => {
         setSortedCages(sortCagesByCageNumber(selectedRack.cages));
     }, [selectedRack]);

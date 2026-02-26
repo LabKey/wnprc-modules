@@ -16,7 +16,6 @@
  *
  */
 
-
 .room-header {
   //background-color: lightgreen;
 }
@@ -1236,10 +1235,17 @@
 .room-view-title {
   font-size: xx-large;
   padding: 5px;
+  display: flex;
+  align-items: center;
+  gap:  10px;
 }
 
-.room-view-title label {
+.room-view-title span {
   margin-left: 10px;
+}
+
+.room-view-title button {
+margin-top: 0px;
 }
 
 .room-view-checkbox {

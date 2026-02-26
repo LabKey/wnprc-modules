@@ -1,5 +1,6 @@
 package org.labkey.cageui.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.cageui.action.RoomHistoryForm;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class Room
     private String _name;
     private List<RackGroup> _rackGroups;
     private List<RoomObject> _objects;
-    private RoomHistoryForm _roomHistoryForm;
+    private LayoutData _layoutData;
     private Map<String, ModEntry> _mods;
 
     public String getName()
@@ -43,14 +44,14 @@ public class Room
         _objects = objects;
     }
 
-    public RoomHistoryForm getLayoutData()
+    public LayoutData getLayoutData()
     {
-        return _roomHistoryForm;
+        return _layoutData;
     }
 
-    public void setLayoutData(RoomHistoryForm roomHistoryForm)
+    public void setLayoutData(LayoutData layoutData)
     {
-        _roomHistoryForm = roomHistoryForm;
+        _layoutData = layoutData;
     }
 
     public Map<String, ModEntry> getMods()

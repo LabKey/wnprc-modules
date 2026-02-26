@@ -22,22 +22,38 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.apache.commons.lang3.SerializationUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.BaseApiAction;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.security.RequiresAnyOf;
+import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.BundledForms;
+import org.labkey.cageui.action.CagesForm;
+import org.labkey.cageui.action.RackTypesForm;
+import org.labkey.cageui.action.RacksForm;
+import org.labkey.cageui.model.Cage;
+import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
+import org.labkey.cageui.model.Rack;
+import org.labkey.cageui.model.RackGroup;
+import org.labkey.cageui.model.RackSwitchOption;
+import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -47,6 +63,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
 
 public class CageUIController extends SpringActionController
 {
@@ -93,6 +111,178 @@ public class CageUIController extends SpringActionController
 
 
     //APIS Here
+    @RequiresAnyOf({CageUILayoutEditorAccessPermission.class, CageUIRoomCreatorPermission.class, CageUITemplateCreatorPermission.class})
+    public static class CreateNewRoomFromRackChangeAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+
+        private Room _room;
+        private RackSwitchOption _option;
+        private Rack _prevRack;
+        private Room _newRoom;
+
+
+        public Room getRoom()
+        {
+            return _room;
+        }
+
+        public void setRoom(Room room)
+        {
+            _room = room;
+        }
+
+        public Room getNewRoom()
+        {
+            return _newRoom;
+        }
+
+        public void setNewRoom(Room newRoom)
+        {
+            _newRoom = newRoom;
+        }
+
+        public RackSwitchOption getOption()
+        {
+            return _option;
+        }
+
+        public void setOption(RackSwitchOption option)
+        {
+            _option = option;
+        }
+
+        public Rack getPrevRack()
+        {
+            return _prevRack;
+        }
+
+        public void setPrevRack(Rack prevRack)
+        {
+            _prevRack = prevRack;
+        }
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+            }
+
+            JSONObject jsonRoom = json.getJSONObject("room");
+            JSONObject jsonRackSwitchOption = json.getJSONObject("rackSwitchOption");
+            JSONObject jsonRack = json.getJSONObject("prevRack");
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            /*SimpleModule module = new SimpleModule();
+            module.addDeserializer(Cage.class, new CageDeserializer());
+            mapper.registerModule(module);*/
+            try
+            {
+                Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
+                RackSwitchOption rackSwitchOption = mapper.readValue(jsonRackSwitchOption.toString(), mapper.getTypeFactory().constructType(RackSwitchOption.class));
+                Rack prevRack = mapper.readValue(jsonRack.toString(), mapper.getTypeFactory().constructType(Rack.class));
+                if (room != null)
+                {
+                    setRoom(room);
+                }
+                else
+                {
+                    errors.reject(ERROR_MSG, "Missing room parameter.");
+                }
+                if (rackSwitchOption != null)
+                {
+                    setOption(rackSwitchOption);
+                }else{
+                    errors.reject(ERROR_MSG, "Missing rackSwitchOption.");
+                }
+                if(prevRack != null)
+                {
+                    setPrevRack(prevRack);
+                }else{
+                    errors.reject(ERROR_MSG, "Missing prevRack.");
+                }
+            }
+            catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+
+            RackTypesForm newRackType = CageUIManager.getRackType(getOption().getValue().getTypeRowId());
+            // Cages within new rack, ensure there is same number as in prev rack to be able to make a valid switch
+            ArrayList<CagesForm> newCagesForm = CageUIManager.getCagesInRack(getOption().getValue().getObjectId());
+
+
+            Manufacturer newManufacturer = CageUIManager.getRackManufacturer(newRackType.getManufacturer());
+            if(newRackType.getType() != getPrevRack().getType().getRackType().getNumericValue()){
+                errors.reject(ERROR_MSG, "Racks have different types, cannot switch cages with pens, etc");
+            }
+            Rack newRack = new Rack();
+            Rack.UnitType newType = new Rack.UnitType(
+                newRackType.getRowid(),
+                newRackType.getDisplayName(),
+                RackTypes.fromNumericValue(newRackType.getType()),
+                false,
+                newRackType.getSize(),
+                newManufacturer,
+                newRackType.isStationary()
+            );
+            newRack.setItemId(getOption().getValue().getRackId());
+            newRack.setSvgId("rack_" + getOption().getValue().getObjectId());
+            newRack.setObjectId(getOption().getValue().getObjectId());
+            newRack.setSelectionType(getPrevRack().getSelectionType());
+            newRack.setCages(getPrevRack().getCages());
+            newRack.setType(newType);
+            newRack.setX(getPrevRack().getX());
+            newRack.setY(getPrevRack().getY());
+            newRack.setIsNew(getPrevRack().getIsNew());
+            newRack.setIsActive(getPrevRack().getIsActive());
+            newRack.setExtraContext(getPrevRack().getExtraContext());
+
+            // loop through cages and update their objectIds and svgIds, keep old cage data to ensure smooth swap, link by position id,
+            // meaning the positionid=1 in both old and new rack should be the cage that is swapped.
+            for (int i = 0; i < newRack.getCages().size(); i++)
+            {
+                int posId = newRack.getCages().get(i).getPositionId();
+                if(newCagesForm.isEmpty()){
+                    //Rack was created in the UI and no cages were added to it,
+                    // if this is the case then we can assign new IDs to the cages and keep everything else.
+                    String newObjId = UUID.randomUUID().toString().toUpperCase();
+                    newRack.getCages().get(i).setObjectId(newObjId);
+                    newRack.getCages().get(i).setSvgId(RackTypes.getSvgName(newRack.getType().getRackType()) + "_" + newObjId);
+                }else{
+                    if(newCagesForm.size() != getPrevRack().getCages().size()){
+                        errors.reject(ERROR_MSG, "Racks have different number of cages");
+                    }
+                    Optional<CagesForm> foundCage = newCagesForm.stream()
+                        .filter(cage -> cage.getPositionId() == posId)
+                        .findFirst();
+
+                    if (foundCage.isPresent()) {
+                        CagesForm newCage = foundCage.get();
+                        newRack.getCages().get(i).setObjectId(newCage.getObjectId());
+                        newRack.getCages().get(i).setSvgId(RackTypes.getSvgName(newRack.getType().getRackType()) + "_" + newCage.getObjectId());
+                    }else{
+                        // If this error occurs something is happening with position id assignment client side
+                        errors.reject(ERROR_MSG, "No Cage found for position " + posId);
+                    }
+                }
+
+            }
+
+            setNewRoom(CageUIManager.createRoomWithReplacedRack(getRoom(), getPrevRack().getObjectId(), newRack));
+        }
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            JSONObject newRoom = mapper.convertValue(getNewRoom(), JSONObject.class);
+            //JSONObject newRoom = new JSONObject(getNewRoom());
+            return new ApiSimpleResponse("room", newRoom);
+        }
+    }
 
 
     // this api action saves the layout for a given room
@@ -171,26 +361,6 @@ public class CageUIController extends SpringActionController
             {
                 errors.reject(ERROR_MSG, e.getMessage());
             }
-
-     /*       List<Map<String, Object>> newLayoutHistoryData = JsonUtil.toMapList(json.getJSONArray("newRoomData"));
-
-            Set<String> seenCageNumByType = new HashSet<>();
-            for (Map<String, Object> map : newLayoutHistoryData) {
-                if(map.get("cage") == null){continue;}// ignore room objects
-
-                RackTypes typeObj = RackTypes.fromNumericValue((Integer) map.get("object_type"));
-                Object nameObj = map.get("cage");
-
-                if (nameObj == null) {
-                    continue;
-                }
-
-                String compositeKey = typeObj + ":" + nameObj;
-
-                if (!seenCageNumByType.add(compositeKey)) {
-                    errors.reject(ERROR_MSG, "Duplicate numbers found in layout: " + RackTypes.getName(typeObj) + ": " + nameObj);
-                }
-            }*/
         }
 
         @Override
@@ -207,12 +377,12 @@ public class CageUIController extends SpringActionController
             boolean isTemplateSave = savingTemplate || isDefaultSave;
 
             CageUIManager.RoomSubmissionService submissionService = new CageUIManager.RoomSubmissionService(
-                    getContainer(),
-                    getUser(),
-                    isTemplateSave,
-                    prevRoomName,
-                    getRoom(),
-                    getRoomDefaultMods()
+                getContainer(),
+                getUser(),
+                isTemplateSave,
+                prevRoomName,
+                getRoom(),
+                getRoomDefaultMods()
             );
             BundledForms newSubmissionForms = submissionService.submitRoom();
 

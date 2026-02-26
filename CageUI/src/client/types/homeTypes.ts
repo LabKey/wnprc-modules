@@ -8,7 +8,7 @@ import {
     ModStyle,
     ModTypes,
     Rack,
-    Room
+    Room, UnitType
 } from './typings';
 import { Option } from '@labkey/components';
 
@@ -114,4 +114,13 @@ export type ConnectedCages = {
 export interface ModificationSaveResult {
     status: 'Success' | 'Failure';
     reason?: string[];
+}
+
+export interface RackSwitchOption {
+    value: {
+        objectId: string;
+        rackId: number;
+        typeRowId: number;
+    };
+    label: string;
 }

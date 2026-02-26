@@ -1,5 +1,5 @@
 import { Cage, CurrCageMods, Rack, RackGroup, Room, RoomMods } from './typings';
-import { ModificationSaveResult } from './homeTypes';
+import { ModificationSaveResult, RackSwitchOption } from './homeTypes';
 import { LayoutSaveResult } from './layoutEditorTypes';
 
 export interface RoomContextType {
@@ -11,4 +11,5 @@ export interface RoomContextType {
     selectedCage: Cage;
     saveCageMods: (currCage: Cage, currCageMods: CurrCageMods) => ModificationSaveResult;
     submitLayoutMods: () => Promise<LayoutSaveResult>;
+    submitRackChange: (newRack: RackSwitchOption, prevRack: Rack) => Promise<LayoutSaveResult>
 }

@@ -135,7 +135,9 @@ public class TriggerScriptHelper
         RackHistoryForm form = new RackHistoryForm();
         form.setObjectId(rackRow.get("objectid").toString());
         form.setHistoryId(historyId);
-        form.setRoom(rackRow.get("room").toString());
+        if(rackRow.get("room") != null){
+            form.setRoom(rackRow.get("room").toString());
+        }
         form.setCondition((int) rackRow.get("condition"));
 
         try {

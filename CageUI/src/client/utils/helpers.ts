@@ -1326,7 +1326,6 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
                         Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
                             modSubsections.forEach(section => {
                                 section.modKeys.forEach(key => {
-                                    console.log('Mod Key: ', key);
                                     newModData.push({
                                         cage: c.objectId,
                                         location: parseInt(direction),

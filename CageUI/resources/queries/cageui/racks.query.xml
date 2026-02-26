@@ -40,7 +40,7 @@
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>rack_types</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                            <fkDisplayColumnName>displayName</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="condition">

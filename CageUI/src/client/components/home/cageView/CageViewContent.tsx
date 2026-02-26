@@ -48,9 +48,9 @@ export const CageViewContent: FC = () => {
         <div className={'room-view-container'}
              key={'layout-' + selectedRoom + '-rack-' + selectedRack.itemId + '-' + selectedCage.cageNum}>
             <div className={'room-view-title'}>
-                <label>
+                <span>
                     {getCageNumDisplay(selectedCage.cageNum)}
-                </label>
+                </span>
             </div>
             <SubViewContent
                     tabs={[{

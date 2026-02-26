@@ -8,9 +8,10 @@ import { CurrentRackLayout } from './CurrentRackLayout';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { CagesOverview } from './CagesOverview';
 import { ChangeRackPopup } from './ChangeRackPopup';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const RackViewContent: FC = () => {
-    const {selectedRoom, selectedRack} = useRoomContext();
+    const {selectedRoom, selectedRack} = useHomeNavigationContext();
     const [showChangeRackPopup, setShowChangeRackPopup] = useState(false);
 
     const handleRackChange = () => {

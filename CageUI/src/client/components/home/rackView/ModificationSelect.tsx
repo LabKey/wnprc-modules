@@ -7,6 +7,7 @@ import { Filter } from '@labkey/api';
 import { ModDirections, ModTypes } from '../../../types/typings';
 import { cageModLookup } from '../../../api/popularQueries';
 import { useRoomContext } from '../../../context/RoomContextManager';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface ModificationSelectProps {
     removeMod: () => void;
@@ -17,7 +18,7 @@ interface ModificationSelectProps {
 
 export const ModificationSelect: FC<ModificationSelectProps> = (props) => {
     const {directionCategory, defaultValue, removeMod, changeMod} = props;
-    const {selectedRoom} = useRoomContext();
+    const {selectedRoom} = useHomeNavigationContext();
     const [options, setOptions] = useState<Option<ModTypes>[]>(null);
     const [selectedMod, setSelectedMod] = useState<Option<ModTypes>>(defaultValue);
 

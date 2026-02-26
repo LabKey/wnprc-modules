@@ -7,13 +7,14 @@ import { RackModifications } from '../rackView/RackModifications';
 import { CurrentRackLayout } from '../rackView/CurrentRackLayout';
 import { RackDetails } from '../rackView/RackDetails';
 import { SubViewContent } from '../SubViewContent';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CageDetailsProps {
     cageDimensions: CageDimensions;
 }
 
 export const CageDetails: FC<CageDetailsProps> = (props) => {
-    const {selectedRack} = useRoomContext();
+    const {selectedRack} = useHomeNavigationContext();
     const {cageDimensions} = props;
 
     return (

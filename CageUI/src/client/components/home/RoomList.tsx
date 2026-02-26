@@ -9,8 +9,7 @@ import { useHomeNavigationContext } from '../../context/HomeNavigationContextMan
 import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomList: FC = () => {
-    const {navigateTo, navigateToRoom} = useHomeNavigationContext();
-    const {switchToRoom} = useRoomContext();
+    const {navigateTo, navigateToRoom, switchToRoom} = useHomeNavigationContext();
     // keeps track of which rooms have already been fetched from layout_history
     const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
     const [expandedRacks, setExpandedRacks] = useState<ListRack[]>([]);

@@ -9,6 +9,7 @@ import { useRoomContext } from '../../../context/RoomContextManager';
 import { Button } from 'react-bootstrap';
 import { AnimalEditor } from './AnimalEditor';
 import { formatCageNum } from '../../../utils/helpers';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CagePopupProps {
     showEditor: boolean;
@@ -22,7 +23,8 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
         closeMenu,
         selectedObj,
     } = props;
-    const {selectedRoom, saveCageMods} = useRoomContext();
+    const {saveCageMods} = useRoomContext();
+    const {selectedRoom} = useHomeNavigationContext();
 
     const [currCage, setCurrCage] = useState<Cage>(null);
     const [currRack, setCurrRack] = useState<Rack>(null);

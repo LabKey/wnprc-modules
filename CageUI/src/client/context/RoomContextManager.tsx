@@ -16,7 +16,6 @@ import {
     UnitType
 } from '../types/typings';
 import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
-import _ from 'lodash';
 import { LayoutSaveResult } from '../types/layoutEditorTypes';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { useHomeNavigationContext } from './HomeNavigationContextManager';
@@ -40,104 +39,7 @@ export const useRoomContext = () => {
 };
 
 export const RoomContextProvider = ({children}) => {
-    const {selectedPage} = useHomeNavigationContext();
-    const [selectedRoom, setSelectedRoom] = useState<Room>(null);
-    const [selectedRoomMods, setSelectedRoomMods] = useState<RoomMods>({});
-    const [roomLoading, setRoomLoading] = useState<boolean>(false);
-
-    const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
-    const [selectedRack, setSelectedRack] = useState<Rack>(null);
-    const [selectedCage, setSelectedCage] = useState<Cage>(null);
-
-    useEffect(() => {
-        if (!selectedPage?.rack) {
-            return;
-        }
-        const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
-        setSelectedRack(currRack);
-        setSelectedRackGroup(currGroup);
-    }, [selectedPage.rack]);
-
-    useEffect(() => {
-        if (!selectedPage?.cage) {
-            return;
-        }
-
-        const {
-            cage: currCage,
-            rack: currRack,
-            rackGroup: currGroup
-        } = findCageInGroup(selectedPage.cage, selectedRoom.rackGroups);
-        setSelectedRackGroup(currGroup);
-        setSelectedRack(currRack);
-        setSelectedCage(currCage);
-    }, [selectedPage.cage]);
-
-    const [abortController, setAbortController] = useState(null);
-
-    // Room loading function - this will be called when user clicks a room
-    const loadRoomData = async (roomName, forceReload = false) => {
-        // If we already have this room and not forcing reload, return cached data
-
-
-        // Cancel any ongoing requests
-        if (abortController) {
-            abortController.abort();
-        }
-
-        setRoomLoading(true);
-        const controller = new AbortController();
-        setAbortController(controller);
-
-        try {
-            // Your existing room loading logic here
-            const roomData = await fetchRoomData(roomName, controller.signal);
-            //setLoadedRooms(prev => ({ ...prev, [roomName]: roomData }));
-            console.log('Set new room: ', roomData);
-            // room exists
-            if (roomData.prevRoomData) {
-                buildNewLocalRoom(roomData.prevRoomData).then((d) => {
-                    const newLocalRoom = d[0];
-                    if (newLocalRoom) {
-                        newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
-                        // Ensure they don't share the same reference (using lodash to clone)
-                        setSelectedRoomMods(_.cloneDeep(newLocalRoom.mods));
-                        setSelectedRoom(newLocalRoom);
-                    }
-                });
-            } else {
-                setSelectedRoom(null);
-                setSelectedRoomMods({});
-            }
-        }
-        catch (err) {
-            if (err.name !== 'AbortError') {
-                console.error('Error loading room:', err);
-            }
-            throw err;
-        }
-        finally {
-            setRoomLoading(false);
-            setAbortController(null);
-        }
-    };
-
-    // Method to explicitly switch to a different room
-    const switchToRoom = async (roomName: string) => {
-        try {
-            await loadRoomData(roomName, true); // Force reload
-        }
-        catch (error) {
-            console.error('Failed to switch to room:', error);
-        }
-    };
-
-    const cancelRoomLoad = () => {
-        if (abortController) {
-            abortController.abort();
-            setAbortController(null);
-        }
-    };
+    const {selectedRoom, selectedRackGroup, selectedRoomMods, selectedRack, selectedCage, setSelectedRoom} = useHomeNavigationContext();
 
     const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
         const cageModsByCage: { [key in string]: CageModificationsType } = {}; // string is object uuid
@@ -289,14 +191,8 @@ export const RoomContextProvider = ({children}) => {
 
     return (
         <RoomContext.Provider value={{
-            switchToRoom,
-            selectedRoom,
-            selectedRoomMods,
             saveCageMods,
             submitLayoutMods,
-            selectedRackGroup,
-            selectedRack,
-            selectedCage,
             submitRackChange
         }}>
             {children}

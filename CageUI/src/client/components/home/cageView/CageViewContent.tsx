@@ -15,8 +15,7 @@ import { CageDetails } from './CageDetails';
 import { getCageNumDisplay } from '../../../utils/homeHelpers';
 
 export const CageViewContent: FC = () => {
-    const {selectedPage} = useHomeNavigationContext();
-    const {selectedCage, selectedRoom, selectedRack} = useRoomContext();
+    const {selectedCage, selectedRoom, selectedRack} = useHomeNavigationContext();
     const [cageDimensions, setCageDimensions] = useState<CageDimensions>(null);
 
     useEffect(() => {

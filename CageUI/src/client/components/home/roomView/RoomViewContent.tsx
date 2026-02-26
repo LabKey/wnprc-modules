@@ -12,8 +12,7 @@ interface RoomViewContentProps {
 }
 
 export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
-    const {selectedPage} = useHomeNavigationContext();
-    const {selectedRoom} = useRoomContext();
+    const {selectedPage, selectedRoom} = useHomeNavigationContext();
     const roomName = selectedPage?.room;
 
     const handleLayoutEdit = () => {

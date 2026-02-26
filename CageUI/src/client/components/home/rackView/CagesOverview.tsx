@@ -4,9 +4,10 @@ import '../../../cageui.scss';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { getCageNumDisplay, sortCagesByCageNumber } from '../../../utils/homeHelpers';
 import { Cage } from '../../../types/typings';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const CagesOverview: FC = () => {
-    const {selectedRack} = useRoomContext();
+    const {selectedRack} = useHomeNavigationContext();
     const [sortedCages, setSortedCages] = useState<Cage[]>([]);
 
     useEffect(() => {

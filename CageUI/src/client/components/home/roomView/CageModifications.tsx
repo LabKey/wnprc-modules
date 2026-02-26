@@ -33,6 +33,7 @@ import {
 import { ModificationMultiSelect } from './ModificationMultiSelect';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { Utils } from '@labkey/api';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CageModificationsProps {
     cage: Cage;
@@ -43,7 +44,7 @@ interface CageModificationsProps {
 
 export const CageModifications: FC<CageModificationsProps> = (props) => {
     const {cage, rack, currCageMods, setCurrCageMods} = props;
-    const {selectedRoom} = useRoomContext();
+    const {selectedRoom} = useHomeNavigationContext();
     const [rackGroup, setRackGroup] = useState<RackGroup>(null);
     const [connectedCages, setConnectedCages] = useState<ConnectedCages>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);

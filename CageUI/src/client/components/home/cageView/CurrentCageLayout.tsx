@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 import { Cage } from '../../../types/typings';
 import { CELL_SIZE } from '../../../utils/constants';
 import { useRoomContext } from '../../../context/RoomContextManager';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CurrentCageLayoutProps {
     cage: Cage;
@@ -13,7 +14,7 @@ interface CurrentCageLayoutProps {
 
 export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
     const {cage} = props;
-    const {selectedRoom} = useRoomContext();
+    const {selectedRoom} = useHomeNavigationContext();
 
     const cageRef = useRef<SVGSVGElement>(null);
 

@@ -4,9 +4,10 @@ import '../../../cageui.scss';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
 import { useRoomContext } from '../../../context/RoomContextManager';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const CurrentRackLayout: FC = () => {
-    const {selectedRack, selectedRackGroup, selectedRoom} = useRoomContext();
+    const {selectedRack, selectedRackGroup, selectedRoom} = useHomeNavigationContext();
     const rackRef = useRef<SVGSVGElement>(null);
     useEffect(() => {
         if (!selectedRack || !rackRef.current) {

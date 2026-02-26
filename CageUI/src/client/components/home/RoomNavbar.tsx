@@ -5,8 +5,7 @@ import { useHomeNavigationContext } from '../../context/HomeNavigationContextMan
 import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomNavbar: FC = () => {
-    const {selectedPage, goToHome, navigateTo} = useHomeNavigationContext();
-    const {selectedRack, selectedCage} = useRoomContext();
+    const {selectedPage, goToHome, navigateTo, selectedRack, selectedCage} = useHomeNavigationContext();
 
     const handleRoomClick = () => {
         navigateTo('Room', {room: selectedPage.room});

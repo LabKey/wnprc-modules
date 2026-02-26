@@ -18,12 +18,14 @@ import { useRoomContext } from '../../../context/RoomContextManager';
 import { LoadingScreen } from '../../LoadingScreen';
 import { RoomLegend } from './RoomLegend';
 import { CagePopup } from './CagePopup';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
-    const {selectedRoom, selectedRoomMods, submitLayoutMods, switchToRoom} = useRoomContext();
+    const {submitLayoutMods} = useRoomContext();
+    const {selectedRoom, selectedRoomMods, switchToRoom} = useHomeNavigationContext();
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);

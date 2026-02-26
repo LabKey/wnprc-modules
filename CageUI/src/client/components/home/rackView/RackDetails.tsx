@@ -4,9 +4,10 @@ import '../../../cageui.scss';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { RackConditions } from '../../../types/typings';
 import { StatusSvgIcon } from '../../StatusSvgIcon';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 export const RackDetails: FC = () => {
-    const {selectedRack} = useRoomContext();
+    const {selectedRack} = useHomeNavigationContext();
 
     useEffect(() => {
         console.log(selectedRack);

@@ -19,9 +19,8 @@ interface ChangeRackPopupProps {
 
 export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
     const {showChangeRackPopup} = props;
-    const {navigateToRoom} = useHomeNavigationContext();
     const {submitRackChange} = useRoomContext();
-    const {selectedRack, selectedRoom, switchToRoom} = useHomeNavigationContext();
+    const {selectedRack, selectedRoom, navigateTo} = useHomeNavigationContext();
     const [rackOptions, setRackOptions] = useState<RackSwitchOption[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [selectedOption, setSelectedOption] = useState<RackSwitchOption>({
@@ -100,7 +99,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                 // succssesful save
                 setIsSaving(false);
                 showChangeRackPopup(false);
-                navigateToRoom(selectedRoom.name, switchToRoom);
+                navigateTo({selected: 'Room', room: selectedRoom.name});
             } else {
                 setIsSaving(false);
                 if (res?.reason) {

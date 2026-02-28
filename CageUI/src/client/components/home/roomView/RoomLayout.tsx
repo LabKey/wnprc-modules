@@ -25,7 +25,7 @@ interface RoomLayoutProps {
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {submitLayoutMods} = useRoomContext();
-    const {selectedRoom, selectedRoomMods, switchToRoom} = useHomeNavigationContext();
+    const {selectedRoom, selectedRoomMods, navigateTo} = useHomeNavigationContext();
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
@@ -89,7 +89,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         if (res.success) {
             // succssesful save
             setIsSaving(false);
-            switchToRoom(selectedRoom.name);
+            navigateTo({selected: 'Room', room: selectedRoom.name});
         } else {
             if (res?.reason) {
                 setShowLayoutErrors(res.reason);

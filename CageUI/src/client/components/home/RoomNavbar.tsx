@@ -5,24 +5,24 @@ import { useHomeNavigationContext } from '../../context/HomeNavigationContextMan
 import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomNavbar: FC = () => {
-    const {selectedPage, goToHome, navigateTo, selectedRack, selectedCage} = useHomeNavigationContext();
+    const {selectedPage, navigateTo, selectedRack, selectedCage} = useHomeNavigationContext();
 
     const handleRoomClick = () => {
-        navigateTo('Room', {room: selectedPage.room});
+        navigateTo({selected: 'Room', room: selectedPage.room});
     };
 
     const handleRackClick = () => {
-        navigateTo('Rack', {room: selectedPage.room, rack: selectedPage.rack});
+        navigateTo({selected: 'Rack', room: selectedPage.room, rack: selectedPage.rack});
     };
     const handleCageClick = () => {
-        navigateTo('Room', {room: selectedPage.room, rack: selectedPage.rack, cage: selectedPage.cage});
+        navigateTo({selected: 'Room', room: selectedPage.room, rack: selectedPage.rack, cage: selectedPage.cage});
     };
 
     // TODO add cage type for cage instead of 'Cage'
     return (
         <div className="page-map">
             <div className={'page-map-url'}>
-                <span className={'page-map-link'} onClick={goToHome}> Home </span>
+                <span className={'page-map-link'} onClick={() => navigateTo({selected: 'Home'})}> Home </span>
                 {selectedPage.room && <div>/</div>}
                 {selectedPage.room &&
                         <span

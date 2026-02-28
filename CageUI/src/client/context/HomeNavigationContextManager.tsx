@@ -1,17 +1,15 @@
 import * as React from 'react';
-import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { HomeNavigationContextType } from '../types/homeNavigationContextTypes';
 import { SelectedPage } from '../types/homeTypes';
-import { Cage, Rack, RackGroup, Room, RoomMods } from '../types/typings';
+import { Cage, CageSvgId, Rack, RackGroup, Room, RoomMods } from '../types/typings';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, fetchRoomData } from '../utils/helpers';
 import _ from 'lodash';
+import { ActionURL } from '@labkey/api';
 
 interface HomeNavigationContextProps {
     children: ReactNode;
-    room?: string;
-    rack?: string;
-    cage?: string;
 }
 
 const HomeNavigationContext = createContext<HomeNavigationContextType>({} as HomeNavigationContextType);
@@ -28,61 +26,144 @@ export const useHomeNavigationContext = () => {
     return context;
 };
 
-export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({children, room, rack, cage}) => {
+export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({children}) => {
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: 'Home'});
 
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
     const [selectedRoomMods, setSelectedRoomMods] = useState<RoomMods>({});
-    const [roomLoading, setRoomLoading] = useState<boolean>(false);
 
     const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
-
-
-
+    useEffect(() => {
+        console.log("selectedPage: ", selectedPage);
+    }, [selectedPage]);
 
     useEffect(() => {
-        if(room && !rack && !cage){
-            navigateTo("room", {room: room});
-        }else if(room && rack && !cage){
-            navigateTo("Rack", {room: room, rack: rack});
-        }else if(room && rack && cage){
-            navigateTo("Cage", {room: room, rack: rack, cage: cage});
-        }else{
-            goToHome();
-        }
-    }, [room, rack, cage]);
+        console.log("selectedRoom: ", selectedRoom);
+    }, [selectedRoom]);
 
+    // Track if we've already handled this specific URL
+
+    // Load initial data based on URL parameters
     useEffect(() => {
-        if (!selectedPage?.rack) {
-            return;
-        }
-        const {rack: currRack, rackGroup: currGroup} = findRackInGroup(selectedPage.rack, selectedRoom.rackGroups);
-        setSelectedRack(currRack);
-        setSelectedRackGroup(currGroup);
-    }, [selectedPage.rack]);
+        const roomParam = ActionURL.getParameter('room');
+        const rackParam = ActionURL.getParameter('rack');
+        const cageParam = ActionURL.getParameter('cage');
 
-    useEffect(() => {
-        if (!selectedPage?.cage) {
-            return;
-        }
+        if (roomParam) {
+            loadRoomData(roomParam).then(() => {
+                if (rackParam) {
+                    const { rack: currRack, rackGroup: currGroup } = findRackInGroup(rackParam, selectedRoom?.rackGroups || []);
+                    setSelectedRack(currRack);
+                    setSelectedRackGroup(currGroup);
 
-        const {
-            cage: currCage,
-            rack: currRack,
-            rackGroup: currGroup
-        } = findCageInGroup(selectedPage.cage, selectedRoom.rackGroups);
-        setSelectedRackGroup(currGroup);
-        setSelectedRack(currRack);
-        setSelectedCage(currCage);
-    }, [selectedPage.cage]);
+                    if (cageParam) {
+                        const {
+                            cage: currCage,
+                            rack: currRack,
+                            rackGroup: currGroup
+                        } = findCageInGroup(cageParam, selectedRoom?.rackGroups || []);
+                        setSelectedRackGroup(currGroup);
+                        setSelectedRack(currRack);
+                        setSelectedCage(currCage);
+                        setSelectedPage({selected: 'Cage', room: roomParam, rack: currRack.svgId, cage: currCage.svgId})
+                    }else{
+                        setSelectedPage({selected: 'Rack', room: roomParam, rack: currRack.svgId})
+                    }
+                }else{
+                    setSelectedPage({selected: 'Room', room: roomParam})
+                }
+            });
+        }
+    }, []);
+
+    const navigateTo = (page: SelectedPage) => {
+        // Update URL using History API
+        const url = new URL(window.location.href);
+
+        // Clear all parameters first
+        url.searchParams.delete('room');
+        url.searchParams.delete('rack');
+        url.searchParams.delete('cage');
+
+        // Set new parameters based on page
+        if (page.room) url.searchParams.set('room', page.room);
+        if (page.rack) url.searchParams.set('rack', page.rack);
+        if (page.cage) url.searchParams.set('cage', page.cage);
+
+        // Update history
+        window.history.pushState({}, '', url);
+
+        // Update state
+        setSelectedPage(page);
+
+        // Handle navigation to different page types
+        switch (page.selected) {
+            case 'Home':
+                setSelectedRoom(null);
+                setSelectedRackGroup(null);
+                setSelectedRack(null);
+                setSelectedCage(null);
+                break;
+
+            case 'Room':
+                if (page.room) {
+                    loadRoomData(page.room);
+                }
+                break;
+
+            case 'Rack':
+                if (page.room && page.rack) {
+                    // Load room if needed
+                    if (!selectedRoom || selectedRoom.name !== page.room) {
+                        loadRoomData(page.room).then((newRoom) => {
+                            const { rack: currRack, rackGroup: currGroup } = findRackInGroup(page.rack, newRoom?.rackGroups || []);
+                            setSelectedRack(currRack);
+                            setSelectedRackGroup(currGroup);
+                        });
+                    } else {
+                        const { rack: currRack, rackGroup: currGroup } = findRackInGroup(page.rack, selectedRoom?.rackGroups || []);
+                        setSelectedRack(currRack);
+                        setSelectedRackGroup(currGroup);
+                    }
+                }
+                break;
+
+            case 'Cage':
+                if (page.room && page.rack && page.cage) {
+                    // Load room if needed
+                    if (!selectedRoom || selectedRoom.name !== page.room) {
+                        loadRoomData(page.room).then((newRoom) => {
+                            const {
+                                cage: currCage,
+                                rack: currRack,
+                                rackGroup: currGroup
+                            } = findCageInGroup(page.cage, newRoom?.rackGroups || []);
+                            setSelectedRackGroup(currGroup);
+                            setSelectedRack(currRack);
+                            setSelectedCage(currCage);
+                        });
+                    } else {
+                        const {
+                            cage: currCage,
+                            rack: currRack,
+                            rackGroup: currGroup
+                        } = findCageInGroup(page.cage, selectedRoom?.rackGroups || []);
+                        setSelectedRackGroup(currGroup);
+                        setSelectedRack(currRack);
+                        setSelectedCage(currCage);
+                    }
+                }
+                break;
+        }
+    };
 
     const [abortController, setAbortController] = useState(null);
 
     // Room loading function - this will be called when user clicks a room
-    const loadRoomData = async (roomName, forceReload = false) => {
+    const loadRoomData = async (roomName, forceReload = false): Promise<Room> => {
         // If we already have this room and not forcing reload, return cached data
 
 
@@ -91,7 +172,6 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
             abortController.abort();
         }
 
-        setRoomLoading(true);
         const controller = new AbortController();
         setAbortController(controller);
 
@@ -102,18 +182,18 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
             console.log('Set new room: ', roomData);
             // room exists
             if (roomData.prevRoomData) {
-                buildNewLocalRoom(roomData.prevRoomData).then((d) => {
-                    const newLocalRoom = d[0];
-                    if (newLocalRoom) {
-                        newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
-                        // Ensure they don't share the same reference (using lodash to clone)
-                        setSelectedRoomMods(_.cloneDeep(newLocalRoom.mods));
-                        setSelectedRoom(newLocalRoom);
-                    }
-                });
+                const newLocalRoom: Room = (await buildNewLocalRoom(roomData.prevRoomData))[0];
+                if (newLocalRoom) {
+                    newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
+                    // Ensure they don't share the same reference (using lodash to clone)
+                    setSelectedRoomMods(_.cloneDeep(newLocalRoom.mods));
+                    setSelectedRoom(newLocalRoom);
+                }
+                return newLocalRoom;
             } else {
                 setSelectedRoom(null);
                 setSelectedRoomMods({});
+                return null;
             }
         }
         catch (err) {
@@ -123,56 +203,9 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
             throw err;
         }
         finally {
-            setRoomLoading(false);
             setAbortController(null);
         }
     };
-
-    // Method to explicitly switch to a different room
-    const switchToRoom = async (roomName: string) => {
-        try {
-            await loadRoomData(roomName, true); // Force reload
-        }
-        catch (error) {
-            console.error('Failed to switch to room:', error);
-        }
-    };
-
-    const cancelRoomLoad = () => {
-        if (abortController) {
-            abortController.abort();
-            setAbortController(null);
-        }
-    };
-
-    // Navigation functions
-    const navigateTo = (page, data = null) => {
-        console.log('navigateTo', page, data);
-        setSelectedPage({selected: page, ...data});
-    };
-
-    const goToHome = () => {
-        setSelectedPage(prevState => ({
-            selected: 'Home'
-        }));
-    };
-
-    const navigateToRoom = async (roomName, switchRoom) => {
-        // First navigate to the room page
-        navigateTo('Room', {room: roomName});
-
-        // Then load the room data if needed
-        if (switchRoom) {
-            try {
-                // This is the switchToRoom function from the RoomContextProvider instance
-                await switchRoom(roomName);
-            }
-            catch (error) {
-                console.error('Failed to load room data:', error);
-            }
-        }
-    };
-
 
     return (
         <HomeNavigationContext.Provider value={{
@@ -183,10 +216,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
             selectedRack,
             selectedCage,
             navigateTo,
-            switchToRoom,
             setSelectedRoom,
-            goToHome,
-            navigateToRoom
         }}>
             {children}
         </HomeNavigationContext.Provider>

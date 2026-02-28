@@ -10,16 +10,8 @@ import { ActionURL } from '@labkey/api';
 
 
 export const RoomHome: FC = () => {
-    const roomName = ActionURL.getParameter('room');
-    const rackObjId = ActionURL.getParameter('rack');
-    const cageObjId = ActionURL.getParameter('cage');
-
-    useEffect(() => {
-        console.log('roomName: ', roomName);
-    }, []);
-
     return (
-        <HomeNavigationContextProvider room={roomName} rack={rackObjId} cage={cageObjId}>
+        <HomeNavigationContextProvider>
             <RoomContextProvider>
                 <div className={'home-container'}>
                     <RoomList/>

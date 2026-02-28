@@ -9,7 +9,7 @@ import { useHomeNavigationContext } from '../../context/HomeNavigationContextMan
 import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomList: FC = () => {
-    const {navigateTo, navigateToRoom, switchToRoom} = useHomeNavigationContext();
+    const {navigateTo} = useHomeNavigationContext();
     // keeps track of which rooms have already been fetched from layout_history
     const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
     const [expandedRacks, setExpandedRacks] = useState<ListRack[]>([]);
@@ -126,15 +126,15 @@ export const RoomList: FC = () => {
     };
 
     const handleRoomClick = (room: ListRoom) => {
-        navigateToRoom(room.name, switchToRoom);
+        navigateTo({selected: 'Room', room: room.name})
     };
 
     const handleRackClick = (room: ListRoom, rack: ListRack) => {
-        navigateTo('Rack', {room: room.name, rack: rack.id});
+        navigateTo({selected: 'Rack', room: room.name, rack: rack.id});
     };
 
     const handleCageClick = (room: ListRoom, rack: ListRack, cage: ListCage) => {
-        navigateTo('Cage', {room: room.name, rack: rack.id, cage: cage.id});
+        navigateTo({selected: 'Cage', room: room.name, rack: rack.id, cage: cage.id});
     };
 
     return (

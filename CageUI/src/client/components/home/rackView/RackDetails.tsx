@@ -10,8 +10,8 @@ export const RackDetails: FC = () => {
     const {selectedRack} = useHomeNavigationContext();
 
     useEffect(() => {
-        console.log(selectedRack);
-    }, []);
+        console.log("Rack Details: ", selectedRack);
+    }, [selectedRack]);
 
     return (
         <div className="rack-details-container">
@@ -22,7 +22,7 @@ export const RackDetails: FC = () => {
                         <div className="dimension-value-container">
                             <div className="dimension-value-icon">
                                 <StatusSvgIcon
-                                    status={selectedRack.condition === RackConditions.Operational ? 'valid' : 'invalid'}
+                                        status={selectedRack.condition === RackConditions.Operational ? 'valid' : 'invalid'}
                                 />
                             </div>
                             <span className="dimension-value-text">{RackConditions[selectedRack.condition]}</span>

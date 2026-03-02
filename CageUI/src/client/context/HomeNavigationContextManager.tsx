@@ -36,14 +36,6 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
-    useEffect(() => {
-        console.log("selectedPage: ", selectedPage);
-    }, [selectedPage]);
-
-    useEffect(() => {
-        console.log("selectedRoom: ", selectedRoom);
-    }, [selectedRoom]);
-
     // Track if we've already handled this specific URL
 
     // Load initial data based on URL parameters
@@ -53,9 +45,9 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
         const cageParam = ActionURL.getParameter('cage');
 
         if (roomParam) {
-            loadRoomData(roomParam).then(() => {
+            loadRoomData(roomParam).then((room) => {
                 if (rackParam) {
-                    const { rack: currRack, rackGroup: currGroup } = findRackInGroup(rackParam, selectedRoom?.rackGroups || []);
+                    const { rack: currRack, rackGroup: currGroup } = findRackInGroup(rackParam, room.rackGroups || []);
                     setSelectedRack(currRack);
                     setSelectedRackGroup(currGroup);
 
@@ -64,7 +56,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
                             cage: currCage,
                             rack: currRack,
                             rackGroup: currGroup
-                        } = findCageInGroup(cageParam, selectedRoom?.rackGroups || []);
+                        } = findCageInGroup(cageParam, room.rackGroups || []);
                         setSelectedRackGroup(currGroup);
                         setSelectedRack(currRack);
                         setSelectedCage(currCage);
@@ -176,10 +168,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({c
         setAbortController(controller);
 
         try {
-            // Your existing room loading logic here
             const roomData = await fetchRoomData(roomName, controller.signal);
-            //setLoadedRooms(prev => ({ ...prev, [roomName]: roomData }));
-            console.log('Set new room: ', roomData);
             // room exists
             if (roomData.prevRoomData) {
                 const newLocalRoom: Room = (await buildNewLocalRoom(roomData.prevRoomData))[0];

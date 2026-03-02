@@ -35,10 +35,6 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const borderRef = useRef(null);
     const contextRef = useRef(selectedRoom);
 
-    useEffect(() => {
-        console.log('Room Layout Selected Room: ', selectedRoom);
-    }, [selectedRoom]);
-
     // Loads room into the svg
     useEffect(() => {
         if (!selectedRoom.name) {

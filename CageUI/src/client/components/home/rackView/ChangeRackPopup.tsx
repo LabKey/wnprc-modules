@@ -47,7 +47,6 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
             ]
         };
         labkeyActionSelectWithPromise(racksConfig).then((racksResult) => {
-            console.log('racksResult', racksResult);
             if (racksResult.rowCount > 0) {
                 const options = racksResult.rows.reduce((acc, row) => {
                     acc.push({

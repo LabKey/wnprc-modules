@@ -77,7 +77,6 @@ export const LayoutEditor: FC<any> = () => {
             setIsLoading(false);
         } else {
             fetchRoomData(roomName).then(prevRoomData => {
-                console.log('prev room data', prevRoomData);
                 setPrevRoomData(prevRoomData.prevRoomData);
                 setErrorPopup(prevRoomData?.error);
                 setShowSelectionPopup(prevRoomData.showSelectionPopup);

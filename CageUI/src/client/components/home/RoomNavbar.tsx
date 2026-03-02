@@ -18,7 +18,6 @@ export const RoomNavbar: FC = () => {
         navigateTo({selected: 'Room', room: selectedPage.room, rack: selectedPage.rack, cage: selectedPage.cage});
     };
 
-    // TODO add cage type for cage instead of 'Cage'
     return (
         <div className="page-map">
             <div className={'page-map-url'}>

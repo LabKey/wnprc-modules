@@ -78,7 +78,6 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             const rackTypesPromise = labkeyActionSelectWithPromise(rackTypesConfig);
 
             Promise.all([rackPromise, rackTypesPromise]).then(([rackResult, rackTypesResult]) => {
-                console.log(rackResult, rackTypesResult);
                 const tmp: RackChangeOption[] = [];
                 if (rackResult.rows.length > 0) {
                     for (const row of rackResult.rows) {

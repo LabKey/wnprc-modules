@@ -1170,7 +1170,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
         setLocalRoom(prevRoom.room);
         setRoom(prevRoom.room);
-        console.log('prevRoom', prevRoom);
         setIsLoading(false);
     }, [prevRoom]);
 

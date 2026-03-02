@@ -51,7 +51,6 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        console.log(res, historyid, cage);
         if (res.rows.length === 1) {
             return {
                 rowid: res.rows[0].rowid,

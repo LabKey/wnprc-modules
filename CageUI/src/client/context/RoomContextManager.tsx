@@ -65,7 +65,6 @@ export const RoomContextProvider = ({children}) => {
                 // 1. go through connected cage mods and add them to the cagesModsByCage object.
                 [...newCurrMods, ...newAdjMods].forEach(mod => {
                     newRoomMods[mod.modId] = {label: mod.label, value: mod.value};
-                    console.log('Add mod: ', mod.modId, ' value: ', mod.value, ' label: ', mod.label);
                 });
 
                 // Track old mod IDs to remove (from previous cage modKeys)

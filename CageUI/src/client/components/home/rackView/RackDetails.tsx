@@ -9,10 +9,6 @@ import { useHomeNavigationContext } from '../../../context/HomeNavigationContext
 export const RackDetails: FC = () => {
     const {selectedRack} = useHomeNavigationContext();
 
-    useEffect(() => {
-        console.log("Rack Details: ", selectedRack);
-    }, [selectedRack]);
-
     return (
         <div className="rack-details-container">
             <div className="rack-details-section">

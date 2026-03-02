@@ -11,7 +11,6 @@ export const RoomContent: FC = () => {
     const {selectedPage} = useHomeNavigationContext();
 
     const renderContent = () => {
-        console.log("Render Content: ", selectedPage);
         switch (selectedPage?.selected) {
             case 'Room':
                 return <RoomViewContent/>;

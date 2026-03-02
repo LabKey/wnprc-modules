@@ -1176,7 +1176,6 @@ export const findConnectedCages = (rack: Rack, rotation: GroupRotation, cage?: C
         for (let i = 0; i < rack.cages.length; i++) {
             if (rack.cages[i].cageNum !== cage.cageNum) {
                 const adj = areAdjacent(cage, rack, rack.cages[i], rack, rotation);
-                console.log(`${rack.cages[i].cageNum} is ${ModLocations[adj.location]} of ${cage.cageNum} `);
                 // adj.location is the location of adj cage to current cage meaning if 1 is curr and is left of 2 then adj.location = right. (adj is right of curr)
                 if (adj.location !== null) {
                     adj.currLines.forEach(((line, idx) => {
@@ -1344,7 +1343,6 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
         });
     }
 
-    console.log('Saving Room With Mods: ', newModData);
     let result: LayoutSaveResult;
 
     try {
@@ -1358,7 +1356,6 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
     catch (e) {
         const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
         result = {success: e.success, roomName: roomName, reason: errors.map(err => err.message || err)};
-        console.log(result)
     }
     // Determine success or failure
     return result;

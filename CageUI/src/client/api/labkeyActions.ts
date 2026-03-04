@@ -171,6 +171,7 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
 
 export function createNewRoomFromRackChange(room: Room, newRackOption: RackSwitchOption, prevRack: Rack ): Promise<{
     room: Room,
+    rack: string;
     errors: any[]
 }> {
     return new Promise((resolve, reject) => {

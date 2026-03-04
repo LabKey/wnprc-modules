@@ -45,6 +45,13 @@ export interface LayoutSaveResult {
     reason?: string[];
 }
 
+export interface RackChangeSaveResult {
+    success: boolean;
+    roomName: string; // redirect room
+    rack: string; // rack_{objectid}
+    reason?: string[];
+}
+
 export interface OffsetProps {
     clientX: number;
     clientY: number;

@@ -16,7 +16,7 @@ import {
     UnitType
 } from '../types/typings';
 import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
-import { LayoutSaveResult } from '../types/layoutEditorTypes';
+import { LayoutSaveResult, RackChangeSaveResult } from '../types/layoutEditorTypes';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { useHomeNavigationContext } from './HomeNavigationContextManager';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
@@ -39,7 +39,7 @@ export const useRoomContext = () => {
 };
 
 export const RoomContextProvider = ({children}) => {
-    const {selectedRoom, selectedRackGroup, selectedRoomMods, selectedRack, selectedCage, setSelectedRoom} = useHomeNavigationContext();
+    const {selectedRoom, setSelectedRoom} = useHomeNavigationContext();
 
     const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
         const cageModsByCage: { [key in string]: CageModificationsType } = {}; // string is object uuid
@@ -166,26 +166,37 @@ export const RoomContextProvider = ({children}) => {
         return saveRoomHelper(selectedRoom);
     };
 
-    const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack): Promise<LayoutSaveResult> => {
+    const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack): Promise<RackChangeSaveResult> => {
         // First pass it to java for validation and to create the room to submit to saveRoomHelper.
-        let result: LayoutSaveResult;
+        let result: RackChangeSaveResult;
         let newRoom: Room;
+        let newRack: string;
         try {
             const newRoomRes = await createNewRoomFromRackChange(selectedRoom, newRackOption, prevRack);
             newRoom = newRoomRes.room;
             let errors;
             if (newRoomRes.errors) {
                 errors = Array.isArray(newRoomRes.errors) ? newRoomRes.errors : [newRoomRes.errors];
-                result = {success: false, roomName: selectedRoom.name, reason: errors};
+                result = {success: false, roomName: selectedRoom.name, rack: "",reason: errors};
                 return result;
             }
+            newRack = newRoomRes.rack;
         }
         catch (e) {
             const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
-            result = {success: e.success, roomName: selectedRoom.name, reason: errors.map(err => err.message || err)};
+            result = {
+                success: e.success,
+                roomName: selectedRoom.name,
+                rack: "",
+                reason: errors.map(err => err.message || err)
+            };
             return result;
         }
-        return saveRoomHelper(newRoom);
+        const saveRoomRes = await saveRoomHelper(newRoom);
+        return {
+            ...saveRoomRes,
+            rack: newRack,
+        }
     }
 
     return (

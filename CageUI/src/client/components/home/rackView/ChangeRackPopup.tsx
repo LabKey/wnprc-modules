@@ -6,7 +6,7 @@ import { Rack, RackChangeOption, RackChangeValue, RackConditions } from '../../.
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { Filter } from '@labkey/api';
+import { ActionURL, Filter } from '@labkey/api';
 import { RackSwitchOption } from '../../../types/homeTypes';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LoadingScreen } from '../../LoadingScreen';
@@ -98,7 +98,13 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                 // succssesful save
                 setIsSaving(false);
                 showChangeRackPopup(false);
-                navigateTo({selected: 'Room', room: selectedRoom.name});
+                //navigateTo({selected: 'Room', room: selectedRoom.name});
+                window.location.href = ActionURL.buildURL(
+                ActionURL.getController(),
+                'cageui-home',
+                ActionURL.getContainer(),
+                {room: res.roomName, rack: res.rack});
+
             } else {
                 setIsSaving(false);
                 if (res?.reason) {

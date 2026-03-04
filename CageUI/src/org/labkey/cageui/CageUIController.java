@@ -64,6 +64,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -103,7 +104,18 @@ public class CageUIController extends SpringActionController
         private RackSwitchOption _option;
         private Rack _prevRack;
         private Room _newRoom;
+        private String _newRackSvgId;
 
+
+        public String getNewRackSvgId()
+        {
+            return _newRackSvgId;
+        }
+
+        public void setNewRackSvgId(String newRackSvgId)
+        {
+            _newRackSvgId = newRackSvgId;
+        }
 
         public Room getRoom()
         {
@@ -224,6 +236,7 @@ public class CageUIController extends SpringActionController
             newRack.setIsNew(getPrevRack().getIsNew());
             newRack.setIsActive(getPrevRack().getIsActive());
             newRack.setExtraContext(getPrevRack().getExtraContext());
+            setNewRackSvgId(newRack.getSvgId());
 
             // loop through cages and update their objectIds and svgIds, keep old cage data to ensure smooth swap, link by position id,
             // meaning the positionid=1 in both old and new rack should be the cage that is swapped.
@@ -267,8 +280,12 @@ public class CageUIController extends SpringActionController
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             JSONObject newRoom = mapper.convertValue(getNewRoom(), JSONObject.class);
             //JSONObject newRoom = new JSONObject(getNewRoom());
-            return new ApiSimpleResponse("room", newRoom);
+            Map<String, Object> response = new HashMap<String, Object>();
+            response.put("room", newRoom);
+            response.put("rack", getNewRackSvgId());
+            return new ApiSimpleResponse(response);
         }
+
     }
 
 

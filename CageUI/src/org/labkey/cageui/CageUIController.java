@@ -331,17 +331,36 @@ public class CageUIController extends SpringActionController
             JSONObject jsonRoom = json.getJSONObject("room");
             JSONArray jsonModsArray = json.getJSONArray("mods");
             String prevRoomName = json.get("prevRoomName").toString();
+
+
+
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            try
-            {
+            try {
                 Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
-                if (room != null)
-                {
+                if (room != null){
                     setRoom(room);
+                    boolean savingTemplate = room.getName().toLowerCase().contains("template");
+                    boolean isDefaultSave = json.get("isDefault").toString().equals("true");
+                    boolean isTemplateSave = savingTemplate || isDefaultSave;
+                    // Reject if template room has real racks or if real room has default racks.
+                    if(isTemplateSave){
+                        boolean validTemplateRoom = room.getRackGroups().stream()
+                            .allMatch(rg -> rg.getRacks().stream()
+                                .allMatch(rack -> rack.getType().isDefault()));
+                        if(!validTemplateRoom){
+                            errors.reject(ERROR_MSG,"Cannot save template room with real racks. Please change to default racks.");
+                        }
+                    }else{
+                        boolean validRealRoom = room.getRackGroups().stream()
+                            .allMatch(rg -> rg.getRacks().stream()
+                                .noneMatch(rack -> rack.getType().isDefault()));
+                        if(!validRealRoom){
+                            errors.reject(ERROR_MSG,"Cannot save real room with default racks. Please change to real racks.");
+                        }
+                    }
                 }
-                else
-                {
+                else {
                     errors.reject(ERROR_MSG, "Missing room parameter.");
                 }
             }
@@ -365,6 +384,7 @@ public class CageUIController extends SpringActionController
             {
                 errors.reject(ERROR_MSG, e.getMessage());
             }
+
         }
 
         @Override

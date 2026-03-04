@@ -6,7 +6,6 @@ import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTyp
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
-import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomList: FC = () => {
     const {navigateTo} = useHomeNavigationContext();

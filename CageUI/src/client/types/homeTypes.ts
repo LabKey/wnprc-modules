@@ -8,7 +8,7 @@ import {
     ModStyle,
     ModTypes,
     Rack,
-    Room, UnitType
+    Room
 } from './typings';
 import { Option } from '@labkey/components';
 

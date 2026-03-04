@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import Select from 'react-select';
-import { Rack, RackChangeOption, RackChangeValue, RackConditions } from '../../../types/typings';
+import { RackConditions } from '../../../types/typings';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';

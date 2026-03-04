@@ -5,7 +5,6 @@ import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
 import { Cage } from '../../../types/typings';
 import { CELL_SIZE } from '../../../utils/constants';
-import { useRoomContext } from '../../../context/RoomContextManager';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CurrentCageLayoutProps {

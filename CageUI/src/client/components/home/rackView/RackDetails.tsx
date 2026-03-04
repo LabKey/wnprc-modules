@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import '../../../cageui.scss';
-import { useRoomContext } from '../../../context/RoomContextManager';
 import { RackConditions } from '../../../types/typings';
 import { StatusSvgIcon } from '../../StatusSvgIcon';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';

@@ -31,8 +31,6 @@ import {
     ConnectedRacks
 } from '../../../types/homeTypes';
 import { ModificationMultiSelect } from './ModificationMultiSelect';
-import { useRoomContext } from '../../../context/RoomContextManager';
-import { Utils } from '@labkey/api';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CageModificationsProps {

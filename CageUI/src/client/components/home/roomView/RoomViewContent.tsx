@@ -6,7 +6,6 @@ import { SubViewContent } from '../SubViewContent';
 import { RoomDetails } from './RoomDetails';
 import { RoomLayout } from './RoomLayout';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
-import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface RoomViewContentProps {
 }

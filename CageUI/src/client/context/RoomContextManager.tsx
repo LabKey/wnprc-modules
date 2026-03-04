@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext } from 'react';
 
 import { RoomContextType } from '../types/roomContextTypes';
-import { buildNewLocalRoom, fetchRoomData, getAdjLocation, saveRoomHelper } from '../utils/helpers';
+import { getAdjLocation, saveRoomHelper } from '../utils/helpers';
 import {
     Cage,
     CageModification,
@@ -10,18 +10,13 @@ import {
     CurrCageMods,
     ModLocations,
     Rack,
-    RackGroup,
     Room,
-    RoomMods,
-    UnitType
+    RoomMods
 } from '../types/typings';
 import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
 import { LayoutSaveResult, RackChangeSaveResult } from '../types/layoutEditorTypes';
-import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { useHomeNavigationContext } from './HomeNavigationContextManager';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
-import { createNewRoomFromRackChange, labkeyActionSelectWithPromise } from '../api/labkeyActions';
+import { createNewRoomFromRackChange } from '../api/labkeyActions';
 
 
 const RoomContext = createContext<RoomContextType>({} as RoomContextType);

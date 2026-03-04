@@ -17,12 +17,10 @@
  */
 
 import * as React from 'react';
-import { FC, useEffect } from 'react';
-import { SelectedObj } from '../../types/layoutEditorTypes';
+import { FC } from 'react';
 import { findCageInGroup } from '../../utils/LayoutEditorHelpers';
-import { Cage, Room, RoomItemClass } from '../../types/typings';
+import { Cage } from '../../types/typings';
 import { Button } from 'react-bootstrap';
-import { roomItemToString, rotatePoint } from '../../utils/helpers';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 
 interface RotateRackGroupProps {

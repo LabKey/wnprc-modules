@@ -19,7 +19,7 @@ import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Option } from '@labkey/components';
 import { ModDirections, ModTypes } from '../../../types/typings';
-import { Filter, Utils } from '@labkey/api';
+import { Filter } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
 import { generateUUID } from '../../../utils/helpers';

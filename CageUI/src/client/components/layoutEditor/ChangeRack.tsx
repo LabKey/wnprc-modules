@@ -24,8 +24,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Button } from 'react-bootstrap';
 import { CreateRackPopup } from './CreateRackPopup';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
-import { SelectedObj } from '../../types/layoutEditorTypes';
-import { Cage, Rack, RackChangeOption, RackChangeValue, UnitType } from '../../types/typings';
+import { Rack, RackChangeOption, UnitType } from '../../types/typings';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
 
 

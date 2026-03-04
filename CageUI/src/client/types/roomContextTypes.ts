@@ -1,4 +1,4 @@
-import { Cage, CurrCageMods, Rack, RackGroup, Room, RoomMods } from './typings';
+import { Cage, CurrCageMods, Rack } from './typings';
 import { ModificationSaveResult, RackSwitchOption } from './homeTypes';
 import { LayoutSaveResult, RackChangeSaveResult } from './layoutEditorTypes';
 

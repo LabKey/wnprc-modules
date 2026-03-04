@@ -1,4 +1,4 @@
-import { SelectedPage, SelectedViews } from './homeTypes';
+import { SelectedPage } from './homeTypes';
 import { Cage, Rack, RackGroup, Room, RoomMods } from './typings';
 import { SetStateAction } from 'react';
 

@@ -5,8 +5,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import Select from 'react-select';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
-import { RackChangeOption, RackChangeValue, UnitType } from '../../types/typings';
-import { Utils } from '@labkey/api';
+import { RackChangeOption, UnitType } from '../../types/typings';
 import { generateUUID } from '../../utils/helpers';
 
 interface CreateRackPopupProps {

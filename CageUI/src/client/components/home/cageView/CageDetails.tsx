@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { FC } from 'react';
 import '../../../cageui.scss';
-import { useRoomContext } from '../../../context/RoomContextManager';
 import { CageDimensions, RackTypes } from '../../../types/typings';
-import { RackModifications } from '../rackView/RackModifications';
-import { CurrentRackLayout } from '../rackView/CurrentRackLayout';
-import { RackDetails } from '../rackView/RackDetails';
-import { SubViewContent } from '../SubViewContent';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CageDetailsProps {

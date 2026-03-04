@@ -2,7 +2,6 @@ import * as React from 'react';
 import { FC } from 'react';
 import '../../cageui.scss';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
-import { useRoomContext } from '../../context/RoomContextManager';
 
 export const RoomNavbar: FC = () => {
     const {selectedPage, navigateTo, selectedRack, selectedCage} = useHomeNavigationContext();

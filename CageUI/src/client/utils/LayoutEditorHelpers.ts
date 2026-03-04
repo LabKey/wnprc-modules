@@ -62,7 +62,7 @@ import {
 } from '../types/layoutEditorTypes';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
-import { Security, Utils } from '@labkey/api';
+import { Security } from '@labkey/api';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
 import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';

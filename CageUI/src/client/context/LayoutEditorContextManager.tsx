@@ -27,7 +27,8 @@ import {
     GroupId,
     GroupRotation,
     LocationCoords,
-    Rack, RackChangeOption, RackChangeValue,
+    Rack,
+    RackChangeOption,
     RackConditions,
     RackGroup,
     RackStringType,
@@ -48,13 +49,11 @@ import {
     findSelectObjRack,
     getNextGroupId,
     getTranslation,
-    isRackDefault,
     isRackEnum,
     showLayoutEditorError,
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
-    defaultTypeToRackType,
     generateCageId,
     generateUUID,
     getNextDefaultRackId,

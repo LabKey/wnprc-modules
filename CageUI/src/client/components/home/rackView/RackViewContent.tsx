@@ -2,10 +2,7 @@ import * as React from 'react';
 import { FC, useState } from 'react';
 import '../../../cageui.scss';
 import { SubViewContent } from '../SubViewContent';
-import { RackModifications } from './RackModifications';
 import { RackDetails } from './RackDetails';
-import { CurrentRackLayout } from './CurrentRackLayout';
-import { useRoomContext } from '../../../context/RoomContextManager';
 import { CagesOverview } from './CagesOverview';
 import { ChangeRackPopup } from './ChangeRackPopup';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
@@ -36,14 +33,6 @@ export const RackViewContent: FC = () => {
                 },{
                     name: 'Cages Overview',
                     children: <CagesOverview/>
-                }, {
-                    name: 'Modifications',
-                    children:
-                        <>
-                            <RackModifications/>
-                            <CurrentRackLayout/>
-                        </>
-
                 }
                 ]}
             />

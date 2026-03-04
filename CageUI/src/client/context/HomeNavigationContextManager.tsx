@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
 import { HomeNavigationContextType } from '../types/homeNavigationContextTypes';
 import { SelectedPage } from '../types/homeTypes';
-import { Cage, CageSvgId, Rack, RackGroup, Room, RoomMods } from '../types/typings';
+import { Cage, Rack, RackGroup, Room, RoomMods } from '../types/typings';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, fetchRoomData } from '../utils/helpers';
 import _ from 'lodash';

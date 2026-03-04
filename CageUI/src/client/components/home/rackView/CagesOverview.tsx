@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
-import { useRoomContext } from '../../../context/RoomContextManager';
 import { getCageNumDisplay, sortCagesByCageNumber } from '../../../utils/homeHelpers';
 import { Cage } from '../../../types/typings';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';

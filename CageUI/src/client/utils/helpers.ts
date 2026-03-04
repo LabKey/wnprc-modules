@@ -1303,7 +1303,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
         room.rackGroups.forEach((group) => {
             group.racks.forEach((r) => {
                 r.cages.forEach((c) => {
-                    if (c.mods === undefined) {
+                    if (c.mods === undefined || c.mods === null) {
                         const connectedCages = findConnectedCages(r, group.rotation, c);
                         Object.entries(connectedCages).forEach(([direction, connections]) => {
                             if (connections.length === 0) {

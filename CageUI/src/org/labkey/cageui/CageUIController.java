@@ -50,6 +50,7 @@ import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
+import org.labkey.cageui.model.ModLocations;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackSwitchOption;
@@ -63,6 +64,9 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,26 +79,6 @@ public class CageUIController extends SpringActionController
     {
         setActionResolver(_actionResolver);
     }
-
-    // todo fix this method to use array of cage ids to end. currently does not
-    // todo move helper functions to CageUIManager
-/*    private static List<Map<String, Object>> getModsToEnd(int[] cages, Date newEndDate, User user, Container container)
-    {
-        UserSchema cageuiSchema = QueryService.get().getUserSchema(user, container, "cageui");
-        TableInfo modHistoryTable = cageuiSchema.getTable("cage_modifications_history");
-        SimpleFilter modFilter = new SimpleFilter();
-        modFilter.addCondition(FieldKey.fromString("cage"), cages, CompareType.CONTAINS_ONE_OF);
-        modFilter.addCondition(FieldKey.fromString("endDate"),null, CompareType.ISBLANK);
-        TableSelector modSelector = new TableSelector(modHistoryTable, modFilter, null);
-        List<CageModificationHistoryForm> modHistoryFormData = modSelector.getArrayList(CageModificationHistoryForm.class);
-        JSONArray modJsonData = new JSONArray();
-        for (CageModificationHistoryForm data : modHistoryFormData){
-            data.setEndDate(newEndDate);
-            modJsonData.put(data.toJSON());
-        }
-        List<Map<String, Object>> oldModRowsToUpdate = JsonUtil.toMapList(modJsonData);
-        return oldModRowsToUpdate;
-    }*/
 
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
@@ -175,9 +159,6 @@ public class CageUIController extends SpringActionController
             JSONObject jsonRack = json.getJSONObject("prevRack");
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            /*SimpleModule module = new SimpleModule();
-            module.addDeserializer(Cage.class, new CageDeserializer());
-            mapper.registerModule(module);*/
             try
             {
                 Room room = mapper.readValue(jsonRoom.toString(), mapper.getTypeFactory().constructType(Room.class));
@@ -228,6 +209,10 @@ public class CageUIController extends SpringActionController
                 newManufacturer,
                 newRackType.isStationary()
             );
+            // wipe rack mods if the rack size or manufacturer changes.
+            boolean wipeRackMods = !(newType.getManufacturer().getValue().equals(getPrevRack().getType().getManufacturer().getValue())
+                    && Objects.equals(newType.getSize(), getPrevRack().getType().getSize()));
+
             newRack.setItemId(getOption().getValue().getRackId());
             newRack.setSvgId("rack_" + getOption().getValue().getObjectId());
             newRack.setObjectId(getOption().getValue().getObjectId());
@@ -268,7 +253,9 @@ public class CageUIController extends SpringActionController
                         errors.reject(ERROR_MSG, "No Cage found for position " + posId);
                     }
                 }
-
+                if(wipeRackMods){
+                    newRack.getCages().get(i).resetModsMap();
+                }
             }
 
             setNewRoom(CageUIManager.createRoomWithReplacedRack(getRoom(), getPrevRack().getObjectId(), newRack));

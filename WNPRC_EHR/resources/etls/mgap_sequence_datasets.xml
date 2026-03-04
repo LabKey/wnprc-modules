@@ -5,7 +5,7 @@
     <transforms>
         <transform id="step1" type="RemoteQueryTransformStep">
             <description>Copy to local table</description>
-            <source schemaName="mGAP" queryName="sequenceDatasetsSource" remoteSource="PRIMe-Seq">
+            <source schemaName="mGAP_Data" queryName="sequenceDatasetsSource" remoteSource="PRIMe-Seq">
                 <sourceColumns>
                     <column>mgapId</column>
                     <column>sequenceType</column>

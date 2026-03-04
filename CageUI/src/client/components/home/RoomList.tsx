@@ -6,6 +6,7 @@ import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTyp
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
+import { Filter } from '@labkey/api';
 
 export const RoomList: FC = () => {
     const {navigateTo} = useHomeNavigationContext();
@@ -42,7 +43,8 @@ export const RoomList: FC = () => {
         labkeyActionSelectWithPromise({
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
-            columns: ['room']
+            columns: ['room'],
+            filterArray: [Filter.create('room', "template", Filter.Types.CONTAINS_NONE_OF)]
         }).then((res) => {
             if (res.rowCount > 0) {
                 const roomList: ListRoom[] = [];

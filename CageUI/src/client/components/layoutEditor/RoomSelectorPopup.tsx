@@ -105,11 +105,11 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
                 {(template && !templateLoad) &&
                         <div className={'popup-row'}>
                             <label>
-                                Rename template? (Please include the word "template" in new name)
+                                Rename template?
                             </label>
                             <input
-                                    value={templateName}
-                                    onChange={(e) => setTemplateName(e.target.value)}
+                                value={templateName}
+                                onChange={(e) => setTemplateName("template-" + e.target.value)}
                             />
                         </div>
                 }

@@ -54,12 +54,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
-                        {
-                            return new LayoutHistoryTable(schema, CageUISchema.getInstance().getLayoutHistoryTable(), cf).init();
-                        }
-
-                        return null;
+                        return new LayoutHistoryTable(schema, CageUISchema.getInstance().getLayoutHistoryTable(), cf).init();
                     }
                 },
         room_history
@@ -67,12 +62,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
-                        {
-                            return new RoomHistoryTable(schema, CageUISchema.getInstance().getRoomHistoryTable(), cf).init();
-                        }
-
-                        return null;
+                        return new RoomHistoryTable(schema, CageUISchema.getInstance().getRoomHistoryTable(), cf).init();
                     }
                 },
         all_history
@@ -80,12 +70,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
-                        {
-                            return new AllHistoryTable(schema, CageUISchema.getInstance().getAllHistoryTable(), cf).init();
-                        }
-
-                        return null;
+                        return new AllHistoryTable(schema, CageUISchema.getInstance().getAllHistoryTable(), cf).init();
                     }
                 },
         template_layout_history
@@ -93,12 +78,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
-                        {
-                            return new TemplateLayoutHistoryTable(schema, CageUISchema.getInstance().getTemplateLayoutHistoryTable(), cf).init();
-                        }
-
-                        return null;
+                        return new TemplateLayoutHistoryTable(schema, CageUISchema.getInstance().getTemplateLayoutHistoryTable(), cf).init();
                     }
                 },
         cage_history
@@ -106,12 +86,7 @@ public class CageUIUserSchema extends SimpleUserSchema
                     @Override
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
-                        if (schema.getContainer().hasPermission(schema.getUser(), CageUILayoutEditorAccessPermission.class))
-                        {
-                            return new CageHistoryTable(schema, CageUISchema.getInstance().getCageHistoryTable(), cf).init();
-                        }
-
-                        return null;
+                        return new CageHistoryTable(schema, CageUISchema.getInstance().getCageHistoryTable(), cf).init();
                     }
                 },
         rack_types

@@ -23,6 +23,8 @@ import { Filter } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
 import { generateUUID } from '../../../utils/helpers';
+import { isCageModifier } from '../../../utils/LayoutEditorHelpers';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface ModificationMultiSelectProps {
     handleChange: (selectedItems: ConnectedModType[]) => void;
@@ -32,6 +34,7 @@ interface ModificationMultiSelectProps {
 
 export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props) => {
     const {directionCategory, handleChange, prevItems} = props;
+    const {userProfile} = useHomeNavigationContext();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedItems, setSelectedItems] = useState<ConnectedModType[]>(prevItems || []);
     const [searchTerm, setSearchTerm] = useState('');
@@ -119,7 +122,11 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         handleChange(selectedItems);
     }, [selectedItems]);
 
-    const toggleDropdown = () => setIsOpen(!isOpen);
+    const toggleDropdown = () => {
+        if(isCageModifier(userProfile)){
+            setIsOpen(!isOpen);
+        }
+    }
 
     const handleSelectItem = (item: Option<ModTypes>) => {
         const newItems = selectedItems || [];
@@ -155,8 +162,10 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
                             <span
                                 className="remove-item"
                                 onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeItem(item);
+                                    if(isCageModifier(userProfile)){
+                                        e.stopPropagation();
+                                        removeItem(item);
+                                    }
                                 }}
                             >
                 &times;

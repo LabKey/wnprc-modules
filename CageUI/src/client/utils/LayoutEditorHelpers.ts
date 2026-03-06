@@ -81,6 +81,10 @@ export const isRoomModifier = (user: GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
 };
 
+export const isCageModifier = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
+};
+
 export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{
     fulfilled: FullObjectHistoryData[];
     rejected: PromiseRejectedResult[]

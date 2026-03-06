@@ -27,7 +27,7 @@ import Editor from '../../components/layoutEditor/Editor';
 import { labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { isTemplateCreator } from '../../utils/LayoutEditorHelpers';
+import { isRoomCreator, isTemplateCreator } from '../../utils/LayoutEditorHelpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { roomSizeOptions } from '../../utils/constants';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
@@ -60,10 +60,10 @@ export const LayoutEditor: FC<any> = () => {
             if (profile.user) {
                 setUserProfile(profile);
                 // if the user is a template creator grant access
-                if (!(!roomName && !isTemplateCreator(profile))) {
+                if (isTemplateCreator(profile) || (isRoomCreator(profile))) {
                     setAccess(true);
-                } else if (roomName) {
-                    setAccess(true);
+                }else{
+                    setAccess(false);
                 }
             }
         }).catch((e) => {

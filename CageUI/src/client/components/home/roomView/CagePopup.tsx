@@ -4,7 +4,7 @@ import '../../../cageui.scss';
 import { ModificationEditor } from './ModificationEditor';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
 import { Cage, CurrCageMods, Rack } from '../../../types/typings';
-import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
+import { findCageInGroup, isCageModifier } from '../../../utils/LayoutEditorHelpers';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { Button } from 'react-bootstrap';
 import { AnimalEditor } from './AnimalEditor';
@@ -24,7 +24,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
         selectedObj,
     } = props;
     const {saveCageMods} = useRoomContext();
-    const {selectedRoom} = useHomeNavigationContext();
+    const {selectedRoom, userProfile} = useHomeNavigationContext();
 
     const [currCage, setCurrCage] = useState<Cage>(null);
     const [currRack, setCurrRack] = useState<Rack>(null);
@@ -112,8 +112,14 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
                     <div className="cage-popup-actions">
                         <Button className="cage-popup-button cage-popup-cancel"
                                 onClick={handleCleanup}>Cancel</Button>
-                        <Button className="cage-popup-button cage-popup-save"
-                                onClick={handleSaveMods}>Save Mods</Button>
+                        {isCageModifier(userProfile) &&
+                            <Button
+                                className="cage-popup-button cage-popup-save"
+                                onClick={handleSaveMods}
+                            >
+                                Save Mods
+                            </Button>
+                        }
                     </div>
                 </div>
             </div>

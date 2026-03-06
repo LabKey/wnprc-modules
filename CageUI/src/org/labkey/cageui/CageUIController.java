@@ -57,7 +57,9 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
+import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
+import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -96,7 +98,7 @@ public class CageUIController extends SpringActionController
 
 
     //APIS Here
-    @RequiresAnyOf({CageUILayoutEditorAccessPermission.class, CageUIRoomCreatorPermission.class, CageUITemplateCreatorPermission.class})
+    @RequiresPermission(CageUIRoomModifierPermission.class)
     public static class CreateNewRoomFromRackChangeAction extends MutatingApiAction<SimpleApiJsonForm>
     {
 
@@ -187,13 +189,17 @@ public class CageUIController extends SpringActionController
                 if (rackSwitchOption != null)
                 {
                     setOption(rackSwitchOption);
-                }else{
+                }
+                else
+                {
                     errors.reject(ERROR_MSG, "Missing rackSwitchOption.");
                 }
-                if(prevRack != null)
+                if (prevRack != null)
                 {
                     setPrevRack(prevRack);
-                }else{
+                }
+                else
+                {
                     errors.reject(ERROR_MSG, "Missing prevRack.");
                 }
             }
@@ -208,18 +214,19 @@ public class CageUIController extends SpringActionController
 
 
             Manufacturer newManufacturer = CageUIManager.getRackManufacturer(newRackType.getManufacturer());
-            if(newRackType.getType() != getPrevRack().getType().getRackType().getNumericValue()){
+            if (newRackType.getType() != getPrevRack().getType().getRackType().getNumericValue())
+            {
                 errors.reject(ERROR_MSG, "Racks have different types, cannot switch cages with pens, etc");
             }
             Rack newRack = new Rack();
             Rack.UnitType newType = new Rack.UnitType(
-                newRackType.getRowid(),
-                newRackType.getDisplayName(),
-                RackTypes.fromNumericValue(newRackType.getType()),
-                false,
-                newRackType.getSize(),
-                newManufacturer,
-                newRackType.isStationary()
+                    newRackType.getRowid(),
+                    newRackType.getDisplayName(),
+                    RackTypes.fromNumericValue(newRackType.getType()),
+                    false,
+                    newRackType.getSize(),
+                    newManufacturer,
+                    newRackType.isStationary()
             );
             // wipe rack mods if the rack size or manufacturer changes.
             boolean wipeRackMods = !(newType.getManufacturer().getValue().equals(getPrevRack().getType().getManufacturer().getValue())
@@ -243,30 +250,38 @@ public class CageUIController extends SpringActionController
             for (int i = 0; i < newRack.getCages().size(); i++)
             {
                 int posId = newRack.getCages().get(i).getPositionId();
-                if(newCagesForm.isEmpty()){
+                if (newCagesForm.isEmpty())
+                {
                     //Rack was created in the UI and no cages were added to it,
                     // if this is the case then we can assign new IDs to the cages and keep everything else.
                     String newObjId = UUID.randomUUID().toString().toUpperCase();
                     newRack.getCages().get(i).setObjectId(newObjId);
                     newRack.getCages().get(i).setSvgId(RackTypes.getSvgName(newRack.getType().getRackType()) + "_" + newObjId);
-                }else{
-                    if(newCagesForm.size() != getPrevRack().getCages().size()){
+                }
+                else
+                {
+                    if (newCagesForm.size() != getPrevRack().getCages().size())
+                    {
                         errors.reject(ERROR_MSG, "Racks have different number of cages");
                     }
                     Optional<CagesForm> foundCage = newCagesForm.stream()
-                        .filter(cage -> cage.getPositionId() == posId)
-                        .findFirst();
+                            .filter(cage -> cage.getPositionId() == posId)
+                            .findFirst();
 
-                    if (foundCage.isPresent()) {
+                    if (foundCage.isPresent())
+                    {
                         CagesForm newCage = foundCage.get();
                         newRack.getCages().get(i).setObjectId(newCage.getObjectId());
                         newRack.getCages().get(i).setSvgId(RackTypes.getSvgName(newRack.getType().getRackType()) + "_" + newCage.getObjectId());
-                    }else{
+                    }
+                    else
+                    {
                         // If this error occurs something is happening with position id assignment client side
                         errors.reject(ERROR_MSG, "No Cage found for position " + posId);
                     }
                 }
-                if(wipeRackMods){
+                if (wipeRackMods)
+                {
                     newRack.getCages().get(i).resetModsMap();
                 }
             }
@@ -290,7 +305,7 @@ public class CageUIController extends SpringActionController
 
 
     // this api action saves the layout for a given room
-    @RequiresAnyOf({CageUILayoutEditorAccessPermission.class, CageUIRoomCreatorPermission.class, CageUITemplateCreatorPermission.class})
+    @RequiresAnyOf({CageUILayoutEditorAccessPermission.class, CageUIRoomCreatorPermission.class, CageUITemplateCreatorPermission.class, CageUIRoomModifierPermission.class})
     public static class SaveLayoutHistoryAction extends MutatingApiAction<SimpleApiJsonForm>
     {
 

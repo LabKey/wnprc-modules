@@ -36,7 +36,6 @@ public class CageUIRoomModifierRole extends AbstractRole
                 CageUIRoomModifierPermission.class,
                 CageUIAnimalEditorPermission.class,
                 CageUIModificationEditorPermission.class,
-                CageUILayoutEditorAccessPermission.class,
                 CageUINotesEditorPermission.class
         );
     }

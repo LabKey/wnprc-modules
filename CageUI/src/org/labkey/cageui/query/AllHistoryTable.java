@@ -61,6 +61,12 @@ public class AllHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserSche
         }
 
         @Override
+        public List<Map<String, Object>> getRows(User user, Container container, List<Map<String, Object>> keys) throws InvalidKeyException, QueryUpdateServiceException, SQLException
+        {
+            return super.getRows(user, container, keys);
+        }
+
+        @Override
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;

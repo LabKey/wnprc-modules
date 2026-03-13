@@ -11,7 +11,10 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build": "better-npm-run build",
-    "start": "cross-env NODE_ENV=development LK_MODULE=WNPRC_EHR webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
+    "build-ios": "better-npm-run build-ios",
+    "start": "cross-env NODE_ENV=development LK_MODULE=CageUI webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
+    "start-ios": "cross-env NODE_ENV=development LK_MODULE=CageUI webpack-dev-server --config ios-webpack/watch.config.js",
+    "start-ios-better": "better-npm-run start-ios",
     "build-prod": "better-npm-run build-prod",
     "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
   },
@@ -57,8 +60,20 @@
         "NODE_ENV": "development"
       }
     },
+    "start-ios": {
+      "command": "webpack serve --config ./ios-webpack/watch.config.js",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
     "build": {
       "command": "webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "build-ios": {
+      "command": "webpack --config ./ios-webpack/dev.config.js --color",
       "env": {
         "NODE_ENV": "development"
       }

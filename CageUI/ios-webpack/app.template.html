@@ -1,0 +1,4 @@
+<div id="app"></div>
+<% if (htmlWebpackPlugin.options.mode === 'dev') { %>
+<script src="http://10.134.100.108:<%= htmlWebpackPlugin.options.port %>/<%= htmlWebpackPlugin.options.name %>.js" nonce="<%= htmlWebpackPlugin.options.nonce %>"></script>
+<% } %>

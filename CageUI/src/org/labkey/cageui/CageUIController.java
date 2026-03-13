@@ -35,12 +35,15 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.module.ModuleHtmlView;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.BundledForms;
@@ -86,9 +89,12 @@ public class CageUIController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+
         public ModelAndView getView(Object o, BindException errors)
         {
-            return new JspView("/org/labkey/cageui/view/hello.jsp");
+            //getPageConfig().setMetaTag("viewport", "width=device-width, initial-scale=1, viewport-fit=cover");
+            return new JspView("/org/labkey/cageui/view/gen/home.html");
+           // return ModuleHtmlView.get(ModuleLoader.getInstance().getModule("CageUI"), ModuleHtmlView.getGeneratedViewPath("home"));
         }
 
         public void addNavTrail(NavTree root)

@@ -184,3 +184,19 @@ export function createNewRoomFromRackChange(room: Room, newRackOption: RackSwitc
         });
     });
 }
+
+// This function is for updating racks that don't belong to a room.
+export function updateRackConditionStatus(rack: RackSwitchOption, condition: RackConditionOption ): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'updateRackConditionStatus.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {rack: rack.value.objectId, condition: condition.value},
+        });
+    });
+}

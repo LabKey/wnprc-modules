@@ -32,6 +32,14 @@ module.exports = {
                 'org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission',
             ],
             path: './src/client/pages/layoutEditor'
+        },
+        {
+            name: "updateRackStatus",
+            title: "Update Rack Status",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+            ],
+            path: './src/client/pages/updateRackStatus'
         }
     ]
 };

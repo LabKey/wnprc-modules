@@ -35,9 +35,17 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
@@ -69,6 +77,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +109,55 @@ public class CageUIController extends SpringActionController
 
         public void addNavTrail(NavTree root)
         {
+        }
+    }
+
+    @RequiresPermission(CageUIRoomModifierPermission.class)
+    public static class UpdateRackConditionStatusAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            BatchValidationException batchErrors = new BatchValidationException();
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            UserSchema cageUISchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
+            JSONObject json = form.getJsonObject();
+            String rackObjId = json.getString("rack");
+            int condition = json.getInt("condition");
+            Map<String, Object> map = new HashMap<>();
+            map.put("objectid", rackObjId);
+            map.put("condition", condition);
+            List<Map<String, Object>> updatedRack = new ArrayList<>();
+            updatedRack.add(map);
+
+
+            TableInfo racksTable = cageUISchema.getTable("racks");
+            QueryUpdateService racksQus = racksTable.getUpdateService();
+            if (racksQus == null)
+            {
+                throw new IllegalStateException(racksTable.getName() + " query update service");
+            }
+            try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+            {
+                if (rackObjId != null)
+                {
+                    racksQus.updateRows(getUser(), getContainer(), updatedRack, null, batchErrors, null, null);
+                }
+                if (batchErrors.hasErrors())
+                {
+                    response.put("success", false);
+                    response.put("errors", batchErrors);
+                    return response;
+                }
+                tx.commit();
+                response.put("success", true);
+            }catch (QueryUpdateServiceException | BatchValidationException | RuntimeException |
+                    SQLException e)
+            {
+                throw new ValidationException(e.getMessage());
+            }
+            return response;
         }
     }
 

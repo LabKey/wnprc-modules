@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import Select from 'react-select';
-import { RackConditions } from '../../../types/typings';
+import { RackConditionOption, RackConditions } from '../../../types/typings';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
@@ -22,6 +22,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
     const {submitRackChange} = useRoomContext();
     const {selectedRack, selectedRoom, navigateTo} = useHomeNavigationContext();
     const [rackOptions, setRackOptions] = useState<RackSwitchOption[]>([]);
+    const [rackConditions, setRackConditions] = useState<RackConditionOption[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [selectedOption, setSelectedOption] = useState<RackSwitchOption>({
         value: {
@@ -31,9 +32,32 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
         },
         label: `${selectedRack.itemId} - ${selectedRack.type.displayName}`
     });
+    const [selectedCondition, setSelectedCondition] = useState<RackConditionOption>({
+        value: RackConditions.Operational,
+        label: RackConditions[RackConditions.Operational]})
     const [showConfirmation, setShowConfirmation] = useState(false);
     const popupRef = useRef(null);
     const [showLayoutErrors, setShowLayoutErrors] = useState<string[]>([]);
+
+    useEffect(() => {
+        const config: SelectRowsOptions = {
+            schemaName: 'ehr_lookups',
+            queryName: 'cageui_condition_codes',
+            columns: ['value', 'title']
+        }
+         labkeyActionSelectWithPromise(config).then((res) => {
+             if(res.rowCount > 0){
+                 const opts: RackConditionOption[] = [];
+                 res.rows.forEach(row => {
+                     opts.push({
+                         value: row.value,
+                         label: row.title,
+                     })
+                 })
+                 setRackConditions(opts);
+             }
+         })
+    }, []);
 
     useEffect(() => {
         const racksConfig: SelectRowsOptions = {
@@ -85,6 +109,10 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
         setSelectedOption(rackOption);
     }
 
+    const handleConditionChange = (condition: RackConditionOption) => {
+        setSelectedCondition(condition);
+    }
+
     const handleSave = async () => {
         // First time it saves confirm, second time start save api call
         if(!showConfirmation){
@@ -92,7 +120,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
         }else{
             setShowConfirmation(false);
             setIsSaving(true);
-            const res = await submitRackChange(selectedOption, selectedRack);
+            const res = await submitRackChange(selectedOption, selectedRack, selectedCondition);
 
             if (res.success) {
                 // succssesful save
@@ -127,16 +155,30 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
             <div className="popup" ref={popupRef}>
                 <div className={'popup-row'}>
                     {!showConfirmation && showLayoutErrors.length === 0 &&
-                        <div className="context-menu-input menu-item">
-                            <label>Racks</label>
-                            <Select
-                                options={rackOptions}
-                                defaultValue={selectedOption}
-                                className={'select-menu'}
-                                classNamePrefix={'select'}
-                                onChange={handleRackChange}
-                            />
-                        </div>
+                        <>
+                            <div className="context-menu-input menu-item">
+                                <label>Available Racks</label>
+                                <Select
+                                    options={rackOptions}
+                                    defaultValue={selectedOption}
+                                    className={'select-menu'}
+                                    classNamePrefix={'select'}
+                                    onChange={handleRackChange}
+                                />
+                            </div>
+                            <div className="context-menu-input menu-item">
+                                <label>Previous Rack Condition</label>
+                                <Select
+                                    options={rackConditions}
+                                    defaultValue={selectedCondition}
+                                    className={'select-menu'}
+                                    classNamePrefix={'select'}
+                                    onChange={handleConditionChange}
+                                />
+                            </div>
+                        </>
+
+
                     }
                     {showConfirmation &&
                     <div className="context-menu-input menu-item">

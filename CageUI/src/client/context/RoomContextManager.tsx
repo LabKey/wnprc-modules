@@ -9,7 +9,7 @@ import {
     CageModificationsType,
     CurrCageMods,
     ModLocations,
-    Rack,
+    Rack, RackConditionOption,
     Room,
     RoomMods
 } from '../types/typings';
@@ -161,7 +161,7 @@ export const RoomContextProvider = ({children}) => {
         return saveRoomHelper(selectedRoom);
     };
 
-    const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack): Promise<RackChangeSaveResult> => {
+    const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack, prevRackCondition: RackConditionOption): Promise<RackChangeSaveResult> => {
         // First pass it to java for validation and to create the room to submit to saveRoomHelper.
         let result: RackChangeSaveResult;
         let newRoom: Room;
@@ -187,7 +187,7 @@ export const RoomContextProvider = ({children}) => {
             };
             return result;
         }
-        const saveRoomRes = await saveRoomHelper(newRoom);
+        const saveRoomRes = await saveRoomHelper(newRoom,null, prevRackCondition);
         return {
             ...saveRoomRes,
             rack: newRack,

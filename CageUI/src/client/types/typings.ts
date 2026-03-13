@@ -422,3 +422,8 @@ export interface RackChangeOption {
     value: RackChangeValue;
     label: string;
 }
+
+export interface RackConditionOption {
+    value: RackConditions;
+    label: string;
+}

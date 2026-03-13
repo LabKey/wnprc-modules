@@ -37,7 +37,7 @@ import {
     ModLocations,
     ModTypes,
     PrevRoom,
-    Rack,
+    Rack, RackConditionOption,
     RackConditions,
     RackData,
     RackGroup,
@@ -1276,7 +1276,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 };
 
-export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Promise<LayoutSaveResult> => {
+export const saveRoomHelper = async (room: Room, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 
     const roomName = room.name;
@@ -1346,7 +1346,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string): Prom
     let result: LayoutSaveResult;
 
     try {
-        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName);
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName, prevRackCondition);
         let errors;
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];

@@ -61,6 +61,7 @@ import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.ModTypes;
 import org.labkey.cageui.model.Rack;
+import org.labkey.cageui.model.RackCondition;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
@@ -520,9 +521,10 @@ public class CageUIManager
         private final String prevRoomName;
         private ArrayList<ModData> roomMods;
         private Map<String, Map<String, Double>> cageDims;
+        private final RackCondition prevRackCondition;
 
 
-        public RoomSubmissionService(Container containerId, User userId, boolean isTemplate, String prevRoomName, Room room, ArrayList<ModData> roomMods)
+        public RoomSubmissionService(Container containerId, User userId, boolean isTemplate, String prevRoomName, Room room, ArrayList<ModData> roomMods, RackCondition prevRackCondition)
         {
             this.containerId = containerId;
             this.userId = userId;
@@ -531,6 +533,7 @@ public class CageUIManager
             this.prevRoomName = prevRoomName;
             this.roomMods = roomMods;
             this.cageDims = new HashMap<>();
+            this.prevRackCondition = prevRackCondition;
         }
 
         private void getCageDims()
@@ -1092,6 +1095,9 @@ public class CageUIManager
             if(!racksInRoomBeforeList.isEmpty()){
                 racksInRoomBeforeList.forEach(racksForm -> {
                     racksForm.setRoom(null);
+                    if(prevRackCondition != null){
+                        racksForm.setCondition(prevRackCondition.getValue());
+                    }
                     racksToUpdateList.add(racksForm);
                 });
             }

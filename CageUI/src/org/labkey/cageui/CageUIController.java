@@ -55,6 +55,7 @@ import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.ModLocations;
 import org.labkey.cageui.model.Rack;
+import org.labkey.cageui.model.RackCondition;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
@@ -420,6 +421,15 @@ public class CageUIController extends SpringActionController
             String prevRoomName = json.get("prevRoomName").toString();
             boolean isDefaultSave = json.get("isDefault").toString().equals("true");
             boolean isTemplateSave = savingTemplate || isDefaultSave;
+            RackCondition prevRackCondition = null;
+
+            if (json.has("prevRackCondition") && json.get("prevRackCondition") != null) {
+                JSONObject prevRackConditionJson = json.getJSONObject("prevRackCondition");
+                prevRackCondition = new RackCondition(
+                        prevRackConditionJson.getInt("value"),
+                        prevRackConditionJson.getString("label")
+                );
+            }
 
             CageUIManager.RoomSubmissionService submissionService = new CageUIManager.RoomSubmissionService(
                 getContainer(),
@@ -427,7 +437,8 @@ public class CageUIController extends SpringActionController
                 isTemplateSave,
                 prevRoomName,
                 getRoom(),
-                getRoomDefaultMods()
+                getRoomDefaultMods(),
+                prevRackCondition
             );
             BundledForms newSubmissionForms = submissionService.submitRoom();
 

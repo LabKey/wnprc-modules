@@ -21,7 +21,7 @@ import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
 import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { CageMods, Rack, Room } from '../types/typings';
+import { CageMods, Rack, RackConditionOption, Room } from '../types/typings';
 import { buildURL } from '@labkey/components';
 import { RackSwitchOption } from '../types/homeTypes';
 
@@ -142,7 +142,7 @@ export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => 
     });
 };
 
-export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string): Promise<{
+export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string, prevRackCondition?: RackConditionOption): Promise<{
     success: boolean,
     errors: any[]
 }> {
@@ -164,7 +164,7 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault},
+            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault, prevRackCondition: prevRackCondition},
         });
     });
 }

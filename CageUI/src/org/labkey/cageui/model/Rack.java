@@ -15,6 +15,7 @@ public class Rack
     private SelectionType _selectionType;
     private List<Cage> _cages;
     private UnitType _type;
+    private int _condition;
     private int _x;
     private int _y;
     private boolean _isNew;
@@ -129,6 +130,16 @@ public class Rack
     public void setSvgId(String svgId)
     {
         _svgId = svgId;
+    }
+
+    public int getCondition()
+    {
+        return _condition;
+    }
+
+    public void setCondition(int condition)
+    {
+        _condition = condition;
     }
 
 

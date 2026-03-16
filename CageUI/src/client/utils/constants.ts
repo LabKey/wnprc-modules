@@ -191,7 +191,7 @@ export const Modifications: ModRecord = {
             value: 'black'
         }, {
             property: 'stroke-dasharray',
-            value: '5 10 5 10 5 10'
+            value: '1 1 1 1 1 1'
         }, {
             property: 'stroke-width',
             value: '4'
@@ -208,7 +208,7 @@ export const Modifications: ModRecord = {
             value: 'black'
         }, {
             property: 'stroke-dasharray',
-            value: '1 1 1 1 1 1'
+            value: '5 10 5 10 5 10'
         }, {
             property: 'stroke-width',
             value: '4'

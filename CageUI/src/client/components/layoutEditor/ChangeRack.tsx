@@ -26,6 +26,7 @@ import { CreateRackPopup } from './CreateRackPopup';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { Rack, RackChangeOption, UnitType } from '../../types/typings';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
+import { Filter } from '@labkey/api';
 
 
 interface ChangeRackProps {
@@ -66,7 +67,8 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
             const optConfig: SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'racks',
-                columns: ['rackid', 'rack_type', 'rowid', 'objectid']
+                columns: ['rackid', 'rack_type', 'rowid', 'objectid', 'room'],
+                filterArray: [Filter.create('room', null, Filter.Types.ISBLANK)]
             };
             const rackTypesConfig: SelectRowsOptions = {
                 schemaName: 'cageui',

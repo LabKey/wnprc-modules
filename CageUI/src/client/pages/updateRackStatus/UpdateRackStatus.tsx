@@ -12,7 +12,6 @@ import { RackConditionOption, RackConditions } from '../../types/typings';
 import { Filter } from '@labkey/api';
 import { RackSwitchOption } from '../../types/homeTypes';
 import Select from 'react-select';
-import { Button } from 'react-bootstrap';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
 
 

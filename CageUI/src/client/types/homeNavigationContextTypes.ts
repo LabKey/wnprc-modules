@@ -1,7 +1,6 @@
 import { SelectedPage } from './homeTypes';
 import { Cage, Rack, RackGroup, Room, RoomMods } from './typings';
 import { SetStateAction } from 'react';
-import { UserProfile } from '@labkey/components';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 export interface HomeNavigationContextType {

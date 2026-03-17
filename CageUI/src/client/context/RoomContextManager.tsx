@@ -9,7 +9,8 @@ import {
     CageModificationsType,
     CurrCageMods,
     ModLocations,
-    Rack, RackConditionOption,
+    Rack,
+    RackConditionOption,
     Room,
     RoomMods
 } from '../types/typings';

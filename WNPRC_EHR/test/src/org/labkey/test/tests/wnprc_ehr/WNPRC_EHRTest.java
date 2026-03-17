@@ -104,6 +104,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
@@ -4828,9 +4829,31 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertTrue(layoutSvg.isDisplayed());
 
         // Ensure cage and door loaded in correctly
-        cage = waitForElement(Locator.id("default-rack-1"), 10000);
+        cage = waitForElement(Locator.id("rack_default-rack-1"), 10000);
         assertTrue(cage.isDisplayed());
         door = getDriver().findElement(By.id("door-1"));
         assertTrue(door.isDisplayed());
+    }
+
+    @Test
+    public void testCageUIHomeDisplay() throws Exception {
+        testCageUIBasic();
+        beginAt(buildURL("cageui", getContainerPath(), "home"));
+
+        // Ensure room list renders available rooms correctly.
+        List<WebElement> roomList = getDriver().findElements(By.className("room-dir-room-obj"));
+        assertFalse(roomList.isEmpty());
+
+        //Since we previously saved the room as the first option we will ensure that it loads here as well.
+        roomList.get(0).click();
+        WebElement layoutSvg = waitForElement(Locator.id("layout-svg"), 20000);
+        assertTrue(layoutSvg.isDisplayed());
+
+        WebElement cage = waitForElement(Locator.name("cage-1"), 10000);
+        assertTrue(cage.isDisplayed());
+        WebElement door = getDriver().findElement(By.id("door-1"));
+        assertTrue(door.isDisplayed());
+
+
     }
 }

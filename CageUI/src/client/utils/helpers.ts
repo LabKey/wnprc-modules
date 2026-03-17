@@ -64,7 +64,6 @@ import {
     areAllRacksNonDefault,
     createEmptyUnitLoc,
     findCageInGroup,
-    isRackDefault,
     isRackEnum,
     isRoomHomogeneousDefault,
     placeAndScaleGroup,
@@ -79,10 +78,6 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
-
-export const zeroPadName = (num, places) => {
-    return (String(num).padStart(places, '0'));
-};
 
 export const generateCageId = (objectId: string): CageSvgId => {
 
@@ -156,9 +151,6 @@ export const parseRoomItemType = (input: string): string => {
     }
     return;
 };
-export const extractNumbers = (input: string): number => {
-    return parseInt(input.replace(/\D/g, ''));
-};
 
 export const getTypeClassFromElement = (element) => {
     const classes: string[] = Array.from(element.classList);
@@ -210,18 +202,6 @@ export const formatCageNum = (str: string) => {
 
 };
 
-export const rotatePoint = (x: number, y: number, angle: number): { x: number, y: number } => {
-    const radians = (angle * 90) * (Math.PI / 180);
-    const cos = Math.cos(radians);
-    const sin = Math.sin(radians);
-
-    return {
-        x: x * cos - y * sin,
-        y: x * sin + y * cos
-    };
-}
-
-
 export const getNextDefaultRackId = (groups: RackGroup[]): number => {
     // Extract & parse only "default-rack-*" IDs
     const allRackNumbers = groups
@@ -247,11 +227,6 @@ export const getNextDefaultRackId = (groups: RackGroup[]): number => {
 };
 export const convertToTitleCase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
-
-
-export const cleanString = (name: string) => {
-    return name.toLowerCase().replace(/[\s-]/g, '');
 };
 
 const generateTypeMaps = () => {
@@ -648,29 +623,6 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             cageGroup.append(() => shape.node());
         });
     }
-};
-
-export const buildNewLocs = (prevRoomData: LayoutHistoryData[]): UnitLocations => {
-    // Empty Unit locations object
-    const newUnitLocs: UnitLocations = createEmptyUnitLoc();
-
-    prevRoomData.forEach(roomItem => {
-        if (!isRackEnum(roomItem.objectType)) {
-            return;
-        } // ignore room objects here
-        let rackType: RoomItemStringType;
-        if (isRackDefault(roomItem.objectType)) {
-            rackType = roomItemToString(defaultTypeToRackType(roomItem.objectType));
-        } else {
-            rackType = roomItemToString(roomItem.objectType);
-        }
-        newUnitLocs[rackType].push({
-            cageId: generateCageId(generateUUID()),
-            cellX: roomItem.xCoord,
-            cellY: roomItem.yCoord
-        });
-    });
-    return newUnitLocs;
 };
 
 export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, UnitLocations]> => {

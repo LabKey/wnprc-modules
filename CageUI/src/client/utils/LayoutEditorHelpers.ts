@@ -143,12 +143,6 @@ export const getTranslation = (transform) => {
     return {x: 0, y: 0}; // Default to (0, 0) if no translation is found
 };
 
-export const convertCageNumToNum = (num: CageNumber) => {
-    const parts = num.split('-');
-    const cageNum = parts[1];
-    return parseInt(cageNum);
-};
-
 export const createEmptyUnitLoc = (): UnitLocations => {
     return (
         Object.fromEntries(

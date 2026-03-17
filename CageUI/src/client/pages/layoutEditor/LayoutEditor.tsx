@@ -93,7 +93,6 @@ export const LayoutEditor: FC<any> = () => {
             let newUnitLocs: UnitLocations;
 
             if (prevRoomData.cagingData.length !== 0) {
-                //newUnitLocs = buildNewLocs(prevRoomData.cagingData);
                 buildNewLocalRoom(prevRoomData).then((d) => {
                     let newLocalRoom = d[0];
                     newUnitLocs = d[1];

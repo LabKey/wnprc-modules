@@ -56,27 +56,29 @@ UNION ALL
 -- 3. Gets total number of unique animals that received treatments.
 SELECT
     'Unique Animals that Received Treatments' AS "Report Type",
-    COUNT(DISTINCT tr.id) AS "Colony Total",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Capuchin' THEN tr.id END) AS "Capuchin",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Cotton-top Tamarin' THEN tr.id END) AS "Cotton-top Tamarin",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Cynomolgus' THEN tr.id END) AS "Cynomolgus",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Galago Crassicaudatus' THEN tr.id END) AS "Galago Crassicaudatus",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Marmoset' THEN tr.id END) AS "Marmoset",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Pigtail' THEN tr.id END) AS "Pigtail",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Rhesus' THEN tr.id END) AS "Rhesus",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Stump Tailed' THEN tr.id END) AS "Stump Tailed",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Unknown' THEN tr.id END) AS "Unknown",
-    COUNT(DISTINCT CASE WHEN d.species LIKE 'Vervet' THEN tr.id END) AS "Vervet"
+    COUNT(DISTINCT dr.id) AS "Colony Total",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Capuchin' THEN dr.id END) AS "Capuchin",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Cotton-top Tamarin' THEN dr.id END) AS "Cotton-top Tamarin",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Cynomolgus' THEN dr.id END) AS "Cynomolgus",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Galago Crassicaudatus' THEN dr.id END) AS "Galago Crassicaudatus",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Marmoset' THEN dr.id END) AS "Marmoset",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Pigtail' THEN dr.id END) AS "Pigtail",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Rhesus' THEN dr.id END) AS "Rhesus",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Stump Tailed' THEN dr.id END) AS "Stump Tailed",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Unknown' THEN dr.id END) AS "Unknown",
+    COUNT(DISTINCT CASE WHEN d.species LIKE 'Vervet' THEN dr.id END) AS "Vervet"
 FROM
-    treatment_order tr
+    drug dr
         JOIN
-    study.Demographics d ON tr.id = d.id
+    study.Demographics d ON dr.id = d.id
 WHERE
-    tr.QCState.label LIKE 'Completed'
+    dr.QCState.label LIKE 'Completed'
   AND
-    tr.date >= cast(MINDATE as date)
+    dr.category.value LIKE 'Treatments'
   AND
-    tr.date <= cast (MAXDATE as date)
+    dr.date >= cast(MINDATE as date)
+  AND
+    dr.date <= cast (MAXDATE as date)
 
 UNION ALL
 
@@ -95,12 +97,14 @@ SELECT
     COUNT(CASE WHEN d.species LIKE 'Unknown' THEN 1 END) AS "Unknown",
     COUNT(CASE WHEN d.species LIKE 'Vervet' THEN 1 END) AS "Vervet"
 FROM
-    treatment_order tr
+    drug dr
         JOIN
-    study.Demographics d ON tr.id = d.id
+    study.Demographics d ON dr.id = d.id
 WHERE
-    tr.QCState.label LIKE 'Completed'
+    dr.QCState.label LIKE 'Completed'
   AND
-    tr.date >= cast(MINDATE as date)
+    dr.category.value LIKE 'Treatments'
   AND
-    tr.date <= cast (MAXDATE as date)
+    dr.date >= cast(MINDATE as date)
+  AND
+    dr.date <= cast (MAXDATE as date)

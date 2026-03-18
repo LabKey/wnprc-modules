@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -53,12 +53,6 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
     const handleChange = (newVal: RackChangeOption) => {
         onSubmit(newVal);
     };
-
-    /*useEffect(() => {
-        if(defaultOption.value.isNew){
-            handleChange(defaultOption);
-        }
-    }, [defaultOption]);*/
 
     useEffect(() => {
         if (options.length > 0) {

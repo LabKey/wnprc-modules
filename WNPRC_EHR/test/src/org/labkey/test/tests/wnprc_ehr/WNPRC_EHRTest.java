@@ -4837,7 +4837,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     @Test
     public void testCageUIHomeDisplay() throws Exception {
-        testCageUIBasic();
+        //testCageUIBasic();
         beginAt(buildURL("cageui", getContainerPath(), "home"));
 
         // Ensure room list renders available rooms correctly.

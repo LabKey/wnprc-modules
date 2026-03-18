@@ -42,7 +42,6 @@ import org.labkey.test.SortDirection;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebDriverWrapper;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.bootstrap.ModalDialog;
@@ -116,7 +115,7 @@ import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
  * NOTE: EHRApiTest may be a better location for tests designed to test server-side trigger scripts
  * or similar business logic.
  */
-@Category({CustomModules.class, EHR.class, WNPRC_EHR.class})
+@Category({EHR.class, WNPRC_EHR.class})
 public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnlyTest
 {
     public static final String PROJECT_NAME = "WNPRC";

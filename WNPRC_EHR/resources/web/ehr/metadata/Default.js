@@ -782,9 +782,6 @@ EHR.Metadata.registerMetadata('Default', {
             ,cage: {
                 allowBlank: false
             }
-            ,cageOld: {
-                allowBlank: false
-            }
             ,cond: {
                 allowBlank: false
                 ,shownInGrid: false

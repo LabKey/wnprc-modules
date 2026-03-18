@@ -344,3 +344,16 @@ select setname, container, 1 as value, 'Damaged' as title from ehr_lookups.looku
 
 insert into ehr_lookups.lookups (set_name,container,value,title)
 select setname, container, 2 as value, 'Repairing' as title from ehr_lookups.lookup_sets where setname='cageui_condition_codes';
+
+
+insert into ehr_lookups.lookups (set_name,container,value, title)
+select setname, container, 'lp' as value, 'Lab Products' as title from ehr_lookups.lookup_sets where setname='cageui_rack_manufacturers';
+
+insert into ehr_lookups.lookups (set_name,container,value, title)
+select setname, container, 'vl' as value, 'Visiline' as title from ehr_lookups.lookup_sets where setname='cageui_rack_manufacturers';
+
+insert into ehr_lookups.lookups (set_name,container,value, title)
+select setname, container, 'bz' as value, 'Britz' as title from ehr_lookups.lookup_sets where setname='cageui_rack_manufacturers';
+
+insert into ehr_lookups.lookups (set_name,container,value, title)
+select setname, container, 'hl' as value, '4 Pack Hall' as title from ehr_lookups.lookup_sets where setname='cageui_rack_manufacturers';

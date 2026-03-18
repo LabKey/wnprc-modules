@@ -5,7 +5,6 @@ import org.labkey.api.ehr.security.EHRStartedInsertPermission;
 import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.SecurableResource;
-import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.roles.AbstractRole;
 import org.labkey.api.security.roles.Role;
@@ -30,7 +29,7 @@ public class WNPRCEHRFullSubmitterRole extends AbstractRole
     }
 
     @Override
-    public boolean isApplicable(SecurityPolicy policy, SecurableResource resource)
+    public boolean isApplicable(SecurableResource resource)
     {
         if (resource instanceof Container)
             return ((Container)resource).getActiveModules().contains(ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class));

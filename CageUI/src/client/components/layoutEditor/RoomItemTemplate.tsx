@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -19,31 +19,35 @@
 import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ActionURL } from '@labkey/api';
-import { RoomItemStringType } from '../../types/typings';
 import { ReactSVG } from 'react-svg';
 
 interface RoomItemTemplateProps {
     fileName: string,
     className?: string
 }
+
 export const RoomItemTemplate: FC<RoomItemTemplateProps> = (props) => {
     const {fileName, className} = props;
     const imgRef = useRef(null);
-    const [width, setWidth] = useState<string>("100%");
-    const [height, setHeight] = useState<string>("100%");
+    const [width, setWidth] = useState<string>('100%');
+    const [height, setHeight] = useState<string>('100%');
 
     // Effect reloads the svg to change the height and width of the wrapper for the requested svg after it is injected.
     // This ensures that it doesn't have a lot of empty space in between the svgs
     useEffect(() => {
-        if (!imgRef.current) return;
+        if (!imgRef.current) {
+            return;
+        }
         // Wait briefly for the nested SVG to render (adjust delay if needed)
         const timer = setTimeout(() => {
             const nestedSvg = imgRef.current?.reactWrapper.children[0].children[0];
-            if (!nestedSvg) return;
+            if (!nestedSvg) {
+                return;
+            }
 
             // Method 1: Use explicit width/height (if nested SVG has them)
-            const tempWidth = nestedSvg.getAttribute("width");
-            const tempHeight = nestedSvg.getAttribute("height");
+            const tempWidth = nestedSvg.getAttribute('width');
+            const tempHeight = nestedSvg.getAttribute('height');
 
             if (tempWidth && tempHeight) {
                 setWidth(tempWidth);

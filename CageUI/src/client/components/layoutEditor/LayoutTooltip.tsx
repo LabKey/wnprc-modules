@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -24,18 +24,18 @@ interface LayoutTooltipProps {
     children: ReactNode;
 }
 
-export const LayoutTooltip: FC<LayoutTooltipProps> = ({ text, children }) => {
+export const LayoutTooltip: FC<LayoutTooltipProps> = ({text, children}) => {
     const [isVisible, setIsVisible] = useState(false);
 
     return (
         <div
-            className={"layout-tooltip-container"}
+            className={'layout-tooltip-container'}
             onMouseEnter={() => setIsVisible(true)}
             onMouseLeave={() => setIsVisible(false)}
         >
             {children}
             {isVisible && (
-                <div className={"layout-tooltip"}>
+                <div className={'layout-tooltip'}>
                     {text}
                 </div>
             )}

@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
  *
  */
 
-import { Cage, CageNumber, Rack, RackGroup, Room, RoomItem, RoomItemType } from './typings';
+import { Cage, CageSvgId, Rack, RackGroup, Room, RoomItem, RoomItemClass, RoomItemType } from './typings';
 import * as d3 from 'd3';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
-import {RoomItemClass} from './typings';
 
-export type GateContext = {room: string, roomId: number}; // extra context for Gate Object, describes target room and status
+export type GateContext = { room: string, roomId: number }; // extra context for Gate Object, describes target room and status
 
 export type RackActions = 'merge' | 'connect' | 'cancel';
 
@@ -36,14 +35,21 @@ export type SelectedObj = RoomItem | RackGroup | Cage;
 
 
 export interface ExtraContext {
-    cage?: {[key: string]: any};
-    rack?: {[key: string]: any};
+    cage?: { [key: string]: any };
+    rack?: { [key: string]: any };
 }
 
 export interface LayoutSaveResult {
-    status: string;
-    roomName: string // redirect room
-    reason?: any;
+    success: boolean;
+    roomName: string; // redirect room
+    reason?: string[];
+}
+
+export interface RackChangeSaveResult {
+    success: boolean;
+    roomName: string; // redirect room
+    rack: string; // rack_{objectid}
+    reason?: string[];
 }
 
 export interface OffsetProps {
@@ -57,7 +63,7 @@ export interface PendingRoomUpdate {
     updateItemType: RoomItemType;
     cellX: number;
     cellY: number;
-    itemId: string;
+    itemId: number;
 }
 
 export interface CageActionProps {
@@ -73,12 +79,12 @@ export interface LayoutDragProps {
 export interface MergeProps {
     contextMenuRef: MutableRefObject<Room>;
     targetRack: Rack;
-    targetCageNum: CageNumber;
+    targetCageId: CageSvgId;
     draggedRack: Rack;
-    dragCageNum: CageNumber;
+    dragCageId: CageSvgId;
     targetRackGroup: RackGroup;
     dragRackGroup: RackGroup;
-    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageNumber, dragCageNum: CageNumber, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
+    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageSvgId, dragCageNum: CageSvgId, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     layoutDrag: d3.DragBehavior<any, any, any>;
     cageActionProps: CageActionProps;
 }

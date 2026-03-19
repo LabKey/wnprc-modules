@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - /*
+  -  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
+  -  *
+  -  * Licensed under the Apache License, Version 2.0 (the "License");
+  -  * you may not use this file except in compliance with the License.
+  -  * You may obtain a copy of the License at
+  -  *
+  -  *     http://www.apache.org/licenses/LICENSE-2.0
+  -  *
+  -  * Unless required by applicable law or agreed to in writing, software
+  -  * distributed under the License is distributed on an "AS IS" BASIS,
+  -  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  * See the License for the specific language governing permissions and
+  -  * limitations under the License.
+  -  */
+  -->
+
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="435.94" height="758.88" viewBox="0 0 435.94 758.88">
+    <rect x="340.24" y="694.36" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <rect x="340.24" y="615.83" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="340.24" y1="567.89" x2="345.24" y2="567.89"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10; stroke-width:2px;"/>
+    <line x1="348.09" y1="567.89" x2="365.19" y2="567.89"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 0 0 5.7 5.7 2.85 5.7; stroke-miterlimit:10; stroke-width:2px;"/>
+    <line x1="368.04" y1="567.89" x2="393.68" y2="567.89"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 0 0 0 0 5.7 2.85 5.7 5.7 2.85 5.7; stroke-miterlimit:10; stroke-width:2px;"/>
+    <line x1="396.53" y1="567.89" x2="401.53" y2="567.89"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10; stroke-width:2px;"/>
+    <rect x="340.24" y="537.24" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="340.24" y1="489.36" x2="345.24" y2="489.36" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="355.5" y1="489.36" x2="391.4" y2="489.36"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 10.26 10.26; stroke-miterlimit:10;"/>
+    <line x1="396.53" y1="489.36" x2="401.53" y2="489.36" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <rect x="340.24" y="458.71" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="340.24" y1="410.82" x2="401.53" y2="410.82" style="fill:#fff; stroke:#231f20; stroke-miterlimit:10;"/>
+    <rect x="340.24" y="380.18" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="371.39" y1="214.76" x2="371.39" y2="214.26"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10; stroke-width:4px;"/>
+    <line x1="371.39" y1="213.23" x2="371.39" y2="209.66"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 0 0 1.02 1.02 1.02 1.02; stroke-miterlimit:10; stroke-width:4px;"/>
+    <line x1="371.39" y1="209.15" x2="371.39" y2="154.48"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 0 0 0 0 1.02 1.02 1.02 1.02 1.02 1.02; stroke-miterlimit:10; stroke-width:4px;"/>
+    <line x1="371.39" y1="153.97" x2="371.39" y2="153.47"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10; stroke-width:4px;"/>
+    <rect x="340.24" y="301.64" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="370.89" y1="362.93" x2="370.89" y2="301.64"
+          style="fill:#fff; stroke:#231f20; stroke-dasharray:0 0 0 0 0 0 5 10 5 10 5 10; stroke-miterlimit:10; stroke-width:4px;"/>
+    <rect x="340.24" y="153.24" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="370.89" y1="140.32" x2="370.89" y2="139.32"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10; stroke-width:4px;"/>
+    <line x1="370.89" y1="133.62" x2="370.89" y2="122.22"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 0 0 2.28 2.28 5.7 2.28; stroke-miterlimit:10; stroke-width:4px;"/>
+    <line x1="370.89" y1="121.08" x2="370.89" y2="81.17"
+          style="fill:none; stroke:#231f20; stroke-dasharray:0 0 0 0 0 0 2.28 5.7 2.28 2.28 5.7 2.28; stroke-miterlimit:10; stroke-width:4px;"/>
+    <line x1="370.89" y1="80.03" x2="370.89" y2="79.03"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10; stroke-width:4px;"/>
+    <rect x="340.24" y="79.03" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="370.89" y1="61.79" x2="370.89" y2=".5" style="fill:#fff; stroke:#231f20; stroke-miterlimit:10;"/>
+    <rect x="340.24" y=".5" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <text transform="translate(.21 31.14)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:0em;">S</tspan>
+        <tspan x="10.48" y="0">olid Divider</tspan>
+    </text>
+    <text transform="translate(1.1 109.91)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:-.02em;">P</tspan>
+        <tspan x="10.84" y="0" style="letter-spacing:0em;">r</tspan>
+        <tspan x="17.49" y="0">o</tspan>
+        <tspan x="29.02" y="0" style="letter-spacing:0em;">t</tspan>
+        <tspan x="35.85" y="0" style="letter-spacing:0em;">e</tspan>
+        <tspan x="46.37" y="0" style="letter-spacing:.01em;">c</tspan>
+        <tspan x="56.05" y="0" style="letter-spacing:0em;">t</tspan>
+        <tspan x="62.87" y="0" style="letter-spacing:0em;">ed</tspan>
+        <tspan x="89.69" y="0" style="letter-spacing:-.01em;">C</tspan>
+        <tspan x="101.64" y="0">o</tspan>
+        <tspan x="113.17" y="0" style="letter-spacing:0em;">n</tspan>
+        <tspan x="124.74" y="0">ta</tspan>
+        <tspan x="141.81" y="0" style="letter-spacing:.01em;">c</tspan>
+        <tspan x="151.49" y="0">t Divider</tspan>
+    </text>
+    <text transform="translate(1.1 183.88)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:-.02em;">V</tspan>
+        <tspan x="11.38" y="0" style="letter-spacing:0em;">isual</tspan>
+        <tspan x="55.71" y="0" style="letter-spacing:-.01em;">C</tspan>
+        <tspan x="67.66" y="0" style="letter-spacing:0em;">o</tspan>
+        <tspan x="79.19" y="0" style="letter-spacing:0em;">n</tspan>
+        <tspan x="90.76" y="0">ta</tspan>
+        <tspan x="107.83" y="0" style="letter-spacing:.01em;">c</tspan>
+        <tspan x="117.51" y="0">t Divider</tspan>
+    </text>
+    <text transform="translate(1.1 332.29)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:-.02em;">P</tspan>
+        <tspan x="10.84" y="0" style="letter-spacing:0em;">r</tspan>
+        <tspan x="17.79" y="0" style="letter-spacing:0em;">i</tspan>
+        <tspan x="22.7" y="0" style="letter-spacing:0em;">v</tspan>
+        <tspan x="32.72" y="0" style="letter-spacing:0em;">a</tspan>
+        <tspan x="42.84" y="0" style="letter-spacing:.02em;">c</tspan>
+        <tspan x="52.63" y="0">y Divider</tspan>
+    </text>
+    <text transform="translate(1.1 410.82)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:0em;">S</tspan>
+        <tspan x="10.29" y="0" style="letter-spacing:0em;">tanda</tspan>
+        <tspan x="60.98" y="0" style="letter-spacing:0em;">r</tspan>
+        <tspan x="67.64" y="0">d</tspan>
+        <tspan x="83.94" y="0" style="letter-spacing:-.02em;">F</tspan>
+        <tspan x="93.81" y="0">loor</tspan>
+    </text>
+    <text transform="translate(1.1 489.36)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:0em;">M</tspan>
+        <tspan x="17.01" y="0" style="letter-spacing:0em;">esh</tspan>
+        <tspan x="51.95" y="0" style="letter-spacing:-.02em;">F</tspan>
+        <tspan x="61.82" y="0" style="letter-spacing:0em;">loor</tspan>
+    </text>
+    <text transform="translate(1.1 568.12)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:0em;">M</tspan>
+        <tspan x="17.01" y="0" style="letter-spacing:0em;">esh</tspan>
+        <tspan x="51.95" y="0" style="letter-spacing:-.02em;">F</tspan>
+        <tspan x="61.82" y="0" style="letter-spacing:0em;">loor x2</tspan>
+    </text>
+    <text transform="translate(0 643.6)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0">E</tspan>
+        <tspan x="10.33" y="0" style="letter-spacing:.01em;">x</tspan>
+        <tspan x="20.33" y="0" style="letter-spacing:0em;">t</tspan>
+        <tspan x="27.15" y="0">ension</tspan>
+    </text>
+    <text transform="translate(0 721.91)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0">C</tspan>
+        <tspan x="12.18" y="0" style="letter-spacing:-.05em;">-</tspan>
+        <tspan x="17.58" y="0" style="letter-spacing:-.04em;">T</tspan>
+        <tspan x="27.07" y="0">unnel</tspan>
+    </text>
+    <path d="M360.92,744.07c.43-4.88,4.65-9,9.81-9.08,5.28-.08,9.85,4.1,10.14,9.44.31,5.55-4.13,10.24-9.42,10.53-5.97.33-11.04-5.05-10.53-10.89Z"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <path d="M359.92,704.14c.43-4.89,4.65-9.01,9.81-9.08,5.28-.08,9.85,4.11,10.14,9.45.31,5.56-4.13,10.25-9.42,10.54-5.97.33-11.04-5.05-10.53-10.9Z"
+          style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="370.73" y1="734.99" x2="370.46" y2="715.04" style="fill:#fff; stroke:#231f20; stroke-miterlimit:10;"/>
+    <rect x="340.24" y="646.47" width="30.64" height="30.64"
+          style="fill:#fcb017; stroke:#231f20; stroke-miterlimit:10;"/>
+    <line x1="371.39" y1="288.73" x2="371.39" y2="227.44"
+          style="fill:#fff; stroke:#231f20; stroke-dasharray:0 0 0 0 0 0 5 1 5 2 5 10; stroke-miterlimit:10; stroke-width:4px;"/>
+    <rect x="340.74" y="227.44" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
+    <text transform="translate(1.6 258.08)"
+          style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
+        <tspan x="0" y="0" style="letter-spacing:0em;">S</tspan>
+        <tspan x="10.48" y="0">ocial</tspan>
+        <tspan x="55.86" y="0" style="letter-spacing:-.03em;">P</tspan>
+        <tspan x="66.49" y="0">anel Divider</tspan>
+    </text>
+</svg>

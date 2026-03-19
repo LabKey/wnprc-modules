@@ -21,6 +21,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const host = require("./host.js");
 
 const cwd = path.resolve('./').split(path.sep);
 const lkModule = cwd[cwd.length - 1];
@@ -358,6 +359,7 @@ module.exports = {
                     }),
                     new HtmlWebpackPlugin({
                         inject: false,
+                        host: host.ip,
                         filename: '../../views/gen/' + app.name + '.html',
                         template: './ios-webpack/app.template.html',
                         minify: minifyTemplateOptions
@@ -381,6 +383,7 @@ module.exports = {
                     new HtmlWebpackPlugin({
                         inject: false,
                         mode: 'dev',
+                        host: host.ip,
                         port: watchPort,
                         name: app.name,
                         nonce: '<%=scriptNonce%>',

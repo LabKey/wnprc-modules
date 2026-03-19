@@ -22,12 +22,14 @@ const constants = require('./constants');
 const path = require('path');
 // relative to the <lk_module>/node_modules/@labkey/build/webpack dir
 const entryPoints = require('../src/client/entryPoints.js');
+const host = require("host");
+
 
 const devServer = {
     client: {
         overlay: true,
     },
-    host: '10.134.100.108',
+    host: host.ip,
     port: constants.watchPort,
     hot: true,
     headers: {

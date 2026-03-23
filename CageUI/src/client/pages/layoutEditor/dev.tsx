@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import { createRoot } from 'react-dom/client';
 import { LayoutEditor } from './LayoutEditor';
 
 const render = () => {
-    createRoot(document.getElementById("app")).render(
+    createRoot(document.getElementById('app')).render(
         <AppContainer>
-            <LayoutEditor />
+            <LayoutEditor/>
         </AppContainer>
     );
 };

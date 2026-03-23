@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ import { FC } from 'react';
 interface HeaderProps {
     name: string;
 }
+
 export const RoomHeader: FC<HeaderProps> = (props) => {
     const {name} = props;
     return (
-        <div className={"room-header"}>
-            <h1 className={"room-header-text"}>Room - </h1>
-            <h1 className={"room-header-name"}>{name}</h1>
+        <div className={'room-header'}>
+            <h1 className={'room-header-text'}>Room - </h1>
+            <h1 className={'room-header-name'}>{name}</h1>
         </div>
     );
-}
+};

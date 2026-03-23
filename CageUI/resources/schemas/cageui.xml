@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /*
-  ~  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+  ~  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
   ~  *
   ~  * Licensed under the Apache License, Version 2.0 (the "License");
   ~  * you may not use this file except in compliance with the License.
@@ -20,13 +20,10 @@
     <table tableName="layout_history" tableDbType="TABLE">
         <columns>
             <column columnName="rowid" />
-            <column columnName="room"/>
-            <column columnName="object_type"/>
-            <column columnName="rack_group"/>
-            <column columnName="rack"/>
+            <column columnName="historyid"/>
             <column columnName="cage"/>
-            <column columnName="start_date"/>
-            <column columnName="end_date"/>
+            <column columnName="object_type"/>
+            <column columnName="extra_context"/>
             <column columnName="x_coord"/>
             <column columnName="y_coord"/>
             <column columnName="container"/>
@@ -34,14 +31,31 @@
             <column columnName="created"/>
             <column columnName="modified"/>
             <column columnName="modifiedby"/>
-            <column columnName="extra_context"/>
         </columns>
     </table>
     <table tableName="racks" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
+            <column columnName="objectid"/>
+            <column columnName="room"/>
             <column columnName="rackid"/>
             <column columnName="rack_type"/>
+            <column columnName="condition"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="rack_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="objectid"/>
+            <column columnName="room"/>
+            <column columnName="condition"/>
+            <column columnName="notes"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>
@@ -52,14 +66,131 @@
     <table tableName="rack_types" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
-            <column columnName="name"/>
             <column columnName="type"/>
             <column columnName="manufacturer"/>
+            <column columnName="stationary"/>
             <column columnName="length"/>
             <column columnName="width"/>
             <column columnName="height"/>
-            <column columnName="supportsTunnel"/>
+            <column columnName="size"/>
             <column columnName="description"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="cage_modifications_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="cage"/>
+            <column columnName="modid"/>
+            <column columnName="parent_modid"/>
+            <column columnName="modification"/>
+            <column columnName="subid"/>
+            <column columnName="location"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="cage_modifications" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="value"/>
+            <column columnName="title"/>
+            <column columnName="direction"/>
+            <column columnName="type"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="cages" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="objectid"/>
+            <column columnName="positionid"/>
+            <column columnName="rack"/>
+            <column columnName="cage_number"/>
+            <column columnName="length"/>
+            <column columnName="width"/>
+            <column columnName="height"/>
+            <column columnName="sqft"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="room_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="scale"/>
+            <column columnName="border_width"/>
+            <column columnName="border_height"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="all_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="room"/>
+            <column columnName="valid"/>
+            <column columnName="history_type"/>
+            <column columnName="start_date"/>
+            <column columnName="end_date"/>
+            <column columnName="historyid"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="template_layout_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="rack_group"/>
+            <column columnName="rack"/>
+            <column columnName="cage"/>
+            <column columnName="extra_context"/>
+            <column columnName="object_type"/>
+            <column columnName="group_rotation"/>
+            <column columnName="x_coord"/>
+            <column columnName="y_coord"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="cage_history" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="historyid"/>
+            <column columnName="rack_group"/>
+            <column columnName="cage"/>
+            <column columnName="cage_number"/>
+            <column columnName="group_rotation"/>
+            <column columnName="length"/>
+            <column columnName="width"/>
+            <column columnName="height"/>
+            <column columnName="sqft"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>

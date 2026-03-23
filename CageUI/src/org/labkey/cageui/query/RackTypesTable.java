@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ public class RackTypesTable extends SimpleUserSchema.SimpleTable<CageUIUserSchem
             boolean hasPermission = super.hasPermission(user, perm);
             boolean isEditPerm = perm == InsertPermission.class || perm == UpdatePermission.class || perm == DeletePermission.class;
 
-            if (isEditPerm){
+            if (isEditPerm)
+            {
                 return super.hasPermission(user, CageUITemplateCreatorPermission.class); // Besides normal folder permissions check for CageUILayoutEditorPermission
             }
 
@@ -80,7 +81,8 @@ public class RackTypesTable extends SimpleUserSchema.SimpleTable<CageUIUserSchem
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUITemplateCreatorPermission.class)){
+            if (hasPermission(user, CageUITemplateCreatorPermission.class))
+            {
                 result = super._insertRowsUsingDIB(user, container, rows, getDataIteratorContext(errors, InsertOption.INSERT, configParameters), extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -93,7 +95,8 @@ public class RackTypesTable extends SimpleUserSchema.SimpleTable<CageUIUserSchem
                 throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUITemplateCreatorPermission.class)){
+            if (hasPermission(user, CageUITemplateCreatorPermission.class))
+            {
                 result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -104,7 +107,8 @@ public class RackTypesTable extends SimpleUserSchema.SimpleTable<CageUIUserSchem
         public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
                 throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            if(hasPermission(user, CageUITemplateCreatorPermission.class)){
+            if (hasPermission(user, CageUITemplateCreatorPermission.class))
+            {
                 return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }
             return null;

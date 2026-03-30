@@ -72,15 +72,11 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
         }
 
         if (templateName.length > 0) {
-            //return if new name doesn't have word template in it
-            if (!templateName.includes('template')) {
-                onCancel();
-                return;
-            }
+            const newTemplateName = "template-" + templateName;
             // if template, save old template name for later
             setRoom(prevState => ({
                 ...prevState,
-                name: templateName
+                name: newTemplateName
             }));
             templateRename(selectedRoom);
         } else {
@@ -109,7 +105,7 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
                             </label>
                             <input
                                 value={templateName}
-                                onChange={(e) => setTemplateName("template-" + e.target.value)}
+                                onChange={(e) => setTemplateName(e.target.value)}
                             />
                         </div>
                 }

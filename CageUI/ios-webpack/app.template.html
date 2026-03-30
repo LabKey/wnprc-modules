@@ -1,6 +1,6 @@
 <!--
   ~ /*
-  ~  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+  ~  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
   ~  *
   ~  * Licensed under the Apache License, Version 2.0 (the "License");
   ~  * you may not use this file except in compliance with the License.
@@ -16,19 +16,7 @@
   ~  */
   -->
 
-<customView xmlns="http://labkey.org/data/xml/queryCustomView">
-    <columns>
-        <column name="rowid"/>
-        <column name="location"/>
-        <column name="room"/>
-        <column name="cage" />
-        <column name="cage_type"/>
-        <column name="divider"/>
-        <column name="length"/>
-        <column name="width"/>
-        <column name="height"/>
-        <column name="hasTunnel"/>
-        <column name="joinToCage"/>
-        <column name="status"/>
-    </columns>
-</customView>
+<div id="app"></div>
+<% if (htmlWebpackPlugin.options.mode === 'dev') { %>
+<script src="http://<%= htmlWebpackPlugin.options.host %>:<%= htmlWebpackPlugin.options.port %>/<%= htmlWebpackPlugin.options.name %>.js" nonce="<%= htmlWebpackPlugin.options.nonce %>"></script>
+<% } %>

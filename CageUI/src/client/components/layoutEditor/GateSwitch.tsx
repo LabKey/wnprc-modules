@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 import * as React from 'react';
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import * as d3 from 'd3';
 import { Room, RoomObject, RoomObjectTypes } from '../../types/typings';
 import { parseRoomItemNum } from '../../utils/helpers';
@@ -31,15 +31,14 @@ interface GateSwitchProps {
 
 export const GateSwitch: FC<GateSwitchProps> = (props) => {
     const {layoutSvg, selectedObj, setLocalRoom, closeMenu} = props;
-    console.log("Gate: ", selectedObj);
 
     // For each open or close, remove gate svg template of the opposite and replace with new version. Also switch id name version keeping id number
     const handleClick = () => {
         const gateSvg = layoutSvg.select(`#${selectedObj.itemId}`);
         let newGateIdPrefix;
-        if(selectedObj.type === RoomObjectTypes.GateOpen){
+        if (selectedObj.type === RoomObjectTypes.GateOpen) {
             newGateIdPrefix = 'gateClosed';
-        }else{
+        } else {
             newGateIdPrefix = 'gateOpen';
         }
 
@@ -52,22 +51,23 @@ export const GateSwitch: FC<GateSwitchProps> = (props) => {
             return {
                 ...prevState,
                 objects: prevState.objects.map((obj) => {
-                    if(obj.itemId === selectedObj.itemId){
+                    if (obj.itemId === selectedObj.itemId) {
                         return {
                             ...obj,
                             itemId: `${newGateIdPrefix}-${parseRoomItemNum((selectedObj as RoomObject).itemId)}`,
                             type: selectedObj.type === RoomObjectTypes.GateOpen ? RoomObjectTypes.GateClosed : RoomObjectTypes.GateOpen
-                        }
+                        };
                     }
                     return obj;
                 })
-            }
-        })
+            };
+        });
         closeMenu();
-    }
+    };
     return (
-        <div className={"menu-item"}>
-            <button className={"menu-item-button"} onClick={handleClick}>{selectedObj.type === RoomObjectTypes.GateOpen ? 'Close' : 'Open'}</button>
+        <div className={'menu-item'}>
+            <button className={'menu-item-button'}
+                    onClick={handleClick}>{selectedObj.type === RoomObjectTypes.GateOpen ? 'Close' : 'Open'}</button>
         </div>
     );
-}
+};

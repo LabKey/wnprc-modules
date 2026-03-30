@@ -1,6 +1,6 @@
 <!--
   ~ /*
-  ~  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+  ~  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
   ~  *
   ~  * Licensed under the Apache License, Version 2.0 (the "License");
   ~  * you may not use this file except in compliance with the License.
@@ -25,11 +25,13 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="room">
+                    <column columnName="historyid"/>
+                    <column columnName="cage">
                         <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>rooms</fkTable>
-                            <fkColumnName>room</fkColumnName>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cages</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="extra_context"/>
@@ -42,20 +44,6 @@
                             <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="rack_group"/>
-                    <column columnName="rack">
-                        <fk>
-                            <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>racks</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>rackid</fkDisplayColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="cage">
-                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
-                    </column>
-                    <column columnName="start_date"/>
-                    <column columnName="end_date"/>
                     <column columnName="x_coord"/>
                     <column columnName="y_coord"/>
                     <column columnName="container"/>

@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  */
 
 package org.labkey.cageui.security.roles;
+
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.roles.AbstractRole;
 import org.labkey.cageui.CageUIModule;
@@ -26,7 +27,8 @@ import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission
 public class CageUIModificationEditorRole extends AbstractRole
 {
 
-    public CageUIModificationEditorRole(){
+    public CageUIModificationEditorRole()
+    {
         this("Cage UI Cage Modification Editor",
                 "Cage modification editor role for Cage UI",
                 CageUIAnimalEditorPermission.class,
@@ -34,7 +36,8 @@ public class CageUIModificationEditorRole extends AbstractRole
         );
     }
 
-    protected CageUIModificationEditorRole(String name, String description, Class<? extends Permission>... perms) {
+    protected CageUIModificationEditorRole(String name, String description, Class<? extends Permission>... perms)
+    {
         super(name, description, CageUIModule.class, perms);
     }
 

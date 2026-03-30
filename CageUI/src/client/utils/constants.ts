@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -16,195 +16,271 @@
  *
  */
 
-import { Modification, ModLocations, ModRecord, ModTypes } from '../types/typings';
+import { GroupRotation, ModLocations, ModRecord, ModSvgLocId, ModTypes } from '../types/typings';
 
 export const CELL_SIZE = 30; // number of pixels of a cell for length/width
 export const SVG_WIDTH = 810; // width of the layout svg
 export const SVG_HEIGHT = 1290; // height of the layout svg
 
+// These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
+export const roomSizeOptions = [
+    {
+        id: 1,
+        scale: 1.0,
+        title: 'Small',
+        description: 'Small room size fitting up to 10x5 cages'
+    },
+    {
+        id: 2,
+        scale: 0.8,
+        title: 'Medium',
+        description: 'Medium room size fitting up to 12x6 cages'
+    },
+    {
+        id: 3,
+        scale: 0.4,
+        title: 'Large',
+        description: 'Large room size fitting up to 17x8 cages'
+    }
+];
+
+const LocationWithRotationMap = {
+    [ModLocations.Bottom]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Bottom],
+        [GroupRotation.Quarter]: [ModSvgLocId.Left],
+        [GroupRotation.Half]: [ModSvgLocId.Top],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Right],
+    },
+    [ModLocations.Top]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Top],
+        [GroupRotation.Quarter]: [ModSvgLocId.Right],
+        [GroupRotation.Half]: [ModSvgLocId.Bottom],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Left],
+    },
+    [ModLocations.Left]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Left],
+        [GroupRotation.Quarter]: [ModSvgLocId.Top],
+        [GroupRotation.Half]: [ModSvgLocId.Right],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Bottom],
+    },
+    [ModLocations.Right]: {
+        [GroupRotation.Origin]: [ModSvgLocId.Right],
+        [GroupRotation.Quarter]: [ModSvgLocId.Bottom],
+        [GroupRotation.Half]: [ModSvgLocId.Left],
+        [GroupRotation.ThreeQuarter]: [ModSvgLocId.Top],
+    },
+}
+
 //TODO finish styles
 export const Modifications: ModRecord = {
     [ModTypes.StandardFloor]: {
-        name: "Standard Floor",
+        name: 'Standard Floor',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [{
-            property: "stroke",
-            value: "black"
+            property: 'stroke',
+            value: 'black'
         }]
     },
     [ModTypes.MeshFloor]: {
-        name: "Mesh Floor",
+        name: 'Mesh Floor',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [
             {
-                property: "stroke",
-                value: "black"
+                property: 'stroke',
+                value: 'black'
             },
             {
-                property: "stroke-dasharray",
-                value: "10"
+                property: 'stroke-dasharray',
+                value: '10'
             }
         ]
     },
     [ModTypes.MeshFloorX2]: {
-        name: "Mesh Floor x2",
+        name: 'Mesh Floor x2',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [
             {
-                property: "stroke",
-                value: "black"
+                property: 'stroke',
+                value: 'black'
             },
             {
-                property: "stroke-dasharray",
-                value: "10 5 10"
-            },{
-                property: "stroke-width",
-                value: "2"
+                property: 'stroke-dasharray',
+                value: '10 5 10'
+            }, {
+                property: 'stroke-width',
+                value: '2'
             }
         ]
     },
     [ModTypes.NoFloor]: {
-        name: "No Floor",
+        name: 'No Floor',
         svgIds: {
-            [ModLocations.Bottom]: ['floor'],
-            [ModLocations.Top]: ['ceiling']
+            [ModLocations.Bottom]: LocationWithRotationMap[ModLocations.Bottom],
+            [ModLocations.Top]: LocationWithRotationMap[ModLocations.Top],
         },
         styles: [
             {
-                property: "stroke",
-                value: "none"
+                property: 'stroke',
+                value: 'none'
             }
-        ]
+        ],
+
     },
     [ModTypes.SolidDivider]: {
-        name: "Solid Divider",
+        name: 'Solid Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
-            property: "stroke",
-            value: "black"
+            property: 'stroke',
+            value: 'black'
         }]
     },
     [ModTypes.PCDivider]: {
-        name: "Protected Contact Divider",
+        name: 'Protected Contact Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "2 5 2"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '2 5 2'
+        }, {
+            property: 'stroke-width',
+            value: '4'
+        }]
+    },
+    [ModTypes.SPDivider]: {
+        name: 'Social Panel Divider',
+        svgIds: {
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
+        },
+        styles: [{
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '2 5 2 5'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.VCDivider]: {
-        name: "Visual Contact Divider",
+        name: 'Visual Contact Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "5 10 5 10 5 10"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '1 1 1 1 1 1'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.PrivacyDivider]: {
-        name: "Privacy Divider",
+        name: 'Privacy Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-dasharray",
-            value: "1 1 1 1 1 1"
-        },{
-            property: "stroke-width",
-            value: "4"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-dasharray',
+            value: '5 10 5 10 5 10'
+        }, {
+            property: 'stroke-width',
+            value: '4'
         }]
     },
     [ModTypes.NoDivider]: {
-        name: "No Divider",
+        name: 'No Divider',
         svgIds: {
-            [ModLocations.Left]: ['left'],
-            [ModLocations.Right]: ['right']
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
         },
         styles: [{
-            property: "stroke",
-            value: "none"
+            property: 'stroke',
+            value: 'none'
         }]
     },
     [ModTypes.CTunnel]: {
-        name: "C-Tunnel",
+        name: 'C-Tunnel',
         svgIds: {
-            [ModLocations.Top]: ['cTunnel-circle', 'cTunnel-top'],
-            [ModLocations.Bottom]: ['cTunnel-circle', 'cTunnel-bottom'],
-            [ModLocations.Left]: ['cTunnel-circle', 'cTunnel-left'],
-            [ModLocations.Right]: ['cTunnel-circle', 'cTunnel-right'],
+            [ModLocations.Top]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+            },
+            [ModLocations.Bottom]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+            },
+            [ModLocations.Left]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+            },
+            [ModLocations.Right]: {
+                [GroupRotation.Origin]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelRight],
+                [GroupRotation.Quarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelBottom],
+                [GroupRotation.Half]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelLeft],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.CTunnelCircle, ModSvgLocId.CTunnelTop],
+            },
         },
         styles: [{
-            property: "stroke",
-            value: "black",
-        },{
-            property: "stroke-width",
-            value: "1px",
+            property: 'stroke',
+            value: 'black',
+        }, {
+            property: 'stroke-width',
+            value: '1px',
         }
         ]
     },
     [ModTypes.Extension]: {
-        name: "Extension",
+        name: 'Extension',
         svgIds: {
-            [ModLocations.Direct]: ['extension'],
+            [ModLocations.Direct]: {
+                [GroupRotation.Origin]: [ModSvgLocId.Extension],
+                [GroupRotation.Quarter]: [ModSvgLocId.Extension],
+                [GroupRotation.Half]: [ModSvgLocId.Extension],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.Extension]
+            },
         },
         styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-width",
-            value: "1px"
-        },{
-            property: "fill",
-            value: "#FCB017"
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-width',
+            value: '1px'
+        }, {
+            property: 'fill',
+            value: '#FCB017'
         }]
-    },
-    [ModTypes.PlayCage]: {
-        name: "Play Cage",
-        svgIds: {
-            [ModLocations.Direct]: ['playCage'],
-        },
-        styles: [{
-            property: "stroke",
-            value: "black"
-        },{
-            property: "stroke-width",
-            value: "1px"
-        },{
-            property: "fill",
-            value: "#6D88C4"
-        }]
-    },
-}
+    }
+};

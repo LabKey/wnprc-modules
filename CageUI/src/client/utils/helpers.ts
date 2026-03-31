@@ -758,13 +758,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             cageNumType = roomItemToString(defaultTypeToRackType(rackItem.objectType as DefaultRackTypes));
         }
 
-        let cageMods: CageModificationsType = {
-            [ModLocations.Top]: [],
-            [ModLocations.Bottom]: [],
-            [ModLocations.Left]: [],
-            [ModLocations.Right]: [],
-            [ModLocations.Direct]: []
-        };
+        let cageMods: CageModificationsType;
         if (rackItem.extraContext) {
             extraContext = JSON.parse(rackItem.extraContext);
         }
@@ -772,6 +766,13 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
         // This is where mods are loaded into state for the room
         if (loadMods && !rack.type.isDefault) {
+            cageMods = {
+                [ModLocations.Top]: [],
+                [ModLocations.Bottom]: [],
+                [ModLocations.Left]: [],
+                [ModLocations.Right]: [],
+                [ModLocations.Direct]: []
+            };
 
             const modReturnData = await cageModLookup([], []);
             const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));

@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -19,28 +19,27 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
 import {
-    Cage, CageNumber, DefaultRackId,
-    LayoutHistoryData, LocationCoords,
+    Cage,
+    CageSvgId,
+    FullObjectHistoryData,
+    LocationCoords,
     Rack,
+    RackChangeOption,
     RackGroup,
-    RackStringType, RealRackId,
+    RackStringType,
     Room,
     RoomItemClass,
     RoomItemType,
+    RoomObject,
     UnitLocations
 } from './typings';
-import {
-    DeleteActions,
-    LayoutSaveResult,
-    RackActions,
-    SelectedObj
-} from './layoutEditorTypes';
+import { DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from './layoutEditorTypes';
 import * as d3 from 'd3';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 export interface LayoutContextProps {
     children: ReactNode;
-    prevRoom: {room: Room, locs: UnitLocations, data: LayoutHistoryData[], isTemplate: boolean};
+    prevRoom: { room: Room, locs: UnitLocations, data: FullObjectHistoryData[], isTemplate: boolean };
     user: GetUserPermissionsResponse;
 }
 
@@ -53,11 +52,11 @@ export interface LayoutContextType {
     unitLocs: UnitLocations;
     localRoom: Room;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
-    addRoomItem: (itemType: RoomItemType, itemId: string, x: number, y: number, scale: number) => Promise<boolean>;
+    addRoomItem: (itemType: RoomItemType, itemId: number, x: number, y: number, scale: number) => Promise<Rack | RoomObject | null>;
     changeCageNum: (numBefore: number, numAfter: number) => void;
-    cageNumChange: {before: number, after: number};
+    cageNumChange: { before: number, after: number };
     moveObjLocation: (itemId: string, type: RoomItemClass, x: number, y: number, k: number) => void;
-    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageNum: CageNumber, dragCageNum: CageNumber, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
+    doRackAction: (action: RackActions, targetId: string, dragId: string, targetCageId: CageSvgId, dragCageId: CageSvgId, newGroup: d3.Selection<SVGGElement, {}, HTMLElement, any>) => void;
     getNextCageNum: (rackType: RackStringType) => number;
     selectedObj: SelectedObj;
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>;
@@ -65,7 +64,7 @@ export interface LayoutContextType {
     delObject: (objId: string) => void;
     scale: number;
     setScale: React.Dispatch<React.SetStateAction<number>>;
-    changeRack: (newType: {value: string, label: string}) => Promise<string>;
+    changeRack: (newType: RackChangeOption) => Promise<string>;
     clearGrid: () => void;
     user: GetUserPermissionsResponse;
     getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];

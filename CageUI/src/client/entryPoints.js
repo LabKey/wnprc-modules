@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -18,13 +18,28 @@
 
 module.exports = {
     apps: [
-    {
-        name: "editLayout",
-        title: "Room Layout Editor",
-        permissionClasses: [
-            'org.labkey.api.security.permissions.ReadPermission',
-            'org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission',
-        ],
-        path: './src/client/pages/layoutEditor'
-    }]
+        {
+            name: "home",
+            title: "Cage Display",
+            permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
+            path: './src/client/pages/home'
+        },
+        {
+            name: "editLayout",
+            title: "Room Layout Editor",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+                'org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission',
+            ],
+            path: './src/client/pages/layoutEditor'
+        },
+        {
+            name: "updateRackStatus",
+            title: "Update Rack Status",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+            ],
+            path: './src/client/pages/updateRackStatus'
+        }
+    ]
 };

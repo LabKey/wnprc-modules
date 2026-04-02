@@ -526,9 +526,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             shape.classed('draggable', false);
             shape.style('pointer-events', 'none');
 
-            const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
             // in order to set the event pass in the context menu ref and styles to show/hide it
-            setupEditCageEvent(cageGroupContext, setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             if (mode === 'view') {
@@ -536,6 +534,7 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             }
 
             cageGroup.append(() => shape.node());
+            setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
 
         });
 
@@ -572,12 +571,15 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         });
 
         (unitsToRender as Room).objects.forEach(async (roomObj) => {
-            const roomObjGroup = layoutSvg.append('g')
-                .data([{x: roomObj.x, y: roomObj.y}])
-                .attr('id', roomObj.itemId)
+            const wrapperGroup = layoutSvg.append('g')
+                .attr('id', roomObj.itemId + '-wrapper')
                 .attr('class', 'draggable room-obj')
                 .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === 'edit' ? roomObj.scale : 1})`)
                 .style('pointer-events', 'bounding-box');
+
+            const roomObjGroup = wrapperGroup.append('g')
+                .attr('id', roomObj.itemId)
+                .attr('transform', `translate(0,0)`)
 
             let objSvg: SVGElement;
 
@@ -596,9 +598,9 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
 
             roomObjGroup.append(() => shape.node());
-            placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
-            setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, contextMenuRef, setCtxMenuStyle);
-            roomObjGroup.call(closeMenuThenDrag);
+            placeAndScaleGroup(wrapperGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
+            setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            wrapperGroup.call(closeMenuThenDrag);
         });
     } else if (renderType === 'group') { // we are rendering a single rack group
         createGroup(unitsToRender as RackGroup);

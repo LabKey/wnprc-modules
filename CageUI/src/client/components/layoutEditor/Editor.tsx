@@ -190,11 +190,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         if (!isRackEnum(updateItemType)) { // adding dragged room object
             group = layoutSvg.append('g')
-                .data([{x: cellX, y: cellY}])
                 .attr('class', 'draggable room-obj')
-                .attr('id', `${roomItemToString(updateItemType)}-${itemId}`)
+                .attr('id', `${roomItemToString(updateItemType)}-${itemId}-wrapper`)
                 .style('pointer-events', 'bounding-box');
-            group.append(() => draggedShape.node());
+
+            group.append('g')
+                .attr('id', `${roomItemToString(updateItemType)}-${itemId}`)
+                .attr('transform', `translate(0,0)`)
+                .append(() => draggedShape.node());
 
         } else { // adding dragged caging unit
             const newRack: Rack = res as Rack;
@@ -220,19 +223,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         group.call(closeMenuThenDrag);
 
-        // attach click listener for context menu
-        if (isRackEnum(updateItemType)) {
-            group.selectAll('text').each(function () {
-                const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
-                textElement.setAttribute('contentEditable', 'true');
-                (textElement.children[0] as SVGTSpanElement).style.cursor = 'pointer';
-                (textElement.children[0] as SVGTSpanElement).style.pointerEvents = 'auto';
-                const cageGroupElement = textElement.closest(`[id="${((res as Rack).cages[0] as Cage).svgId}"]`) as SVGGElement;
-                setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef, 'edit', setCtxMenuStyle);
-            });
-        } else {
-            setupEditCageEvent(group.node(), setSelectedObj, contextMenuRef, 'edit', setCtxMenuStyle);
-        }
+        setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef, setCtxMenuStyle);
 
         dragLockRef.current = false;
     };

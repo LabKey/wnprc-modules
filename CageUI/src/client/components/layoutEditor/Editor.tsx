@@ -1110,9 +1110,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                     element:
                                         <GateSwitch
                                             key={`gate-switch-${(selectedObj as RoomObject).itemId}`}
-                                            layoutSvg={layoutSvg}
                                             selectedObj={selectedObj as RoomObject}
                                             setLocalRoom={setLocalRoom}
+                                            setReloadRoom={setReloadRoom}
                                             closeMenu={() => setShowObjectContextMenu(false)}
                                         />,
                                     types: [RoomObjectTypes.GateClosed, RoomObjectTypes.GateOpen],

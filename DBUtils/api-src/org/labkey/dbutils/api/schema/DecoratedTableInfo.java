@@ -391,13 +391,13 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public void fireBatchTrigger(Container c, User u,TriggerType type, boolean before, BatchValidationException errors, Map<String, Object> extraContext) throws BatchValidationException {
-        _tableInfo.fireBatchTrigger(c, u, type, before, errors, extraContext);
+    public void fireBatchTrigger(Container c, User u, TriggerType type, @Nullable QueryUpdateService.InsertOption insertOption, boolean before, BatchValidationException errors, Map<String, Object> extraContext) throws BatchValidationException {
+        _tableInfo.fireBatchTrigger(c, u, type, insertOption, before, errors, extraContext);
     }
 
     @Override
-    public void fireRowTrigger(Container c, User u, TriggerType type, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext, @Nullable Map<String, Object> existingRecord, boolean manageColumns) throws ValidationException {
-        _tableInfo.fireRowTrigger(c, u, type, before, rowNumber, newRow, oldRow, extraContext, existingRecord, manageColumns);
+    public void fireRowTrigger(Container c, User u, TriggerType type, @Nullable QueryUpdateService.InsertOption insertOption, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext, @Nullable Map<String, Object> existingRecord, boolean manageColumns) throws ValidationException {
+        _tableInfo.fireRowTrigger(c, u, type, insertOption, before, rowNumber, newRow, oldRow, extraContext, existingRecord, manageColumns);
     }
 
     @Override

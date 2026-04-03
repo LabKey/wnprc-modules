@@ -43,7 +43,7 @@ import {
 } from '../types/typings';
 import { CellKey, DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from '../types/layoutEditorTypes';
 import {
-    createEmptyUnitLoc,
+    createEmptyUnitLoc, extractRoomObjId,
     findCageInGroup,
     findRackInGroup,
     findSelectObjRack,
@@ -676,7 +676,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 updatedLocalRoom = {
                     ...prevRoom,
                     objects: prevRoom.objects.map(item =>
-                        item.itemId === itemId
+                        item.itemId === extractRoomObjId(itemId)
                             ? {...item, x, y, scale: k}
                             : item
                     )

@@ -783,14 +783,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
 
     const handleDelObject = () => {
-        const selectionToDel = layoutSvg.select(`#${(selectedObj as RoomObject).itemId}`);
+        const objId = (selectedObj as RoomObject).itemId;
+        const selectionToDel = layoutSvg.select(`#${objId}-wrapper`);
         let selectionName = selectionToDel.select('.injected-svg').attr('id'); // name from id in file/injected svg
         // parses the first word if id contains multiple words.
         selectionName = selectionName.indexOf('_') !== -1 ? selectionName.slice(0, selectionName.indexOf('_')) : selectionName;
         showLayoutEditorConfirmation(`Are you sure you want to delete ${selectionName}`).then((r) => {
             if (r) {
                 selectionToDel.remove();
-                delObject(selectionToDel.attr('id'));
+                delObject(objId);
             }
         });
 

@@ -89,6 +89,11 @@ export const isTouchEvent = (event)=> {
     return event.type.startsWith('touch');
 }
 
+// removes the wrapper for the id portion of room objects to properly move the object.
+export const extractRoomObjId = (id: string) => {
+    return id.replace(/-wrapper$/, '');
+}
+
 export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{
     fulfilled: FullObjectHistoryData[];
     rejected: PromiseRejectedResult[]

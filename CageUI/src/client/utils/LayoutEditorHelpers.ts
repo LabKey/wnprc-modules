@@ -33,7 +33,6 @@ import {
     CageDirection,
     CageHistoryData,
     CageMods,
-    CageNumber,
     CageSvgId,
     DefaultRackTypes,
     FullObjectHistoryData,
@@ -50,6 +49,7 @@ import {
     RoomItemClass,
     RoomItemStringType,
     RoomItemType,
+    RoomObjectTypes,
     UnitLocations
 } from '../types/typings';
 import {
@@ -92,6 +92,19 @@ export const isTouchEvent = (event)=> {
 // removes the wrapper for the id portion of room objects to properly move the object.
 export const extractRoomObjId = (id: string) => {
     return id.replace(/-wrapper$/, '');
+}
+
+// determines if the user has access to manipulating room layout objects
+export const isDraggable = (user, itemType: RoomItemType) => {
+    if(isRoomCreator(user) || isTemplateCreator(user)) {
+        return true;
+    }
+    if(isRoomModifier(user)){
+        if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+    }
+    return false;
 }
 
 export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{

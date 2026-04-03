@@ -57,7 +57,7 @@ import {
     findCageInGroup,
     findRackInGroup,
     getLayoutOffset,
-    getTargetRect,
+    getTargetRect, isDraggable,
     isRackEnum,
     isRoomCreator,
     isTemplateCreator,
@@ -190,7 +190,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         if (!isRackEnum(updateItemType)) { // adding dragged room object
             group = layoutSvg.append('g')
-                .attr('class', 'draggable room-obj')
+                .attr('class', `draggable room-obj type-${roomItemToString(updateItemType)}`)
                 .attr('id', `${roomItemToString(updateItemType)}-${itemId}-wrapper`)
                 .style('pointer-events', 'bounding-box');
 
@@ -221,7 +221,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         placeAndScaleGroup(group, cellX, cellY, transform);
 
 
-        group.call(closeMenuThenDrag);
+        if(isDraggable(user, updateItemType)){
+            group.call(closeMenuThenDrag);
+
+        }
 
         setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef, setCtxMenuStyle);
 
@@ -677,7 +680,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
         });
         // loads grid with new room
-        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
+        addPrevRoomSvgs(user, 'edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
         setReloadRoom(null);
     }, [reloadRoom]);
 

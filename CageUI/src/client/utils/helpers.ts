@@ -63,7 +63,7 @@ import {
     addModEntries,
     areAllRacksNonDefault,
     createEmptyUnitLoc,
-    findCageInGroup,
+    findCageInGroup, isDraggable,
     isRackEnum,
     isRoomHomogeneousDefault,
     placeAndScaleGroup,
@@ -78,6 +78,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 export const generateCageId = (objectId: string): CageSvgId => {
 
@@ -447,7 +448,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
-export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
 
     if ((unitsToRender as Room)?.rackGroups) {
@@ -560,7 +561,9 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         let groupY = renderType === 'room' ? group.y : group.racks[0].y;
         placeAndScaleGroup(parentGroup, groupX, groupY, zoomTransform(layoutSvg.node()));
         if (mode === 'edit') {
-            parentGroup.call(closeMenuThenDrag);
+            if(isDraggable(user, group.racks[0].type.type)){
+                parentGroup.call(closeMenuThenDrag);
+            }
         }
     };
 
@@ -600,7 +603,9 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             roomObjGroup.append(() => shape.node());
             placeAndScaleGroup(wrapperGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
             setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
-            wrapperGroup.call(closeMenuThenDrag);
+            if(isDraggable(user, roomObj.type)){
+                wrapperGroup.call(closeMenuThenDrag);
+            }
         });
     } else if (renderType === 'group') { // we are rendering a single rack group
         createGroup(unitsToRender as RackGroup);

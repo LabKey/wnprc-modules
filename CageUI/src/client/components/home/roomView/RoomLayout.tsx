@@ -39,7 +39,7 @@ interface RoomLayoutProps {
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {submitLayoutMods} = useRoomContext();
-    const {selectedRoom, selectedRoomMods, navigateTo} = useHomeNavigationContext();
+    const {selectedRoom, selectedRoomMods, navigateTo, userProfile} = useHomeNavigationContext();
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
@@ -60,7 +60,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         d3.select('#layout-svg').selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select('#layout-svg') as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedRoom;
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg,undefined, selectedRoom.mods, setSelectedContextObj, contextRef);
+        addPrevRoomSvgs(userProfile,'view', selectedRoom, layoutSvg,undefined, selectedRoom.mods, setSelectedContextObj, contextRef);
     }, [selectedRoom.name, showCageContextMenu]);
 
 

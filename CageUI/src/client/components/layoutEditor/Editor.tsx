@@ -46,7 +46,7 @@ import {
 } from '../../types/layoutEditorTypes';
 import { LayoutTooltip } from './LayoutTooltip';
 import {
-    areCagesInSameRack,
+    areCagesInSameRack, canOpenContextMenu, canPlaceObject,
     checkAdjacent,
     createDragInLayout,
     createEmptyUnitLoc,
@@ -117,6 +117,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     const [templateOptions, setTemplateOptions] = useState<boolean>(false);
     const [templateRename, setTemplateRename] = useState<string>(null);
     const [startSaving, setStartSaving] = useState<boolean>(false);
+    const [showPermissionError, setShowPermissionError] = useState<boolean>(false);
 
     // number of cells in grid width/height, based off scale
     const gridWidth = Math.ceil(SVG_WIDTH / roomSize.scale / CELL_SIZE);
@@ -220,13 +221,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
         placeAndScaleGroup(group, cellX, cellY, transform);
 
-
+        // attach drag if user has permissions
         if(isDraggable(user, updateItemType)){
             group.call(closeMenuThenDrag);
 
         }
-
-        setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef, setCtxMenuStyle);
+        // attach context menu if user has permissions
+        if(canOpenContextMenu(user, updateItemType)){
+            setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef, setCtxMenuStyle);
+        }
 
         dragLockRef.current = false;
     };
@@ -260,6 +263,16 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             shape = (event.sourceEvent.target as SVGRectElement).closest(`[class*='draggable']`).cloneNode(true) as SVGElement;
         } else {
             shape = event.sourceEvent.target.cloneNode(true) as SVGElement;
+        }
+
+        const draggedNodeId = d3.select(shape).attr('id');
+
+        const updateItemType: RoomItemType = stringToRoomItem(parseWrapperId(draggedNodeId));
+
+        if(!canPlaceObject(user, updateItemType)){
+            // set error msg denying access to place this object
+            setShowPermissionError(true);
+            return;
         }
 
         d3.select(shape)
@@ -641,7 +654,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
         // Attach x and y data to border group and drag call for resizing
         placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
-        borderGroup.call(
+        if(isTemplateCreator(user) || isRoomCreator(user)){
+            borderGroup.call(
             dragBorder(
                 () => {
                     setShowObjectContextMenu(false);
@@ -650,8 +664,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 CELL_SIZE,
                 borderGroup,
                 setLocalRoom
-            )
-        );
+                )
+            );
+        }
+
 
         // Set zoom after border is loaded in
         zoomToScale(roomSize.scale);
@@ -969,12 +985,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         data-tg-on="Grid Enabled"
                         htmlFor="cb3-8"></label>
                 </div>
-                <button
-                    id={'clearBtn'}
-                    className={'layout-toolbar-btn'}
-                    onClick={handleClear}
-                >Clear Layout
-                </button>
+                {(isRoomCreator(user) || isTemplateCreator(user)) &&
+                    <button
+                        id={'clearBtn'}
+                        className={'layout-toolbar-btn'}
+                        onClick={handleClear}
+                    >Clear Layout
+                    </button>
+                }
                 {isTemplateCreator(user) &&
                         <button
                                 id={'saveTemplateBtn'}
@@ -1005,6 +1023,12 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 >{localRoom.name === 'new-layout' ? 'Save Layout' : 'Update Layout'}
                 </button>
             </div>
+            {showPermissionError &&
+                <ConfirmationPopup
+                    message={"You do not have permissions to add this item to the layout."}
+                    onClose={() => setShowPermissionError(null)}
+                />
+            }
             {showSaveConfirm &&
                     <ConfirmationPopup
                             message={`Are you sure you want to save this current layout as the new layout for room <strong>${localRoom.name}</strong> ?`}

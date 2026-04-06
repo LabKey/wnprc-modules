@@ -94,8 +94,8 @@ export const extractRoomObjId = (id: string) => {
     return id.replace(/-wrapper$/, '');
 }
 
-// determines if the user has access to manipulating room layout objects
-export const isDraggable = (user, itemType: RoomItemType) => {
+// Determines if the user has access to dragging the item
+export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -106,6 +106,33 @@ export const isDraggable = (user, itemType: RoomItemType) => {
     }
     return false;
 }
+
+// Determines if the user can open the items context menu
+export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+    if(isRoomCreator(user) || isTemplateCreator(user)) {
+        return true;
+    }
+    if(isRoomModifier(user)){
+        if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+    }
+    return false;
+}
+
+export const canPlaceObject = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+    if(isRoomCreator(user) || isTemplateCreator(user)) {
+        return true;
+    }
+    if(isRoomModifier(user)){
+        if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+    }
+    return false;
+}
+
+
 
 export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{
     fulfilled: FullObjectHistoryData[];

@@ -61,7 +61,7 @@ import { MutableRefObject } from 'react';
 import { ActionURL, Filter, Utils } from '@labkey/api';
 import {
     addModEntries,
-    areAllRacksNonDefault,
+    areAllRacksNonDefault, canOpenContextMenu,
     createEmptyUnitLoc,
     findCageInGroup, isDraggable,
     isRackEnum,
@@ -535,7 +535,10 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
             }
 
             cageGroup.append(() => shape.node());
-            setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            // attach context menu if user has permissions for cages
+            if(canOpenContextMenu(user, rack.type.type)){
+                setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            }
 
         });
 
@@ -602,7 +605,11 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
 
             roomObjGroup.append(() => shape.node());
             placeAndScaleGroup(wrapperGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
-            setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            // Attach context menu if user has permissions for room objects
+            if(canOpenContextMenu(user, roomObj.type)){
+                setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            }
+            // Attach drag functionality if user has permissions
             if(isDraggable(user, roomObj.type)){
                 wrapperGroup.call(closeMenuThenDrag);
             }

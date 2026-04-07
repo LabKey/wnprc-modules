@@ -64,7 +64,7 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         type
     } = props;
 
-    const menuRef = useRef(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     // Delete object for room objects
     const handleDeleteObject = (e: React.MouseEvent<HTMLElement>) => {
@@ -97,7 +97,44 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [menuRef]);
+    }, [closeMenu]);
+
+    // Handle dynamic positioning
+    useEffect(() => {
+        if (!menuRef.current || ctxMenuStyle.display !== 'block') return;
+
+        const menu = menuRef.current;
+        const { top, left } = ctxMenuStyle;
+        const topValue = parseInt(top, 10);
+        const leftValue = parseInt(left, 10);
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const menuWidth = menu.offsetWidth;
+        const menuHeight = menu.offsetHeight;
+
+        let adjustedTop = topValue;
+        let adjustedLeft = leftValue;
+
+        // Prevent overflow to the right
+        if (leftValue + menuWidth > windowWidth) {
+            adjustedLeft = windowWidth - menuWidth - 10;
+        }
+
+        // Prevent overflow to the bottom
+        if (topValue + menuHeight > windowHeight) {
+            adjustedTop = windowHeight - menuHeight - 10;
+        }
+
+        // Prevent overflow to the left
+        if (adjustedLeft < 10) adjustedLeft = 10;
+
+        // Prevent overflow to the top
+        if (adjustedTop < 10) adjustedTop = 10;
+
+        menu.style.left = `${adjustedLeft}px`;
+        menu.style.top = `${adjustedTop}px`;
+    }, [ctxMenuStyle.display, ctxMenuStyle.left, ctxMenuStyle.top]);
 
     return (
         <div id="contextMenu" className="context-menu" ref={menuRef} style={{

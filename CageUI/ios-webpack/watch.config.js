@@ -22,7 +22,7 @@ const constants = require('./constants');
 const path = require('path');
 // relative to the <lk_module>/node_modules/@labkey/build/webpack dir
 const entryPoints = require('../src/client/entryPoints.js');
-const host = require("host");
+const host = require("./host");
 
 
 const devServer = {

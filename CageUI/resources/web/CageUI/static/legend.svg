@@ -61,83 +61,39 @@
     <rect x="340.24" y=".5" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
     <text transform="translate(.21 31.14)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:0em;">S</tspan>
-        <tspan x="10.48" y="0">olid Divider</tspan>
+        <tspan x="0" y="0" style="letter-spacing:0em;">Solid Divider</tspan>
     </text>
     <text transform="translate(1.1 109.91)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:-.02em;">P</tspan>
-        <tspan x="10.84" y="0" style="letter-spacing:0em;">r</tspan>
-        <tspan x="17.49" y="0">o</tspan>
-        <tspan x="29.02" y="0" style="letter-spacing:0em;">t</tspan>
-        <tspan x="35.85" y="0" style="letter-spacing:0em;">e</tspan>
-        <tspan x="46.37" y="0" style="letter-spacing:.01em;">c</tspan>
-        <tspan x="56.05" y="0" style="letter-spacing:0em;">t</tspan>
-        <tspan x="62.87" y="0" style="letter-spacing:0em;">ed</tspan>
-        <tspan x="89.69" y="0" style="letter-spacing:-.01em;">C</tspan>
-        <tspan x="101.64" y="0">o</tspan>
-        <tspan x="113.17" y="0" style="letter-spacing:0em;">n</tspan>
-        <tspan x="124.74" y="0">ta</tspan>
-        <tspan x="141.81" y="0" style="letter-spacing:.01em;">c</tspan>
-        <tspan x="151.49" y="0">t Divider</tspan>
+        <tspan x="0" y="0" style="letter-spacing:-.02em;">Protected Contact Divider</tspan>
     </text>
     <text transform="translate(1.1 183.88)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:-.02em;">V</tspan>
-        <tspan x="11.38" y="0" style="letter-spacing:0em;">isual</tspan>
-        <tspan x="55.71" y="0" style="letter-spacing:-.01em;">C</tspan>
-        <tspan x="67.66" y="0" style="letter-spacing:0em;">o</tspan>
-        <tspan x="79.19" y="0" style="letter-spacing:0em;">n</tspan>
-        <tspan x="90.76" y="0">ta</tspan>
-        <tspan x="107.83" y="0" style="letter-spacing:.01em;">c</tspan>
-        <tspan x="117.51" y="0">t Divider</tspan>
+        <tspan x="0" y="0" style="letter-spacing:-.02em;">Visual Contact Divider</tspan>
     </text>
     <text transform="translate(1.1 332.29)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:-.02em;">P</tspan>
-        <tspan x="10.84" y="0" style="letter-spacing:0em;">r</tspan>
-        <tspan x="17.79" y="0" style="letter-spacing:0em;">i</tspan>
-        <tspan x="22.7" y="0" style="letter-spacing:0em;">v</tspan>
-        <tspan x="32.72" y="0" style="letter-spacing:0em;">a</tspan>
-        <tspan x="42.84" y="0" style="letter-spacing:.02em;">c</tspan>
-        <tspan x="52.63" y="0">y Divider</tspan>
+        <tspan x="0" y="0" style="letter-spacing:-.02em;">Privacy Divider</tspan>
     </text>
     <text transform="translate(1.1 410.82)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:0em;">S</tspan>
-        <tspan x="10.29" y="0" style="letter-spacing:0em;">tanda</tspan>
-        <tspan x="60.98" y="0" style="letter-spacing:0em;">r</tspan>
-        <tspan x="67.64" y="0">d</tspan>
-        <tspan x="83.94" y="0" style="letter-spacing:-.02em;">F</tspan>
-        <tspan x="93.81" y="0">loor</tspan>
+        <tspan x="0" y="0" style="letter-spacing:0em;">Standard Floor</tspan>
     </text>
     <text transform="translate(1.1 489.36)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:0em;">M</tspan>
-        <tspan x="17.01" y="0" style="letter-spacing:0em;">esh</tspan>
-        <tspan x="51.95" y="0" style="letter-spacing:-.02em;">F</tspan>
-        <tspan x="61.82" y="0" style="letter-spacing:0em;">loor</tspan>
+        <tspan x="0" y="0" style="letter-spacing:0em;">Mesh Floor</tspan>
     </text>
     <text transform="translate(1.1 568.12)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:0em;">M</tspan>
-        <tspan x="17.01" y="0" style="letter-spacing:0em;">esh</tspan>
-        <tspan x="51.95" y="0" style="letter-spacing:-.02em;">F</tspan>
-        <tspan x="61.82" y="0" style="letter-spacing:0em;">loor x2</tspan>
+        <tspan x="0" y="0" style="letter-spacing:0em;">Mesh Floor x2</tspan>
     </text>
     <text transform="translate(0 643.6)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0">E</tspan>
-        <tspan x="10.33" y="0" style="letter-spacing:.01em;">x</tspan>
-        <tspan x="20.33" y="0" style="letter-spacing:0em;">t</tspan>
-        <tspan x="27.15" y="0">ension</tspan>
+        <tspan x="0" y="0">Extension</tspan>
     </text>
     <text transform="translate(0 721.91)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0">C</tspan>
-        <tspan x="12.18" y="0" style="letter-spacing:-.05em;">-</tspan>
-        <tspan x="17.58" y="0" style="letter-spacing:-.04em;">T</tspan>
-        <tspan x="27.07" y="0">unnel</tspan>
+        <tspan x="0" y="0">C-Tunnel</tspan>
     </text>
     <path d="M360.92,744.07c.43-4.88,4.65-9,9.81-9.08,5.28-.08,9.85,4.1,10.14,9.44.31,5.55-4.13,10.24-9.42,10.53-5.97.33-11.04-5.05-10.53-10.89Z"
           style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
@@ -151,9 +107,6 @@
     <rect x="340.74" y="227.44" width="61.29" height="61.29" style="fill:none; stroke:#231f20; stroke-miterlimit:10;"/>
     <text transform="translate(1.6 258.08)"
           style="fill:#231f20; font-family:MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size:21px;">
-        <tspan x="0" y="0" style="letter-spacing:0em;">S</tspan>
-        <tspan x="10.48" y="0">ocial</tspan>
-        <tspan x="55.86" y="0" style="letter-spacing:-.03em;">P</tspan>
-        <tspan x="66.49" y="0">anel Divider</tspan>
+        <tspan x="0" y="0" style="letter-spacing:0em;">Social Panel Divider</tspan>
     </text>
 </svg>

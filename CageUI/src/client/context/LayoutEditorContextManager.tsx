@@ -39,9 +39,16 @@ import {
     RoomObject,
     RoomObjectTypes,
     UnitLocations,
-    UnitType
+    UnitType,
+    SessionLog
 } from '../types/typings';
-import { CellKey, DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from '../types/layoutEditorTypes';
+import {
+    CellKey,
+    DeleteActions,
+    LayoutSaveResult,
+    RackActions,
+    SelectedObj,
+} from '../types/layoutEditorTypes';
 import {
     createEmptyUnitLoc, extractRoomObjId,
     findCageInGroup,
@@ -63,7 +70,7 @@ import {
     parseRoomItemType,
     rackTypeToDefaultType,
     roomItemToString,
-    saveRoomHelper
+    saveRoomHelper, toLabKeyDate
 } from '../utils/helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
@@ -85,6 +92,12 @@ export const useLayoutEditorContext = () => {
 };
 
 export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, prevRoom, user}) => {
+    const [sessionLog, setSessionLog] = useState<SessionLog>({
+        startTime: toLabKeyDate(new Date()),
+        userAgent: navigator.userAgent,
+        schemaName: 'cageui',
+        queryName: 'layout_history'
+    });
     // loaded in and unchanged since start of layout editing
     const [room, setRoom] = useState<Room>({
         name: 'new-layout',
@@ -138,6 +151,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     // instead of tying scale to each location, manage one scale for the whole layout
     const [scale, setScale] = useState<number>(1);
 
+    useEffect(() => {
+        console.log("Log: ", sessionLog);
+    }, [sessionLog]);
 
     const grid = useRef<Map<CellKey, LocationCoords[]>>(new Map());
 
@@ -1153,7 +1169,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     };
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        return saveRoomHelper(localRoom, oldTemplateName);
+        return saveRoomHelper(localRoom, sessionLog, oldTemplateName );
     };
 
     useEffect(() => {

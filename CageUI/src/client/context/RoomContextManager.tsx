@@ -17,10 +17,10 @@
  */
 
 import * as React from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 import { RoomContextType } from '../types/roomContextTypes';
-import { getAdjLocation, saveRoomHelper } from '../utils/helpers';
+import { getAdjLocation, saveRoomHelper, toLabKeyDate } from '../utils/helpers';
 import {
     Cage,
     CageModification,
@@ -30,7 +30,7 @@ import {
     Rack,
     RackConditionOption,
     Room,
-    RoomMods
+    RoomMods, SessionLog
 } from '../types/typings';
 import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
 import { LayoutSaveResult, RackChangeSaveResult } from '../types/layoutEditorTypes';
@@ -54,6 +54,12 @@ export const useRoomContext = () => {
 
 export const RoomContextProvider = ({children}) => {
     const {selectedRoom, setSelectedRoom} = useHomeNavigationContext();
+    const [sessionLog, setSessionLog] = useState<SessionLog>({
+        startTime: toLabKeyDate(new Date()),
+        userAgent: navigator.userAgent,
+        schemaName: 'cageui',
+        queryName: null,
+    });
 
     const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
         const cageModsByCage: { [key in string]: CageModificationsType } = {}; // string is object uuid
@@ -177,7 +183,8 @@ export const RoomContextProvider = ({children}) => {
     };
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
-        return saveRoomHelper(selectedRoom);
+        const newSessionLog: SessionLog = {...sessionLog, queryName: 'cage_modifications_history'};
+        return saveRoomHelper(selectedRoom, newSessionLog);
     };
 
     const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack, prevRackCondition: RackConditionOption): Promise<RackChangeSaveResult> => {
@@ -185,6 +192,7 @@ export const RoomContextProvider = ({children}) => {
         let result: RackChangeSaveResult;
         let newRoom: Room;
         let newRack: string;
+        const newSessionLog: SessionLog = {...sessionLog, queryName: 'rack_history'};
         try {
             const newRoomRes = await createNewRoomFromRackChange(selectedRoom, newRackOption, prevRack);
             newRoom = newRoomRes.room;
@@ -206,7 +214,7 @@ export const RoomContextProvider = ({children}) => {
             };
             return result;
         }
-        const saveRoomRes = await saveRoomHelper(newRoom,null, prevRackCondition);
+        const saveRoomRes = await saveRoomHelper(newRoom,newSessionLog, null, prevRackCondition);
         return {
             ...saveRoomRes,
             rack: newRack,

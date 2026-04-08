@@ -228,7 +228,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
         // attach context menu if user has permissions
         if(canOpenContextMenu(user, updateItemType)){
-            setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef, setCtxMenuStyle);
+            setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef,"edit", setCtxMenuStyle);
         }
 
         dragLockRef.current = false;

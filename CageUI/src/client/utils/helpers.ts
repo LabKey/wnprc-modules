@@ -53,7 +53,8 @@ import {
     RoomObjectTypes,
     TemplateHistoryData,
     UnitLocations,
-    UnitType
+    UnitType,
+    SessionLog
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
@@ -79,6 +80,13 @@ import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActi
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+
+// Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
+export const toLabKeyDate = (date: Date): string => {
+    const pad = (n: number, cnt: number) => n.toString().padStart(cnt, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1,2)}-${pad(date.getDate(), 2)} ` +
+        `${pad(date.getHours(),2)}:${pad(date.getMinutes(),2)}:${pad(date.getSeconds(),2)}.${pad(date.getMilliseconds(),3)}`;
+}
 
 export const generateCageId = (objectId: string): CageSvgId => {
 
@@ -537,7 +545,7 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
             cageGroup.append(() => shape.node());
             // attach context menu if user has permissions for cages
             if(canOpenContextMenu(user, rack.type.type)){
-                setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+                setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
             }
 
         });
@@ -607,7 +615,7 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
             placeAndScaleGroup(wrapperGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
             // Attach context menu if user has permissions for room objects
             if(canOpenContextMenu(user, roomObj.type)){
-                setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, setCtxMenuStyle);
+                setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
             }
             // Attach drag functionality if user has permissions
             if(isDraggable(user, roomObj.type)){
@@ -1244,7 +1252,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 };
 
-export const saveRoomHelper = async (room: Room, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
+export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 
     const roomName = room.name;
@@ -1314,7 +1322,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string, prevR
     let result: LayoutSaveResult;
 
     try {
-        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName, prevRackCondition);
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition);
         let errors;
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];

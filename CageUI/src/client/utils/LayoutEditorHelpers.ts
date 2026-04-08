@@ -416,6 +416,7 @@ export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
     localRoomRef: MutableRefObject<Room>,
+    eventType: "edit" | "view",
     setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
 ): () => void {
 
@@ -515,26 +516,26 @@ export function setupEditCageEvent(
         }
     };
 
-    // Attach listeners
-    cageGroupElement.addEventListener('contextmenu', handleContextMenu);
-    cageGroupElement.addEventListener('touchstart', handleTouchStart);
-    cageGroupElement.addEventListener('touchmove', handleTouchMove);
-    cageGroupElement.addEventListener('touchend', handleTouchEnd);
 
-    // Optional: Also support desktop right-click directly
-    cageGroupElement.addEventListener('mousedown', (e) => {
-        if (e.button === 2) { // right click
-            handleContextMenu(e);
-        }
-    });
+
+    if (eventType === 'edit') {
+        cageGroupElement.addEventListener('contextmenu', handleContextMenu);
+        cageGroupElement.addEventListener('touchstart', handleTouchStart);
+        cageGroupElement.addEventListener('touchmove', handleTouchMove);
+        cageGroupElement.addEventListener('touchend', handleTouchEnd);
+    } else {
+        cageGroupElement.addEventListener('click', handleContextMenu);
+    }
 
     return () => {
-        cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
-        cageGroupElement.removeEventListener('touchstart', handleTouchStart);
-        cageGroupElement.removeEventListener('touchmove', handleTouchMove);
-        cageGroupElement.removeEventListener('touchend', handleTouchEnd);
-        // Also remove mousedown listener if added
-        cageGroupElement.removeEventListener('mousedown', (e) => { if (e.button === 2) handleContextMenu(e); });
+        if (eventType === 'edit') {
+            cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
+            cageGroupElement.removeEventListener('touchstart', handleTouchStart);
+            cageGroupElement.removeEventListener('touchmove', handleTouchMove);
+            cageGroupElement.removeEventListener('touchend', handleTouchEnd);
+        } else {
+            cageGroupElement.removeEventListener('click', handleContextMenu);
+        }
     };
 }
 
@@ -575,7 +576,7 @@ export async function mergeRacks(props: MergeProps) {
             element.setAttribute('class', `grouped-${shapeType}`);
             element.setAttribute('style', '');
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, cageActionProps.setCtxMenuStyle);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, "edit", cageActionProps.setCtxMenuStyle);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.

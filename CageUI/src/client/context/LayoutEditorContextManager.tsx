@@ -151,10 +151,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     // instead of tying scale to each location, manage one scale for the whole layout
     const [scale, setScale] = useState<number>(1);
 
-    useEffect(() => {
-        console.log("Log: ", sessionLog);
-    }, [sessionLog]);
-
     const grid = useRef<Map<CellKey, LocationCoords[]>>(new Map());
 
     const getCageLoc = (cageId: CageSvgId, cageNum: CageNumber): LocationCoords => {
@@ -608,7 +604,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                     // Find the moved rack to access its cages
                     if (!movedRack) {
-                        console.log('Failed to update cages location for rack');
+                        console.error('Failed to update cages location for rack');
                         return prevRoom; // cannot find an available rack id to move
                     }
 
@@ -659,7 +655,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                     // Find the moved rack to access its cages
                     if (movedRacks.length === 0) {
-                        console.log('Failed to update cages location for rack');
+                        console.error('Failed to update cages location for rack');
                         return prevRoom; // cannot find an available rack id to move
                     }
                     setUnitLocs((prevUnitLocations) => {

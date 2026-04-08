@@ -96,7 +96,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log('Error fetching prev room mods', err);
+            console.error('Error fetching prev room mods', err);
         });
     }, []);
 

@@ -97,7 +97,6 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
     // This submission updates the room mods with the current selections.
     const handleSaveMods = () => {
         const result = saveCageMods(currCage, currCageMods);
-        console.log('Submit result: ', result);
 
         if (result) {
             if (result.status === 'Success') {

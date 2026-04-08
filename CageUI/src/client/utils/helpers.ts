@@ -418,7 +418,6 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
                 }));
 
                 const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
-                console.log('Layout history results', layoutHistoryResults);
 
                 if (layoutHistoryResults.rejected.length > 0) {
                     throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`);

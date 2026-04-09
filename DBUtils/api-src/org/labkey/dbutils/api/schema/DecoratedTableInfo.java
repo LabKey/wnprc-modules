@@ -396,8 +396,8 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public void fireRowTrigger(Container c, User u, TriggerType type, @Nullable QueryUpdateService.InsertOption insertOption, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext, @Nullable Map<String, Object> existingRecord, boolean manageColumns) throws ValidationException {
-        _tableInfo.fireRowTrigger(c, u, type, insertOption, before, rowNumber, newRow, oldRow, extraContext, existingRecord, manageColumns);
+    public void fireRowTrigger(Container c, User u, TriggerType type, @Nullable QueryUpdateService.InsertOption insertOption, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext, @Nullable Map<String, Object> existingRecord) throws ValidationException {
+        _tableInfo.fireRowTrigger(c, u, type, insertOption, before, rowNumber, newRow, oldRow, extraContext, existingRecord);
     }
 
     @Override

@@ -72,7 +72,9 @@ export enum ModTypes {
     NoDivider = 'nd',
     CTunnel = 'ct',
     Extension = 'ex',
-    SPDivider = 'spd' // Social Panel
+    SPDivider = 'spd', // Social Panel
+    Restraint = 'res',
+    Blind = 'bld'
 }
 
 export enum ModDirections {
@@ -114,6 +116,8 @@ export enum ModSvgLocId {
     Top = 'ceiling',
     Bottom = 'floor',
     Extension = 'extension',
+    Restraint = 'restraint',
+    Blind = 'blind',
     CTunnelCircle = 'cTunnel-circle',
     CTunnelLeft = 'cTunnel-left',
     CTunnelRight = 'cTunnel-right',
@@ -125,7 +129,6 @@ export enum ModSvgLocId {
 export enum RackConditions {
     Operational,
     Damaged,
-    Repairing,
 }
 
 export type RackStringType = string & { __brand: 'RackStringType' };

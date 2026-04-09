@@ -27,7 +27,7 @@ import Editor from '../../components/layoutEditor/Editor';
 import { labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { isRoomCreator, isRoomModifier, isTemplateCreator } from '../../utils/LayoutEditorHelpers';
+import { isRoomCreator, isRoomModifier, isTemplateCreator } from '../../utils/helpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { roomSizeOptions } from '../../utils/constants';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';

@@ -23,7 +23,7 @@ import {
     generateUUID,
     getAdjLocation,
     getDefaultMod,
-    getTypeClassFromElement,
+    getTypeClassFromElement, isRoomCreator, isRoomModifier, isTemplateCreator,
     parseRoomItemType,
     roomItemToString
 } from './helpers';
@@ -69,21 +69,7 @@ import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
 
 
-export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
-};
 
-export const isRoomCreator = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
-};
-
-export const isRoomModifier = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
-};
-
-export const isCageModifier = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
-};
 
 export const isTouchEvent = (event)=> {
     return event.type.startsWith('touch');

@@ -26,10 +26,17 @@ import {
     ModTypes,
     RoomMods
 } from '../types/typings';
-import { Option } from '@labkey/components';
-import { cageModLookup } from '../api/popularQueries';
-import { parseRoomItemNum, parseRoomItemType } from './helpers';
+import { isRoomCreator, isRoomModifier, isTemplateCreator, parseRoomItemNum, parseRoomItemType } from './helpers';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
+
+// Determines if the user has access to editing the layout
+export const canEditLayout = (user: GetUserPermissionsResponse) => {
+    if(isRoomCreator(user) || isTemplateCreator(user) || isRoomModifier(user)) {
+        return true;
+    }
+    return false;
+}
 
 // takes a cage number and returns it in a display friendly format, ex: cage-1 -> Cage 1
 export const getCageNumDisplay = (cageNum: CageNumber) => {

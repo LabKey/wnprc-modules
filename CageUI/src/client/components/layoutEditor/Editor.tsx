@@ -59,8 +59,6 @@ import {
     getLayoutOffset,
     getTargetRect, isDraggable,
     isRackEnum,
-    isRoomCreator,
-    isTemplateCreator,
     mergeRacks,
     parseWrapperId,
     placeAndScaleGroup,
@@ -75,6 +73,8 @@ import {
     parseRoomItemNum,
     parseRoomItemType,
     roomItemToString,
+    isRoomCreator,
+    isTemplateCreator,
     stringToRoomItem
 } from '../../utils/helpers';
 import { SelectorOptions } from './RoomSizeSelector';

@@ -22,8 +22,7 @@ import { ModDirections, ModTypes } from '../../../types/typings';
 import { Filter } from '@labkey/api';
 import { ConnectedModType, EHRCageMods } from '../../../types/homeTypes';
 import { cageModLookup } from '../../../api/popularQueries';
-import { generateUUID } from '../../../utils/helpers';
-import { isCageModifier } from '../../../utils/LayoutEditorHelpers';
+import { generateUUID, isCageModifier } from '../../../utils/helpers';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface ModificationMultiSelectProps {

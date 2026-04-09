@@ -59,7 +59,7 @@ import {
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
-import { ActionURL, Filter, Utils } from '@labkey/api';
+import { ActionURL, Filter, Security, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault, canOpenContextMenu,
@@ -80,6 +80,24 @@ import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActi
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+
+
+export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
+};
+
+export const isRoomCreator = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
+};
+
+export const isRoomModifier = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
+};
+
+export const isCageModifier = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
+};
+
 
 // Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
 export const toLabKeyDate = (date: Date): string => {

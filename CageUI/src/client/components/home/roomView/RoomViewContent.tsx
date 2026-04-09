@@ -24,12 +24,14 @@ import { SubViewContent } from '../SubViewContent';
 import { RoomDetails } from './RoomDetails';
 import { RoomLayout } from './RoomLayout';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { Button } from 'react-bootstrap';
+import { canEditLayout } from '../../../utils/homeHelpers';
 
 interface RoomViewContentProps {
 }
 
 export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
-    const {selectedPage, selectedRoom} = useHomeNavigationContext();
+    const {selectedPage, selectedRoom, userProfile} = useHomeNavigationContext();
     const roomName = selectedPage?.room;
 
     const handleLayoutEdit = () => {
@@ -43,15 +45,25 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
         selectedPage &&
         <div className={'room-view-container'} key={'layout-' + roomName}>
             <div className={'room-view-title'}>
+                {/* Hide room valid for now, it could be misleading until we add room validations
                 <input
                         type="checkbox"
                         className="room-view-checkbox"
                         disabled={true}
                         checked={selectedRoom?.valid ?? false}
-                />
+                />*/}
                 <span>
                     {roomName}
                 </span>
+
+                {canEditLayout(userProfile) &&
+                    <Button
+                        onClick={handleLayoutEdit}
+                        className={"labkey-button"}
+                    >
+                        Edit Room
+                    </Button>
+                }
             </div>
             <SubViewContent
                     tabs={[{
@@ -63,10 +75,10 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
                                 <div className={'labkey-error'}>
                                     {roomName} does not have an existing layout.
                                 </div>
-                    }, {
+                    }, /*{ Hide RoomDetails for now since it is currently not used.
                         name: 'Details',
                         children: <RoomDetails/>
-                    }
+                    }*/
                     ]}
             />
         </div>

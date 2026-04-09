@@ -22,11 +22,11 @@ import '../../../cageui.scss';
 import { ModificationEditor } from './ModificationEditor';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
 import { Cage, CurrCageMods, Rack } from '../../../types/typings';
-import { findCageInGroup, isCageModifier } from '../../../utils/LayoutEditorHelpers';
+import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { Button } from 'react-bootstrap';
 import { AnimalEditor } from './AnimalEditor';
-import { formatCageNum } from '../../../utils/helpers';
+import { formatCageNum, isCageModifier } from '../../../utils/helpers';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CagePopupProps {

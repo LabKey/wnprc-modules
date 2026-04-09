@@ -24,7 +24,7 @@ import { RackDetails } from './RackDetails';
 import { CagesOverview } from './CagesOverview';
 import { ChangeRackPopup } from './ChangeRackPopup';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
-import { isRoomModifier } from '../../../utils/LayoutEditorHelpers';
+import { isRoomModifier } from '../../../utils/helpers';
 
 export const RackViewContent: FC = () => {
     const {selectedRoom, selectedRack, userProfile} = useHomeNavigationContext();

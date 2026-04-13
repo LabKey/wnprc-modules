@@ -31,7 +31,7 @@ interface RoomViewContentProps {
 }
 
 export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
-    const {selectedPage, selectedRoom, userProfile} = useHomeNavigationContext();
+    const {selectedPage, selectedLocalRoom, userProfile} = useHomeNavigationContext();
     const roomName = selectedPage?.room;
 
     const handleLayoutEdit = () => {
@@ -69,7 +69,7 @@ export const RoomViewContent: FC<RoomViewContentProps> = (props) => {
                     tabs={[{
                         name: 'Layout',
                         children:
-                            selectedRoom ?
+                            selectedLocalRoom ?
                                 <RoomLayout/>
                                 :
                                 <div className={'labkey-error'}>

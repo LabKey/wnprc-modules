@@ -405,7 +405,7 @@ export function setupEditCageEvent(
     eventType: "edit" | "view",
     setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
 ): () => void {
-
+    
     // Main context menu handler
     const handleContextMenu = (event: MouseEvent | CustomEvent) => {
         // Only block native menu if we're using a custom one

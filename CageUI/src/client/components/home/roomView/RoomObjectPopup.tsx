@@ -15,49 +15,37 @@
  *  * limitations under the License.
  *
  */
-
 import * as React from 'react';
 import { FC, useEffect, useRef, useState } from 'react';
-import '../../../cageui.scss';
-import { ModificationEditor } from './ModificationEditor';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
-import { Cage, CurrCageMods, Rack } from '../../../types/typings';
-import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
-import { useRoomContext } from '../../../context/RoomContextManager';
+import { formatRoomObj, isRoomModifier } from '../../../utils/helpers';
+import { RoomObject, RoomObjectTypes } from '../../../types/typings';
 import { Button } from 'react-bootstrap';
-import { AnimalEditor } from './AnimalEditor';
-import { formatCageNum, isCageModifier } from '../../../utils/helpers';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { GateEditor } from './GateEditor';
+import { useRoomContext } from '../../../context/RoomContextManager';
 
 interface CagePopupProps {
     selectedObj: SelectedObj;
     closeMenu: () => void;
 }
 
-export const CagePopup: FC<CagePopupProps> = (props) => {
+export const RoomObjectPopup: FC<CagePopupProps> = (props) => {
     const {
         closeMenu,
         selectedObj,
     } = props;
-    const {saveCageMods} = useRoomContext();
-    const {selectedLocalRoom, userProfile} = useHomeNavigationContext();
 
-    const [currCage, setCurrCage] = useState<Cage>(null);
-    const [currRack, setCurrRack] = useState<Rack>(null);
-    const [currCageMods, setCurrCageMods] = useState<CurrCageMods>(null);
-    const [showError, setShowError] = useState<string>(null);
+    const {userProfile} = useHomeNavigationContext();
+    const {saveRoomObj} = useRoomContext();
 
+    const [roomObj, setRoomObj] = useState<RoomObject>(selectedObj as RoomObject);
+    const [prevRoomObjId, setPrevRoomObjId] = useState<string>((selectedObj as RoomObject).itemId);
     const menuRef = useRef(null);
 
     useEffect(() => {
-        const tempCage = selectedObj as Cage;
-        if (tempCage) {
-            const cageRack = findCageInGroup(tempCage.svgId, selectedLocalRoom.rackGroups).rack;
-            setCurrCage(tempCage);
-            setCurrRack(cageRack);
-        }
-    }, [selectedObj]);
-
+        console.log('roomObj: ', roomObj);
+    }, [roomObj]);
 
     useEffect(() => {
         // Check if the click was outside the menu
@@ -72,7 +60,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
             }
             // if the target is outside the modification editor menu ref close the editor
             if (menuRef.current && !menuRef.current.contains(event.target)) {
-               closeMenu();
+                closeMenu();
             }
         };
 
@@ -87,59 +75,45 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
 
 
     const handleCleanup = () => {
-        setCurrCage(null);
-        setCurrRack(null);
         closeMenu();
     };
 
     // This submission updates the room mods with the current selections.
-    const handleSaveMods = () => {
-        const result = saveCageMods(currCage, currCageMods);
-
-        if (result) {
-            if (result.status === 'Success') {
-                handleCleanup();
-            } else {
-                setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join('\n'));
-            }
-        }
+    const handleSave = () => {
+        saveRoomObj(prevRoomObjId, roomObj);
+        handleCleanup();
     };
 
     return (
-        currCage &&
         <div className="room-display-popup-overlay">
             <div className={"room-display-popup"} ref={menuRef}>
                 <div className="room-display-popup-header">
-                    <h1 className="room-display-popup-title">{formatCageNum(currCage.cageNum)}</h1>
+                    <h1 className="room-display-popup-title">{formatRoomObj(roomObj.itemId)}</h1>
                     <button className="room-display-popup-close" onClick={handleCleanup}>&times;</button>
                 </div>
-                <ModificationEditor
-                    currCage={currCage}
-                    currRack={currRack}
-                    updateCageMods={(mods: CurrCageMods) => setCurrCageMods(mods)}
-                />
-                <AnimalEditor
-                />
+                {(roomObj.type === RoomObjectTypes.GateOpen || RoomObjectTypes.GateClosed) &&
+                        <GateEditor
+                                roomObj={roomObj}
+                                setRoomObj={setRoomObj}
+                        />
+                }
                 <div className="room-display-popup-content" style={{alignItems: 'flex-end'}}>
                     <div className="room-display-popup-error">
-                        {showError}
                     </div>
                     <div className="room-display-popup-actions">
                         <Button className="room-display-popup-button room-display-popup-cancel"
                                 onClick={handleCleanup}>Cancel</Button>
-                        {isCageModifier(userProfile) &&
-                            <Button
-                                className="room-display-popup-button room-display-popup-save"
-                                onClick={handleSaveMods}
-                            >
-                                Save Mods
-                            </Button>
+                        {isRoomModifier(userProfile) &&
+                                <Button
+                                        className="room-display-popup-button room-display-popup-save"
+                                        onClick={handleSave}
+                                >
+                                    Save
+                                </Button>
                         }
                     </div>
                 </div>
             </div>
         </div>
     );
-
-
 }

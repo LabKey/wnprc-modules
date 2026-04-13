@@ -27,7 +27,7 @@ import { useHomeNavigationContext } from '../../../context/HomeNavigationContext
 import { isRoomModifier } from '../../../utils/helpers';
 
 export const RackViewContent: FC = () => {
-    const {selectedRoom, selectedRack, userProfile} = useHomeNavigationContext();
+    const {selectedLocalRoom, selectedRack, userProfile} = useHomeNavigationContext();
     const [showChangeRackPopup, setShowChangeRackPopup] = useState(false);
 
     const handleRackChange = () => {
@@ -36,7 +36,7 @@ export const RackViewContent: FC = () => {
 
     return (
         selectedRack &&
-        <div className={'room-view-container'} id={"rack-view-container"} key={'layout-' + selectedRoom + '-rack-' + selectedRack}>
+        <div className={'room-view-container'} id={"rack-view-container"} key={'layout-' + selectedLocalRoom + '-rack-' + selectedRack}>
             <div className={'room-view-title'}>
                 <span>
                     Rack {selectedRack.itemId}

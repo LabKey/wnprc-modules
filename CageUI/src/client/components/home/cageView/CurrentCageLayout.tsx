@@ -31,7 +31,7 @@ interface CurrentCageLayoutProps {
 
 export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
     const {cage} = props;
-    const {selectedRoom, userProfile} = useHomeNavigationContext();
+    const {selectedLocalRoom, userProfile} = useHomeNavigationContext();
 
     const cageRef = useRef<SVGSVGElement>(null);
 
@@ -45,7 +45,7 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
             const element = d3.select(this) as d3.Selection<SVGGElement, {}, null, undefined>;
             element.remove();
         });
-        addPrevRoomSvgs(userProfile, 'view', cage, cageSvg, selectedRoom, selectedRoom.mods);
+        addPrevRoomSvgs(userProfile, 'view', cage, cageSvg, selectedLocalRoom, selectedLocalRoom.mods);
     }, [cage]);
 
     // adding 1 to the width/height helps make sure the lines don't get cut off in the image

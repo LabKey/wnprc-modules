@@ -30,7 +30,7 @@ import {
     Rack,
     RackConditionOption,
     Room,
-    RoomMods, SessionLog
+    RoomMods, RoomObject, SessionLog
 } from '../types/typings';
 import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
 import { LayoutSaveResult, RackChangeSaveResult } from '../types/layoutEditorTypes';
@@ -53,7 +53,7 @@ export const useRoomContext = () => {
 };
 
 export const RoomContextProvider = ({children}) => {
-    const {selectedRoom, setSelectedRoom} = useHomeNavigationContext();
+    const {selectedLocalRoom, setSelectedLocalRoom} = useHomeNavigationContext();
     const [sessionLog, setSessionLog] = useState<SessionLog>({
         startTime: toLabKeyDate(new Date()),
         userAgent: navigator.userAgent,
@@ -61,10 +61,22 @@ export const RoomContextProvider = ({children}) => {
         queryName: null,
     });
 
+    const saveRoomObj = (itemId: string, newObj: RoomObject)=> {
+        setSelectedLocalRoom(prevState => ({
+            ...prevState,
+            objects: prevState.objects.map(obj => {
+                if(obj.itemId === itemId){
+                    return newObj;
+                }
+                return obj;
+            })
+        }));
+    }
+
     const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
         const cageModsByCage: { [key in string]: CageModificationsType } = {}; // string is object uuid
         let idsToRemove: Map<string, boolean> = new Map();
-        const newRoomMods: RoomMods = {...selectedRoom.mods};
+        const newRoomMods: RoomMods = {...selectedLocalRoom.mods};
 
 
         // Add adjacent cage mods
@@ -159,7 +171,7 @@ export const RoomContextProvider = ({children}) => {
             }
         });
 
-        setSelectedRoom(
+        setSelectedLocalRoom(
             prevState => ({
                 ...prevState,
                 rackGroups: prevState.rackGroups.map((g) => ({
@@ -184,7 +196,7 @@ export const RoomContextProvider = ({children}) => {
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
         const newSessionLog: SessionLog = {...sessionLog, queryName: 'cage_modifications_history'};
-        return saveRoomHelper(selectedRoom, newSessionLog);
+        return saveRoomHelper(selectedLocalRoom, newSessionLog);
     };
 
     const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack, prevRackCondition: RackConditionOption): Promise<RackChangeSaveResult> => {
@@ -194,12 +206,12 @@ export const RoomContextProvider = ({children}) => {
         let newRack: string;
         const newSessionLog: SessionLog = {...sessionLog, queryName: 'rack_history'};
         try {
-            const newRoomRes = await createNewRoomFromRackChange(selectedRoom, newRackOption, prevRack);
+            const newRoomRes = await createNewRoomFromRackChange(selectedLocalRoom, newRackOption, prevRack);
             newRoom = newRoomRes.room;
             let errors;
             if (newRoomRes.errors) {
                 errors = Array.isArray(newRoomRes.errors) ? newRoomRes.errors : [newRoomRes.errors];
-                result = {success: false, roomName: selectedRoom.name, rack: "",reason: errors};
+                result = {success: false, roomName: selectedLocalRoom.name, rack: "",reason: errors};
                 return result;
             }
             newRack = newRoomRes.rack;
@@ -208,7 +220,7 @@ export const RoomContextProvider = ({children}) => {
             const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
             result = {
                 success: e.success,
-                roomName: selectedRoom.name,
+                roomName: selectedLocalRoom.name,
                 rack: "",
                 reason: errors.map(err => err.message || err)
             };
@@ -225,7 +237,8 @@ export const RoomContextProvider = ({children}) => {
         <RoomContext.Provider value={{
             saveCageMods,
             submitLayoutMods,
-            submitRackChange
+            submitRackChange,
+            saveRoomObj
         }}>
             {children}
         </RoomContext.Provider>

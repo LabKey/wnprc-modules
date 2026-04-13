@@ -207,6 +207,29 @@ export const parseLongId = (input: string) => {
     return;
 };
 
+export const formatRoomObj = (input: string): string => {
+    // Handle the special cases with any digit after hyphen
+    if (input.startsWith("gateClosed-") || input.startsWith("gateOpen-")) {
+        return "Gate";
+}
+    // Remove the "-{digit}" suffix if present
+    let cleanString = input.replace(/-\d+$/, '');
+
+    // Handle empty string
+    if (!cleanString) return '';
+
+    // Split on uppercase letters and hyphens, then filter out empty strings
+    const parts = cleanString.split(/(?=[A-Z])|[-_]/).filter(part => part.length > 0);
+
+    // Capitalize first letter of each part and make the rest lowercase
+    return parts
+        .map(part => {
+            if (part.length === 0) return '';
+            return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+        })
+        .join(' ');
+}
+
 export const formatCageNum = (str: string) => {
     // Split the string by hyphens
     try {// if the rack is default split and correctly display it
@@ -597,10 +620,12 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
 
     // We are loading an entire room into the svg
     if (renderType === 'room') {
+        // Render rack groups, racks, and cages
         (unitsToRender as Room).rackGroups.forEach((group) => {
             createGroup(group);
         });
 
+        // Render room objects
         (unitsToRender as Room).objects.forEach(async (roomObj) => {
             const wrapperGroup = layoutSvg.append('g')
                 .attr('id', roomObj.itemId + '-wrapper')
@@ -618,9 +643,8 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
                 objSvg = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
             } else if (mode === 'view') {
                 await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
-                    (roomObjGroup.node() as SVGElement).appendChild(d.documentElement);
+                    objSvg = d.querySelector('svg');
                 });
-                return;
             }
 
             const shape = d3.select(objSvg)
@@ -634,9 +658,11 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
             if(canOpenContextMenu(user, roomObj.type)){
                 setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
             }
-            // Attach drag functionality if user has permissions
-            if(isDraggable(user, roomObj.type)){
-                wrapperGroup.call(closeMenuThenDrag);
+            if(mode === 'edit'){
+                // Attach drag functionality if user has permissions
+                if(isDraggable(user, roomObj.type)){
+                    wrapperGroup.call(closeMenuThenDrag);
+                }
             }
         });
     } else if (renderType === 'group') { // we are rendering a single rack group

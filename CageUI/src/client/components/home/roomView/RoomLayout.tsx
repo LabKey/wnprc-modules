@@ -51,10 +51,6 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const borderRef = useRef(null);
     const contextRef = useRef(selectedLocalRoom);
 
-    useEffect(() => {
-        console.log("Selected Room: ", selectedLocalRoom);
-    }, [selectedLocalRoom]);
-
     // Loads room into the svg
     useEffect(() => {
         if (!selectedLocalRoom.name) {
@@ -94,20 +90,16 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         setSelectedContextObj(null);
     }, [showCageContextMenu, showObjContextMenu]);
 
+    /* Mods equal here won't always work since keys are UUIDs and won't be the same. This is a small bug but only an
+    /  issue for user experience (changing a mod then changing it back to the prev mod will still show save button).
+    /  The solution to this would be to write a custom method to check the deep version of the prev room and local room.
+    /  This would take some time and can be added later if requested/needed.
+     */
     useEffect(() => {
-        if (!selectedLocalRoom.mods || !selectedRoomMods) {
-            return;
-        }
-        setShowChangesMenu(!(_.isEqual(selectedRoomMods, selectedLocalRoom.mods)));
-    }, [selectedLocalRoom.mods]);
-
-    useEffect(() => {
-        if (!selectedRoom || selectedLocalRoom.objects.length === 0) {
-            return;
-        }
-        setShowChangesMenu(!(_.isEqual(selectedRoom.objects, selectedLocalRoom.objects)));
-    }, [selectedLocalRoom.objects]);
-
+        const modsEqual = _.isEqual(selectedRoomMods, selectedLocalRoom.mods);
+        const objectsEqual = _.isEqual(selectedRoom.objects, selectedLocalRoom.objects);
+        setShowChangesMenu(!modsEqual || !objectsEqual);
+    }, [selectedRoom, selectedLocalRoom, selectedRoomMods]);
 
     const saveLayout = async () => {
 

@@ -167,7 +167,7 @@ export const buildUpdatedCageAndRoomMods = (
 
             // Step A: Add new mods to room-wide mods registry
             [...currMods, ...adjMods].forEach(mod => {
-                newRoomMods[mod.modId] = { label: mod.label, value: mod.value };
+                newRoomMods[mod.modId] = {direction: mod.direction, rowid: mod.rowid, title: mod.title, type: mod.type, value: mod.value};
             });
 
             // Step B: Collect mod IDs to remove (from old modKeys in same dir/subId)
@@ -239,7 +239,7 @@ export const buildUpdatedCageAndRoomMods = (
 
     // Add new direct mods
     const newDirectMods = currCageMods.currCage.map(mod => {
-        newRoomMods[mod.modId] = { label: mod.label, value: mod.value };
+        newRoomMods[mod.modId] = {direction: mod.direction, rowid: mod.rowid, title: mod.title, type: mod.type, value: mod.value};
         idsToRemove.delete(mod.modId); // prevent removal if re-saved unchanged
         return {
             modId: mod.modId,

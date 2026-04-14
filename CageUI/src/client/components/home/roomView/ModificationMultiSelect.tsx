@@ -39,7 +39,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
     const [searchTerm, setSearchTerm] = useState('');
     const dropdownRef = useRef(null);
 
-    const [options, setOptions] = useState<Option<ModTypes>[]>(null);
+    const [options, setOptions] = useState<Option<EHRCageMods>[]>(null);
     const [availableMods, setAvailableMods] = useState<EHRCageMods[]>(null);
 
     useEffect(() => {
@@ -49,7 +49,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
 
         // If nothing is selected, reset to all available options
         if (!selectedItems || selectedItems.length === 0) {
-            setOptions(availableMods.map(m => ({label: m.title, value: m.value})));
+            setOptions(availableMods.map(m => ({label: m.title, value: m})));
             return;
         }
 
@@ -74,7 +74,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
             return !selectedDirTypePairs.has(key);
         });
 
-        setOptions(allowedMods.map(m => ({label: m.title, value: m.value})));
+        setOptions(allowedMods.map(m => ({label: m.title, value: m})));
     }, [selectedItems, availableMods]);
 
     useEffect(() => {
@@ -85,10 +85,10 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
 
         cageModLookup([], [directionFilter]).then(result => {
             if (result.length !== 0) {
-                const rowOptions: Option<ModTypes>[] = [];
+                const rowOptions: Option<EHRCageMods>[] = [];
                 const availMods: EHRCageMods[] = [];
                 result.forEach(row => {
-                    rowOptions.push({label: row.title, value: row.value as ModTypes});
+                    rowOptions.push({label: row.title, value: row});
                     availMods.push({...row});
                 });
                 setAvailableMods(availMods);
@@ -127,12 +127,12 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         }
     }
 
-    const handleSelectItem = (item: Option<ModTypes>) => {
+    const handleSelectItem = (item: Option<EHRCageMods>) => {
         const newItems = selectedItems || [];
 
-        if (!newItems.find(items => items.value === item.value)) {
+        if (!newItems.find(items => items.value === item.value.value)) {
             setSelectedItems([...newItems, {
-                ...item,
+                ...item.value,
                 modId: generateUUID(),
             }]);
         }
@@ -140,13 +140,13 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
         setIsOpen(false);
     };
 
-    const removeItem = (itemToRemove) => {
-        setSelectedItems(selectedItems.filter(item => item !== itemToRemove));
+    const removeItem = (itemToRemove: ConnectedModType) => {
+        setSelectedItems(selectedItems.filter(item => item.value !== itemToRemove.value));
     };
 
     const filteredOptions = options?.filter(option =>
         option.label.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !selectedItems.find(item => item.value === option.value)
+        !selectedItems.find(item => item.value === option.value.value)
     );
 
     return (
@@ -157,7 +157,7 @@ export const ModificationMultiSelect: FC<ModificationMultiSelectProps> = (props)
                 ) : (
                     selectedItems.map(item => (
                         <div key={item.value} className="selected-item">
-                            {item.label}
+                            {item.title}
                             <span
                                 className="remove-item"
                                 onClick={(e) => {

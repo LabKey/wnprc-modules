@@ -51,10 +51,10 @@ import {
     RoomObject,
     RoomObjectStringType,
     RoomObjectTypes,
+    SessionLog,
     TemplateHistoryData,
     UnitLocations,
-    UnitType,
-    SessionLog
+    UnitType
 } from '../types/typings';
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
@@ -62,9 +62,11 @@ import { MutableRefObject } from 'react';
 import { ActionURL, Filter, Security, Utils } from '@labkey/api';
 import {
     addModEntries,
-    areAllRacksNonDefault, canOpenContextMenu,
+    areAllRacksNonDefault,
+    canOpenContextMenu,
     createEmptyUnitLoc,
-    findCageInGroup, isDraggable,
+    findCageInGroup,
+    isDraggable,
     isRackEnum,
     isRoomHomogeneousDefault,
     placeAndScaleGroup,
@@ -839,8 +841,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 [ModLocations.Direct]: []
             };
 
-            const modReturnData = await cageModLookup([], []);
-            const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
+            const availMods = await cageModLookup([], []);
 
             const prevMods = prevRoom.modData.filter((mod) => mod.cage === cageData.objectId);
             prevMods.forEach((mod) => {

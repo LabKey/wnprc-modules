@@ -21,13 +21,15 @@ import { FC, useEffect, useRef, useState } from 'react';
 import '../../../cageui.scss';
 import { ModificationEditor } from './ModificationEditor';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
-import { Cage, CurrCageMods, Rack } from '../../../types/typings';
+import { Cage, CurrCageMods, ModDirections, ModLocations, ModStyle, ModTypes, Rack } from '../../../types/typings';
 import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { Button } from 'react-bootstrap';
 import { AnimalEditor } from './AnimalEditor';
-import { formatCageNum, isCageModifier } from '../../../utils/helpers';
+import { formatCageNum, generateUUID, isCageModifier } from '../../../utils/helpers';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { ConnectedCage, ConnectedRack } from '../../../types/homeTypes';
+import { cageModLookup } from '../../../api/popularQueries';
 
 interface CagePopupProps {
     selectedObj: SelectedObj;
@@ -107,15 +109,67 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
 
     // This submission updates the room mods with the current selections.
     const handleSaveMods = () => {
-        const result = saveCageMods(prevCage, currCageMods);
+        console.log("SaveMods: ", currCageMods);
+        validateAndApplyDefaults(currCageMods).then((res) => {
+            const result = saveCageMods(prevCage, res);
 
-        if (result) {
-            if (result.status === 'Success') {
-                handleCleanup();
-            } else {
-                setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join('\n'));
+            if (result) {
+                if (result.status === 'Success') {
+                    handleCleanup();
+                } else {
+                    setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join('\n'));
+                }
             }
+        });
+    };
+
+    // Function ensures that default mods are chosen if the user fails to pick any mods and the selection component is empty when saving.
+    const validateAndApplyDefaults = async (mods: CurrCageMods): Promise<CurrCageMods> => {
+        const cageModData = await cageModLookup([],[]);
+        const fillDefaultMods = (direction: ModDirections, connections: ConnectedRack[] | ConnectedCage[]) => {
+            // Define your default values here
+            const defaultHorizontalMod = cageModData.find((mod) => mod.value === ModTypes.SolidDivider);
+            const defaultVerticalMod = cageModData.find((mod) => mod.value === ModTypes.StandardFloor);
+            const defaultModValue = direction === ModDirections.Vertical ? defaultVerticalMod : defaultHorizontalMod;
+
+
+            const newConnections = connections.map((connection: ConnectedRack | ConnectedCage) => {
+                const containsAdjDivider = connection.adjMods.find(mod => mod.type === ModStyle.Separator);
+                const containsCurrDivider = connection.currMods.find(mod => mod.type === ModStyle.Separator);
+                if(!(containsAdjDivider || containsCurrDivider)){
+                    const modId = generateUUID();
+                    return {
+                        ...connection,
+                        adjMods: [...connection.adjMods, {
+                            ...defaultModValue,
+                            modId: generateUUID(),
+                            parentModId: modId
+                        }],
+                        currMods: [...connection.currMods, {
+                            ...defaultModValue,
+                            modId: modId,
+                        }]
+                    }
+                }else{
+                    return connection;
+                }
+            });
+            return newConnections;
         }
+
+        // Apply defaults to empty directions
+        let modifiedMods = {
+            ...mods,
+            adjCages: {
+                ...mods.adjCages,
+                [ModLocations.Left]: fillDefaultMods(ModDirections.Horizontal, mods.adjCages[ModLocations.Left]),
+                [ModLocations.Right]: fillDefaultMods(ModDirections.Horizontal, mods.adjCages[ModLocations.Right]),
+                [ModLocations.Top]: fillDefaultMods(ModDirections.Vertical, mods.adjCages[ModLocations.Top]),
+                [ModLocations.Bottom]: fillDefaultMods(ModDirections.Vertical, mods.adjCages[ModLocations.Bottom]),
+            },
+        };
+
+        return modifiedMods;
     };
 
     return (

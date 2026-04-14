@@ -17,7 +17,7 @@
  */
 
 import { GateContext } from './layoutEditorTypes';
-import { ConnectedCages, ConnectedModType, ConnectedRacks } from './homeTypes';
+import { ConnectedCages, ConnectedModType, ConnectedRacks, EHRCageMods } from './homeTypes';
 import { Option } from '@labkey/components';
 import { SelectorOptions } from '../components/layoutEditor/RoomSizeSelector';
 
@@ -213,7 +213,7 @@ export interface CageDimensions {
 }
 
 export interface RoomMods {
-    [key: ModIdKey]: Option<ModTypes>;
+    [key: ModIdKey]: EHRCageMods;
 }
 
 export interface CurrCageMods {

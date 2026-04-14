@@ -97,7 +97,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
      */
     useEffect(() => {
         const modsEqual = _.isEqual(selectedRoomMods, selectedLocalRoom.mods);
-        const objectsEqual = _.isEqual(selectedRoom.objects, selectedLocalRoom.objects);
+        const objectsEqual = _.isEqual(selectedRoom?.objects, selectedLocalRoom.objects);
         setShowChangesMenu(!modsEqual || !objectsEqual);
     }, [selectedRoom, selectedLocalRoom, selectedRoomMods]);
 

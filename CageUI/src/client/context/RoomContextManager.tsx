@@ -36,6 +36,7 @@ import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
 import { LayoutSaveResult, RackChangeSaveResult } from '../types/layoutEditorTypes';
 import { useHomeNavigationContext } from './HomeNavigationContextManager';
 import { createNewRoomFromRackChange } from '../api/labkeyActions';
+import { buildUpdatedCageAndRoomMods } from '../utils/homeHelpers';
 
 
 const RoomContext = createContext<RoomContextType>({} as RoomContextType);
@@ -73,7 +74,9 @@ export const RoomContextProvider = ({children}) => {
         }));
     }
 
-    const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
+
+
+    /*const saveCageMods = (currCage: Cage, currCageMods: CurrCageMods): ModificationSaveResult => {
         const cageModsByCage: { [key in string]: CageModificationsType } = {}; // string is object uuid
         let idsToRemove: Map<string, boolean> = new Map();
         const newRoomMods: RoomMods = {...selectedLocalRoom.mods};
@@ -192,7 +195,44 @@ export const RoomContextProvider = ({children}) => {
         );
 
         return {status: 'Success'};
+    };*/
+
+    const saveCageMods = (
+        currCage: Cage,
+        currCageMods: CurrCageMods
+    ): ModificationSaveResult => {
+        // Phase 1: Build updated structures (pure)
+        const { cageModsByCage, newRoomMods } =
+            buildUpdatedCageAndRoomMods(selectedLocalRoom, currCage, currCageMods);
+
+
+
+        // Phase 2: Update React state
+        setSelectedLocalRoom(prevState => {
+            // Deep-update cages only where mods were changed
+            const updatedRackGroups = prevState.rackGroups.map(rg => ({
+                ...rg,
+                racks: rg.racks.map(rack => ({
+                    ...rack,
+                    cages: rack.cages.map(cage => {
+                        if (cageModsByCage[cage.objectId]) {
+                            return { ...cage, mods: cageModsByCage[cage.objectId] };
+                        }
+                        return cage;
+                    }),
+                })),
+            }));
+
+            return {
+                ...prevState,
+                rackGroups: updatedRackGroups,
+                mods: newRoomMods,
+            };
+        });
+
+        return { status: 'Success' };
     };
+
 
     const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
         const newSessionLog: SessionLog = {...sessionLog, queryName: 'cage_modifications_history'};

@@ -42,6 +42,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
     const {saveCageMods} = useRoomContext();
     const {selectedLocalRoom, userProfile} = useHomeNavigationContext();
 
+    const [prevCage, setPrevCage] = useState<Cage>(null);
     const [currCage, setCurrCage] = useState<Cage>(null);
     const [currRack, setCurrRack] = useState<Rack>(null);
     const [currCageMods, setCurrCageMods] = useState<CurrCageMods>(null);
@@ -53,10 +54,22 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
         const tempCage = selectedObj as Cage;
         if (tempCage) {
             const cageRack = findCageInGroup(tempCage.svgId, selectedLocalRoom.rackGroups).rack;
-            setCurrCage(tempCage);
+            setPrevCage(tempCage);
             setCurrRack(cageRack);
         }
     }, [selectedObj]);
+
+    useEffect(() => {
+        setCurrCage(prevCage);
+    }, [prevCage]);
+
+    /*useEffect(() => {
+        if(currCage && currCageMods){
+            const newMods = buildUpdatedCageAndRoomMods(selectedLocalRoom, currCage, currCageMods);
+            console.log("newMods: ", newMods);
+            setCurrCage({...currCage, mods:  newMods.cageModsByCage[currCage.objectId]});
+        }
+    }, [currCageMods]);*/
 
 
     useEffect(() => {
@@ -94,7 +107,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
 
     // This submission updates the room mods with the current selections.
     const handleSaveMods = () => {
-        const result = saveCageMods(currCage, currCageMods);
+        const result = saveCageMods(prevCage, currCageMods);
 
         if (result) {
             if (result.status === 'Success') {

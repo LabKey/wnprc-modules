@@ -21,16 +21,17 @@ import { FC, useEffect, useRef } from 'react';
 import '../../../cageui.scss';
 import { addPrevRoomSvgs } from '../../../utils/helpers';
 import * as d3 from 'd3';
-import { Cage } from '../../../types/typings';
+import { Cage, RoomMods } from '../../../types/typings';
 import { CELL_SIZE } from '../../../utils/constants';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CurrentCageLayoutProps {
     cage: Cage;
+    cageRoomMods: RoomMods;
 }
 
 export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
-    const {cage} = props;
+    const {cage, cageRoomMods} = props;
     const {selectedLocalRoom, userProfile} = useHomeNavigationContext();
 
     const cageRef = useRef<SVGSVGElement>(null);
@@ -45,7 +46,7 @@ export const CurrentCageLayout: FC<CurrentCageLayoutProps> = (props) => {
             const element = d3.select(this) as d3.Selection<SVGGElement, {}, null, undefined>;
             element.remove();
         });
-        addPrevRoomSvgs(userProfile, 'view', cage, cageSvg, selectedLocalRoom, selectedLocalRoom.mods);
+        addPrevRoomSvgs(userProfile, 'view', cage, cageSvg, selectedLocalRoom, cageRoomMods);
     }, [cage]);
 
     // adding 1 to the width/height helps make sure the lines don't get cut off in the image

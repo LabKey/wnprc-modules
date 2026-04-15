@@ -560,17 +560,9 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
             let unitSvg: SVGElement;
-            // If we are editing we can simply copy the svg from the ones displayed.
-            // If we are in view mode they aren't on the page so we must fetch and load them in
-            if (mode === 'edit') {
-                unitSvg = (d3.select(`[id=${rackTypeString}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
-                    .node().cloneNode(true) as SVGElement;
-            } else if (mode === 'view') {
-                await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
-                    unitSvg = d.querySelector(`svg[id*=template]`);
-                });
-            }
-
+            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
+                unitSvg = d.querySelector(`svg[id*=template]`);
+            });
 
             // Only needed for layout editor to attach context menus
             const shape = d3.select(unitSvg);
@@ -640,14 +632,9 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
                 .attr('transform', `translate(0,0)`)
 
             let objSvg: SVGElement;
-
-            if (mode === 'edit') {
-                objSvg = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
-            } else if (mode === 'view') {
-                await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
-                    objSvg = d.querySelector('svg');
-                });
-            }
+            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
+                objSvg = d.querySelector('svg');
+            });
 
             const shape = d3.select(objSvg)
                 .classed('draggable', false)

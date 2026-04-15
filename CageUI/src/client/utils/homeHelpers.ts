@@ -136,7 +136,7 @@ interface BuildResult {
     newRoomMods: RoomMods;
 }
 
-/**
+/*
  * Builds updated cage modifications and room mods based on current changes,
  * without modifying React state.
  */
@@ -264,7 +264,7 @@ export const buildUpdatedCageAndRoomMods = (
     return { cageModsByCage, newRoomMods };
 };
 
-/**
+/*
  * Helper to deep-clone cage mods safely (avoids mutating original)
  */
 const deepCopyCageMods = (mods?: CageModificationsType): CageModificationsType => {
@@ -288,27 +288,3 @@ const initialCageMods = (): CageModificationsType => ({
     [ModLocations.Right]: [],
     [ModLocations.Direct]: [],
 });
-
-
-/**
- * Updates only the `currCage`'s mods in isolation —
- * doesn’t touch adjacents or room mods (for unit testing or isolated edits).
- */
-export const updateCurrCageModsOnly = (
-    cage: Cage,
-    currCageMods: ConnectedModType[]
-): CageModificationsType => {
-    const mods = deepCopyCageMods(cage.mods);
-
-    const directKey = ModLocations.Direct;
-    const newDirectKeys = currCageMods.map(m => ({
-        modId: m.modId,
-        parentModId: m.parentModId ?? null,
-    }));
-
-    mods[directKey] = newDirectKeys.length
-        ? [{ subId: 1, modKeys: newDirectKeys }]
-        : [];
-
-    return mods;
-};

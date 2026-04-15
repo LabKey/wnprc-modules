@@ -89,6 +89,9 @@ export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItem
         if (RoomObjectTypes.RoomDivider === itemType){
             return true;
         }
+        if (RoomObjectTypes.GateOpen === itemType || RoomObjectTypes.GateClosed === itemType){
+            return true;
+        }
     }
     return false;
 }
@@ -102,6 +105,9 @@ export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: R
         if (RoomObjectTypes.RoomDivider === itemType){
             return true;
         }
+        if (RoomObjectTypes.GateOpen === itemType || RoomObjectTypes.GateClosed === itemType){
+            return true;
+        }
     }
     return false;
 }
@@ -112,6 +118,9 @@ export const canPlaceObject = (user: GetUserPermissionsResponse, itemType: RoomI
     }
     if(isRoomModifier(user)){
         if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+        if (RoomObjectTypes.GateOpen === itemType || RoomObjectTypes.GateClosed === itemType){
             return true;
         }
     }

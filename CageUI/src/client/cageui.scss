@@ -1153,8 +1153,8 @@
 
 .arrow {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 15px;
+  height: 15px;
   border-top: 2px solid black;
   border-right: 2px solid black;
   transform: rotate(45deg);
@@ -1172,26 +1172,31 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: large;
+  font-size: x-large;
 }
 
 .room-dir-room-obj {
-  margin: 10px 10px 10px 5px;
+  margin: 15px 10px 15px 5px;
+  border-bottom: 1px solid lightgrey;
 }
 
 .room-dir-rack-obj {
   cursor: pointer;
+  font-size: large;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 15px 10px 15px 5px;
 }
 
 .room-dir-cage-obj {
   cursor: pointer;
   display: flex;
+  font-size: large;
   align-items: center;
   justify-content: space-between;
+  margin: 15px 10px 15px 5px;
 }
 
 .room-dir-header.open .arrow {
@@ -1207,7 +1212,7 @@
   width: 100%;
   border: 3px solid #9DBFAF;
   padding: 5px;
-  height: 3vh;
+  height: 4vh;
   border-radius: 5px 0 0 5px;
   outline: none;
 }

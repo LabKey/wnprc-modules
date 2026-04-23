@@ -32,6 +32,7 @@ import {
     RackChangeValue,
     RackGroup,
     RackStringType,
+    RackTypes,
     RoomItemType,
     RoomObject,
     RoomObjectTypes,
@@ -47,6 +48,8 @@ import {
 import { LayoutTooltip } from './LayoutTooltip';
 import {
     areCagesInSameRack,
+    canOpenContextMenu,
+    canPlaceObject,
     checkAdjacent,
     createDragInLayout,
     createEmptyUnitLoc,
@@ -58,9 +61,8 @@ import {
     findRackInGroup,
     getLayoutOffset,
     getTargetRect,
+    isDraggable,
     isRackEnum,
-    isRoomCreator,
-    isTemplateCreator,
     mergeRacks,
     parseWrapperId,
     placeAndScaleGroup,
@@ -72,6 +74,8 @@ import {
 import {
     addPrevRoomSvgs,
     getNextDefaultRackId,
+    isRoomCreator,
+    isTemplateCreator,
     parseRoomItemNum,
     parseRoomItemType,
     roomItemToString,
@@ -190,11 +194,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
         if (!isRackEnum(updateItemType)) { // adding dragged room object
             group = layoutSvg.append('g')
-                .data([{x: cellX, y: cellY}])
-                .attr('class', 'draggable room-obj')
-                .attr('id', `${roomItemToString(updateItemType)}-${itemId}`)
+                .attr('class', `draggable room-obj type-${roomItemToString(updateItemType)}`)
+                .attr('id', `${roomItemToString(updateItemType)}-${itemId}-wrapper`)
                 .style('pointer-events', 'bounding-box');
-            group.append(() => draggedShape.node());
+
+            group.append('g')
+                .attr('id', `${roomItemToString(updateItemType)}-${itemId}`)
+                .attr('transform', `translate(0,0)`)
+                .append(() => draggedShape.node());
 
         } else { // adding dragged caging unit
             const newRack: Rack = res as Rack;
@@ -217,21 +224,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
         placeAndScaleGroup(group, cellX, cellY, transform);
 
+        // attach drag if user has permissions
+        if(isDraggable(user, updateItemType)){
+            group.call(closeMenuThenDrag);
 
-        group.call(closeMenuThenDrag);
-
-        // attach click listener for context menu
-        if (isRackEnum(updateItemType)) {
-            group.selectAll('text').each(function () {
-                const textElement: SVGTextElement = d3.select(this).node() as SVGTextElement;
-                textElement.setAttribute('contentEditable', 'true');
-                (textElement.children[0] as SVGTSpanElement).style.cursor = 'pointer';
-                (textElement.children[0] as SVGTSpanElement).style.pointerEvents = 'auto';
-                const cageGroupElement = textElement.closest(`[id="${((res as Rack).cages[0] as Cage).svgId}"]`) as SVGGElement;
-                setupEditCageEvent(cageGroupElement, setSelectedObj, contextMenuRef, 'edit', setCtxMenuStyle);
-            });
-        } else {
-            setupEditCageEvent(group.node(), setSelectedObj, contextMenuRef, 'edit', setCtxMenuStyle);
+        }
+        // attach context menu if user has permissions
+        if(canOpenContextMenu(user, updateItemType)){
+            setupEditCageEvent(group.node().firstChild, setSelectedObj, contextMenuRef,"edit", setCtxMenuStyle);
         }
 
         dragLockRef.current = false;
@@ -647,7 +647,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         }
         // Attach x and y data to border group and drag call for resizing
         placeAndScaleGroup(borderGroup, 0, 0, zoomTransform(layoutSvg.node()));
-        borderGroup.call(
+        if(isTemplateCreator(user) || isRoomCreator(user)){
+            borderGroup.call(
             dragBorder(
                 () => {
                     setShowObjectContextMenu(false);
@@ -656,8 +657,10 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 CELL_SIZE,
                 borderGroup,
                 setLocalRoom
-            )
-        );
+                )
+            );
+        }
+
 
         // Set zoom after border is loaded in
         zoomToScale(roomSize.scale);
@@ -686,7 +689,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
         });
         // loads grid with new room
-        addPrevRoomSvgs('edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
+        addPrevRoomSvgs(user, 'edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
         setReloadRoom(null);
     }, [reloadRoom]);
 
@@ -792,14 +795,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
 
 
     const handleDelObject = () => {
-        const selectionToDel = layoutSvg.select(`#${(selectedObj as RoomObject).itemId}`);
+        const objId = (selectedObj as RoomObject).itemId;
+        const selectionToDel = layoutSvg.select(`#${objId}-wrapper`);
         let selectionName = selectionToDel.select('.injected-svg').attr('id'); // name from id in file/injected svg
         // parses the first word if id contains multiple words.
         selectionName = selectionName.indexOf('_') !== -1 ? selectionName.slice(0, selectionName.indexOf('_')) : selectionName;
         showLayoutEditorConfirmation(`Are you sure you want to delete ${selectionName}`).then((r) => {
             if (r) {
                 selectionToDel.remove();
-                delObject(selectionToDel.attr('id'));
+                delObject(objId);
             }
         });
 
@@ -875,62 +879,81 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
             <div ref={utilsRef} id="utils" className={'room-utils'}>
                 <div className={'room-objects'}>
-                    <LayoutTooltip text={'Top'}>
-                        <RoomItemTemplate
-                            fileName={'top'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Bottom'}>
-                        <RoomItemTemplate
-                            fileName={'bottom'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Door'}>
-                        <RoomItemTemplate
-                            fileName={'door'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Drain'}>
-                        <RoomItemTemplate
-                            fileName={'drain'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Divider'}>
-                        <RoomItemTemplate
-                            fileName={'roomDivider'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Room Gate (Closed)'}>
-                        <RoomItemTemplate
-                            fileName={'gateClosed'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Room Gate (Open)'}>
-                        <RoomItemTemplate
-                            fileName={'gateOpen'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
+                    {canPlaceObject(user, RoomObjectTypes.Top) &&
+                        <LayoutTooltip text={'Top'}>
+                            <RoomItemTemplate
+                                    fileName={'top'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RoomObjectTypes.Bottom) &&
+                        <LayoutTooltip text={'Bottom'}>
+                            <RoomItemTemplate
+                                    fileName={'bottom'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RoomObjectTypes.Door) &&
+                        <LayoutTooltip text={'Door'}>
+                            <RoomItemTemplate
+                                    fileName={'door'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RoomObjectTypes.Drain) &&
+                        <LayoutTooltip text={'Drain'}>
+                            <RoomItemTemplate
+                                    fileName={'drain'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RoomObjectTypes.RoomDivider) &&
+                        <LayoutTooltip text={'Divider'}>
+                            <RoomItemTemplate
+                                    fileName={'roomDivider'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RoomObjectTypes.GateClosed) &&
+                        <LayoutTooltip text={'Room Gate (Closed)'}>
+                            <RoomItemTemplate
+                                    fileName={'gateClosed'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RoomObjectTypes.GateOpen) &&
+                        <LayoutTooltip text={'Room Gate (Open)'}>
+                            <RoomItemTemplate
+                                    fileName={'gateOpen'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+
                 </div>
                 <div className={'cage-templates'}>
-                    <LayoutTooltip text={'Single Cage'}>
-                        <RoomItemTemplate
-                            fileName={'cage'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
-                    <LayoutTooltip text={'Pen'}>
-                        <RoomItemTemplate
-                            fileName={'pen'}
-                            className={'draggable'}
-                        />
-                    </LayoutTooltip>
+                    {canPlaceObject(user, RackTypes.Cage) &&
+                        <LayoutTooltip text={'Single Cage'}>
+                            <RoomItemTemplate
+                                    fileName={'cage'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
+                    {canPlaceObject(user, RackTypes.Pen) &&
+                        <LayoutTooltip text={'Pen'}>
+                            <RoomItemTemplate
+                                    fileName={'pen'}
+                                    className={'draggable'}
+                            />
+                        </LayoutTooltip>
+                    }
                 </div>
             </div>
             <div id={'layout-grid'}>
@@ -974,12 +997,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                         data-tg-on="Grid Enabled"
                         htmlFor="cb3-8"></label>
                 </div>
-                <button
-                    id={'clearBtn'}
-                    className={'layout-toolbar-btn'}
-                    onClick={handleClear}
-                >Clear Layout
-                </button>
+                {(isRoomCreator(user) || isTemplateCreator(user)) &&
+                    <button
+                        id={'clearBtn'}
+                        className={'layout-toolbar-btn'}
+                        onClick={handleClear}
+                    >Clear Layout
+                    </button>
+                }
                 {isTemplateCreator(user) &&
                         <button
                                 id={'saveTemplateBtn'}
@@ -1119,9 +1144,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                     element:
                                         <GateSwitch
                                             key={`gate-switch-${(selectedObj as RoomObject).itemId}`}
-                                            layoutSvg={layoutSvg}
                                             selectedObj={selectedObj as RoomObject}
                                             setLocalRoom={setLocalRoom}
+                                            setReloadRoom={setReloadRoom}
                                             closeMenu={() => setShowObjectContextMenu(false)}
                                         />,
                                     types: [RoomObjectTypes.GateClosed, RoomObjectTypes.GateOpen],

@@ -23,7 +23,7 @@ import {
     generateUUID,
     getAdjLocation,
     getDefaultMod,
-    getTypeClassFromElement,
+    getTypeClassFromElement, isRoomCreator, isRoomModifier, isTemplateCreator,
     parseRoomItemType,
     roomItemToString
 } from './helpers';
@@ -33,7 +33,6 @@ import {
     CageDirection,
     CageHistoryData,
     CageMods,
-    CageNumber,
     CageSvgId,
     DefaultRackTypes,
     FullObjectHistoryData,
@@ -50,6 +49,7 @@ import {
     RoomItemClass,
     RoomItemStringType,
     RoomItemType,
+    RoomObjectTypes,
     UnitLocations
 } from '../types/typings';
 import {
@@ -69,21 +69,65 @@ import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
 
 
-export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
-};
 
-export const isRoomCreator = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
-};
 
-export const isRoomModifier = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
-};
+export const isTouchEvent = (event)=> {
+    return event.type.startsWith('touch');
+}
 
-export const isCageModifier = (user: GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
-};
+// removes the wrapper for the id portion of room objects to properly move the object.
+export const extractRoomObjId = (id: string) => {
+    return id.replace(/-wrapper$/, '');
+}
+
+// Determines if the user has access to dragging the item
+export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+    if(isRoomCreator(user) || isTemplateCreator(user)) {
+        return true;
+    }
+    if(isRoomModifier(user)){
+        if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+        if (RoomObjectTypes.GateOpen === itemType || RoomObjectTypes.GateClosed === itemType){
+            return true;
+        }
+    }
+    return false;
+}
+
+// Determines if the user can open the items context menu
+export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+    if(isRoomCreator(user) || isTemplateCreator(user)) {
+        return true;
+    }
+    if(isRoomModifier(user)){
+        if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+        if (RoomObjectTypes.GateOpen === itemType || RoomObjectTypes.GateClosed === itemType){
+            return true;
+        }
+    }
+    return false;
+}
+
+export const canPlaceObject = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+    if(isRoomCreator(user) || isTemplateCreator(user)) {
+        return true;
+    }
+    if(isRoomModifier(user)){
+        if (RoomObjectTypes.RoomDivider === itemType){
+            return true;
+        }
+        if (RoomObjectTypes.GateOpen === itemType || RoomObjectTypes.GateClosed === itemType){
+            return true;
+        }
+    }
+    return false;
+}
+
+
 
 export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promise<{
     fulfilled: FullObjectHistoryData[];
@@ -367,39 +411,113 @@ export function setupEditCageEvent(
     cageGroupElement: SVGGElement,
     setSelectedObj: React.Dispatch<React.SetStateAction<SelectedObj>>,
     localRoomRef: MutableRefObject<Room>,
-    eventType: 'view' | 'edit',
+    eventType: "edit" | "view",
     setCtxMenuStyle?: React.Dispatch<React.SetStateAction<{ display: string, top: string, left: string }>>,
 ): () => void {
-    const handleContextMenu = (event: MouseEvent) => {
-        event.preventDefault();
-        const localRoom = localRoomRef.current;
-        let tempObj: SelectedObj;
-        const element = event.currentTarget as SVGGElement;
+    
+    // Main context menu handler
+    const handleContextMenu = (event: MouseEvent | CustomEvent) => {
+        // Only block native menu if we're using a custom one
+        if (setCtxMenuStyle && event.defaultPrevented === false) {
+            event.preventDefault();
+        }
 
-        //set selected object to either room object or cage
-        if (d3.select(element).classed('room-obj')) {
-            tempObj = localRoom.objects.find((obj) => obj.itemId === element.id);
+        const element = event.target as SVGGElement;
+        let tempObj: SelectedObj;
+
+        if (d3.select(element.parentElement).classed('room-obj')) {
+            tempObj = localRoomRef.current.objects.find(obj => obj.itemId === element.id);
         } else {
             const cageGroupElement = element.closest(`[id^="cageSVG_"]`) as SVGGElement | null;
-            const cageObj = localRoom.rackGroups.flatMap(g => g.racks).flatMap(r => r.cages).find(c => c.svgId === cageGroupElement.id);
+            const cageObj = localRoomRef.current.rackGroups
+                .flatMap(g => g.racks)
+                .flatMap(r => r.cages)
+                .find(c => c.svgId === cageGroupElement?.id);
             tempObj = cageObj;
         }
-        setSelectedObj(tempObj);
-        if (setCtxMenuStyle) {
-            setCtxMenuStyle((prevState) => ({
-                ...prevState,
-                display: 'block',
-                left: `${event.clientX}px`,
-                top: `${event.clientY - 5}px`,
-            }));
-        }
 
+        if (!tempObj) return; // safety
+
+        setSelectedObj(tempObj);
+
+        if (setCtxMenuStyle) {
+            const clientX = (event as MouseEvent).clientX;
+            const clientY = (event as MouseEvent).clientY;
+
+            setCtxMenuStyle({
+                display: 'block',
+                left: `${clientX}px`,
+                top: `${clientY - 5}px`,
+            });
+        }
     };
 
-    // Attach context menu to the lowest level group for that cage.
-    cageGroupElement.style.pointerEvents = 'bounding-box';
+    // Touch gesture handlers
+    let touchStartTime = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchTimer: number | null = null;
+    let isDragging = false;
+
+    const handleTouchStart = (event: TouchEvent) => {
+        if (event.touches.length !== 1) return;
+
+        const touch = event.touches[0];
+        touchStartTime = Date.now();
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        isDragging = false;
+
+        if (touchTimer) clearTimeout(touchTimer);
+
+        // ⚠️ DO NOT preventDefault() here — let long-press begin!
+        touchTimer = window.setTimeout(() => {
+            if (!isDragging) {
+                event.preventDefault();
+                // Create a trusted synthetic contextmenu event for iOS
+                const contextMenuEvent = new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                }) as MouseEvent;
+
+                // Dispatch directly on the element
+                cageGroupElement.dispatchEvent(contextMenuEvent);
+            }
+        }, 500); // iOS default long-press is ~500ms
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+        if (event.touches.length !== 1) return;
+
+        const touch = event.touches[0];
+        const dx = Math.abs(touch.clientX - touchStartX);
+        const dy = Math.abs(touch.clientY - touchStartY);
+
+        if (dx > 10 || dy > 10) {
+            isDragging = true;
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+                touchTimer = null;
+            }
+        }
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+        if (touchTimer) {
+            clearTimeout(touchTimer);
+            touchTimer = null;
+        }
+    };
+
+
+
     if (eventType === 'edit') {
         cageGroupElement.addEventListener('contextmenu', handleContextMenu);
+        cageGroupElement.addEventListener('touchstart', handleTouchStart);
+        cageGroupElement.addEventListener('touchmove', handleTouchMove);
+        cageGroupElement.addEventListener('touchend', handleTouchEnd);
     } else {
         cageGroupElement.addEventListener('click', handleContextMenu);
     }
@@ -407,11 +525,15 @@ export function setupEditCageEvent(
     return () => {
         if (eventType === 'edit') {
             cageGroupElement.removeEventListener('contextmenu', handleContextMenu);
+            cageGroupElement.removeEventListener('touchstart', handleTouchStart);
+            cageGroupElement.removeEventListener('touchmove', handleTouchMove);
+            cageGroupElement.removeEventListener('touchend', handleTouchEnd);
         } else {
             cageGroupElement.removeEventListener('click', handleContextMenu);
         }
     };
 }
+
 
 /*
     Helper function to either connect racks or merge cages
@@ -449,7 +571,7 @@ export async function mergeRacks(props: MergeProps) {
             element.setAttribute('class', `grouped-${shapeType}`);
             element.setAttribute('style', '');
         }
-        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, 'edit', cageActionProps.setCtxMenuStyle);
+        setupEditCageEvent(element, cageActionProps.setSelectedObj, contextMenuRef, "edit", cageActionProps.setCtxMenuStyle);
     }
 
     // add starting x and y for each group to then increment its local subgroup coords by.
@@ -776,7 +898,13 @@ export function createDragInLayout() {
             const element = d3.select(this);
             const transform = d3.zoomTransform(layoutSvg.node());
             const scale = transform.k;
-            const [newX, newY] = d3.pointer(event.sourceEvent, this.parentNode);
+            let [newX, newY] = [0,0];
+            if(isTouchEvent(event.sourceEvent)){
+                [newX, newY] = d3.pointer(event.sourceEvent.touches[0], this.parentNode);
+
+            }else{
+                [newX, newY] = d3.pointer(event.sourceEvent, this.parentNode);
+            }
 
             element.attr('transform', `translate(${newX},${newY}) scale(${scale})`);
         }
@@ -795,7 +923,13 @@ export function createEndDragInLayout(props: LayoutDragProps) {
             const layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any> = d3.select('[id=layout-svg]');
 
             const transform = d3.zoomTransform(layoutSvg.node());
-            const [pointerX, pointerY] = d3.pointer(event, layoutSvg.node()); // mouse position with respect to layout svg
+            let [pointerX, pointerY] = [0,0];
+            if(isTouchEvent(event.sourceEvent)){
+                [pointerX, pointerY] = d3.pointer(event.sourceEvent.changedTouches[0], layoutSvg.node()); // mouse position with respect to layout svg
+
+            }else{
+                [pointerX, pointerY] = d3.pointer(event, layoutSvg.node()); // mouse position with respect to layout svg
+            }
             const {x, y} = getLayoutOffset({
                 clientX: pointerX,
                 clientY: pointerY,

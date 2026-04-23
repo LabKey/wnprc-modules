@@ -23,18 +23,17 @@ import { Room, RoomObject, RoomObjectTypes } from '../../types/typings';
 import { parseRoomItemNum } from '../../utils/helpers';
 
 interface GateSwitchProps {
-    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>;
     selectedObj: RoomObject;
     setLocalRoom: React.Dispatch<React.SetStateAction<Room>>;
+    setReloadRoom: React.Dispatch<React.SetStateAction<Room>>;
     closeMenu: () => void;
 }
 
 export const GateSwitch: FC<GateSwitchProps> = (props) => {
-    const {layoutSvg, selectedObj, setLocalRoom, closeMenu} = props;
+    const {selectedObj, setLocalRoom, closeMenu, setReloadRoom} = props;
 
     // For each open or close, remove gate svg template of the opposite and replace with new version. Also switch id name version keeping id number
     const handleClick = () => {
-        const gateSvg = layoutSvg.select(`#${selectedObj.itemId}`);
         let newGateIdPrefix;
         if (selectedObj.type === RoomObjectTypes.GateOpen) {
             newGateIdPrefix = 'gateClosed';
@@ -42,13 +41,8 @@ export const GateSwitch: FC<GateSwitchProps> = (props) => {
             newGateIdPrefix = 'gateOpen';
         }
 
-        const newGateSvg = (d3.select(`#${newGateIdPrefix}_template_wrapper`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
-        gateSvg.selectChild().remove();
-        gateSvg.append(() => newGateSvg);
-        gateSvg.attr('id', `${newGateIdPrefix}-${parseRoomItemNum((selectedObj as RoomObject).itemId)}`);
-
         setLocalRoom(prevState => {
-            return {
+            const newRoom = {
                 ...prevState,
                 objects: prevState.objects.map((obj) => {
                     if (obj.itemId === selectedObj.itemId) {
@@ -61,7 +55,10 @@ export const GateSwitch: FC<GateSwitchProps> = (props) => {
                     return obj;
                 })
             };
+            setReloadRoom(newRoom);
+            return newRoom;
         });
+
         closeMenu();
     };
     return (

@@ -51,6 +51,7 @@ import {
     RoomObject,
     RoomObjectStringType,
     RoomObjectTypes,
+    SessionLog,
     TemplateHistoryData,
     UnitLocations,
     UnitType
@@ -58,12 +59,14 @@ import {
 import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
-import { ActionURL, Filter, Utils } from '@labkey/api';
+import { ActionURL, Filter, Security, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault,
+    canOpenContextMenu,
     createEmptyUnitLoc,
     findCageInGroup,
+    isDraggable,
     isRackEnum,
     isRoomHomogeneousDefault,
     placeAndScaleGroup,
@@ -78,6 +81,32 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+
+
+export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
+};
+
+export const isRoomCreator = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
+};
+
+export const isRoomModifier = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
+};
+
+export const isCageModifier = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
+};
+
+
+// Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
+export const toLabKeyDate = (date: Date): string => {
+    const pad = (n: number, cnt: number) => n.toString().padStart(cnt, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1,2)}-${pad(date.getDate(), 2)} ` +
+        `${pad(date.getHours(),2)}:${pad(date.getMinutes(),2)}:${pad(date.getSeconds(),2)}.${pad(date.getMilliseconds(),3)}`;
+}
 
 export const generateCageId = (objectId: string): CageSvgId => {
 
@@ -179,6 +208,29 @@ export const parseLongId = (input: string) => {
     }
     return;
 };
+
+export const formatRoomObj = (input: string): string => {
+    // Handle the special cases with any digit after hyphen
+    if (input.startsWith("gateClosed-") || input.startsWith("gateOpen-")) {
+        return "Gate";
+}
+    // Remove the "-{digit}" suffix if present
+    let cleanString = input.replace(/-\d+$/, '');
+
+    // Handle empty string
+    if (!cleanString) return '';
+
+    // Split on uppercase letters and hyphens, then filter out empty strings
+    const parts = cleanString.split(/(?=[A-Z])|[-_]/).filter(part => part.length > 0);
+
+    // Capitalize first letter of each part and make the rest lowercase
+    return parts
+        .map(part => {
+            if (part.length === 0) return '';
+            return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+        })
+        .join(' ');
+}
 
 export const formatCageNum = (str: string) => {
     // Split the string by hyphens
@@ -409,7 +461,6 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
                 }));
 
                 const layoutHistoryResults = await processRealLayoutHistory(layoutHistoryData);
-                console.log('Layout history results', layoutHistoryResults);
 
                 if (layoutHistoryResults.rejected.length > 0) {
                     throw new Error(`Error processing layout history for ${roomName}: \n ${layoutHistoryResults.rejected.join(`\n`)}`);
@@ -447,7 +498,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
-export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
 
     if ((unitsToRender as Room)?.rackGroups) {
@@ -509,26 +560,16 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
             let unitSvg: SVGElement;
-            // If we are editing we can simply copy the svg from the ones displayed.
-            // If we are in view mode they aren't on the page so we must fetch and load them in
-            if (mode === 'edit') {
-                unitSvg = (d3.select(`[id=${rackTypeString}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>)
-                    .node().cloneNode(true) as SVGElement;
-            } else if (mode === 'view') {
-                await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
-                    unitSvg = d.querySelector(`svg[id*=template]`);
-                });
-            }
-
+            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
+                unitSvg = d.querySelector(`svg[id*=template]`);
+            });
 
             // Only needed for layout editor to attach context menus
             const shape = d3.select(unitSvg);
             shape.classed('draggable', false);
             shape.style('pointer-events', 'none');
 
-            const cageGroupContext = shape.select(`#${rackTypeString}`).node() as SVGGElement;
             // in order to set the event pass in the context menu ref and styles to show/hide it
-            setupEditCageEvent(cageGroupContext, setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
             (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
 
             if (mode === 'view') {
@@ -536,6 +577,10 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
             }
 
             cageGroup.append(() => shape.node());
+            // attach context menu if user has permissions for cages
+            if(canOpenContextMenu(user, rack.type.type)){
+                setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
+            }
 
         });
 
@@ -561,34 +606,35 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
         let groupY = renderType === 'room' ? group.y : group.racks[0].y;
         placeAndScaleGroup(parentGroup, groupX, groupY, zoomTransform(layoutSvg.node()));
         if (mode === 'edit') {
-            parentGroup.call(closeMenuThenDrag);
+            if(isDraggable(user, group.racks[0].type.type)){
+                parentGroup.call(closeMenuThenDrag);
+            }
         }
     };
 
     // We are loading an entire room into the svg
     if (renderType === 'room') {
+        // Render rack groups, racks, and cages
         (unitsToRender as Room).rackGroups.forEach((group) => {
             createGroup(group);
         });
 
+        // Render room objects
         (unitsToRender as Room).objects.forEach(async (roomObj) => {
-            const roomObjGroup = layoutSvg.append('g')
-                .data([{x: roomObj.x, y: roomObj.y}])
-                .attr('id', roomObj.itemId)
+            const wrapperGroup = layoutSvg.append('g')
+                .attr('id', roomObj.itemId + '-wrapper')
                 .attr('class', 'draggable room-obj')
                 .attr('transform', `translate(${roomObj.x}, ${roomObj.y}) scale(${mode === 'edit' ? roomObj.scale : 1})`)
                 .style('pointer-events', 'bounding-box');
 
-            let objSvg: SVGElement;
+            const roomObjGroup = wrapperGroup.append('g')
+                .attr('id', roomObj.itemId)
+                .attr('transform', `translate(0,0)`)
 
-            if (mode === 'edit') {
-                objSvg = (d3.select(`[id=${roomItemToString(roomObj.type)}_template_wrapper]`) as d3.Selection<SVGElement, {}, HTMLElement, any>).node().cloneNode(true) as SVGElement;
-            } else if (mode === 'view') {
-                await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
-                    (roomObjGroup.node() as SVGElement).appendChild(d.documentElement);
-                });
-                return;
-            }
+            let objSvg: SVGElement;
+            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
+                objSvg = d.querySelector('svg');
+            });
 
             const shape = d3.select(objSvg)
                 .classed('draggable', false)
@@ -596,9 +642,17 @@ export const addPrevRoomSvgs = (mode: 'edit' | 'view', unitsToRender: Room | Rac
 
 
             roomObjGroup.append(() => shape.node());
-            placeAndScaleGroup(roomObjGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
-            setupEditCageEvent(roomObjGroup.node() as SVGGElement, setSelectedObj, contextMenuRef, setCtxMenuStyle);
-            roomObjGroup.call(closeMenuThenDrag);
+            placeAndScaleGroup(wrapperGroup, roomObj.x, roomObj.y, zoomTransform(layoutSvg.node()));
+            // Attach context menu if user has permissions for room objects
+            if(canOpenContextMenu(user, roomObj.type)){
+                setupEditCageEvent(roomObjGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
+            }
+            if(mode === 'edit'){
+                // Attach drag functionality if user has permissions
+                if(isDraggable(user, roomObj.type)){
+                    wrapperGroup.call(closeMenuThenDrag);
+                }
+            }
         });
     } else if (renderType === 'group') { // we are rendering a single rack group
         createGroup(unitsToRender as RackGroup);
@@ -774,8 +828,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 [ModLocations.Direct]: []
             };
 
-            const modReturnData = await cageModLookup([], []);
-            const availMods = modReturnData.map(row => ({value: row.value, label: row.title}));
+            const availMods = await cageModLookup([], []);
 
             const prevMods = prevRoom.modData.filter((mod) => mod.cage === cageData.objectId);
             prevMods.forEach((mod) => {
@@ -1230,7 +1283,7 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 };
 
-export const saveRoomHelper = async (room: Room, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
+export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 
     const roomName = room.name;
@@ -1300,7 +1353,7 @@ export const saveRoomHelper = async (room: Room, oldTemplateName?: string, prevR
     let result: LayoutSaveResult;
 
     try {
-        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName, prevRackCondition);
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition);
         let errors;
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];

@@ -36,6 +36,9 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
+import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
+import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 import java.sql.SQLException;
@@ -68,10 +71,11 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
         {
             boolean hasPermission = super.hasPermission(user, perm);
             boolean isEditPerm = perm == InsertPermission.class || perm == UpdatePermission.class || perm == DeletePermission.class;
-
             if (isEditPerm)
             {
-                return super.hasPermission(user, CageUITemplateCreatorPermission.class); // Besides normal folder permissions check for CageUILayoutEditorPermission
+                return super.hasPermission(user, CageUILayoutEditorAccessPermission.class)
+                        || super.hasPermission(user, CageUIModificationEditorPermission.class)
+                        || super.hasPermission(user, CageUIAnimalEditorPermission.class);
             }
 
             return hasPermission;
@@ -82,7 +86,7 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if (hasPermission(user, CageUITemplateCreatorPermission.class))
+            if (hasPermission(user, InsertPermission.class))
             {
                 result = super._insertRowsUsingDIB(user, container, rows, getDataIteratorContext(errors, InsertOption.INSERT, configParameters), extraScriptContext);
             }
@@ -96,7 +100,7 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
                 throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if (hasPermission(user, CageUITemplateCreatorPermission.class))
+            if (hasPermission(user, UpdatePermission.class))
             {
                 result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
             }
@@ -108,7 +112,7 @@ public class RacksTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
         public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
                 throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            if (hasPermission(user, CageUITemplateCreatorPermission.class))
+            if (hasPermission(user, DeletePermission.class))
             {
                 return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }

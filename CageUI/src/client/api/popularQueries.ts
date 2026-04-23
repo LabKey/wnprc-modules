@@ -35,7 +35,7 @@ export const cageModLookup = async (columns: string[], filterArray: Filter.IFilt
     if (res.rows.length !== 0) {
         return res.rows as EHRCageMods[];
     } else {
-        console.log('Error cageui modifications', res);
+        console.error('Error cageui modifications', res);
     }
 };
 

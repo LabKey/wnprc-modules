@@ -21,29 +21,30 @@ import { FC, useEffect, useRef, useState } from 'react';
 import '../../../cageui.scss';
 import { ModificationEditor } from './ModificationEditor';
 import { SelectedObj } from '../../../types/layoutEditorTypes';
-import { Cage, CurrCageMods, Rack } from '../../../types/typings';
-import { findCageInGroup, isCageModifier } from '../../../utils/LayoutEditorHelpers';
+import { Cage, CurrCageMods, ModDirections, ModLocations, ModStyle, ModTypes, Rack } from '../../../types/typings';
+import { findCageInGroup } from '../../../utils/LayoutEditorHelpers';
 import { useRoomContext } from '../../../context/RoomContextManager';
 import { Button } from 'react-bootstrap';
 import { AnimalEditor } from './AnimalEditor';
-import { formatCageNum } from '../../../utils/helpers';
+import { formatCageNum, generateUUID, isCageModifier } from '../../../utils/helpers';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { ConnectedCage, ConnectedRack } from '../../../types/homeTypes';
+import { cageModLookup } from '../../../api/popularQueries';
 
 interface CagePopupProps {
-    showEditor: boolean;
     selectedObj: SelectedObj;
     closeMenu: () => void;
 }
 
 export const CagePopup: FC<CagePopupProps> = (props) => {
     const {
-        showEditor,
         closeMenu,
         selectedObj,
     } = props;
     const {saveCageMods} = useRoomContext();
-    const {selectedRoom, userProfile} = useHomeNavigationContext();
+    const {selectedLocalRoom, userProfile} = useHomeNavigationContext();
 
+    const [prevCage, setPrevCage] = useState<Cage>(null);
     const [currCage, setCurrCage] = useState<Cage>(null);
     const [currRack, setCurrRack] = useState<Rack>(null);
     const [currCageMods, setCurrCageMods] = useState<CurrCageMods>(null);
@@ -54,12 +55,15 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
     useEffect(() => {
         const tempCage = selectedObj as Cage;
         if (tempCage) {
-            const cageRack = findCageInGroup(tempCage.svgId, selectedRoom.rackGroups).rack;
-            setCurrCage(tempCage);
+            const cageRack = findCageInGroup(tempCage.svgId, selectedLocalRoom.rackGroups).rack;
+            setPrevCage(tempCage);
             setCurrRack(cageRack);
         }
     }, [selectedObj]);
 
+    useEffect(() => {
+        setCurrCage(prevCage);
+    }, [prevCage]);
 
     useEffect(() => {
         // Check if the click was outside the menu
@@ -96,25 +100,76 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
 
     // This submission updates the room mods with the current selections.
     const handleSaveMods = () => {
-        const result = saveCageMods(currCage, currCageMods);
-        console.log('Submit result: ', result);
+        console.log("SaveMods: ", currCageMods);
+        validateAndApplyDefaults(currCageMods).then((res) => {
+            const result = saveCageMods(prevCage, res);
 
-        if (result) {
-            if (result.status === 'Success') {
-                handleCleanup();
-            } else {
-                setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join('\n'));
+            if (result) {
+                if (result.status === 'Success') {
+                    handleCleanup();
+                } else {
+                    setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join('\n'));
+                }
             }
+        });
+    };
+
+    // Function ensures that default mods are chosen if the user fails to pick any mods and the selection component is empty when saving.
+    const validateAndApplyDefaults = async (mods: CurrCageMods): Promise<CurrCageMods> => {
+        const cageModData = await cageModLookup([],[]);
+        const fillDefaultMods = (direction: ModDirections, connections: ConnectedRack[] | ConnectedCage[]) => {
+            // Define your default values here
+            const defaultHorizontalMod = cageModData.find((mod) => mod.value === ModTypes.SolidDivider);
+            const defaultVerticalMod = cageModData.find((mod) => mod.value === ModTypes.StandardFloor);
+            const defaultModValue = direction === ModDirections.Vertical ? defaultVerticalMod : defaultHorizontalMod;
+
+
+            const newConnections = connections.map((connection: ConnectedRack | ConnectedCage) => {
+                const containsAdjDivider = connection.adjMods.find(mod => mod.type === ModStyle.Separator);
+                const containsCurrDivider = connection.currMods.find(mod => mod.type === ModStyle.Separator);
+                if(!(containsAdjDivider || containsCurrDivider)){
+                    const modId = generateUUID();
+                    return {
+                        ...connection,
+                        adjMods: [...connection.adjMods, {
+                            ...defaultModValue,
+                            modId: generateUUID(),
+                            parentModId: modId
+                        }],
+                        currMods: [...connection.currMods, {
+                            ...defaultModValue,
+                            modId: modId,
+                        }]
+                    }
+                }else{
+                    return connection;
+                }
+            });
+            return newConnections;
         }
+
+        // Apply defaults to empty directions
+        let modifiedMods = {
+            ...mods,
+            adjCages: {
+                ...mods.adjCages,
+                [ModLocations.Left]: fillDefaultMods(ModDirections.Horizontal, mods.adjCages[ModLocations.Left]),
+                [ModLocations.Right]: fillDefaultMods(ModDirections.Horizontal, mods.adjCages[ModLocations.Right]),
+                [ModLocations.Top]: fillDefaultMods(ModDirections.Vertical, mods.adjCages[ModLocations.Top]),
+                [ModLocations.Bottom]: fillDefaultMods(ModDirections.Vertical, mods.adjCages[ModLocations.Bottom]),
+            },
+        };
+
+        return modifiedMods;
     };
 
     return (
-        showEditor &&
-        <div className="cage-popup-overlay">
-            <div className={"cage-popup"} ref={menuRef}>
-                <div className="cage-popup-header">
-                    <h1 className="cage-popup-title">{formatCageNum(currCage.cageNum)}</h1>
-                    <button className="cage-popup-close" onClick={handleCleanup}>&times;</button>
+        currCage &&
+        <div className="room-display-popup-overlay">
+            <div className={"room-display-popup"} ref={menuRef}>
+                <div className="room-display-popup-header">
+                    <h1 className="room-display-popup-title">{formatCageNum(currCage.cageNum)}</h1>
+                    <button className="room-display-popup-close" onClick={handleCleanup}>&times;</button>
                 </div>
                 <ModificationEditor
                     currCage={currCage}
@@ -123,16 +178,16 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
                 />
                 <AnimalEditor
                 />
-                <div className="cage-popup-content" style={{alignItems: 'flex-end'}}>
-                    <div className="cage-popup-error">
+                <div className="room-display-popup-content" style={{alignItems: 'flex-end'}}>
+                    <div className="room-display-popup-error">
                         {showError}
                     </div>
-                    <div className="cage-popup-actions">
-                        <Button className="cage-popup-button cage-popup-cancel"
+                    <div className="room-display-popup-actions">
+                        <Button className="room-display-popup-button room-display-popup-cancel"
                                 onClick={handleCleanup}>Cancel</Button>
                         {isCageModifier(userProfile) &&
                             <Button
-                                className="cage-popup-button cage-popup-save"
+                                className="room-display-popup-button room-display-popup-save"
                                 onClick={handleSaveMods}
                             >
                                 Save Mods

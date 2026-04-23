@@ -68,7 +68,7 @@ export const GateChangeRoom: FC<GateChangeRoomProps> = (props) => {
                 setOptions(rowOptions);
             }
         }).catch(err => {
-            console.log('Error fetching prev room', err);
+            console.error('Error fetching prev room', err);
         });
     }, []);
 

@@ -282,5 +282,41 @@ export const Modifications: ModRecord = {
             property: 'fill',
             value: '#FCB017'
         }]
+    },
+    [ModTypes.Restraint]: {
+        name: 'Restraint',
+        svgIds: {
+            [ModLocations.Direct]: {
+                [GroupRotation.Origin]: [ModSvgLocId.Restraint],
+                [GroupRotation.Quarter]: [ModSvgLocId.Restraint],
+                [GroupRotation.Half]: [ModSvgLocId.Restraint],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.Restraint]
+            },
+        },
+        styles: [{
+            property: 'stroke',
+            value: 'black'
+        }, {
+            property: 'stroke-width',
+            value: '1px'
+        }, {
+            property: 'fill',
+            value: '#FF0000'
+        }]
+    },
+    [ModTypes.Blind]: {
+        name: 'Window Blind',
+        svgIds: {
+            [ModLocations.Direct]: {
+                [GroupRotation.Origin]: [ModSvgLocId.Blind],
+                [GroupRotation.Quarter]: [ModSvgLocId.Blind],
+                [GroupRotation.Half]: [ModSvgLocId.Blind],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.Blind]
+            },
+        },
+        styles: [{
+            property: 'opacity',
+            value: '100'
+        }]
     }
 };

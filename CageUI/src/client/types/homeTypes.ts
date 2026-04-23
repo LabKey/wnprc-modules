@@ -33,7 +33,7 @@ import { Option } from '@labkey/components';
 
 export type SelectedViews = 'Home' | 'Room' | 'Rack' | 'Cage';
 
-export type ConnectedModType = Partial<Option<ModTypes>> & { modId: ModIdKey, parentModId?: ModIdKey };
+export type ConnectedModType = Partial<EHRCageMods> & { modId: ModIdKey, parentModId?: ModIdKey };
 
 export type ExpandedRooms = {
     [key: string]: boolean;

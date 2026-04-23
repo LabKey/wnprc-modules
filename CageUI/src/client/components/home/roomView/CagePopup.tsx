@@ -65,15 +65,6 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
         setCurrCage(prevCage);
     }, [prevCage]);
 
-    /*useEffect(() => {
-        if(currCage && currCageMods){
-            const newMods = buildUpdatedCageAndRoomMods(selectedLocalRoom, currCage, currCageMods);
-            console.log("newMods: ", newMods);
-            setCurrCage({...currCage, mods:  newMods.cageModsByCage[currCage.objectId]});
-        }
-    }, [currCageMods]);*/
-
-
     useEffect(() => {
         // Check if the click was outside the menu
         const handleClickOutside = (event) => {

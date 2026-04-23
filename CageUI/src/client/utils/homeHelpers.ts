@@ -18,18 +18,33 @@
 
 import {
     Cage,
-    CageDirection,
+    CageDirection, CageModification, CageModificationsType,
     CageNumber,
     CurrCageMods,
     ModDirections,
     ModLocations,
-    ModTypes,
+    ModTypes, Room,
     RoomMods
 } from '../types/typings';
-import { Option } from '@labkey/components';
-import { cageModLookup } from '../api/popularQueries';
-import { parseRoomItemNum, parseRoomItemType } from './helpers';
+import {
+    getAdjLocation,
+    isRoomCreator,
+    isRoomModifier,
+    isTemplateCreator,
+    parseRoomItemNum,
+    parseRoomItemType
+} from './helpers';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { ConnectedModType } from '../types/homeTypes';
 
+
+// Determines if the user has access to editing the layout
+export const canEditLayout = (user: GetUserPermissionsResponse) => {
+    if(isRoomCreator(user) || isTemplateCreator(user) || isRoomModifier(user)) {
+        return true;
+    }
+    return false;
+}
 
 // takes a cage number and returns it in a display friendly format, ex: cage-1 -> Cage 1
 export const getCageNumDisplay = (cageNum: CageNumber) => {
@@ -114,3 +129,162 @@ export const findDetails = (clickedCage, cageDetails, rack) => {
         }
     });
 };
+
+
+interface BuildResult {
+    cageModsByCage: { [key: string]: CageModificationsType };
+    newRoomMods: RoomMods;
+}
+
+/*
+ * Builds updated cage modifications and room mods based on current changes,
+ * without modifying React state.
+ */
+export const buildUpdatedCageAndRoomMods = (
+    selectedLocalRoom: Room,
+    currCage: Cage,
+    currCageMods: CurrCageMods
+): BuildResult => {
+    const cageModsByCage: { [key: string]: CageModificationsType } = {};
+    const idsToRemove = new Set<string>();
+    const newRoomMods: RoomMods = { ...selectedLocalRoom.mods }; // shallow copy of current room mods
+
+    // --- 1. Process adjacent cages ---
+    Object.entries(currCageMods.adjCages).forEach(([dirKey, allDirMods]) => {
+        allDirMods.forEach((modSubsection) => {
+            const { currMods = [], adjMods = [], currCage: adjCurrCage, adjCage: adjAdjCage } = modSubsection;
+
+            const currCageId = adjCurrCage.objectId;
+            const adjCageId = adjAdjCage.objectId;
+
+            // Initialize cage modifications if missing (deep copy the existing mods)
+            if (!cageModsByCage[currCageId]) {
+                cageModsByCage[currCageId] = deepCopyCageMods(adjCurrCage.mods);
+            }
+            if (!cageModsByCage[adjCageId]) {
+                cageModsByCage[adjCageId] = deepCopyCageMods(adjAdjCage.mods);
+            }
+
+            // Step A: Add new mods to room-wide mods registry
+            [...currMods, ...adjMods].forEach(mod => {
+                newRoomMods[mod.modId] = {direction: mod.direction, rowid: mod.rowid, title: mod.title, type: mod.type, value: mod.value};
+            });
+
+            // Step B: Collect mod IDs to remove (from old modKeys in same dir/subId)
+            const oldModIds = [
+                // From current cage's mods in this direction + subId
+                ...(cageModsByCage[currCageId][dirKey] ?? [])
+                    .filter(cm => cm.subId === modSubsection.currSubId)
+                    .flatMap(cm => cm.modKeys.map(m => m.modId)),
+                // From adjacent cage's mods in *reverse* direction + same subId
+                ...(cageModsByCage[adjCageId][getAdjLocation(parseInt(dirKey)) as ModLocations] ?? [])
+                    .filter(cm => cm.subId === modSubsection.adjSubId)
+                    .flatMap(cm => cm.modKeys.map(m => m.modId)),
+            ];
+
+            oldModIds.forEach(id => idsToRemove.add(id));
+
+            // Step C: Update modKeys for current cage
+            cageModsByCage[currCageId][dirKey] = (
+                cageModsByCage[currCageId][dirKey] || []
+            ).map((cm: CageModification) => {
+                if (cm.subId === modSubsection.currSubId) {
+                    const updatedModKeys = currMods.map(m => ({
+                        modId: m.modId,
+                        parentModId: m.parentModId ?? null,
+                    }));
+
+                    // De-duplicate removals: if new mod has same ID as an old one we're removing, don't remove it
+                    updatedModKeys.forEach(m => idsToRemove.delete(m.modId));
+
+                    return {
+                        ...cm,
+                        modKeys: updatedModKeys,
+                    };
+                }
+                return cm;
+            });
+
+            // Step D: Update modKeys for adjacent cage
+            const reverseDir = getAdjLocation(parseInt(dirKey)) as ModLocations;
+            cageModsByCage[adjCageId][reverseDir] = (
+                cageModsByCage[adjCageId][reverseDir] || []
+            ).map((cm: CageModification) => {
+                if (cm.subId === modSubsection.adjSubId) {
+                    const updatedModKeys = adjMods.map(m => ({
+                        modId: m.modId,
+                        parentModId: m.parentModId ?? null,
+                    }));
+
+                    updatedModKeys.forEach(m => idsToRemove.delete(m.modId));
+
+                    return {
+                        ...cm,
+                        modKeys: updatedModKeys,
+                    };
+                }
+                return cm;
+            });
+        });
+    });
+
+    // --- 2. Process current (direct) cage mods ---
+    const directKey = ModLocations.Direct;
+
+    // Remove old direct mod keys
+    const currDirectMods = currCage.mods?.[directKey] ?? [];
+    if (currDirectMods.length > 0) {
+        currDirectMods[0].modKeys.forEach(m => idsToRemove.add(m.modId));
+    }
+
+    // Add new direct mods
+    const newDirectMods = currCageMods.currCage.map(mod => {
+        newRoomMods[mod.modId] = {direction: mod.direction, rowid: mod.rowid, title: mod.title, type: mod.type, value: mod.value};
+        idsToRemove.delete(mod.modId); // prevent removal if re-saved unchanged
+        return {
+            modId: mod.modId,
+            parentModId: mod.parentModId ?? null,
+        };
+    });
+
+    // Update direct cage mods (only first subId = 1 is used)
+    const currCageId = currCage.objectId;
+    if (!cageModsByCage[currCageId]) {
+        cageModsByCage[currCageId] = deepCopyCageMods(currCage.mods);
+    }
+    cageModsByCage[currCageId][directKey] = newDirectMods.length
+        ? [{ subId: 1, modKeys: newDirectMods }]
+        : [];
+
+    // Apply removals (already tracked in Set → delete from newRoomMods)
+    idsToRemove.forEach(modId => {
+        delete newRoomMods[modId];
+    });
+
+    return { cageModsByCage, newRoomMods };
+};
+
+/*
+ * Helper to deep-clone cage mods safely (avoids mutating original)
+ */
+const deepCopyCageMods = (mods?: CageModificationsType): CageModificationsType => {
+    if (!mods) return initialCageMods(); // assuming you have a fallback
+    return Object.fromEntries(
+        Object.entries(mods).map(([dir, cMods]) => [
+            dir,
+            cMods.map(cm => ({
+                ...cm,
+                modKeys: [...cm.modKeys],
+            })),
+        ])
+    ) as CageModificationsType;
+};
+
+// You’ll need this fallback somewhere — e.g., for empty cages
+const initialCageMods = (): CageModificationsType => ({
+    [ModLocations.Top]: [],
+    [ModLocations.Bottom]: [],
+    [ModLocations.Left]: [],
+    [ModLocations.Right]: [],
+    [ModLocations.Direct]: [],
+});

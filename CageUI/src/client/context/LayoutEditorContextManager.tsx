@@ -39,11 +39,18 @@ import {
     RoomObject,
     RoomObjectTypes,
     UnitLocations,
-    UnitType
+    UnitType,
+    SessionLog
 } from '../types/typings';
-import { CellKey, DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from '../types/layoutEditorTypes';
 import {
-    createEmptyUnitLoc,
+    CellKey,
+    DeleteActions,
+    LayoutSaveResult,
+    RackActions,
+    SelectedObj,
+} from '../types/layoutEditorTypes';
+import {
+    createEmptyUnitLoc, extractRoomObjId,
     findCageInGroup,
     findRackInGroup,
     findSelectObjRack,
@@ -63,7 +70,7 @@ import {
     parseRoomItemType,
     rackTypeToDefaultType,
     roomItemToString,
-    saveRoomHelper
+    saveRoomHelper, toLabKeyDate
 } from '../utils/helpers';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
@@ -85,6 +92,12 @@ export const useLayoutEditorContext = () => {
 };
 
 export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, prevRoom, user}) => {
+    const [sessionLog, setSessionLog] = useState<SessionLog>({
+        startTime: toLabKeyDate(new Date()),
+        userAgent: navigator.userAgent,
+        schemaName: 'cageui',
+        queryName: 'layout_history'
+    });
     // loaded in and unchanged since start of layout editing
     const [room, setRoom] = useState<Room>({
         name: 'new-layout',
@@ -137,7 +150,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
     // instead of tying scale to each location, manage one scale for the whole layout
     const [scale, setScale] = useState<number>(1);
-
 
     const grid = useRef<Map<CellKey, LocationCoords[]>>(new Map());
 
@@ -592,7 +604,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                     // Find the moved rack to access its cages
                     if (!movedRack) {
-                        console.log('Failed to update cages location for rack');
+                        console.error('Failed to update cages location for rack');
                         return prevRoom; // cannot find an available rack id to move
                     }
 
@@ -643,7 +655,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                     // Find the moved rack to access its cages
                     if (movedRacks.length === 0) {
-                        console.log('Failed to update cages location for rack');
+                        console.error('Failed to update cages location for rack');
                         return prevRoom; // cannot find an available rack id to move
                     }
                     setUnitLocs((prevUnitLocations) => {
@@ -676,7 +688,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 updatedLocalRoom = {
                     ...prevRoom,
                     objects: prevRoom.objects.map(item =>
-                        item.itemId === itemId
+                        item.itemId === extractRoomObjId(itemId)
                             ? {...item, x, y, scale: k}
                             : item
                     )
@@ -1153,7 +1165,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     };
 
     const saveRoom = async (oldTemplateName?: string): Promise<LayoutSaveResult> => {
-        return saveRoomHelper(localRoom, oldTemplateName);
+        return saveRoomHelper(localRoom, sessionLog, oldTemplateName );
     };
 
     useEffect(() => {

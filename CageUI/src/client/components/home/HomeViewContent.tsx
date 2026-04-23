@@ -22,9 +22,10 @@ import '../../cageui.scss';
 
 export const HomeViewContent: FC = () => {
 
+    // TODO possibly add instructions or another search bar here.
     return (
         <div>
-            Home Content
+
         </div>
     );
 };

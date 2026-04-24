@@ -25,6 +25,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -133,7 +134,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -144,6 +147,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.springframework.validation.Errors;
 
@@ -2470,7 +2475,9 @@ public class WNPRC_EHRController extends SpringActionController
 
             // Verifies passed-in arguments are not null.
             if (form.getJsonObject() == null) {
-                response.put("detailedResponse", "JSON argument cannot be null.");
+                String issueDetails = "JSON argument cannot be null.";
+                _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
+                response.put("detailedResponse", issueDetails);
                 response.put("success", false);
                 return response;
             }
@@ -2479,6 +2486,39 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject myForm = form.getJsonObject();
             String recordId = myForm.get("Id").toString();
             String recordObservation = myForm.get("observation").toString();
+            String deviceDate = myForm.get("date").toString();
+            String timezoneOffset = myForm.get("timezoneOffset").toString();
+            String timezone = myForm.get("timezone").toString();
+
+            // Gets the current server time & offset.
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+            java.time.LocalDateTime serverDate = java.time.LocalDateTime.now();    // Explicitly import Java here, otherwise script defaults to joda time due to both being imported above.
+            java.time.LocalDateTime serverDatePlus10 = serverDate.plusMinutes(10);
+            java.time.LocalDateTime serverDateMinus10 = serverDate.minusMinutes(10);
+            String formattedServerDate = serverDate.format(formatter);
+            ZoneId currentTimezone = ZoneId.systemDefault();
+            ZoneOffset currentOffset = OffsetDateTime.now().getOffset();
+
+            // Verifies the iOS clock matches our server timezone.
+            java.time.LocalDateTime deviceDateAsLocalDateTime = java.time.LocalDateTime.parse(deviceDate, formatter);
+            if (deviceDateAsLocalDateTime.isBefore(serverDateMinus10) || deviceDateAsLocalDateTime.isAfter(serverDatePlus10)) {
+                String issueDetails = "Your current device time is over 10 minutes off from the current server time.  Please update your current device time.";
+                _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
+                response.put("detailedResponse", issueDetails);
+                response.put("success", false);
+                return response;
+            }
+
+            // Logs debug data for setting up timezone validation in the future.
+            _log.info(
+                    "Anesthesia Recovery Time Test" + System.lineSeparator() +
+                    "iOS Parsed Date: [" + deviceDate + "]" + System.lineSeparator() +
+                    "iOS Timezone: [" + timezone + "]" + System.lineSeparator() +
+                    "iOS Offset: [" + timezoneOffset + "]" + System.lineSeparator() +
+                    "Java Parsed Date: [" + formattedServerDate + "]" + System.lineSeparator() +
+                    "Server Timezone: [" + currentTimezone + "]" + System.lineSeparator() +
+                    "Server Offset: [" + currentOffset + "]" + System.lineSeparator()
+            );
 
             // Retrieves all necessary data.
             try {
@@ -2487,38 +2527,60 @@ public class WNPRC_EHRController extends SpringActionController
                 String[] demographicsTargetColumns = new String[]{"Id", "calculated_status"};
                 ArrayList<HashMap<String, String>> demographicsRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", demographicsFilter, null, demographicsTargetColumns);
                 if (demographicsRows.isEmpty()) {
-                    response.put("detailedResponse", "Animal " + recordId + " does not currently exist at the center.");
+                    String issueDetails = "Animal " + recordId + " does not currently exist at the center.";
+                    _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
+                    response.put("detailedResponse", issueDetails);
                     response.put("success", false);
                     return response;
                 }
                 else {
                     if (!demographicsRows.get(0).get("calculated_status").equals("Alive")) {
-                        response.put("detailedResponse", "Animal " + recordId + " is not currently alive at the center.");
+                        String issueDetails = "Animal " + recordId + " is not currently alive at the center.";
+                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
+                        response.put("detailedResponse", issueDetails);
                         response.put("success", false);
                         return response;
                     }
                 }
 
-                // Gets all recoveries started.
-                SimpleFilter recoveryStartFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
-                recoveryStartFilter.addCondition("observation", "Started Recovery", CompareType.EQUAL);
-                String[] recoveryStartTargetColumn = new String[]{"Id"};
-                ArrayList<HashMap<String, String>> recoveryStartRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryStartFilter, null, recoveryStartTargetColumn);
-                // Gets all recoveries finished.
-                SimpleFilter recoveryEndFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
-                recoveryEndFilter.addCondition("observation", "Fully Recovered", CompareType.EQUAL);
-                String[] recoveryEndTargetColumn = new String[]{"Id"};
-                ArrayList<HashMap<String, String>> recoveryEndRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryEndFilter, null, recoveryEndTargetColumn);
-                // Verifies all recoveries have been closed before a new recovery can be started.
-                if (recordObservation.equals("Started Recovery")) {
-                    if (recoveryStartRows.size() > recoveryEndRows.size()) {
-                        response.put("detailedResponse", "Animal " + recordId + " still has open anesthesia recovery records.");
+                // Verifies there are no active recoveries ONLY if this an import.
+                if (recordObservation.equals("Imported")) {
+                    // Gets all recoveries started.
+                    SimpleFilter recoveryStartFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
+                    recoveryStartFilter.addCondition("observation", "Imported", CompareType.EQUAL);
+                    String[] recoveryStartTargetColumn = new String[]{"recoveryId"};
+                    ArrayList<HashMap<String, String>> recoveryStartRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryStartFilter, null, recoveryStartTargetColumn);
+                    // Gets all recoveries finished.
+                    SimpleFilter recoveryEndFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
+                    recoveryEndFilter.addCondition("observation", "Fully Recovered", CompareType.EQUAL);
+                    String[] recoveryEndTargetColumn = new String[]{"recoveryId"};
+                    ArrayList<HashMap<String, String>> recoveryEndRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryEndFilter, null, recoveryEndTargetColumn);
+                    // Converts all finished recoveries into a set for fast comparison.
+                    Set<String> finishedIds = recoveryEndRows.stream()
+                            .map(row -> row.get("recoveryId"))
+                            .filter(id -> id != null)
+                            .collect(Collectors.toSet());
+                    // Verifies every recovery ID 'started' has also 'ended'.
+                    boolean allClosed = true;
+                    ArrayList<String> missingEndIds = new ArrayList<>();
+                    for (HashMap<String, String> startRow : recoveryStartRows) {
+                        String startId = startRow.get("recoveryId");
+                        if (!finishedIds.contains(startId)) {
+                            allClosed = false;
+                            missingEndIds.add(startId);
+                        }
+                    }
+                    if (!allClosed) {
+                        String issueDetails = "The following recoveries are still open: " + missingEndIds;
+                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
+                        response.put("detailedResponse", issueDetails);
                         response.put("success", false);
                         return response;
                     }
                 }
             }
             catch (Exception e) {
+                _log.info("Error updating the anesthesia recovery dataset: " + e.getMessage());
                 response.put("detailedResponse", "There was an issue querying the necessary datasets for anesthesia recovery validation: " + e.getMessage());
                 response.put("success", false);
                 return response;

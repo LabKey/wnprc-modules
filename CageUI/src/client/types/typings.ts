@@ -17,7 +17,7 @@
  */
 
 import { GateContext } from './layoutEditorTypes';
-import { ConnectedCages, ConnectedModType, ConnectedRacks } from './homeTypes';
+import { ConnectedCages, ConnectedModType, ConnectedRacks, EHRCageMods } from './homeTypes';
 import { Option } from '@labkey/components';
 import { SelectorOptions } from '../components/layoutEditor/RoomSizeSelector';
 
@@ -72,7 +72,9 @@ export enum ModTypes {
     NoDivider = 'nd',
     CTunnel = 'ct',
     Extension = 'ex',
-    SPDivider = 'spd' // Social Panel
+    SPDivider = 'spd', // Social Panel
+    Restraint = 'res',
+    Blind = 'bld'
 }
 
 export enum ModDirections {
@@ -114,6 +116,8 @@ export enum ModSvgLocId {
     Top = 'ceiling',
     Bottom = 'floor',
     Extension = 'extension',
+    Restraint = 'restraint',
+    Blind = 'blind',
     CTunnelCircle = 'cTunnel-circle',
     CTunnelLeft = 'cTunnel-left',
     CTunnelRight = 'cTunnel-right',
@@ -125,7 +129,6 @@ export enum ModSvgLocId {
 export enum RackConditions {
     Operational,
     Damaged,
-    Repairing,
 }
 
 export type RackStringType = string & { __brand: 'RackStringType' };
@@ -210,7 +213,7 @@ export interface CageDimensions {
 }
 
 export interface RoomMods {
-    [key: ModIdKey]: Option<ModTypes>;
+    [key: ModIdKey]: EHRCageMods;
 }
 
 export interface CurrCageMods {
@@ -426,4 +429,26 @@ export interface RackChangeOption {
 export interface RackConditionOption {
     value: RackConditions;
     label: string;
+}
+
+/*
+    In order to fit the wnprc.session_log format and work around the fact that the cageui submits data to many different
+    tables for each room update, schemaName and queryName denote the following submissions. It should be noted that even
+    though these are the schema/query displayed in the session log, that each submission usually submits to all of the tables
+    listed below to build a complete room history.
+
+    Layout editor submission:
+        SchemaName: cageui, QueryName: layout_history
+    Cage modification submission:
+        SchemaName: cageui, QueryName: cage_modifications_history
+    Rack change submission:
+        schemaName: cageui, QueryName: rack_history
+
+
+ */
+export interface SessionLog {
+    startTime: string;
+    userAgent: string;
+    schemaName: string;
+    queryName: string;
 }

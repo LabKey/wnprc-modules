@@ -81,7 +81,7 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if (hasPermission(user, CageUIRoomCreatorPermission.class))
+            if (hasPermission(user, InsertPermission.class))
             {
                 result = super._insertRowsUsingDIB(user, container, rows, getDataIteratorContext(errors, InsertOption.INSERT, configParameters), extraScriptContext);
             }
@@ -95,7 +95,7 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
                 throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if (hasPermission(user, CageUIRoomCreatorPermission.class))
+            if (hasPermission(user, UpdatePermission.class))
             {
                 result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
             }
@@ -107,7 +107,7 @@ public class CageModificationsTable extends SimpleUserSchema.SimpleTable<CageUIU
         public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
                 throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            if (hasPermission(user, CageUIRoomCreatorPermission.class))
+            if (hasPermission(user, DeletePermission.class))
             {
                 return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }

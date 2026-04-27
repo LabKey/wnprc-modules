@@ -42,7 +42,7 @@ interface CageModificationsProps {
 
 export const CageModifications: FC<CageModificationsProps> = (props) => {
     const {cage, rack, currCageMods, setCurrCageMods} = props;
-    const {selectedRoom} = useHomeNavigationContext();
+    const {selectedLocalRoom} = useHomeNavigationContext();
     const [rackGroup, setRackGroup] = useState<RackGroup>(null);
     const [connectedCages, setConnectedCages] = useState<ConnectedCages>(null);
     const [aloneCages, setAloneCages] = useState<Cage[]>(null);
@@ -50,7 +50,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
 
     // Find possible connects
     useEffect(() => {
-        const {rackGroup: currGroup, rack: currRack} = findCageInGroup(cage.svgId, selectedRoom.rackGroups);
+        const {rackGroup: currGroup, rack: currRack} = findCageInGroup(cage.svgId, selectedLocalRoom.rackGroups);
         const connectionsObj = findConnectedCages(currRack, currGroup.rotation, cage);
 
         // connect prev cages
@@ -64,8 +64,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                         if (modKeysInLoc.subId === connection.currSubId) {
                             connection.currMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
                                 return {
-                                    label: selectedRoom.mods[key.modId].label,
-                                    value: selectedRoom.mods[key.modId].value,
+                                    ...selectedLocalRoom.mods[key.modId],
                                     modId: key.modId,
                                     parentModId: key.parentModId
                                 };
@@ -81,8 +80,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                         if (modKeysInLoc.subId === connection.currSubId) {
                             connection.adjMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
                                 return {
-                                    label: selectedRoom.mods[key.modId].label,
-                                    value: selectedRoom.mods[key.modId].value,
+                                    ...selectedLocalRoom.mods[key.modId],
                                     modId: key.modId,
                                     parentModId: key.parentModId
                                 };
@@ -114,8 +112,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                         if (modKeysInLoc.subId === connection.currSubId) {
                             connection.currMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
                                 return {
-                                    label: selectedRoom.mods[key.modId].label,
-                                    value: selectedRoom.mods[key.modId].value,
+                                    ...selectedLocalRoom.mods[key.modId],
                                     modId: key.modId,
                                     parentModId: key.parentModId
                                 };
@@ -131,8 +128,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                         if (modKeysInLoc.subId === connection.currSubId) {
                             connection.adjMods = modKeysInLoc.modKeys.map((key: ModKeyMap) => {
                                 return {
-                                    label: selectedRoom.mods[key.modId].label,
-                                    value: selectedRoom.mods[key.modId].value,
+                                    ...selectedLocalRoom.mods[key.modId],
                                     modId: key.modId,
                                     parentModId: key.parentModId
                                 };
@@ -256,8 +252,7 @@ export const CageModifications: FC<CageModificationsProps> = (props) => {
                                 handleChange={(selectedItems) => handleChange(ModLocations.Direct, cage, selectedItems)}
                                 prevItems={cage.mods[ModLocations.Direct].flatMap(subMods => {
                                     return subMods.modKeys.map(key => ({
-                                        label: selectedRoom.mods[key.modId].label,
-                                        value: selectedRoom.mods[key.modId].value,
+                                        ...selectedLocalRoom.mods[key.modId],
                                         modId: key.modId
                                     }));
                                 })}

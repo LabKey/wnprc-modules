@@ -21,6 +21,7 @@ package org.labkey.cageui;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.cache.Cache;
@@ -65,6 +66,7 @@ import org.labkey.cageui.model.RackCondition;
 import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
+import org.labkey.cageui.model.SessionLog;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -141,6 +143,20 @@ public class CageUIManager
         }
     }
 
+    // Function to finalize the session log, errors occured is true
+    public static SessionLog finalizeSessionLog(SessionLog oldSessionLog, Boolean errorsOccurred){
+        oldSessionLog.setEndTime(new Date());
+        oldSessionLog.setErrorsOccurred(errorsOccurred);
+        return oldSessionLog;
+    }
+    // Function to finalize the session log, errors occured is false
+    public static SessionLog finalizeSessionLog(SessionLog oldSessionLog, Boolean errorsOccurred, String historyId){
+        oldSessionLog.setEndTime(new Date());
+        oldSessionLog.setErrorsOccurred(errorsOccurred);
+        oldSessionLog.setTaskId(historyId);
+        return oldSessionLog;
+    }
+
     // Helper function to wrap class object to labkeys List<Map<String, Object>> for data submission
     public <E> List<Map<String, Object>> convertToMapList(E object)
     {
@@ -161,6 +177,46 @@ public class CageUIManager
         {
             throw new RuntimeException("Error converting object to map list", e);
         }
+    }
+
+    /*
+        Helper function to submit the session log
+     */
+    public ApiSimpleResponse submitSessionLog(SessionLog sessionLog, User user, Container container) throws Exception {
+        BatchValidationException batchErrors = new BatchValidationException();
+        ApiSimpleResponse response = new ApiSimpleResponse();
+        UserSchema wnprcSchema = QueryService.get().getUserSchema(user, container, "wnprc");
+
+        TableInfo table = wnprcSchema.getTable("session_log");
+        QueryUpdateService qus = table.getUpdateService();
+        if (qus == null)
+        {
+            throw new IllegalStateException(table.getName() + " query update service");
+        }
+
+        try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+        {
+
+            if (sessionLog != null)
+            {
+                qus.insertRows(user, container, convertToMapList(sessionLog), batchErrors, null, null);
+            }
+
+            if (batchErrors.hasErrors())
+            {
+                response.put("success", false);
+                response.put("errors", batchErrors);
+                return response;
+            }
+            tx.commit();
+            response.put("success", true);
+        }
+        catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
+               SQLException e)
+        {
+            throw new ValidationException(e.getMessage());
+        }
+        return response;
     }
 
     /*

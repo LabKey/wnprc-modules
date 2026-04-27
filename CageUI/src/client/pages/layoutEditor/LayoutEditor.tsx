@@ -27,13 +27,13 @@ import Editor from '../../components/layoutEditor/Editor';
 import { labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
-import { isRoomCreator, isTemplateCreator } from '../../utils/LayoutEditorHelpers';
+import { isRoomCreator, isRoomModifier, isTemplateCreator } from '../../utils/helpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { roomSizeOptions } from '../../utils/constants';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 
 export const LayoutEditor: FC<any> = () => {
-    const roomName = ActionURL.getParameter('room');
+    const roomName: string = ActionURL.getParameter('room');
     const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({
         name: null,
         cagingData: [],
@@ -62,7 +62,10 @@ export const LayoutEditor: FC<any> = () => {
                 // if the user is a template creator grant access
                 if (isTemplateCreator(profile) || (isRoomCreator(profile))) {
                     setAccess(true);
-                }else{
+                }else if(isRoomModifier(profile) && roomName && !roomName.includes("template")){ // ensure room modifiers are editing a real room
+                    setAccess(true);
+                }
+                else{
                     setAccess(false);
                 }
             }
@@ -145,7 +148,10 @@ export const LayoutEditor: FC<any> = () => {
         }
     }, [prevRoomData]);
 
-    return (!isLoading && userProfile && access) ? (
+    return (isLoading) ?
+        <div>
+            <h3>Page is loading, please wait.</h3>
+        </div> : (!isLoading && userProfile && access) ? (
         <LayoutEditorContextProvider
             prevRoom={prevRoom}
             user={userProfile}
@@ -174,12 +180,14 @@ export const LayoutEditor: FC<any> = () => {
                 </div>
             }
         />
-    ) : <div>
-        <h3>Error loading page. This could be due to a number of issues</h3>
-        <ul>
-            <li>Insufficient permissions</li>
-            <li>Slow load times</li>
-            <li>New bugs on our end. If you believe this might be the issue please submit a ticket.</li>
-        </ul>
-    </div>;
+    ) : (!isLoading && !access) ?
+    (
+        <div>
+            <h3>Error loading page. You do not have sufficient permissions. Please open a ticket if you believe this is a mistake.</h3>
+        </div>
+    ) : (
+        <div>
+            <h3>Error loading page. Please submit a ticket.</h3>
+        </div>
+    );
 };

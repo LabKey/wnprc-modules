@@ -34,6 +34,7 @@ public class CageUIRoomModifierRole extends AbstractRole
         this("Cage UI Room Modifier Role",
                 "Room modifier role for Cage UI",
                 CageUIRoomModifierPermission.class,
+                CageUILayoutEditorAccessPermission.class,
                 CageUIAnimalEditorPermission.class,
                 CageUIModificationEditorPermission.class,
                 CageUINotesEditorPermission.class

@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -36,16 +36,15 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
+import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.labkey.api.query.QueryUpdateService.ConfigParameters.PreferPKOverObjectUriAsKey;
 
 public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserSchema>
 {
@@ -73,10 +72,11 @@ public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserS
         {
             boolean hasPermission = super.hasPermission(user, perm);
             boolean isEditPerm = perm == InsertPermission.class || perm == UpdatePermission.class || perm == DeletePermission.class;
-            if (isEditPerm){
-                return super.hasPermission(user, CageUITemplateCreatorPermission.class)
-                        || super.hasPermission(user, CageUIRoomCreatorPermission.class)
-                        || super.hasPermission(user, CageUILayoutEditorAccessPermission.class);
+            if (isEditPerm)
+            {
+                return super.hasPermission(user, CageUILayoutEditorAccessPermission.class)
+                        || super.hasPermission(user, CageUIModificationEditorPermission.class)
+                        || super.hasPermission(user, CageUIAnimalEditorPermission.class);
             }
 
             return hasPermission;
@@ -86,7 +86,8 @@ public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserS
         public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUITemplateCreatorPermission.class) || hasPermission(user, CageUIRoomCreatorPermission.class)){
+            if (hasPermission(user, InsertPermission.class))
+            {
                 result = super._insertRowsUsingDIB(user, container, rows, getDataIteratorContext(errors, InsertOption.INSERT, configParameters), extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
@@ -99,8 +100,9 @@ public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserS
                 throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
             List<Map<String, Object>> result = null;
-            if(hasPermission(user, CageUILayoutEditorAccessPermission.class)){
-                 result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
+            if (hasPermission(user, UpdatePermission.class))
+            {
+                result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
             }
             afterInsertUpdate(result == null ? 0 : result.size(), errors);
             return result;
@@ -110,7 +112,8 @@ public class LayoutHistoryTable extends SimpleUserSchema.SimpleTable<CageUIUserS
         public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
                 throws SQLException, BatchValidationException, QueryUpdateServiceException, InvalidKeyException
         {
-            if(hasPermission(user, CageUITemplateCreatorPermission.class)){
+            if (hasPermission(user, DeletePermission.class))
+            {
                 return super.deleteRows(user, container, keys, configParameters, extraScriptContext);
             }
             return null;

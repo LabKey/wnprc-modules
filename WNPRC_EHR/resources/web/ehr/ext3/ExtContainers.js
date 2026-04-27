@@ -974,7 +974,7 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
             tests = {};
 
             //result.animalId = row1[2].substr(0,6);
-            result.animalId = row1.substr(27,6);
+            result.animalId = row1.substring(27,33);
             result.animalId = result.animalId.toLowerCase();
 
             var requestNumber = runsStore.find('Id',result.animalId)
@@ -997,40 +997,41 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
                 return;
             }
 
-            tests['WBC'] = row2.substr(6,6);
-            tests['RBC'] = row2.substr(12,5);
-            tests['HGB'] = row2.substr(17,5);
-            tests['HCT'] = row2.substr(22,5);
-            tests['MCV'] = row2.substr(27,5);
-            tests['MCH'] = row2.substr(32,5);
-            tests['MCHC'] = row2.substr(37,5);
-            tests['PLT'] = row2.substr(42,5);
-      	     //tests['LYMPH%'] = row2.substr(47,5);
-            tests['LY'] = row2.substr(47,5);
+            tests['WBC'] = row2.substring(6, 12);
+            tests['RBC'] = row2.substring(12, 17);
+            tests['HGB'] = row2.substring(17, 22);
+            tests['HCT'] = row2.substring(22, 27);
+            tests['MCV'] = row2.substring(27, 32);
+            tests['MCH'] = row2.substring(32, 37);
+            tests['MCHC'] = row2.substring(37, 42);
+            tests['PLT'] = row2.substring(42, 47);
+            //tests['LYMPH%'] = row2.substring(47, 52);
+            tests['LY'] = row2.substring(47, 52);
 
-            //tests['MONO%'] = row2.substr(52,5);
-            tests['MN'] = row2.substr(52,5);
+            //tests['MONO%'] = row2.substring(52, 57);
+            tests['MN'] = row2.substring(52, 57);
 
-            //tests['SEG%'] = row2.substr(57,5);
-            tests['NE'] = row2.substr(57,5);
+            //tests['SEG%'] = row2.substring(57, 62);
+            tests['NE'] = row2.substring(57, 62);
 
-            //tests['EOSIN%'] = row2.substr(62,5);
-            tests['EO'] = row2.substr(62,5);
+            //tests['EOSIN%'] = row2.substring(62, 67);
+            tests['EO'] = row2.substring(62, 67);
 
-            //tests['BASO%'] = row2.substr(67,5);
-            tests['BS'] = row2.substr(67,5);
+            //tests['BASO%'] = row2.substring(67, 72);
+            tests['BS'] = row2.substring(67, 72);
 
-            //tests['LYMPH#'] = row2.substr(72,6);
-            //tests['MONO#'] = row2.substr(78,6);
-            //tests['SEG#'] = row2.substr(84,6);
-            //tests['EOSIN#'] = row2.substr(90,6);
-            //tests['BASO#'] = row2.substr(96,6);
-            tests['RDW'] = row2.substr(102,5);
-            //tests'RDW-CV'] = row2.substr(102,5);
-            //tests['RDW-SD'] = row2.substr(107,5);
-            //tests['PDW'] = row2.substr(112,5);
-            tests['MPV'] = row2.substr(117,5);
-            //tests['P-LCR'] = row2.substr(122,5);
+            //tests['LYMPH#'] = row2.substring(72, 78);
+            //tests['MONO#'] = row2.substring(78, 84);
+            //tests['SEG#'] = row2.substring(84, 90);
+            //tests['EOSIN#'] = row2.substring(90, 96);
+            //tests['BASO#'] = row2.substring(96, 102);
+            //tests['RDW'] = row2.substring(102, 107);
+            tests['RDW-CV'] = row2.substring(102, 107);
+            tests['RDW-SD'] = row2.substring(107, 112);
+            //tests['PDW'] = row2.substring(112, 117);
+            tests['MPV'] = row2.substring(117, 122);
+            //tests['P-LCR'] = row2.substring(122, 127);
+
 
             var value;
             for(var test in tests){
@@ -1038,25 +1039,25 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
                 value = tests[test];
 
                 if (value.match(/^00(\d){4}$/)) {
-                    tests[test] = value.substr(2,3) / 100;
+                    tests[test] = value.substring(2,5) / 100;
                 }
                 //note: at the moment WBC is the only test with 6 chars, so this test is possibly redundant
                 else if (value.match(/^0(\d){4,}$/) && test=='WBC') {
-                    tests[test] = value.substr(1,4) / 100;
+                    tests[test] = value.substring(1,5) / 100;
                 }
                 else if (value.match(/^0\d{4}$/)){
                     if (test=='RBC') {
-                        tests[test] = value.substr(1,3) / 100;
+                        tests[test] = value.substring(1,4) / 100;
                     }
                     else if (test=='PLT') {
-                        tests[test] = value.substr(1,3) / 1; //convert to number
+                        tests[test] = value.substring(1,4) / 1; //convert to number
                     }
                     else {
-                        tests[test] = value.substr(1,3) / 10;
+                        tests[test] = value.substring(1,4) / 10;
                     }
                 }
                 else if (test=='PLT') {
-                	tests[test] = value.substr(0,4);
+                	tests[test] = value.substring(0,4);
                 }
 
                 //NOTE: the following is a possible replacement for the logic above

@@ -104,6 +104,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
@@ -1843,16 +1844,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "contact_name",
                 "contact_phone",
                 "contact_email",
+                "institution",
                 "address",
                 "city",
                 "state",
                 "zip",
+                "billing_contact_info",
                 "comments",
                 "po_number",
                 "po_amount",
                 "charge_grant_accounts_id",
                 "uw_fund",
                 "uw_account",
+                "spend_category",
                 "uw_udds",
                 "uw_class_code",
                 "grant_period_end",
@@ -4794,7 +4798,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         // Puts a cage on the layout and ensures it exists
         getDriver().findElement(By.id("cage_template_wrapper")).click();
-        WebElement cage = waitForElement(Locator.id("default-rack-1"), 10000);
+        WebElement cage = waitForElement(Locator.name("cage-1"), 10000);
         assertTrue(cage.isDisplayed());
 
         // Puts a door on the layout and ensures it exists
@@ -4825,9 +4829,31 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertTrue(layoutSvg.isDisplayed());
 
         // Ensure cage and door loaded in correctly
-        cage = waitForElement(Locator.id("default-rack-1"), 10000);
+        cage = waitForElement(Locator.id("rack_default-rack-1"), 10000);
         assertTrue(cage.isDisplayed());
         door = getDriver().findElement(By.id("door-1"));
         assertTrue(door.isDisplayed());
+    }
+
+    @Test
+    public void testCageUIHomeDisplay() throws Exception {
+        //testCageUIBasic();
+        beginAt(buildURL("cageui", getContainerPath(), "home"));
+
+        // Ensure room list renders available rooms correctly.
+        List<WebElement> roomList = getDriver().findElements(By.className("room-dir-room-obj"));
+        assertFalse(roomList.isEmpty());
+
+        //Since we previously saved the room as the first option we will ensure that it loads here as well.
+        roomList.get(0).click();
+        WebElement layoutSvg = waitForElement(Locator.id("layout-svg"), 20000);
+        assertTrue(layoutSvg.isDisplayed());
+
+        WebElement cage = waitForElement(Locator.name("cage-1"), 10000);
+        assertTrue(cage.isDisplayed());
+        WebElement door = getDriver().findElement(By.id("door-1"));
+        assertTrue(door.isDisplayed());
+
+
     }
 }

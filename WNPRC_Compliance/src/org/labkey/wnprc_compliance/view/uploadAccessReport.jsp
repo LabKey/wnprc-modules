@@ -32,7 +32,7 @@
     _safe.module = module;
     module = undefined;
 </script>
-<script type="text/javascript" src="<%= getContextPath()%>/compliance/dropzone.js"></script>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>" src="<%= getContextPath()%>/compliance/dropzone.js"></script>
 <link rel="stylesheet" href="https://rawgit.com/enyo/dropzone/master/dist/dropzone.css">
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     module = _safe.module;

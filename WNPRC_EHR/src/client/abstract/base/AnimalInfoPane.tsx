@@ -41,6 +41,7 @@ let constructArrayForTable = (animalInfo) => {
     if (!animalInfo["metaData"]["fields"][i].hidden) {
       let fieldMetadata = animalInfo["metaData"]["fields"][i];
       let key = getNameOfField(fieldMetadata);
+      let isDate: boolean = fieldMetadata.type === "date";
 
       let column = animalInfo["rows"][0][key];
       //cover the case where column could be an array
@@ -50,7 +51,7 @@ let constructArrayForTable = (animalInfo) => {
 
       let item = {
         label: fieldMetadata["caption"],
-        displayValue: column["displayValue"],
+        displayValue: isDate ? column["formattedValue"] : column["displayValue"],
         url: column["url"],
         value: column["value"]
       };

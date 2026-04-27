@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
  *
  */
 
-import { ExtraContext, GateContext } from './layoutEditorTypes';
+import { GateContext } from './layoutEditorTypes';
+import { ConnectedCages, ConnectedModType, ConnectedRacks, EHRCageMods } from './homeTypes';
+import { Option } from '@labkey/components';
+import { SelectorOptions } from '../components/layoutEditor/RoomSizeSelector';
 
 /*
    **IMPORTANT**
@@ -25,10 +28,10 @@ import { ExtraContext, GateContext } from './layoutEditorTypes';
    Type checking and enum looping is used throughout the cage UI project so it's important to have them written here.
 
    RackTypes, DefaultRackTypes and RoomObjectTypes enums equal the value in the ehr_lookups table cageui_item_types.
+
  */
 
 
-// used in ehr to determine if the rack is default (doesn't have a rackid)
 export enum DefaultRackTypes {
     DefaultCage = 0,
     DefaultPen = 1,
@@ -52,24 +55,37 @@ export enum RoomObjectTypes {
     Door = 102,
     GateClosed = 103,
     GateOpen = 104,
-    Top = 104,
-    Bottom = 104,
+    Top = 105,
+    Bottom = 106,
 }
 
 // value in the cage modifications table in EHR
 export enum ModTypes {
-    StandardFloor='sf',
-    MeshFloor='mf',
-    MeshFloorX2='dmf',
-    NoFloor='nf',
-    SolidDivider='sd',
-    PCDivider='pcd', // protected contact
-    VCDivider='vcd', // visual contact
-    PrivacyDivider='pd',
-    NoDivider='nd',
-    CTunnel='ct',
-    Extension='ex',
-    PlayCage='pc',
+    StandardFloor = 'sf',
+    MeshFloor = 'mf',
+    MeshFloorX2 = 'dmf',
+    NoFloor = 'nf',
+    SolidDivider = 'sd',
+    PCDivider = 'pcd', // protected contact
+    VCDivider = 'vcd', // visual contact
+    PrivacyDivider = 'pd',
+    NoDivider = 'nd',
+    CTunnel = 'ct',
+    Extension = 'ex',
+    SPDivider = 'spd', // Social Panel
+    Restraint = 'res',
+    Blind = 'bld'
+}
+
+export enum ModDirections {
+    Horizontal,
+    Vertical,
+    Direct
+}
+
+export enum ModStyle {
+    Attachment,
+    Separator
 }
 
 export enum ModLocations {
@@ -87,13 +103,40 @@ export enum CageDirection {
     Bottom,
 }
 
-export type DirectionCategory = "vertical" | "horizontal" | "direct";
+export enum GroupRotation {
+    Origin = 0,
+    Quarter = 90,
+    Half = 180,
+    ThreeQuarter = 270,
+}
 
-export type RackStringType = string & { __brand: "RackStringType" };
-export type DefaultRackStringType = string & { __brand: "DefaultRackStringType" };
-export type RoomObjectStringType = string & { __brand: "RoomObjectStringType" };
-export type DefaultRackId = `default-rack-${number}`;
-export type RealRackId = `rack-${number}`;
+export enum ModSvgLocId {
+    Left = 'left',
+    Right = 'right',
+    Top = 'ceiling',
+    Bottom = 'floor',
+    Extension = 'extension',
+    Restraint = 'restraint',
+    Blind = 'blind',
+    CTunnelCircle = 'cTunnel-circle',
+    CTunnelLeft = 'cTunnel-left',
+    CTunnelRight = 'cTunnel-right',
+    CTunnelTop = 'cTunnel-top',
+    CTunnelBottom = 'cTunnel-bottom',
+}
+
+// found in ehr_lookups.cageui_condition_codes
+export enum RackConditions {
+    Operational,
+    Damaged,
+}
+
+export type RackStringType = string & { __brand: 'RackStringType' };
+export type DefaultRackStringType = string & { __brand: 'DefaultRackStringType' };
+export type RoomObjectStringType = string & { __brand: 'RoomObjectStringType' };
+export type CageSvgId = `cageSVG_${string}`;
+export type RackSvgId = `rack_${string}`;
+export type FullCageHistory = { cageHistory: CageHistoryData, cageData: CageData };
 
 export type GroupId = `rack-group-${number}`
 export type CageNumber = `${RackStringType}-${number}`
@@ -104,10 +147,19 @@ export type RoomItemType = RackTypes | RoomObjectTypes | DefaultRackTypes;
 
 export type RoomItem = Rack | RoomObject;
 //client side to determine which object type is currently selected
-export type SelectionType =  'rack' | 'cage' | 'obj' | 'rackGroup';
+export type SelectionType = 'rack' | 'cage' | 'obj' | 'rackGroup';
 
 // Classification of the objects, caging is for racks/cages/rack groups, roomObj is for things placed in the room not applied to caging
 export type RoomItemClass = 'caging' | 'roomObj';
+export type historyType = 'real' | 'template';
+
+export type ModIdKey = string;
+export type ModKeyMap = { modId: ModIdKey, parentModId: ModIdKey | null }
+export type CageModification = {
+    modKeys: ModKeyMap[];
+    subId: number; // subsection id
+}
+
 
 /* svgIds is an array of ids to apply the style to.
     Each id is a string to the following these rules to match the id in the svg file.
@@ -120,7 +172,9 @@ export type RoomItemClass = 'caging' | 'roomObj';
 export type Modification = {
     name: string;
     svgIds: {
-        [key in ModLocations]?: string[];
+        [key in ModLocations]?: {
+            [key in GroupRotation]?: ModSvgLocId[]
+        };
     };
     styles: {
         property: string;
@@ -130,106 +184,206 @@ export type Modification = {
 
 export type ModRecord = Record<ModTypes, Modification>;
 
-export type CageModification = {
-    id: number; // id for duplicate mods in the same location, imagine 2 cages on one side of a pen
-    mod: CageModType; // Use mod in the Modifications constant to get styles for mod
+
+export interface FetchRoomData {
+    selectedSize: SelectorOptions;
+    showSelectionPopup: boolean;
+    prevRoomData: PrevRoom;
+    error?: string;
 }
 
-export type CageModType = ModTypes | 'newMod';
-
 export interface Cage {
-    id: number; // Id local to rack
+    objectId: string; //object id of cage in cages table, if it was loaded in from previous room.
+    svgId: CageSvgId; // unique id for svg
+    positionId: number; // Id local to rack
     selectionType: SelectionType;
     cageNum: CageNumber; // Id local to room
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
     size: number; // length in cells of cage square of svg image
-    extraContext?:  {[key: string]: any}; // extra context if needed for cage
+    extraContext?: { [key: string]: any }; // extra context if needed for cage
+    mods?: CageModificationsType;
 }
 
-export type CageWithMods = Cage & Partial<CageModifications>;
+export interface CageDimensions {
+    length: number;
+    width: number;
+    height: number;
+    sqft: number;
+}
 
-export interface CageModifications {
-    mods: {
-        [ModLocations.Top]: CageModification[]
-        [ModLocations.Bottom]: CageModification[];
-        [ModLocations.Left]: CageModification[];
-        [ModLocations.Right]: CageModification[];
-        [ModLocations.Direct]: CageModification[];
-    };
-    isDirty: boolean; // determines if modifications have been changed
+export interface RoomMods {
+    [key: ModIdKey]: EHRCageMods;
+}
+
+export interface CurrCageMods {
+    adjCages: ConnectedCages | ConnectedRacks;
+    currCage: ConnectedModType[];
+}
+
+export interface CageModificationsType {
+    [ModLocations.Top]: CageModification[];
+    [ModLocations.Bottom]: CageModification[];
+    [ModLocations.Left]: CageModification[];
+    [ModLocations.Right]: CageModification[];
+    [ModLocations.Direct]: CageModification[];
 }
 
 export interface Room {
     name: string;
+    valid: boolean;
     rackGroups: RackGroup[];
     objects: RoomObject[];
     layoutData: LayoutData;
+    mods?: RoomMods;
 }
 
 export interface LayoutData {
     scale: number;
     borderWidth: number;
     borderHeight: number;
-    status?: boolean;
+}
+
+export interface TemplateHistoryData {
+    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    historyid?: string;
+    extra_context: string | null;
+    rack_group: number;
+    group_rotation: GroupRotation;
+    rack: number;
+    cage: number;
+    x_coord: number;
+    y_coord: number;
+    rowid: number;
 }
 
 export interface LayoutHistoryData {
-    object_type: RoomObjectTypes | RackTypes | DefaultRackTypes;
-    extra_context: string | null;
-    rack_group: number | null;
-    rack: number | null;
-    cage: string | null;
-    x_coord: number;
-    y_coord: number;
-    start_date?: Date;
-    end_date?: Date;
-    room?: string;
+    historyId: string;
+    cage: string;
+    objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extraContext: string | null;
+    xCoord: number;
+    yCoord: number;
     rowid?: number;
 }
 
-export interface PrevRoom {
-    cagingData: LayoutHistoryData[];
-    layoutData: LayoutData;
-    modData?: ModData[];
-    name: string | null;
+export interface CageHistoryData {
+    rowid?: number;
+    historyId: string;
+    cage: string;
+    rackGroup: number;
+    groupRotation: GroupRotation;
+    cageNum: number;
+    length: number;
+    width: number;
+    height: number;
+    sqft: number;
+}
+
+// interface for cageui.cages table
+export interface CageData {
+    rowid: number;
+    positionId: number; // id of position in rack
+    objectId: string;
+    // objectid of rack in racks table
+    rack: string;
+    cageNum: string;
+    length: number;
+    width: number;
+    height: number;
+    sqft: number;
+}
+
+// interface for cageui.racks table
+export interface RackData {
+    rowid: number;
+    objectId: string;
+    room: string;
+    rackId: number;
+    rackType: number;
+    condition: RackConditions;
+}
+
+// interface for cageui.all_history table
+export interface AllHistoryData {
+    rowid: number;
+    room: string;
+    valid: boolean;
+    historyId: string;
+    historyType: historyType;
+    startDate: number;
+    endDate: number;
+}
+
+export interface FullObjectHistoryData {
+    objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
+    extraContext: string | null;
+    rackGroup?: number;
+    groupRotation?: GroupRotation;
+    // objectid of rack in racks table
+    rack?: RackData | number;
+    cage?: FullCageHistory | number;
+    xCoord: number;
+    yCoord: number;
 }
 
 export interface ModData {
-    rowid: number;
-    room: string;
-    rack: number; // rowid of rack
-    cage: number;
-    location: ModLocations;
-    locationId: number;
+    historyId: string;
+    cage: string;
+    modId: string;
+    parentModId: string | null;
     modification: ModTypes;
+    location: ModLocations;
+    subId: number;
+}
+
+export interface PrevRoom {
+    cagingData: FullObjectHistoryData[];
+    layoutData: LayoutData;
+    modData?: ModData[];
+    isDefault: boolean;
+    name: string | null;
+}
+
+export interface CageMods {
+    modId: string; // unique mod id
+    parentModId: string | null; // this determines if the mod is the flipped perspective of the inserted mod or the original (null if original, or modId of the original mod if flipped perspective)
+    rack: string; // rack objectid
+    cage: string;// cage objectid
+    modification: ModTypes;
+    location: ModLocations;
+    subId: number; // subsection of location where the mod is located
 }
 
 export interface RackGroup {
     racks: Rack[];
     selectionType: SelectionType;
     groupId: GroupId;
+    rotation: GroupRotation;
     x: number; // x coords relative to group of connected racks
     y: number; // y coords relative to group of connected racks
-    scale: number // scale relative to group of connected racks
+    scale: number; // scale relative to group of connected racks
 }
 
 export interface Rack {
-    itemId: DefaultRackId | RealRackId; // rack id
-    rowid?: number; // if real rack this will have a rowid
+    itemId: number; // rack id
+    svgId: RackSvgId;
+    objectId: string;
     selectionType: SelectionType;
     type: UnitType;
-    cages: CageWithMods[];
+    cages: Cage[];
     x: number; // x coordinate of rack relative to the rack group
     y: number; // y coordinate of rack relative to the rack group
+    condition: RackConditions;
     isActive?: boolean; // Determines if rack is "in use or active"
-    extraContext?: {[key: string]: any};
+    extraContext?: { [key: string]: any };
+    isNew: boolean; // if true this rack was created during the current session and not loaded from the database
 }
 
 export interface RoomObject {
     itemId: string; // object id
     selectionType: SelectionType;
-    type: RoomObjectTypes
+    type: RoomObjectTypes;
     x: number;
     y: number;
     scale: number;
@@ -238,13 +392,19 @@ export interface RoomObject {
 
 export interface UnitType {
     rowid: number;
-    name: string; // naming convention is 'type-manufacturer-sqft'
+    displayName: string; // naming convention is 'type-manufacturer-size-stationary'
     type: RackTypes; // this cannot be a default, defaults are stored in layout history but not included in code. use isDefault to check if a rack is default outside of getting data
     isDefault: boolean;
+    size: number;
+    manufacturer: {
+        value: string;
+        title: string;
+    };
+    stationary: boolean;
 }
 
 export interface LocationCoords {
-    num: CageNumber;
+    cageId: CageSvgId;
     cellX: number;
     cellY: number;
 }
@@ -253,3 +413,42 @@ export interface LocationCoords {
 export type UnitLocations = {
     [key in RackStringType]: LocationCoords[];
 };
+
+export interface RackChangeValue {
+    rackType: UnitType;
+    rackId: number;
+    rackObjectId: string;
+    isNew: boolean;
+}
+
+export interface RackChangeOption {
+    value: RackChangeValue;
+    label: string;
+}
+
+export interface RackConditionOption {
+    value: RackConditions;
+    label: string;
+}
+
+/*
+    In order to fit the wnprc.session_log format and work around the fact that the cageui submits data to many different
+    tables for each room update, schemaName and queryName denote the following submissions. It should be noted that even
+    though these are the schema/query displayed in the session log, that each submission usually submits to all of the tables
+    listed below to build a complete room history.
+
+    Layout editor submission:
+        SchemaName: cageui, QueryName: layout_history
+    Cage modification submission:
+        SchemaName: cageui, QueryName: cage_modifications_history
+    Rack change submission:
+        schemaName: cageui, QueryName: rack_history
+
+
+ */
+export interface SessionLog {
+    startTime: string;
+    userAgent: string;
+    schemaName: string;
+    queryName: string;
+}

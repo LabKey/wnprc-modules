@@ -55,7 +55,7 @@ export const setupRestraintValues = (values: any[], taskId: string): Array<Restr
       Id: value.animalid.value,
       restraintType: value.restraint.value,
       taskid: taskId,
-      objectid: value.restraint.objectid,
+      objectid: value.restraint_objectid.value,
       date: value.date.value
     })
   }

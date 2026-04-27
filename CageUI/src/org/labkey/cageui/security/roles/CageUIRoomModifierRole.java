@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2025 Board of Regents of the University of Wisconsin System
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -29,18 +29,20 @@ import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
 
 public class CageUIRoomModifierRole extends AbstractRole
 {
-    public CageUIRoomModifierRole(){
+    public CageUIRoomModifierRole()
+    {
         this("Cage UI Room Modifier Role",
                 "Room modifier role for Cage UI",
                 CageUIRoomModifierPermission.class,
+                CageUILayoutEditorAccessPermission.class,
                 CageUIAnimalEditorPermission.class,
                 CageUIModificationEditorPermission.class,
-                CageUILayoutEditorAccessPermission.class,
                 CageUINotesEditorPermission.class
         );
     }
 
-    protected CageUIRoomModifierRole(String name, String description, Class<? extends Permission>... perms) {
+    protected CageUIRoomModifierRole(String name, String description, Class<? extends Permission>... perms)
+    {
         super(name, description, CageUIModule.class, perms);
     }
 

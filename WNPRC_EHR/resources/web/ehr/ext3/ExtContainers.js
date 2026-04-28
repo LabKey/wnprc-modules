@@ -939,161 +939,170 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
         this.processData(data);
     },
     processData: function(data){
-        var skippedRows = [];
         var runsStore = Ext.StoreMgr.get("study||Clinpath Runs||||");
         var unitStore = Ext.StoreMgr.get("ehr_lookups||hematology_tests||testid||testid");
 
-        var result;
-        var tests;
-        var row1;
-        var row2;
-        var toAdd = [];
-
-        if(!data.length || !data[0].length){
+        if (!Array.isArray(data) || !data.length || !data[0]?.length) {
             alert('Something went wrong processing the file');
             console.log(data)
             return;
         }
 
-        data = data[0][0].split(/D1U/i);
+        const formattedObjData = {};
+        const regex = /(\.D[A-Z0-9]+U)\s+(.*?)(?=\.\D[A-Z0-9]+U|$)/gs;
+        let match;
+        while ((match = regex.exec(data[0][0])) !== null) {
+            const key = match[1];
+            const value = match[2].trim();
+            const animalId = value.substring(25, 31).toLowerCase();
+            if(!formattedObjData[animalId]){
+                formattedObjData[animalId] = {};
+            }
+            formattedObjData[animalId][key] = value;
+        }
+        const skippedRows = [];
+        const toAdd = [];
 
-        Ext.each(data, function(row, idx){
-            if(!row.match(/D2U/i))
+        // CONFIGURABLE: Define where to start extracting substrings from D2U and D6U
+        const headerConfig = {
+            ".D2U": 31, // "XN-10^854650000000017000 cj2795" (0-30) (31 length)
+            ".D6U": 137, // remove header plus 106 "reserved"
+            // Example: D2U starts with "XN-10^... cj2795", skip header, then parse fixed fields
+        };
+
+        Object.entries(formattedObjData).forEach(([animalId, rawTests]) => {
+            if (!rawTests[".D2U"] || !rawTests[".D6U"]) {
+                alert("Failed to parse formatted data (missing .D1U/.D2U...) for ", animalId);
                 return;
+            }
+            const d2uRaw = rawTests[".D2U"];
+            const d6uRaw = rawTests[".D6U"];
+            // Remove headers
 
-            row = row.split(/D2U/i);
+            const d2u = d2uRaw.slice(headerConfig[".D2U"]);
+            const d6u = d6uRaw.slice(headerConfig[".D6U"]);
 
-            row1 = row[0];
-            row2 = row[1];
-            row1 = row1.replace(/\s+/g, '');
-            row2 = row2.split(/\s+/);
-            row2 = row2.slice(2, row2.length-1);
-            row2 = row2.join('');
+            /* These tests were based on the standard definitions revision 7 and 12. The ones initially provided (revision 12) seems to be incorrect given
+        * our current output. To best understand this data refer to revision 7.
+        */
 
-            result = {};
-            tests = {};
+            /*
+                "Reserved" Definition: “0”s or " "(space) are set to this parameter to fill the specified number of characters.
+                Reserved should be "0" characters but this doesn't seem to be the actual case, it looks like it is a mix
+                of "0" and " " (space). Because of this it can cause issues with CoolTerm because CoolTerm trims whitespace,
+                which is needed to correctly guess some values.
+            */
 
-            //result.animalId = row1[2].substr(0,6);
-            result.animalId = row1.substring(27,33);
-            result.animalId = result.animalId.toLowerCase();
+            const tests = {
+                WBC:         d2u.substring(0, 6),
+                RBC:         d2u.substring(6, 11),
+                HGB:         d2u.substring(11, 16),
+                HCT:         d2u.substring(16, 21),
+                MCV:         d2u.substring(21, 26),
+                MCH:         d2u.substring(26, 31),
+                MCHC:        d2u.substring(31, 36),
+                PLT:         d2u.substring(36, 41),
+                LY:          d2u.substring(41, 46),
+                MN:          d2u.substring(46, 51),
+                NE:          d2u.substring(51, 56),
+                EO:          d2u.substring(56, 61),
+                BS:          d2u.substring(61, 66),
+                "RDW-CV":    d2u.substring(95, 101),
+                "RDW-SD":    d2u.substring(101, 106),
+                MPV:         d2u.substring(106, 111),
+                RETICULO:    d2u.substring(121, 126),
+                IRF:         d2u.substring(131, 136),
+                NRBC:        d2u.substring(157, 162),
+                "NRBC#":     d2u.substring(162, 168),
+                'RETIC-AB':  d2u.substring(179, 185),
+                'RETIC HGB': d2u.substring(185, 190),
+                IPF:         d2u.substring(190, 195),
+                // Start D6U Tests
+                PDW:         d6u.substring(0, 5),
+                "P-LCR":     d6u.substring(10, 15),
+                LFR:         d6u.substring(30, 35),
+                MFR:         d6u.substring(35, 40),
+                HFR:         d6u.substring(40, 45),
+                PCT:         d6u.substring(45, 50),
+            };
 
-            var requestNumber = runsStore.find('Id',result.animalId)
-            var record = runsStore.getAt(requestNumber);
-
+            // Lookup run record
+            const requestNumber = runsStore.find('Id', animalId);
+            const record = runsStore.getAt(requestNumber);
+            let collectionDate;
             //Getting the collection time from the request itself, if it matches animalId
-            if(requestNumber!= -1 && result.animalId == record.get('Id')){
+            if(requestNumber !== -1 && animalId === record.get('Id')){
 
-                var collectionDate = record.get('date');
+                collectionDate = record.get('date');
             }
 
-            //result.sequenceNo = row1[1].substr(20,4);
-            //result.date = new Date(row1[2].substr(6,4), row1[2].substr(10,2)-1, row1[2].substr(12,2));
-            //result.date = new Date(row1.substr(33,4), row1.substr(37,2)-1, row1.substr(39,2));
-            result.date= new Date(collectionDate);
-
-            if(!result.animalId || runsStore.find('Id', result.animalId)==-1){
+            if(!animalId || runsStore.find('Id', animalId)===-1){
                 //alert('ID: '+result.animalId+' not found in Clinpath Runs section. Records will not be added');
-                skippedRows.push('Not found in Clinpath Runs: '+result.animalId);
+                skippedRows.push('Not found in Clinpath Runs: ' + animalId);
+                console.log("Skip Row", animalId);
                 return;
             }
 
-            tests['WBC'] = row2.substring(6, 12);
-            tests['RBC'] = row2.substring(12, 17);
-            tests['HGB'] = row2.substring(17, 22);
-            tests['HCT'] = row2.substring(22, 27);
-            tests['MCV'] = row2.substring(27, 32);
-            tests['MCH'] = row2.substring(32, 37);
-            tests['MCHC'] = row2.substring(37, 42);
-            tests['PLT'] = row2.substring(42, 47);
-            //tests['LYMPH%'] = row2.substring(47, 52);
-            tests['LY'] = row2.substring(47, 52);
-
-            //tests['MONO%'] = row2.substring(52, 57);
-            tests['MN'] = row2.substring(52, 57);
-
-            //tests['SEG%'] = row2.substring(57, 62);
-            tests['NE'] = row2.substring(57, 62);
-
-            //tests['EOSIN%'] = row2.substring(62, 67);
-            tests['EO'] = row2.substring(62, 67);
-
-            //tests['BASO%'] = row2.substring(67, 72);
-            tests['BS'] = row2.substring(67, 72);
-
-            //tests['LYMPH#'] = row2.substring(72, 78);
-            //tests['MONO#'] = row2.substring(78, 84);
-            //tests['SEG#'] = row2.substring(84, 90);
-            //tests['EOSIN#'] = row2.substring(90, 96);
-            //tests['BASO#'] = row2.substring(96, 102);
-            //tests['RDW'] = row2.substring(102, 107);
-            tests['RDW-CV'] = row2.substring(102, 107);
-            tests['RDW-SD'] = row2.substring(107, 112);
-            //tests['PDW'] = row2.substring(112, 117);
-            tests['MPV'] = row2.substring(117, 122);
-            //tests['P-LCR'] = row2.substring(122, 127);
+            const result = {
+                animalId,
+                date: new Date(collectionDate),
+            };
 
 
-            var value;
+            /*
+                Rules: Define the test and how many digits from the right the decimal should appear in the string.
+                It does not matter how many initial digits are in the string (WBC has 6 while RBC has 5).
+                The majority of tests are 1 decimal, so that is the default. If the test does not exist within rules
+                specifically it will use the default.
+                Ex.
+                Rule: 2
+                RBC: 000.00
+                WBRC: 0000.00
+             */
+            const rules = {
+                WBC: 2,
+                'NRBC#': 2,
+                RBC: 2,
+                RETICULO: 2,
+                'RETIC-AB': 4,
+                PLT: 0,
+                PCT: 2,
+                _default: 1
+            };
+
             for(var test in tests){
-                var origVal = tests[test];
-                value = tests[test];
+                const decimal = (test in rules) ? rules[test] : rules['_default'];
+                const value = tests[test];
 
-                if (value.match(/^00(\d){4}$/)) {
-                    tests[test] = value.substring(2,5) / 100;
-                }
-                //note: at the moment WBC is the only test with 6 chars, so this test is possibly redundant
-                else if (value.match(/^0(\d){4,}$/) && test=='WBC') {
-                    tests[test] = value.substring(1,5) / 100;
-                }
-                else if (value.match(/^0\d{4}$/)){
-                    if (test=='RBC') {
-                        tests[test] = value.substring(1,4) / 100;
-                    }
-                    else if (test=='PLT') {
-                        tests[test] = value.substring(1,4) / 1; //convert to number
-                    }
-                    else {
-                        tests[test] = value.substring(1,4) / 10;
-                    }
-                }
-                else if (test=='PLT') {
-                	tests[test] = value.substring(0,4);
-                }
+                const data = value.slice(0, -1);
 
-                //NOTE: the following is a possible replacement for the logic above
-                //it attempts to more clearly define how the parsing works
-                //so far as i can tell, specific tests return different sets of decimals
-                //and there is no clear way to determine decimal number without knowing the test name
-//                if(value.match(/^(\d){5,6}$/)){
-//                    //we drop the last digit in all cases
-//                    value = value.substr(0, value.length-1);
-//
-//                    var decimals = 1;
-//                    //WBC is output as 10^1/uL, but reported at 10^3/ul
-//                    //RBC is output as 10^4/ul, but reported at 10^6/ul
-//                    if(test=='WBC' || test=='RBC')
-//                        decimals = 2;
-//                    if(test=='PLT')
-//                        decimals = 0;
-//
-//                    value = value / Math.pow(10, decimals);
-//
-//                    value = Ext4.util.Format.round(value, decimals);
-//                }
-//                else {
-//                    //alert('Value: '+value+' is not a number');
-//                    return;
-//                }
-//
-//                if(value != tests[test]){
-//                    console.log('error: '+test+'/'+tests[test]+'/'+value+'/'+decimals);
-//                }
+                const number = parseInt(data);
+
+                // Convert to string to easily manipulate decimal placement
+                let numberStr = number.toString();
+
+                // If decimal is 0, no decimal point needed
+                if (decimal === 0) {
+                    tests[test] = number;
+                } else {
+                    // If we need to add a decimal point
+                    if (numberStr.length <= decimal) {
+                        // If number is shorter than decimal places, pad with zeros
+                        numberStr = '0'.repeat(decimal - numberStr.length) + numberStr;
+                        tests[test] = parseFloat('0.' + numberStr);
+                    } else {
+                        // Insert decimal point at the correct position from the right
+                        const decimalIndex = numberStr.length - decimal;
+                        const formatted = numberStr.slice(0, decimalIndex) + '.' + numberStr.slice(decimalIndex);
+                        tests[test] = parseFloat(formatted);
+                    }
+                }
 
                 //find units
                 var idx = unitStore.find('testid', test);
                 var units = null;
                 var sortOrder = null;
-                if(idx!=-1){
+                if(idx !== -1){
                     units = unitStore.getAt(idx).get('units');
                     sortOrder = unitStore.getAt(idx).get('sort_order');
                 }
@@ -1112,8 +1121,7 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
                     sortOrder: sortOrder
                 });
             }
-
-        }, this);
+        });
 
         if(toAdd.length){
             toAdd.sort(function(a, b){

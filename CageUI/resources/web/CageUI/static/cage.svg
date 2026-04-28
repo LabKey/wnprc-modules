@@ -29,6 +29,15 @@
                 <line id="right" x1="80.65" y1="61.27" x2="120" y2="61.27" style="fill:none; stroke-width:0px;"/>
                 <circle id="circle" cx="60.65" cy="61.27" r="20" style="fill:none; stroke-width:0px;"/>
             </g>
+            <rect id="restraint-1" x=".5" y="87.12" width="40.25" height="32.88" style="fill:none; stroke-width:0px;"/>
+            <g id="blind-1" style="opacity:0;">
+                <rect id="blindRect" x="79.75" y=".5" width="40.25" height="32.88"
+                      style="fill:#00aeef; stroke:#010101; stroke-miterlimit:10;"/>
+                <path id="blindLine-2" d="M79.75.5l40.25,32.88"
+                      style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
+                <path id="blindLine-1" d="M120,.5l-40.25,32.88"
+                      style="fill:none; stroke:#010101; stroke-miterlimit:10;"/>
+            </g>
         </g>
         <g id="sub-cage">
             <path id="floor-1" d="M.5,120h119.5" style="fill:none; stroke:#010101; stroke-miterlimit:13.33;"/>

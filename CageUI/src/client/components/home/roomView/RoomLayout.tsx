@@ -21,8 +21,8 @@ import { FC, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
-import { Cage } from '../../../types/typings';
-import { addPrevRoomSvgs } from '../../../utils/helpers';
+import { Cage, Room } from '../../../types/typings';
+import { addPrevRoomSvgs, isRoomModifier } from '../../../utils/helpers';
 import { findCageInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
 import _ from 'lodash';
@@ -33,64 +33,73 @@ import { LoadingScreen } from '../../LoadingScreen';
 import { RoomLegend } from './RoomLegend';
 import { CagePopup } from './CagePopup';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { RoomObjectPopup } from './RoomObjectPopup';
 
 interface RoomLayoutProps {
 }
 
 export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     const {submitLayoutMods} = useRoomContext();
-    const {selectedRoom, selectedRoomMods, navigateTo} = useHomeNavigationContext();
+    const {selectedLocalRoom, selectedRoomMods, navigateTo, userProfile, selectedRoom} = useHomeNavigationContext();
     const [selectedContextObj, setSelectedContextObj] = useState<SelectedObj>(null);
     const [showCageContextMenu, setShowCageContextMenu] = useState<boolean>(false);
+    const [showObjContextMenu, setShowObjContextMenu] = useState<boolean>(false);
     const [showChangesMenu, setShowChangesMenu] = useState<boolean>(false);
     const [errorPopup, setErrorPopup] = useState<string>(null);
     const [showLayoutErrors, setShowLayoutErrors] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const borderRef = useRef(null);
-    const contextRef = useRef(selectedRoom);
+    const contextRef = useRef(selectedLocalRoom);
 
     // Loads room into the svg
     useEffect(() => {
-        if (!selectedRoom.name) {
+        if (!selectedLocalRoom.name) {
             return;
         }
-        if (showCageContextMenu) {
+        if (showCageContextMenu || showObjContextMenu) {
             return;
         }
         d3.select('#layout-svg').selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select('#layout-svg') as d3.Selection<SVGElement, {}, HTMLElement, any>;
-        contextRef.current = selectedRoom;
-        addPrevRoomSvgs('view', selectedRoom, layoutSvg,undefined, selectedRoom.mods, setSelectedContextObj, contextRef);
-    }, [selectedRoom.name, showCageContextMenu]);
+        contextRef.current = selectedLocalRoom;
+        addPrevRoomSvgs(userProfile,'view', selectedLocalRoom, layoutSvg,undefined, selectedLocalRoom.mods, setSelectedContextObj, contextRef);
+    }, [selectedLocalRoom.name, showCageContextMenu, showObjContextMenu]);
 
 
     // Effect watches for right clicks to open the modification editor
     useEffect(() => {
         if (selectedContextObj) {
-            const currRackDefault = findCageInGroup((selectedContextObj as Cage).svgId, selectedRoom.rackGroups).rack.type.isDefault;
-            if (currRackDefault) {
-                setErrorPopup('This cage is a default cage and as such it cannot have mods attached. Please only attach mods to real cages');
-            } else {
-                setShowCageContextMenu(true);
+            if(selectedContextObj.selectionType === 'obj'){
+                setShowObjContextMenu(true);
+            }else{
+                const currRackDefault = findCageInGroup((selectedContextObj as Cage).svgId, selectedLocalRoom.rackGroups).rack.type.isDefault;
+                if (currRackDefault) {
+                    setErrorPopup('This cage is a default cage and as such it cannot have mods attached. Please only attach mods to real cages');
+                } else {
+                    setShowCageContextMenu(true);
+                }
             }
         }
     }, [selectedContextObj]);
 
     // Cleans up selected object after modification editor is closed
     useEffect(() => {
-        if (showCageContextMenu) {
+        if (showCageContextMenu || showObjContextMenu) {
             return;
         }
         setSelectedContextObj(null);
-    }, [showCageContextMenu]);
+    }, [showCageContextMenu, showObjContextMenu]);
 
+    /* Mods equal here won't always work since keys are UUIDs and won't be the same. This is a small bug but only an
+    /  issue for user experience (changing a mod then changing it back to the prev mod will still show save button).
+    /  The solution to this would be to write a custom method to check the deep version of the prev room and local room.
+    /  This would take some time and can be added later if requested/needed.
+     */
     useEffect(() => {
-        if (!selectedRoom.mods || !selectedRoomMods) {
-            return;
-        }
-        setShowChangesMenu(!(_.isEqual(selectedRoomMods, selectedRoom.mods)));
-    }, [selectedRoom.mods]);
-
+        const modsEqual = _.isEqual(selectedRoomMods, selectedLocalRoom.mods);
+        const objectsEqual = _.isEqual(selectedRoom?.objects, selectedLocalRoom.objects);
+        setShowChangesMenu(!modsEqual || !objectsEqual);
+    }, [selectedRoom, selectedLocalRoom, selectedRoomMods]);
 
     const saveLayout = async () => {
 
@@ -99,7 +108,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         if (res.success) {
             // succssesful save
             setIsSaving(false);
-            navigateTo({selected: 'Room', room: selectedRoom.name});
+            navigateTo({selected: 'Room', room: selectedLocalRoom.name});
         } else {
             if (res?.reason) {
                 setShowLayoutErrors(res.reason);
@@ -141,9 +150,9 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
             </div>
             <div id={'layout-grid'} className={'room-layout-grid'}>
                 <svg // svg here is the size of the border (objects outside of border ignored), add 1 to viewbox to prevent visual cutting by a pixel
-                    width={selectedRoom.layoutData.borderWidth + 1}
-                    height={selectedRoom.layoutData.borderHeight + 1}
-                    viewBox={`0 0 ${selectedRoom.layoutData.borderWidth + 1} ${selectedRoom.layoutData.borderHeight + 1}`}
+                    width={selectedLocalRoom.layoutData.borderWidth + 1}
+                    height={selectedLocalRoom.layoutData.borderHeight + 1}
+                    viewBox={`0 0 ${selectedLocalRoom.layoutData.borderWidth + 1} ${selectedLocalRoom.layoutData.borderHeight + 1}`}
                     id="layout-svg"
                 >
                     <g className={'draggable room-obj'}
@@ -157,24 +166,31 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                             key={'border_template_key'}
                             ref={borderRef}
                             className={''}
-                            viewBox={`0 0 ${selectedRoom.layoutData.borderWidth} ${selectedRoom.layoutData.borderHeight}`}
-                            height={selectedRoom.layoutData.borderHeight}
-                            width={selectedRoom.layoutData.borderWidth}
+                            viewBox={`0 0 ${selectedLocalRoom.layoutData.borderWidth} ${selectedLocalRoom.layoutData.borderHeight}`}
+                            height={selectedLocalRoom.layoutData.borderHeight}
+                            width={selectedLocalRoom.layoutData.borderWidth}
                             pointerEvents={'none'}
                             afterInjection={(svg) => {
                                 const borderGroup = d3.select('#layout-border') as d3.Selection<SVGGElement, {}, HTMLElement, any>;
-                                updateBorderSize(borderGroup, selectedRoom.layoutData.borderWidth, selectedRoom.layoutData.borderHeight);
+                                updateBorderSize(borderGroup, selectedLocalRoom.layoutData.borderWidth, selectedLocalRoom.layoutData.borderHeight);
                             }}
                         />
                     </g>
                 </svg>
             </div>
 
-            <CagePopup
-                showEditor={showCageContextMenu}
-                selectedObj={selectedContextObj}
-                closeMenu={() => setShowCageContextMenu(false)}
-            />
+            {showCageContextMenu &&
+                <CagePopup
+                    selectedObj={selectedContextObj}
+                    closeMenu={() => setShowCageContextMenu(false)}
+                />
+            }
+            {(showObjContextMenu && isRoomModifier(userProfile)) &&
+                <RoomObjectPopup
+                    selectedObj={selectedContextObj}
+                    closeMenu={() => setShowObjContextMenu(false)}
+                />
+            }
             {errorPopup &&
                     <ConfirmationPopup message={errorPopup} onClose={() => setErrorPopup(null)}/>
             }

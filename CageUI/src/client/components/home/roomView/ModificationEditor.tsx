@@ -19,9 +19,11 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
-import { Cage, CurrCageMods, ModLocations, Rack } from '../../../types/typings';
+import { Cage, CurrCageMods, ModLocations, Rack, RoomMods } from '../../../types/typings';
 import { CurrentCageLayout } from '../cageView/CurrentCageLayout';
 import { CageModifications } from './CageModifications';
+import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { buildUpdatedCageAndRoomMods } from '../../../utils/homeHelpers';
 
 interface ModificationEditorProps {
     currCage: Cage;
@@ -39,6 +41,10 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
         currRack,
         updateCageMods,
     } = props;
+    const {selectedLocalRoom} = useHomeNavigationContext();
+
+    const [localCage, setLocalCage] = useState<Cage>(currCage);
+    const [cageRoomMods, setCageRoomMods] = useState<RoomMods>(selectedLocalRoom.mods);
 
     const [currCageMods, setCurrCageMods] = useState<CurrCageMods>({
         adjCages: {
@@ -53,6 +59,14 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
     useEffect(() => {
         if(currCageMods){
             updateCageMods(currCageMods);
+
+            const {cageModsByCage, newRoomMods} = buildUpdatedCageAndRoomMods(selectedLocalRoom, currCage, currCageMods);
+
+            setLocalCage((prevState) => ({
+                ...prevState,
+                mods: cageModsByCage[prevState.objectId]
+            }));
+            setCageRoomMods(newRoomMods);
         }
     }, [currCageMods]);
 
@@ -67,7 +81,8 @@ export const ModificationEditor: FC<ModificationEditorProps> = (props) => {
                     setCurrCageMods={setCurrCageMods}
                 />
                 <CurrentCageLayout
-                    cage={currCage}
+                    cage={localCage}
+                    cageRoomMods={cageRoomMods}
                 />
             </div>
         </div>

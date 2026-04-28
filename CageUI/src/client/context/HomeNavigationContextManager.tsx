@@ -51,13 +51,16 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
     const [userProfile, setUserProfile] = useState<GetUserPermissionsResponse>(user);
 
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
+    const [selectedLocalRoom, setSelectedLocalRoom] = useState<Room>(null);
     const [selectedRoomMods, setSelectedRoomMods] = useState<RoomMods>({});
 
     const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>(null);
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
-    // Track if we've already handled this specific URL
+    useEffect(() => {
+        setSelectedLocalRoom(selectedRoom);
+    }, [selectedRoom]);
 
     // Load initial data based on URL parameters
     useEffect(() => {
@@ -197,7 +200,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
                     newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
                     // Ensure they don't share the same reference (using lodash to clone)
                     setSelectedRoomMods(_.cloneDeep(newLocalRoom.mods));
-                    setSelectedRoom(newLocalRoom);
+                    setSelectedRoom({...newLocalRoom, objects: [...newLocalRoom.objects]});
                 }
                 return newLocalRoom;
             } else {
@@ -223,10 +226,11 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
             selectedRoomMods,
             selectedRackGroup,
             selectedRoom,
+            selectedLocalRoom,
             selectedRack,
             selectedCage,
             navigateTo,
-            setSelectedRoom,
+            setSelectedLocalRoom,
             userProfile,
         }}>
             {children}

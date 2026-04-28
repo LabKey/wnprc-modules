@@ -68,6 +68,7 @@ import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
+import org.labkey.cageui.model.SessionLog;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -378,6 +379,7 @@ public class CageUIController extends SpringActionController
 
         private Room _room;
         private ArrayList<ModData> _roomDefaultMods;
+        private SessionLog _sessionLog;
 
         public Room getRoom()
         {
@@ -399,6 +401,16 @@ public class CageUIController extends SpringActionController
             _roomDefaultMods = roomDefaultMods;
         }
 
+        public SessionLog getSessionLog()
+        {
+            return _sessionLog;
+        }
+
+        public void setSessionLog(SessionLog sessionLog)
+        {
+            _sessionLog = sessionLog;
+        }
+
         //todo add room name validation to prevent template saving without template in the name
         // todo add validation to prevent room from being save with default cages, and templates being saved with real cages.
         @Override
@@ -412,9 +424,8 @@ public class CageUIController extends SpringActionController
             }
             JSONObject jsonRoom = json.getJSONObject("room");
             JSONArray jsonModsArray = json.getJSONArray("mods");
+            JSONObject jsonSessionLog = json.getJSONObject("sessionLog");
             String prevRoomName = json.get("prevRoomName").toString();
-
-
 
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -467,6 +478,21 @@ public class CageUIController extends SpringActionController
                 errors.reject(ERROR_MSG, e.getMessage());
             }
 
+            try
+            {
+                SessionLog sessionLog = mapper.readValue(jsonSessionLog.toString(), mapper.getTypeFactory().constructType(SessionLog.class));
+                if (sessionLog != null)
+                {
+                    setSessionLog(sessionLog);
+                }else {
+                    errors.reject(ERROR_MSG, "Session log is corrupt");
+                }
+            }
+            catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+
         }
 
         @Override
@@ -502,8 +528,19 @@ public class CageUIController extends SpringActionController
             );
             BundledForms newSubmissionForms = submissionService.submitRoom();
 
+
+            ApiSimpleResponse res = CageUIManager.get().submitLayoutHistory(newSubmissionForms, getUser(), getContainer());
+            if(res.get("success").equals(true)){
+                CageUIManager.finalizeSessionLog(getSessionLog(), true, newSubmissionForms.getNewAllHistoryForm().getHistoryId());
+
+                CageUIManager.finalizeSessionLog(getSessionLog(), false);
+            }else{
+                CageUIManager.finalizeSessionLog(getSessionLog(), false);
+            }
+            CageUIManager.get().submitSessionLog(getSessionLog(), getUser(), getContainer());
             //return new ApiSimpleResponse();
-            return CageUIManager.get().submitLayoutHistory(newSubmissionForms, getUser(), getContainer());
+            return res;
         }
+
     }
 }

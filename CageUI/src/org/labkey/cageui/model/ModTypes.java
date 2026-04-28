@@ -34,7 +34,9 @@ public enum ModTypes
     NoDivider("nd"),
     CTunnel("ct"),
     Extension("ex"),
-    SPDivider("spd");
+    SPDivider("spd"),
+    Restraint("res"),
+    Blind("bld");
 
     private final String value;
 

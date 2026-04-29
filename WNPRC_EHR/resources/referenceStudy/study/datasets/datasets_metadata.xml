@@ -12751,6 +12751,14 @@
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
         <scale>0</scale>
       </column>
+      <column columnName="cageOld">
+        <datatype>varchar</datatype>
+        <columnTitle>Cage Old</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cageOld}&]]></url>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>0</scale>
+      </column>
       <column columnName="cond">
         <datatype>varchar</datatype>
         <columnTitle>Condition</columnTitle>

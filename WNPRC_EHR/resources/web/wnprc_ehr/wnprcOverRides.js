@@ -115,7 +115,7 @@ EHR.Metadata.Columns['Treatment Orders']       = EHR.Metadata.topCols+',account,
 EHR.Metadata.Columns['Behavior Remarks']       = EHR.Metadata.topCols+',so,a,p,,behatype,category, behatreatment, followup,'+EHR.Metadata.bottomCols;
 EHR.Metadata.Columns['Behavior Abstract']      = EHR.Metadata.topCols+',behavior,performedby,'+EHR.Metadata.bottomCols;
 EHR.Metadata.Columns['Virology Results']       = EHR.Metadata.topCols+',virus,method,source,resultOORIndicator,result,units,qualResult,laboratory,performing_lab,'+EHR.Metadata.bottomCols;
-EHR.Metadata.Columns['Housing']                = 'id,date,enddate,room,cage,id/numroommates/cagemates,cond,reason,ejacConfirmed,project,isTemp,' + EHR.Metadata.bottomCols;
+EHR.Metadata.Columns['Housing']                = 'id,date,enddate,room,cage,cageOld,id/numroommates/cagemates,cond,reason,ejacConfirmed,project,isTemp,' + EHR.Metadata.bottomCols;
 
 EHR.Metadata.registerMetadata('Default', {
     byQuery: {

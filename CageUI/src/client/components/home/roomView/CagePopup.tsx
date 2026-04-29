@@ -177,6 +177,7 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
                     updateCageMods={(mods: CurrCageMods) => setCurrCageMods(mods)}
                 />
                 <AnimalEditor
+                    currCage={currCage}
                 />
                 <div className="room-display-popup-content" style={{alignItems: 'flex-end'}}>
                     <div className="room-display-popup-error">

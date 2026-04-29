@@ -113,3 +113,7 @@ export interface RackSwitchOption {
     };
     label: string;
 }
+
+export interface AnimalInCage {
+    id: string;
+}

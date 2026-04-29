@@ -158,6 +158,19 @@ EHR.Metadata.registerMetadata('Default', {
                     }
                 }
             }
+        },
+        cageOld: {
+            editorConfig: {
+                listeners: {
+                    change: function(field, val){
+                        if(val && !isNaN(val)){
+                            var newVal = EHR.Utils.padDigits(val, 4);
+                            if(val != newVal)
+                                field.setValue(newVal);
+                        }
+                    }
+                }
+            }
         }
         ,code: {
             xtype: 'ehr-snomedcombo'
@@ -780,6 +793,9 @@ EHR.Metadata.registerMetadata('Default', {
                 //,allowBlank: false
             }
             ,cage: {
+                allowBlank: false
+            }
+            ,cageOld: {
                 allowBlank: false
             }
             ,cond: {

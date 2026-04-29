@@ -20,8 +20,9 @@
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
-import { EHRCageMods } from '../types/homeTypes';
-import { CageData, CageHistoryData, RackData } from '../types/typings';
+import { AnimalInCage, EHRCageMods } from '../types/homeTypes';
+import { CageData, CageHistoryData, CageNumber, RackData } from '../types/typings';
+import { parseRoomItemNum } from '../utils/helpers';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: SelectRowsOptions = {
@@ -130,3 +131,32 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
         throw new Error('Error fetching cage history data: ' + (e as Error).message);
     }
 };
+
+export const findAnimalsInCage = async (room: string, cage: CageNumber): Promise<AnimalInCage[]> => {
+    //const cageNum = zeroPadName(parseRoomItemNum(cage), 4);
+    const config: SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'housing',
+        filterArray: [
+            Filter.create('room', room, Filter.Types.EQUAL),
+            Filter.create('cageOld', parseRoomItemNum(cage), Filter.Types.EQUAL),
+            Filter.create('enddate', null, Filter.Types.ISBLANK)]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        console.log("Animal Res: ", res, config);
+        const animalsInCage: AnimalInCage[] = [];
+        if (res.rows.length > 0) {
+            res.rows.forEach(r => {
+                animalsInCage.push({
+                    id: r.Id,
+                })
+            });
+        }
+        return animalsInCage;
+    }
+    catch (e) {
+        throw new Error('Error fetching cage history data: ' + (e as Error).message);
+    }
+}

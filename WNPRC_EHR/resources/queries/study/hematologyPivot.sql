@@ -3,6 +3,7 @@ SELECT
 b.id,
 b.date,
 b.testId,
+b.runId,
 group_concat(b.result) as results
 
 FROM (SELECT
@@ -13,9 +14,8 @@ coalesce(b.taskid, b.parentid, b.runId) as runId,
 b.resultoorindicator,
 CASE
 WHEN b.result IS NULL THEN  b.qualresult
-  ELSE CAST(TRUNCATE(ROUND(CAST(b.result AS NUMERIC), 2), 2) AS VARCHAR)
+  ELSE CAST(CAST(ROUND(CAST(b.result AS NUMERIC), 4) AS DOUBLE) AS VARCHAR)
 END as result
-
 FROM study."Hematology Results" b
 
 WHERE testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW','RDW-SD', 'RDW-CV', 'PLT', 'MPV','PCV','NE','LY','MN','EO','BS','BANDS','METAMYELO','MYELO','TP','RETICULO', 'RETIC-AB', 'IRF', 'NRBC', 'NRBC#', 'RETIC HGB', 'IPF', 'PDW', 'P-LCR', 'PCT', 'LFR', 'MFR', 'HFR', 'PRO MYELO', 'ATYP', 'OTHER')
@@ -29,7 +29,7 @@ b.date,
 b.testId,
 coalesce(b.taskid, b.parentid) as runId,
 b.percentoorindicator,
-CAST(TRUNCATE(ROUND(CAST(b.result AS NUMERIC), 2), 2) AS VARCHAR),
+CAST(CAST(ROUND(CAST(b.result AS NUMERIC), 2) AS DOUBLE) AS VARCHAR)
 FROM study.hematologyAbsCount b
 
 ) b

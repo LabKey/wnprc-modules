@@ -3,7 +3,6 @@ SELECT
 b.id,
 b.date,
 b.testId,
-b.runId,
 group_concat(b.result) as results
 
 FROM (SELECT

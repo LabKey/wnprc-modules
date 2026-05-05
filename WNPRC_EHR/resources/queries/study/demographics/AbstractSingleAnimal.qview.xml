@@ -29,6 +29,11 @@
                 <property name="columnTitle" value="Cage"/>
             </properties>
         </column>
+        <column name="Id/curLocation/cageOld">
+            <properties>
+                <property name="columnTitle" value="Cage Old"/>
+            </properties>
+        </column>
         <column name="Id/CurrentBehavior/currentBehaviors"/>
         <column name="Id/curLocation/cond">
             <properties>

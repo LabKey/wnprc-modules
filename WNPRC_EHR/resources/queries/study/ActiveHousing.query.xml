@@ -50,7 +50,7 @@
                     </column>
                     <column columnName="cageOld">
                         <!--<nullable>false</nullable>-->
-                        <columnTitle>Cage</columnTitle>
+                        <columnTitle>Cage Old</columnTitle>
                         <url>/EHR/cageDetails.view?
                             room=${room}&amp;
                             cage=${cageOld}&amp;

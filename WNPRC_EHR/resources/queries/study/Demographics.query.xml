@@ -150,6 +150,15 @@
                             <fkColumnName>room</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="cageOld">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Cage Old</columnTitle>
+                        <url>/EHR/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cageOld}&amp;
+                        </url>
+                    </column>
                     <column columnName="cage">
                         <isHidden>true</isHidden>
                         <shownInInsertView>false</shownInInsertView>

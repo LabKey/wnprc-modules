@@ -198,4 +198,17 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="housing_condition_records" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="housing"/>
+            <column columnName="pair_condition"/>
+            <column columnName="cage_condition"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

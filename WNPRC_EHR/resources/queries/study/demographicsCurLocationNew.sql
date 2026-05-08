@@ -21,17 +21,15 @@ SELECT
     d2.id,
 
     CASE
-        WHEN d2.cage is null then d2.room
-        ELSE (d2.room || '-' || d2.cage)
+        WHEN d2.cageNew is null then d2.room
+        ELSE (d2.room || '-' || d2.cageNew)
         END AS Location,
 
     d2.room.area,
 
     d2.room,
 
-    d2.cageOld,
-
-    d2.cage,
+    d2.cageNew,
 
     ifdefined(d2.cond) as cond,
 
@@ -44,7 +42,7 @@ SELECT
     coalesce(d2.room, '') as room_order,
     d2.room_sortValue @hidden,
 
-    coalesce(d2.cage, '') as cage_order,
+    coalesce(d2.cageNew, '') as cage_order,
     d2.cage_sortValue @hidden
 
 FROM study.housing d2

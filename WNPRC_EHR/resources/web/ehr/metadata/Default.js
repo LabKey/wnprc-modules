@@ -146,7 +146,7 @@ EHR.Metadata.registerMetadata('Default', {
                 timeFormat: 'H:i'
             }
         }
-        ,cage: {
+        ,cageNew: {
             editorConfig: {
                 listeners: {
                     change: function(field, val){
@@ -159,7 +159,7 @@ EHR.Metadata.registerMetadata('Default', {
                 }
             }
         },
-        cageOld: {
+        cage: {
             editorConfig: {
                 listeners: {
                     change: function(field, val){
@@ -792,10 +792,10 @@ EHR.Metadata.registerMetadata('Default', {
                 shownInGrid: false
                 //,allowBlank: false
             }
-            ,cage: {
+            ,cageNew: {
                 allowBlank: false
             }
-            ,cageOld: {
+            ,cage: {
                 allowBlank: false
             }
             ,cond: {

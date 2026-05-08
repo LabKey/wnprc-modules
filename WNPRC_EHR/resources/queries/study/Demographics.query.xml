@@ -150,22 +150,22 @@
                             <fkColumnName>room</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="cageOld">
-                        <isHidden>true</isHidden>
-                        <shownInInsertView>false</shownInInsertView>
-                        <columnTitle>Cage Old</columnTitle>
-                        <url>/EHR/cageDetails.view?
-                            room=${room}&amp;
-                            cage=${cageOld}&amp;
-                        </url>
-                    </column>
                     <column columnName="cage">
                         <isHidden>true</isHidden>
                         <shownInInsertView>false</shownInInsertView>
                         <columnTitle>Cage</columnTitle>
-                        <url>/wnprc_ehr/cageDetails.view?
+                        <url>/EHR/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
+                        </url>
+                    </column>
+                    <column columnName="cageNew">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Cage New</columnTitle>
+                        <url>/wnprc_ehr/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cageNew}&amp;
                         </url>
                     </column>
                     <column columnName="cond">

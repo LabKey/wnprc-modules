@@ -28,21 +28,21 @@
                         <columnTitle>Room</columnTitle>
                         <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;</url>
                     </column>
-                    <column columnName="cageOld">
-                        <!--<nullable>false</nullable>-->
-                        <columnTitle>Cage Old</columnTitle>
-                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cageOld}&amp;</url>
-                    </column>
                     <column columnName="cage">
                         <!--<nullable>false</nullable>-->
                         <columnTitle>Cage</columnTitle>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                    </column>
+                    <column columnName="cageNew">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Cage New</columnTitle>
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>cages</fkTable>
                             <fkColumnName>objectid</fkColumnName>
                             <fkDisplayColumnName>cage_number</fkDisplayColumnName>
                         </fk>
-                        <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                        <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;cage=${cageNew}&amp;</url>
                     </column>
                     <column columnName="cond">
                         <nullable>true</nullable>

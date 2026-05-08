@@ -12743,19 +12743,19 @@
         </fk>
         <scale>0</scale>
       </column>
+      <column columnName="cageNew">
+        <datatype>varchar</datatype>
+        <columnTitle>Cage New</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&cage=${cageNew}&]]></url>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>0</scale>
+      </column>
       <column columnName="cage">
         <datatype>varchar</datatype>
         <columnTitle>Cage</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&cage=${cage}&]]></url>
-        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
-        <scale>0</scale>
-      </column>
-      <column columnName="cageOld">
-        <datatype>varchar</datatype>
-        <columnTitle>Cage Old</columnTitle>
-        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
-        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cageOld}&]]></url>
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
         <scale>0</scale>
       </column>

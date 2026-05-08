@@ -42,11 +42,7 @@
                 <property name="columnTitle" value="Room"/>
             </properties>
         </column>
-        <column name="Id/curLocation/cageOld">
-            <properties>
-                <property name="columnTitle" value="Cage Old"/>
-            </properties>
-        </column>
+
         <column name="Id/curLocation/cage">
             <properties>
                 <property name="columnTitle" value="Cage"/>

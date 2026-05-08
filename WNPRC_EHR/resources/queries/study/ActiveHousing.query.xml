@@ -48,18 +48,18 @@
                             <fkColumnName>room</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="cageOld">
+                    <column columnName="cageNew">
                         <!--<nullable>false</nullable>-->
-                        <columnTitle>Cage Old</columnTitle>
-                        <url>/EHR/cageDetails.view?
+                        <columnTitle>Cage New</columnTitle>
+                        <url>/wnprc_ehr/cageDetails.view?
                             room=${room}&amp;
-                            cage=${cageOld}&amp;
+                            cage=${cageNew}&amp;
                         </url>
                     </column>
                     <column columnName="cage">
                         <!--<nullable>false</nullable>-->
                         <columnTitle>Cage</columnTitle>
-                        <url>/wnprc_ehr/cageDetails.view?
+                        <url>/EHR/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
                         </url>

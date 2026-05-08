@@ -345,10 +345,13 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (ds.getColumn("demographicsMHC") == null)
         {
-            BaseColumnInfo col = getWrappedIdCol(us, ds, "MHCtyping", "demographicsMHC");
+
+            //TODO This removes this query from the study.Animals table so that it works on my local server.
+            // VERY IMPORTANT TO RE-ENABLE IT WHEN WE DONT NEED IT ANYMORE
+           /* BaseColumnInfo col = getWrappedIdCol(us, ds, "MHCtyping", "demographicsMHC");
             col.setLabel("MHC SSP Typing");
             col.setDescription("Summarizes MHC SSP typing results for the common alleles");
-            ds.addColumn(col);
+            ds.addColumn(col);*/
 
             BaseColumnInfo col2 = getWrappedIdCol(us, ds, "ViralLoad", "demographicsVL");
             col2.setLabel("Viral Loads");
@@ -384,6 +387,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col5.setLabel("Assignments - Detailed");
             col5.setDescription("Contains more detailed summaries of the active assignments for each animal, including a breakdown between research, breeding, training, etc.");
             ds.addColumn(col5);
+
+            var housingColNew = getWrappedIdCol(us, ds, "curLocationNew", "demographicsCurLocationNew");
+            housingColNew.setLabel("Housing - Current - New");
+            housingColNew.setDescription("The CageUI Version that calculates the current housing location for each living animal.");
+            ds.addColumn(housingColNew);
 
             BaseColumnInfo col10 = getWrappedIdCol(us, ds, "DaysAlone", "demographicsDaysAlone");
             col10.setLabel("Days Alone");

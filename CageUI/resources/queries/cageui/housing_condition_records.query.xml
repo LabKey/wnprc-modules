@@ -33,14 +33,26 @@
                             <fkDisplayColumnName>Id</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="pair_condition">
+                    <column columnName="special_condition">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>housing_condition_codes</fkTable>
+                            <fkTable>cageui_housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
                             <filters>
                                 <filterGroup>
-                                    <filter column="category" value="Pairing" operator="eq"/>
+                                    <filter column="category" value="special" operator="eq"/>
+                                </filterGroup>
+                            </filters>
+                        </fk>
+                    </column>
+                    <column columnName="pair_condition">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_housing_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="category" value="pairing" operator="eq"/>
                                 </filterGroup>
                             </filters>
                         </fk>
@@ -48,11 +60,23 @@
                     <column columnName="cage_condition">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>housing_condition_codes</fkTable>
+                            <fkTable>cageui_housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
                             <filters>
                                 <filterGroup>
-                                    <filter column="category" value="Caging" operator="eq"/>
+                                    <filter column="category" value="caging" operator="eq"/>
+                                </filterGroup>
+                            </filters>
+                        </fk>
+                    </column>
+                    <column columnName="social_condition">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>cageui_housing_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="category" value="social" operator="eq"/>
                                 </filterGroup>
                             </filters>
                         </fk>

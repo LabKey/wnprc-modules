@@ -53,6 +53,15 @@
                             <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="condNew">
+                        <nullable>true</nullable>
+                        <columnTitle>Condition New</columnTitle>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>housing_condition_records</fkTable>
+                            <fkColumnName>housing</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="divider">
                         <columnTitle>Divider</columnTitle>
                         <fk>

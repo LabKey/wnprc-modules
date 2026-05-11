@@ -102,5 +102,10 @@ public class CageUISchema
         return getSchema().getTable(CageUIUserSchema.CAGE_MODIFICATIONS_HISTORY_TABLE);
     }
 
+    public TableInfo getHousingConditionRecordsTable()
+    {
+        return getSchema().getTable(CageUIUserSchema.HOUSING_CONDITION_RECORDS_TABLE);
+    }
+
 
 }

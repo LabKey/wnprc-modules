@@ -20,6 +20,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="housing_condition_records" tableDbType="TABLE">
+                <javaCustomizer class="org.labkey.cageui.table.CageUICustomizer" />
                 <tableTitle>Housing Condition Records</tableTitle>
                 <columns>
                     <column columnName="rowid">
@@ -36,7 +37,7 @@
                     <column columnName="special_condition">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_housing_condition_codes</fkTable>
+                            <fkTable>housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
                             <filters>
                                 <filterGroup>
@@ -48,7 +49,7 @@
                     <column columnName="pair_condition">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_housing_condition_codes</fkTable>
+                            <fkTable>housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
                             <filters>
                                 <filterGroup>
@@ -60,7 +61,7 @@
                     <column columnName="cage_condition">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_housing_condition_codes</fkTable>
+                            <fkTable>housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
                             <filters>
                                 <filterGroup>
@@ -72,7 +73,7 @@
                     <column columnName="social_condition">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_housing_condition_codes</fkTable>
+                            <fkTable>housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
                             <filters>
                                 <filterGroup>
@@ -81,6 +82,7 @@
                             </filters>
                         </fk>
                     </column>
+                    <column columnName="final_condition"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

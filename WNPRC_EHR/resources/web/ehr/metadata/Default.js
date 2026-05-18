@@ -803,6 +803,11 @@ EHR.Metadata.registerMetadata('Default', {
                 ,shownInGrid: false
                 ,lookup:{ schemaName: 'ehr_lookups', queryName: 'housing_condition_codes', displayColumn: 'value', keyColumn: 'value'}
             }
+            ,condNew: {
+                allowBlank: false
+                ,shownInGrid: false
+                ,lookup:{ schemaName: 'cageui', queryName: 'housing_condition_records', displayColumn: 'final_condition', keyColumn: 'housing'}
+            }
             ,reason: {
                 shownInGrid: false,
                 lookup:{

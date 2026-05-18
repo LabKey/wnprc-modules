@@ -60,6 +60,7 @@
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>housing_condition_records</fkTable>
                             <fkColumnName>housing</fkColumnName>
+                            <fkDisplayColumnName>final_condition</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="divider">

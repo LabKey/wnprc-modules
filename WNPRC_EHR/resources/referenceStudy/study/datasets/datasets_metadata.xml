@@ -12771,6 +12771,19 @@
         </fk>
         <scale>0</scale>
       </column>
+      <column columnName="condNew">
+        <datatype>varchar</datatype>
+        <columnTitle>Condition New</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>cageui</fkDbSchema>
+          <fkTable>housing_condition_records</fkTable>
+          <fkColumnName>housing</fkColumnName>
+          <fkDisplayColumnName>final_condition</fkDisplayColumnName>
+        </fk>
+        <scale>0</scale>
+      </column>
       <column columnName="reason">
         <datatype>varchar</datatype>
         <columnTitle>Reason For Move</columnTitle>

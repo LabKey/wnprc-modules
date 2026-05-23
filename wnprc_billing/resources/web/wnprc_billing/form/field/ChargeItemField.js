@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2019-2026 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 
 Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
     extend: 'Ext.form.field.ComboBox',

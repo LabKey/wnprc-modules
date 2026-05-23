@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

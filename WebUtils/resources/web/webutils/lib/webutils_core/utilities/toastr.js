@@ -1,4 +1,9 @@
 /*
+ * Copyright (c) 2018-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
+/*
  * Note that this is toastr v2.1.3, the "latest" version in url has no more maintenance,
  * please go to https://cdnjs.com/libraries/toastr.js and pick a certain version you want to use,
  * make sure you copy the url from the website since the url may change between versions.

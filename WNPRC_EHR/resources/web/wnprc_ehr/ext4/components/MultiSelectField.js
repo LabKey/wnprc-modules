@@ -1,4 +1,9 @@
 /*
+ * Copyright (c) 2016-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
+/*
  * This defines a field that appears like a drop down, but it is disabled to prevent typing,
  * and pops up a box to select from the list.  It pins selections to the top of the modal,
  * as well as allowing the user to filter the list of options.

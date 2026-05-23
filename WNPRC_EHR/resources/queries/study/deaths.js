@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2023-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 
 //This is REQUIRED to make the script functions (onInit, onComplete, etc.) work.
 require("ehr/triggers").initScript(this);

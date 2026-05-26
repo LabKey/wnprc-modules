@@ -948,10 +948,12 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
             return;
         }
 
+        const cleanData = data[0][0].replace(/\s+/g, ' ').trim(); // remove extra whitespace
+
         const formattedObjData = {};
         const regex = /(\.D[A-Z0-9]+U)\s+(.*?)(?=\.\D[A-Z0-9]+U|$)/gs;
         let match;
-        while ((match = regex.exec(data[0][0])) !== null) {
+        while ((match = regex.exec(cleanData)) !== null) {
             const key = match[1];
             const value = match[2].trim();
             const animalId = value.substring(25, 31).toLowerCase();

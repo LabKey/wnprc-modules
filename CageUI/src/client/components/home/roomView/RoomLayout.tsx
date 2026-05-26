@@ -25,7 +25,7 @@ import { Cage, Room } from '../../../types/typings';
 import { addPrevRoomSvgs, isRoomModifier } from '../../../utils/helpers';
 import { findCageInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
-import _ from 'lodash';
+import * as lodash from 'lodash';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LayoutSaveResult, SelectedObj } from '../../../types/layoutEditorTypes';
 import { useRoomContext } from '../../../context/RoomContextManager';
@@ -96,8 +96,8 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     /  This would take some time and can be added later if requested/needed.
      */
     useEffect(() => {
-        const modsEqual = _.isEqual(selectedRoomMods, selectedLocalRoom.mods);
-        const objectsEqual = _.isEqual(selectedRoom?.objects, selectedLocalRoom.objects);
+        const modsEqual = lodash.isEqual(selectedRoomMods, selectedLocalRoom.mods);
+        const objectsEqual = lodash.isEqual(selectedRoom?.objects, selectedLocalRoom.objects);
         setShowChangesMenu(!modsEqual || !objectsEqual);
     }, [selectedRoom, selectedLocalRoom, selectedRoomMods]);
 

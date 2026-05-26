@@ -84,6 +84,10 @@ import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 
+export const zeroPadName = (num, places) => {
+    return(String(num).padStart(places, '0'));
+};
+
 export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
 };

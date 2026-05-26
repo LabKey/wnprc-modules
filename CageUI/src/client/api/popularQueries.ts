@@ -22,7 +22,7 @@ import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { AnimalInCage, EHRCageMods } from '../types/homeTypes';
 import { CageData, CageHistoryData, CageNumber, RackData } from '../types/typings';
-import { parseRoomItemNum } from '../utils/helpers';
+import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: SelectRowsOptions = {
@@ -134,13 +134,13 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
 
 // TODO update this query with cageNew
 export const findAnimalsInCage = async (room: string, cage: CageNumber): Promise<AnimalInCage[]> => {
-    //const cageNum = zeroPadName(parseRoomItemNum(cage), 4);
+    const cageNum = zeroPadName(parseRoomItemNum(cage), 4);
     const config: SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'housing',
         filterArray: [
             Filter.create('room', room, Filter.Types.EQUAL),
-            Filter.create('cage', parseRoomItemNum(cage), Filter.Types.EQUAL),
+            Filter.create('cage', cageNum, Filter.Types.EQUAL),
             Filter.create('enddate', null, Filter.Types.ISBLANK)]
     };
 
@@ -153,6 +153,7 @@ export const findAnimalsInCage = async (room: string, cage: CageNumber): Promise
                 animalsInCage.push({
                     id: r.Id,
                 })
+                animalsInCage.push({id: 'test animal'})
             });
         }
         return animalsInCage;

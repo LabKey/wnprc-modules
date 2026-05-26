@@ -40,6 +40,15 @@ module.exports = {
                 'org.labkey.api.security.permissions.ReadPermission',
             ],
             path: './src/client/pages/updateRackStatus'
+        },
+        {
+            name: "housingTransfer",
+            title: "Housing Transfer",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+                'org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission'
+            ],
+            path: './src/client/pages/housingTransfer'
         }
     ]
 };

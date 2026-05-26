@@ -17,21 +17,22 @@
  */
 
 import * as React from 'react';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { AnimalInCage } from '../../../types/homeTypes';
 import { Cage } from '../../../types/typings';
 import { findAnimalsInCage } from '../../../api/popularQueries';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { ActionURL } from '@labkey/api';
 
 interface AnimalEditorProps {
-
     currCage: Cage;
 }
 
 export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
     const { currCage } = props;
     const {selectedRoom} = useHomeNavigationContext();
-    const [animalsInCage, setAnimalsInCage] = React.useState<AnimalInCage[]>([]);
+    const [animalsInCage, setAnimalsInCage] = useState<AnimalInCage[]>([]);
+    const [selectedAnimals, setSelectedAnimals] = useState<AnimalInCage[]>([]);
 
     useEffect(() => {
         findAnimalsInCage(selectedRoom.name, currCage.cageNum).then(res => {
@@ -39,26 +40,42 @@ export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
         });
     }, []);
 
-    const startHousingTransfer = (animal: AnimalInCage) => {
+    const addToSelectedAnimals = (animal: AnimalInCage) => {
+        const isAnimalCurrentlySelected = selectedAnimals.find(a => a.id === animal.id);
+        if(isAnimalCurrentlySelected){
+            setSelectedAnimals(prevState => prevState.filter(a => a.id !== animal.id));
+        }else{
+            setSelectedAnimals(prevState => [...prevState, animal]);
+        }
+    }
 
+    const startHousingTransfer = () => {
+        window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
+            subjects:  selectedAnimals.map(animal => animal.id).join(','),
+            returnUrl: window.location.href
+        });
     }
 
     return (
         <div className={'animal-editor'}>
             <h2 className={"animal-editor-title"}>Animals</h2>
             {animalsInCage.length > 0 &&
-                    <div className={'animal-editor-list'}>
-                        <ul>
-                            {animalsInCage.map((animal, idx) => (
-                                <li key={`animal-list-${idx}`}>
-                                    <div>{animal.id}</div>
-                                    <button onClick={() => startHousingTransfer(animal)}>
-                                        Transfer
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                <div className={'animal-editor-list'}>
+                    <ul>
+                        {animalsInCage.map((animal, idx) => (
+                            <li
+                                key={`animal-list-${idx}`}
+                                className={selectedAnimals.find(a => a.id === animal.id) ? 'selected' : ''}
+                                onClick={() => addToSelectedAnimals(animal)}
+                            >
+                                <div>{animal.id}</div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            }
+            {selectedAnimals.length > 0 &&
+                <button onClick={startHousingTransfer}>Start Animal Transfer</button>
             }
         </div>
     );

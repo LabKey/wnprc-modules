@@ -16,25 +16,17 @@
  *
  */
 
-import { Dayjs } from 'dayjs';
-import { Option } from '@labkey/components';
-
-export type HousingRowMetadata = {
-    cageOptions: Option<string>[];
-};
-
-export type ExtendedHousingTransferData = HousingTransferData & {
-    metadata?: HousingRowMetadata;
-};
-
-export interface HousingTransferData {
-    id: string;
-    inDate: Dayjs;
-    outDate: Dayjs;
-    room: Option<number>;
-    cage: Option<string>;
-    condition: string;
-    reasonForMove: string;
-    remarks: string;
-    performedBy: string;
-}
+SELECT
+    r.room,
+    r.objectid as rack_object_id,
+    r.rackid,
+    c.objectid as cage_object_id,
+    c.cage_number
+FROM
+    cageui.racks r
+        JOIN
+    ehr_lookups.rooms rm ON r.room = rm.room
+        LEFT JOIN
+    cageui.cages c ON r.objectid = c.rack
+ORDER BY
+    r.room, r.rackid, c.cage_number;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LabKey Corporation
+ * Copyright (c) 2020-2026 Board of Regents of the University of Wisconsin System
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.labkey.api.exp.api.ExperimentService.asInteger;
+import static org.labkey.api.util.IntegerUtils.asInteger;
 
 public class WNPRC_PurchasingManager
 {

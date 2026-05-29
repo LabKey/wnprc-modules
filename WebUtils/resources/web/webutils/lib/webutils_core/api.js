@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 WebUtils.API = (function(){
     // LABKEY should always be defined because it is required by the library, but this little piece
     // ensures that parsers can tell that.

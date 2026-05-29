@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2020-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 Ext4.define('WNPRC_Billing.form.field.ChargeGroupEntryField', {
     extend: 'Ext.form.field.ComboBox',
     alias: 'widget.wnprc_billing-chargegroupentryfield',

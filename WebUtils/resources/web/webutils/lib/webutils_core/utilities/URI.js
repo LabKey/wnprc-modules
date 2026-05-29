@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2026 Board of Regents of the University of Wisconsin System
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 /*! URI.js v1.18.0 http://medialize.github.io/URI.js/ */
 /* build contains: IPv6.js, punycode.js, SecondLevelDomains.js, URI.js, URITemplate.js, URI.fragmentQuery.js */
 (function(e,h){"object"===typeof exports?module.exports=h():"function"===typeof define&&define.amd?define(h):e.IPv6=h(e)})(this,function(e){var h=e&&e.IPv6;return{best:function(g){g=g.toLowerCase().split(":");var e=g.length,b=8;""===g[0]&&""===g[1]&&""===g[2]?(g.shift(),g.shift()):""===g[0]&&""===g[1]?g.shift():""===g[e-1]&&""===g[e-2]&&g.pop();e=g.length;-1!==g[e-1].indexOf(".")&&(b=7);var l;for(l=0;l<e&&""!==g[l];l++);if(l<b)for(g.splice(l,1,"0000");g.length<b;)g.splice(l,0,"0000");for(l=0;l<b;l++){for(var e=

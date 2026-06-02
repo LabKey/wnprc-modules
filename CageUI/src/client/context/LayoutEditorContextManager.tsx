@@ -58,11 +58,14 @@ import {
     getTranslation,
     isRackEnum,
     showLayoutEditorError,
+    checkAdjacent
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
+    cageDirectionToModLocation,
     generateCageId,
     generateUUID,
+    getAdjLocation,
     getNextDefaultRackId,
     getSvgSize,
     parseLongId,
@@ -1152,8 +1155,53 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         if (rackGroupIndex === -1) return;
 
+        const removedModIds: string[] = [];
+        const otherRacks = rackGroup.racks.filter(r => r.objectId !== selectedRack.objectId);
+
+        // Process modifications between selectedRack and other racks in the group
+        selectedRack.cages.forEach(selectedCage => {
+            const selectedCageLoc = getCageLoc(selectedCage.svgId, selectedCage.cageNum);
+            if (!selectedCageLoc) return;
+
+            otherRacks.forEach(otherRack => {
+                otherRack.cages.forEach(otherCage => {
+                    const otherCageLoc = getCageLoc(otherCage.svgId, otherCage.cageNum);
+                    if (!otherCageLoc) return;
+
+                    const adjResult = checkAdjacent(otherCageLoc, selectedCageLoc, selectedCage.size, otherCage.size);
+                    if (adjResult.isAdjacent) {
+                        const location = cageDirectionToModLocation(adjResult.direction, rackGroup.rotation);
+                        const adjLocation = getAdjLocation(location);
+
+                        // Remove from selectedCage
+                        if (selectedCage.mods && selectedCage.mods[location]) {
+                            selectedCage.mods[location].forEach(mod => {
+                                mod.modKeys.forEach(key => removedModIds.push(key.modId));
+                            });
+                            selectedCage.mods[location] = [];
+                        }
+
+                        // Remove from otherCage
+                        if (otherCage.mods && otherCage.mods[adjLocation]) {
+                            otherCage.mods[adjLocation].forEach(mod => {
+                                mod.modKeys.forEach(key => removedModIds.push(key.modId));
+                            });
+                            otherCage.mods[adjLocation] = [];
+                        }
+                    }
+                });
+            });
+        });
+
+        // Remove collected modIds from room.mods
+        if (newRoom.mods) {
+            removedModIds.forEach(id => {
+                delete newRoom.mods[id];
+            });
+        }
+
         // 2. Create the updated original rack group (without the selected rack)
-        let updatedOriginalRacks = rackGroup.racks.filter(rack => rack.objectId !== selectedRack.objectId);
+        let updatedOriginalRacks = otherRacks;
         let updatedOriginalGroup = { ...rackGroup };
 
         if (updatedOriginalRacks.length > 0) {

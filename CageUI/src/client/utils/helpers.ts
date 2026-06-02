@@ -19,6 +19,7 @@
 import {
     AllHistoryData,
     Cage,
+    CageDirection,
     CageModification,
     CageModificationsType,
     CageMods,
@@ -865,7 +866,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             x: rackItem.xCoord - rack.x - group.x, // get cage coords by subtracting from both rack and group
             y: rackItem.yCoord - rack.y - group.y,
             size: svgSize,
-            mods: cageMods
+            mods: cageMods,
         };
 
         newUnitLocs[cageNumType].push({
@@ -881,6 +882,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         const rackGroup: RackGroup = findOrAddGroup(rackItem);
         const rack: Rack = await findOrAddRack(rackGroup, rackItem);
         await addCageToRack(rack, rackItem, rackGroup);
+
     };
 
     // generates room object state for room objects from layout history data
@@ -926,6 +928,55 @@ export const getAdjLocation = (loc: ModLocations): ModLocations => {
         default:
             return ModLocations.Direct;
     }
+};
+
+export const cageDirectionToModLocation = (loc: CageDirection, rotation: GroupRotation): ModLocations => {
+    if(rotation === GroupRotation.Origin){ // 0
+        switch (loc) {
+            case CageDirection.Left:
+                return ModLocations.Left;
+            case CageDirection.Right:
+                return ModLocations.Right;
+            case CageDirection.Top:
+                return ModLocations.Top;
+            case CageDirection.Bottom:
+                return ModLocations.Bottom;
+        }
+    }else if(rotation === GroupRotation.Quarter){ // 90
+        switch (loc) {
+            case CageDirection.Left:
+                return ModLocations.Bottom;
+            case CageDirection.Right:
+                return ModLocations.Top;
+            case CageDirection.Top:
+                return ModLocations.Right;
+            case CageDirection.Bottom:
+                return ModLocations.Left;
+        }
+    }else if(rotation === GroupRotation.Half){ // 180
+        switch (loc) {
+            case CageDirection.Left:
+                return ModLocations.Right;
+            case CageDirection.Right:
+                return ModLocations.Left;
+            case CageDirection.Top:
+                return ModLocations.Bottom;
+            case CageDirection.Bottom:
+                return ModLocations.Top;
+        }
+    }else if(rotation === GroupRotation.ThreeQuarter){ // 270
+        switch (loc) {
+            case CageDirection.Left:
+                return ModLocations.Top;
+            case CageDirection.Right:
+                return ModLocations.Bottom;
+            case CageDirection.Top:
+                return ModLocations.Left;
+            case CageDirection.Bottom:
+                return ModLocations.Right;
+        }
+    }
+
 };
 
 export const getDefaultMod = (loc: ModLocations): ModTypes | null => {
@@ -1304,43 +1355,66 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
 
     // Create default mods for new rooms.
     if (isRoomNonDefault) {
-
         const usedMap = new Map<string, boolean>();
 
         room.rackGroups.forEach((group) => {
             group.racks.forEach((r) => {
                 r.cages.forEach((c) => {
-                    if (c.mods === undefined || c.mods === null) {
-                        const connectedCages = findConnectedCages(r, group.rotation, c);
-                        Object.entries(connectedCages).forEach(([direction, connections]) => {
-                            if (connections.length === 0) {
-                                return;
-                            }
-                            const locDir = parseInt(direction) as ModLocations;
-                            addModEntries(connections, locDir, r, false, newModData, usedMap);
-                        });
+                    const connectedCages = findConnectedCages(r, group.rotation, c);
+                    const connectedRacks = findConnectedRacks(group, r, c);
 
-                        const connectedRacks = findConnectedRacks(group, r, c);
-                        Object.entries(connectedRacks).forEach(([direction, connections]) => {
-                            if (connections.length === 0) {
-                                return;
-                            }
-                            const locDir = parseInt(direction) as ModLocations;
-                            addModEntries(connections, locDir, r, true, newModData, usedMap);
-                        });
-                    } else {
-                        Object.entries(c.mods).forEach(([direction, modSubsections]: [string, CageModification[]]) => {
-                            modSubsections.forEach(section => {
-                                section.modKeys.forEach(key => {
-                                    newModData.push({
-                                        cage: c.objectId,
-                                        location: parseInt(direction),
-                                        modId: key.modId,
-                                        modification: room.mods[key.modId].value,
-                                        parentModId: key.parentModId,
-                                        rack: r.objectId,
-                                        subId: section.subId,
+                    // Combine all potential connection directions from both adjacent cages and racks
+                    const allDirections = new Set([
+                        ...Object.keys(connectedCages),
+                        ...Object.keys(connectedRacks)
+                    ]);
+
+                    allDirections.forEach((direction) => {
+                        const locDir = parseInt(direction) as ModLocations;
+                        const cageConnections = connectedCages[locDir] || [];
+                        const rackConnections = connectedRacks[locDir] || [];
+
+                        // Only proceed if there is a connection in this direction
+                        if (cageConnections.length > 0 || rackConnections.length > 0) {
+                            if (c.mods && c.mods[locDir] && c.mods[locDir].length > 0) {
+                                // If existing mods exist for this direction, add them
+                                c.mods[locDir].forEach(section => {
+                                    section.modKeys.forEach(key => {
+                                        newModData.push({
+                                            cage: c.objectId,
+                                            location: locDir,
+                                            modId: key.modId,
+                                            modification: room.mods[key.modId].value,
+                                            parentModId: key.parentModId,
+                                            rack: r.objectId,
+                                            subId: section.subId,
+                                        });
                                     });
+                                });
+                            } else {
+                                // If no mods exist for this connection, add default ones
+                                if (cageConnections.length > 0) {
+                                    addModEntries(cageConnections, locDir, r, false, newModData, usedMap);
+                                }
+                                if (rackConnections.length > 0) {
+                                    addModEntries(rackConnections, locDir, r, true, newModData, usedMap);
+                                }
+                            }
+                        }
+                    });
+
+                    // Handle Direct location mods (not used in connections)
+                    if (c.mods && c.mods[ModLocations.Direct] && c.mods[ModLocations.Direct].length > 0) {
+                        c.mods[ModLocations.Direct].forEach(section => {
+                            section.modKeys.forEach(key => {
+                                newModData.push({
+                                    cage: c.objectId,
+                                    location: ModLocations.Direct,
+                                    modId: key.modId,
+                                    modification: room.mods[key.modId].value,
+                                    parentModId: key.parentModId,
+                                    rack: r.objectId,
+                                    subId: section.subId,
                                 });
                             });
                         });

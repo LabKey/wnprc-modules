@@ -154,6 +154,7 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
     const handleUnmergeRack = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         unmergeRacks(selectedRackGroup, selectedRack);
+        closeMenu();
     }
 
     return (

@@ -750,8 +750,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         if (loadTemplate) {
             window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
-                'cageui-editLayout',
-                ActionURL.getContainer(),
+                'editLayout',
+                undefined,
                 {room: localRoom.name}
             );
         }

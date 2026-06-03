@@ -208,12 +208,14 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                             Delete Rack
                         </Button>
 
-                        <Button
-                            variant={'primary'}
-                            onClick={handleUnmergeRack}
-                        >
-                            Unmerge Rack
-                        </Button>
+                        {(selectedRackGroup && selectedRackGroup.racks.length > 1) &&
+                            <Button
+                                variant={'primary'}
+                                onClick={handleUnmergeRack}
+                            >
+                                Unmerge Rack
+                            </Button>
+                        }
                     </div>
                 }
             </div>

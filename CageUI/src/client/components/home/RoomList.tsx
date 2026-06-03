@@ -27,7 +27,7 @@ import { useHomeNavigationContext } from '../../context/HomeNavigationContextMan
 import { ActionURL, Filter } from '@labkey/api';
 
 export const RoomList: FC = () => {
-    const {navigateTo, selectedPage} = useHomeNavigationContext();
+    const {navigateTo, selectedPage, setIsNavLoading} = useHomeNavigationContext();
     // keeps track of which rooms have already been fetched from layout_history
     const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
     const [expandedRacks, setExpandedRacks] = useState<Record<string, boolean>>({});
@@ -193,14 +193,17 @@ export const RoomList: FC = () => {
     }, [selectedPage, allRooms, visibleRooms]);
 
     const handleRoomClick = (room: ListRoom) => {
+        setIsNavLoading(true);
         navigateTo({selected: 'Room', room: room.name})
     };
 
     const handleRackClick = (room: ListRoom, rack: ListRack) => {
+        setIsNavLoading(true);
         navigateTo({selected: 'Rack', room: room.name, rack: rack.id});
     };
 
     const handleCageClick = (room: ListRoom, rack: ListRack, cage: ListCage) => {
+        setIsNavLoading(true);
         navigateTo({selected: 'Cage', room: room.name, rack: rack.id, cage: cage.id});
     };
 

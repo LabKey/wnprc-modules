@@ -874,6 +874,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             {startSaving &&
                     <LoadingScreen
                             isVisible={startSaving}
+                            message={"Saving..."}
                             targetElement={document.getElementById('layout-editor-container')}
                     />
             }

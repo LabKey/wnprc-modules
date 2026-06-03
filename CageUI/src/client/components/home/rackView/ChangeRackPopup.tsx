@@ -167,6 +167,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
             {isSaving &&
                 <LoadingScreen
                     isVisible={isSaving}
+                    message={"Saving..."}
                     targetElement={document.getElementById('rack-view-container')}
                 />
             }

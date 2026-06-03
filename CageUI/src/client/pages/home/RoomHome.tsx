@@ -22,7 +22,7 @@ import '../../cageui.scss';
 import { RoomList } from '../../components/home/RoomList';
 import { RoomNavbar } from '../../components/home/RoomNavbar';
 import { RoomContent } from '../../components/home/RoomContent';
-import { HomeNavigationContextProvider } from '../../context/HomeNavigationContextManager';
+import { HomeNavigationContextProvider, useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
 import { RoomContextProvider } from '../../context/RoomContextManager';
 import { labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
@@ -45,7 +45,7 @@ export const RoomHome: FC = () => {
     return (user?.container &&
         <HomeNavigationContextProvider user={user}>
             <RoomContextProvider>
-                <div className={'home-container'}>
+                <div className={'home-container'} id={'home-container-id'}>
                     <RoomList/>
                     <div className="page-content-wrapper">
                         <RoomNavbar/>

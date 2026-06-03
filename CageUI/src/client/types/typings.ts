@@ -69,6 +69,7 @@ export enum ModTypes {
     PCDivider = 'pcd', // protected contact
     VCDivider = 'vcd', // visual contact
     PrivacyDivider = 'pd',
+    LockedDivider = 'ld',
     NoDivider = 'nd',
     CTunnel = 'ct',
     Extension = 'ex',

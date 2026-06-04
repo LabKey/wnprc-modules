@@ -185,6 +185,9 @@ export type Modification = {
 
 export type ModRecord = Record<ModTypes, Modification>;
 
+export interface LoadedSvgs {
+    [key: RoomItemStringType]: SVGElement;
+}
 
 export interface FetchRoomData {
     selectedSize: SelectorOptions;

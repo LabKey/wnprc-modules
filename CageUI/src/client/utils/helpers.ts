@@ -33,7 +33,7 @@ import {
     GroupId,
     GroupRotation,
     LayoutData,
-    LayoutHistoryData,
+    LayoutHistoryData, LoadedSvgs,
     ModData,
     ModLocations,
     ModTypes,
@@ -75,7 +75,7 @@ import {
     setupEditCageEvent
 } from './LayoutEditorHelpers';
 import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { selectDistinctRows } from '@labkey/components';
+import { selectDistinctRows, selectRows } from '@labkey/components';
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
@@ -496,11 +496,45 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
     return prevRoomData;
 };
 
+const loadSvgs = async (): Promise<LoadedSvgs> => {
+    const loadedSvgs: LoadedSvgs = {};
+
+    const config: SelectRowsOptions = {
+        schemaName: "ehr_lookups",
+        queryName: "cageui_svg_urls",
+        columns: ["value", "title"]
+    }
+
+    const res = await labkeyActionSelectWithPromise(config);
+    if(res.rowCount > 0){
+
+        // Create all promises first
+        const promises = res.rows.map(row => {
+            return d3.svg(`${ActionURL.getContextPath()}${row.title}`).then((d) => {
+                if(!loadedSvgs[row.value]){ // cage templates
+                    loadedSvgs[row.value] = d.querySelector(`svg[id*=template]`);
+                }
+                if(!loadedSvgs[row.value]){ // room objects
+                    loadedSvgs[row.value] = d.querySelector('svg');
+                }
+            });
+        });
+
+        // Wait for all promises to complete
+        await Promise.all(promises);
+    }else{
+        console.error("Error finding cageUI Svgs")
+    }
+
+    return loadedSvgs;
+}
+
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
-export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+export const addPrevRoomSvgs = async (user: GetUserPermissionsResponse, mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
+    const loadedSvgs: LoadedSvgs = await loadSvgs();
 
     if ((unitsToRender as Room)?.rackGroups) {
         renderType = 'room';
@@ -554,16 +588,13 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
             .style('pointer-events', 'bounding-box');
 
         // This is where the cage svg group is created.
-        rack.cages.forEach(async (cage) => {
+        rack.cages.forEach((cage) => {
             const cageGroup = rackGroup.append('g')
                 .attr('id', cage.svgId)
                 .attr('name', cage.cageNum)
                 .attr('transform', `translate(${cage.x},${cage.y})`);
 
-            let unitSvg: SVGElement;
-            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${rackTypeString}.svg`).then((d) => {
-                unitSvg = d.querySelector(`svg[id*=template]`);
-            });
+            const unitSvg: SVGElement = loadedSvgs[rackTypeString].cloneNode(true) as SVGElement;
 
             // Only needed for layout editor to attach context menus
             const shape = d3.select(unitSvg);
@@ -599,9 +630,9 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
                 .attr('id', group.groupId)
                 .attr('class', 'draggable rack-group');
 
-        group.racks.forEach(async rack => {
+        group.racks.forEach( rack => {
             // Use parent group as rackGroup if only 1 rack, otherwise create a new rack group
-            await createRackGroup(parentGroup, rack, isSingleRack, group.rotation);
+            createRackGroup(parentGroup, rack, isSingleRack, group.rotation);
         });
         let groupX = renderType === 'room' ? group.x : group.racks[0].x;
         let groupY = renderType === 'room' ? group.y : group.racks[0].y;
@@ -621,7 +652,7 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
         });
 
         // Render room objects
-        (unitsToRender as Room).objects.forEach(async (roomObj) => {
+        (unitsToRender as Room).objects.forEach( (roomObj) => {
             const wrapperGroup = layoutSvg.append('g')
                 .attr('id', roomObj.itemId + '-wrapper')
                 .attr('class', 'draggable room-obj')
@@ -632,10 +663,7 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
                 .attr('id', roomObj.itemId)
                 .attr('transform', `translate(0,0)`)
 
-            let objSvg: SVGElement;
-            await d3.svg(`${ActionURL.getContextPath()}/cageui/static/${roomItemToString(roomObj.type)}.svg`).then((d) => {
-                objSvg = d.querySelector('svg');
-            });
+            const objSvg: SVGElement = loadedSvgs[roomItemToString(roomObj.type)].cloneNode(true) as SVGElement;
 
             const shape = d3.select(objSvg)
                 .classed('draggable', false)
@@ -665,18 +693,15 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
         const cageGroup = layoutSvg.append('g')
             .attr('id', cage.cageNum)
             .attr('transform', `translate(0,0)`);
-        let unitSvg: SVGElement;
+        const unitSvg: SVGElement = loadedSvgs[parseRoomItemType((unitsToRender as Cage).cageNum)].cloneNode(true) as SVGElement;
 
-        d3.svg(`${ActionURL.getContextPath()}/cageui/static/${parseRoomItemType((unitsToRender as Cage).cageNum)}.svg`).then((d) => {
-            unitSvg = d.querySelector(`svg[id*=template]`);
-            const shape = d3.select(unitSvg);
-            (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum((unitsToRender as Cage).cageNum)}`;
+        const shape = d3.select(unitSvg);
+        (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum((unitsToRender as Cage).cageNum)}`;
 
-            if (mode === 'view') {
-                loadCageMods(cage, shape, rackGroup.rotation);
-            }
-            cageGroup.append(() => shape.node());
-        });
+        if (mode === 'view') {
+            loadCageMods(cage, shape, rackGroup.rotation);
+        }
+        cageGroup.append(() => shape.node());
     }
 };
 

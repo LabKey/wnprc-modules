@@ -689,8 +689,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
         });
         // loads grid with new room
-        addPrevRoomSvgs(user, 'edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
-        setReloadRoom(null);
+        addPrevRoomSvgs(user, 'edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag).then(() => {
+            setReloadRoom(null);
+        });
     }, [reloadRoom]);
 
     // Effect attaches an observer to the border_template svg. after it is injected into the dom it will run
@@ -751,7 +752,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
                 'editLayout',
-                undefined,
+                ActionURL.getController(),
                 {room: localRoom.name}
             );
         }

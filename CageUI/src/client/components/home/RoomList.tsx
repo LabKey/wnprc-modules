@@ -123,6 +123,18 @@ export const RoomList: FC = () => {
                                 });
                             });
                         });
+
+                        // Sort cages within each rack and then sort racks by their first cage
+                        tempRacks.forEach((rack) => {
+                            rack.cages.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+                        });
+                        tempRacks.sort((a, b) => {
+                            if (a.cages.length > 0 && b.cages.length > 0) {
+                                return a.cages[0].name.localeCompare(b.cages[0].name, undefined, { numeric: true });
+                            }
+                            return 0;
+                        });
+
                         return {
                             ...prevRoom,
                             racks: tempRacks,

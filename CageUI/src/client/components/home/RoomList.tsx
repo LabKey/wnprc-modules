@@ -225,22 +225,26 @@ export const RoomList: FC = () => {
                             if (el) roomRefs.current[room.name] = el;
                         }}
                     >
-                        <div
-                            onClick={() => handleRoomClick(room)}
-                            className={`room-dir-header ${expandedRooms[room.name] ? 'open' : ''}`}
-                        >
-                            {room.name}
+                        <div className={`room-dir-header-container ${expandedRooms[room.name] ? 'open' : ''}`}>
+                            <div
+                                onClick={() => handleRoomClick(room)}
+                                className={`room-dir-header`}
+                            >
+                                {room.name}
+                            </div>
                             <span className="arrow" onClick={() => toggleExpandRoom(room.name)}></span>
                         </div>
                         {expandedRooms[room.name] && (
                             <ul>
                                 {room?.racks?.map((rack) => (
                                     <li key={`${room.name}_${rack.id}`}>
-                                        <div
-                                            onClick={() => handleRackClick(room, rack)}
-                                            className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
-                                        >
-                                            {rack.name}
+                                        <div className={`room-dir-rack-obj-container ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}>
+                                            <div
+                                                onClick={() => handleRackClick(room, rack)}
+                                                className={`room-dir-rack-obj`}
+                                            >
+                                                {rack.name}
+                                            </div>
                                             <span className="arrow"
                                                   onClick={() => toggleExpandRack(room.name, rack.id)}></span>
                                         </div>

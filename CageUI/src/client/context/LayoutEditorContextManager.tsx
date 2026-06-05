@@ -1142,8 +1142,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     /*
         Effectively unconnects the selectedRack from any connections with other racks. It does this by removing it from
         the current rack group and creating a new rack group for the selected rack.
-
-        //TODO how to handle unconnecting when the selected rack is in the middle of multiple racks?
      */
     const unmergeRacks = (rackGroup: RackGroup, selectedRack: Rack) => {
         const newRoom: Room = { ...localRoom };

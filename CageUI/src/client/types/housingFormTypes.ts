@@ -34,7 +34,7 @@ export interface HousingTransferData {
     room: Option<number>;
     cage: Option<string>;
     condition: string;
-    reasonForMove: string;
+    reasonForMove: Option<string>;
     remarks: string;
     performedBy: string;
 }

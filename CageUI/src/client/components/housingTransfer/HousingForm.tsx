@@ -43,7 +43,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
     const [newAnimalId, setNewAnimalId] = useState<string>('');
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
-
+    const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
 
     useEffect(() => {
         console.log("animals: ", animals)
@@ -58,7 +58,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 room: {value: null, label: ''},
                 cage: {value: '', label: ''},
                 condition: '',
-                reasonForMove: '',
+                reasonForMove: {value: '', label: ''},
                 remarks: '',
                 performedBy: ''
             }));
@@ -87,6 +87,27 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         });
     }, []);
 
+    useEffect(() => {
+        const config: SelectRowsOptions = {
+            schemaName: 'ehr_lookups',
+            queryName: 'housing_reason',
+            columns: ['value', 'title'],
+            filterArray: [Filter.create('date_disabled', null, Filter.Types.ISBLANK)]
+        };
+
+        labkeyActionSelectWithPromise(config).then(result => {
+            if (result.rows.length !== 0) {
+                const rowOptions: Option<string>[] = [];
+                result.rows.forEach(row => {
+                    rowOptions.push({label: row.title, value: row.value});
+                });
+                setReasonOptions(rowOptions);
+            }
+        }).catch(err => {
+            console.error('Error fetching housing reasons', err);
+        });
+    }, []);
+
     const handleAddAnimal = () => {
         if (newAnimalId.trim() === '') return;
         
@@ -97,7 +118,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             room: {value: null, label: ''},
             cage: {value: '', label: ''},
             condition: '',
-            reasonForMove: '',
+            reasonForMove: {value: '', label: ''},
             remarks: '',
             performedBy: ''
         };
@@ -147,6 +168,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             display: 'flex',
             flex: 1,
             minWidth: 225,
+            editable: true,
         },
         {
             field: 'outDate',
@@ -241,7 +263,29 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             }
         },
         { field: 'condition', headerName: 'Condition', flex: 1, minWidth: 100, editable: true },
-        { field: 'reasonForMove', headerName: 'Reason For Move', flex: 1, minWidth: 100, editable: true },
+        { field: 'reasonForMove', headerName: 'Reason For Move', flex: 1, minWidth: 150, editable: true, renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Autocomplete
+                    value={reasonOptions.find(option => option.value === params.row.reasonForMove.value) || null}
+                    options={reasonOptions || []}
+                    getOptionLabel={(option: Option<string>) => option.label}
+                    onChange={(event, newValue) => {
+                        if(!newValue){
+                            handleCellChange('reasonForMove', params.id, {value: '', label: ''});
+                            return;
+                        }
+                        handleCellChange('reasonForMove', params.id, newValue)
+                    }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="standard"
+                            size="small"
+                        />
+                    )}
+                />
+            );}
+        },
         { field: 'remarks', headerName: 'Remarks', flex: 1, minWidth: 100, renderCell: (params: GridRenderCellParams) => {
             return (
                 <TextField

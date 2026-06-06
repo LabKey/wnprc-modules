@@ -15,8 +15,8 @@
  */
 package org.labkey.wnprc_ehr.data.breeding;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
@@ -24,7 +24,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.dataiterator.DataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.ListofMapsDataIterator;
@@ -109,7 +108,7 @@ public final class PregnancyHistoryCreator
         }
 
         ArrayList<Map<String, Object>> records = new ArrayList<>();
-        try (ResultSet rs = QueryService.get().select(schema, sql))
+        try (ResultSet rs = QueryService.get().getSelectBuilder(schema, sql).select())
         {
             while (rs.next())
             {

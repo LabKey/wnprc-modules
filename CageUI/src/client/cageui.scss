@@ -2261,9 +2261,14 @@ Multi Dropdown Css
 
 
 .housing-transfer-page {
-  padding: 20px;
   background-color: #f5f5f5;
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+
+  & > * {
+    min-width: 0;
+  }
 }
 
 .housing-transfer-header {
@@ -2274,13 +2279,28 @@ Multi Dropdown Css
 }
 
 .housing-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  width: 100%;
+
+  & > * {
+    min-width: 0;
+  }
+
+  & > div {
+    margin-bottom: 20px;
+  }
 
   .MuiDataGrid-root {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    overflow: hidden; // Ensure DataGrid handles its own internal overflow
+
+    .MuiDataGrid-main {
+      min-width: 0;
+    }
 
     .MuiDataGrid-cell:focus-within {
       outline: none;

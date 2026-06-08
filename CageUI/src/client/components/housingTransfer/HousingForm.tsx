@@ -19,11 +19,19 @@
 import * as React from 'react';
 import { FC, useState, useEffect, useCallback } from 'react';
 import { HousingRowMetadata, HousingTransferData } from '../../types/housingFormTypes';
-import { DataGrid, GridColDef, GridRenderCellParams, GridRowId, GridRowModel } from '@mui/x-data-grid';
+import {
+    DataGrid,
+    GridAutosizeOptions,
+    GridColDef,
+    GridRenderCellParams,
+    GridRowId,
+    GridRowModel,
+    useGridApiRef
+} from '@mui/x-data-grid';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import * as dayjs from 'dayjs';
 import { DateTimePicker } from '@mui/x-date-pickers';
-import { Autocomplete, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Box, IconButton, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Select from '@mui/material/Select';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
@@ -32,6 +40,7 @@ import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
 import { Filter } from '@labkey/api';
 import { dateTimeColumnType } from './DateTimeGridField';
+import ColumnAutosizing from './test';
 
 interface HousingFormProps {
     selectedAnimals?: string[];
@@ -44,6 +53,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     const [newAnimalId, setNewAnimalId] = useState<string>('');
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
+    const [autoSizeOptions, setAutoSizeOptions] = useState<GridAutosizeOptions>({
+        includeHeaders: true,
+        includeOutliers: true,
+        expand: true,
+        outliersFactor: 1.5
+    })
+    const apiRef = useGridApiRef();
 
     useEffect(() => {
         console.log("animals: ", animals)
@@ -108,6 +124,10 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         });
     }, []);
 
+    useEffect(() => {
+        apiRef.current?.autosizeColumns(autoSizeOptions);
+    }, [apiRef.current, animals]);
+
     const handleAddAnimal = () => {
         if (newAnimalId.trim() === '') return;
         
@@ -130,11 +150,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         setAnimals(animals.filter(a => a.id !== id));
     };
 
+    // This function is used to change state when not using a custom component within the grid
     const processRowUpdate = useCallback((newRow: GridRowModel<HousingTransferData>) => {
         setAnimals((prev) => prev.map((row) => (row.id === newRow.id ? newRow : row)));
         return newRow;
     }, []);
 
+    // This function is used to change state when using a custom component such as autocomplete within the grid
     const handleCellChange = (field: string, paramId: GridRowId, value: any)=> {
         const updatedAnimals = [...animals];
         const index = updatedAnimals.findIndex(a => a.id === paramId);
@@ -160,14 +182,12 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     };
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', flex: 1, minWidth: 100, editable: false, display: 'flex' },
+        { field: 'id', headerName: 'ID', editable: false, display: 'flex' },
         {
             field: 'inDate',
             headerName: 'In Date',
             ...dateTimeColumnType,
             display: 'flex',
-            flex: 1,
-            minWidth: 225,
             editable: true,
         },
         {
@@ -175,14 +195,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             headerName: 'Out Date',
             ...dateTimeColumnType,
             display: 'flex',
-            flex: 1,
-            minWidth: 225,
             editable: true,
         },
-        { field: 'room', headerName: 'Room', flex: 1, minWidth: 200,  renderCell: (params: GridRenderCellParams) => {
+        { field: 'room', headerName: 'Room', renderCell: (params: GridRenderCellParams) => {
                 const currentRoom: Option<number> = params.row.room; // assuming room is stored as a number
                 return (
                     <Autocomplete
+                        fullWidth
                         value={roomOptions.find(option => option.value === currentRoom.value) || null}
                         options={roomOptions}
                         getOptionLabel={(option: Option<number>) => option.label}
@@ -228,19 +247,26 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                                 {...params}
                                 variant="standard"
                                 size="small"
+                                sx={{
+                                    '& .MuiInputBase-input': {
+                                        whiteSpace: 'normal',
+                                        wordBreak: 'break-word',
+                                    }
+                                }}
                             />
                         )}
                     />
                 );
             }
         },
-        { field: 'cage', headerName: 'Cage', flex: 1, minWidth: 100, renderCell: (params: GridRenderCellParams) => {
+        { field: 'cage', headerName: 'Cage', renderCell: (params: GridRenderCellParams) => {
                 const currentRow = params.row as HousingTransferData;
                 const currentCage = currentRow.cage;
                 const metadata = rowMetadata[currentRow.id];
 
                 return (
                     <Autocomplete
+                        fullWidth
                         value={metadata?.cageOptions?.find(option => option.value === currentCage.value) || null}
                         options={metadata?.cageOptions || []}
                         getOptionLabel={(option: Option<string>) => option.label}
@@ -262,10 +288,11 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 );
             }
         },
-        { field: 'condition', headerName: 'Condition', flex: 1, minWidth: 100, editable: true },
-        { field: 'reasonForMove', headerName: 'Reason For Move', flex: 1, minWidth: 150, editable: true, renderCell: (params: GridRenderCellParams) => {
+        { field: 'condition', headerName: 'Condition', editable: true, display: 'flex' },
+        { field: 'reasonForMove', headerName: 'Reason For Move', editable: true, renderCell: (params: GridRenderCellParams) => {
             return (
                 <Autocomplete
+                    fullWidth
                     value={reasonOptions.find(option => option.value === params.row.reasonForMove.value) || null}
                     options={reasonOptions || []}
                     getOptionLabel={(option: Option<string>) => option.label}
@@ -281,26 +308,28 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                             {...params}
                             variant="standard"
                             size="small"
+                            multiline={true}
                         />
                     )}
                 />
             );}
         },
-        { field: 'remarks', headerName: 'Remarks', flex: 1, minWidth: 100, renderCell: (params: GridRenderCellParams) => {
+        { field: 'remarks', headerName: 'Remarks', display: 'flex', renderCell: (params: GridRenderCellParams) => {
             return (
                 <TextField
                     variant={'standard'}
                     multiline={true}
+                    fullWidth
                     onChange={(event) => handleCellChange('remarks', params.id, event.target.value)}
                 />
             )}
         },
-        { field: 'performedBy', headerName: 'Performed By', flex: 1, minWidth: 100, editable: true },
+        { field: 'performedBy', headerName: 'Performed By', editable: true, display: 'flex' },
         {
             field: 'actions',
             headerName: 'Actions',
-            flex: 1, minWidth: 100,
             sortable: false,
+            display: 'flex',
             renderCell: (params: GridRenderCellParams) => (
                 <IconButton onClick={() => handleRemoveAnimal(params.id as string)} color="error">
                     <DeleteIcon />
@@ -323,13 +352,17 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     Add Animal
                 </button>
             </div>
+            {/*<ColumnAutosizing />*/}
 
-            <div className={"data-grid-parent"}>
+            <Box sx={{width: '100%'}}>
                 <DataGrid
                     sx={{
-                        gridTemplateRows: 'auto 1f auto',
                         '& .MuiDataGrid-cell': {
+                            display: 'flex',
                             alignItems: 'center',
+                            padding: '8px',
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
                         },
                         '& .MuiDataGrid-cellContent': {
                             width: '100%',
@@ -337,16 +370,17 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                             alignItems: 'center',
                         },
                         '& .MuiInputBase-root': {
-                            height: '100%',
+                            height: 'auto',
+                            minHeight: '100%',
                         },
                         '& .MuiOutlinedInput-root': {
-                            height: '100%',
+                            height: 'auto',
                         },
                         '& .MuiAutocomplete-root': {
-                            height: '100%',
+                            width: '100%',
                         },
                         '& .MuiTextField-root': {
-                            height: '100%',
+                            width: '100%',
                         },
                         '& .MuiDateTimePicker': {
                             height: '100%',
@@ -354,12 +388,15 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     }}
                     rows={animals}
                     columns={columns}
+                    apiRef={apiRef}
                     processRowUpdate={processRowUpdate}
                     getRowId={(row) => row.id}
                     getRowHeight={() => 'auto'}
+                    autosizeOptions={autoSizeOptions}
+                    autosizeOnMount
                     disableRowSelectionOnClick
                 />
-            </div>
+            </Box>
 
             {animals.length > 0 && (
                 <div className="form-actions">

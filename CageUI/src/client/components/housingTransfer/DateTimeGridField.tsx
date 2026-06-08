@@ -138,7 +138,7 @@ function GridFilterDateInput(
 
 export const dateTimeColumnType: GridColTypeDef<Date, string> = {
     ...GRID_DATETIME_COL_DEF,
-    resizable: false,
+    resizable: true,
     renderEditCell: (params) => {
         return <GridEditDateCell {...params} />;
     },

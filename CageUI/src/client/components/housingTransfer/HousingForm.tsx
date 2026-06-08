@@ -17,7 +17,7 @@
  */
 
 import * as React from 'react';
-import { FC, useState, useEffect, useCallback } from 'react';
+import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { HousingRowMetadata, HousingTransferData } from '../../types/housingFormTypes';
 import {
     DataGrid,
@@ -128,7 +128,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         apiRef.current?.autosizeColumns(autoSizeOptions);
     }, [apiRef.current, animals]);
 
-    const handleAddAnimal = () => {
+    const handleAddAnimal = useCallback(() => {
         if (newAnimalId.trim() === '') return;
         
         const newAnimal: HousingTransferData = {
@@ -142,13 +142,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             remarks: '',
             performedBy: ''
         };
-        setAnimals([...animals, newAnimal]);
+        setAnimals(prev => [...prev, newAnimal]);
         setNewAnimalId('');
-    };
+    }, [newAnimalId]);
 
-    const handleRemoveAnimal = (id: string) => {
-        setAnimals(animals.filter(a => a.id !== id));
-    };
+    const handleRemoveAnimal = useCallback((id: string) => {
+        setAnimals(prev => prev.filter(a => a.id !== id));
+    }, []);
 
     // This function is used to change state when not using a custom component within the grid
     const processRowUpdate = useCallback((newRow: GridRowModel<HousingTransferData>) => {
@@ -157,31 +157,46 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, []);
 
     // This function is used to change state when using a custom component such as autocomplete within the grid
-    const handleCellChange = (field: string, paramId: GridRowId, value: any)=> {
-        const updatedAnimals = [...animals];
-        const index = updatedAnimals.findIndex(a => a.id === paramId);
-        if (index > -1) {
-            updatedAnimals[index][field] = value;
-            setAnimals(updatedAnimals);
-        }
-    }
+    const handleCellChange = useCallback((field: string, paramId: GridRowId, value: any)=> {
+        setAnimals((prev) => {
+            const index = prev.findIndex(a => a.id === paramId);
+            if (index > -1) {
+                const updatedAnimals = [...prev];
+                updatedAnimals[index] = {
+                    ...updatedAnimals[index],
+                    [field]: value
+                };
+                return updatedAnimals;
+            }
+            return prev;
+        });
+    }, []);
 
-    const handleValidate = () => {
-        console.log('Validating form...', animals);
+    const handleValidate = useCallback(() => {
+        setAnimals(prev => {
+            console.log('Validating form...', prev);
+            return prev;
+        });
         alert('Validation triggered (see console)');
-    };
+    }, []);
 
-    const handleSubmit = () => {
-        console.log('Submitting form...', animals);
+    const handleSubmit = useCallback(() => {
+        setAnimals(prev => {
+            console.log('Submitting form...', prev);
+            return prev;
+        });
         alert('Submit triggered (see console)');
-    };
+    }, []);
 
-    const handleSave = () => {
-        console.log('Saving form...', animals);
+    const handleSave = useCallback(() => {
+        setAnimals(prev => {
+            console.log('Saving form...', prev);
+            return prev;
+        });
         alert('Save triggered (see console)');
-    };
+    }, []);
 
-    const columns: GridColDef[] = [
+    const columns: GridColDef[] = useMemo<GridColDef[]>(() => [
         { field: 'id', headerName: 'ID', editable: false, display: 'flex' },
         {
             field: 'inDate',
@@ -312,7 +327,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                         />
                     )}
                 />
-            );}
+            )}
         },
         { field: 'remarks', headerName: 'Remarks', display: 'flex', renderCell: (params: GridRenderCellParams) => {
             return (
@@ -320,6 +335,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     variant={'standard'}
                     multiline={true}
                     fullWidth
+                    value={params.row.remarks || ''}
                     onChange={(event) => handleCellChange('remarks', params.id, event.target.value)}
                 />
             )}
@@ -336,7 +352,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 </IconButton>
             ),
         },
-    ];
+    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal]);
 
     return (
         <div className="housing-form-container">

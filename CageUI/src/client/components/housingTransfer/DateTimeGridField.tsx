@@ -72,10 +72,21 @@ function GridEditDateCell({
                           }: GridRenderEditCellParams<any, Date | null, string>) {
     const apiRef = useGridApiContext();
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const [open, setOpen] = React.useState(true);
     const Component = colDef.type === 'dateTime' ? DateTimePicker : DatePicker;
 
     const handleChange = (newValue: unknown) => {
         apiRef.current.setEditCellValue({ id, field, value: newValue });
+    };
+
+    const handleAccept = (newValue: unknown) => {
+        apiRef.current.setEditCellValue({ id, field, value: newValue });
+        apiRef.current.stopCellEditMode({ id, field });
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        apiRef.current.stopCellEditMode({ id, field });
     };
 
     useEnhancedEffect(() => {
@@ -88,8 +99,17 @@ function GridEditDateCell({
         <Component
             value={value}
             autoFocus
+            open={open}
+            onOpen={() => setOpen(true)}
+            onClose={handleClose}
             onChange={handleChange}
+            onAccept={handleAccept}
+            closeOnSelect={false}
+            timeSteps={{ minutes: 1 }}
             slotProps={{
+                actionBar: {
+                    actions: ['cancel', 'accept'],
+                },
                 textField: {
                     inputRef,
                     variant: 'standard',

@@ -22,6 +22,7 @@ import { HousingRowMetadata, HousingTransferData } from '../../types/housingForm
 import {
     DataGrid,
     GridAutosizeOptions,
+    GridCellParams,
     GridColDef,
     GridRenderCellParams,
     GridRowId,
@@ -321,7 +322,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             }
         },
         { field: 'condition', headerName: 'Condition', editable: true, display: 'flex' },
-        { field: 'reasonForMove', headerName: 'Reason For Move', editable: true, renderCell: (params: GridRenderCellParams) => {
+        { field: 'reasonForMove', headerName: 'Reason For Move', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Autocomplete
                     value={params.row.reasonForMove || []}
@@ -381,6 +382,12 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             ),
         },
     ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal]);
+
+    const handleCellClick = useCallback((params: GridCellParams) => {
+        if (params.isEditable && params.cellMode === 'view') {
+            apiRef.current.startCellEditMode({ id: params.id, field: params.field });
+        }
+    }, [apiRef]);
 
     return (
         <div className="housing-form-container">
@@ -443,6 +450,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     rows={animals}
                     columns={columns}
                     apiRef={apiRef}
+                    onCellClick={handleCellClick}
                     processRowUpdate={processRowUpdate}
                     getRowId={(row) => row.id}
                     getRowHeight={() => 'auto'}

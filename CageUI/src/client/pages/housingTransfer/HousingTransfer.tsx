@@ -60,7 +60,6 @@ export const HousingTransfer: FC = () => {
             <div className="housing-transfer-page">
                 {user &&
                     <>
-                        <div className="housing-transfer-header"> Housing Page</div>
                         <HousingForm selectedAnimals={selectedAnimals}/>
                     </>
                 }

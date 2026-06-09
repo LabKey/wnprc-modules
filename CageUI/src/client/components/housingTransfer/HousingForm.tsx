@@ -46,6 +46,11 @@ interface HousingFormProps {
 export const HousingForm: FC<HousingFormProps> = (props) => {
     const { selectedAnimals } = props;
     const [animals, setAnimals] = useState<HousingTransferData[]>([]);
+    const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
+    const filteredCenterAnimals = useMemo(() => {
+        const addedAnimalIds = new Set(animals.map(a => a.id));
+        return centerAnimals.filter(id => !addedAnimalIds.has(id));
+    }, [centerAnimals, animals]);
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
     const [newAnimalId, setNewAnimalId] = useState<string>('');
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
@@ -97,6 +102,27 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             }
         }).catch(err => {
             console.error('Error fetching prev room', err);
+        });
+    }, []);
+
+    useEffect(() => {
+        const config: SelectRowsOptions = {
+            schemaName: 'study',
+            queryName: 'demographics',
+            viewName: 'Alive, at Center',
+            columns: ['Id']
+        };
+
+        labkeyActionSelectWithPromise(config).then(result => {
+            if (result.rows.length !== 0) {
+                const rowOptions: string[] = [];
+                result.rows.forEach(row => {
+                    rowOptions.push(row.Id);
+                });
+                setCenterAnimals(rowOptions);
+            }
+        }).catch(err => {
+            console.error('Error fetching alive at center animals', err);
         });
     }, []);
 
@@ -359,12 +385,20 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     return (
         <div className="housing-form-container">
             <div className="add-animal-controls">
-                <input 
-                    type="text" 
-                    value={newAnimalId} 
-                    onChange={(e) => setNewAnimalId(e.target.value)}
-                    placeholder="Enter Animal ID"
-                    className="form-control animal-id-input"
+                <Autocomplete
+                    value={filteredCenterAnimals.find(option => option === newAnimalId) || null}
+                    options={filteredCenterAnimals}
+                    getOptionLabel={(option: string) => option}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label={"Animals"}
+                            variant="standard"
+                            size="small"
+                        />
+                    )}
+                    onChange={(e, newValue) => setNewAnimalId(newValue)}
+                    className="animal-id-input"
                 />
                 <button className="btn btn-primary" onClick={handleAddAnimal}>
                     Add Animal

@@ -134,14 +134,11 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
 
 // TODO update this query with cageNew
 export const findAnimalsInCage = async (room: string, cage: CageNumber): Promise<AnimalInCage[]> => {
-    const cageNum = zeroPadName(parseRoomItemNum(cage), 4);
     const config: SelectRowsOptions = {
         schemaName: 'study',
-        queryName: 'housing',
+        queryName: 'demographicsCurLocationNew',
         filterArray: [
-            Filter.create('room', room, Filter.Types.EQUAL),
-            Filter.create('cage', cageNum, Filter.Types.EQUAL),
-            Filter.create('enddate', null, Filter.Types.ISBLANK)]
+            Filter.create('location', `${room}-${parseRoomItemNum(cage)}`, Filter.Types.EQUAL)]
     };
 
     try {
@@ -151,7 +148,7 @@ export const findAnimalsInCage = async (room: string, cage: CageNumber): Promise
         if (res.rows.length > 0) {
             res.rows.forEach(r => {
                 animalsInCage.push({
-                    id: r.Id,
+                    id: r.id,
                 })
                 animalsInCage.push({id: 'test animal'})
             });

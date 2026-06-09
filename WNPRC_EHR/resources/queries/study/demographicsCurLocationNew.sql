@@ -22,16 +22,16 @@ SELECT
 
     CASE
         WHEN d2.cageNew is null then d2.room
-        ELSE (d2.room || '-' || d2.cageNew)
+        ELSE (d2.room || '-' || d2.cageNew.cage_number)
         END AS Location,
 
     d2.room.area,
 
     d2.room,
 
-    d2.cageNew,
+    d2.cageNew as cage,
 
-    ifdefined(d2.cond) as cond,
+    d2.condNew as cond,
 
     d2.date,
 

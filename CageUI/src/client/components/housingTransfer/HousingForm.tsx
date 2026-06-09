@@ -31,6 +31,8 @@ import {
 import * as dayjs from 'dayjs';
 import { Autocomplete, Box, IconButton, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
@@ -69,7 +71,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 room: {value: null, label: ''},
                 cage: {value: '', label: ''},
                 condition: '',
-                reasonForMove: {value: '', label: ''},
+                reasonForMove: [],
                 remarks: '',
                 performedBy: ''
             }));
@@ -133,7 +135,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             room: {value: null, label: ''},
             cage: {value: '', label: ''},
             condition: '',
-            reasonForMove: {value: '', label: ''},
+            reasonForMove: [],
             remarks: '',
             performedBy: ''
         };
@@ -296,25 +298,36 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         { field: 'reasonForMove', headerName: 'Reason For Move', editable: true, renderCell: (params: GridRenderCellParams) => {
             return (
                 <Autocomplete
-                    fullWidth
-                    value={reasonOptions.find(option => option.value === params.row.reasonForMove.value) || null}
+                    value={params.row.reasonForMove || []}
                     options={reasonOptions || []}
                     getOptionLabel={(option: Option<string>) => option.label}
+                    isOptionEqualToValue={(option, value) => option.value === value.value}
                     onChange={(event, newValue) => {
-                        if(!newValue){
-                            handleCellChange('reasonForMove', params.id, {value: '', label: ''});
-                            return;
-                        }
-                        handleCellChange('reasonForMove', params.id, newValue)
+                        handleCellChange('reasonForMove', params.id, newValue || [])
+                    }}
+                    renderOption={(props, option, { selected }) => {
+                        const { key, ...optionProps } = props;
+                        const SelectionIcon = selected ? CheckBoxIcon : CheckBoxOutlineBlankIcon;
+                        return (
+                            <li key={key} {...optionProps}>
+                                <SelectionIcon
+                                    fontSize="small"
+                                    style={{ marginRight: 8, padding: 9, boxSizing: 'content-box' }}
+                                />
+                                {option.label}
+                            </li>
+                        );
                     }}
                     renderInput={(params) => (
                         <TextField
                             {...params}
                             variant="standard"
                             size="small"
-                            multiline={true}
                         />
                     )}
+                    multiple
+                    fullWidth
+                    disableCloseOnSelect
                 />
             )}
         },

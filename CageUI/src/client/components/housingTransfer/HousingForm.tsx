@@ -28,19 +28,14 @@ import {
     GridRowModel,
     useGridApiRef
 } from '@mui/x-data-grid';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import * as dayjs from 'dayjs';
-import { DateTimePicker } from '@mui/x-date-pickers';
 import { Autocomplete, Box, IconButton, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Select from '@mui/material/Select';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import MenuItem from '@mui/material/MenuItem';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
 import { Filter } from '@labkey/api';
 import { dateTimeColumnType } from './DateTimeGridField';
-import ColumnAutosizing from './test';
 
 interface HousingFormProps {
     selectedAnimals?: string[];
@@ -368,7 +363,6 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     Add Animal
                 </button>
             </div>
-            {/*<ColumnAutosizing />*/}
 
             <Box sx={{width: '100%'}}>
                 <DataGrid

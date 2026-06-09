@@ -257,12 +257,6 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                                 {...params}
                                 variant="standard"
                                 size="small"
-                                sx={{
-                                    '& .MuiInputBase-input': {
-                                        whiteSpace: 'normal',
-                                        wordBreak: 'break-word',
-                                    }
-                                }}
                             />
                         )}
                     />
@@ -394,6 +388,9 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                         },
                         '& .MuiDateTimePicker': {
                             height: '100%',
+                        },
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                            margin: 0,
                         },
                     }}
                     rows={animals}

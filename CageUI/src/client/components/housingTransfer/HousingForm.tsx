@@ -60,7 +60,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         includeHeaders: true,
         includeOutliers: true,
         expand: true,
-        outliersFactor: 1.5
+        outliersFactor: 1.5,
     })
     const apiRef = useGridApiRef();
 
@@ -149,8 +149,15 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, []);
 
     useEffect(() => {
-        apiRef.current?.autosizeColumns(autoSizeOptions);
-    }, [apiRef.current, animals]);
+        if (apiRef.current) {
+            // Use setTimeout to ensure the grid has rendered before autosizing
+            // Mobile devices often need a bit more time for layout to settle
+            const timeout = setTimeout(() => {
+                apiRef.current?.autosizeColumns(autoSizeOptions);
+            }, 250);
+            return () => clearTimeout(timeout);
+        }
+    }, [apiRef, animals, autoSizeOptions]);
 
     const handleAddAnimal = useCallback(() => {
         if (newAnimalId.trim() === '') return;
@@ -221,11 +228,12 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, []);
 
     const columns: GridColDef[] = useMemo<GridColDef[]>(() => [
-        { field: 'id', headerName: 'ID', editable: false, display: 'flex' },
+        { field: 'id', headerName: 'ID', minWidth: 100, editable: false, display: 'flex' },
         {
             field: 'inDate',
             headerName: 'In Date',
             ...dateTimeColumnType,
+            minWidth: 180,
             display: 'flex',
             editable: true,
         },
@@ -233,10 +241,11 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             field: 'outDate',
             headerName: 'Out Date',
             ...dateTimeColumnType,
+            minWidth: 180,
             display: 'flex',
             editable: true,
         },
-        { field: 'room', headerName: 'Room', renderCell: (params: GridRenderCellParams) => {
+        { field: 'room', headerName: 'Room', flex: 1, minWidth: 150, renderCell: (params: GridRenderCellParams) => {
                 const currentRoom: Option<number> = params.row.room; // assuming room is stored as a number
                 return (
                     <Autocomplete
@@ -292,7 +301,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 );
             }
         },
-        { field: 'cage', headerName: 'Cage', renderCell: (params: GridRenderCellParams) => {
+        { field: 'cage', headerName: 'Cage', flex: 1, minWidth: 100, renderCell: (params: GridRenderCellParams) => {
                 const currentRow = params.row as HousingTransferData;
                 const currentCage = currentRow.cage;
                 const metadata = rowMetadata[currentRow.id];
@@ -321,8 +330,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 );
             }
         },
-        { field: 'condition', headerName: 'Condition', editable: true, display: 'flex' },
-        { field: 'reasonForMove', headerName: 'Reason For Move', renderCell: (params: GridRenderCellParams) => {
+        { field: 'condition', headerName: 'Condition', minWidth: 100, editable: true, display: 'flex' },
+        { field: 'reasonForMove', headerName: 'Reason For Move', flex: 2, minWidth: 200, renderCell: (params: GridRenderCellParams) => {
             return (
                 <Autocomplete
                     value={params.row.reasonForMove || []}
@@ -358,7 +367,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 />
             )}
         },
-        { field: 'remarks', headerName: 'Remarks', display: 'flex', renderCell: (params: GridRenderCellParams) => {
+        { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, display: 'flex', renderCell: (params: GridRenderCellParams) => {
             return (
                 <TextField
                     variant={'standard'}
@@ -369,7 +378,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 />
             )}
         },
-        { field: 'performedBy', headerName: 'Performed By', editable: true, display: 'flex' },
+        { field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, display: 'flex' },
         {
             field: 'actions',
             headerName: 'Actions',

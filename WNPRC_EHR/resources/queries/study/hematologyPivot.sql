@@ -16,7 +16,7 @@ FROM (SELECT
               END as result
       FROM study."Hematology Results" b
 
-      WHERE testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW','RDW-SD', 'RDW-CV', 'PLT', 'MPV','PCV','NE','LY','MN','EO','BS','BANDS','METAMYELO','MYELO','TP','RETICULO', 'RETIC-AB', 'IRF', 'NRBC', 'NRBC#', 'RETIC HGB', 'IPF', 'PDW', 'P-LCR', 'PCT', 'LFR', 'MFR', 'HFR', 'PRO MYELO', 'ATYP', 'OTHER')
+      WHERE testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW','RDW-SD', 'RDW-CV', 'PLT', 'MPV','PCV','NE','LY','MN','EO','BS','BANDS','METAMYELO','MYELO','TP','RETICULO', 'RETIC-AB', 'IRF', 'NRBC', 'NRBC-ABS', 'RETIC HGB', 'IPF', 'PDW', 'P-LCR', 'PCT', 'LFR', 'MFR', 'HFR', 'PRO MYELO', 'ATYP', 'OTHER')
         and b.qcstate.publicdata = true
 
       UNION ALL
@@ -34,4 +34,4 @@ FROM (SELECT
          LEFT JOIN study.clinpathRuns cpr ON b.runId = cpr.objectId
 
 GROUP BY b.id, b.runId, b.testId, cpr.date
-    PIVOT results BY testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW','RDW-SD', 'RDW-CV', 'PLT', 'MPV','PCV','NE','NE-ABS','LY','LY-ABS','MN','MN-ABS','EO','EO-ABS','BS','BS-ABS','BANDS','BANDS-ABS','METAMYELO','MYELO','TP','RETICULO', 'RETIC-AB', 'IRF', 'NRBC', 'NRBC#', 'RETIC HGB', 'IPF', 'PDW', 'P-LCR', 'PCT', 'LFR', 'MFR', 'HFR', 'PRO MYELO', 'ATYP', 'OTHER')
+    PIVOT results BY testId IN ('WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH','MCHC', 'RDW','RDW-SD', 'RDW-CV', 'PLT', 'MPV','PCV','NE','NE-ABS','LY','LY-ABS','MN','MN-ABS','EO','EO-ABS','BS','BS-ABS','BANDS','BANDS-ABS','METAMYELO','MYELO','PRO MYELO', 'ATYP', 'OTHER', 'TP','RETICULO', 'RETIC-AB', 'IRF', 'NRBC', 'NRBC-ABS', 'RETIC HGB', 'IPF', 'PDW', 'P-LCR', 'PCT', 'LFR', 'MFR', 'HFR')

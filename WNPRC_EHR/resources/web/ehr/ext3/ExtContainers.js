@@ -1015,7 +1015,6 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
                 RETICULO:    d2u.substring(121, 126),
                 IRF:         d2u.substring(131, 136),
                 NRBC:        d2u.substring(157, 162),
-                "NRBC#":     d2u.substring(162, 168),
                 'RETIC-AB':  d2u.substring(179, 185),
                 'RETIC HGB': d2u.substring(185, 190),
                 IPF:         d2u.substring(190, 195),

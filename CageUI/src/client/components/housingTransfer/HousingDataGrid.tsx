@@ -135,7 +135,9 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 cageOptions = result.rows.map(row => ({
                     label: row.cage_number.toString(),
                     value: row.cage_object_id
-                }));
+                })).sort((a, b) => {
+                    return Number(a.label) - Number(b.label);
+                });
             } catch (err) {
                 console.error('Error fetching cage options:', err);
             }

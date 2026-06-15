@@ -122,6 +122,21 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const selectedRoom = newValue.label;
         let cageOptions: Option<string>[] = [];
 
+        if (newValue.label === 'No Change' && newValue.value === 0) {
+            setRowMetadata(prev => ({
+                ...prev,
+                [paramId]: {
+                    cageOptions: []
+                }
+            }));
+            onAnimalsChange(animals.map(a =>
+                a.id === paramId
+                    ? { ...a, destinationRoom: newValue, destinationCage: { label: 'No Change', value: '0' } }
+                    : a
+            ));
+            return;
+        }
+
         if (selectedRoom) {
             const config: SelectRowsOptions = {
                 schemaName: 'cageui',
@@ -249,10 +264,15 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 return (
                     <Autocomplete
                         fullWidth
-                        value={metadata?.cageOptions?.find(option => option.value === currentCage.value) || null}
+                        value={
+                            (metadata?.cageOptions?.find(option => option.value === currentCage.value)) ||
+                            (currentCage.label === 'No Change' ? currentCage : null) ||
+                            null
+                        }
                         options={metadata?.cageOptions || []}
                         getOptionLabel={(option: Option<string>) => option.label || ''}
                         isOptionEqualToValue={(option, value) => option.value === value.value}
+                        disableClearable={currentRow.destinationRoom?.value === 0 && currentCage.value === '0'}
                         onChange={(event, newValue) => {
                             const updatedValue = newValue || { value: '', label: '' };
                             // Get current state animal

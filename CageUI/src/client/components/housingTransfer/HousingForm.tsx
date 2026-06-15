@@ -40,6 +40,10 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
 
     useEffect(() => {
+        console.log("Data: ", animalsByRoom);
+    }, [animalsByRoom]);
+
+    useEffect(() => {
         if (selectedAnimals && selectedAnimals.length > 0) {
             const initialAnimals = selectedAnimals.map(id => ({
                 id,
@@ -70,6 +74,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 result.rows.forEach(row => {
                     rowOptions.push({label: row.room, value: row.rowid});
                 });
+                // Add no change to the options
+                rowOptions.splice(0,0,{label: "No Change", value: 0});
                 setRoomOptions(rowOptions);
             }
         }).catch(err => {

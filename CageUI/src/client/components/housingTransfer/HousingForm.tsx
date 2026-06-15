@@ -53,6 +53,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 destinationCage: {value: '', label: ''},
                 condition: '',
                 reasonForMove: [],
+                project: null,
                 remarks: '',
                 performedBy: ''
             } as HousingTransferData));

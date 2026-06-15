@@ -68,6 +68,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         return centerAnimals.filter(id => !addedAnimalIds.has(id));
     }, [centerAnimals, animals]);
 
+
     useEffect(() => {
         if (apiRef.current) {
             const timeout = setTimeout(() => {
@@ -88,6 +89,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             destinationCage: {value: '', label: ''},
             condition: '',
             reasonForMove: [],
+            project: null,
             remarks: '',
             performedBy: ''
         };
@@ -102,6 +104,43 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     const handleCellChange = useCallback((field: string, paramId: GridRowId, value: any)=> {
         onAnimalsChange(animals.map(a => a.id === paramId ? { ...a, [field]: value } : a));
     }, [animals, onAnimalsChange]);
+
+    const fetchProjectOptions = useCallback(async (animalId: string) => {
+        const config: SelectRowsOptions = {
+            schemaName: 'study',
+            queryName: 'ActiveAssignments',
+            columns: ['project', 'project/displayName'],
+            filterArray: [Filter.create('Id', animalId, Filter.Types.EQUALS)]
+        };
+
+        try {
+            const result = await labkeyActionSelectWithPromise(config);
+            const projectOptions: Option<string>[] = result.rows.map(row => ({
+                label: row['project/displayName'] || row.project.toString(),
+                value: row.project.toString()
+            }));
+
+            setRowMetadata(prev => ({
+                ...prev,
+                [animalId]: {
+                    ...prev[animalId],
+                    projectOptions
+                }
+            }));
+        } catch (err) {
+            console.error('Error fetching project options:', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        animals.forEach(animal => {
+            if (animal.reasonForMove.find(r => r.value === 'Breeding')) {
+                if (!rowMetadata[animal.id]?.projectOptions) {
+                    fetchProjectOptions(animal.id);
+                }
+            }
+        });
+    }, [animals, fetchProjectOptions]);
 
     const handleRoomChange = useCallback(async (paramId: GridRowId, newValue: Option<number>) => {
         if (!newValue) {
@@ -201,6 +240,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     destinationCage: { value: '', label: '' },
                     condition: '',
                     reasonForMove: [],
+                    project: null,
                     remarks: '',
                     performedBy: '',
                     triggeredBy: triggeredById
@@ -310,7 +350,18 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     isOptionEqualToValue={(option, value) => option.value === value.value}
                     onBlur={(event) => event.stopPropagation()}
                     onChange={(event, newValue) => {
-                        handleCellChange('reasonForMove', params.id, newValue || [])
+                        const updatedValue = newValue || [];
+                        const isBreeding = updatedValue.find((r: Option<string>) => r.value === 'Breeding');
+                        
+                        onAnimalsChange(animals.map(a => 
+                            a.id === params.id 
+                                ? { ...a, reasonForMove: updatedValue, project: isBreeding ? a.project : null } 
+                                : a
+                        ));
+
+                        if (isBreeding && !rowMetadata[params.id as string]?.projectOptions) {
+                            fetchProjectOptions(params.id as string);
+                        }
                     }}
                     blurOnSelect
                     renderOption={(props, option, { selected }) => {
@@ -339,6 +390,38 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 />
             )}
         },
+        { field: 'project', headerName: 'Project', flex: 0.5, minWidth: 100,
+            renderCell: (params: GridRenderCellParams) => {
+                const currentRow = params.row as HousingTransferData;
+                const metadata = rowMetadata[currentRow.id];
+                const isBreeding = currentRow.reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
+
+                if (isBreeding) {
+                    return (
+                        <Autocomplete
+                            fullWidth
+                            value={metadata?.projectOptions?.find(option => option.value === params.value) || (params.value ? {label: params.value, value: params.value} : null)}
+                            options={metadata?.projectOptions || []}
+                            getOptionLabel={(option: Option<string>) => option.label || ''}
+                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                            onBlur={(event) => event.stopPropagation()}
+                            onChange={(event, newValue) => {
+                                handleCellChange('project', params.id, newValue?.value || null);
+                            }}
+                            blurOnSelect
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    variant="standard"
+                                    size="small"
+                                />
+                            )}
+                        />
+                    );
+                }
+                return null;
+            }
+        },
         { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, display: 'flex', renderCell: (params: GridRenderCellParams) => {
             return (
                 <TextField
@@ -366,7 +449,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 </IconButton>
             ),
         },
-    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal, fetchAnimalsInCage, handleRoomChange]);
+    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal, fetchAnimalsInCage, handleRoomChange, fetchProjectOptions]);
 
     const handleCellClick = useCallback((params: GridCellParams) => {
         if (params.isEditable && params.cellMode === 'view') {

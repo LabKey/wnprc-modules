@@ -21,6 +21,7 @@ import { Option } from '@labkey/components';
 
 export type HousingRowMetadata = {
     cageOptions: Option<string>[];
+    projectOptions?: Option<string>[];
 };
 
 export type ExtendedHousingTransferData = HousingTransferData & {
@@ -35,6 +36,7 @@ export interface HousingTransferData {
     destinationCage: Option<string>;
     condition: string;
     reasonForMove: Option<string>[];
+    project: string;
     remarks: string;
     performedBy: string;
     triggeredBy?: string; // ID of the animal that triggered this animal's addition to the grid

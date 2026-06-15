@@ -32,26 +32,17 @@ export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
     const { currCage } = props;
     const {selectedRoom} = useHomeNavigationContext();
     const [animalsInCage, setAnimalsInCage] = useState<AnimalInCage[]>([]);
-    const [selectedAnimals, setSelectedAnimals] = useState<AnimalInCage[]>([]);
 
     useEffect(() => {
-        findAnimalsInCage(selectedRoom.name, currCage.cageNum).then(res => {
+        findAnimalsInCage(currCage.objectId).then(res => {
             setAnimalsInCage(res);
         });
     }, []);
 
-    const addToSelectedAnimals = (animal: AnimalInCage) => {
-        const isAnimalCurrentlySelected = selectedAnimals.find(a => a.id === animal.id);
-        if(isAnimalCurrentlySelected){
-            setSelectedAnimals(prevState => prevState.filter(a => a.id !== animal.id));
-        }else{
-            setSelectedAnimals(prevState => [...prevState, animal]);
-        }
-    }
-
     const startHousingTransfer = () => {
         window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
-            subjects:  selectedAnimals.map(animal => animal.id).join(','),
+            room: selectedRoom.name,
+            cage: currCage.objectId,
             returnUrl: window.location.href
         });
     }
@@ -65,8 +56,6 @@ export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
                         {animalsInCage.map((animal, idx) => (
                             <li
                                 key={`animal-list-${idx}`}
-                                className={selectedAnimals.find(a => a.id === animal.id) ? 'selected' : ''}
-                                onClick={() => addToSelectedAnimals(animal)}
                             >
                                 <div>{animal.id}</div>
                             </li>
@@ -74,9 +63,8 @@ export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
                     </ul>
                 </div>
             }
-            {selectedAnimals.length > 0 &&
-                <button onClick={startHousingTransfer}>Start Animal Transfer</button>
-            }
+            <button onClick={startHousingTransfer}>Start Animal Transfer</button>
+
         </div>
     );
 }

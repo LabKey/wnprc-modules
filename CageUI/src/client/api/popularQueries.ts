@@ -133,12 +133,12 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
 };
 
 // TODO update this query with cageNew
-export const findAnimalsInCage = async (room: string, cage: CageNumber): Promise<AnimalInCage[]> => {
+export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> => {
     const config: SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographicsCurLocationNew',
         filterArray: [
-            Filter.create('location', `${room}-${parseRoomItemNum(cage)}`, Filter.Types.EQUAL)]
+            Filter.create('cage', cage, Filter.Types.EQUAL)]
     };
 
     try {

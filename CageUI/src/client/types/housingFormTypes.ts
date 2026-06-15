@@ -31,10 +31,11 @@ export interface HousingTransferData {
     id: string;
     inDate: Dayjs;
     outDate: Dayjs;
-    room: Option<number>;
-    cage: Option<string>;
+    destinationRoom: Option<number>;
+    destinationCage: Option<string>;
     condition: string;
     reasonForMove: Option<string>[];
     remarks: string;
     performedBy: string;
+    triggeredBy?: string; // ID of the animal that triggered this animal's addition to the grid
 }

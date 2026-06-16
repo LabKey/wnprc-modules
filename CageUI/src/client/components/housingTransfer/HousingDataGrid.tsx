@@ -273,6 +273,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         },
         { field: 'destinationRoom', headerName: 'Room', flex: 1, minWidth: 150, renderCell: (params: GridRenderCellParams) => {
                 const currentRoom: Option<number> = params.row.destinationRoom;
+                const isMissing = !currentRoom || currentRoom.value === null;
+
                 return (
                     <Autocomplete
                         fullWidth
@@ -281,6 +283,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                         getOptionLabel={(option: Option<number>) => option.label || ''}
                         isOptionEqualToValue={(option, value) => option.value === value.value}
                         onBlur={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => {
+                            if (event.key === ' ') {
+                                event.stopPropagation();
+                            }
+                        }}
                         onChange={(event, newValue) => {
                             handleRoomChange(params.id, newValue);
                         }}
@@ -290,6 +297,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                                 {...params}
                                 variant="standard"
                                 size="small"
+                                required
+                                error={isMissing}
                             />
                         )}
                     />
@@ -300,6 +309,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 const currentRow = params.row as HousingTransferData;
                 const currentCage = currentRow.destinationCage;
                 const metadata = rowMetadata[currentRow.id];
+                const isMissing = !currentCage || (currentCage.value === '' && currentCage.label === '');
 
                 return (
                     <Autocomplete
@@ -313,6 +323,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                         getOptionLabel={(option: Option<string>) => option.label || ''}
                         isOptionEqualToValue={(option, value) => option.value === value.value}
                         disableClearable={currentRow.destinationRoom?.value === 0 && currentCage.value === '0'}
+                        onKeyDown={(event) => {
+                            if (event.key === ' ') {
+                                event.stopPropagation();
+                            }
+                        }}
                         onChange={(event, newValue) => {
                             const updatedValue = newValue || { value: '', label: '' };
                             // Get current state animal
@@ -334,14 +349,39 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                                 {...params}
                                 variant="standard"
                                 size="small"
+                                required
+                                error={isMissing}
                             />
                         )}
                     />
                 );
             }
         },
-        { field: 'condition', headerName: 'Condition', minWidth: 100, editable: true, display: 'flex' },
+        { field: 'condition', headerName: 'Condition', minWidth: 100, editable: true, display: 'flex', renderCell: (params: GridRenderCellParams) => {
+            const isMissing = !params.value || params.value.trim() === '';
+            return (
+                <TextField
+                    fullWidth
+                    variant="standard"
+                    size="small"
+                    defaultValue={params.value || ''}
+                    required
+                    error={isMissing}
+                    onBlur={(e) => {
+                        if (e.target.value !== params.value) {
+                            handleCellChange('condition', params.id, e.target.value);
+                        }
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === ' ') {
+                            event.stopPropagation();
+                        }
+                    }}
+                />
+            );
+        }},
         { field: 'reasonForMove', headerName: 'Reason For Move', flex: 2, minWidth: 200, renderCell: (params: GridRenderCellParams) => {
+            const isMissing = !params.row.reasonForMove || params.row.reasonForMove.length === 0;
             return (
                 <Autocomplete
                     value={params.row.reasonForMove || []}
@@ -349,6 +389,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     getOptionLabel={(option: Option<string>) => option.label || ''}
                     isOptionEqualToValue={(option, value) => option.value === value.value}
                     onBlur={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => {
+                        if (event.key === ' ') {
+                            event.stopPropagation();
+                        }
+                    }}
                     onChange={(event, newValue) => {
                         const updatedValue = newValue || [];
                         const isBreeding = updatedValue.find((r: Option<string>) => r.value === 'Breeding');
@@ -382,6 +427,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                             {...params}
                             variant="standard"
                             size="small"
+                            required
+                            error={isMissing}
                         />
                     )}
                     multiple
@@ -395,6 +442,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 const currentRow = params.row as HousingTransferData;
                 const metadata = rowMetadata[currentRow.id];
                 const isBreeding = currentRow.reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
+                const isMissing = isBreeding && !params.value;
 
                 if (isBreeding) {
                     return (
@@ -405,6 +453,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                             getOptionLabel={(option: Option<string>) => option.label || ''}
                             isOptionEqualToValue={(option, value) => option.value === value.value}
                             onBlur={(event) => event.stopPropagation()}
+                            onKeyDown={(event) => {
+                                if (event.key === ' ') {
+                                    event.stopPropagation();
+                                }
+                            }}
                             onChange={(event, newValue) => {
                                 handleCellChange('project', params.id, newValue?.value || null);
                             }}
@@ -414,6 +467,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                                     {...params}
                                     variant="standard"
                                     size="small"
+                                    required
+                                    error={isMissing}
                                 />
                             )}
                         />
@@ -423,6 +478,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             }
         },
         { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, display: 'flex', renderCell: (params: GridRenderCellParams) => {
+            const reasonForMoveValues = params.row.reasonForMove.map((r: Option<string>) => r.value);
+            const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
+                reasonForMoveValues.includes("Behavior");
+            const isMissing = requiresRemarks && (!params.row.remarks || params.row.remarks.trim() === '');
+            
             return (
                 <TextField
                     variant={'standard'}
@@ -431,13 +491,44 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     onBlur={(event) => {
                         // Prevent event propagation to avoid DataGrid intercepting blur
                         event.stopPropagation();
+                        if (event.target.value !== (params.row.remarks || '')) {
+                            handleCellChange('remarks', params.id, event.target.value);
+                        }
                     }}
-                    value={params.row.remarks || ''}
-                    onChange={(event) => handleCellChange('remarks', params.id, event.target.value)}
+                    onKeyDown={(event) => {
+                        if (event.key === ' ') {
+                            event.stopPropagation();
+                        }
+                    }}
+                    defaultValue={params.row.remarks || ''}
+                    required={requiresRemarks}
+                    error={isMissing}
                 />
             )}
         },
-        { field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, display: 'flex' },
+        { field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, display: 'flex', renderCell: (params: GridRenderCellParams) => {
+            const isMissing = !params.value || params.value.trim() === '';
+            return (
+                <TextField
+                    fullWidth
+                    variant="standard"
+                    size="small"
+                    defaultValue={params.value || ''}
+                    required
+                    error={isMissing}
+                    onBlur={(e) => {
+                        if (e.target.value !== params.value) {
+                            handleCellChange('performedBy', params.id, e.target.value);
+                        }
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === ' ') {
+                            event.stopPropagation();
+                        }
+                    }}
+                />
+            );
+        } },
         {
             field: 'actions',
             headerName: 'Actions',
@@ -449,7 +540,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 </IconButton>
             ),
         },
-    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal, fetchAnimalsInCage, handleRoomChange, fetchProjectOptions]);
+    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal, fetchAnimalsInCage, handleRoomChange, fetchProjectOptions, animals, onAnimalsChange]);
 
     const handleCellClick = useCallback((params: GridCellParams) => {
         if (params.isEditable && params.cellMode === 'view') {

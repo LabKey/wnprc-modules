@@ -22,6 +22,7 @@ import { Option } from '@labkey/components';
 export type HousingRowMetadata = {
     cageOptions: Option<string>[];
     projectOptions?: Option<string>[];
+    animalsInDestinationCage?: string[];
 };
 
 export type ExtendedHousingTransferData = HousingTransferData & {
@@ -34,7 +35,7 @@ export interface HousingTransferData {
     outDate: Dayjs;
     destinationRoom: Option<number>;
     destinationCage: Option<string>;
-    condition: string;
+    condition: Option<string>[];
     reasonForMove: Option<string>[];
     project: string;
     remarks: string;

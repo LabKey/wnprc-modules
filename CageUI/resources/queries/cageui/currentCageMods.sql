@@ -17,18 +17,17 @@
  */
 
 SELECT
+    cmh.cage,
+    cmh.modification,
+    cmh.location,
+    cmh.modid,
+    cmh.parent_modid,
+    cmh.subid,
+    ah.start_date,
+    ah.end_date,
+    ah.historyid
+FROM cageui.cage_modifications_history cmh
+JOIN cageui.all_history ah ON cmh.historyid = ah.historyid
+WHERE ah.end_date IS NULL
 
-    d.id,
 
-    d.dam,
-
-    d.sire,
-
-    age.ageInDays,
-    age.ageInYears,
-    CASE WHEN age.ageInYears < 1.0 THEN true ELSE false END AS isInfant
-
-FROM study.Demographics d
-LEFT JOIN study.demographicsAge age
-on (d.id = age.id)
-WHERE d.calculated_status = 'Alive';

@@ -26,14 +26,16 @@ import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
 import { Filter } from '@labkey/api';
 import { HousingDataGrid } from './HousingDataGrid';
+import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 interface HousingFormProps {
+    user: GetUserPermissionsResponse;
     currRoom?: string;
     selectedAnimals?: string[];
 }
 
 export const HousingForm: FC<HousingFormProps> = (props) => {
-    const { selectedAnimals, currRoom } = props;
+    const { selectedAnimals, currRoom, user } = props;
     const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom]: [] });
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
@@ -51,7 +53,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 outDate: null,
                 destinationRoom: {value: null, label: ''},
                 destinationCage: {value: '', label: ''},
-                condition: '',
+                condition: [],
                 reasonForMove: [],
                 project: null,
                 remarks: '',
@@ -206,6 +208,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         <div className="housing-form-container">
             {Object.keys(animalsByRoom).map(roomLabel => (
                 <HousingDataGrid
+                    user={user}
                     key={roomLabel}
                     roomLabel={roomLabel}
                     animals={animalsByRoom[roomLabel]}

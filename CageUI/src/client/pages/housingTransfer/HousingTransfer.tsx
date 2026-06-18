@@ -70,6 +70,7 @@ export const HousingTransfer: FC = () => {
                 {user &&
                     <>
                         <HousingForm
+                            user={user}
                             currRoom={firstRoom}
                             selectedAnimals={selectedAnimals}
                         />

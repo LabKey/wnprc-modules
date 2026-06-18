@@ -36,6 +36,7 @@ import {
 } from './helpers';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { ConnectedModType } from '../types/homeTypes';
+import { Security } from '@labkey/api';
 
 
 // Determines if the user has access to editing the layout
@@ -45,6 +46,10 @@ export const canEditLayout = (user: GetUserPermissionsResponse) => {
     }
     return false;
 }
+
+export const canEditConditionPermission = (user: GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
+};
 
 // takes a cage number and returns it in a display friendly format, ex: cage-1 -> Cage 1
 export const getCageNumDisplay = (cageNum: CageNumber) => {

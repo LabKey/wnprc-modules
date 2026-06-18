@@ -23,6 +23,7 @@ import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { AnimalInCage, EHRCageMods } from '../types/homeTypes';
 import { CageData, CageHistoryData, CageNumber, RackData } from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
+import { Option } from '@labkey/components';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: SelectRowsOptions = {
@@ -143,19 +144,56 @@ export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> =
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        console.log("Animal Res: ", res, config);
         const animalsInCage: AnimalInCage[] = [];
         if (res.rows.length > 0) {
             res.rows.forEach(r => {
                 animalsInCage.push({
                     id: r.id,
                 })
-                animalsInCage.push({id: 'test animal'})
             });
         }
         return animalsInCage;
     }
     catch (e) {
-        throw new Error('Error fetching cage history data: ' + (e as Error).message);
+        throw new Error('Error fetching animals in cage: ' + (e as Error).message);
     }
 }
+
+export const fetchConditionCodes = async (): Promise<Option<string>[]> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'ehr_lookups',
+        queryName: 'housing_condition_codes',
+        filterArray: [
+            Filter.create('date_disabled', null, Filter.Types.ISBLANK)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        return res.rows.map(row => ({
+            label: `${row.value} - ${row.category}`,
+            value: row.value.toString()
+        }));
+    } catch (e) {
+        console.error('Error fetching condition codes:', e);
+        return [];
+    }
+};
+
+export const fetchCurrentCageMods = async (cageId: string): Promise<string[]> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'currentCageMods',
+        filterArray: [
+            Filter.create('cage', cageId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        return res.rows.map(row => (row.modification));
+    } catch (e) {
+        console.error('Error fetching condition codes:', e);
+        return [];
+    }
+};

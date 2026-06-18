@@ -105,6 +105,8 @@ export const isCageModifier = (user: GetUserPermissionsResponse) => {
 };
 
 
+
+
 // Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
 export const toLabKeyDate = (date: Date): string => {
     const pad = (n: number, cnt: number) => n.toString().padStart(cnt, '0');
@@ -551,7 +553,7 @@ export const addPrevRoomSvgs = (user: GetUserPermissionsResponse, mode: 'edit' |
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
-            .attr('id', rack.objectId)
+            .attr('id', rack.svgId)
             .attr('class', `rack type-${rackTypeString}`)
             .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');

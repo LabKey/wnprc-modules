@@ -41,4 +41,6 @@ export interface HousingTransferData {
     remarks: string;
     performedBy: string;
     triggeredBy?: string; // ID of the animal that triggered this animal's addition to the grid
+    currentRoom?: Option<number>;
+    currentCage?: Option<string>;
 }

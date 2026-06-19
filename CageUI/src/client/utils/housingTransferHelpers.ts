@@ -110,7 +110,7 @@ export const checkIsAdopted = async (parentId: string, infantId: string): Promis
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        if(res.rows[0]['Offspring/parents/sire'] === parentId || res.rows[0]['Offspring/parents/dam'] === parentId){
+        if(res.rows[0]['Offspring/parents/sire'] !== parentId && res.rows[0]['Offspring/parents/dam'] !== parentId){
             return true;
         }
         return false;
@@ -118,4 +118,106 @@ export const checkIsAdopted = async (parentId: string, infantId: string): Promis
         console.error('Error fetching adoption status', e);
         return false;
     }
+}
+
+export const checkIsMale = async (id: string): Promise<boolean> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographics',
+        viewName: 'Alive, At Center',
+        columns: ['gender'],
+        filterArray: [
+            Filter.create('Id', id, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if(res.rows[0].gender === 'm'){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adoption status', e);
+        return false;
+    }
+}
+
+// TODO finish this
+/*
+    This function determines the social code for the following codes (M, F, AM, AF)
+ */
+export const getSocialCode = async (animalId: string, animalsInCage: string[]): Promise<string | null> => {
+
+    return null;
+}
+
+/*
+    This function determines if the mother is in the destination animal list
+ */
+export const checkIsMotherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsOffspring',
+        columns: ['Offspring/parents/dam'],
+        filterArray: [
+            Filter.create('Offspring', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const motherId: string = res.rows[0]['Offspring/parents/dam'];
+
+        if(animalsInCage.find(id => id === motherId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching mother status', e);
+        return false;
+    }
+}
+
+/*
+    This function determines if the father is in the destination animal list
+ */
+export const checkIsFatherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsOffspring',
+        columns: ['Offspring/parents/sire'],
+        filterArray: [
+            Filter.create('Offspring', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const fatherId: string = res.rows[0]['Offspring/parents/sire'];
+
+        if(animalsInCage.find(id => id === fatherId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching father status', e);
+        return false;
+    }
+}
+
+// TODO finish this function
+/*
+    This function determines if the adopted mother is in the destination animal list
+ */
+export const checkIsAdoptedMotherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    return false;
+}
+
+// TODO finish this function
+/*
+    This function determines if the adopted father is in the destination animal list
+ */
+export const checkIsAdoptedFatherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    return false;
 }

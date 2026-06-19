@@ -36,7 +36,7 @@ interface HousingFormProps {
 
 export const HousingForm: FC<HousingFormProps> = (props) => {
     const { selectedAnimals, currRoom, user } = props;
-    const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom]: [] });
+    const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom || 'Unassigned']: [] });
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
@@ -47,21 +47,57 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
 
     useEffect(() => {
         if (selectedAnimals && selectedAnimals.length > 0) {
-            const initialAnimals = selectedAnimals.map(id => ({
-                id,
-                inDate: dayjs(),
-                outDate: null,
-                destinationRoom: {value: null, label: ''},
-                destinationCage: {value: '', label: ''},
-                condition: [],
-                reasonForMove: [],
-                project: null,
-                remarks: '',
-                performedBy: ''
-            } as HousingTransferData));
-            setAnimalsByRoom({ [currRoom]: initialAnimals });
+            const config: SelectRowsOptions = {
+                schemaName: 'study',
+                queryName: 'demographicsCurLocationNew',
+                columns: ['id', 'room', 'room/rowid', 'cage'],
+                filterArray: [Filter.create('id', selectedAnimals, Filter.Types.IN)]
+            };
+
+            labkeyActionSelectWithPromise(config).then(result => {
+                const currentLocations: Record<string, {room: Option<number>, cage: Option<string>}> = {};
+                result.rows.forEach(row => {
+                    currentLocations[row.id] = {
+                        room: { label: row.room, value: row['room/rowid'] },
+                        cage: { label: row.cage?.cage_number?.toString() || '', value: row.cage?.toString() || '' }
+                    };
+                });
+
+                const initialAnimals = selectedAnimals.map(id => ({
+                    id,
+                    inDate: dayjs(),
+                    outDate: null,
+                    destinationRoom: {value: null, label: ''},
+                    destinationCage: {value: '', label: ''},
+                    condition: [],
+                    reasonForMove: [],
+                    project: null,
+                    remarks: '',
+                    performedBy: '',
+                    currentRoom: currentLocations[id]?.room || { value: null, label: '' },
+                    currentCage: currentLocations[id]?.cage || { value: '', label: '' }
+                } as HousingTransferData));
+                setAnimalsByRoom({ [currRoom || 'Unassigned']: initialAnimals });
+            }).catch(err => {
+                console.error('Error fetching current locations:', err);
+                const initialAnimals = selectedAnimals.map(id => ({
+                    id,
+                    inDate: dayjs(),
+                    outDate: null,
+                    destinationRoom: {value: null, label: ''},
+                    destinationCage: {value: '', label: ''},
+                    condition: [],
+                    reasonForMove: [],
+                    project: null,
+                    remarks: '',
+                    performedBy: '',
+                    currentRoom: { value: null, label: '' },
+                    currentCage: { value: '', label: '' }
+                } as HousingTransferData));
+                setAnimalsByRoom({ [currRoom || 'Unassigned']: initialAnimals });
+            });
         }
-    }, [selectedAnimals]);
+    }, [selectedAnimals, currRoom]);
 
     useEffect(() => {
         const config: SelectRowsOptions = {
@@ -169,25 +205,83 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [currRoom]);
 
     const handleAnimalsFound = useCallback((room: string, cage: Option<string>, foundAnimals: HousingTransferData[], triggeredBy: string) => {
-        setAnimalsByRoom(prev => {
-            const next = { ...prev };
-            const roomKey = room; 
-            
-            const existingInTarget = next[roomKey] || [];
-            const existingIds = new Set(existingInTarget.map(a => a.id));
-            const uniqueNew = foundAnimals.filter(a => !existingIds.has(a.id));
-            
-            if (uniqueNew.length > 0) {
-                next[roomKey] = [...existingInTarget, ...uniqueNew];
-            }
-            
-            return next;
+        const config: SelectRowsOptions = {
+            schemaName: 'study',
+            queryName: 'demographicsCurLocationNew',
+            columns: ['id', 'room', 'room/rowid', 'cage'],
+            filterArray: [Filter.create('id', foundAnimals.map(a => a.id), Filter.Types.IN)]
+        };
+
+        labkeyActionSelectWithPromise(config).then(result => {
+            const currentLocations: Record<string, {room: Option<number>, cage: Option<string>}> = {};
+            result.rows.forEach(row => {
+                currentLocations[row.id] = {
+                    room: { label: row.room, value: row['room/rowid'] },
+                    cage: { label: row.cage?.cage_number?.toString() || '', value: row.cage?.toString() || '' }
+                };
+            });
+
+            setAnimalsByRoom(prev => {
+                const next = { ...prev };
+                const roomKey = room;
+
+                const existingInTarget = next[roomKey] || [];
+                const existingIds = new Set(existingInTarget.map(a => a.id));
+                const uniqueNew = foundAnimals
+                    .filter(a => !existingIds.has(a.id))
+                    .map(a => ({
+                        ...a,
+                        currentRoom: currentLocations[a.id]?.room || { value: null, label: '' },
+                        currentCage: currentLocations[a.id]?.cage || { value: '', label: '' },
+                        destinationRoom: { label: 'No Change', value: 0 },
+                        destinationCage: { label: 'No Change', value: '0' }
+                    }));
+
+                if (uniqueNew.length > 0) {
+                    next[roomKey] = [...existingInTarget, ...uniqueNew];
+                }
+
+                return next;
+            });
+        }).catch(err => {
+            console.error('Error fetching current locations for found animals:', err);
+            setAnimalsByRoom(prev => {
+                const next = { ...prev };
+                const roomKey = room;
+
+                const existingInTarget = next[roomKey] || [];
+                const existingIds = new Set(existingInTarget.map(a => a.id));
+                const uniqueNew = foundAnimals.filter(a => !existingIds.has(a.id)).map(a => ({
+                    ...a,
+                    destinationRoom: { label: 'No Change', value: 0 },
+                    destinationCage: { label: 'No Change', value: '0' }
+                }));
+
+                if (uniqueNew.length > 0) {
+                    next[roomKey] = [...existingInTarget, ...uniqueNew];
+                }
+
+                return next;
+            });
         });
     }, []);
 
     const allAnimals = useMemo(() => {
         return Object.values(animalsByRoom).flat();
     }, [animalsByRoom]);
+
+    useEffect(() => {
+        // When any animal in the form changes, all grids might need to update their condition codes
+        // because cage mates can be across different room grids.
+        // However, HousingDataGrid already has a useEffect/callback that depends on allAnimals.
+        // We just need to ensure that when allAnimals changes, we trigger recalculation in each grid.
+        // Actually, updateConditionCodes in HousingDataGrid depends on allAnimals.
+    }, [allAnimals]);
+
+    const calculateAllConditionCodes = useCallback(async () => {
+        // This is a placeholder if we wanted to trigger everything from the top.
+        // But per-grid recalculation is probably more efficient.
+    }, []);
 
     const handleValidate = useCallback(() => {
         console.log('Validating form...', allAnimals);
@@ -212,6 +306,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     key={roomLabel}
                     roomLabel={roomLabel}
                     animals={animalsByRoom[roomLabel]}
+                    allAnimals={allAnimals}
                     onAnimalsChange={(updated) => handleAnimalsChange(roomLabel, updated)}
                     onAnimalsFound={handleAnimalsFound}
                     roomOptions={roomOptions || []}

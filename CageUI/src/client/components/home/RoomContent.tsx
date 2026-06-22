@@ -24,9 +24,10 @@ import { CageViewContent } from './cageView/CageViewContent';
 import { RackViewContent } from './rackView/RackViewContent';
 import { HomeViewContent } from './HomeViewContent';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
+import { LoadingScreen } from '../LoadingScreen';
 
 export const RoomContent: FC = () => {
-    const {selectedPage} = useHomeNavigationContext();
+    const {selectedPage, isNavLoading} = useHomeNavigationContext();
 
     const renderContent = () => {
         switch (selectedPage?.selected) {
@@ -43,7 +44,12 @@ export const RoomContent: FC = () => {
 
     return (
         <div className={'view-content'}>
-            {renderContent()}
+            <LoadingScreen
+                isVisible={isNavLoading}
+                targetElement={document.getElementById('home-container-id')}
+                message={"Loading..."}
+            />
+            {!isNavLoading && renderContent()}
         </div>
     );
 };

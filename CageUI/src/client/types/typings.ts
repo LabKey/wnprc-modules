@@ -69,6 +69,7 @@ export enum ModTypes {
     PCDivider = 'pcd', // protected contact
     VCDivider = 'vcd', // visual contact
     PrivacyDivider = 'pd',
+    LockedDivider = 'ld',
     NoDivider = 'nd',
     CTunnel = 'ct',
     Extension = 'ex',
@@ -184,6 +185,9 @@ export type Modification = {
 
 export type ModRecord = Record<ModTypes, Modification>;
 
+export interface LoadedSvgs {
+    [key: RoomItemStringType]: SVGElement;
+}
 
 export interface FetchRoomData {
     selectedSize: SelectorOptions;

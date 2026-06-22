@@ -44,10 +44,6 @@ export const RoomObjectPopup: FC<CagePopupProps> = (props) => {
     const menuRef = useRef(null);
 
     useEffect(() => {
-        console.log('roomObj: ', roomObj);
-    }, [roomObj]);
-
-    useEffect(() => {
         // Check if the click was outside the menu
         const handleClickOutside = (event) => {
             // Ignore dropdowns that disappear causing them to no longer be in menuRef

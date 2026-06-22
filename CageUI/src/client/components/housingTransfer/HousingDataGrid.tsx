@@ -377,7 +377,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             reasonForMove: [],
             project: null,
             remarks: '',
-            performedBy: ''
+            performedBy: '',
+            alert: false
         };
         const updatedAnimals = [...animals, newAnimal];
         onAnimalsChange(updatedAnimals);
@@ -506,6 +507,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     project: null,
                     remarks: '',
                     performedBy: '',
+                    alert: false,
                     triggeredBy: triggeredById
                 } as HousingTransferData));
 
@@ -824,7 +826,26 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     }}
                 />
             );
-        } },
+        }},
+        {
+            field: 'alert',
+            headerName: 'Alert',
+            minWidth: 80,
+            display: 'flex',
+            renderCell: (params: GridRenderCellParams) => {
+                const isAlert = params.value as boolean;
+                return (
+                    <IconButton
+                        size="small"
+                        onClick={() => {
+                            handleCellChange('alert', params.id, !isAlert);
+                        }}
+                    >
+                        {isAlert ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />}
+                    </IconButton>
+                );
+            }
+        },
         {
             field: 'actions',
             headerName: 'Actions',

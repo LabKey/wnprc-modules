@@ -74,6 +74,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     project: null,
                     remarks: '',
                     performedBy: '',
+                    alert: false,
                     currentRoom: currentLocations[id]?.room || { value: null, label: '' },
                     currentCage: currentLocations[id]?.cage || { value: '', label: '' }
                 } as HousingTransferData));
@@ -91,6 +92,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     project: null,
                     remarks: '',
                     performedBy: '',
+                    alert: false,
                     currentRoom: { value: null, label: '' },
                     currentCage: { value: '', label: '' }
                 } as HousingTransferData));

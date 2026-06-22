@@ -59,7 +59,7 @@ public class CageUIModule extends ExtendedSimpleModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.003;
+        return 26.001;
     }
 
     @Override

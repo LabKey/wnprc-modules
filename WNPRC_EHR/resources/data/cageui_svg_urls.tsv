@@ -1,0 +1,12 @@
+Value	Title	Category	Description	Sort Order	Date Disabled
+bottom	/cageui/static/bottom.svg
+cage	/cageui/static/cage.svg
+door	/cageui/static/door.svg
+drain	/cageui/static/drain.svg
+gateClosed	/cageui/static/gateClosed.svg
+gateOpen	/cageui/static/gateOpen.svg
+pen	/cageui/static/pen.svg
+playCage	/cageui/static/pen.svg
+roomDivider	/cageui/static/roomDivider.svg
+tempCage	/cageui/static/cage.svg
+top	/cageui/static/top.svg

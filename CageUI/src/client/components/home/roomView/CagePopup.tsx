@@ -100,7 +100,6 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
 
     // This submission updates the room mods with the current selections.
     const handleSaveMods = () => {
-        console.log("SaveMods: ", currCageMods);
         validateAndApplyDefaults(currCageMods).then((res) => {
             const result = saveCageMods(prevCage, res);
 

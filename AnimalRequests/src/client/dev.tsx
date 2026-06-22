@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2026 Board of Regents of the University of Wisconsin System
+ * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import './theme/css/react-datepicker.css';
 import './theme/css/bootstrap.min.css';
 import './theme/css/tooltip.css';
 
-window.addEventListener('DOMContentLoaded', (event) => {
+const render = (): void => {
+    // TODO: Do this once in application init
     const dataArr: Promise<any>[] = [
         getEHRData('ehr','investigatorsWithName', '', '', [], 'IncludeExternal'),
         getEHRData('ehr_lookups','animal_requests_viral_status'),
@@ -54,4 +55,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
             dataArr={dataArr}
         />
     );
-});
+};
+
+render();

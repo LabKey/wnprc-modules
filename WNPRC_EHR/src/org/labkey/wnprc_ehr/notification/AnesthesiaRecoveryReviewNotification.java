@@ -52,9 +52,9 @@ public class AnesthesiaRecoveryReviewNotification extends AbstractEHRNotificatio
         return "Anesthesia Recovery Review: " + dateToolkit.getCurrentTime();
     }
     @Override
-    public String getScheduleDescription() { return "Daily at 4:00PM"; }
+    public String getScheduleDescription() { return "Daily at 3:00PM"; }
     @Override
-    public String getCronString() { return notificationToolkit.createCronString("0", "16", "*"); }
+    public String getCronString() { return notificationToolkit.createCronString("0", "15", "*"); }
     @Override
     public String getCategory() { return "iOS App Notifications"; }
 

@@ -101,9 +101,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             } else if (matches(table, "wnprc", "animal_requests")) {
                 customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
+            else if (matches(table, "wnprc", "anesthesiaRecovery")) {
+                customizeAnesthesiaRecoveryTable((AbstractTableInfo) table);
+            }
             else if (table.getName().equalsIgnoreCase("waterOrders"))
                 appendEnddateFuture((AbstractTableInfo) table, "enddate");
-
         }
     }
 
@@ -313,6 +315,26 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         newCol2.setLabel("Chow Lookup");
         ti.addColumn(newCol2);
 
+    }
+
+    private void customizeAnesthesiaRecoveryTable(AbstractTableInfo ti) {
+        // Defines new customized column and display name.
+        String recoveryStartTimeColumnName = "recoveryStartTime";
+        String recoveryStartTimeDisplayName = "Recovery Start Time";
+        String recoveryStartTimeDescription = "This column shows the calculated original start time for this specific recovery (the date/time the first observation was made).";
+        // Gets the dataset name.
+        String tableName = ti.getSchema().getName() + "." + ti.getName();
+        // Creates SQL script to define what to show in column.
+        SQLFragment sql = new SQLFragment("(SELECT MIN(sub.date) " +
+                "FROM " + tableName + " sub " +
+                "WHERE sub.observation != 'imported' " +
+                "AND sub.recoveryId = '" + ExprColumn.STR_TABLE_ALIAS + ".recoveryId')"
+        );
+        // Compiles data and creates the new column to insert.
+        ExprColumn newCol = new ExprColumn(ti, recoveryStartTimeColumnName, sql, JdbcType.TIMESTAMP);
+        newCol.setLabel(recoveryStartTimeDisplayName);
+        newCol.setDescription(recoveryStartTimeDescription);
+        ti.addColumn(newCol);
     }
 
     private void customizeBirthTable(AbstractTableInfo ti)

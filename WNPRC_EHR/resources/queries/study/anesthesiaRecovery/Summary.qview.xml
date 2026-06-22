@@ -1,0 +1,11 @@
+<!--Defines the summary qview for the anesthesiaRecovery dataset.-->
+
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="recoveryStartTime"/>
+    </columns>
+    <filters>
+        <filter column="observation" operator="eq" value="Fully Recovered"/>
+    </filters>
+</customView>

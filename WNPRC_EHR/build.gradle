@@ -40,7 +40,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.api-client:google-api-client:${googleApiClientVersion}",
+            "com.google.api-client:google-api-client:${project.parent.ext.googleApiClientVersion}",
             "Google API Client Library for Java",
             "Google",
             "https://developers.google.com/api-client-library/java",
@@ -53,7 +53,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.apis:google-api-services-calendar:${googleApiServicesCalendarVersion}",
+            "com.google.apis:google-api-services-calendar:${project.parent.ext.googleApiServicesCalendarVersion}",
             "Google Calendar API Client Library for Java",
             "Google",
             "https://github.com/googleapis/google-api-java-client-services/tree/master/clients/google-api-services-calendar/v3",

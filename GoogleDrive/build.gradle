@@ -12,7 +12,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.api-client:google-api-client:${googleApiClientVersion}",
+            "com.google.api-client:google-api-client:${project.parent.ext.googleApiClientVersion}",
             "Google API Client Library for Java",
             "Google",
             "https://developers.google.com/api-client-library/java",
@@ -25,7 +25,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.http-client:google-http-client:${googleHttpClientVersion}",
+            "com.google.http-client:google-http-client:${project.parent.ext.googleHttpClientVersion}",
             "Google HTTP Client Library for Java",
             "Google",
             "https://developers.google.com/api-client-library/java",
@@ -38,7 +38,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.apis:google-api-services-drive:${googleApiServiceDriveVersion}",
+            "com.google.apis:google-api-services-drive:${project.parent.ext.googleApiServiceDriveVersion}",
             "Google Drive API Client Library for Java",
             "Google",
             "https://developers.google.com/api-client-library/java/apis/drive/v3",

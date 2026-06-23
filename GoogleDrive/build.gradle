@@ -25,7 +25,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "com.google.http-client:google-http-client:${project.parent.ext.googleHttpClientVersion}",
+            "com.google.http-client:google-http-client:${googleHttpClientVersion}",
             "Google HTTP Client Library for Java",
             "Google",
             "https://developers.google.com/api-client-library/java",

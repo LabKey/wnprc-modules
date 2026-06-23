@@ -147,7 +147,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                 //navigateTo({selected: 'Room', room: selectedRoom.name});
                 window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
-                'cageui-home',
+                'home',
                 ActionURL.getContainer(),
                 {room: res.roomName, rack: res.rack});
 
@@ -167,6 +167,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
             {isSaving &&
                 <LoadingScreen
                     isVisible={isSaving}
+                    message={"Saving..."}
                     targetElement={document.getElementById('rack-view-container')}
                 />
             }

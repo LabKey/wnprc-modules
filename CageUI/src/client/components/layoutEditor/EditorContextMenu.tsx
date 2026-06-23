@@ -17,13 +17,13 @@
  */
 
 import * as React from 'react';
-import { FC, ReactElement, useEffect, useRef } from 'react';
+import { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import '../../cageui.scss';
 import { Button } from 'react-bootstrap';
 import { parseRoomItemType, stringToRoomItem } from '../../utils/helpers';
 import {
     Cage,
-    DefaultRackTypes,
+    DefaultRackTypes, Rack, RackGroup,
     RackStringType,
     RackTypes,
     RoomItemType,
@@ -31,6 +31,8 @@ import {
     RoomObjectTypes
 } from '../../types/typings';
 import { SelectedObj } from '../../types/layoutEditorTypes';
+import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
+import { findCageInGroup } from '../../utils/LayoutEditorHelpers';
 
 interface Option {
     label: string;
@@ -64,23 +66,19 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         type
     } = props;
 
+    const {localRoom, unmergeRacks} = useLayoutEditorContext();
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Delete object for room objects
-    const handleDeleteObject = (e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        onClickDelete();
-    };
+    const [selectedRack, setSelectedRack] = useState<Rack>();
+    const [selectedRackGroup, setSelectedRackGroup] = useState<RackGroup>();
 
-    // Delete cage and rack for caging units
-    const handleDeleteCage = (e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        onClickDelete('cage');
-    };
-    const handleDeleteRack = (e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        onClickDelete('rack');
-    };
+    useEffect(() => {
+        if(selectedObj.selectionType === 'cage'){
+            const {rack, rackGroup} = findCageInGroup((selectedObj as Cage).svgId, localRoom.rackGroups);
+            setSelectedRack(rack);
+            setSelectedRackGroup(rackGroup);
+        }
+    }, [selectedObj]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -136,12 +134,35 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
         menu.style.top = `${adjustedTop}px`;
     }, [ctxMenuStyle.display, ctxMenuStyle.left, ctxMenuStyle.top]);
 
+
+    // Delete object for room objects
+    const handleDeleteObject = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onClickDelete();
+    };
+
+    // Delete cage and rack for caging units
+    const handleDeleteCage = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onClickDelete('cage');
+    };
+    const handleDeleteRack = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onClickDelete('rack');
+    };
+
+    const handleUnmergeRack = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        unmergeRacks(selectedRackGroup, selectedRack);
+        closeMenu();
+    }
+
     return (
         <div id="contextMenu" className="context-menu" ref={menuRef} style={{
             display: ctxMenuStyle.display,
             left: ctxMenuStyle.left,
             top: ctxMenuStyle.top,
-            width: 200,
+            width: 'auto',
             height: 'auto'
         }}>
             {menuItems && menuItems.map((item, index) => {
@@ -186,6 +207,15 @@ export const EditorContextMenu: FC<EditorContextMenuProps> = (props) => {
                         >
                             Delete Rack
                         </Button>
+
+                        {(selectedRackGroup && selectedRackGroup.racks.length > 1) &&
+                            <Button
+                                variant={'primary'}
+                                onClick={handleUnmergeRack}
+                            >
+                                Unmerge Rack
+                            </Button>
+                        }
                     </div>
                 }
             </div>

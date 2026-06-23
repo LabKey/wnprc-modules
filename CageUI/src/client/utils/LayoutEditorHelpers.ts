@@ -830,7 +830,7 @@ export function checkAdjacent(targetCage: LocationCoords, draggedCage: LocationC
         }
     }
 
-    return {isAdjacent: false, direction: '0'};
+    return {isAdjacent: false, direction: null};
 }
 
 //Offset for the top left corner of the layout, without doing this objects will randomly jump when dragging and placing

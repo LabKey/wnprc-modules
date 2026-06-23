@@ -70,4 +70,5 @@ export interface LayoutContextType {
     getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];
     reloadRoom: Room,
     setReloadRoom: React.Dispatch<React.SetStateAction<Room>>,
+    unmergeRacks: (rackGroup: RackGroup, selectedRack: Rack) => void;
 }

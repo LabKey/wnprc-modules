@@ -214,6 +214,20 @@ export const Modifications: ModRecord = {
             value: '4'
         }]
     },
+    [ModTypes.LockedDivider]: {
+        name: 'Locked Divider',
+        svgIds: {
+            [ModLocations.Left]: LocationWithRotationMap[ModLocations.Left],
+            [ModLocations.Right]: LocationWithRotationMap[ModLocations.Right],
+        },
+        styles: [{
+            property: 'stroke',
+            value: '#ed1c24'
+        }, {
+            property: 'stroke-width',
+            value: '2'
+        }]
+    },
     [ModTypes.NoDivider]: {
         name: 'No Divider',
         svgIds: {

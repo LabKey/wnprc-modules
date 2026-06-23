@@ -689,8 +689,9 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             }
         });
         // loads grid with new room
-        addPrevRoomSvgs(user, 'edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag);
-        setReloadRoom(null);
+        addPrevRoomSvgs(user, 'edit', reloadRoom, layoutSvg, undefined, undefined, setSelectedObj, contextMenuRef, setCtxMenuStyle, closeMenuThenDrag).then(() => {
+            setReloadRoom(null);
+        });
     }, [reloadRoom]);
 
     // Effect attaches an observer to the border_template svg. after it is injected into the dom it will run
@@ -750,8 +751,8 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
         if (loadTemplate) {
             window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
-                'cageui-editLayout',
-                ActionURL.getContainer(),
+                'editLayout',
+                ActionURL.getController(),
                 {room: localRoom.name}
             );
         }
@@ -874,6 +875,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             {startSaving &&
                     <LoadingScreen
                             isVisible={startSaving}
+                            message={"Saving..."}
                             targetElement={document.getElementById('layout-editor-container')}
                     />
             }

@@ -965,17 +965,12 @@ public class CageUIManager
             ArrayList<TemplateLayoutHistoryForm> templateForms = new ArrayList<>();
 
             // Process rack groups
-            int rackGroupIndex = 0;
             for (RackGroup rackGroup : room.getRackGroups())
             {
-                rackGroupIndex++;
 
                 // Process racks in this group
-                int rackIndex = 0;
                 for (Rack rack : rackGroup.getRacks())
                 {
-                    rackIndex++;
-
                     // Process cages in this rack
                     if (rack.getCages() != null)
                     {
@@ -983,9 +978,9 @@ public class CageUIManager
                         {
                             TemplateLayoutHistoryForm form = new TemplateLayoutHistoryForm();
                             form.setHistoryId(historyId);
-                            form.setRackGroup(rackGroupIndex);
+                            form.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
                             form.setGroupRotation(rackGroup.getRotation());
-                            form.setRack(rackIndex);
+                            form.setRack(rack.getItemId());
                             form.setCage(findLastNumberAfterDash(cage.getCageNum()));
                             form.setObjectType(rack.getType().getEffectiveRackType().getNumericValue());
                             form.setExtraContext(cage.getExtraContext() != null ?

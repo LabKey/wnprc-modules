@@ -58,11 +58,14 @@ import {
     getTranslation,
     isRackEnum,
     showLayoutEditorError,
+    checkAdjacent
 } from '../utils/LayoutEditorHelpers';
 import * as d3 from 'd3';
 import {
+    cageDirectionToModLocation,
     generateCageId,
     generateUUID,
+    getAdjLocation,
     getNextDefaultRackId,
     getSvgSize,
     parseLongId,
@@ -289,6 +292,15 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         });
     };
 
+    const getNewGroupId = () => {
+        const newId = nextAvailGroup;
+        setNextAvailGroup(prevState => {
+            const nextId = parseLongId(prevState) + 1;
+            return `rack-group-${nextId}` as GroupId;
+        });
+        return newId;
+    }
+
     // This only adds default racks/cages to the layout, it is not used in loading in previous layouts
     const addRack = async (id: number, x: number, y: number, newScale: number, rackType: RackTypes): Promise<Rack | null> => {
         const newCageNum: CageNumber = `${roomItemToString(rackType) as RackStringType}-${getNextCageNum(roomItemToString(rackType) as RackStringType)}`;
@@ -367,7 +379,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         const newRackGroup: RackGroup = {
             selectionType: 'rackGroup',
-            groupId: nextAvailGroup,
+            groupId: getNewGroupId(),
             racks: [newRack],
             rotation: GroupRotation.Quarter,
             x: x,
@@ -375,10 +387,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             scale: newScale,
         };
 
-        setNextAvailGroup(prevState => {
-            const nextId = parseLongId(prevState) + 1;
-            return `rack-group-${nextId}` as GroupId;
-        });
         setLocalRoom(prevRoom => ({
             ...prevRoom,
             rackGroups: [...prevRoom.rackGroups, newRackGroup]
@@ -844,7 +852,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         // 6. Split groups based on components
         let finalGroups = updatedGroups.filter(g => g.groupId !== location.rackGroup.groupId);
-        let nextGroupId = nextAvailGroup;
 
         // In the group splitting logic:
         if (components.size > 1) {
@@ -948,15 +955,11 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
                 finalGroups.push({
                     ...affectedGroup,
-                    groupId: nextGroupId,
+                    groupId: getNewGroupId(),
                     x: minX,
                     y: minY,
                     racks: newRacks
                 });
-
-                // Update next group ID
-                const nextIdNum = parseInt(nextGroupId.split('-')[2]) + 1;
-                nextGroupId = `rack-group-${nextIdNum}` as GroupId;
             }
         } else {
             // No splitting needed, keep the modified group
@@ -964,7 +967,6 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         }
 
         // 7. Update state
-        setNextAvailGroup(nextGroupId);
         setLocalRoom(prev => ({
             ...prev,
             rackGroups: finalGroups
@@ -1137,6 +1139,111 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
         setCageNumChange({before: numBefore, after: numAfter});
     };
 
+    /*
+        Effectively unconnects the selectedRack from any connections with other racks. It does this by removing it from
+        the current rack group and creating a new rack group for the selected rack.
+     */
+    const unmergeRacks = (rackGroup: RackGroup, selectedRack: Rack) => {
+        const newRoom: Room = { ...localRoom };
+
+        // 1. Find the index of the rack group that contains the selected rack
+        const rackGroupIndex = newRoom.rackGroups.findIndex(group =>
+            group.groupId === rackGroup.groupId
+        );
+
+        if (rackGroupIndex === -1) return;
+
+        const removedModIds: string[] = [];
+        const otherRacks = rackGroup.racks.filter(r => r.objectId !== selectedRack.objectId);
+
+        // Process modifications between selectedRack and other racks in the group
+        selectedRack.cages.forEach(selectedCage => {
+            const selectedCageLoc = getCageLoc(selectedCage.svgId, selectedCage.cageNum);
+            if (!selectedCageLoc) return;
+
+            otherRacks.forEach(otherRack => {
+                otherRack.cages.forEach(otherCage => {
+                    const otherCageLoc = getCageLoc(otherCage.svgId, otherCage.cageNum);
+                    if (!otherCageLoc) return;
+
+                    const adjResult = checkAdjacent(otherCageLoc, selectedCageLoc, selectedCage.size, otherCage.size);
+                    if (adjResult.isAdjacent) {
+                        const location = cageDirectionToModLocation(adjResult.direction, rackGroup.rotation);
+                        const adjLocation = getAdjLocation(location);
+
+                        // Remove from selectedCage
+                        if (selectedCage.mods && selectedCage.mods[location]) {
+                            selectedCage.mods[location].forEach(mod => {
+                                mod.modKeys.forEach(key => removedModIds.push(key.modId));
+                            });
+                            selectedCage.mods[location] = [];
+                        }
+
+                        // Remove from otherCage
+                        if (otherCage.mods && otherCage.mods[adjLocation]) {
+                            otherCage.mods[adjLocation].forEach(mod => {
+                                mod.modKeys.forEach(key => removedModIds.push(key.modId));
+                            });
+                            otherCage.mods[adjLocation] = [];
+                        }
+                    }
+                });
+            });
+        });
+
+        // Remove collected modIds from room.mods
+        if (newRoom.mods) {
+            removedModIds.forEach(id => {
+                delete newRoom.mods[id];
+            });
+        }
+
+        // 2. Create the updated original rack group (without the selected rack)
+        let updatedOriginalRacks = otherRacks;
+        let updatedOriginalGroup = { ...rackGroup };
+
+        if (updatedOriginalRacks.length > 0) {
+            // Normalize the original group: find the new top-left corner
+            const minX = Math.min(...updatedOriginalRacks.map(r => r.x));
+            const minY = Math.min(...updatedOriginalRacks.map(r => r.y));
+
+            updatedOriginalGroup = {
+                ...rackGroup,
+                x: rackGroup.x + minX,
+                y: rackGroup.y + minY,
+                racks: updatedOriginalRacks.map(r => ({
+                    ...r,
+                    x: r.x - minX,
+                    y: r.y - minY
+                }))
+            };
+            newRoom.rackGroups[rackGroupIndex] = updatedOriginalGroup;
+        } else {
+            // If no racks left, remove the group entirely
+            newRoom.rackGroups.splice(rackGroupIndex, 1);
+        }
+
+        // 3. Create the new rack group for the unmerged rack
+        // The new group starts at the global position of the selected rack
+        const newRackGroup: RackGroup = {
+            ...rackGroup,
+            groupId: getNewGroupId(),
+            x: rackGroup.x + selectedRack.x,
+            y: rackGroup.y + selectedRack.y,
+            racks: [{
+                ...selectedRack,
+                x: 0, // Reset local coordinates to 0,0 in the new group
+                y: 0
+            }]
+        };
+
+        // 4. Update the room state
+        newRoom.rackGroups = [...newRoom.rackGroups, newRackGroup];
+
+        setLocalRoom(newRoom);
+        setReloadRoom(newRoom);
+    };
+
     const getNextCageNum = (rackType: RackStringType) => {
         const cages = unitLocs[rackType];
 
@@ -1211,7 +1318,8 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             user,
             getAdjCages,
             reloadRoom,
-            setReloadRoom
+            setReloadRoom,
+            unmergeRacks
         }}>
             {!isLoading ? children : null}
         </LayoutEditorContext.Provider>

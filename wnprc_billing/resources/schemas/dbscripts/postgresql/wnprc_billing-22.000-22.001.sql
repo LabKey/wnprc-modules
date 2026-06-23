@@ -1,0 +1,2 @@
+-- Dropping idx_wnprc_billing_groupcategoryassociations_chargegroupname [chargeGroupName] because it overlaps with uq_wnprc_billing_groupcategoryassociations_group_category [chargeGroupName, chargeCategoryId]
+DROP INDEX wnprc_billing.idx_wnprc_billing_groupcategoryassociations_chargegroupname;

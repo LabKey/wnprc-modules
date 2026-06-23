@@ -2028,6 +2028,11 @@ EHR.Metadata.registerMetadata('Default', {
                         }
                     }
                 }
+            },
+            result: {
+                editorConfig: {
+                    decimalPrecision: 4,
+                }
             }
             ,date: {
                 xtype: 'xdatetime',

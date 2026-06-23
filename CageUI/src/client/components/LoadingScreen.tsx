@@ -22,11 +22,12 @@ import { createPortal } from 'react-dom';
 
 interface LoadingScreenProps {
     isVisible: boolean;
+    message: string;
     targetElement?: HTMLElement | null;
 }
 
 export const LoadingScreen: FC<LoadingScreenProps> = (props) => {
-    const {isVisible, targetElement} = props;
+    const {isVisible, message, targetElement} = props;
 
     const [container, setContainer] = useState<HTMLElement | null>(null);
 
@@ -44,7 +45,7 @@ export const LoadingScreen: FC<LoadingScreenProps> = (props) => {
         <div className="loading-overlay">
             <div className="loading-content">
                 <div className="spinner"></div>
-                <p className="loading-message">Saving...</p>
+                <p className="loading-message">{message}</p>
             </div>
         </div>,
         container

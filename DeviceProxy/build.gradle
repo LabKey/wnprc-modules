@@ -24,7 +24,7 @@ dependencies {
     BuildUtils.addExternalDependency(
         project,
         new ExternalDependency(
-            "org.jooq:jooq:${jooqVersion}",
+            "org.jooq:jooq:${project.parent.ext.jooqVersion}",
             "jOOQ",
             "jOOQ.org",
             "https://www.jooq.org/",

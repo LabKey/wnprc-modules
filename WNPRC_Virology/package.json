@@ -2,48 +2,29 @@
   "name": "WNPRC_Virology",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cross-env NODE_ENV=development LK_MODULE=WNPRC_Virology webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
     "build": "npm run build-dev",
     "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
     "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
-    "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
+    "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
+    "start": "cross-env NODE_ENV=development LK_MODULE=WNPRC_Virology webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jquery": "3.5.0",
+    "@labkey/api": "1.51.5",
     "react": "18.3.1",
-    "react-bootstrap": "2.10.6",
+    "react-bootstrap": "2.10.10",
     "react-dom": "18.3.1",
-    "react-select": "5.8.3",
-    "@labkey/api": "1.35.6"
+    "react-select": "5.10.2"
   },
   "devDependencies": {
-    "@labkey/build": "8.2.0",
-    "@types/react": "18.3.12",
-    "@types/react-bootstrap": "1.0.1",
-    "@types/react-dom": "18.3.1",
-    "better-npm-run": "0.1.1"
-  },
-  "betterScripts": {
-    "build": {
-      "command": "webpack --config webpack.config.js",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "build-prod": {
-      "command": "webpack --config webpack.config.js",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    }
+    "@labkey/build": "9.1.5",
+    "@types/react": "18.3.31",
+    "@types/react-bootstrap": "1.1.0",
+    "@types/react-dom": "18.3.7"
   }
 }

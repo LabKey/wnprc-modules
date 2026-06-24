@@ -11,25 +11,23 @@
     "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
     "lint-fix": "eslint --fix --ext .tsx,.ts src/client/**"
   },
-  "moduleFileExtensions": [
-    "js",
-    "ts",
-    "tsx"
-  ],
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.4.2",
-    "@fortawesome/free-solid-svg-icons": "^6.4.2",
-    "@fortawesome/react-fontawesome": "^0.2.0",
-    "@labkey/api": "1.35.6",
-    "@labkey/components": "5.20.4",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.6",
+    "@labkey/api": "~1.51.5",
+    "@labkey/components": "~7.43.0",
     "font-awesome": "~4.7.0",
-    "immer": "~10.0.3",
-    "immutable": "~4.3.4",
+    "immer": "~10.2.0",
+    "immutable": "~3.8.3",
     "react-bootstrap": "~0.33.1"
   },
   "devDependencies": {
-    "@labkey/build": "8.2.0",
-    "@labkey/eslint-config-base": "0.0.12",
-    "@labkey/eslint-config-react": "0.0.12"
+    "@labkey/build": "9.1.5",
+    "@labkey/eslint-config": "1.2.2",
+    "uuid": "14.0.0"
+  },
+  "overrides": {
+    "uuid": "14.0.0"
   }
 }

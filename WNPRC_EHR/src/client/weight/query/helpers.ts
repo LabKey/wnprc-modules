@@ -16,7 +16,7 @@
 import {
   labkeyActionSelectWithPromise,
 } from "./actions";
-import {Filter, Utils} from "@labkey/api";
+import { Filter, Query, Utils } from '@labkey/api';
 import {
   Commands,
   ConfigProps,
@@ -27,7 +27,6 @@ import {
   TaskValuesType,
   WeightValuesType
 } from "../typings/main";
-import { CommandType } from "@labkey/api/dist/labkey/query/Rows";
 
 //TODO implement this...
 export const getSchemaMetaData = (schemaName: string, queryName: string) => {};
@@ -138,10 +137,10 @@ export const getlocations = (location:Array<any>): Array<Promise<any>> => {
 
 };
 
-export const setupJsonData = (values: DataRowsPerCommandType, QCState: string, taskId: string, reviewer: number, date: string, command: CommandType): Commands => {
+export const setupJsonData = (values: DataRowsPerCommandType, QCState: string, taskId: string, reviewer: number, date: string, command: Query.CommandType): Commands => {
   //for each grouped item (insert, update, delete), set up commands for each diff set.
   let commands: Array<ModifyRowsCommands> = [];
-  Object.keys(values).forEach(function(key: CommandType,index: number) {
+  Object.keys(values).forEach(function(key: Query.CommandType,index: number) {
     let valuesToInsert = setupWeightValues(values[key], QCState, taskId);
     commands.push({
       schemaName: "study",
@@ -160,7 +159,7 @@ export const setupJsonData = (values: DataRowsPerCommandType, QCState: string, t
   });
 
 
-  Object.keys(values).forEach(function(key: CommandType, index: number) {
+  Object.keys(values).forEach(function(key: Query.CommandType, index: number) {
     let valuesToInsert = setupRestraintValues(values[key], taskId);
     commands.push({
       schemaName: "study",

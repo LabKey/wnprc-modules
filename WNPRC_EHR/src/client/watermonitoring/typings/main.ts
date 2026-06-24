@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CommandType } from "@labkey/api/dist/labkey/query/Rows";
+import { Query } from '@labkey/api';
 
 export interface ConfigProps {
     schemaName: string;
@@ -34,7 +34,7 @@ export type DataRowsPerCommandType = {
 export interface ModifyRowsCommands {
     schemaName: string;
     queryName: string;
-    command: CommandType
+    command: Query.CommandType;
     rows: Array<any>;
 }
 

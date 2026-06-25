@@ -7,8 +7,7 @@ module.exports = {
     apps: [{
         name: 'app',
         title: 'Animal Request Form',
-        // permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
+        permissionClasses: ['org.labkey.api.security.permissions.ReadPermission'],
         path: './src/client',
-        // generateLib: true, // used by views/animalRequest.html
     }]
 };

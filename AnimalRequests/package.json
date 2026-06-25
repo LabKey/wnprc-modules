@@ -30,6 +30,10 @@
   "devDependencies": {
     "@labkey/build": "9.1.5",
     "@types/react": "18.3.31",
-    "@types/react-dom": "18.3.7"
+    "@types/react-dom": "18.3.7",
+    "uuid": "14.0.1"
+  },
+  "overrides": {
+    "uuid": "14.0.1"
   }
 }

@@ -59,10 +59,18 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         if (showCageContextMenu || showObjContextMenu) {
             return;
         }
+
+        let cancelled = false;
+        const isCancelled = () => cancelled;
+
         d3.select('#layout-svg').selectAll('*:not(#layout-border, #layout-border *)').remove();
         const layoutSvg = d3.select('#layout-svg') as d3.Selection<SVGElement, {}, HTMLElement, any>;
         contextRef.current = selectedLocalRoom;
-        addPrevRoomSvgs(userProfile,'view', selectedLocalRoom, layoutSvg,undefined, selectedLocalRoom.mods, setSelectedContextObj, contextRef);
+        addPrevRoomSvgs(userProfile,'view', selectedLocalRoom, layoutSvg,undefined, selectedLocalRoom.mods, setSelectedContextObj, contextRef, undefined, undefined, isCancelled);
+
+        return () => {
+            cancelled = true;
+        };
     }, [selectedLocalRoom.name, showCageContextMenu, showObjContextMenu]);
 
 

@@ -21,7 +21,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ActionURL } from '@labkey/api';
 import { ReactSVG } from 'react-svg';
-import { Cage, Room } from '../../../types/typings';
+import { Cage, Room, RoomObject, RoomObjectTypes } from '../../../types/typings';
 import { addPrevRoomSvgs, isRoomModifier } from '../../../utils/helpers';
 import { findCageInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
@@ -34,6 +34,7 @@ import { RoomLegend } from './RoomLegend';
 import { CagePopup } from './CagePopup';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 import { RoomObjectPopup } from './RoomObjectPopup';
+import { availRoomObjPopups } from '../../../utils/homeHelpers';
 
 interface RoomLayoutProps {
 }
@@ -197,7 +198,7 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
                     closeMenu={() => setShowCageContextMenu(false)}
                 />
             }
-            {(showObjContextMenu && isRoomModifier(userProfile)) &&
+            {(showObjContextMenu && isRoomModifier(userProfile) && availRoomObjPopups(selectedContextObj as RoomObject)) &&
                 <RoomObjectPopup
                     selectedObj={selectedContextObj}
                     closeMenu={() => setShowObjContextMenu(false)}

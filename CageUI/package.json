@@ -2,115 +2,39 @@
   "name": "cageui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
-    "build": "better-npm-run build",
-    "build-ios": "better-npm-run build-ios",
-    "start": "cross-env NODE_ENV=development LK_MODULE=CageUI webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
-    "start-ios": "cross-env NODE_ENV=development LK_MODULE=CageUI webpack-dev-server --config ios-webpack/watch.config.js",
-    "start-ios-better": "better-npm-run start-ios",
-    "build-prod": "better-npm-run build-prod",
-    "clean": "rimraf resources/web/gen && rimraf resources/views/gen"
+    "build": "npm run build-dev",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+    "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
+    "setup": "npm ci --legacy-peer-deps",
+    "start": "cross-env NODE_ENV=development LK_MODULE=CageUI serve --config node_modules/@labkey/build/webpack/watch.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Board of Regents of the University of Wisconsin System",
   "license": "Apache-2.0",
   "dependencies": {
-    "@labkey/api": "1.42.0",
+    "@labkey/api": "1.51.5",
+    "@labkey/components": "7.43.0",
     "d3": "^7.9.0",
-    "dayjs": "^1.11.8",
+    "dayjs": "^1.11.21",
     "react": "~18.3.1",
-    "react-bootstrap": "~2.10.4",
-    "react-bootstrap-typeahead": "6.3.2",
+    "react-bootstrap": "~2.10.10",
     "react-dom": "~18.3.1",
-    "react-hot-loader": "^4.13.1",
-    "react-router": "^7.13.1",
-    "react-select": "^5.10.0",
-    "react-svg": "^16.3.0",
-    "ts-loader": "^9.5.2",
-    "typescript": "^5.7.3",
-    "urijs": "^1.19.11"
+    "react-select": "^5.10.2",
+    "react-svg": "^16.4.2"
   },
   "devDependencies": {
-    "@babel/core": "7.26.7",
-    "@labkey/build": "8.6.0",
-    "@labkey/components": "6.56.2",
+    "@labkey/build": "9.1.5",
     "@types/d3": "^7.4.3",
     "@types/react": "~18.3.3",
-    "@types/react-bootstrap": "~0.32.32",
+    "@types/react-bootstrap": "~0.32.37",
     "@types/react-dom": "~18.3.0",
-    "@types/react-select": "^5.0.1",
-    "better-npm-run": "0.1.1",
-    "css-loader": "^7.1.2",
-    "style-loader": "^4.0.0",
-    "webpack": "5.104.1",
-    "webpack-cli": "6.0.1",
-    "webpack-dev-server": "5.2.1"
+    "uuid": "14.0.1"
   },
-  "betterScripts": {
-    "start": {
-      "command": "webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "start-ios": {
-      "command": "webpack serve --config ./ios-webpack/watch.config.js",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "build": {
-      "command": "webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "build-ios": {
-      "command": "webpack --config ./ios-webpack/dev.config.js --color",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "build-prod": {
-      "command": "webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
-      "env": {
-        "NODE_ENV": "production",
-        "PROD_SOURCE_MAP": "source-map"
-      }
-    }
-  },
-  "jest": {
-    "globals": {
-      "LABKEY": {}
-    },
-    "moduleFileExtensions": [
-      "tsx",
-      "ts",
-      "js"
-    ],
-    "preset": "ts-jest",
-    "setupFilesAfterEnv": [
-      "<rootDir>/test/jest.setup.ts"
-    ],
-    "testEnvironment": "jsdom",
-    "testMatch": null,
-    "testRegex": "(\\.(test|spec))\\.(ts|tsx)$",
-    "testResultsProcessor": "jest-teamcity-reporter",
-    "transform": {
-      "^.+\\.tsx?$": [
-        "ts-jest",
-        {
-          "isolatedModules": true,
-          "tsconfig": "node_modules/@labkey/build/webpack/tsconfig.json"
-        }
-      ]
-    }
+  "overrides": {
+    "uuid": "14.0.1"
   }
 }

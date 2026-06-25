@@ -16,12 +16,10 @@
  *
  */
 
-import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
 import Select from 'react-select';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Room } from '../../types/typings';
 import { Option } from '@labkey/components';
@@ -44,7 +42,7 @@ export const RoomSelectorPopup: FC<RoomSelectorPopup> = (props) => {
 
     // Fetch room, if template only fetch template rooms, otherwise fill options with {label: row.room, value: row.rowid}
     useEffect(() => {
-        const roomsConfig: SelectRowsOptions = {
+        const roomsConfig: Query.SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
             columns: ['room', 'rowid'],

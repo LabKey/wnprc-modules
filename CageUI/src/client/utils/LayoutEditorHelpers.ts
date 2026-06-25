@@ -63,7 +63,6 @@ import {
 import * as React from 'react';
 import { MutableRefObject } from 'react';
 import { Security } from '@labkey/api';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
 import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
@@ -81,7 +80,7 @@ export const extractRoomObjId = (id: string) => {
 }
 
 // Determines if the user has access to dragging the item
-export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const isDraggable = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -97,7 +96,7 @@ export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItem
 }
 
 // Determines if the user can open the items context menu
-export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const canOpenContextMenu = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -112,7 +111,7 @@ export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: R
     return false;
 }
 
-export const canPlaceObject = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const canPlaceObject = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }

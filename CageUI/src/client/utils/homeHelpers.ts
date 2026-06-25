@@ -15,7 +15,7 @@
  *  * limitations under the License.
  *
  */
-
+import { Security } from '@labkey/api';
 import {
     Cage,
     CageDirection, CageModification, CageModificationsType,
@@ -34,12 +34,9 @@ import {
     parseRoomItemNum,
     parseRoomItemType
 } from './helpers';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { ConnectedModType } from '../types/homeTypes';
-
 
 // Determines if the user has access to editing the layout
-export const canEditLayout = (user: GetUserPermissionsResponse) => {
+export const canEditLayout = (user: Security.GetUserPermissionsResponse) => {
     if(isRoomCreator(user) || isTemplateCreator(user) || isRoomModifier(user)) {
         return true;
     }

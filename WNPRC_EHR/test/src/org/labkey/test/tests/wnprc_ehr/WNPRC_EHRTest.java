@@ -4881,7 +4881,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         String selectedTimes = getLovComboValue("Time of Day:");
         Assertions.assertThat(selectedTimes)
-                .as("Time of Day lovcombo dropped its selections (Issue 7144)")
+                .as("Time of Day lovcombo dropped its selections (Issue 1266)")
                 .contains("AM").contains("Noon");
 
         log("Submit; the selected times must pass validation and reach the schedule query");

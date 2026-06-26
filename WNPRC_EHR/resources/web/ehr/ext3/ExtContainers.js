@@ -948,15 +948,13 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
             return;
         }
 
-        const cleanData = data[0][0].replace(/\s+/g, ' ').trim(); // remove extra whitespace
-
         const formattedObjData = {};
         const regex = /(\.D[A-Z0-9]+U)\s+(.*?)(?=\.\D[A-Z0-9]+U|$)/gs;
         let match;
-        while ((match = regex.exec(cleanData)) !== null) {
+        while ((match = regex.exec(data[0][0])) !== null) {
             const key = match[1];
             const value = match[2].trim();
-            const animalId = value.substring(25, 31).toLowerCase();
+            const animalId = value.substring(40, 46).toLowerCase();
             if(!formattedObjData[animalId]){
                 formattedObjData[animalId] = {};
             }
@@ -967,8 +965,8 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
 
         // CONFIGURABLE: Define where to start extracting substrings from D2U and D6U
         const headerConfig = {
-            ".D2U": 31, // "XN-10^854650000000017000 cj2795" (0-30) (31 length)
-            ".D6U": 137, // remove header plus 106 "reserved"
+            ".D2U": 46, // "XN-10^854650000000017000 cj2795" (0-30) (31 length)
+            ".D6U": 152, // remove header plus 106 "reserved"
             // Example: D2U starts with "XN-10^... cj2795", skip header, then parse fixed fields
         };
 
@@ -1062,7 +1060,6 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
              */
             const rules = {
                 WBC: 2,
-                'NRBC#': 2,
                 RBC: 2,
                 RETICULO: 2,
                 'RETIC-AB': 4,
@@ -1074,6 +1071,12 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
             for(var test in tests){
                 const decimal = (test in rules) ? rules[test] : rules['_default'];
                 const value = tests[test];
+
+                // if the test is not included in the upload, this string will contain 5 spaces. We will remove this test from the tests object
+                if(!(/\d/.test(value))){
+                    delete tests[test];
+                    continue;
+                }
 
                 const data = value.slice(0, -1);
 

@@ -21,7 +21,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { AnimalInCage, EHRCageMods } from '../types/homeTypes';
-import { CageData, CageHistoryData, CageNumber, RackData } from '../types/typings';
+import { CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
 
@@ -102,6 +102,35 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
     }
     catch (e) {
         throw new Error('Error fetching cage history data: ' + (e as Error).message);
+    }
+};
+
+export const fetchGhostCage = async (objectId: string): Promise<GhostCageData> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'ghost_cages',
+        filterArray: [Filter.create('cage_objectid', objectId, Filter.Types.EQUAL)]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if (res.rows.length === 1) {
+            return {
+                rowid: res.rows[0].rowid,
+                cageObjId: res.rows[0].cage_objectid,
+                positionId: res.rows[0].positionid,
+                rackGroup: res.rows[0].rack_group,
+                rack: 0,
+                rackObjId: res.rows[0].rack_objectid,
+                groupRotation: res.rows[0].group_rotation,
+                cage: res.rows[0].cage,
+            };
+        } else {
+            throw new Error('Error fetching ghost cage data');
+        }
+    }
+    catch (e) {
+        throw new Error('Error fetching ghost cage data: ' + (e as Error).message);
     }
 };
 

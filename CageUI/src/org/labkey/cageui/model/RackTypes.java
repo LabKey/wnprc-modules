@@ -30,7 +30,8 @@ public enum RackTypes
     CAGE(4),
     PEN(5),
     TEMPCAGE(6),
-    PLAYCAGE(7);
+    PLAYCAGE(7),
+    GHOSTCAGE(8);
 
     private final int numericValue;
 
@@ -78,6 +79,8 @@ public enum RackTypes
                 return "Temp Cage";
             case PLAYCAGE:
                 return "Play Cage";
+            case GHOSTCAGE:
+                return "Ghost Cage";
             default:
                 throw new IllegalArgumentException("Invalid status value: " + value);
         }
@@ -103,6 +106,8 @@ public enum RackTypes
                 return "tempCage";
             case PLAYCAGE:
                 return "playCage";
+            case GHOSTCAGE:
+                return "ghostCage";
             default:
                 throw new IllegalArgumentException("Invalid status value: " + value);
         }

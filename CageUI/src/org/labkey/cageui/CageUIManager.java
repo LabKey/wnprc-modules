@@ -21,14 +21,11 @@ package org.labkey.cageui;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
@@ -44,14 +41,13 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.cageui.action.AllHistoryForm;
 import org.labkey.cageui.action.BundledForms;
-import org.labkey.cageui.action.CageHistoryForm;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.CagesFormWithContext;
+import org.labkey.cageui.action.GhostCagesForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
@@ -64,6 +60,7 @@ import org.labkey.cageui.model.ModTypes;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackCondition;
 import org.labkey.cageui.model.RackGroup;
+import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
 import org.labkey.cageui.model.SessionLog;
@@ -293,6 +290,13 @@ public class CageUIManager
             throw new IllegalStateException(racksTable.getName() + " query update service");
         }
 
+        TableInfo ghostCagesTable = cageUISchema.getTable("ghost_cages");
+        QueryUpdateService ghostCagesQus = ghostCagesTable.getUpdateService();
+        if (ghostCagesQus == null)
+        {
+            throw new IllegalStateException(ghostCagesTable.getName() + " query update service");
+        }
+
         try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
         {
 
@@ -354,6 +358,11 @@ public class CageUIManager
                 racksQus.updateRows(user, container, convertToMapList(newForms.getPrevRacksForm()), null, batchErrors, null, extraContext);
             }
 
+            if (newForms.getNewGhostCagesForm() != null)
+            {
+                ghostCagesQus.insertRows(user, container, convertToMapList(newForms.getNewGhostCagesForm()), batchErrors, null, extraContext);
+            }
+
             if (batchErrors.hasErrors())
             {
                 response.put("success", false);
@@ -412,11 +421,17 @@ public class CageUIManager
         return allHistory;
     }
 
+    // If rowid = 0 then this will get the ghost rack type
     public static RackTypesForm getRackType(int rowid)
     {
         TableInfo table = CageUISchema.getInstance().getRackTypesTable();
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromString("rowid"), rowid, CompareType.EQUAL);
+        if(rowid == 0){
+            // Ghost cage type value
+            filter.addCondition(FieldKey.fromString("type"), 8, CompareType.EQUAL);
+        }else{
+            filter.addCondition(FieldKey.fromString("rowid"), rowid, CompareType.EQUAL);
+        }
         TableSelector selector = new TableSelector(table, filter, null);
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();
@@ -1024,6 +1039,7 @@ public class CageUIManager
             ArrayList<LayoutHistoryForm> layoutForms = new ArrayList<>();
             ArrayList<RacksForm> racksToInsertList = new ArrayList<>();
             ArrayList<CagesForm> cagesToInsertList = new ArrayList<>();
+            ArrayList<GhostCagesForm> ghostCagesToInsertList = new ArrayList<>();
             Map<String,Map<String, Object>> cagesExtraContextMap = new HashMap<>();
             ArrayList<RacksForm> racksToUpdateList = new ArrayList<>();
             ArrayList<CagesForm> cagesToUpdateList = new ArrayList<>();
@@ -1042,6 +1058,21 @@ public class CageUIManager
                 // Process racks in this group
                 for (Rack rack : rackGroup.getRacks())
                 {
+                    // Ghost Racks
+                    if(rack.getType().getRackType() == RackTypes.GHOSTCAGE){
+                        for (Cage cage : rack.getCages())
+                        {
+                            GhostCagesForm newGhostCage = new GhostCagesForm();
+                            newGhostCage.setCageObjectId(cage.getObjectId());
+                            newGhostCage.setPositionId(cage.getPositionId());
+                            newGhostCage.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
+                            newGhostCage.setRackObjectId(rack.getObjectId());
+                            newGhostCage.setGroupRotation(rackGroup.getRotation());
+                            newGhostCage.setCage(findLastNumberAfterDash(cage.getCageNum()));
+                            ghostCagesToInsertList.add(newGhostCage);
+                        }
+                        continue;
+                    }
                     // Check if this is a new real rack that needs to be added to racks table
                     if (rack.getIsNew() && !rack.getType().isDefault())
                     {
@@ -1203,6 +1234,7 @@ public class CageUIManager
             bundledForms.setPrevRacksForm(racksToUpdateList);
             bundledForms.setPrevCagesForm(prevCagesFormWithContext);
             bundledForms.setLayoutHistoryForm(layoutForms);
+            bundledForms.setNewGhostCagesForm(ghostCagesToInsertList);
 
             // Handle cage modifications history
             submitCageModificationsHistory(room, historyId, bundledForms);
@@ -1216,6 +1248,9 @@ public class CageUIManager
             {
                 for (Rack rack : rackGroup.getRacks())
                 {
+                    if(rack.getType().getRackType() == RackTypes.GHOSTCAGE){
+                        continue;
+                    }
                     if (rack.getCages() != null)
                     {
                         for (Cage cage : rack.getCages())

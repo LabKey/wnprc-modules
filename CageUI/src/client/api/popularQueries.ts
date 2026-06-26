@@ -100,6 +100,35 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
     }
 };
 
+export const fetchGhostCage = async (objectId: string): Promise<GhostCageData> => {
+    const config: SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'ghost_cages',
+        filterArray: [Filter.create('cage_objectid', objectId, Filter.Types.EQUAL)]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if (res.rows.length === 1) {
+            return {
+                rowid: res.rows[0].rowid,
+                cageObjId: res.rows[0].cage_objectid,
+                positionId: res.rows[0].positionid,
+                rackGroup: res.rows[0].rack_group,
+                rack: 0,
+                rackObjId: res.rows[0].rack_objectid,
+                groupRotation: res.rows[0].group_rotation,
+                cage: res.rows[0].cage,
+            };
+        } else {
+            throw new Error('Error fetching ghost cage data');
+        }
+    }
+    catch (e) {
+        throw new Error('Error fetching ghost cage data: ' + (e as Error).message);
+    }
+};
+
 export const fetchRack = async (objectId: string): Promise<RackData> => {
     const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',

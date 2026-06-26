@@ -19,26 +19,18 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="layout_history" tableDbType="TABLE">
-                <tableTitle>Layout History</tableTitle>
+            <table tableName="ghost_cages" tableDbType="TABLE">
+                <tableTitle>Ghost Cages</tableTitle>
                 <columns>
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="historyid"/>
+                    <column columnName="cage_objectid"/>
+                    <column columnName="positionid"/>
+                    <column columnName="rack_group"/>
+                    <column columnName="rack_objectid"/>
+                    <column columnName="group_rotation"/>
                     <column columnName="cage"/>
-                    <column columnName="extra_context"/>
-                    <column columnName="object_type">
-                        <datatype>integer</datatype>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_item_types</fkTable>
-                            <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumnName>title</fkDisplayColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="x_coord"/>
-                    <column columnName="y_coord"/>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

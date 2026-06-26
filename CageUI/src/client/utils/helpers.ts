@@ -35,10 +35,12 @@ import {
     FetchRoomData,
     FullCageHistory,
     FullObjectHistoryData,
+    GhostCageData,
     GroupId,
     GroupRotation,
     LayoutData,
-    LayoutHistoryData, LoadedSvgs,
+    LayoutHistoryData,
+    LoadedSvgs,
     ModData,
     ModLocations,
     ModTypes,
@@ -591,7 +593,7 @@ export const addPrevRoomSvgs = async (
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
-            .attr('id', rack.objectId)
+            .attr('id', rack.svgId)
             .attr('class', `rack type-${rackTypeString}`)
             .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');
@@ -615,6 +617,12 @@ export const addPrevRoomSvgs = async (
 
             if (mode === 'view') {
                 loadCageMods(cage, shape, groupRotation);
+                // Ghost racks have 0 item id
+                if(rack.itemId === 0){
+                    shape.select('[id=cageRect]')
+                        .style("fill", '#878787')
+                        .style("opacity", '0.7');
+                }
             }
 
             cageGroup.append(() => shape.node());
@@ -749,19 +757,24 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: FullObjectHistoryData): Promise<Rack> => {
-        let rackIdNum;
+        let rackIdNum: number;
         let rackObjectId;
         let extraContext: ExtraContext;
         let rackData = rackItem.rack as RackData;
         let rack: Rack;
         let rackCondition: RackConditions = RackConditions.Operational;
 
-        if (!prevRoom.isDefault) {
+        if(rackItem.isGhost){
+            rackIdNum = (rackItem.cage as GhostCageData).rack;
+            rackObjectId = (rackItem.cage as GhostCageData).rackObjId;
+            rackCondition = RackConditions.Operational;
+        }
+        else if (!prevRoom.isDefault) {
             rackIdNum = rackData.rackId;
             rackObjectId = rackData.objectId;
             rackCondition = rackData.condition;
         } else {
-            rackIdNum = rackItem.rack;
+            rackIdNum = rackItem.rack as number;
             rackObjectId = `default-rack-${rackIdNum}`;
         }
         rack = rackGroup.racks.find(r => rackObjectId === r.objectId);
@@ -772,7 +785,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             let typeRowId;
             const rackPrefix = prevRoom.isDefault ? 'default-rack' : 'rack';
 
-            if (!prevRoom.isDefault) {
+            if (!prevRoom.isDefault && !rackItem.isGhost) {
                 typeRowId = rackData.rackType;
             }
 
@@ -782,7 +795,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 queryName: 'rack_types',
                 columns: ['rowid', 'type', 'displayName', 'size', 'manufacturer/value', 'manufacturer/title', 'stationary'],
                 filterArray: [
-                    Filter.create(prevRoom.isDefault ? 'type' : 'rowid', prevRoom.isDefault ? rackItem.objectType : typeRowId, Filter.Types.EQUALS)
+                    Filter.create(prevRoom.isDefault || rackItem.isGhost ? 'type' : 'rowid', prevRoom.isDefault || rackItem.isGhost ? rackItem.objectType : typeRowId, Filter.Types.EQUALS)
                 ]
             };
 
@@ -832,14 +845,22 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         let extraContext: ExtraContext;
         let cageHistoryData = (rackItem.cage as FullCageHistory)?.cageHistory;
         let cageData = (rackItem.cage as FullCageHistory)?.cageData;
+        let ghostCageData = (rackItem.cage as GhostCageData);
         let cageObjId: string;
         let cageNum;
         let cagePositionId;
         if (!prevRoom.isDefault) {
-            cageNum = cageHistoryData.cageNum;
-            cageObjId = cageHistoryData.cage;
-            cagePositionId = cageData.positionId;
-            cageNumType = roomItemToString(rackItem.objectType);
+            if(rackItem.objectType === RackTypes.GhostCage){
+                cageNum = ghostCageData.cage;
+                cageObjId = ghostCageData.cageObjId;
+                cagePositionId = ghostCageData.positionId;
+                cageNumType = roomItemToString(rackItem.objectType);
+            }else{
+                cageNum = cageHistoryData.cageNum;
+                cageObjId = cageHistoryData.cage;
+                cagePositionId = cageData.positionId;
+                cageNumType = roomItemToString(rackItem.objectType);
+            }
         } else {
             cageNum = rackItem.cage;
             cageObjId = generateUUID();
@@ -854,7 +875,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         const svgSize = await getSvgSize(rack.type.type);
 
         // This is where mods are loaded into state for the room
-        if (loadMods && !rack.type.isDefault) {
+        if (loadMods && !rack.type.isDefault && rack.type.type !== RackTypes.GhostCage) {
             cageMods = {
                 [ModLocations.Top]: [],
                 [ModLocations.Bottom]: [],

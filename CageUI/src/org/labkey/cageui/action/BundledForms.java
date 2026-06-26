@@ -35,6 +35,7 @@ public class BundledForms
     ArrayList<RacksForm> _prevRacksForm;
     CagesFormWithContext _newCagesForm;
     CagesFormWithContext _prevCagesForm;
+    ArrayList<GhostCagesForm> _newGhostCagesForm;
 
     public AllHistoryForm getNewAllHistoryForm()
     {
@@ -155,4 +156,15 @@ public class BundledForms
     {
         _ehrRoomsForm = ehrRoomsForm;
     }
+
+    public ArrayList<GhostCagesForm>getNewGhostCagesForm()
+    {
+        return _newGhostCagesForm;
+    }
+
+    public void setNewGhostCagesForm(ArrayList<GhostCagesForm> newGhostCagesForm)
+    {
+        _newGhostCagesForm = newGhostCagesForm;
+    }
+
 }

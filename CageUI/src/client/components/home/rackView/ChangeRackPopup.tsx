@@ -28,6 +28,7 @@ import { RackSwitchOption } from '../../../types/homeTypes';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LoadingScreen } from '../../LoadingScreen';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { generateUUID } from '../../../utils/helpers';
 
 interface ChangeRackPopupProps {
     showChangeRackPopup: React.Dispatch<React.SetStateAction<boolean>>;
@@ -89,7 +90,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
         };
         labkeyActionSelectWithPromise(racksConfig).then((racksResult) => {
             if (racksResult.rowCount > 0) {
-                const options = racksResult.rows.reduce((acc, row) => {
+                let options = racksResult.rows.reduce((acc, row) => {
                     acc.push({
                         value: {
                             objectId: row.objectid,
@@ -100,6 +101,15 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                     });
                     return acc;
                 }, [] as RackSwitchOption[]);
+                const ghostCageOption: RackSwitchOption = {
+                    value: {
+                        objectId: generateUUID(),
+                        rackId: 0,
+                        typeRowId: 0
+                    },
+                    label: "Ghost Rack"
+                }
+                options = [ghostCageOption, ...options];
                 setRackOptions(options);
             }
         });
@@ -149,7 +159,6 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                 'home',
                 ActionURL.getContainer(),
                 {room: res.roomName, rack: res.rack});
-
             } else {
                 setIsSaving(false);
                 if (res?.reason) {

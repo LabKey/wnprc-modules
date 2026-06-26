@@ -17,25 +17,28 @@
  */
 
 import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import '../../cageui.scss';
 import { Room } from '../../types/typings';
 import { ExpandedRooms, ListCage, ListRack, ListRoom } from '../../types/homeTypes';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 import { useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
-import { Filter } from '@labkey/api';
+import { ActionURL, Filter } from '@labkey/api';
 
 export const RoomList: FC = () => {
-    const {navigateTo} = useHomeNavigationContext();
+    const {navigateTo, selectedPage, setIsNavLoading} = useHomeNavigationContext();
     // keeps track of which rooms have already been fetched from layout_history
     const [expandedRooms, setExpandedRooms] = useState<ExpandedRooms>({});
-    const [expandedRacks, setExpandedRacks] = useState<ListRack[]>([]);
+    const [expandedRacks, setExpandedRacks] = useState<Record<string, boolean>>({});
 
     const [allRooms, setAllRooms] = useState<ListRoom[]>([]); // Stores all items fetched on load
     const [visibleRooms, setVisibleRooms] = useState<ListRoom[]>([]); // Items currently visible
 
     const [searchQuery, setSearchQuery] = useState('');
+
+    const roomRefs = useRef<Record<string, HTMLDivElement>>({});
+    const listContainerRef = useRef<HTMLUListElement>(null);
 
     const handleSearch = (e) => {
         setSearchQuery(e.target.value);
@@ -120,6 +123,18 @@ export const RoomList: FC = () => {
                                 });
                             });
                         });
+
+                        // Sort cages within each rack and then sort racks by their first cage
+                        tempRacks.forEach((rack) => {
+                            rack.cages.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+                        });
+                        tempRacks.sort((a, b) => {
+                            if (a.cages.length > 0 && b.cages.length > 0) {
+                                return a.cages[0].name.localeCompare(b.cages[0].name, undefined, { numeric: true });
+                            }
+                            return 0;
+                        });
+
                         return {
                             ...prevRoom,
                             racks: tempRacks,
@@ -144,15 +159,63 @@ export const RoomList: FC = () => {
         }));
     };
 
+    // Auto-expand and scroll based on URL parameters
+    useEffect(() => {
+        const roomName = ActionURL.getParameter("room");
+        const rackId = ActionURL.getParameter("rack");
+
+        if (roomName) {
+            if (!expandedRooms[roomName]) {
+                toggleExpandRoom(roomName);
+            }
+
+            if (rackId) {
+                const rackKey = `${roomName}_${rackId}`;
+                if (!expandedRacks[rackKey]) {
+                    setExpandedRacks(prev => ({
+                        ...prev,
+                        [rackKey]: true
+                    }));
+                }
+            }
+
+            // Scroll room into view
+            if (roomRefs.current[roomName] && listContainerRef.current) {
+                const container = listContainerRef.current;
+                const element = roomRefs.current[roomName];
+
+                // Use a short timeout to ensure the DOM has updated (expanded) before we calculate the offset
+                setTimeout(() => {
+                    if (element && container) {
+                        const containerRect = container.getBoundingClientRect();
+                        const elementRect = element.getBoundingClientRect();
+                        // elementRect.top is the distance from viewport top to element top
+                        // containerRect.top is the distance from viewport top to container top
+                        // relativeTop is the distance from container top to element top within the scrollable area
+                        const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+
+                        container.scrollTo({
+                            top: relativeTop,
+                            behavior: 'auto'
+                        });
+                    }
+                }, 100);
+            }
+        }
+    }, [selectedPage, allRooms, visibleRooms]);
+
     const handleRoomClick = (room: ListRoom) => {
+        setIsNavLoading(true);
         navigateTo({selected: 'Room', room: room.name})
     };
 
     const handleRackClick = (room: ListRoom, rack: ListRack) => {
+        setIsNavLoading(true);
         navigateTo({selected: 'Rack', room: room.name, rack: rack.id});
     };
 
     const handleCageClick = (room: ListRoom, rack: ListRack, cage: ListCage) => {
+        setIsNavLoading(true);
         navigateTo({selected: 'Cage', room: room.name, rack: rack.id, cage: cage.id});
     };
 
@@ -165,25 +228,35 @@ export const RoomList: FC = () => {
                 className={'room-search'}
                 onChange={handleSearch}
             />
-            <ul className={'room-list-items'}>
+            <ul className={'room-list-items'} ref={listContainerRef}>
                 {visibleRooms.map((room, index) => (
-                    <div key={room.name} className={'room-dir-room-obj'}>
-                        <div
-                            onClick={() => handleRoomClick(room)}
-                            className={`room-dir-header ${expandedRooms[room.name] ? 'open' : ''}`}
-                        >
-                            {room.name}
+                    <div
+                        key={room.name}
+                        className={'room-dir-room-obj'}
+                        ref={(el) => {
+                            if (el) roomRefs.current[room.name] = el;
+                        }}
+                    >
+                        <div className={`room-dir-header-container ${expandedRooms[room.name] ? 'open' : ''}`}>
+                            <div
+                                onClick={() => handleRoomClick(room)}
+                                className={`room-dir-header`}
+                            >
+                                {room.name}
+                            </div>
                             <span className="arrow" onClick={() => toggleExpandRoom(room.name)}></span>
                         </div>
                         {expandedRooms[room.name] && (
                             <ul>
                                 {room?.racks?.map((rack) => (
                                     <li key={`${room.name}_${rack.id}`}>
-                                        <div
-                                            onClick={() => handleRackClick(room, rack)}
-                                            className={`room-dir-rack-obj ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}
-                                        >
-                                            {rack.name}
+                                        <div className={`room-dir-rack-obj-container ${expandedRacks[`${room.name}_${rack.id}`] ? 'open' : ''}`}>
+                                            <div
+                                                onClick={() => handleRackClick(room, rack)}
+                                                className={`room-dir-rack-obj`}
+                                            >
+                                                {rack.name}
+                                            </div>
                                             <span className="arrow"
                                                   onClick={() => toggleExpandRack(room.name, rack.id)}></span>
                                         </div>

@@ -283,6 +283,13 @@
             queryName: 'cageui_rack_manufacturers',
             module: 'wnprc_ehr',
             pk: 'value'
+        },{
+            label: 'SVG URLS Field Values',
+            populateFn: 'populateFromFile',
+            schemaName: 'ehr_lookups',
+            queryName: 'cageui_svg_urls',
+            module: 'wnprc_ehr',
+            pk: 'value'
         }];
 
         tables.sort(function(a, b) {

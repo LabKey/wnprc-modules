@@ -58,6 +58,8 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
     const [selectedRack, setSelectedRack] = useState<Rack>(null);
     const [selectedCage, setSelectedCage] = useState<Cage>(null);
 
+    const [isNavLoading, setIsNavLoading] = useState<boolean>(false);
+
     useEffect(() => {
         setSelectedLocalRoom(selectedRoom);
     }, [selectedRoom]);
@@ -122,11 +124,14 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
                 setSelectedRackGroup(null);
                 setSelectedRack(null);
                 setSelectedCage(null);
+                setIsNavLoading(false);
                 break;
 
             case 'Room':
                 if (page.room) {
-                    loadRoomData(page.room);
+                    loadRoomData(page.room).then((newRoom) => {
+                        setIsNavLoading(false);
+                    });
                 }
                 break;
 
@@ -138,11 +143,13 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
                             const { rack: currRack, rackGroup: currGroup } = findRackInGroup(page.rack, newRoom?.rackGroups || []);
                             setSelectedRack(currRack);
                             setSelectedRackGroup(currGroup);
+                            setIsNavLoading(false);
                         });
                     } else {
                         const { rack: currRack, rackGroup: currGroup } = findRackInGroup(page.rack, selectedRoom?.rackGroups || []);
                         setSelectedRack(currRack);
                         setSelectedRackGroup(currGroup);
+                        setIsNavLoading(false);
                     }
                 }
                 break;
@@ -160,6 +167,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
                             setSelectedRackGroup(currGroup);
                             setSelectedRack(currRack);
                             setSelectedCage(currCage);
+                            setIsNavLoading(false);
                         });
                     } else {
                         const {
@@ -170,6 +178,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
                         setSelectedRackGroup(currGroup);
                         setSelectedRack(currRack);
                         setSelectedCage(currCage);
+                        setIsNavLoading(false);
                     }
                 }
                 break;
@@ -232,6 +241,8 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
             navigateTo,
             setSelectedLocalRoom,
             userProfile,
+            isNavLoading,
+            setIsNavLoading
         }}>
             {children}
         </HomeNavigationContext.Provider>

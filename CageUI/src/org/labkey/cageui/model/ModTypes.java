@@ -31,6 +31,7 @@ public enum ModTypes
     PCDivider("pcd"),
     VCDivider("vcd"),
     PrivacyDivider("pd"),
+    LockedDivider("ld"),
     NoDivider("nd"),
     CTunnel("ct"),
     Extension("ex"),

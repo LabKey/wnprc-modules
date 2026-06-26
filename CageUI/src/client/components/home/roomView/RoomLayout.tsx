@@ -122,8 +122,12 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
 
     return (
         <div className={'room-layout'} id={'room-layout-container'}>
-            {isSaving && <LoadingScreen isVisible={isSaving}
-                                        targetElement={document.getElementById('room-layout-container')}
+            {isSaving &&
+                <LoadingScreen
+                    isVisible={isSaving}
+                    message={"Saving..."}
+                    targetElement={document.getElementById('room-layout-container')
+                }
             />}
             <div className={'room-layout-toolbar'}>
                 {showChangesMenu &&

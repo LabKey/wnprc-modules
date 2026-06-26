@@ -33,4 +33,6 @@ export interface HomeNavigationContextType {
     selectedCage: Cage;
     navigateTo: (page: SelectedPage) => void;
     userProfile: GetUserPermissionsResponse;
+    setIsNavLoading: React.Dispatch<SetStateAction<boolean>>;
+    isNavLoading: boolean;
 }

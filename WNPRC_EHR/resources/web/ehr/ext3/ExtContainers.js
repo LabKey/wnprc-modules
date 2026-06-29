@@ -951,15 +951,44 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
         const formattedObjData = {};
         const regex = /(\.D[A-Z0-9]+U)\s+(.*?)(?=\.\D[A-Z0-9]+U|$)/gs;
         let match;
+        let currentAnimal = null;
+
         while ((match = regex.exec(data[0][0])) !== null) {
             const key = match[1];
             const value = match[2].trim();
+            // Extract animalId from the value
             const animalId = value.substring(40, 46).toLowerCase();
-            if(!formattedObjData[animalId]){
-                formattedObjData[animalId] = {};
+
+            // Ensure the array for this animal exists and has at least one object
+            if (!formattedObjData[animalId]) {
+                formattedObjData[animalId] = [{}];
             }
-            formattedObjData[animalId][key] = value;
+
+            let currentTestArray = formattedObjData[animalId];
+            let currentTest = currentTestArray[currentTestArray.length - 1];
+
+            // Determine if we need to start a new test iteration.
+            // We only push a new object if the current one is already populated.
+            if (Object.keys(currentTest).length > 0) {
+                if (currentTest[key] !== undefined ||
+                        (currentAnimal !== null && currentAnimal !== animalId) ||
+                        Object.keys(currentTest).length >= 17) {
+
+                    currentTest = {};
+                    currentTestArray.push(currentTest);
+                }
+            }
+
+            // Add the key-value pair to the current test object
+            currentTest[key] = value;
+
+            // Update currentAnimal for the next iteration's comparison
+            currentAnimal = animalId;
         }
+
+        console.log("Formatted Data: ", formattedObjData);
+
+        console.log("Formatted Data: ", formattedObjData);
         const skippedRows = [];
         const toAdd = [];
 
@@ -971,160 +1000,162 @@ EHR.ext.HematologyExcelWin = Ext.extend(Ext.Panel, {
         };
 
         Object.entries(formattedObjData).forEach(([animalId, rawTests]) => {
-            if (!rawTests[".D2U"] || !rawTests[".D6U"]) {
-                alert("Failed to parse formatted data (missing .D1U/.D2U...) for ", animalId);
-                return;
-            }
-            const d2uRaw = rawTests[".D2U"];
-            const d6uRaw = rawTests[".D6U"];
-            // Remove headers
+            rawTests.forEach(rawTest => {
+                if (!rawTest[".D2U"] || !rawTest[".D6U"]) {
+                    alert("Failed to parse formatted data (missing .D1U/.D2U...) for ", animalId);
+                    return;
+                }
+                const d2uRaw = rawTest[".D2U"];
+                const d6uRaw = rawTest[".D6U"];
+                // Remove headers
 
-            const d2u = d2uRaw.slice(headerConfig[".D2U"]);
-            const d6u = d6uRaw.slice(headerConfig[".D6U"]);
+                const d2u = d2uRaw.slice(headerConfig[".D2U"]);
+                const d6u = d6uRaw.slice(headerConfig[".D6U"]);
 
-            /* These tests were based on the standard definitions revision 7 and 12. The ones initially provided (revision 12) seems to be incorrect given
-        * our current output. To best understand this data refer to revision 7.
-        */
-
-            /*
-                "Reserved" Definition: “0”s or " "(space) are set to this parameter to fill the specified number of characters.
-                Reserved should be "0" characters but this doesn't seem to be the actual case, it looks like it is a mix
-                of "0" and " " (space). Because of this it can cause issues with CoolTerm because CoolTerm trims whitespace,
-                which is needed to correctly guess some values.
+                /* These tests were based on the standard definitions revision 7 and 12. The ones initially provided (revision 12) seems to be incorrect given
+            * our current output. To best understand this data refer to revision 7.
             */
 
-            const tests = {
-                WBC:         d2u.substring(0, 6),
-                RBC:         d2u.substring(6, 11),
-                HGB:         d2u.substring(11, 16),
-                HCT:         d2u.substring(16, 21),
-                MCV:         d2u.substring(21, 26),
-                MCH:         d2u.substring(26, 31),
-                MCHC:        d2u.substring(31, 36),
-                PLT:         d2u.substring(36, 41),
-                LY:          d2u.substring(41, 46),
-                MN:          d2u.substring(46, 51),
-                NE:          d2u.substring(51, 56),
-                EO:          d2u.substring(56, 61),
-                BS:          d2u.substring(61, 66),
-                "RDW-CV":    d2u.substring(95, 101),
-                "RDW-SD":    d2u.substring(101, 106),
-                MPV:         d2u.substring(106, 111),
-                RETICULO:    d2u.substring(121, 126),
-                IRF:         d2u.substring(131, 136),
-                NRBC:        d2u.substring(157, 162),
-                'RETIC-AB':  d2u.substring(179, 185),
-                'RETIC HGB': d2u.substring(185, 190),
-                IPF:         d2u.substring(190, 195),
-                // Start D6U Tests
-                PDW:         d6u.substring(0, 5),
-                "P-LCR":     d6u.substring(10, 15),
-                LFR:         d6u.substring(30, 35),
-                MFR:         d6u.substring(35, 40),
-                HFR:         d6u.substring(40, 45),
-                PCT:         d6u.substring(45, 50),
-            };
+                /*
+                    "Reserved" Definition: “0”s or " "(space) are set to this parameter to fill the specified number of characters.
+                    Reserved should be "0" characters but this doesn't seem to be the actual case, it looks like it is a mix
+                    of "0" and " " (space). Because of this it can cause issues with CoolTerm because CoolTerm trims whitespace,
+                    which is needed to correctly guess some values.
+                */
 
-            // Lookup run record
-            const requestNumber = runsStore.find('Id', animalId);
-            const record = runsStore.getAt(requestNumber);
-            let collectionDate;
-            //Getting the collection time from the request itself, if it matches animalId
-            if(requestNumber !== -1 && animalId === record.get('Id')){
+                const tests = {
+                    WBC:         d2u.substring(0, 6),
+                    RBC:         d2u.substring(6, 11),
+                    HGB:         d2u.substring(11, 16),
+                    HCT:         d2u.substring(16, 21),
+                    MCV:         d2u.substring(21, 26),
+                    MCH:         d2u.substring(26, 31),
+                    MCHC:        d2u.substring(31, 36),
+                    PLT:         d2u.substring(36, 41),
+                    LY:          d2u.substring(41, 46),
+                    MN:          d2u.substring(46, 51),
+                    NE:          d2u.substring(51, 56),
+                    EO:          d2u.substring(56, 61),
+                    BS:          d2u.substring(61, 66),
+                    "RDW-CV":    d2u.substring(95, 101),
+                    "RDW-SD":    d2u.substring(101, 106),
+                    MPV:         d2u.substring(111, 116),
+                    RETICULO:    d2u.substring(121, 126),
+                    IRF:         d2u.substring(131, 136),
+                    NRBC:        d2u.substring(157, 162),
+                    'RETIC-AB':  d2u.substring(179, 185),
+                    'RETIC HGB': d2u.substring(185, 190),
+                    IPF:         d2u.substring(190, 195),
+                    // Start D6U Tests
+                    PDW:         d6u.substring(0, 5),
+                    "P-LCR":     d6u.substring(10, 15),
+                    LFR:         d6u.substring(30, 35),
+                    MFR:         d6u.substring(35, 40),
+                    HFR:         d6u.substring(40, 45),
+                    PCT:         d6u.substring(45, 50),
+                };
 
-                collectionDate = record.get('date');
-            }
+                // Lookup run record
+                const requestNumber = runsStore.find('Id', animalId);
+                const record = runsStore.getAt(requestNumber);
+                let collectionDate;
+                //Getting the collection time from the request itself, if it matches animalId
+                if(requestNumber !== -1 && animalId === record.get('Id')){
 
-            if(!animalId || runsStore.find('Id', animalId)===-1){
-                //alert('ID: '+result.animalId+' not found in Clinpath Runs section. Records will not be added');
-                skippedRows.push('Not found in Clinpath Runs: ' + animalId);
-                console.log("Skip Row", animalId);
-                return;
-            }
-
-            const result = {
-                animalId,
-                date: new Date(collectionDate),
-            };
-
-
-            /*
-                Rules: Define the test and how many digits from the right the decimal should appear in the string.
-                It does not matter how many initial digits are in the string (WBC has 6 while RBC has 5).
-                The majority of tests are 1 decimal, so that is the default. If the test does not exist within rules
-                specifically it will use the default.
-                Ex.
-                Rule: 2
-                RBC: 000.00
-                WBRC: 0000.00
-             */
-            const rules = {
-                WBC: 2,
-                RBC: 2,
-                RETICULO: 2,
-                'RETIC-AB': 4,
-                PLT: 0,
-                PCT: 2,
-                _default: 1
-            };
-
-            for(var test in tests){
-                const decimal = (test in rules) ? rules[test] : rules['_default'];
-                const value = tests[test];
-
-                // if the test is not included in the upload, this string will contain 5 spaces. We will remove this test from the tests object
-                if(!(/\d/.test(value))){
-                    delete tests[test];
-                    continue;
+                    collectionDate = record.get('date');
                 }
 
-                const data = value.slice(0, -1);
+                if(!animalId || runsStore.find('Id', animalId)===-1){
+                    //alert('ID: '+result.animalId+' not found in Clinpath Runs section. Records will not be added');
+                    skippedRows.push('Not found in Clinpath Runs: ' + animalId);
+                    console.log("Skip Row", animalId);
+                    return;
+                }
 
-                const number = parseInt(data);
+                const result = {
+                    animalId,
+                    date: new Date(collectionDate),
+                };
 
-                // Convert to string to easily manipulate decimal placement
-                let numberStr = number.toString();
 
-                // If decimal is 0, no decimal point needed
-                if (decimal === 0) {
-                    tests[test] = number;
-                } else {
-                    // If we need to add a decimal point
-                    if (numberStr.length <= decimal) {
-                        // If number is shorter than decimal places, pad with zeros
-                        numberStr = '0'.repeat(decimal - numberStr.length) + numberStr;
-                        tests[test] = parseFloat('0.' + numberStr);
-                    } else {
-                        // Insert decimal point at the correct position from the right
-                        const decimalIndex = numberStr.length - decimal;
-                        const formatted = numberStr.slice(0, decimalIndex) + '.' + numberStr.slice(decimalIndex);
-                        tests[test] = parseFloat(formatted);
+                /*
+                    Rules: Define the test and how many digits from the right the decimal should appear in the string.
+                    It does not matter how many initial digits are in the string (WBC has 6 while RBC has 5).
+                    The majority of tests are 1 decimal, so that is the default. If the test does not exist within rules
+                    specifically it will use the default.
+                    Ex.
+                    Rule: 2
+                    RBC: 000.00
+                    WBRC: 0000.00
+                 */
+                const rules = {
+                    WBC: 2,
+                    RBC: 2,
+                    RETICULO: 2,
+                    'RETIC-AB': 4,
+                    PLT: 0,
+                    PCT: 2,
+                    _default: 1
+                };
+
+                for(var test in tests){
+                    const decimal = (test in rules) ? rules[test] : rules['_default'];
+                    const value = tests[test];
+
+                    // if the test is not included in the upload, this string will contain 5 spaces. We will remove this test from the tests object
+                    if(!(/\d/.test(value))){
+                        delete tests[test];
+                        continue;
                     }
-                }
 
-                //find units
-                var idx = unitStore.find('testid', test);
-                var units = null;
-                var sortOrder = null;
-                if(idx !== -1){
-                    units = unitStore.getAt(idx).get('units');
-                    sortOrder = unitStore.getAt(idx).get('sort_order');
-                }
+                    const data = value.slice(0, -1);
 
-                if(tests[test] && isNaN(tests[test])){
-                    skippedRows.push('Invalid Result for: '+result.animalId+', TestId: '+test+', '+tests[test]);
-                    tests[test] = null;
-                }
+                    const number = parseInt(data);
 
-                toAdd.push({
-                    Id: result.animalId,
-                    date: result.date,
-                    testid: test,
-                    result: tests[test],
-                    units: units,
-                    sortOrder: sortOrder
-                });
-            }
+                    // Convert to string to easily manipulate decimal placement
+                    let numberStr = number.toString();
+
+                    // If decimal is 0, no decimal point needed
+                    if (decimal === 0) {
+                        tests[test] = number;
+                    } else {
+                        // If we need to add a decimal point
+                        if (numberStr.length <= decimal) {
+                            // If number is shorter than decimal places, pad with zeros
+                            numberStr = '0'.repeat(decimal - numberStr.length) + numberStr;
+                            tests[test] = parseFloat('0.' + numberStr);
+                        } else {
+                            // Insert decimal point at the correct position from the right
+                            const decimalIndex = numberStr.length - decimal;
+                            const formatted = numberStr.slice(0, decimalIndex) + '.' + numberStr.slice(decimalIndex);
+                            tests[test] = parseFloat(formatted);
+                        }
+                    }
+
+                    //find units
+                    var idx = unitStore.find('testid', test);
+                    var units = null;
+                    var sortOrder = null;
+                    if(idx !== -1){
+                        units = unitStore.getAt(idx).get('units');
+                        sortOrder = unitStore.getAt(idx).get('sort_order');
+                    }
+
+                    if(tests[test] && isNaN(tests[test])){
+                        skippedRows.push('Invalid Result for: '+result.animalId+', TestId: '+test+', '+tests[test]);
+                        tests[test] = null;
+                    }
+
+                    toAdd.push({
+                        Id: result.animalId,
+                        date: result.date,
+                        testid: test,
+                        result: tests[test],
+                        units: units,
+                        sortOrder: sortOrder
+                    });
+                }
+            })
         });
 
         if(toAdd.length){

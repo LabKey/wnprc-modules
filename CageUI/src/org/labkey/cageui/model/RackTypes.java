@@ -113,4 +113,31 @@ public enum RackTypes
         }
     }
 
+    public boolean isGhost()
+    {
+        return this == GHOSTCAGE;
+    }
+
+    public RackTypes getBaseType()
+    {
+        switch (this)
+        {
+            case DEFAULTCAGE:
+            case CAGE:
+            case GHOSTCAGE:
+                return CAGE;
+            case DEFAULTPEN:
+            case PEN:
+                return PEN;
+            case DEFAULTTEMPCAGE:
+            case TEMPCAGE:
+                return TEMPCAGE;
+            case DEFAULTPLAYCAGE:
+            case PLAYCAGE:
+                return PLAYCAGE;
+            default:
+                return this;
+        }
+    }
+
 }

@@ -81,6 +81,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class CageUIManager
 {
@@ -547,6 +549,11 @@ public class CageUIManager
         newRoom.setLayoutData(originalRoom.getLayoutData());
         newRoom.setMods(originalRoom.getMods());
 
+        RackTypes baseType = null;
+        boolean isNewRackGhost = newRack.getType().getRackType().isGhost();
+        int cagesToRemoveCount = 0;
+        boolean foundRack = false;
+
         // Copy rack groups with racks
         if (originalRoom.getRackGroups() != null) {
             List<RackGroup> newRackGroups = new ArrayList<>();
@@ -566,8 +573,33 @@ public class CageUIManager
                         if (originalRack != null && prevRackObjectId.equals(originalRack.getObjectId())) {
                             // Replace the specific rack
                             newRacks.add(newRack);
+                            foundRack = true;
+
+                            RackTypes oldType = originalRack.getType().getRackType();
+                            RackTypes newType = newRack.getType().getRackType();
+                            baseType = oldType.getBaseType();
+
+                            boolean wasOriginalRackGhost = oldType.isGhost();
+
+                            if (!wasOriginalRackGhost && isNewRackGhost) {
+                                // Transition from real to ghost - subsequent cages need to be decremented
+                                cagesToRemoveCount = originalRack.getCages() != null ? originalRack.getCages().size() : 0;
+                            } else if (wasOriginalRackGhost && !isNewRackGhost) {
+                                // Transition from ghost to real - subsequent cages need to be incremented
+                                cagesToRemoveCount = -(newRack.getCages() != null ? newRack.getCages().size() : 0);
+                            }
                         } else {
                             // Keep the original rack
+                            if (foundRack && cagesToRemoveCount != 0 && originalRack != null && !originalRack.getType().getRackType().isGhost()) {
+                                // Update cage numbers for subsequent real racks of the same base type
+                                if (originalRack.getType().getRackType().getBaseType() == baseType && originalRack.getCages() != null) {
+                                    for (Cage cage : originalRack.getCages()) {
+                                        int currentCageNum = findLastNumberAfterDash(cage.getCageNum());
+                                        String prefix = cage.getCageNum().substring(0, cage.getCageNum().lastIndexOf('-') + 1);
+                                        cage.setCageNum(prefix + (currentCageNum - cagesToRemoveCount));
+                                    }
+                                }
+                            }
                             newRacks.add(originalRack);
                         }
                     }

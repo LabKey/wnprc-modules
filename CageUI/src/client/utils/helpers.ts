@@ -591,6 +591,8 @@ export const addPrevRoomSvgs = async (
     // this function renders the actual visible svg in some groups
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack, groupRotation: GroupRotation) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
+        // Ghost racks have 0 item id
+        const isGhostRack = rack.itemId === 0;
 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
             .attr('id', rack.svgId)
@@ -612,13 +614,13 @@ export const addPrevRoomSvgs = async (
             shape.classed('draggable', false);
             shape.style('pointer-events', 'none');
 
-            // in order to set the event pass in the context menu ref and styles to show/hide it
-            (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+            if(!isGhostRack){
+                (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+            }
 
             if (mode === 'view') {
                 loadCageMods(cage, shape, groupRotation);
-                // Ghost racks have 0 item id
-                if(rack.itemId === 0){
+                if(isGhostRack){
                     shape.select('[id=cageRect]')
                         .style("fill", '#878787')
                         .style("opacity", '0.7');
@@ -626,9 +628,13 @@ export const addPrevRoomSvgs = async (
             }
 
             cageGroup.append(() => shape.node());
-            // attach context menu if user has permissions for cages
-            if(canOpenContextMenu(user, rack.type.type)){
-                setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
+            // Dont attach menus to ghost racks
+            if(!isGhostRack){
+                // attach context menu if user has permissions for cages
+                if(canOpenContextMenu(user, rack.type.type)){
+                    // in order to set the event pass in the context menu ref and styles to show/hide it
+                    setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
+                }
             }
 
         });

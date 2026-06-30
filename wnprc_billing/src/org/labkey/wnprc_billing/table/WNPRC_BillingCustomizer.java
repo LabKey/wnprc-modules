@@ -95,6 +95,8 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
                     " THEN 'Yes'" +
                     " WHEN " +  ExprColumn.STR_TABLE_ALIAS + ".name  = 'Special Animal Per Diem'" +
                     " THEN 'Yes'" +
+                    " WHEN " +  ExprColumn.STR_TABLE_ALIAS + ".name  = 'BSL3 Per diems'" +
+                    " THEN 'Yes'" +
                     " ELSE ''" +
                     " END)" +
                     ")";

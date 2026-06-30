@@ -25,7 +25,7 @@ ON (
 )
 
 WHERE
-b.testId IN ('NE', 'LY', 'MN', 'EO', 'BS', 'BANDS', 'METAMYELO', 'MYELO', 'TP', 'RETICULO', 'PRO MYELO', 'ATYP', 'OTHER')
+b.testId IN ('NE', 'LY', 'MN', 'EO', 'BS', 'BANDS', 'METAMYELO', 'MYELO', 'TP', 'RETICULO', 'PRO MYELO', 'ATYP', 'OTHER', 'NRBC')
 and b.qcstate.publicdata = true
 and b2.qcstate.publicdata = true
 and b2.id is not null

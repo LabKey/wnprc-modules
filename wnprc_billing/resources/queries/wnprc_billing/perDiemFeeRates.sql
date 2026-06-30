@@ -59,3 +59,4 @@
   LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId) pdr
   WHERE (pdr.item = 'Per diems' AND pdr.project.projectType IS NULL) --Excluding research projects from reduce perDiem
      OR (pdr.item = 'Special Animal Per Diem' AND pdr.project.projectType = 'Marmoset U24')  --Only assigning reduce perDiem to U24 projects
+     OR (pdr.item = 'BSL3 Per diems' AND pdr.project.projectType = 'BSL3')

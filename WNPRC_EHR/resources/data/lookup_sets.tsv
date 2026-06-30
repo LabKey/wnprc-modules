@@ -14,7 +14,7 @@ blood_billed_by	Blood Billed By Field Values	value	title
 blood_code_prefixes	Blood Code Prefix Field Values	value
 cageui_item_types	Room Item Type Field Values	value
 cageui_rack_manufacturers	Rack Manufacturer Field Values	value
-cageui_svg_urls SVG URLS Field Values    value
+cageui_svg_urls	SVG URLS Field Values	value
 chemistry_method	Chemistry Method Field Values	value
 chow_types	Chow Types Field Values	value	
 clinpath_collection_method	Clinpath Collection Method Field Values	value	

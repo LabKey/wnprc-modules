@@ -18,7 +18,6 @@
 
 import { GateContext } from './layoutEditorTypes';
 import { ConnectedCages, ConnectedModType, ConnectedRacks, EHRCageMods } from './homeTypes';
-import { Option } from '@labkey/components';
 import { SelectorOptions } from '../components/layoutEditor/RoomSizeSelector';
 
 /*
@@ -206,6 +205,7 @@ export interface Cage {
     x: number; // x coordinate of cage in rack coordinate plane
     y: number; // y coordinate of cage in rack coordinate plane
     size: number; // length in cells of cage square of svg image
+    animals?: AnimalInCage[]; // animal ids in current cage
     extraContext?: { [key: string]: any }; // extra context if needed for cage
     mods?: CageModificationsType;
 }
@@ -332,6 +332,10 @@ export interface AllHistoryData {
     endDate: number;
 }
 
+export interface AnimalInCage {
+    id: string;
+}
+
 export interface FullObjectHistoryData {
     isGhost: boolean;
     objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
@@ -341,6 +345,7 @@ export interface FullObjectHistoryData {
     // objectid of rack in racks table
     rack?: RackData | number;
     cage?: FullCageHistory | GhostCageData | number;
+    animals?: AnimalInCage[];
     xCoord: number;
     yCoord: number;
 }

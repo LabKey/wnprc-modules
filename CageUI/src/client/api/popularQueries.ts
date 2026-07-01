@@ -20,8 +20,8 @@
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Filter } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
-import { AnimalInCage, EHRCageMods } from '../types/homeTypes';
-import { CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
+import { EHRCageMods } from '../types/homeTypes';
+import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
 

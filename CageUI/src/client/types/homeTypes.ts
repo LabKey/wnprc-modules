@@ -25,10 +25,8 @@ import {
     ModLocations,
     ModStyle,
     ModTypes,
-    Rack,
-    Room
+    Rack
 } from './typings';
-import { Option } from '@labkey/components';
 
 
 export type SelectedViews = 'Home' | 'Room' | 'Rack' | 'Cage';
@@ -114,6 +112,3 @@ export interface RackSwitchOption {
     label: string;
 }
 
-export interface AnimalInCage {
-    id: string;
-}

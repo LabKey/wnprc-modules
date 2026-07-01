@@ -18,8 +18,7 @@
 
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
-import { AnimalInCage } from '../../../types/homeTypes';
-import { Cage } from '../../../types/typings';
+import { AnimalInCage, Cage } from '../../../types/typings';
 import { findAnimalsInCage } from '../../../api/popularQueries';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 import { ActionURL } from '@labkey/api';
@@ -31,13 +30,7 @@ interface AnimalEditorProps {
 export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
     const { currCage } = props;
     const {selectedRoom} = useHomeNavigationContext();
-    const [animalsInCage, setAnimalsInCage] = useState<AnimalInCage[]>([]);
-
-    useEffect(() => {
-        findAnimalsInCage(currCage.objectId).then(res => {
-            setAnimalsInCage(res);
-        });
-    }, []);
+    const [animalsInCage, setAnimalsInCage] = useState<AnimalInCage[]>(currCage.animals);
 
     const startHousingTransfer = () => {
         window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {

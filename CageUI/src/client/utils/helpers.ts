@@ -598,7 +598,7 @@ export const addPrevRoomSvgs = async (user: GetUserPermissionsResponse, mode: 'e
             .attr("id", "animal-id-container")
             .attr("x", "3")
             .attr("y", `${3 + (idIdx * factor)}`)
-            .attr("width", "42.04")
+            .attr("width", `${id.length * 6.8}`)
             .attr("height", "16.23")
             .attr("rx", "2.44")
             .attr("ry", "2.44")
@@ -656,11 +656,17 @@ export const addPrevRoomSvgs = async (user: GetUserPermissionsResponse, mode: 'e
                         .style("fill", '#878787')
                         .style("opacity", '0.7');
                 }
-                const testStrings = [`r22023`, 'r22024', 'r22025'];
-                testStrings.forEach((test, idx) => {
-
-                    createAnimalContainer(test, shape, idx)
-                })
+                if(cage.animals){
+                    if(cage.animals.length > 3){
+                        // If animals in cage is more than 4 display a count of the animals in the cage
+                        createAnimalContainer(`${cage.animals.length} animals`, shape, 0)
+                    }else{
+                        // Display animal ids if count is less than 4
+                        cage.animals.forEach((animal, idx) => {
+                            createAnimalContainer(animal.id, shape, idx)
+                        })
+                    }
+                }
             }
 
             cageGroup.append(() => shape.node());
@@ -964,6 +970,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             y: rackItem.yCoord - rack.y - group.y,
             size: svgSize,
             mods: cageMods,
+            animals: rackItem.animals
         };
 
         newUnitLocs[cageNumType].push({

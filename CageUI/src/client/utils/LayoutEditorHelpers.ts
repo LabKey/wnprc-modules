@@ -31,6 +31,7 @@ import {
     roomItemToString
 } from './helpers';
 import {
+    AnimalInCage,
     Cage,
     CageData,
     CageDirection,
@@ -67,7 +68,7 @@ import * as React from 'react';
 import { MutableRefObject } from 'react';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
-import { fetchCage, fetchCageHistory, fetchGhostCage, fetchRack } from '../api/popularQueries';
+import { fetchCage, fetchCageHistory, fetchGhostCage, fetchRack, findAnimalsInCage } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
 
 
@@ -159,6 +160,7 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
             const cageHistory: CageHistoryData = await fetchCageHistory(item.historyId, item.cage);
             const cageData: CageData = await fetchCage(cageHistory.cage);
             const rackData: RackData = await fetchRack(cageData.rack);
+            const animalData: AnimalInCage[] = await findAnimalsInCage(cageData.objectId);
             return {
                 isGhost: false,
                 extraContext: item.extraContext,
@@ -168,7 +170,8 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
                 rackGroup: cageHistory.rackGroup,
                 groupRotation: cageHistory.groupRotation,
                 rack: rackData,
-                cage: {cageHistory: cageHistory, cageData: cageData}
+                cage: {cageHistory: cageHistory, cageData: cageData},
+                animals: animalData
             };
         }
     };

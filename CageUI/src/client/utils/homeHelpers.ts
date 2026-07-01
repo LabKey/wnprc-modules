@@ -18,13 +18,17 @@
 
 import {
     Cage,
-    CageDirection, CageModification, CageModificationsType,
+    CageDirection,
+    CageModification,
+    CageModificationsType,
     CageNumber,
     CurrCageMods,
     ModDirections,
     ModLocations,
-    ModTypes, Room,
-    RoomMods
+    ModTypes,
+    Room,
+    RoomMods, RoomObject,
+    RoomObjectTypes
 } from '../types/typings';
 import {
     getAdjLocation,
@@ -38,6 +42,14 @@ import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Per
 import { ConnectedModType } from '../types/homeTypes';
 import { Security } from '@labkey/api';
 
+
+// Returns true if the obj is in the list of available room objects that have a popup.
+export const availRoomObjPopups = (obj: RoomObject): boolean => {
+    if(obj.type === RoomObjectTypes.GateOpen || obj.type === RoomObjectTypes.GateClosed){
+        return true;
+    }
+    return false;
+}
 
 // Determines if the user has access to editing the layout
 export const canEditLayout = (user: GetUserPermissionsResponse) => {

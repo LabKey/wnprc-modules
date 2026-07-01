@@ -87,11 +87,11 @@ export const RoomObjectPopup: FC<CagePopupProps> = (props) => {
                     <h1 className="room-display-popup-title">{formatRoomObj(roomObj.itemId)}</h1>
                     <button className="room-display-popup-close" onClick={handleCleanup}>&times;</button>
                 </div>
-                {(roomObj.type === RoomObjectTypes.GateOpen || RoomObjectTypes.GateClosed) &&
-                        <GateEditor
-                                roomObj={roomObj}
-                                setRoomObj={setRoomObj}
-                        />
+                {(roomObj.type === RoomObjectTypes.GateOpen || roomObj.type === RoomObjectTypes.GateClosed) &&
+                    <GateEditor
+                            roomObj={roomObj}
+                            setRoomObj={setRoomObj}
+                    />
                 }
                 <div className="room-display-popup-content" style={{alignItems: 'flex-end'}}>
                     <div className="room-display-popup-error">

@@ -528,9 +528,22 @@ const loadSvgs = async (): Promise<LoadedSvgs> => {
 
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
-export const addPrevRoomSvgs = async (user: Security.GetUserPermissionsResponse, mode: 'edit' | 'view', unitsToRender: Room | RackGroup | Rack | Cage, layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>, currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?, contextMenuRef?: MutableRefObject<Room>, setCtxMenuStyle?, closeMenuThenDrag?) => {
+export const addPrevRoomSvgs = async (
+    user: Security.GetUserPermissionsResponse,
+    mode: 'edit' | 'view',
+    unitsToRender: Room | RackGroup | Rack | Cage,
+    layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>,
+    currRoom?: Room, modsToLoad?: RoomMods, setSelectedObj?,
+    contextMenuRef?: MutableRefObject<Room>,
+    setCtxMenuStyle?,
+    closeMenuThenDrag?,
+    isCancelled?: () => boolean) => {
     let renderType: 'room' | 'group' | 'rack' | 'cage';
     const loadedSvgs: LoadedSvgs = await loadSvgs();
+
+    if (isCancelled && isCancelled()) {
+        return;
+    }
 
     if ((unitsToRender as Room)?.rackGroups) {
         renderType = 'room';

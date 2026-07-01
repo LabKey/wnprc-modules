@@ -28,8 +28,6 @@ Currently, a dump file for all info related to integrating animal moves into the
     - PC (Protected Contact)
     - VC (Visual Contact)
     - Breeding
-- On the next page of the transfer process, include destinations for all animals involved.
-- Separate sections are needed for each animal in the transfer form.
 - Users can remove animals from the form or choose "no change."
 - Transfer "Performed By", autofill but editable (text field) as "performed by" can have multiple initials
 
@@ -69,82 +67,15 @@ What new tables are required to complete the integration?
 What old tables can be used to complete the integration?
 
 ## Handling Condition Codes
-- study.housing
-  - Issues with the current table
-    - Each animal in the record is only allowed one condition code. This violates the rule that animals can have multiple codes.
-      - Solutions?
-        - Housing codes are strictly for housing, new table to hold multiple condition codes.
-        - Extend a new column for each category of condition codes.
-          - Add category to ehr_lookups.housing_condition_codes
-- study.demographics
-  - Issues
-    - Same with housing, each animal has one condition code
-    - No history of past housing
-- study.ActiveHousing
-  - Issues
-    - No history
-    - same with housing, each animal has only one condition
-      - Solutions?
-        - Same as housing table
+Update the condition code table to include categories and assignments.
 
-### Proposal
+Right now we have four categories; pairing, special, social, and caging codes.
 
-I think that the best option here given the options is to extend columns onto the housing tables.
-Both study.housing and study.ActiveHousing will need these columns, possibly demographics as well.
+Three assignments: any, infant, adult.
 
-I am not sure why demographics has condition codes as a column when the same data can be found from ActiveHousing or Housing.
-Possibly rework demographics to remove the dependencies on the condition code.
+Only animals that fit the assignment can have that code (some codes are "duplicates" but from different perspectives)
 
-I think separating the housing condition codes into two categories is the best option. This will require one extensible column.
-Might require a script to fix data from the original old column.
 
-1. Caging Codes
-2. Pairing Codes
-
-Suggestion: Keep old column as pairing Codes, new column is caging codes.
-
-Here is a list of codes that belong to each column
-
-1. Caging Codes
-   - VC
-   - PC
-   - GPC
-2. Pairing Codes
-   - C
-   - S
-   - P
-   - B
-   - PI
-   - PIA
-   - PM
-   - PMA
-   - PF
-   - P
-   - GMF
-   - GM
-   - GF
-   - GMA
-   - G
-   - GI
-   - GIA
-   - GB
-   - GBI
-   
-This is a list of codes found in ehr_lookups.housing_condition_codes that do not yet appear in the flowchart. 
-
-These are possibly unused codes? or has not yet been explained. Ask questions to resolve these codes.
-
-Codes:
-- AF: with adopted father
-- AM: with adopted mother
-- F: with the father
-- M: with the mother
-- GAF: in a group with adopted father
-- GAM: in a group with adopted mother
-- GAMAF: in a group with adopted mother and adopted father
-- GAMF: in group with father and adopted mother
-- GBIAF: mother/dam in group breeding with adopted infant and father/sire
-- GMAF: in a group with the mother/dam and adopted father/sire
-- GMAFA: infant in group with adopted mother/dam and adopted father/sire
-- GMFA: infant in a group with mother/dam and adopted father/sire
-- PFA: infant paired with adopted father/sire
+We will create a new table in cageUI module called housing_condition_records. One row in this table
+is equal to one row in the housing table to hold that housing records codes. We can write a calculated column
+to produce a user-friendly code based on the categories.

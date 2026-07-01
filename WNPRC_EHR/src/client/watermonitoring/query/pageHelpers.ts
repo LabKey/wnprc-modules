@@ -1,4 +1,4 @@
-import { CommandType } from '@labkey/api/dist/labkey/query/Rows';
+import { Query } from '@labkey/api';
 import {
     Commands,
     DataRowsPerCommandType,
@@ -63,10 +63,10 @@ export const groupCommands = (values: Array<RowObj>): DataRowsPerCommandType => 
     }, {} as InsertValuesWithCommand) as DataRowsPerCommandType;
 };
 
-export const setupJsonData = (values: DataRowsPerCommandType, QCState: string, taskId: string, reviewer: number, date: string, command: CommandType): Commands => {
+export const setupJsonData = (values: DataRowsPerCommandType, QCState: string, taskId: string, reviewer: number, date: string, command: Query.CommandType): Commands => {
     //for each grouped item (insert, update, delete), set up commands for each diff set.
     let commands: Array<ModifyRowsCommands> = [];
-    Object.keys(values).forEach(function(key: CommandType,index: number) {
+    Object.keys(values).forEach(function(key: Query.CommandType, index: number) {
         let valuesToInsert = setupWaterAmountValues(values[key], QCState, taskId);
         commands.push({
             schemaName: "study",

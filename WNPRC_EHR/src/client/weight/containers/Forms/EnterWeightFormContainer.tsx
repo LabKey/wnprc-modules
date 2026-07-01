@@ -1,10 +1,8 @@
-import * as React from "react";
-import {
-  useContext,
-  useEffect,
-  useRef,
-  useState
-} from "react";
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Button } from 'react-bootstrap';
+import dayjs from 'dayjs';
+import { ActionURL, Filter, Query, Security, Utils } from '@labkey/api';
+
 import {
   InfoProps,
   ConfigProps,
@@ -18,7 +16,6 @@ import {
   labkeyActionSelectWithPromise
 } from "../../query/actions";
 import { lookupAnimalInfo, saveRowsDirect } from '../../../query/helpers';
-import { Button } from "react-bootstrap";
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 import EnterWeightForm from "./EnterWeightForm";
 import {
@@ -26,7 +23,6 @@ import {
   groupCommands,
   setupJsonData
 } from "../../query/helpers";
-//import {setupJsonData} from "../../../query/helpers";
 import BatchModal from "../../components/BatchModal";
 import SubmitModal from "../../../components/SubmitModal";
 import BulkEditModal from "../../components/BulkEditModal";
@@ -34,10 +30,7 @@ import Spinner from "../../../components/Spinner";
 import SubmitForReviewModal from "../../components/SubmitForReviewModal";
 import { AppContext } from "../App/ContextProvider";
 import CustomAlert from "../../components/CustomAlert";
-import * as dayjs from "dayjs";
-import {ActionURL, Utils, Security, Filter} from "@labkey/api";
 import {AnimalInfoStates, FormErrorLevels} from "../../../typings/main";
-import { Command, CommandType } from "@labkey/api/dist/labkey/query/Rows";
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -400,7 +393,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     e.preventDefault();
     //to animate the popup
     setSaving(true);
-    let command: CommandType = wasSaved || editMode ? "update" : "insert";
+    let command: Query.CommandType = wasSaved || editMode ? "update" : "insert";
     //if we are in edit mode, just grab current QCState of a record...
     //TODO think about this qcstate implementation a bit more since the qc state gets saved "globally"
     // (see saveWeights function)...
@@ -444,7 +437,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const triggerSubmit = () => {
-    let command: CommandType = wasSaved || editMode ? "update" : "insert";
+    let command: Query.CommandType = wasSaved || editMode ? "update" : "insert";
     setSubmitBoxText("Submitting...");
 
     let itemsToInsert = groupCommands(formdata);
@@ -583,7 +576,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const triggerSubmitForReview = () => {
-    let command: CommandType = wasSaved || editMode ? "update" : "insert";
+    let command: Query.CommandType = wasSaved || editMode ? "update" : "insert";
 
     let itemsToInsert = groupCommands(formdata);
     let currentDate: string = dayjs(new Date()).format();

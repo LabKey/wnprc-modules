@@ -38,7 +38,6 @@ import {
     parseRoomItemNum,
     parseRoomItemType
 } from './helpers';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 
 // Returns true if the obj is in the list of available room objects that have a popup.

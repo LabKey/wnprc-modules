@@ -4858,4 +4858,41 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
 
     }
+
+    // https://github.com/LabKey/internal-issues/issues/1266: the "Time of Day" multi-select (lovcombo) must
+    // retain string selections so they reach the schedule query. A bogus room makes the query empty, so a
+    // passing Submit reaches "No uncompleted treatments were found." instead of the pre-fix "Must provide
+    // room and time of day" validation alert.
+    @Test
+    public void testTreatmentTimeOfDayMultiSelect()
+    {
+        beginAt(buildURL("ehr", getContainerPath(), "manageTask.view?formtype=Treatments"));
+        WebElement titleEl = waitForElement(Locator.xpath("//input[@name='title' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+        waitForFormElementToEqual(titleEl, "Treatments");
+
+        log("Open the Import Scheduled Treatments dialog");
+        waitAndClick(Locator.extButton("Add Treatments"));
+        waitForElement(ExtHelper.Locators.formItemWithLabel("Time of Day:").notHidden(), WAIT_FOR_JAVASCRIPT);
+
+        log("Enter a (bogus) room and select multiple Time of Day values from the lovcombo");
+        _extHelper.setExtFormElementByLabel("Room:", "zz999");
+        _extHelper.selectComboBoxItem("Time of Day:", "AM");
+        _extHelper.selectComboBoxItem("Time of Day:", "Noon");
+
+        String selectedTimes = getLovComboValue("Time of Day:");
+        Assertions.assertThat(selectedTimes)
+                .as("Time of Day lovcombo dropped its selections (GH Issue 1266)")
+                .contains("AM").contains("Noon");
+
+        log("Submit; the selected times must pass validation and reach the schedule query");
+        _extHelper.clickExtButton("", "Submit", 0);
+        assertAlert("No uncompleted treatments were found.");
+    }
+
+    private String getLovComboValue(String label)
+    {
+        WebElement comboEl = ExtHelper.Locators.formItemWithLabel(label).notHidden().findElement(getDriver());
+        WebElement input = Locator.xpath(".//input[contains(@class, 'x-form-field')]").findElement(comboEl);
+        return getFormElement(input);
+    }
 }

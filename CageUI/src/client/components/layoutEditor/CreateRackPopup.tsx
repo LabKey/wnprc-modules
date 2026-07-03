@@ -16,10 +16,9 @@
  *
  */
 
-import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import { Query } from '@labkey/api';
 import { Button } from 'react-bootstrap';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import Select from 'react-select';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
@@ -44,7 +43,7 @@ export const CreateRackPopup: FC<CreateRackPopupProps> = (props) => {
     const [rackIdValue, setRackIdValue] = useState<string>('');
 
     useEffect(() => {
-        const rackTypesConfig: SelectRowsOptions = {
+        const rackTypesConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'rack_types',
             columns: ['displayName', 'rowid', 'type', 'manufacturer/title', 'manufacturer/value', 'size', 'stationary'],

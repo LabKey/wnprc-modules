@@ -75,8 +75,7 @@ import {
     roomItemToString,
     saveRoomHelper, toLabKeyDate
 } from '../utils/helpers';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise, } from '../api/labkeyActions';
 import { CELL_SIZE } from '../utils/constants';
 
@@ -333,7 +332,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         let type: UnitType;
 
-        const optConfig: SelectRowsOptions = {
+        const optConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'rack_types',
             filterArray: [
@@ -1022,7 +1021,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
 
         let prevCages: CageData[] = [];
         if (!rackChangeValue.isNew) {
-            const cagesInRackConfig: SelectRowsOptions = {
+            const cagesInRackConfig: Query.SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'cages',
                 filterArray: [

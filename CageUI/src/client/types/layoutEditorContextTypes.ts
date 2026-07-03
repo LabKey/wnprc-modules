@@ -16,8 +16,8 @@
  *
  */
 
-import * as React from 'react';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
+import { Security } from '@labkey/api';
 import {
     Cage,
     CageSvgId,
@@ -35,12 +35,11 @@ import {
 } from './typings';
 import { DeleteActions, LayoutSaveResult, RackActions, SelectedObj } from './layoutEditorTypes';
 import * as d3 from 'd3';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 export interface LayoutContextProps {
     children: ReactNode;
     prevRoom: { room: Room, locs: UnitLocations, data: FullObjectHistoryData[], isTemplate: boolean };
-    user: GetUserPermissionsResponse;
+    user: Security.GetUserPermissionsResponse;
 }
 
 export interface LayoutContextType {
@@ -66,7 +65,7 @@ export interface LayoutContextType {
     setScale: React.Dispatch<React.SetStateAction<number>>;
     changeRack: (newType: RackChangeOption) => Promise<string>;
     clearGrid: () => void;
-    user: GetUserPermissionsResponse;
+    user: Security.GetUserPermissionsResponse;
     getAdjCages: (cage: Cage, cageLoc: LocationCoords) => LocationCoords[];
     reloadRoom: Room,
     setReloadRoom: React.Dispatch<React.SetStateAction<Room>>,

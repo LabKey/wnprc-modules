@@ -49,6 +49,15 @@ module.exports = {
                 'org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission'
             ],
             path: './src/client/pages/housingTransfer'
+        },
+        {
+            name: "adoptionDataEntry",
+            title: "Adoption Form",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+                'org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission'
+            ],
+            path: './src/client/pages/adoptionDataEntry'
         }
     ]
 };

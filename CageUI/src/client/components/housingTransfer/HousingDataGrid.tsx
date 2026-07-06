@@ -39,7 +39,7 @@ import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
 import { Filter, Security } from '@labkey/api';
-import { dateTimeColumnType } from './DateTimeGridField';
+import { dateTimeColumnType } from '../DateTimeGridField';
 import { fetchConditionCodes, findAnimalsInCage } from '../../api/popularQueries';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { canEditConditionPermission } from '../../utils/homeHelpers';

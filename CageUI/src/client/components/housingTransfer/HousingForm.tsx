@@ -272,19 +272,6 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         return Object.values(animalsByRoom).flat();
     }, [animalsByRoom]);
 
-    useEffect(() => {
-        // When any animal in the form changes, all grids might need to update their condition codes
-        // because cage mates can be across different room grids.
-        // However, HousingDataGrid already has a useEffect/callback that depends on allAnimals.
-        // We just need to ensure that when allAnimals changes, we trigger recalculation in each grid.
-        // Actually, updateConditionCodes in HousingDataGrid depends on allAnimals.
-    }, [allAnimals]);
-
-    const calculateAllConditionCodes = useCallback(async () => {
-        // This is a placeholder if we wanted to trigger everything from the top.
-        // But per-grid recalculation is probably more efficient.
-    }, []);
-
     const handleValidate = useCallback(() => {
         console.log('Validating form...', allAnimals);
         alert('Validation triggered (see console)');

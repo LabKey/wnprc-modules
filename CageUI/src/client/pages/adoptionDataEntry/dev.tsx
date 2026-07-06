@@ -16,13 +16,14 @@
  *
  */
 
-import { Dayjs } from 'dayjs';
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import { AdoptionDataEntry } from './AdoptionDataEntry';
 
-export interface AdoptionData {
-    uuid: string;
-    id: string;
-    date: Dayjs;
-    dam: string;
-    sire: string;
-    type: string;
-}
+const render = () => {
+    createRoot(document.getElementById('app')).render(
+        <AdoptionDataEntry/>
+    );
+};
+
+render();

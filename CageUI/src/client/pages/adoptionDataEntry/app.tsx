@@ -16,13 +16,15 @@
  *
  */
 
-import { Dayjs } from 'dayjs';
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import { AdoptionDataEntry } from './AdoptionDataEntry';
 
-export interface AdoptionData {
-    uuid: string;
-    id: string;
-    date: Dayjs;
-    dam: string;
-    sire: string;
-    type: string;
-}
+
+// Need to wait for container element to be available in labkey wrapper before render
+window.addEventListener('DOMContentLoaded', (event) => {
+
+    createRoot(document.getElementById('app')).render(
+        <AdoptionDataEntry/>
+    );
+});

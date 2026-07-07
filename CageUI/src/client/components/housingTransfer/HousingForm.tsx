@@ -22,11 +22,12 @@ import { HousingTransferData } from '../../types/housingFormTypes';
 import * as dayjs from 'dayjs';
 import { Box } from '@mui/material';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
+import { labkeyActionSelectWithPromise, startHousingTransfer } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
 import { Filter } from '@labkey/api';
 import { HousingDataGrid } from './HousingDataGrid';
 import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { LoadingScreen } from '../LoadingScreen';
 
 interface HousingFormProps {
     user: GetUserPermissionsResponse;
@@ -40,6 +41,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
+    const [isSaving, setIsSaving] = useState<boolean>(false);
 
     useEffect(() => {
         console.log("Data: ", animalsByRoom);
@@ -279,16 +281,27 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
 
     const handleSubmit = useCallback(() => {
         console.log('Submitting form...', allAnimals);
-        alert('Submit triggered (see console)');
-    }, [allAnimals]);
-
-    const handleSave = useCallback(() => {
-        console.log('Saving form...', allAnimals);
-        alert('Save triggered (see console)');
+        startHousingTransfer(allAnimals).then((res) => {
+            if(res.success){
+                // Housing transfer complete
+                alert('Housing Transfer Success');
+            }else{
+                alert('Housing Transfer Error');
+            }
+            setIsSaving(false);
+        }).catch(err => {
+            alert(`Error saving form: ${err}`);
+            setIsSaving(false);
+        });
     }, [allAnimals]);
 
     return (
         <div className="housing-form-container">
+            <LoadingScreen
+                isVisible={isSaving}
+                message={"Saving..."}
+                targetElement={document.getElementById("housing-transfer-root")}
+            />
             {Object.keys(animalsByRoom).map(roomLabel => (
                 <HousingDataGrid
                     user={user}
@@ -307,8 +320,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             {allAnimals.length > 0 && (
                 <div className="form-actions">
                     <button className="btn btn-info" onClick={handleValidate}>Validate</button>
-                    <button className="btn btn-success" onClick={handleSubmit}>Submit</button>
-                    <button className="btn btn-primary" onClick={handleSave}>Save</button>
+                    <button className="btn btn-success" onClick={() => {setIsSaving(true); handleSubmit();}}>Submit</button>
                 </div>
             )}
         </div>

@@ -775,6 +775,27 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 return null;
             }
         },
+        { field: 'ejacConfirmed', headerName: 'Ejaculation Confirmed', flex: 0.5, minWidth: 100,
+            renderCell: (params: GridRenderCellParams) => {
+                const currentRow = params.row as HousingTransferData;
+                const isBreedingEnded = currentRow.reasonForMove.find((r: Option<string>) => r.value === 'Breeding ended');
+
+                if (isBreedingEnded) {
+                    const isAlert = params.value as boolean;
+                    return (
+                        <IconButton
+                            size="small"
+                            onClick={() => {
+                                handleCellChange('ejacConfirmed', params.id, !isAlert);
+                            }}
+                        >
+                            {isAlert ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />}
+                        </IconButton>
+                    );
+                }
+                return null;
+            }
+        },
         { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, display: 'flex', renderCell: (params: GridRenderCellParams) => {
             const reasonForMoveValues = params.row.reasonForMove.map((r: Option<string>) => r.value);
             const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||

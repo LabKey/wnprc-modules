@@ -24,6 +24,7 @@ import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDisti
 import { CageMods, Rack, RackConditionOption, Room, SessionLog } from '../types/typings';
 import { buildURL } from '@labkey/components';
 import { RackSwitchOption } from '../types/homeTypes';
+import { HousingTransferData } from '../types/housingFormTypes';
 
 export function labkeyActionSelectWithPromise(
     options: SelectRowsOptions,
@@ -197,6 +198,22 @@ export function updateRackConditionStatus(rack: RackSwitchOption, condition: Rac
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {rack: rack.value.objectId, condition: condition.value},
+        });
+    });
+}
+
+// This function is for submitting a housing transfer.
+export function startHousingTransfer(animals: HousingTransferData[]): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'prepareHousingTransfer.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {transferData: animals},
         });
     });
 }

@@ -66,7 +66,7 @@ export const HousingTransfer: FC = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <div className="housing-transfer-page">
+            <div className="housing-transfer-page" id={"housing-transfer-root"}>
                 {user &&
                     <>
                         <HousingForm

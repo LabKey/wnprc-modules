@@ -59,6 +59,7 @@ import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.model.Cage;
+import org.labkey.cageui.model.HousingTransferData;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.ModLocations;
@@ -69,6 +70,7 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -113,6 +115,64 @@ public class CageUIController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
         }
+    }
+
+    @RequiresPermission(CageUIAnimalEditorPermission.class)
+    public static class PrepareHousingTransferAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        ArrayList<HousingTransferData> _housingTransferData;
+
+        public ArrayList<HousingTransferData>  getHousingTransferData()
+        {
+            return _housingTransferData;
+        }
+
+        public void setHousingTransferData(ArrayList<HousingTransferData>  housingTransferData)
+        {
+            _housingTransferData = housingTransferData;
+        }
+
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+
+            JSONArray jsonTransferData = json.getJSONArray("transferData");
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try
+            {
+                TypeReference<ArrayList<HousingTransferData>> typeRef = new TypeReference<ArrayList<HousingTransferData>>()
+                {
+                };
+                ArrayList<HousingTransferData> transferDataList = mapper.readValue(jsonTransferData.toString(), typeRef);
+                setHousingTransferData(transferDataList);
+            }catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+
+        }
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            Map<String, Object> response = new HashMap<String, Object>();
+            JSONArray finalData = mapper.convertValue(getHousingTransferData(), JSONArray.class);
+
+            response.put("transferData", finalData);
+            response.put("success", true);
+            return new ApiSimpleResponse(response);
+
+        }
+
     }
 
     @RequiresPermission(CageUIRoomModifierPermission.class)

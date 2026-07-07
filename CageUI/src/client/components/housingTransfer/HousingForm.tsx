@@ -274,6 +274,46 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         return Object.values(animalsByRoom).flat();
     }, [animalsByRoom]);
 
+    const isFormValid = useMemo(() => {
+        if (allAnimals.length === 0) return false;
+
+        return allAnimals.every(animal => {
+            // 1. destinationRoom
+            const hasRoom = animal.destinationRoom && animal.destinationRoom.value !== null;
+            if (!hasRoom) return false;
+
+            // 2. destinationCage
+            const hasCage = animal.destinationCage && (animal.destinationCage.value !== '' || animal.destinationCage.label !== '');
+            if (!hasCage) return false;
+
+            // 3. condition
+            const hasCondition = animal.condition && animal.condition.length > 0;
+            if (!hasCondition) return false;
+
+            // 4. reasonForMove
+            const hasReason = animal.reasonForMove && animal.reasonForMove.length > 0;
+            if (!hasReason) return false;
+
+            const reasonValues = animal.reasonForMove.map(r => r.value);
+
+            // 5. project (required if Breeding)
+            if (reasonValues.includes('Breeding')) {
+                if (!animal.project) return false;
+            }
+
+            // 6. remarks (required if Other or Behavior)
+            if (reasonValues.includes('Other (write reason in remarks section)') || reasonValues.includes('Behavior')) {
+                if (!animal.remarks || animal.remarks.trim() === '') return false;
+            }
+
+            // 7. performedBy
+            const hasPerformedBy = animal.performedBy && animal.performedBy.trim() !== '';
+            if (!hasPerformedBy) return false;
+
+            return true;
+        });
+    }, [allAnimals]);
+
     const handleValidate = useCallback(() => {
         console.log('Validating form...', allAnimals);
         alert('Validation triggered (see console)');
@@ -320,7 +360,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             {allAnimals.length > 0 && (
                 <div className="form-actions">
                     <button className="btn btn-info" onClick={handleValidate}>Validate</button>
-                    <button className="btn btn-success" onClick={() => {setIsSaving(true); handleSubmit();}}>Submit</button>
+                    <button
+                        className="btn btn-success"
+                        disabled={!isFormValid || isSaving}
+                        onClick={() => {setIsSaving(true); handleSubmit();}}
+                    >
+                        Submit
+                    </button>
                 </div>
             )}
         </div>

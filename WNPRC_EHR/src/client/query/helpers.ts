@@ -15,8 +15,6 @@
  */
 import { TaskValuesType } from '../watermonitoring/typings/main';
 import { ActionURL, Filter, Query } from '@labkey/api';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 interface jsonDataType {
   commands: Array<any>;
@@ -72,7 +70,7 @@ export const setupJsonData = (values: any[], schemaName: string, queryName: stri
 export const saveRowsDirect = (jsonData: jsonDataType) => {
 
   return new Promise((resolve, reject) => {
-    let options: SaveRowsOptions = {
+    let options: Query.SaveRowsOptions = {
       commands: jsonData.commands,
       containerPath: ActionURL.getContainer(),
       success: (data) => {resolve(data)},
@@ -103,7 +101,7 @@ export const checkEditMode = () => {
 };
 
 export function labkeyActionSelectWithPromise(
-    options: SelectRowsOptions
+    options: Query.SelectRowsOptions
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     options.success = (data) => {resolve(data)};

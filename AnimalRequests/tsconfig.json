@@ -1,18 +1,5 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "jsx": "react",
-    "sourceMap": false,
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
-  },
-  "exclude": [
-    "node_modules",
-    "resources"
-  ],
-  "files": [
-    "src/client/typings/main.d.ts",
-    "src/client/app.tsx"
-  ]
+  "extends": "./node_modules/@labkey/build/webpack/tsconfig.json",
+  "include": ["src/client/**/*"],
+  "exclude": ["node_modules"],
 }

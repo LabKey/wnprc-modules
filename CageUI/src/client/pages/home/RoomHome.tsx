@@ -16,24 +16,22 @@
  *
  */
 
-import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import { Security } from '@labkey/api';
 import '../../cageui.scss';
 import { RoomList } from '../../components/home/RoomList';
 import { RoomNavbar } from '../../components/home/RoomNavbar';
 import { RoomContent } from '../../components/home/RoomContent';
-import { HomeNavigationContextProvider, useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
+import { HomeNavigationContextProvider } from '../../context/HomeNavigationContextManager';
 import { RoomContextProvider } from '../../context/RoomContextManager';
 import { labkeyGetUserPermissions } from '../../api/labkeyActions';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-
 
 export const RoomHome: FC = () => {
-    const [user, setUser] = useState<GetUserPermissionsResponse>(null);
+    const [user, setUser] = useState<Security.GetUserPermissionsResponse>(null);
 
     useEffect(() => {
         const userProfile = labkeyGetUserPermissions();
-        userProfile.then((profile: GetUserPermissionsResponse) => {
+        userProfile.then((profile: Security.GetUserPermissionsResponse) => {
             if (profile.user) {
                 setUser(profile);
             }

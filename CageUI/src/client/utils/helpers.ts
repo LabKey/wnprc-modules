@@ -15,6 +15,11 @@
  *  * limitations under the License.
  *
  */
+import * as d3 from 'd3';
+import { zoomTransform } from 'd3';
+import { MutableRefObject } from 'react';
+import { ActionURL, Filter, Query, Security, Utils } from '@labkey/api';
+import { selectDistinctRows } from '@labkey/components';
 
 import {
     AllHistoryData,
@@ -59,10 +64,6 @@ import {
     UnitLocations,
     UnitType
 } from '../types/typings';
-import * as d3 from 'd3';
-import { zoomTransform } from 'd3';
-import { MutableRefObject } from 'react';
-import { ActionURL, Filter, Security, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault,
@@ -76,39 +77,32 @@ import {
     processRealLayoutHistory,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
-import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { selectDistinctRows } from '@labkey/components';
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 
 export const zeroPadName = (num, places) => {
     return(String(num).padStart(places, '0'));
 };
 
-export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
+export const isTemplateCreator = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
 };
 
-export const isRoomCreator = (user: GetUserPermissionsResponse) => {
+export const isRoomCreator = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
 };
 
-export const isRoomModifier = (user: GetUserPermissionsResponse) => {
+export const isRoomModifier = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
 };
 
-export const isCageModifier = (user: GetUserPermissionsResponse) => {
+export const isCageModifier = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
 };
-
-
-
 
 // Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
 export const toLabKeyDate = (date: Date): string => {
@@ -152,7 +146,7 @@ export const changeStyleProperty = (element: Element, property: string, newValue
 };
 
 export const getSvgSize = async (type: RackTypes) => {
-    const config: SelectDistinctOptions = {
+    const config: Query.SelectDistinctOptions = {
         schemaName: 'ehr_lookups',
         queryName: 'cageui_item_types',
         column: 'description',
@@ -370,7 +364,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
     };
 
     // Make call to all_history for room and determine if template or not.
-    const allHistoryCfg: SelectRowsOptions = {
+    const allHistoryCfg: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'all_history',
         columns: [],
@@ -396,7 +390,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
         let historyTable: string = allHistObj.historyType === 'template' ? 'template_layout_history' : 'layout_history';
         const isDefaultRoom: boolean = allHistObj.historyType === 'template';
 
-        const prevRoomConfig: SelectRowsOptions = {
+        const prevRoomConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: historyTable,
             columns: [],
@@ -406,7 +400,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
             ]
         };
 
-        const prevRoomBorderConfig: SelectRowsOptions = {
+        const prevRoomBorderConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'room_history',
             columns: ['scale', 'border_width', 'border_height'],
@@ -507,7 +501,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 const loadSvgs = async (): Promise<LoadedSvgs> => {
     const loadedSvgs: LoadedSvgs = {};
 
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: "ehr_lookups",
         queryName: "cageui_svg_urls",
         columns: ["value", "title"]
@@ -541,7 +535,7 @@ const loadSvgs = async (): Promise<LoadedSvgs> => {
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
 export const addPrevRoomSvgs = async (
-    user: GetUserPermissionsResponse,
+    user: Security.GetUserPermissionsResponse,
     mode: 'edit' | 'view',
     unitsToRender: Room | RackGroup | Rack | Cage,
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>,

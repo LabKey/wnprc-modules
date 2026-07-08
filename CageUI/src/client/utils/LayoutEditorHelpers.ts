@@ -39,7 +39,8 @@ import {
     CageMods,
     CageSvgId,
     DefaultRackTypes,
-    FullObjectHistoryData, GhostCageData,
+    FullObjectHistoryData,
+    GhostCageData,
     GroupId,
     LayoutHistoryData,
     LocationCoords,
@@ -66,7 +67,7 @@ import {
 } from '../types/layoutEditorTypes';
 import * as React from 'react';
 import { MutableRefObject } from 'react';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { Security } from '@labkey/api';
 import { CELL_SIZE } from './constants';
 import { fetchCage, fetchCageHistory, fetchGhostCage, fetchRack, findAnimalsInCage } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
@@ -82,7 +83,7 @@ export const extractRoomObjId = (id: string) => {
 }
 
 // Determines if the user has access to dragging the item
-export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const isDraggable = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -98,7 +99,7 @@ export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItem
 }
 
 // Determines if the user can open the items context menu
-export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const canOpenContextMenu = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -113,7 +114,7 @@ export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: R
     return false;
 }
 
-export const canPlaceObject = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const canPlaceObject = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }

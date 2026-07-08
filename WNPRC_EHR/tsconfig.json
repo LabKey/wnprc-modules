@@ -1,14 +1,5 @@
 {
-  "compilerOptions": {
-    "target": "ES5",
-    "jsx": "react",
-    "lib": ["dom","es2017"],
-    "sourceMap": false,
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "downlevelIteration": true
-  },
-  "exclude": [
-    "resources"
-  ]
+  "extends": "./node_modules/@labkey/build/webpack/tsconfig.json",
+  "include": ["src/client/**/*"],
+  "exclude": ["node_modules"],
 }

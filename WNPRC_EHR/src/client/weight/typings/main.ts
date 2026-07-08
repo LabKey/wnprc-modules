@@ -1,5 +1,5 @@
-import {AnimalInfoProps, AnimalInfoStates} from "../../typings/main";
-import { CommandType } from "@labkey/api/dist/labkey/query/Rows";
+import { Query } from '@labkey/api';
+import { AnimalInfoProps, AnimalInfoStates } from '../../typings/main';
 
 export interface InfoProps {
     Id: string;
@@ -133,7 +133,7 @@ export interface WeightFormProps {
 export interface ModifyRowsCommands {
     schemaName: string;
     queryName: string;
-    command: CommandType
+    command: Query.CommandType;
     rows: Array<any>;
 }
 

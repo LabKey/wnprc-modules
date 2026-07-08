@@ -15,10 +15,7 @@
  *  * limitations under the License.
  *
  */
-
-
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
 import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
@@ -26,7 +23,7 @@ import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_modifications',
         columns: columns,
@@ -42,7 +39,7 @@ export const cageModLookup = async (columns: string[], filterArray: Filter.IFilt
 };
 
 export const fetchCageHistory = async (historyid: string, cage: string): Promise<CageHistoryData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_history',
         filterArray: [
@@ -76,7 +73,7 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
 };
 
 export const fetchCage = async (objectId: string): Promise<CageData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cages',
         filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]
@@ -135,7 +132,7 @@ export const fetchGhostCage = async (objectId: string): Promise<GhostCageData> =
 };
 
 export const fetchRack = async (objectId: string): Promise<RackData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'racks',
         filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]

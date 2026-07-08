@@ -22,9 +22,8 @@ import { Button } from 'react-bootstrap';
 import Select from 'react-select';
 import { RackConditionOption, RackConditions } from '../../../types/typings';
 import { useRoomContext } from '../../../context/RoomContextManager';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { ActionURL, Filter } from '@labkey/api';
+import { ActionURL, Filter, Query } from '@labkey/api';
 import { RackSwitchOption } from '../../../types/homeTypes';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LoadingScreen } from '../../LoadingScreen';
@@ -59,7 +58,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
     const [showLayoutErrors, setShowLayoutErrors] = useState<string[]>([]);
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'cageui_condition_codes',
             columns: ['value', 'title']
@@ -79,7 +78,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
     }, []);
 
     useEffect(() => {
-        const racksConfig: SelectRowsOptions = {
+        const racksConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'racks',
             columns: ['room','objectid', 'rack_type/displayName', 'rackid', 'rack_type/stationary', 'rack_type/rowid', 'condition'],

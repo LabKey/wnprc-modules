@@ -3,6 +3,16 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="anesthesiaRecovery" tableDbType="TABLE" useColumnOrder="false">
                 <columns>
+                    <column columnName="Id">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="observer">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
                     <column columnName="recoveryId">
                         <columnTitle>Task Id</columnTitle>
                         <fk>
@@ -11,7 +21,25 @@
                             <fkColumnName>taskid</fkColumnName>
                         </fk>
                         <url>/ehr/WNPRC/EHR/taskDetails.view?formtype=Anesthesia%20Recovery&amp;taskid=${taskid}</url>
+                        <required>true</required>
+                        <nullable>false</nullable>
                     </column>
+
+                    <column columnName="observation">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="recoveryReason">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="submitterInitials">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
                 </columns>
             </table>
         </tables>

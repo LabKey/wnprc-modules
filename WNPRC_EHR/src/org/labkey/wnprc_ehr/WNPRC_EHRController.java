@@ -18,10 +18,12 @@ package org.labkey.wnprc_ehr;
 import au.com.bytecode.opencsv.CSVWriter;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.ArrayUtil;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -55,6 +57,7 @@ import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.formSchema.Field;
 import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -67,6 +70,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.FileResource;
@@ -2468,334 +2472,232 @@ public class WNPRC_EHRController extends SpringActionController
 
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
-            // 1. Creates function variables.
-            BatchValidationException batchErrors = new BatchValidationException();
-            ApiSimpleResponse response = new ApiSimpleResponse();
+            _log.info("INSERT CALLED: UpdateAnesthesiaRecoveryDatasetAction()");
+
+            // 1. Sets up environment variables.
             NotificationToolkit notificationToolkit = new NotificationToolkit();
-            _log.info("Started update to the anesthesia recovery dataset.");
-            int recoveryTaskId = 0;
+            JSONObject response = new JSONObject();
+            response.put("success",false);
+            response.put("detailedResponse", "");
+            response.put("rowsUpdated", 0);
 
-            // 2. Verifies passed-in obeject is not null.
-            if (form.getJsonObject() == null) {
-                String issueDetails = "JSON argument cannot be null.";
-                _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                response.put("detailedResponse", issueDetails);
-                response.put("success", false);
+
+            // 2. Gets passed-in data.
+            // 2a. Verifies an object with data was passed in.
+            JSONObject inputJson = form.getJsonObject();
+            if (inputJson == null) {
+                response.put("detailedResponse", "No JSON payload provided.");
                 return response;
             }
-
-            // 3. Retrieves passed-in arguments and verifies they all exist.
-            // REQUIRED (MANUALLY DEFINED)
-            JSONObject myForm = form.getJsonObject();
-            String recordId = myForm.get("Id").toString();
-            String recordRoom = myForm.get("room").toString();
-            String recordObservation = myForm.get("observation").toString();
-            String deviceDate = myForm.get("date").toString();
-            String recoveryId = myForm.get("recoveryId").toString();
-            String recordSubmitterInitials = myForm.get("submitterInitials").toString();
-            String recordLocation = myForm.get("location").toString();
-            String recordCage = myForm.get("cage").toString();
-            // REQUIRED (CALCULATED)
-            String timezoneOffset = myForm.get("timezoneOffset").toString();
-            String timezone = myForm.get("timezone").toString();
-            String recordObserver = myForm.get("observer").toString();
-            String recordAssignedTo = myForm.get("assignedTo").toString();
-            String recordDeviceId = myForm.get("deviceId").toString();
-            // OPTIONAL
-            String recordRecoveryStart = myForm.optString("recoveryStart");
-            String recordObserverComments = myForm.optString("observerComments");
-            String recordRecoverySpeed = myForm.optString("recoverySpeed");
-            String recordRecoveryCondition = myForm.optString("recoveryCondition");
-            String recordRecoveryReason = myForm.optString("recoveryReason");
-            String recordGroupId = myForm.optString("groupId");
-            String recordFinalizeComments = myForm.optString("finalizeComments");
-            String recordCageLockSecure = myForm.optString("cageLockSecure");
-            // TODO: Verify the necessary fields are filled in (condition, speed, etc) when doing finalize.  Also verify required notes are added for rough/prolonged? recovery.
-            if (recordRecoverySpeed.equals("Prolonged") || recordRecoveryCondition.equals("Rough")) {
-                if (recordFinalizeComments.equals("")) {
-                    String issueDetails = "You must include notes when marking a recovery as 'Prolonged' or 'Rough'";
-                    _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                    response.put("detailedResponse", issueDetails);
-                    response.put("success", false);
-                    return response;
-                }
-            }
-
-
-
-            // 4. Gets the current server time & offset.
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-            java.time.LocalDateTime serverDate = java.time.LocalDateTime.now();    // Explicitly import Java here, otherwise script defaults to joda time due to both being imported above.
-            java.time.LocalDateTime serverDatePlus10 = serverDate.plusMinutes(10);
-            java.time.LocalDateTime serverDateMinus10 = serverDate.minusMinutes(10);
-            String formattedServerDate = serverDate.format(formatter);
-            ZoneId currentTimezone = ZoneId.systemDefault();
-            ZoneOffset currentOffset = OffsetDateTime.now().getOffset();
-
-            // 5. Verifies the iOS clock matches our server timezone.
-            java.time.LocalDateTime deviceDateAsLocalDateTime = java.time.LocalDateTime.parse(deviceDate, formatter);
-            if (deviceDateAsLocalDateTime.isBefore(serverDateMinus10) || deviceDateAsLocalDateTime.isAfter(serverDatePlus10)) {
-                String issueDetails = "Your current device time is over 10 minutes off from the current server time.  Please update your current device time.";
-                _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                response.put("detailedResponse", issueDetails);
-                response.put("success", false);
+            // 2b. Verifies passed-in object has rows.
+            if (!inputJson.has("rows") || inputJson.getJSONArray("rows").isEmpty()) {
+                response.put("detailedResponse", "No rows provided for the update.");
                 return response;
             }
+            // 2c. Converts the JSONArray to the row map our loop expects.
+            List<Map<String, Object>> rowsToValidate = new ArrayList<>();
+            JSONArray rowsArray = inputJson.getJSONArray("rows");
+            for (int i = 0; i < rowsArray.length(); i++) {
+                rowsToValidate.add(rowsArray.getJSONObject(i).toMap());
+            }
 
-            // 6. Logs debug data for setting up timezone validation in the future.
-            _log.info(
-                    "Anesthesia Recovery Time Test" + System.lineSeparator() +
-                    "iOS Parsed Date: [" + deviceDate + "]" + System.lineSeparator() +
-                    "iOS Timezone: [" + timezone + "]" + System.lineSeparator() +
-                    "iOS Offset: [" + timezoneOffset + "]" + System.lineSeparator() +
-                    "Java Parsed Date: [" + formattedServerDate + "]" + System.lineSeparator() +
-                    "Server Timezone: [" + currentTimezone + "]" + System.lineSeparator() +
-                    "Server Offset: [" + currentOffset + "]" + System.lineSeparator()
-            );
 
-            // Retrieves all necessary data.
-            try
-            {
-                // TODO: Get location (and other animal info) below instead of passing-in.
-                // 7. Gets animal demographics record.
-                SimpleFilter demographicsFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
-                String[] demographicsTargetColumns = new String[]{"Id", "calculated_status"};
-                ArrayList<HashMap<String, String>> demographicsRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", demographicsFilter, null, demographicsTargetColumns);
-                if (demographicsRows.isEmpty())
-                {
-                    // Fails if animal does not exist at the center.
-                    String issueDetails = "Animal " + recordId + " does not currently exist at the center.";
-                    _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                    response.put("detailedResponse", issueDetails);
-                    response.put("success", false);
-                    return response;
+            // 3. Creates the object that collects errors from all failing rows, or the successful rows and tasks to upload.
+            BatchValidationException batchErrors = new BatchValidationException();
+            List<Map<String, Object>> validatedRows = new ArrayList<>();
+            List<Map<String, Object>> tasksToInsert = new ArrayList<>();
+            List<Map<String, Object>> tasksToUpdate = new ArrayList<>();
+
+
+            // 4. Loops through each row and validates them.
+            for (int i = 0; i < rowsToValidate.size(); i++) {
+                // Retrieves the current.
+                Map<String, Object> row = rowsToValidate.get(i);
+                // Retrieves required values.
+                String id = row.get("Id") != null ? row.get("Id").toString() : null;
+                String recoveryReason = row.get("recoveryReason") != null ? row.get("recoveryReason").toString() : "none";
+                String observer = row.get("observer") != null ? row.get("observer").toString() : null;
+                String recoveryId = row.get("recoveryId") != null ? row.get("recoveryId").toString() : null;
+                String observation = row.get("observation") != null ? row.get("observation").toString() : null;
+                String submitterInitials = row.get("submitterInitials") != null ? row.get("submitterInitials").toString() : null;
+                java.time.LocalDateTime serverDate = java.time.LocalDateTime.now();    // Explicitly import Java here, otherwise script defaults to joda time due to both being imported above.
+                // TODO: Ask users if initials should be required for deleting a row.
+                if (submitterInitials == null) {
+                    submitterInitials = "empty";
                 }
-                else
-                {
-                    // Fails if animal is not currently alive at the center.
-                    if (!demographicsRows.get(0).get("calculated_status").equals("Alive"))
-                    {
-                        String issueDetails = "Animal " + recordId + " is not currently alive at the center.";
-                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                        response.put("detailedResponse", issueDetails);
-                        response.put("success", false);
-                        return response;
+                // Retrieves optional values.
+                String observerComments = row.get("observerComments") != null ? row.get("observerComments").toString() : null;
+                String room = row.get("room") != null ? row.get("room").toString() : null;
+                String assignedTo = row.get("assignedTo") != null ? row.get("assignedTo").toString() : null;
+                String recoverySpeed = row.get("recoverySpeed") != null ? row.get("recoverySpeed").toString() : null;
+                String recoveryCondition = row.get("recoveryCondition") != null ? row.get("recoveryCondition").toString() : null;
+                String groupId = row.get("groupId") != null ? row.get("groupId").toString() : null;
+                String finalizeComments = row.get("finalizeComments") != null ? row.get("finalizeComments").toString() : null;
+                String location = row.get("location") != null ? row.get("location").toString() : null;
+                String cage = row.get("cage") != null ? row.get("cage").toString() : null;
+                String cageLockSecure = row.get("cageLockSecure") != null ? row.get("cageLockSecure").toString() : null;
+                String deviceId = row.get("deviceId") != null ? row.get("deviceId").toString() : null;
+
+                // Sets data to new row variable.
+                Map<String, Object> validatedRow = new HashMap<>();
+                validatedRow.put("Id", id);
+                validatedRow.put("date", serverDate);
+                validatedRow.put("recoveryReason", recoveryReason);
+                validatedRow.put("observer", observer);
+                validatedRow.put("recoveryId", recoveryId);
+                validatedRow.put("observation", observation);
+                validatedRow.put("submitterInitials", submitterInitials);
+                validatedRow.put("observerComments", observerComments);
+                validatedRow.put("room", room);
+                validatedRow.put("assignedTo", assignedTo);
+                validatedRow.put("recoverySpeed", recoverySpeed);
+                validatedRow.put("recoveryCondition", recoveryCondition);
+                validatedRow.put("groupId", groupId);
+                validatedRow.put("finalizeComments", finalizeComments);
+                validatedRow.put("location", location);
+                validatedRow.put("cage", cage);
+                validatedRow.put("cageLockSecure", cageLockSecure);
+                validatedRow.put("deviceId", deviceId);
+
+                // 4a. Check row for required fields (doesn't require initials for a row deletion).
+                String[] requiredFields = {
+                        "Id", "recoveryReason", "observer", "recoveryId", "observation", "submitterInitials"
+                };
+                boolean missingField = false;
+                for (String field : requiredFields) {
+                    if (validatedRow.get(field) == null || validatedRow.get(field).toString().trim().isEmpty()) {
+                        batchErrors.addRowError(new ValidationException("Row " + (i + 1) + " is missing required field: " + field));
+                        missingField = true;
+                        break;  // Stop checking this row, move to next.
+                    }
+                }
+                if (missingField) {
+                    continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                }
+
+                // 4b. Verifies animal is currently alive and exists at center.
+                SimpleFilter existsAliveAtCenterFilter = new SimpleFilter("id", id, CompareType.EQUAL);
+                String[] existsAliveAtCenterTargetColumns = new String[]{"Id", "calculated_status"};
+                ArrayList<HashMap<String, String>> existsAliveAtCenterRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", existsAliveAtCenterFilter, null, existsAliveAtCenterTargetColumns);
+                if (existsAliveAtCenterRows == null || existsAliveAtCenterRows.isEmpty()) {
+                    batchErrors.addRowError((new ValidationException("Animal does not currently exist at the center.")));
+                    continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                }
+                else if (!existsAliveAtCenterRows.get(0).get("calculated_status").equals("Alive")) {
+                    batchErrors.addRowError((new ValidationException("Animal is no longer alive.")));
+                    continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                }
+
+                // 4c. Verifies no other active recoveries exist for the current animal (only if this is an 'import' observation).
+                if (observation.equals("Imported")) {
+                    // Get started & finished recoveries.
+                    String[] existingRecoveriesTargetColumn = new String[]{"recoveryId"};
+                    SimpleFilter recoveriesStartedFilter = new SimpleFilter("id", id, CompareType.EQUAL);
+                    recoveriesStartedFilter.addCondition("observation", "Imported", CompareType.EQUAL);
+                    SimpleFilter recoveriesFinishedFilter = new SimpleFilter("id", id, CompareType.EQUAL);
+                    recoveriesFinishedFilter.addCondition("observation", "Fully Recovered;Deleted", CompareType.IN);
+                    ArrayList<HashMap<String, String>> recoveriesStartedRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveriesStartedFilter, null, existingRecoveriesTargetColumn);
+                    ArrayList<HashMap<String, String>> recoveriesFinishedRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveriesFinishedFilter, null, existingRecoveriesTargetColumn);
+                    // Verify counts match.
+                    if (recoveriesStartedRows != null && !recoveriesStartedRows.isEmpty() && recoveriesFinishedRows != null && !recoveriesFinishedRows.isEmpty() && recoveriesStartedRows.size() != recoveriesFinishedRows.size()) {
+                        batchErrors.addRowError((new ValidationException("Animal: " + id + " already has an active recovery in-progress.  Please finish this recovery before beginning a new one.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
                     }
                 }
 
-                // 8. Verifies there are no active recoveries ONLY if this an import.
-                if (recordObservation.equals("Imported"))
-                {
-                    // Gets all recoveries started.
-                    SimpleFilter recoveryStartFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
-                    recoveryStartFilter.addCondition("observation", "Imported", CompareType.EQUAL);
-                    String[] recoveryStartTargetColumn = new String[]{"recoveryId"};
-                    ArrayList<HashMap<String, String>> recoveryStartRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryStartFilter, null, recoveryStartTargetColumn);
-                    // Gets all recoveries finished.
-                    SimpleFilter recoveryEndFilter = new SimpleFilter("id", recordId, CompareType.EQUAL);
-                    recoveryEndFilter.addCondition("observation", "Fully Recovered", CompareType.EQUAL);
-                    String[] recoveryEndTargetColumn = new String[]{"recoveryId"};
-                    ArrayList<HashMap<String, String>> recoveryEndRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveryEndFilter, null, recoveryEndTargetColumn);
-                    // Converts all finished recoveries into a set for fast comparison.
-                    Set<String> finishedIds = recoveryEndRows.stream()
-                            .map(row -> row.get("recoveryId"))
-                            .filter(id -> id != null)
-                            .collect(Collectors.toSet());
-                    // Verifies every recovery ID 'started' has also 'ended'.
-                    boolean allClosed = true;
-                    ArrayList<String> missingEndIds = new ArrayList<>();
-                    for (HashMap<String, String> startRow : recoveryStartRows)
-                    {
-                        String startId = startRow.get("recoveryId");
-                        if (!finishedIds.contains(startId))
-                        {
-                            allClosed = false;
-                            missingEndIds.add(startId);
-                        }
-                    }
-                    if (!allClosed)
-                    {
-                        String issueDetails = "The following recoveries are still open: " + missingEndIds;
-                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                        response.put("detailedResponse", issueDetails);
-                        response.put("success", false);
-                        return response;
-                    }
-                }
-
-                // 9. Creates or updates the taskID dataset.
-                if (recordObservation.equals("Imported")) {
-                    // Creates a new Task corresponding to this recovery (using our passed-in recoveryID to create the task id).
-                    Map<String, Object> taskRecord = new HashMap<>();
-                    String newTaskId = recoveryId;
-                    taskRecord.put("taskid", newTaskId);
-                    taskRecord.put("title", "Anesthesia Recovery");
-                    taskRecord.put("category", "task");
+                // 4d. Create or Update task into task dataset.
+                Map<String, Object> taskRecord = new HashMap<>();
+                taskRecord.put("taskid", recoveryId);
+                taskRecord.put("title", "Anesthesia Recovery");
+                taskRecord.put("category", "task");
+                taskRecord.put("formType", "Anesthesia Recovery");
+                taskRecord.put("assignedTo", getUser().getUserId());
+                if (observation.equals("Imported")) {
                     taskRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
-                    taskRecord.put("formType", "Anesthesia Recovery");
-                    taskRecord.put("assignedTo", getUser().getUserId());
-                    // Inserts the task into the 'tasks' dataset.
-                    List<Map<String, Object>> taskToInsert = null;
-                    taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
-                    TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-                    QueryUpdateService service = ti.getUpdateService();
-                    BatchValidationException validationTaskException = new BatchValidationException();
-                    List<Map<String, Object>> insertedTask = service.insertRows(getUser(), getContainer(), taskToInsert, validationTaskException, null, null);
-                    // Verifies task was inserted correctly.
-                    if (taskToInsert.size() != insertedTask.size()) {
-                        String issueDetails = "There was an issue creating a corresponding task for this recovery.";
-                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                        response.put("detailedResponse", issueDetails);
-                        response.put("success", false);
-                        return response;
-                    }
-                    recoveryTaskId = (int) Double.parseDouble(String.valueOf(insertedTask.get(0).get("rowid")));
+                    tasksToInsert.add(taskRecord);
                 }
-                else if (recordObservation.equals("Laying Down") || recordObservation.equals("Sitting Upright")) {
-                    // Updates the Task corresponding to this recovery.
-                    Map<String, Object> taskRecord = new HashMap<>();
-                    String existingTaskId = recoveryId;
-                    taskRecord.put("taskid", existingTaskId);
-                    taskRecord.put("title", "Anesthesia Recovery");
-                    taskRecord.put("category", "task");
+                else if (observation.equals("Sitting Upright") || observation.equals("Laying Down")) {
                     taskRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
-                    taskRecord.put("formType", "Anesthesia Recovery");
-                    taskRecord.put("assignedTo", getUser().getUserId());
-                    // Updates the task in the 'tasks' dataset.
-                    List<Map<String, Object>> taskToUpdate = null;
-                    taskToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
-                    TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-                    QueryUpdateService service = ti.getUpdateService();
-                    BatchValidationException validationTaskException = new BatchValidationException();
-                    List<Map<String, Object>> updatedTask = service.updateRows(getUser(), getContainer(), taskToUpdate, taskToUpdate, validationTaskException, null, null);
-                    // Verifies task was updated correctly.
-                    if (taskToUpdate.size() != updatedTask.size()) {
-                        String issueDetails = "There was an issue completing the corresponding task for this recovery.";
-                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                        response.put("detailedResponse", issueDetails);
-                        response.put("success", false);
-                        return response;
-                    }
-                    recoveryTaskId = (int) Double.parseDouble(String.valueOf(updatedTask.get(0).get("rowid")));
-                    _log.info("RECOVERY TASK ID EXISTING A: " + existingTaskId);
-                    _log.info("RECOVERY TASK ID EXISTING B: " + taskToUpdate);
-                    _log.info("RECOVERY TASK ID EXISTING C: " + updatedTask);
+                    tasksToUpdate.add(taskRecord);
                 }
-                else if (recordObservation.equals("Fully Recovered")) {
-                    // Updates the Task corresponding to this recovery.
-                    Map<String, Object> taskRecord = new HashMap<>();
-                    String existingTaskId = recoveryId;
-                    taskRecord.put("taskid", existingTaskId);
-                    taskRecord.put("title", "Anesthesia Recovery");
-                    taskRecord.put("category", "task");
+                else if (observation.equals("Fully Recovered")) {
                     taskRecord.put("qcstate", EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId());
-                    taskRecord.put("formType", "Anesthesia Recovery");
-                    taskRecord.put("assignedTo", getUser().getUserId());
-                    // Updates the task in the 'tasks' dataset.
-                    List<Map<String, Object>> taskToUpdate = null;
-                    taskToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
-                    TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-                    QueryUpdateService service = ti.getUpdateService();
-                    BatchValidationException validationTaskException = new BatchValidationException();
-                    List<Map<String, Object>> updatedTask = service.updateRows(getUser(), getContainer(), taskToUpdate, taskToUpdate, validationTaskException, null, null);
-                    // Verifies task was updated correctly.
-                    if (taskToUpdate.size() != updatedTask.size()) {
-                        String issueDetails = "There was an issue completing the corresponding task for this recovery.";
-                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                        response.put("detailedResponse", issueDetails);
-                        response.put("success", false);
-                        return response;
-                    }
-                    recoveryTaskId = (int) Double.parseDouble(String.valueOf(updatedTask.get(0).get("rowid")));
+                    tasksToUpdate.add(taskRecord);
                 }
-                else if (recordObservation.equals("Deleted")) {
-                    // Creates a new Task corresponding to this recovery (using our passed-in recoveryID).
-                    Map<String, Object> taskRecord = new HashMap<>();
-                    String existingTaskId = recoveryId;
-                    taskRecord.put("taskid", existingTaskId);
-                    taskRecord.put("title", "Anesthesia Recovery");
-                    taskRecord.put("category", "task");
+                else if (observation.equals("Deleted")) {
                     taskRecord.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
-
-                    // TEST
-//                    QCStateManager.getInstance().getStates(ctx.getContainer())
-
-                    taskRecord.put("qcstate", QCStateManager.getInstance().getStates(getContainer()));
-
-                    // TEST
-
-                    taskRecord.put("formType", "Anesthesia Recovery");
-                    taskRecord.put("assignedTo", getUser().getUserId());
-                    // Updates the task in the 'tasks' dataset.
-                    List<Map<String, Object>> taskToUpdate = null;
-                    taskToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
-                    TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-                    QueryUpdateService service = ti.getUpdateService();
-                    BatchValidationException validationTaskException = new BatchValidationException();
-                    List<Map<String, Object>> updatedTask = service.updateRows(getUser(), getContainer(), taskToUpdate, taskToUpdate, validationTaskException, null, null);
-                    // Verifies task was updated correctly.
-                    if (taskToUpdate.size() != updatedTask.size()) {
-                        String issueDetails = "There was an issue deleting the corresponding task for this recovery.";
-                        _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                        response.put("detailedResponse", issueDetails);
-                        response.put("success", false);
-                        return response;
-                    }
-                    recoveryTaskId = (int) Double.parseDouble(String.valueOf(updatedTask.get(0).get("rowid")));
+                    tasksToUpdate.add(taskRecord);
                 }
 
-                // 10. Updates the anesthesiaRecovery dataset.
-                // Creates a new Task corresponding to this recovery (using our passed-in recoveryID to create the task id).
-                Map<String, Object> anesthesiaEntry = new HashMap<>();
-                anesthesiaEntry.put("Id", recordId);
-                anesthesiaEntry.put("room", recordRoom);
-                anesthesiaEntry.put("date", deviceDate);
-                anesthesiaEntry.put("observation", recordObservation);
-                anesthesiaEntry.put("recoveryStart", recordRecoveryStart);
-                anesthesiaEntry.put("observerComments", recordObserverComments);
-                anesthesiaEntry.put("observer", recordObserver);
-                anesthesiaEntry.put("recoveryId", recoveryId);
-                anesthesiaEntry.put("recoverySpeed", recordRecoverySpeed);
-                anesthesiaEntry.put("recoveryCondition", recordRecoveryCondition);
-                anesthesiaEntry.put("assignedTo", recordAssignedTo);
-                anesthesiaEntry.put("recoveryReason", recordRecoveryReason);
-                anesthesiaEntry.put("submitterInitials", recordSubmitterInitials);
-                anesthesiaEntry.put("groupId", recordGroupId);
-                anesthesiaEntry.put("finalizeComments", recordFinalizeComments);
-                anesthesiaEntry.put("location", recordLocation);
-                anesthesiaEntry.put("cage", recordCage);
-                anesthesiaEntry.put("cageLockSecure", recordCageLockSecure);
-                anesthesiaEntry.put("deviceId", recordDeviceId);
-                anesthesiaEntry.put("taskId", recoveryTaskId);
-                // Inserts the task into the 'anesthesiaRecovery' dataset.
-                List<Map<String, Object>> observationToInsert = null;
-                observationToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(anesthesiaEntry);
-                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("anesthesiaRecovery");
-                QueryUpdateService service = ti.getUpdateService();
-                BatchValidationException validationTaskException = new BatchValidationException();
-                List<Map<String, Object>> insertedObservation = service.insertRows(getUser(), getContainer(), observationToInsert, validationTaskException, null, null);
-                // Verifies observation was inserted correctly.
-                if (observationToInsert.size() != insertedObservation.size()) {
-                    String issueDetails = "There was an issue inserting the observation row into the anesthesia recovery dataset.";
-                    _log.info("Error updating the anesthesia recovery dataset: " + issueDetails);
-                    response.put("detailedResponse", issueDetails);
-                    response.put("success", false);
-                    return response;
-                }
-            } catch (Exception e) {
-                _log.info("Error updating the anesthesia recovery dataset: " + e.getMessage());
-                response.put("detailedResponse", "There was an issue querying the necessary datasets for anesthesia recovery validation: " + e.getMessage());
+                // 4e. Current row is valid, added to validatedRows for the batch update.
+                validatedRows.add(validatedRow);
+
+            }
+
+
+            // 6. Report all manual validation errors back to the user.
+            if (batchErrors.hasErrors()) {
+                String combinedErrors = batchErrors.getRowErrors().stream()
+                        .map(error -> "Row " + error.getRowNumber() + ": " + error.getMessage())
+                        .collect(Collectors.joining("\n"));
                 response.put("success", false);
+                response.put("detailedResponse", combinedErrors);
+                response.put("errors", batchErrors.getRowErrors());
                 return response;
             }
 
-            // Returns successfully.
-            _log.info("Successfully updated the anesthesia recovery dataset.");
-            response.put("detailedResponse", "Anesthesia table was successfully updated for animal: " + recordId);
-            response.put("success", true);
-            return response;
+            // 7. Officially updates the database if all manual validation has been passed.
+            try (DbScope.Transaction transaction = StudySchema.getInstance().getSchema().getScope().ensureTransaction()) {
+                // 7a. Creates the environment variables.
+                TableInfo anesthesiaTableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("anesthesiaRecovery");
+                TableInfo tasksTableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+                QueryUpdateService anesthesiaTableService = anesthesiaTableInfo.getUpdateService();
+                QueryUpdateService tasksTableService = tasksTableInfo.getUpdateService();
+                BatchValidationException dbErrors = new BatchValidationException();
+                validatedRows = SimpleQueryUpdater.makeRowListCaseInsensitive(validatedRows);
+                tasksToInsert = SimpleQueryUpdater.makeRowListCaseInsensitive(tasksToInsert);
+                tasksToUpdate = SimpleQueryUpdater.makeRowListCaseInsensitive(tasksToUpdate);
+
+                // 7b. Creates the tasks containing all rows to be inserted.
+                List<Map<String, Object>> anesthesiaRowsToInsert = anesthesiaTableService.insertRows(getUser(), getContainer(), validatedRows, dbErrors, null, null);
+                tasksTableService.insertRows(getUser(), getContainer(), tasksToInsert, dbErrors, null, null);
+                tasksTableService.updateRows(getUser(), getContainer(), tasksToUpdate, tasksToUpdate, dbErrors, null, null);
+
+                // 7c. Checks for errors in any row and aborts the insert
+                if (dbErrors.hasErrors()) {
+                    throw dbErrors;
+                }
+
+                // 7d. Executes the Task to insert all rows via a batch transaction.
+                transaction.commit();
+                response.put("success", true);;
+                response.put("detailedResponse", "Database save successful.");
+                response.put("rowsUpdated", anesthesiaRowsToInsert.size());
+                return response;
+
+            }
+            // Catches any errors
+            catch (Exception e) {
+                _log.info("There was an issue inserting rows into the anesthesiaRecovery dataset: " + e.getMessage());
+                response.put("success", false);
+                response.put("detailedResponse", "Database save failed: " + e.getMessage());
+                return response;
+            }
         }
     }
+
+    public static class AnesthesiaBatchForm {
+        private List<Map<String, Object>> rows;
+
+        public List<Map<String, Object>> getRows() {
+            return rows;
+        }
+
+        public void setRows(List<Map<String, Object>> rows) {
+            this.rows = rows;
+        }
+    }
+
 
 
 

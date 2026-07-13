@@ -25,7 +25,6 @@ import { RoomContent } from '../../components/home/RoomContent';
 import { HomeNavigationContextProvider, useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
 import { RoomContextProvider } from '../../context/RoomContextManager';
 import { labkeyGetUserPermissions } from '../../api/labkeyActions';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { AdoptionForm } from '../../components/adoptionDataEntry/AdoptionForm';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';

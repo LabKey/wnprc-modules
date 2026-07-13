@@ -57,7 +57,7 @@ export const canEditLayout = (user: Security.GetUserPermissionsResponse) => {
     return false;
 }
 
-export const canEditConditionPermission = (user: GetUserPermissionsResponse) => {
+export const canEditConditionPermission = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
 };
 

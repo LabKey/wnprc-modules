@@ -19,18 +19,16 @@
 import * as React from 'react';
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { HousingTransferData } from '../../types/housingFormTypes';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { Box } from '@mui/material';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, startHousingTransfer } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
-import { Filter } from '@labkey/api';
+import { Filter, Query, Security } from '@labkey/api';
 import { HousingDataGrid } from './HousingDataGrid';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { LoadingScreen } from '../LoadingScreen';
 
 interface HousingFormProps {
-    user: GetUserPermissionsResponse;
+    user: Security.GetUserPermissionsResponse;
     currRoom?: string;
     selectedAnimals?: string[];
 }
@@ -49,7 +47,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
 
     useEffect(() => {
         if (selectedAnimals && selectedAnimals.length > 0) {
-            const config: SelectRowsOptions = {
+            const config: Query.SelectRowsOptions = {
                 schemaName: 'study',
                 queryName: 'demographicsCurLocationNew',
                 columns: ['id', 'room', 'room/rowid', 'cage'],
@@ -104,7 +102,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [selectedAnimals, currRoom]);
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
             columns: ['room', 'rowid'],
@@ -127,7 +125,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, []);
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'study',
             queryName: 'demographics',
             viewName: 'Alive, at Center',
@@ -148,7 +146,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, []);
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'housing_reason',
             columns: ['value', 'title'],
@@ -209,7 +207,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [currRoom]);
 
     const handleAnimalsFound = useCallback((room: string, cage: Option<string>, foundAnimals: HousingTransferData[], triggeredBy: string) => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'study',
             queryName: 'demographicsCurLocationNew',
             columns: ['id', 'room', 'room/rowid', 'cage'],

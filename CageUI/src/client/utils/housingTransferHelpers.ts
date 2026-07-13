@@ -20,8 +20,7 @@
 import { Option } from '@labkey/components';
 import { fetchCurrentCageMods } from '../api/popularQueries';
 import { ModTypes } from '../types/typings';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 
 export const getCode = (code: string, options: Option<string>[]): Option<string> => {
@@ -44,7 +43,7 @@ export const getCagingCodes = async (id: string): Promise<string[]> => {
 }
 
 export const checkIsMarm = async (id: string): Promise<boolean> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographics',
         columns: ['species'],
@@ -68,7 +67,7 @@ export const checkIsMarm = async (id: string): Promise<boolean> => {
 }
 
 export const checkIsInfant = async (id: string): Promise<boolean> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'demographicsInfants',
         columns: ['isInfant'],
@@ -99,7 +98,7 @@ export const infantInDestination = async (ids: string[]): Promise<string | null>
 }
 
 export const checkIsAdopted = async (parentId: string, infantId: string): Promise<boolean> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographicsOffspring',
         columns: ['Offspring/parents/sire', 'Offspring/parents/dam'],
@@ -121,7 +120,7 @@ export const checkIsAdopted = async (parentId: string, infantId: string): Promis
 }
 
 export const checkIsMale = async (id: string): Promise<boolean> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographics',
         viewName: 'Alive, At Center',
@@ -156,7 +155,7 @@ export const getSocialCode = async (animalId: string, animalsInCage: string[]): 
     This function determines if the mother is in the destination animal list
  */
 export const checkIsMotherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographicsOffspring',
         columns: ['Offspring/parents/dam'],
@@ -183,7 +182,7 @@ export const checkIsMotherInDest = async (infantId: string, animalsInCage: strin
     This function determines if the father is in the destination animal list
  */
 export const checkIsFatherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographicsOffspring',
         columns: ['Offspring/parents/sire'],

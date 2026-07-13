@@ -17,22 +17,13 @@
  */
 
 import * as React from 'react';
-import { AppContainer } from 'react-hot-loader';
 import { createRoot } from 'react-dom/client';
 import { HousingTransfer } from './HousingTransfer';
 
 const render = () => {
     createRoot(document.getElementById('app')).render(
-        <AppContainer>
             <HousingTransfer/>
-        </AppContainer>
     );
 };
-
-declare const module: any;
-
-if (module.hot) {
-    module.hot.accept();
-}
 
 render();

@@ -22,8 +22,7 @@ import '../../cageui.scss';
 import {
     labkeyGetUserPermissions,
 } from '../../api/labkeyActions';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { ActionURL } from '@labkey/api';
+import { ActionURL, Security } from '@labkey/api';
 import { HousingForm } from '../../components/housingTransfer/HousingForm';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -31,14 +30,14 @@ import { findAnimalsInCage } from '../../api/popularQueries';
 
 
 export const HousingTransfer: FC = () => {
-    const [user, setUser] = useState<GetUserPermissionsResponse>(null);
+    const [user, setUser] = useState<Security.GetUserPermissionsResponse>(null);
     const [firstRoom, setFirstRoom] = useState<string>();
     const [selectedAnimals, setSelectedAnimals] = useState<string[]>();
 
 
     useEffect(() => {
         const userProfile = labkeyGetUserPermissions();
-        userProfile.then((profile: GetUserPermissionsResponse) => {
+        userProfile.then((profile: Security.GetUserPermissionsResponse) => {
             if (profile.user) {
                 setUser(profile);
             }

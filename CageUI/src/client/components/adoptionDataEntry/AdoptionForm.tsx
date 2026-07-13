@@ -21,7 +21,7 @@ import * as React from 'react';
 import { FC, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridAutosizeOptions, GridColDef, GridRowModel, useGridApiRef } from '@mui/x-data-grid';
 import { Box, Button } from '@mui/material';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { AdoptionData } from '../../types/adoptionFormTypes';
 import { dateTimeColumnType } from '../DateTimeGridField';
 import { generateUUID } from '../../utils/helpers';

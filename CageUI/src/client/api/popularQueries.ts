@@ -103,7 +103,7 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
 };
 
 export const fetchGhostCage = async (objectId: string): Promise<GhostCageData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'ghost_cages',
         filterArray: [Filter.create('cage_objectid', objectId, Filter.Types.EQUAL)]
@@ -161,7 +161,7 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
 
 // TODO update this query with cageNew
 export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'demographicsCurLocationNew',
         filterArray: [
@@ -186,7 +186,7 @@ export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> =
 }
 
 export const fetchConditionCodes = async (): Promise<Option<string>[]> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'ehr_lookups',
         queryName: 'housing_condition_codes',
         filterArray: [
@@ -207,7 +207,7 @@ export const fetchConditionCodes = async (): Promise<Option<string>[]> => {
 };
 
 export const fetchCurrentCageMods = async (cageId: string): Promise<string[]> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'currentCageMods',
         filterArray: [

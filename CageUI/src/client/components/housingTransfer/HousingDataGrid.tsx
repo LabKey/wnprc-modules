@@ -29,19 +29,17 @@ import {
     GridRowModel,
     useGridApiRef
 } from '@mui/x-data-grid';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { Autocomplete, Box, IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
-import { Filter, Security } from '@labkey/api';
+import { Filter, Query, Security } from '@labkey/api';
 import { dateTimeColumnType } from '../DateTimeGridField';
 import { fetchConditionCodes, findAnimalsInCage } from '../../api/popularQueries';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { canEditConditionPermission } from '../../utils/homeHelpers';
 import {
     checkIsMarm,
@@ -54,7 +52,7 @@ import {
 } from '../../utils/housingTransferHelpers';
 
 interface HousingDataGridProps {
-    user: GetUserPermissionsResponse;
+    user: Security.GetUserPermissionsResponse;
     roomLabel: string;
     animals: HousingTransferData[];
     allAnimals: HousingTransferData[];
@@ -114,7 +112,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     }, [animals, onAnimalsChange]);
 
     const fetchProjectOptions = useCallback(async (animalId: string) => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'study',
             queryName: 'ActiveAssignments',
             columns: ['project', 'project/displayName'],
@@ -430,7 +428,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         }
 
         if (selectedRoom) {
-            const config: SelectRowsOptions = {
+            const config: Query.SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'cagesInRoom',
                 columns: ['room', 'rack_object_id', 'rackid', 'cage_object_id', 'cage_number'],

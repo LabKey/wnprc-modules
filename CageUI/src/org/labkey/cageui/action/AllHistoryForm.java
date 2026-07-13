@@ -23,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
-;
-
 public class AllHistoryForm
 {
     private Integer _rowid;

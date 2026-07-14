@@ -1,6 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Animal Request Form">
-    <requiresLogin/>
-    <dependencies>
-        <dependency path="animalrequests/gen/app.js"/>
-    </dependencies>
-</view>

@@ -53,7 +53,7 @@ function onInsert(helper, scriptErrors, row){
         let latestWaterSource;
 
         if (lixitOrderMap != null){
-                lixitStartDate = new Date(lixitOrderMap.date);
+                lixitStartDate = lixitOrderMap.date;
                 lixitOrderObjectid = lixitOrderMap.objectid;
                 latestWaterSource = lixitOrderMap.waterSource;
 

@@ -18,6 +18,8 @@
   "author": "Board of Regents of the University of Wisconsin System",
   "license": "Apache-2.0",
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@labkey/api": "1.51.5",
     "@labkey/components": "7.43.0",
     "@mui/icons-material": "^9.0.1",
@@ -29,6 +31,7 @@
     "react": "~18.3.1",
     "react-bootstrap": "~2.10.10",
     "react-dom": "~18.3.1",
+    "react-is": "^18.3.1",
     "react-select": "^5.10.2",
     "react-svg": "^16.4.2"
   },
@@ -38,7 +41,7 @@
     "@types/lodash": "^4.17.24",
     "@types/react": "~18.3.3",
     "@types/react-bootstrap": "~0.32.37",
-    "@types/react-dom": "~18.3.0",
+    "@types/react-dom": "~18.3.1",
     "uuid": "14.0.1"
   },
   "overrides": {

@@ -40,34 +40,3 @@ select setname, container, 8 as value, 'Caging' as category, 'Ghost Cage' as tit
 
 insert into ehr_lookups.lookups (set_name,container,value, title)
 select setname, container, 'ghostCage' as value, '/cageui/static/cage.svg' as title from ehr_lookups.lookup_sets where setname='cageui_svg_urls';
-
-DROP TABLE IF EXISTS cageui.housing_test;
-CREATE TABLE cageui.housing_test
-(
-    dsrowid SERIAL NOT NULL,
-    room VARCHAR NOT NULL,
-    cage VARCHAR,
-    date TIMESTAMP NOT NULL,
-    enddate TIMESTAMP,
-    objectid VARCHAR NOT NULL,
-    qcstate INTEGER,
-    description VARCHAR,
-    participantid VARCHAR(32),
-    cond VARCHAR,
-    remark VARCHAR,
-    taskid VARCHAR,
-    reason VARCHAR,
-    project INTEGER,
-    account VARCHAR,
-    performedby VARCHAR,
-    requestid VARCHAR,
-    restrainttype VARCHAR,
-    ejacconfirmed BOOLEAN,
-    container         entityid NOT NULL,
-    createdby         userid,
-    created           TIMESTAMP,
-    modifiedby        userid,
-    modified          TIMESTAMP,
-    CONSTRAINT PK_housing_test PRIMARY KEY (dsrowid),
-    CONSTRAINT FK_housing_test_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
-);

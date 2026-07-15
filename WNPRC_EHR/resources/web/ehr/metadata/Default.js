@@ -145,19 +145,6 @@ EHR.Metadata.registerMetadata('Default', {
                 dateFormat: LABKEY.extDefaultDateFormat,
                 timeFormat: 'H:i'
             }
-        }
-        ,cageNew: {
-            editorConfig: {
-                listeners: {
-                    change: function(field, val){
-                        if(val && !isNaN(val)){
-                            var newVal = EHR.Utils.padDigits(val, 4);
-                            if(val != newVal)
-                                field.setValue(newVal);
-                        }
-                    }
-                }
-            }
         },
         cage: {
             editorConfig: {
@@ -792,9 +779,6 @@ EHR.Metadata.registerMetadata('Default', {
                 shownInGrid: false
                 //,allowBlank: false
             }
-            ,cageNew: {
-                allowBlank: false
-            }
             ,cage: {
                 allowBlank: false
             }
@@ -802,11 +786,6 @@ EHR.Metadata.registerMetadata('Default', {
                 allowBlank: false
                 ,shownInGrid: false
                 ,lookup:{ schemaName: 'ehr_lookups', queryName: 'housing_condition_codes', displayColumn: 'value', keyColumn: 'value'}
-            }
-            ,condNew: {
-                allowBlank: false
-                ,shownInGrid: false
-                ,lookup:{ schemaName: 'cageui', queryName: 'housing_condition_records', displayColumn: 'final_condition', keyColumn: 'housing'}
             }
             ,reason: {
                 shownInGrid: false,

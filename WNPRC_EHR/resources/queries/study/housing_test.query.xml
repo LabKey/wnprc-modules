@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="housing_test" tableDbType="TABLE" useColumnOrder="true">
+            <table tableName="housing" tableDbType="TABLE" useColumnOrder="true">
                 <tableUrl />
                 <insertUrl />
                 <importUrl />
@@ -31,11 +31,31 @@
                     <column columnName="cage">
                         <!--<nullable>false</nullable>-->
                         <columnTitle>Cage</columnTitle>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                    </column>
+                    <column columnName="cageNew">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Cage New</columnTitle>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cages</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
+                        </fk>
                         <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;cage=${cageNew}&amp;</url>
                     </column>
                     <column columnName="cond">
                         <nullable>true</nullable>
                         <columnTitle>Condition</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>housing_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="condNew">
+                        <nullable>true</nullable>
+                        <columnTitle>Condition New</columnTitle>
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>housing_condition_records</fkTable>

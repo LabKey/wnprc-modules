@@ -29,8 +29,8 @@
                     <column columnName="housing">
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
-                            <fkTable>housing</fkTable>
-                            <fkColumnName>lsid</fkColumnName>
+                            <fkTable>housing_test</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
                             <fkDisplayColumnName>Id</fkDisplayColumnName>
                         </fk>
                     </column>

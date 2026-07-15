@@ -45,7 +45,7 @@ SELECT
     coalesce(d2.cageNew, '') as cage_order,
     d2.cage_sortValue @hidden
 
-FROM study.housing d2
+FROM study.housing_test d2
 
 WHERE d2.enddate IS NULL
   AND d2.qcstate.publicdata = true

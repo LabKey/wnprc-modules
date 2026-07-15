@@ -59,10 +59,12 @@ import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.model.Cage;
+import org.labkey.cageui.model.HousingData;
 import org.labkey.cageui.model.HousingTransferData;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.ModLocations;
+import org.labkey.cageui.model.Option;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackCondition;
 import org.labkey.cageui.model.RackGroup;
@@ -82,12 +84,14 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CageUIController extends SpringActionController
 {
@@ -132,6 +136,17 @@ public class CageUIController extends SpringActionController
             _housingTransferData = housingTransferData;
         }
 
+        public static String convertOptionArrayToString(Option<String>[] options) {
+            if (options == null) {
+                return "";
+            }
+
+            return Arrays.stream(options)
+                    .map(option -> option != null ? option.getValue() : null)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(","));
+        }
+
 
         @Override
         public void validateForm(SimpleApiJsonForm form, Errors errors)
@@ -163,9 +178,30 @@ public class CageUIController extends SpringActionController
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
         {
+
+            ArrayList<HousingData> housingRecords = new ArrayList<HousingData>();
+            String taskId = UUID.randomUUID().toString();
+            for(HousingTransferData record : getHousingTransferData()){
+                HousingData newRecord = new HousingData();
+                newRecord.setId(record.getId());
+                newRecord.setObjectId(UUID.randomUUID().toString());
+                newRecord.setTaskId(taskId);
+                newRecord.setDate(record.getInDate());
+                newRecord.setEndDate(record.getOutDate());
+                newRecord.setQcState(2);
+                newRecord.setRoom(record.getDestinationRoom().getLabel());
+                newRecord.setCage(record.getDestinationCage().getValue());
+                newRecord.setReason(convertOptionArrayToString(record.getReasonForMove()));
+                newRecord.setRemark(record.getRemarks());
+                newRecord.setProject(record.getProject());
+                newRecord.setPerformedBy(record.getPerformedBy());
+                newRecord.setEjacConfirmed(record.isEjacConfirmed());
+                housingRecords.add(newRecord);
+            }
+
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             Map<String, Object> response = new HashMap<String, Object>();
-            JSONArray finalData = mapper.convertValue(getHousingTransferData(), JSONArray.class);
+            JSONArray finalData = mapper.convertValue(housingRecords, JSONArray.class);
 
             response.put("transferData", finalData);
             response.put("success", true);

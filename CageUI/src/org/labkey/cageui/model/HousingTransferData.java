@@ -33,7 +33,7 @@ public class HousingTransferData
     private Option<String> destinationCage;
     private Option<String>[] condition;
     private Option<String>[] reasonForMove;
-    private String project;
+    private Integer project;
     private String remarks;
     private String performedBy;
     private boolean alert;
@@ -111,12 +111,12 @@ public class HousingTransferData
         this.reasonForMove = reasonForMove;
     }
 
-    public String getProject()
+    public Integer getProject()
     {
         return project;
     }
 
-    public void setProject(String project)
+    public void setProject(Integer project)
     {
         this.project = project;
     }

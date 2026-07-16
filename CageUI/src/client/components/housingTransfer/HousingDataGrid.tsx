@@ -549,6 +549,12 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             isRequired = true;
         } else if (field === 'reasonForMove') {
             isRequired = true;
+        } else if (field === 'remarks') {
+            const reasonForMoveValues = (row.reasonForMove || []).map((r: Option<string>) => r.value);
+            isRequired = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
+                reasonForMoveValues.includes("Behavior");
+        } else if (field === 'performedBy') {
+            isRequired = true;
         } else if (field === 'project') {
             const isBreeding = row.reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
             isRequired = !!isBreeding;
@@ -712,53 +718,82 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 return null;
             }
         },
-        { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, display: 'flex', renderCell: (params: GridRenderCellParams) => {
-            const reasonForMoveValues = params.row.reasonForMove.map((r: Option<string>) => r.value);
+        { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, editable: true, renderCell: (params: GridRenderCellParams) => {
+            const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
             const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
                 reasonForMoveValues.includes("Behavior");
             const isMissing = requiresRemarks && (!params.row.remarks || params.row.remarks.trim() === '');
             
             return (
-                <TextField
-                    variant={'standard'}
-                    multiline={true}
-                    fullWidth
-                    onBlur={(event) => {
-                        // Prevent event propagation to avoid DataGrid intercepting blur
-                        event.stopPropagation();
-                        if (event.target.value !== (params.row.remarks || '')) {
-                            handleCellChange('remarks', params.id, event.target.value);
-                        }
-                    }}
-                    onKeyDown={(event) => {
-                        if (event.key === ' ') {
-                            event.stopPropagation();
-                        }
-                    }}
-                    defaultValue={params.row.remarks || ''}
-                    required={requiresRemarks}
-                    error={isMissing}
-                />
-            )}
+                <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', py: 0.5 }}>
+                    <Typography variant="body2" sx={{ 
+                        color: isMissing ? 'error.main' : 'inherit',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.2
+                    }}>
+                        {params.value}
+                    </Typography>
+                </Box>
+            )},
+            renderEditCell: (params) => {
+                const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
+                const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
+                    reasonForMoveValues.includes("Behavior");
+                const isMissing = requiresRemarks && (!params.value || params.value.trim() === '');
+                
+                return (
+                    <TextField
+                        variant="standard"
+                        fullWidth
+                        multiline
+                        autoFocus
+                        value={params.value || ''}
+                        onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.stopPropagation();
+                            }
+                        }}
+                        required={requiresRemarks}
+                        error={isMissing}
+                        sx={{
+                            '& .MuiInputBase-input': {
+                                lineHeight: 1.2,
+                                whiteSpace: 'pre-wrap',
+                            },
+                            '& .MuiInput-root': {
+                                padding: '4px 0 5px',
+                            }
+                        }}
+                    />
+                );
+            }
         },
-        { field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, display: 'flex', renderCell: (params: GridRenderCellParams) => {
+        { field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, renderCell: (params: GridRenderCellParams) => {
+            const isMissing = !params.value || params.value.trim() === '';
+            return (
+                <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: isMissing ? 'error.main' : 'inherit' }}>
+                        {params.value}
+                    </Typography>
+                </Box>
+            );
+        },
+        renderEditCell: (params) => {
             const isMissing = !params.value || params.value.trim() === '';
             return (
                 <TextField
                     fullWidth
                     variant="standard"
-                    size="small"
-                    defaultValue={params.value || ''}
+                    autoFocus
+                    value={params.value || ''}
+                    onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
                     required
                     error={isMissing}
-                    onBlur={(e) => {
-                        if (e.target.value !== params.value) {
-                            handleCellChange('performedBy', params.id, e.target.value);
-                        }
-                    }}
-                    onKeyDown={(event) => {
-                        if (event.key === ' ') {
-                            event.stopPropagation();
+                    sx={{
+                        '& .MuiInput-root': {
+                            padding: '4px 0 5px',
                         }
                     }}
                 />

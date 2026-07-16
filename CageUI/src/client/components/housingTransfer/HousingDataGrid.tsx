@@ -41,6 +41,7 @@ import { Filter, Query, Security } from '@labkey/api';
 import { dateTimeColumnType } from '../DateTimeGridField';
 import { fetchConditionCodes, findAnimalsInCage } from '../../api/popularQueries';
 import { canEditConditionPermission } from '../../utils/homeHelpers';
+import { AutoCompleteEditCell } from '../AutoCompleteEditCell';
 import {
     checkIsMarm,
     checkIsInfant,
@@ -106,9 +107,6 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     const handleCellChange = useCallback((field: string, paramId: GridRowId, value: any)=> {
         const updatedAnimals = animals.map(a => a.id === paramId ? { ...a, [field]: value } : a);
         onAnimalsChange(updatedAnimals);
-        if (field === 'condition') {
-            // If condition changed manually, we might want to update metadata or just leave it
-        }
     }, [animals, onAnimalsChange]);
 
     const fetchProjectOptions = useCallback(async (animalId: string) => {
@@ -387,7 +385,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     }, [newAnimalId, animals, onAnimalsChange, updateConditionCodes]);
 
     const handleRoomChange = useCallback(async (paramId: GridRowId, newValue: Option<number>) => {
-        if (!newValue) {
+        let updatedAnimalsState = animals;
+        if (!newValue || newValue.value === null || (typeof newValue === 'object' && Object.keys(newValue).length === 0)) {
             setRowMetadata(prev => ({
                 ...prev,
                 [paramId]: {
@@ -396,19 +395,19 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     animalsInDestinationCage: []
                 }
             }));
-            const updatedAnimals = animals.map(a =>
+            updatedAnimalsState = animals.map(a =>
                 a.id === paramId
                     ? { ...a, destinationRoom: { value: null, label: '' }, destinationCage: { value: '', label: '' } }
                     : a
             );
-            onAnimalsChange(updatedAnimals);
-            return;
+            onAnimalsChange(updatedAnimalsState);
+            return updatedAnimalsState;
         }
 
         const selectedRoom = newValue.label;
         let cageOptions: Option<string>[] = [];
 
-        if (newValue.label === 'No Change' && newValue.value === 0) {
+        if (newValue.label === 'No Change' || newValue.value === 0) {
             const noChangeCage = { label: 'No Change', value: '0' };
             setRowMetadata(prev => ({
                 ...prev,
@@ -418,13 +417,13 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     animalsInDestinationCage: []
                 }
             }));
-            const updatedAnimals = animals.map(a =>
+            updatedAnimalsState = animals.map(a =>
                 a.id === paramId
                     ? { ...a, destinationRoom: newValue, destinationCage: noChangeCage }
                     : a
             );
-            onAnimalsChange(updatedAnimals);
-            return;
+            onAnimalsChange(updatedAnimalsState);
+            return updatedAnimalsState;
         }
 
         if (selectedRoom) {
@@ -457,7 +456,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             }
         }));
 
-        const updatedAnimals = animals.map(a => {
+        updatedAnimalsState = animals.map(a => {
             if (a.id === paramId) {
                 const updated = {
                     ...a,
@@ -468,7 +467,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             }
             return a;
         });
-        onAnimalsChange(updatedAnimals);
+        onAnimalsChange(updatedAnimalsState);
+        return updatedAnimalsState;
 
         // Update condition codes as destination cage was cleared
     }, [animals, onAnimalsChange, updateConditionCodes]);
@@ -480,11 +480,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         updateConditionCodes(updatedAnimals, updatedAnimals);
     }, [animals, onAnimalsChange, updateConditionCodes]);
 
-    const processRowUpdate = useCallback((newRow: GridRowModel<HousingTransferData>) => {
-        const updatedAnimals = animals.map((row) => (row.id === newRow.id ? newRow : row));
-        onAnimalsChange(updatedAnimals);
-        return newRow;
-    }, [animals, onAnimalsChange]);
+
 
     const handleAnimalsChange = useCallback((updatedAnimals: HousingTransferData[]) => {
         onAnimalsChange(updatedAnimals);
@@ -516,6 +512,63 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         }
     }, [onAnimalsFound]);
 
+    const processRowUpdate = useCallback(async (newRow: GridRowModel<HousingTransferData>, oldRow: GridRowModel<HousingTransferData>) => {
+        let updatedAnimals = animals.map((row) => (row.id === newRow.id ? newRow : row));
+        let finalRow = newRow;
+
+        if (newRow.destinationRoom?.value !== oldRow.destinationRoom?.value || 
+            (newRow.destinationRoom?.value === null && oldRow.destinationRoom?.value !== null)) {
+            updatedAnimals = await handleRoomChange(newRow.id, newRow.destinationRoom);
+            finalRow = updatedAnimals.find(a => a.id === newRow.id) || newRow;
+        } else if (newRow.destinationCage?.value !== oldRow.destinationCage?.value) {
+            if (newRow.destinationCage && newRow.destinationRoom?.label) {
+                fetchAnimalsInCage(newRow.destinationRoom.label, newRow.destinationCage, newRow.id);
+            }
+        }
+
+        if (JSON.stringify(newRow.reasonForMove) !== JSON.stringify(oldRow.reasonForMove)) {
+            const isBreeding = newRow.reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
+            if (isBreeding && !rowMetadata[newRow.id]?.projectOptions) {
+                fetchProjectOptions(newRow.id);
+            }
+        }
+
+        onAnimalsChange(updatedAnimals);
+        return finalRow;
+    }, [animals, onAnimalsChange, handleRoomChange, fetchAnimalsInCage, fetchProjectOptions, rowMetadata]);
+
+    const getCellClassName = useCallback((params: GridCellParams<HousingTransferData>) => {
+        const { field, value, row } = params;
+
+        let isRequired = false;
+        if (field === 'destinationRoom') {
+            isRequired = true;
+        } else if (field === 'destinationCage') {
+            isRequired = true;
+        } else if (field === 'condition') {
+            isRequired = true;
+        } else if (field === 'reasonForMove') {
+            isRequired = true;
+        } else if (field === 'project') {
+            const isBreeding = row.reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
+            isRequired = !!isBreeding;
+        }
+
+        const isMissing = isRequired && (
+            value === null ||
+            value === undefined ||
+            (typeof value === 'string' && value === '') ||
+            (Array.isArray(value) && value.length === 0) ||
+            (typeof value === 'object' && 'value' in (value as any) && ((value as any).value === null || (value as any).value === ''))
+        );
+
+        if (isMissing) {
+            return 'required-field-error';
+        }
+
+        return '';
+    }, []);
+
     const columns: GridColDef[] = useMemo<GridColDef[]>(() => [
         { field: 'id', headerName: 'ID', minWidth: 100, editable: false, display: 'flex' },
         {
@@ -534,244 +587,109 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             display: 'flex',
             editable: true,
         },
-        { field: 'destinationRoom', headerName: 'Room', flex: 1, minWidth: 150, renderCell: (params: GridRenderCellParams) => {
-                const currentRoom: Option<number> = params.row.destinationRoom;
-                const isMissing = !currentRoom || currentRoom.value === null;
-
-                return (
-                    <Autocomplete
-                        fullWidth
-                        value={roomOptions.find(option => option.value === currentRoom?.value) || null}
-                        options={roomOptions}
-                        getOptionLabel={(option: Option<number>) => option.label || ''}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        onBlur={(event) => event.stopPropagation()}
-                        onKeyDown={(event) => {
-                            if (event.key === ' ') {
-                                event.stopPropagation();
-                            }
-                        }}
-                        onChange={(event, newValue) => {
-                            handleRoomChange(params.id, newValue);
-                        }}
-                        blurOnSelect
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="standard"
-                                size="small"
-                                required
-                                error={isMissing}
-                            />
-                        )}
-                    />
-                );
-            }
-        },
-        { field: 'destinationCage', headerName: 'Cage', flex: 1, minWidth: 100, renderCell: (params: GridRenderCellParams) => {
-                const currentRow = params.row as HousingTransferData;
-                const currentCage = currentRow.destinationCage;
-                const metadata = rowMetadata[currentRow.id];
-                const isMissing = !currentCage || (currentCage.value === '' && currentCage.label === '');
-
-                return (
-                    <Autocomplete
-                        fullWidth
-                        value={
-                            (metadata?.cageOptions?.find(option => option.value === currentCage.value)) ||
-                            (currentCage.label === 'No Change' ? currentCage : null) ||
-                            null
-                        }
-                        options={metadata?.cageOptions || []}
-                        getOptionLabel={(option: Option<string>) => option.label || ''}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        disableClearable={currentRow.destinationRoom?.value === 0 && currentCage.value === '0'}
-                        onKeyDown={(event) => {
-                            if (event.key === ' ') {
-                                event.stopPropagation();
-                            }
-                        }}
-                        onChange={(event, newValue) => {
-                            const updatedValue = newValue || { value: '', label: '' };
-                            // Get current state animal
-                            const animal = animals.find(a => a.id === params.id);
-                            
-                            // Immediately update animals state with new cage
-                            const updatedAnimals = animals.map(a => a.id === params.id ? { ...a, destinationCage: updatedValue } : a);
-                            onAnimalsChange(updatedAnimals);
-                            
-                            // Fetch animals in this cage if room is also set
-                            if (newValue && animal?.destinationRoom?.label) {
-                                fetchAnimalsInCage(animal.destinationRoom.label, newValue, params.id as string);
-                            }
-                        }}
-                        blurOnSelect
-                        onBlur={(event) => event.stopPropagation()}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="standard"
-                                size="small"
-                                required
-                                error={isMissing}
-                            />
-                        )}
-                    />
-                );
-            }
-        },
-        { field: 'condition', headerName: 'Condition', minWidth: 150, editable: false, display: 'flex', renderCell: (params: GridRenderCellParams) => {
-            const isMissing = !params.value || params.value.length === 0;
-            const metadata = rowMetadata[params.id as string];
-            
-            return (
-                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    <Autocomplete
-                        fullWidth
-                        multiple
-                        disabled={!canEditCondition}
-                        value={params.value || []}
-                        options={conditionCodes || []}
-                        getOptionLabel={(option: Option<string>) => option?.label || ''}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        onBlur={(event) => event.stopPropagation()}
-                        onKeyDown={(event) => {
-                            if (event.key === ' ') {
-                                event.stopPropagation();
-                            }
-                        }}
-                        onChange={(event, newValue) => {
-                            handleCellChange('condition', params.id, newValue || null);
-                        }}
-                        renderOption={(props, option, { selected }) => {
-                            const { key, ...optionProps } = props;
-                            const SelectionIcon = selected ? CheckBoxIcon : CheckBoxOutlineBlankIcon;
-                            return (
-                                <li key={key} {...optionProps}>
-                                    <SelectionIcon
-                                        fontSize="small"
-                                        style={{ marginRight: 8, padding: 9, boxSizing: 'content-box' }}
-                                    />
-                                    {option.label}
-                                </li>
-                            );
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="standard"
-                                size="small"
-                                required
-                                error={isMissing}
-                                helperText={!canEditCondition ? "Auto-calculated" : ""}
-                            />
-                        )}
-                        disableCloseOnSelect
-                    />
-                    {metadata?.animalsInDestinationCage && metadata.animalsInDestinationCage.length > 0 && (
-                        <Tooltip title={`Cage mates: ${metadata.animalsInDestinationCage.join(', ')}`}>
-                            <InfoOutlinedIcon fontSize="small" sx={{ ml: 1, color: 'action.active' }} />
-                        </Tooltip>
-                    )}
-                </Box>
-            );
-        }},
-        { field: 'reasonForMove', headerName: 'Reason For Move', flex: 2, minWidth: 200, renderCell: (params: GridRenderCellParams) => {
-            const isMissing = !params.row.reasonForMove || params.row.reasonForMove.length === 0;
-            return (
-                <Autocomplete
-                    value={params.row.reasonForMove || []}
-                    options={reasonOptions || []}
-                    getOptionLabel={(option: Option<string>) => option.label || ''}
-                    isOptionEqualToValue={(option, value) => option.value === value.value}
-                    onBlur={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => {
-                        if (event.key === ' ') {
-                            event.stopPropagation();
-                        }
-                    }}
-                    onChange={(event, newValue) => {
-                        const updatedValue = newValue || [];
-                        const isBreeding = updatedValue.find((r: Option<string>) => r.value === 'Breeding');
-                        
-                        const updatedAnimals = animals.map(a => 
-                            a.id === params.id 
-                                ? { ...a, reasonForMove: updatedValue, project: isBreeding ? a.project : null } 
-                                : a
-                        );
-                        onAnimalsChange(updatedAnimals);
-
-                        if (isBreeding && !rowMetadata[params.id as string]?.projectOptions) {
-                            fetchProjectOptions(params.id as string);
-                        }
-                    }}
-                    renderOption={(props, option, { selected }) => {
-                        const { key, ...optionProps } = props;
-                        const SelectionIcon = selected ? CheckBoxIcon : CheckBoxOutlineBlankIcon;
-                        return (
-                            <li key={key} {...optionProps}>
-                                <SelectionIcon
-                                    fontSize="small"
-                                    style={{ marginRight: 8, padding: 9, boxSizing: 'content-box' }}
-                                />
-                                {option.label}
-                            </li>
-                        );
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            size="small"
-                            required
-                            error={isMissing}
-                        />
-                    )}
-                    multiple
-                    fullWidth
-                    disableCloseOnSelect
+        {
+            field: 'destinationRoom',
+            headerName: 'Room',
+            flex: 1,
+            minWidth: 150,
+            editable: true,
+            renderEditCell: (params) => (
+                <AutoCompleteEditCell
+                    {...params}
+                    required={true}
+                    options={roomOptions}
                 />
-            )}
+            ),
+            valueFormatter: (value: Option<number>) => value?.label || '',
         },
-        { field: 'project', headerName: 'Project', flex: 0.5, minWidth: 100,
-            renderCell: (params: GridRenderCellParams) => {
+        {
+            field: 'destinationCage',
+            headerName: 'Cage',
+            flex: 1,
+            minWidth: 100,
+            editable: true,
+            renderEditCell: (params) => {
+                const metadata = rowMetadata[params.id as string];
                 const currentRow = params.row as HousingTransferData;
-                const metadata = rowMetadata[currentRow.id];
-                const isBreeding = currentRow.reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
-                const isMissing = isBreeding && !params.value;
-
-                if (isBreeding) {
-                    return (
-                        <Autocomplete
-                            fullWidth
-                            value={metadata?.projectOptions?.find(option => option.value === params.value) || (params.value ? {label: params.value, value: params.value} : null)}
-                            options={metadata?.projectOptions || []}
-                            getOptionLabel={(option: Option<string>) => option.label || ''}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            onBlur={(event) => event.stopPropagation()}
-                            onKeyDown={(event) => {
-                                if (event.key === ' ') {
-                                    event.stopPropagation();
-                                }
-                            }}
-                            onChange={(event, newValue) => {
-                                handleCellChange('project', params.id, newValue?.value || null);
-                            }}
-                            blurOnSelect
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="standard"
-                                    size="small"
-                                    required
-                                    error={isMissing}
-                                />
-                            )}
-                        />
-                    );
-                }
-                return null;
-            }
+                return (
+                    <AutoCompleteEditCell
+                        {...params}
+                        required={true}
+                        options={metadata?.cageOptions || []}
+                        disableClearable={currentRow.destinationRoom?.value === 0 && currentRow.destinationCage?.value === '0'}
+                    />
+                );
+            },
+            valueFormatter: (value: Option<string>) => value?.label || '',
+        },
+        {
+            field: 'condition',
+            headerName: 'Condition',
+            minWidth: 150,
+            editable: true,
+            display: 'flex',
+            renderCell: (params: GridRenderCellParams) => {
+                const metadata = rowMetadata[params.id as string];
+                return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <Typography variant="body2">
+                            {(params.value as Option<string>[] || []).map(o => o.label).join(', ')}
+                        </Typography>
+                        {metadata?.animalsInDestinationCage && metadata.animalsInDestinationCage.length > 0 && (
+                            <Tooltip title={`Cage mates: ${metadata.animalsInDestinationCage.join(', ')}`}>
+                                <InfoOutlinedIcon fontSize="small" sx={{ ml: 1, color: 'action.active' }} />
+                            </Tooltip>
+                        )}
+                    </Box>
+                );
+            },
+            renderEditCell: (params) => (
+                <AutoCompleteEditCell
+                    {...params}
+                    required={true}
+                    multiple={true}
+                    options={conditionCodes || []}
+                />
+            ),
+            isCellEditable: () => canEditCondition,
+        },
+        {
+            field: 'reasonForMove',
+            headerName: 'Reason For Move',
+            flex: 2,
+            minWidth: 200,
+            editable: true,
+            renderEditCell: (params) => (
+                <AutoCompleteEditCell
+                    {...params}
+                    required={true}
+                    multiple={true}
+                    options={reasonOptions || []}
+                />
+            ),
+            valueFormatter: (value: Option<string>[]) => (value || []).map(o => o.label).join(', '),
+        },
+        {
+            field: 'project',
+            headerName: 'Project',
+            flex: 0.5,
+            minWidth: 100,
+            editable: true,
+            renderEditCell: (params) => {
+                const metadata = rowMetadata[params.id as string];
+                return (
+                    <AutoCompleteEditCell
+                        {...params}
+                        required={true}
+                        options={metadata?.projectOptions || []}
+                    />
+                );
+            },
+            valueFormatter: (value: any) => (value as Option<string>)?.label || value || '',
+            isCellEditable: (params) => {
+                const reasonForMove = params.row.reasonForMove || [];
+                return !!reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
+            },
         },
         { field: 'ejacConfirmed', headerName: 'Ejaculation Confirmed', flex: 0.5, minWidth: 100,
             renderCell: (params: GridRenderCellParams) => {
@@ -913,6 +831,12 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             <Box sx={{ width: '100%' }}>
                 <DataGrid
                     sx={{
+                        '& .required-field-error': {
+                            backgroundColor: '#ffebee', // Light red background
+                            '&:hover': {
+                                backgroundColor: '#ffcdd2',
+                            },
+                        },
                         '& .MuiDataGrid-cell': {
                             display: 'flex',
                             alignItems: 'center',
@@ -950,6 +874,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     apiRef={apiRef}
                     onCellClick={handleCellClick}
                     processRowUpdate={processRowUpdate}
+                    getCellClassName={getCellClassName}
                     getRowId={(row) => row.id}
                     getRowHeight={() => 'auto'}
                     autosizeOptions={autoSizeOptions}

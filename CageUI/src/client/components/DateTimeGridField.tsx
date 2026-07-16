@@ -117,10 +117,14 @@ function GridEditDateCell({
                     sx: {
                         padding: '0 9px',
                         justifyContent: 'center',
+                        '& .MuiInput-underline:after': {
+                            borderBottomColor: value ? 'primary' : 'error.main',
+                        },
                     },
+                    error: !value,
                     slotProps: {
                         input: {
-                            disableUnderline: true,
+                            disableUnderline: false,
                             sx: { fontSize: 'inherit' },
                         },
                     },

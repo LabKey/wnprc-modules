@@ -52,21 +52,27 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
         outliersFactor: 1.5,
     });
 
+    useEffect(() => {
+        console.log("Data: ", animals)
+    }, [animals]);
+
     const handleAddAnimal = useCallback(() => {
         const newAnimal: AdoptionData = {
             objectid: generateUUID(),
             id: '',
             date: dayjs(),
             dam: '',
-            sire: '',
-            type: AdoptionStatus.Start,
+            type: {
+                label: AdoptionStatus[AdoptionStatus.Start] as keyof typeof AdoptionStatus,
+                value: AdoptionStatus.Start
+            },
             result: null
         };
         setAnimals(prev => [...prev, newAnimal]);
     }, []);
 
     const processRowUpdate = useCallback((newRow: GridRowModel<AdoptionData>, oldRow: GridRowModel<AdoptionData>) => {
-        if (newRow.type !== AdoptionStatus.End) {
+        if (newRow.type.value !== AdoptionStatus.End) {
             newRow.result = null;
         }
         setAnimals(prev => prev.map(row => (row.objectid === newRow.objectid ? newRow : row)));
@@ -156,19 +162,24 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             minWidth: 120,
             editable: true,
             display: 'flex',
-            renderEditCell: (params) => (
-                <AutoCompleteEditCell
-                    {...params}
-                    required={params.row.type === AdoptionStatus.End}
-                    options={adoptionResultOptions}
-                />
-            ),
+            renderEditCell: (params) => {
+                if(params.row.type.value !== AdoptionStatus.End){
+                    return;
+                }
+                return(
+                    <AutoCompleteEditCell
+                        {...params}
+                        required={params.row.type.value === AdoptionStatus.End}
+                        options={adoptionResultOptions}
+                    />
+                );
+            },
             valueFormatter: (value) => {
                 const val = (value as any)?.value !== undefined ? (value as any).value : value;
                 if (val === undefined || val === null) return '';
                 return AdoptionResult[val as number] || '';
             },
-            isCellEditable: (params) => params.row.type === AdoptionStatus.End
+            isCellEditable: (params) => params.row.type.value === AdoptionStatus.End
         }
     ], [adoptionStatusOptions, adoptionResultOptions]);
 
@@ -179,7 +190,7 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             field === 'date' ||
             field === 'dam' ||
             field === 'type' ||
-            (field === 'result' && row.type === AdoptionStatus.End);
+            (field === 'result' && row.type.value === AdoptionStatus.End);
 
         if (isRequired && (value === null || value === undefined || value === '' || (typeof value === 'object' && (value as any).value === null))) {
             return 'required-field-error';

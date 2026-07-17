@@ -34,11 +34,24 @@
                         <columnTitle>Date</columnTitle>
                     </column>
                     <column columnName="type">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>adoption_status</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
                     </column>
                     <column columnName="result">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>adoption_results</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                        </fk>
                     </column>
                     <column columnName="dam">
                         <columnTitle>Foster Dam</columnTitle>
+                        <url>/ehr/participantView.view?participantId=${dam}</url>
                     </column>
                 </columns>
             </table>

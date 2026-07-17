@@ -59,3 +59,17 @@ select setname, container, 2 as value, 'Pause' as title from ehr_lookups.lookup_
 
 insert into ehr_lookups.lookups (set_name,container,value, title)
 select setname, container, 3 as value, 'Resume' as title from ehr_lookups.lookup_sets where setname='adoption_status';
+
+
+INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
+select 'adoption_results' as setname,
+       'Adoption Result Field Values' as label,
+       'List of possible adoption results' as description,
+       'value' as keyField,
+       container from ehr_lookups.lookup_sets where setname='ancestry';
+
+insert into ehr_lookups.lookups (set_name,container,value, title)
+select setname, container, 0 as value, 'Success' as title from ehr_lookups.lookup_sets where setname='adoption_results';
+
+insert into ehr_lookups.lookups (set_name,container,value, title)
+select setname, container, 1 as value, 'Failure' as title from ehr_lookups.lookup_sets where setname='adoption_results';

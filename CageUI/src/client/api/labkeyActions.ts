@@ -20,6 +20,7 @@ import { CageMods, Rack, RackConditionOption, Room, SessionLog } from '../types/
 import { buildURL } from '@labkey/components';
 import { RackSwitchOption } from '../types/homeTypes';
 import { HousingTransferData } from '../types/housingFormTypes';
+import { AdoptionData } from '../types/adoptionFormTypes';
 
 export function labkeyActionSelectWithPromise(
     options: Query.SelectRowsOptions,
@@ -208,6 +209,23 @@ export function startHousingTransfer(animals: HousingTransferData[]): Promise<{
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {transferData: animals},
+        });
+    });
+}
+
+
+// This function is for submitting a adoption form.
+export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'submitAdoptionForm.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {adoptionData: animals},
         });
     });
 }

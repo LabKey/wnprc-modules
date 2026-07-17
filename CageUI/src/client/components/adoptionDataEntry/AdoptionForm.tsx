@@ -37,13 +37,14 @@ import { generateUUID } from '../../utils/helpers';
 import { HousingTransferData } from '../../types/housingFormTypes';
 import { Option } from '@labkey/components';
 import { Query } from '@labkey/api';
-import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
+import { labkeyActionSelectWithPromise, startAdoptionSubmission, startHousingTransfer } from '../../api/labkeyActions';
 import { AutoCompleteEditCell } from '../AutoCompleteEditCell';
 
 interface AdoptionFormProps {}
 
 export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     const [animals, setAnimals] = useState<AdoptionData[]>([]);
+    const [isSaving, setIsSaving] = useState<boolean>(false);
     const apiRef = useGridApiRef();
     const [autoSizeOptions] = useState<GridAutosizeOptions>({
         includeHeaders: true,
@@ -199,6 +200,22 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
         return '';
     }, []);
 
+    const handleSubmit = useCallback(() => {
+        console.log('Submitting form...', animals);
+        startAdoptionSubmission(animals).then((res) => {
+            if(res.success){
+                // Housing transfer complete
+                alert('Adoption Form Submission Complete');
+            }else{
+                alert('Adoption Form Submission Error');
+            }
+            setIsSaving(false);
+        }).catch(err => {
+            alert(`Error saving form: ${err}`);
+            setIsSaving(false);
+        });
+    }, [animals]);
+
     return (
         <Box sx={{ p: 3 }}>
             <Box sx={{ mb: 2 }}>
@@ -259,6 +276,17 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                     }}
                 />
             </Box>
+            {animals.length > 0 && (
+                <div className="form-actions">
+                    <button
+                        className="btn btn-success"
+                        disabled={isSaving}
+                        onClick={() => {setIsSaving(true); handleSubmit();}}
+                    >
+                        Submit
+                    </button>
+                </div>
+            )}
         </Box>
     );
 };

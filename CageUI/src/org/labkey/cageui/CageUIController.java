@@ -54,10 +54,12 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
+import org.labkey.cageui.model.AdoptionData;
 import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
@@ -69,6 +71,7 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -80,12 +83,15 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CageUIController extends SpringActionController
 {
@@ -112,6 +118,100 @@ public class CageUIController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
+        }
+    }
+
+    @RequiresPermission(CageUIAnimalEditorPermission.class)
+    public static class SubmitAdoptionFormAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        ArrayList<AdoptionData> _adoptionData;
+
+        public ArrayList<AdoptionData>  getAdoptionData()
+        {
+            return _adoptionData;
+        }
+
+        public void setAdoptionData(ArrayList<AdoptionData>  adoptionData)
+        {
+            _adoptionData = adoptionData;
+        }
+
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+
+            JSONArray jsonTransferData = json.getJSONArray("adoptionData");
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try
+            {
+                TypeReference<ArrayList<AdoptionData>> typeRef = new TypeReference<ArrayList<AdoptionData>>()
+                {
+                };
+                ArrayList<AdoptionData> adoptionDataList = mapper.readValue(jsonTransferData.toString(), typeRef);
+                setAdoptionData(adoptionDataList);
+            }catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+        }
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            BatchValidationException batchErrors = new BatchValidationException();
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            UserSchema studySchema = QueryService.get().getUserSchema(getUser(), getContainer(), "study");
+            ArrayList<AdoptionDataForm> finalForm = new ArrayList<AdoptionDataForm>();
+
+            for(AdoptionData row : getAdoptionData()){
+                AdoptionDataForm finalRow = new AdoptionDataForm();
+                finalRow.setId(row.getId());
+                finalRow.setObjectid(row.getObjectid());
+                finalRow.setDate(row.getDate());
+                finalRow.setDam(row.getDam());
+                finalRow.setType(row.getType().getValue());
+                if(row.getResult() != null){
+                    finalRow.setResult(row.getResult().getValue());
+                }
+                finalForm.add(finalRow);
+            }
+
+            TableInfo studyAdoptionsTable = studySchema.getTable("adoptions");
+            QueryUpdateService studyAdoptionsQus = studyAdoptionsTable.getUpdateService();
+            if (studyAdoptionsQus == null)
+            {
+                throw new IllegalStateException(studyAdoptionsTable.getName() + " query update service");
+            }
+
+            try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+            {
+                List<Map<String, Object>> adoptionMapList = CageUIManager.get().convertToMapList(finalForm);
+
+                studyAdoptionsQus.insertRows(getUser(), getContainer(), adoptionMapList, batchErrors, null, null);
+
+                if (batchErrors.hasErrors())
+                {
+                    response.put("success", false);
+                    response.put("errors", batchErrors);
+                    return response;
+                }
+                tx.commit();
+                response.put("success", true);
+            }
+            catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
+                   SQLException e)
+            {
+                throw new ValidationException(e.getMessage());
+            }
+            return response;
         }
     }
 

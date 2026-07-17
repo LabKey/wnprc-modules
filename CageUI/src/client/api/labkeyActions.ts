@@ -19,6 +19,7 @@ import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { CageMods, Rack, RackConditionOption, Room, SessionLog } from '../types/typings';
 import { buildURL } from '@labkey/components';
 import { RackSwitchOption } from '../types/homeTypes';
+import { AdoptionData } from '../types/adoptionFormTypes';
 
 export function labkeyActionSelectWithPromise(
     options: Query.SelectRowsOptions,
@@ -191,6 +192,22 @@ export function updateRackConditionStatus(rack: RackSwitchOption, condition: Rac
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {rack: rack.value.objectId, condition: condition.value},
+        });
+    });
+}
+
+// This function is for submitting a adoption form.
+export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'submitAdoptionForm.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {adoptionData: animals},
         });
     });
 }

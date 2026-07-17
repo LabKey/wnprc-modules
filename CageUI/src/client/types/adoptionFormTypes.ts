@@ -19,10 +19,22 @@
 import { Dayjs } from 'dayjs';
 
 export interface AdoptionData {
-    uuid: string;
+    objectid: string;
     id: string;
     date: Dayjs;
     dam: string;
-    sire: string;
-    type: string;
+    type: {label: keyof typeof AdoptionStatus, value: AdoptionStatus};
+    result?: {label: keyof typeof AdoptionResult, value: AdoptionResult};
+}
+
+export enum AdoptionStatus {
+    Start,
+    End,
+    Pause,
+    Resume
+}
+
+export enum AdoptionResult {
+    Success,
+    Failure
 }

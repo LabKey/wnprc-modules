@@ -334,7 +334,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [allAnimals]);
 
     return (
-        <div className="housing-form-container">
+        <div className="MuiDataGrid-form-container">
             <LoadingScreen
                 isVisible={isSaving}
                 message={"Saving..."}

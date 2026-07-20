@@ -44,6 +44,7 @@ interface AdoptionFormProps {}
 
 export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     const [animals, setAnimals] = useState<AdoptionData[]>([]);
+    const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const apiRef = useGridApiRef();
     const [autoSizeOptions] = useState<GridAutosizeOptions>({
@@ -54,8 +55,38 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     });
 
     useEffect(() => {
+        if (apiRef.current) {
+            const timeout = setTimeout(() => {
+                apiRef.current?.autosizeColumns(autoSizeOptions);
+            }, 250);
+            return () => clearTimeout(timeout);
+        }
+    }, [apiRef, animals, autoSizeOptions]);
+
+    useEffect(() => {
         console.log("Data: ", animals)
     }, [animals]);
+
+    useEffect(() => {
+        const config: Query.SelectRowsOptions = {
+            schemaName: 'study',
+            queryName: 'demographics',
+            viewName: 'Alive, at Center',
+            columns: ['Id']
+        };
+
+        labkeyActionSelectWithPromise(config).then(result => {
+            if (result.rows.length !== 0) {
+                const rowOptions: string[] = [];
+                result.rows.forEach(row => {
+                    rowOptions.push(row.Id);
+                });
+                setCenterAnimals(rowOptions);
+            }
+        }).catch(err => {
+            console.error('Error fetching alive at center animals', err);
+        });
+    }, []);
 
     const handleAddAnimal = useCallback(() => {
         const newAnimal: AdoptionData = {
@@ -104,46 +135,70 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             }));
     }, []);
 
+    const centerAnimalsOptions = useMemo(() => {
+        return centerAnimals.map(animalId => ({
+            label: animalId,
+            value: animalId
+        }));
+    }, [centerAnimals]);
+
     const columns: GridColDef[] = useMemo<GridColDef[]>(() => [
         {
             field: 'id',
             headerName: 'Infant Id',
             minWidth: 100,
+            flex: 1,
+            display: 'flex',
             editable: true,
-            display: 'flex'
+            renderEditCell: (params) => (
+                <AutoCompleteEditCell
+                    {...params}
+                    required={true}
+                    options={centerAnimalsOptions}
+                />
+            ),
+            valueFormatter: (value) => {
+                const val = (value as any)?.value !== undefined ? (value as any).value : value;
+                if (val === undefined || val === null) return '';
+                return val;
+            }
         },
         {
             field: 'date',
             headerName: 'Date',
             ...dateTimeColumnType,
             minWidth: 180,
-            editable: true,
-            display: 'flex'
+            flex: 1,
+            display: 'flex',
+            editable: true
         },
         {
             field: 'dam',
             headerName: 'Foster Dam',
             minWidth: 120,
-            editable: true,
+            flex: 1,
             display: 'flex',
+            editable: true,
             renderEditCell: (params) => (
-                <TextField
-                    variant="standard"
-                    fullWidth
-                    value={params.value || ''}
-                    onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
-                    error={!params.value}
-                    required
-                    autoFocus
+                <AutoCompleteEditCell
+                    {...params}
+                    required={true}
+                    options={centerAnimalsOptions}
                 />
-            )
+            ),
+            valueFormatter: (value) => {
+                const val = (value as any)?.value !== undefined ? (value as any).value : value;
+                if (val === undefined || val === null) return '';
+                return val;
+            }
         },
         {
             field: 'type',
             headerName: 'Type',
             minWidth: 120,
-            editable: true,
+            flex: 1,
             display: 'flex',
+            editable: true,
             renderEditCell: (params) => (
                 <AutoCompleteEditCell
                     {...params}
@@ -161,8 +216,9 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             field: 'result',
             headerName: 'Result',
             minWidth: 120,
-            editable: true,
+            flex: 1,
             display: 'flex',
+            editable: true,
             renderEditCell: (params) => {
                 if(params.row.type.value !== AdoptionStatus.End){
                     return;
@@ -182,7 +238,7 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             },
             isCellEditable: (params) => params.row.type.value === AdoptionStatus.End
         }
-    ], [adoptionStatusOptions, adoptionResultOptions]);
+    ], [adoptionStatusOptions, adoptionResultOptions, centerAnimalsOptions]);
 
     const getCellClassName = useCallback((params: GridCellParams<AdoptionData>) => {
         const { field, value, row } = params;
@@ -217,13 +273,13 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     }, [animals]);
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3 }} className="MuiDataGrid-form-container">
             <Box sx={{ mb: 2 }}>
                 <Button variant="contained" onClick={handleAddAnimal}>
                     Add Infant
                 </Button>
             </Box>
-            <Box sx={{width: '100%' }}>
+            <Box sx={{ width: '100%' }}>
                 <DataGrid
                     rows={animals}
                     columns={columns}
@@ -232,6 +288,7 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                     processRowUpdate={processRowUpdate}
                     getCellClassName={getCellClassName}
                     getRowId={(row) => row.objectid}
+                    getRowHeight={() => 'auto'}
                     disableRowSelectionOnClick
                     autosizeOptions={autoSizeOptions}
                     autosizeOnMount

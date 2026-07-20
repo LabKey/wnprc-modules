@@ -1711,35 +1711,18 @@ margin-top: 0px;
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-
-
-
-.modification-editor {
-
-}
-
-.modification-editor-title {
+.mod-table-title {
   padding-bottom: 5px;
   padding-top: 5px;
   border-bottom: lightgrey 5px solid;
 }
 
-.modification-editor-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
 .modification-editor-content {
   margin-bottom: 20px;
   display: flex;
   gap: 10px;
   flex-direction: row;
 }
-
-
-
 
 @keyframes fadeIn {
   from {
@@ -1752,15 +1735,89 @@ margin-top: 0px;
   }
 }
 
-
-.animal-editor{
-
+.animal-editor {
+  padding: 1rem 0 1rem 0;
 }
 
 .animal-editor-title {
   padding-top: 5px;
   border-bottom: lightgrey 5px solid;
 }
+
+.animal-editor-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Each list item row */
+.animal-editor-list li {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.animal-editor-list li.selected {
+  display: flex;
+  align-items: center;
+  background-color: lightblue;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover effect for better interactivity */
+.animal-editor-list li:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Animal ID (start of row) */
+.animal-editor-list li div:first-child {
+  flex: 0 0 auto; /* don't grow/shrink */
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-right: 1rem;
+}
+
+/* Transfer button (end of row, full height) */
+.animal-editor button {
+  margin-top: 1rem;
+  flex: 0 0 auto;
+  align-self: stretch; /* ensures it fills row height */
+  margin-left: auto;  /* pushes to right edge */
+  padding: 0.6rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: cornflowerblue;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Button hover state */
+.animal-editor button:hover {
+  background-color: #4338ca;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+}
+
+/* Optional: active/click effect */
+.animal-editor button:active {
+  transform: scale(0.98);
+}
+
 
 
 /*
@@ -2186,10 +2243,6 @@ Multi Dropdown Css
     overflow: auto;
   }
 
-  .modification-editor-content{
-    flex-direction: column-reverse;
-  }
-
   .room-layout{
     grid-template-areas:
     "room-layout-toolbar room-layout-toolbar"
@@ -2216,4 +2269,76 @@ Multi Dropdown Css
   width: 100% !important;
   height: 100% !important;
   overflow: hidden !important;
+}
+
+
+.housing-transfer-page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  //grid-template-columns: minmax(0, 1fr);
+
+}
+
+.housing-transfer-header {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.MuiDataGrid-form-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  width: 100%;
+  gap: 10px;
+
+  .MuiDataGrid-root {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    overflow: hidden; // Ensure DataGrid handles its own internal overflow
+
+    .MuiDataGrid-main {
+      min-width: 0;
+    }
+
+    .MuiDataGrid-cell:focus-within {
+      outline: none;
+    }
+  }
+}
+
+.add-animal-controls {
+  display: flex;
+  gap: 10px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  align-items: center;
+
+  .animal-id-input {
+    width: 200px;
+  }
+}
+
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  bottom: 0;
+}
+
+.data-grid-parent {
+  width: 100%;
+  overflow: hidden;
 }

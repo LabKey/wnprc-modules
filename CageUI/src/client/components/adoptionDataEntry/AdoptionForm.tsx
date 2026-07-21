@@ -29,7 +29,8 @@ import {
     useGridApiContext,
     GridRenderEditCellParams, GridCellParams
 } from '@mui/x-data-grid';
-import { Autocomplete, Box, Button, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, IconButton, TextField } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from 'dayjs';
 import { AdoptionData, AdoptionResult, AdoptionStatus } from '../../types/adoptionFormTypes';
 import { dateTimeColumnType } from '../DateTimeGridField';
@@ -70,10 +71,6 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     }, [apiRef, animals, autoSizeOptions]);
 
     useEffect(() => {
-        console.log("Data: ", animals)
-    }, [animals]);
-
-    useEffect(() => {
         const config: Query.SelectRowsOptions = {
             schemaName: 'study',
             queryName: 'demographics',
@@ -107,6 +104,10 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             result: null
         };
         setAnimals(prev => [...prev, newAnimal]);
+    }, []);
+
+    const handleDeleteRow = useCallback((objectid: string) => {
+        setAnimals(prev => prev.filter(animal => animal.objectid !== objectid));
     }, []);
 
     const processRowUpdate = useCallback((newRow: GridRowModel<AdoptionData>, oldRow: GridRowModel<AdoptionData>) => {
@@ -262,8 +263,20 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                 return AdoptionResult[val as number] || '';
             },
             isCellEditable: (params) => params.row.type?.value === AdoptionStatus.End
+        },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            sortable: false,
+            minWidth: 80,
+            display: 'flex',
+            renderCell: (params: GridRenderCellParams) => (
+                <IconButton onClick={() => handleDeleteRow(params.row.objectid)} color="error">
+                    <DeleteIcon/>
+                </IconButton>
+            ),
         }
-    ], [adoptionStatusOptions, adoptionResultOptions, centerAnimalsOptions]);
+    ], [adoptionStatusOptions, adoptionResultOptions, centerAnimalsOptions, handleDeleteRow]);
 
     const isRowValid = useCallback((row: AdoptionData) => {
         const { id, date, dam, type, result } = row;
@@ -323,11 +336,14 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                 message={"Saving Form..."}
                 targetElement={document.getElementById("adoption-form-root")}
             />
-            <Box sx={{ mb: 2 }}>
-                <Button variant="contained" onClick={handleAddAnimal}>
-                    Add Infant
-                </Button>
-            </Box>
+            {!prevForm &&
+                <Box sx={{ mb: 2 }}>
+                    <Button variant="contained" onClick={handleAddAnimal}>
+                        Add Infant
+                    </Button>
+                </Box>
+            }
+
             <Box sx={{ width: '100%' }}>
                 <DataGrid
                     rows={animals}
@@ -340,6 +356,9 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                     getRowHeight={() => 'auto'}
                     disableRowSelectionOnClick
                     autosizeOptions={autoSizeOptions}
+                    columnVisibilityModel={{
+                        actions: !prevForm,
+                    }}
                     autosizeOnMount
                     sx={{
                         '& .required-field-error': {

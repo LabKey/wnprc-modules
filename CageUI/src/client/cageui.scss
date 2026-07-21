@@ -673,7 +673,7 @@
 }
 
 .loading-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -681,22 +681,18 @@
   background-color: rgba(0, 0, 0, 0.30);
   display: flex;
   justify-content: center;
-  align-items: start;
+  align-items: center;
   border-radius: 8px;
   z-index: 9999;
   backdrop-filter: blur(5px);
 }
 
 .loading-content {
-  position: sticky;
-  top: 25%;
-  left: 50%;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding-top: 20px;
 }
 
 .spinner {

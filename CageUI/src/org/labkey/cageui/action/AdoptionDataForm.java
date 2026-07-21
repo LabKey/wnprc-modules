@@ -18,15 +18,16 @@
 
 package org.labkey.cageui.action;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
 public class AdoptionDataForm
 {
+    @JsonAlias({"id", "Id"})
     private String id;
-    private String objectid;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date date;
     private String dam;
     private Integer type;
@@ -40,16 +41,6 @@ public class AdoptionDataForm
     public void setId(String id)
     {
         this.id = id;
-    }
-
-    public String getObjectid()
-    {
-        return objectid;
-    }
-
-    public void setObjectid(String objectid)
-    {
-        this.objectid = objectid;
     }
 
     public Date getDate()

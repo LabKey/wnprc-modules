@@ -25,15 +25,17 @@ interface AutoCompleteEditCellParams {
     required: boolean;
     multiple?: boolean;
     disableClearable?: boolean;
+    returnValueOnly?: boolean;
 }
 
 export const AutoCompleteEditCell = (props: GridRenderEditCellParams & AutoCompleteEditCellParams) => {
-    const { id, field, value, options, required, multiple, disableClearable } = props;
+    const { id, field, value, options, required, multiple, disableClearable, returnValueOnly } = props;
     const apiRef = useGridApiContext();
     const [open, setOpen] = useState(true);
 
     const handleChange = (event: any, newValue: any) => {
-        apiRef.current.setEditCellValue({ id, field, value: newValue });
+        const val = returnValueOnly && newValue ? newValue.value : newValue;
+        apiRef.current.setEditCellValue({ id, field, value: val });
         if (!multiple && (newValue || newValue === null)) {
             apiRef.current.stopCellEditMode({ id, field });
         }
@@ -46,7 +48,7 @@ export const AutoCompleteEditCell = (props: GridRenderEditCellParams & AutoCompl
     };
 
     const isError = required && (value === null || value === undefined || (Array.isArray(value) && value.length === 0) || value === '');
-    const selectedOption = multiple ? (value || []) : (options.find(opt => opt.value === value || opt === value) || null);
+    const selectedOption = multiple ? (value || []) : (options.find(opt => opt.value === value || opt === value || (typeof value === 'object' && value !== null && opt.value === value.value)) || null);
 
     return (
         <Autocomplete
@@ -64,7 +66,10 @@ export const AutoCompleteEditCell = (props: GridRenderEditCellParams & AutoCompl
             fullWidth
             multiple={multiple}
             disableClearable={disableClearable}
-            isOptionEqualToValue={(option, value) => option.value === value.value}
+            isOptionEqualToValue={(option, value) => {
+                const val = (value && typeof value === 'object' && 'value' in value) ? value.value : value;
+                return option.value === val;
+            }}
             renderInput={(params) => (
                 <TextField
                     {...params}

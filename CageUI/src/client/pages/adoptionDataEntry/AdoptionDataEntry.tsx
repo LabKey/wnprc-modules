@@ -19,18 +19,56 @@
 import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../cageui.scss';
-import { RoomList } from '../../components/home/RoomList';
-import { RoomNavbar } from '../../components/home/RoomNavbar';
-import { RoomContent } from '../../components/home/RoomContent';
-import { HomeNavigationContextProvider, useHomeNavigationContext } from '../../context/HomeNavigationContextManager';
-import { RoomContextProvider } from '../../context/RoomContextManager';
-import { labkeyGetUserPermissions } from '../../api/labkeyActions';
+import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
 import { AdoptionForm } from '../../components/adoptionDataEntry/AdoptionForm';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
+import { ActionURL, Filter, Query } from '@labkey/api';
+import { AdoptionData, AdoptionResult, AdoptionStatus } from '../../types/adoptionFormTypes';
+import dayjs from 'dayjs';
 
 
 export const AdoptionDataEntry: FC = () => {
+    const prevFormLsid = ActionURL.getParameter('lsid');
+    const [prevFormData, setPrevFormData] = useState<AdoptionData>();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const config: Query.SelectRowsOptions = {
+            schemaName: 'study',
+            queryName: 'adoptions',
+            columns: ['id', 'objectid', 'date', 'dam', 'result/value', 'result/title', 'type/value', 'type/title'],
+            filterArray: [Filter.create('lsid', prevFormLsid, Filter.Types.EQUAL)]
+        };
+
+        labkeyActionSelectWithPromise(config).then(result => {
+            if (result.rowCount === 1) {
+                const res = result.rows[0];
+                const adoptionData: AdoptionData = {
+                    dam: res.dam,
+                    date: dayjs(res.date),
+                    id: res.Id,
+                    objectid: res.objectid,
+                    result: {
+                        label: res['result/title'] as keyof typeof AdoptionResult,
+                        value: parseInt(res['result/value'])
+                    },
+                    type: {
+                        label: res['type/title'] as keyof typeof AdoptionStatus,
+                        value: parseInt(res['type/value'])
+                    }
+                };
+                setPrevFormData(adoptionData);
+                setIsLoading(false);
+            }else{
+                setIsLoading(false);
+            }
+        }).catch(err => {
+            console.error('Error fetching alive at center animals', err);
+            setIsLoading(false);
+        });
+    }, []);
+
     /*const [user, setUser] = useState<GetUserPermissionsResponse>(null);
 
     useEffect(() => {
@@ -45,8 +83,11 @@ export const AdoptionDataEntry: FC = () => {
     }, []);*/
 
     return(
+        !isLoading &&
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <AdoptionForm />
+            <div id={"adoption-form-root"}>
+                <AdoptionForm prevForm={prevFormData}/>
+            </div>
         </LocalizationProvider>
     )
 };

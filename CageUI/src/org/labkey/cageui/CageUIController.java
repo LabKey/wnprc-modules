@@ -54,12 +54,16 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.model.AdoptionData;
+import org.labkey.cageui.model.AdoptionType;
 import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.HousingData;
 import org.labkey.cageui.model.HousingTransferData;
@@ -88,6 +92,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +103,7 @@ import java.util.stream.Collectors;
 
 public class CageUIController extends SpringActionController
 {
+
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(CageUIController.class);
     public static final String NAME = "cageui";
 
@@ -164,6 +170,82 @@ public class CageUIController extends SpringActionController
             {
                 errors.reject(ERROR_MSG, e.getMessage());
             }
+
+            Map<String, List<AdoptionData>> dataById = getAdoptionData().stream()
+                    .collect(Collectors.groupingBy(AdoptionData::getId));
+
+            for (Map.Entry<String, List<AdoptionData>> entry : dataById.entrySet())
+            {
+                String id = entry.getKey();
+                List<AdoptionData> newAdoptions = entry.getValue();
+                newAdoptions.sort(Comparator.comparing(AdoptionData::getDate));
+
+                List<AdoptionDataForm> existingAdoptions = CageUIManager.getAdoptionsForId(id, getUser(), getContainer());
+                existingAdoptions.sort(Comparator.comparing(AdoptionDataForm::getDate));
+
+                AdoptionDataForm lastAdoption = existingAdoptions.isEmpty() ? null : existingAdoptions.get(existingAdoptions.size() - 1);
+                String expectedDam = lastAdoption != null ? lastAdoption.getDam() : null;
+
+                for (AdoptionData newAdoption : newAdoptions)
+                {
+                    AdoptionType newType = AdoptionType.fromInt(newAdoption.getType().getValue());
+                    AdoptionType lastType = lastAdoption != null ? AdoptionType.fromInt(lastAdoption.getType()) : null;
+
+                    // Type validation
+                    if (newType == AdoptionType.START)
+                    {
+                        if (lastType != null && lastType != AdoptionType.END)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " already has an ongoing adoption. Must end previous adoption before starting a new one.");
+                        }
+                    }
+                    else if (newType == AdoptionType.PAUSE)
+                    {
+                        if (lastType != AdoptionType.START && lastType != AdoptionType.RESUME)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " can only be paused if it is currently started or resumed.");
+                        }
+                    }
+                    else if (newType == AdoptionType.RESUME)
+                    {
+                        if (lastType != AdoptionType.PAUSE)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " can only be resumed if it is currently paused.");
+                        }
+                    }
+                    else if (newType == AdoptionType.END)
+                    {
+                        if (lastType == AdoptionType.END)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " adoption has already ended.");
+                        }
+                    }
+
+                    // Dam validation
+                    if (expectedDam == null)
+                    {
+                        expectedDam = newAdoption.getDam();
+                    }
+                    else if (!expectedDam.equals(newAdoption.getDam()))
+                    {
+                        errors.reject(ERROR_MSG, "Dam ID for animal " + id + " must be consistent across adoptions. Expected: " + expectedDam + ", Found: " + newAdoption.getDam());
+                    }
+
+                    // Date validation
+                    if (lastAdoption != null && !newAdoption.getDate().after(lastAdoption.getDate()))
+                    {
+                        errors.reject(ERROR_MSG, "Date for animal " + id + " must be after the previous adoption entry's date.");
+                    }
+
+                    // Update last adoption for next iteration
+                    AdoptionDataForm currentAsForm = new AdoptionDataForm();
+                    currentAsForm.setId(newAdoption.getId());
+                    currentAsForm.setType(newAdoption.getType().getValue());
+                    currentAsForm.setDate(newAdoption.getDate());
+                    currentAsForm.setDam(newAdoption.getDam());
+                    lastAdoption = currentAsForm;
+                }
+            }
         }
 
         @Override
@@ -177,7 +259,6 @@ public class CageUIController extends SpringActionController
             for(AdoptionData row : getAdoptionData()){
                 AdoptionDataForm finalRow = new AdoptionDataForm();
                 finalRow.setId(row.getId());
-                finalRow.setObjectid(row.getObjectid());
                 finalRow.setDate(row.getDate());
                 finalRow.setDam(row.getDam());
                 finalRow.setType(row.getType().getValue());

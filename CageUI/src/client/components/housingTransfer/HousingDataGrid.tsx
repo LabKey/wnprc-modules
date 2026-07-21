@@ -913,6 +913,10 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     getRowId={(row) => row.id}
                     getRowHeight={() => 'auto'}
                     autosizeOptions={autoSizeOptions}
+                    columnVisibilityModel={{
+                        project: !!animals.find(animal => animal.reasonForMove.find(reason => reason.value === "Breeding")),
+                        ejacConfirmed: !!animals.find(animal => animal.reasonForMove.find(reason => reason.value === 'Breeding ended')),
+                    }}
                     autosizeOnMount
                     disableRowSelectionOnClick
                 />

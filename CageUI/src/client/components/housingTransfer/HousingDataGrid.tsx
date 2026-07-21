@@ -218,38 +218,35 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     }
                 }
             }
-        }else{ // Animal in transit is not infant or marm
+        }else { // Animal in transit is not infant or marm
             const isBreeding = reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
 
             // Check if any animals in destination are infant offspring to the animal in transit
             const infantId = await infantInDestination(animalsInCage);
             if (infantId) {
-                if(isBreeding){
+                if (isBreeding) {
                     const isMale = await checkIsMale(animalId);
-                    if(isMale){
+                    if (isMale) {
                         newCond.push(getCode('b', conditionCodes));
-                    }else{
+                    } else {
                         newCond.push(getCode('bi', conditionCodes));
                     }
-                }else{
+                } else {
                     const isInfantAdopted = await checkIsAdopted(animalId, infantId);
-                    if(isInfantAdopted){
+                    if (isInfantAdopted) {
                         newCond.push(getCode('ia', conditionCodes));
-                    }else{
+                    } else {
                         newCond.push(getCode('i', conditionCodes));
                     }
                 }
-            }else{
-                if(isBreeding){
+            } else {
+                if (isBreeding) {
                     newCond.push(getCode('b', conditionCodes));
                 }
             }
         }
-
-        // Example: if more than one animal, maybe it's "Group Housed"
-        // return animalsInCage.length > 1 ? 'G' : 'S'; 
         
-        return newCond; // Returning empty so it doesn't overwrite with wrong data until implemented
+        return newCond;
     }, [conditionCodes]);
 
     const updateConditionCodes = useCallback(async (affectedAnimals: HousingTransferData[], currentAnimals: HousingTransferData[]) => {

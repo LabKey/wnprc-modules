@@ -166,9 +166,9 @@ export const checkIsMotherInDest = async (infantId: string, animalsInCage: strin
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        const motherId: string = res.rows[0]['Offspring/parents/dam'];
+        const damId: string = res.rows[0]['Offspring/parents/dam'];
 
-        if(animalsInCage.find(id => id === motherId)){
+        if(animalsInCage.find(id => id === damId)){
             return true;
         }
         return false;
@@ -193,9 +193,9 @@ export const checkIsFatherInDest = async (infantId: string, animalsInCage: strin
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        const fatherId: string = res.rows[0]['Offspring/parents/sire'];
+        const sireId: string = res.rows[0]['Offspring/parents/sire'];
 
-        if(animalsInCage.find(id => id === fatherId)){
+        if(animalsInCage.find(id => id === sireId)){
             return true;
         }
         return false;
@@ -205,18 +205,54 @@ export const checkIsFatherInDest = async (infantId: string, animalsInCage: strin
     }
 }
 
-// TODO finish this function
 /*
     This function determines if the adopted mother is in the destination animal list
  */
 export const checkIsAdoptedMotherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
-    return false;
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'adoptionsOngoing',
+        filterArray: [
+            Filter.create('Id', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);;
+        const damId: string = res.rows[0]['dam'];
+
+        if(animalsInCage.find(id => id === damId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adopted mother status', e);
+        return false;
+    }
 }
 
-// TODO finish this function
 /*
     This function determines if the adopted father is in the destination animal list
  */
 export const checkIsAdoptedFatherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
-    return false;
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'adoptionsOngoing',
+        filterArray: [
+            Filter.create('Id', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);;
+        const sireId: string = res.rows[0]['sire'];
+
+        if(animalsInCage.find(id => id === sireId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adopted mother status', e);
+        return false;
+    }
 }

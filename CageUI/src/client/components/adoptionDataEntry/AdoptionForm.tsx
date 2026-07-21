@@ -36,15 +36,21 @@ import { dateTimeColumnType } from '../DateTimeGridField';
 import { generateUUID } from '../../utils/helpers';
 import { HousingTransferData } from '../../types/housingFormTypes';
 import { Option } from '@labkey/components';
-import { Query } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise, startAdoptionSubmission, startHousingTransfer } from '../../api/labkeyActions';
 import { AutoCompleteEditCell } from '../AutoCompleteEditCell';
+import { LoadingScreen } from '../LoadingScreen';
+import { LayoutErrors } from '../LayoutErrors';
 
-interface AdoptionFormProps {}
+interface AdoptionFormProps {
+    prevForm?: AdoptionData;
+}
 
 export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
-    const [animals, setAnimals] = useState<AdoptionData[]>([]);
+    const {prevForm} = props;
+    const [animals, setAnimals] = useState<AdoptionData[]>(prevForm ? [prevForm] : []);
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
+    const [errorMsg, setErrorMsg] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const apiRef = useGridApiRef();
     const [autoSizeOptions] = useState<GridAutosizeOptions>({
@@ -104,12 +110,31 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     }, []);
 
     const processRowUpdate = useCallback((newRow: GridRowModel<AdoptionData>, oldRow: GridRowModel<AdoptionData>) => {
-        if (newRow.type.value !== AdoptionStatus.End) {
+        if (newRow.type && newRow.type.value !== AdoptionStatus.End) {
             newRow.result = null;
         }
+
+        if (!prevForm && newRow.id && newRow.id !== oldRow.id) {
+            const config: Query.SelectRowsOptions = {
+                schemaName: 'study',
+                queryName: 'adoptionsOngoing',
+                filterArray: [Filter.create('Id', newRow.id, Filter.Types.EQUAL)],
+                columns: ['dam']
+            };
+
+            labkeyActionSelectWithPromise(config).then(result => {
+                if (result.rows.length !== 0) {
+                    const damId = result.rows[0].dam;
+                    setAnimals(prev => prev.map(row => (row.objectid === newRow.objectid ? { ...newRow, dam: damId } : row)));
+                }
+            }).catch(err => {
+                console.error('Error fetching ongoing adoption for dam ID', err);
+            });
+        }
+
         setAnimals(prev => prev.map(row => (row.objectid === newRow.objectid ? newRow : row)));
         return newRow;
-    }, []);
+    }, [prevForm]);
 
     const handleCellClick = useCallback((params: GridCellParams) => {
         if (params.isEditable && params.cellMode === 'view') {
@@ -155,12 +180,12 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                     {...params}
                     required={true}
                     options={centerAnimalsOptions}
+                    returnValueOnly={true}
                 />
             ),
             valueFormatter: (value) => {
-                const val = (value as any)?.value !== undefined ? (value as any).value : value;
-                if (val === undefined || val === null) return '';
-                return val;
+                if (value === undefined || value === null) return '';
+                return value;
             }
         },
         {
@@ -184,12 +209,12 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                     {...params}
                     required={true}
                     options={centerAnimalsOptions}
+                    returnValueOnly={true}
                 />
             ),
             valueFormatter: (value) => {
-                const val = (value as any)?.value !== undefined ? (value as any).value : value;
-                if (val === undefined || val === null) return '';
-                return val;
+                if (value === undefined || value === null) return '';
+                return value;
             }
         },
         {
@@ -220,13 +245,13 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             display: 'flex',
             editable: true,
             renderEditCell: (params) => {
-                if(params.row.type.value !== AdoptionStatus.End){
+                if(params.row.type?.value !== AdoptionStatus.End){
                     return;
                 }
                 return(
                     <AutoCompleteEditCell
                         {...params}
-                        required={params.row.type.value === AdoptionStatus.End}
+                        required={params.row.type?.value === AdoptionStatus.End}
                         options={adoptionResultOptions}
                     />
                 );
@@ -236,20 +261,38 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                 if (val === undefined || val === null) return '';
                 return AdoptionResult[val as number] || '';
             },
-            isCellEditable: (params) => params.row.type.value === AdoptionStatus.End
+            isCellEditable: (params) => params.row.type?.value === AdoptionStatus.End
         }
     ], [adoptionStatusOptions, adoptionResultOptions, centerAnimalsOptions]);
+
+    const isRowValid = useCallback((row: AdoptionData) => {
+        const { id, date, dam, type, result } = row;
+        const isTypeEnd = type?.value === AdoptionStatus.End;
+
+        return (
+            id !== '' && id !== null && id !== undefined &&
+            date !== null && date !== undefined &&
+            dam !== '' && dam !== null && dam !== undefined &&
+            type !== null && type !== undefined &&
+            (!isTypeEnd || (result !== null && result !== undefined))
+        );
+    }, []);
+
+    const isFormValid = useMemo(() => {
+        return animals.length > 0 && animals.every(isRowValid);
+    }, [animals, isRowValid]);
 
     const getCellClassName = useCallback((params: GridCellParams<AdoptionData>) => {
         const { field, value, row } = params;
 
         const isRequired =
+            field === 'id' ||
             field === 'date' ||
             field === 'dam' ||
             field === 'type' ||
-            (field === 'result' && row.type.value === AdoptionStatus.End);
+            (field === 'result' && row.type?.value === AdoptionStatus.End);
 
-        if (isRequired && (value === null || value === undefined || value === '' || (typeof value === 'object' && (value as any).value === null))) {
+        if (isRequired && (value === null || value === undefined || value === '')) {
             return 'required-field-error';
         }
 
@@ -267,13 +310,19 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             }
             setIsSaving(false);
         }).catch(err => {
-            alert(`Error saving form: ${err}`);
+            console.log(err)
+            setErrorMsg(err.errors.map(e => e.msg));
             setIsSaving(false);
         });
     }, [animals]);
 
     return (
         <Box sx={{ p: 3 }} className="MuiDataGrid-form-container">
+            <LoadingScreen
+                isVisible={isSaving}
+                message={"Saving Form..."}
+                targetElement={document.getElementById("adoption-form-root")}
+            />
             <Box sx={{ mb: 2 }}>
                 <Button variant="contained" onClick={handleAddAnimal}>
                     Add Infant
@@ -337,13 +386,14 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
                 <div className="form-actions">
                     <button
                         className="btn btn-success"
-                        disabled={isSaving}
-                        onClick={() => {setIsSaving(true); handleSubmit();}}
+                        disabled={isSaving || !isFormValid}
+                        onClick={() => {setErrorMsg([]); setIsSaving(true); handleSubmit();}}
                     >
                         Submit
                     </button>
                 </div>
             )}
+            {errorMsg.length > 0 && <LayoutErrors errors={errorMsg} />}
         </Box>
     );
 };

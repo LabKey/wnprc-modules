@@ -25,9 +25,22 @@ export type HousingRowMetadata = {
     animalsInDestinationCage?: string[];
 };
 
+export enum ConditionTypes {
+    special = 'special',
+    pairing = 'pairing',
+    caging = 'caging',
+    social = 'social'
+}
+
 export type ExtendedHousingTransferData = HousingTransferData & {
     metadata?: HousingRowMetadata;
 };
+
+export interface ConditionCode {
+    value: string;
+    label: string;
+    type: ConditionTypes;
+}
 
 export interface HousingTransferData {
     id: string;
@@ -35,7 +48,7 @@ export interface HousingTransferData {
     outDate: Dayjs;
     destinationRoom: Option<number>;
     destinationCage: Option<string>;
-    condition: Option<string>[];
+    condition: ConditionCode[];
     reasonForMove: Option<string>[];
     project: string;
     remarks: string;

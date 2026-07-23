@@ -31,7 +31,7 @@ public class HousingTransferData
     private Date outDate;
     private Option<Integer> destinationRoom;
     private Option<String> destinationCage;
-    private Option<String>[] condition;
+    private ConditionCode[] condition;
     private Option<String>[] reasonForMove;
     private Integer project;
     private String remarks;
@@ -91,12 +91,12 @@ public class HousingTransferData
         this.destinationCage = destinationCage;
     }
 
-    public Option<String>[] getCondition()
+    public ConditionCode[] getCondition()
     {
         return condition;
     }
 
-    public void setCondition(Option<String>[] condition)
+    public void setCondition(ConditionCode[] condition)
     {
         this.condition = condition;
     }

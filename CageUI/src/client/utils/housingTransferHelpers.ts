@@ -22,8 +22,9 @@ import { fetchCurrentCageMods } from '../api/popularQueries';
 import { ModTypes } from '../types/typings';
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
+import { ConditionCode } from '../types/housingFormTypes';
 
-export const getCode = (code: string, options: Option<string>[]): Option<string> => {
+export const getCode = (code: string, options: ConditionCode[]): ConditionCode => {
     return options.find(opt => opt.value === code);
 }
 

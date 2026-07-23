@@ -59,7 +59,7 @@
                         <fk>
                             <fkDbSchema>cageui</fkDbSchema>
                             <fkTable>housing_condition_records</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
+                            <fkColumnName>objectid</fkColumnName>
                             <fkDisplayColumnName>final_condition</fkDisplayColumnName>
                         </fk>
                     </column>

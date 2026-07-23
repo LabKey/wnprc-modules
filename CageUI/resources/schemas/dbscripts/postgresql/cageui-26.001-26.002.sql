@@ -20,7 +20,7 @@ DROP TABLE IF EXISTS cageui.housing_condition_records;
 CREATE TABLE cageui.housing_condition_records
 (
     rowid SERIAL NOT NULL,
-    housing VARCHAR NOT NULL,
+    objectid VARCHAR NOT NULL,
     special_condition VARCHAR,
     pair_condition VARCHAR,
     cage_condition VARCHAR,

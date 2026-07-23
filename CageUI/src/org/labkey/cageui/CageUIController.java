@@ -22,23 +22,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.lang3.SerializationUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
-import org.labkey.api.action.BaseApiAction;
-import org.labkey.api.action.Marshal;
-import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.module.ModuleHtmlView;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.QueryService;
@@ -47,40 +39,33 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
-import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
-import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.UnauthorizedException;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CagesForm;
+import org.labkey.cageui.action.HousingConditionRecordsForm;
 import org.labkey.cageui.action.RackTypesForm;
-import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.model.AdoptionData;
 import org.labkey.cageui.model.AdoptionType;
-import org.labkey.cageui.model.Cage;
-import org.labkey.cageui.model.HousingData;
+import org.labkey.cageui.action.HousingForm;
+import org.labkey.cageui.model.ConditionCode;
+import org.labkey.cageui.model.ConditionType;
 import org.labkey.cageui.model.HousingTransferData;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
-import org.labkey.cageui.model.ModLocations;
 import org.labkey.cageui.model.Option;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackCondition;
-import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
-import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
@@ -91,7 +76,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -325,6 +309,39 @@ public class CageUIController extends SpringActionController
                     .collect(Collectors.joining(","));
         }
 
+        public static HousingConditionRecordsForm populateHousingConditionsStream(ConditionCode[] conditions) {
+            HousingConditionRecordsForm form = new HousingConditionRecordsForm();
+
+            // Group conditions by type
+            Map<ConditionType, List<ConditionCode>> conditionsByType = Arrays.stream(conditions)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.groupingBy(ConditionCode::getType));
+
+            // Set values using stream operations
+            conditionsByType.forEach((type, conditionList) -> {
+                if (conditionList.size() == 1) {
+                    String value = conditionList.getFirst().getValue();
+                    switch (type) {
+                        case SPECIAL:
+                            form.setSpecialCondition(value);
+                            break;
+                        case PAIR:
+                            form.setPairCondition(value);
+                            break;
+                        case CAGE:
+                            form.setCageCondition(value);
+                            break;
+                        case SOCIAL:
+                            form.setSocialCondition(value);
+                            break;
+                    }
+                }
+            });
+
+            return form;
+        }
+
+
 
         @Override
         public void validateForm(SimpleApiJsonForm form, Errors errors)
@@ -357,36 +374,84 @@ public class CageUIController extends SpringActionController
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
         {
 
-            ArrayList<HousingData> housingRecords = new ArrayList<HousingData>();
+            ArrayList<HousingForm> housingRecords = new ArrayList<HousingForm>();
+            ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<HousingConditionRecordsForm>();
+            BatchValidationException batchErrors = new BatchValidationException();
+            ApiSimpleResponse response = new ApiSimpleResponse();
             String taskId = UUID.randomUUID().toString();
+
             for(HousingTransferData record : getHousingTransferData()){
-                HousingData newRecord = new HousingData();
-                newRecord.setId(record.getId());
-                newRecord.setObjectId(UUID.randomUUID().toString());
-                newRecord.setTaskId(taskId);
-                newRecord.setDate(record.getInDate());
-                newRecord.setEndDate(record.getOutDate());
-                newRecord.setQcState(2);
-                newRecord.setRoom(record.getDestinationRoom().getLabel());
-                newRecord.setCage(record.getDestinationCage().getValue());
-                newRecord.setReason(convertOptionArrayToString(record.getReasonForMove()));
-                newRecord.setRemark(record.getRemarks());
-                newRecord.setProject(record.getProject());
-                newRecord.setPerformedBy(record.getPerformedBy());
-                newRecord.setEjacConfirmed(record.isEjacConfirmed());
-                housingRecords.add(newRecord);
+                HousingForm newTransferRecord = new HousingForm();
+                HousingConditionRecordsForm newConditionRecord = populateHousingConditionsStream(record.getCondition());
+                String recordObjectId = UUID.randomUUID().toString();
+                newConditionRecord.setObjectid(recordObjectId);
+
+                newTransferRecord.setId(record.getId());
+                newTransferRecord.setTaskId(taskId);
+                newTransferRecord.setDate(record.getInDate());
+                newTransferRecord.setEndDate(record.getOutDate());
+                newTransferRecord.setQcState(1);
+                newTransferRecord.setCondNew(recordObjectId);
+                newTransferRecord.setReason(convertOptionArrayToString(record.getReasonForMove()));
+                newTransferRecord.setRemark(record.getRemarks());
+                newTransferRecord.setProject(record.getProject());
+                newTransferRecord.setPerformedBy(record.getPerformedBy());
+                newTransferRecord.setEjacConfirmed(record.isEjacConfirmed());
+
+                if(record.getDestinationRoom().getValue() == 0){ // No change (animal stays same room and cage)
+                    newTransferRecord.setRoom(record.getCurrentRoom().getLabel());
+                    newTransferRecord.setCageNew(record.getCurrentCage().getValue());
+                }else{
+                    newTransferRecord.setRoom(record.getDestinationRoom().getLabel());
+                    newTransferRecord.setCageNew(record.getDestinationCage().getValue());
+                }
+                housingRecords.add(newTransferRecord);
+                housingConditionRecords.add(newConditionRecord);
             }
 
-            ObjectMapper mapper = JsonUtil.createDefaultMapper();
-            Map<String, Object> response = new HashMap<String, Object>();
-            JSONArray finalData = mapper.convertValue(housingRecords, JSONArray.class);
+            UserSchema studySchema = QueryService.get().getUserSchema(getUser(), getContainer(), "study");
+            UserSchema cageUISchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
 
-            response.put("transferData", finalData);
-            response.put("success", true);
-            return new ApiSimpleResponse(response);
+            TableInfo studyHousingTable = studySchema.getTable("housing_test");
+            TableInfo cageUIHousingConditionTable = cageUISchema.getTable("housing_condition_records");
 
+            QueryUpdateService studyHousingQus = studyHousingTable.getUpdateService();
+            QueryUpdateService cageUIHousingConditionQus = cageUIHousingConditionTable.getUpdateService();
+
+            if (studyHousingQus == null)
+            {
+                throw new IllegalStateException(studyHousingTable.getName() + " query update service");
+            }
+
+            if (cageUIHousingConditionQus == null)
+            {
+                throw new IllegalStateException(cageUIHousingConditionTable.getName() + " query update service");
+            }
+
+            try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+            {
+                List<Map<String, Object>> housingMapList = CageUIManager.get().convertToMapList(housingRecords);
+                List<Map<String, Object>> housingCodesMapList = CageUIManager.get().convertToMapList(housingConditionRecords);
+
+                studyHousingQus.insertRows(getUser(), getContainer(), housingMapList, batchErrors, null, null);
+                cageUIHousingConditionQus.insertRows(getUser(), getContainer(), housingCodesMapList, batchErrors, null, null);
+
+                if (batchErrors.hasErrors())
+                {
+                    response.put("success", false);
+                    response.put("errors", batchErrors);
+                    return response;
+                }
+                tx.commit();
+                response.put("success", true);
+            }
+            catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
+                   SQLException e)
+            {
+                throw new ValidationException(e.getMessage());
+            }
+            return response;
         }
-
     }
 
     @RequiresPermission(CageUIRoomModifierPermission.class)

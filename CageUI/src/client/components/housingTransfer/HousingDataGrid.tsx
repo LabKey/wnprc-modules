@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { HousingRowMetadata, HousingTransferData } from '../../types/housingFormTypes';
+import { ConditionCode, HousingRowMetadata, HousingTransferData } from '../../types/housingFormTypes';
 import {
     DataGrid,
     GridAutosizeOptions,
@@ -67,7 +67,7 @@ interface HousingDataGridProps {
 export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     const { user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals } = props;
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
-    const [conditionCodes, setConditionCodes] = useState<Option<string>[]>([]);
+    const [conditionCodes, setConditionCodes] = useState<ConditionCode[]>([]);
     const [canEditCondition, setCanEditCondition] = useState<boolean>(false);
     const [newAnimalId, setNewAnimalId] = useState<string>(null);
     const [autoSizeOptions] = useState<GridAutosizeOptions>({
@@ -153,9 +153,9 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
      * @param animalId The ID of the animal to calculate for
      * @param animalsInCage List of all animals (IDs) that will be in the destination cage, this includes animalId above
      */
-    const calculateConditionCodes = useCallback(async (animalId: string, animalsInCage: string[], destCageId: string, reasonForMove: Option<string>[]): Promise<Option<string>[]> => {
+    const calculateConditionCodes = useCallback(async (animalId: string, animalsInCage: string[], destCageId: string, reasonForMove: Option<string>[]): Promise<ConditionCode[]> => {
         // TODO: Implement the actual flow chart logic here
-        const newCond: Option<string>[] = [];
+        const newCond: ConditionCode[] = [];
         let pairingCode;
         // The user will finish this function.
         // For now, return a placeholder or keep existing if any.

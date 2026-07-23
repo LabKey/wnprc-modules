@@ -201,7 +201,7 @@
     <table tableName="housing_condition_records" tableDbType="TABLE">
         <columns>
             <column columnName="rowid"/>
-            <column columnName="housing"/>
+            <column columnName="objectid"/>
             <column columnName="special_condition"/>
             <column columnName="pair_condition"/>
             <column columnName="cage_condition"/>

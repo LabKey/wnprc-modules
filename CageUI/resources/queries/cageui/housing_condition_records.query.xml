@@ -26,13 +26,7 @@
                     <column columnName="rowid">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="housing">
-                        <fk>
-                            <fkDbSchema>study</fkDbSchema>
-                            <fkTable>housing_test</fkTable>
-                            <fkColumnName>objectid</fkColumnName>
-                            <fkDisplayColumnName>Id</fkDisplayColumnName>
-                        </fk>
+                    <column columnName="objectid">
                     </column>
                     <column columnName="special_condition">
                         <fk>

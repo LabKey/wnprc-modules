@@ -16,157 +16,159 @@
  *
  */
 
-package org.labkey.cageui.model;
+package org.labkey.cageui.action;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.labkey.cageui.model.ConditionCode;
 
+import java.util.ArrayList;
 import java.util.Date;
 
-public class HousingData
+public class HousingForm
 {
-    private String _id;
-    private String _objectId;
-    private String _taskId;
+    private String id;
+    private String taskId;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date _date;
+    private Date date;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date _endDate;
-    private Integer _qcState;
-    private String _room;
-    private String _cage;
-    private String _reason;
-    private String _remark;
-    private Integer _project;
-    private String _performedBy;
-    private Boolean _ejacConfirmed;
+    private Date endDate;
+    private Integer qcState;
+    private String room;
+    private String cageNew;
+    private String condNew;
+    private String reason;
+    private String remark;
+    private Integer project;
+    private String performedBy;
+    private Boolean ejacConfirmed;
 
     public String getId()
     {
-        return _id;
+        return this.id;
     }
 
     public void setId(String id)
     {
-        _id = id;
-    }
-
-    public String getObjectId()
-    {
-        return _objectId;
-    }
-
-    public void setObjectId(String objectId)
-    {
-        _objectId = objectId;
+        this.id = id;
     }
 
     public String getTaskId()
     {
-        return _taskId;
+        return this.taskId;
     }
 
     public void setTaskId(String taskId)
     {
-        _taskId = taskId;
+        this.taskId = taskId;
     }
 
     public Date getDate()
     {
-        return _date;
+        return this.date;
     }
 
     public void setDate(Date date)
     {
-        _date = date;
+        this.date = date;
     }
 
     public Date getEndDate()
     {
-        return _endDate;
+        return this.endDate;
     }
 
     public void setEndDate(Date endDate)
     {
-        _endDate = endDate;
+        this.endDate = endDate;
     }
 
     public Integer getQcState()
     {
-        return _qcState;
+        return this.qcState;
     }
 
     public void setQcState(Integer qcState)
     {
-        _qcState = qcState;
+        this.qcState = qcState;
     }
 
     public String getRoom()
     {
-        return _room;
+        return this.room;
     }
 
     public void setRoom(String room)
     {
-        _room = room;
-    }
-
-    public String getCage()
-    {
-        return _cage;
-    }
-
-    public void setCage(String cage)
-    {
-        _cage = cage;
+        this.room = room;
     }
 
     public String getReason()
     {
-        return _reason;
+        return this.reason;
     }
 
     public void setReason(String reason)
     {
-        _reason = reason;
+        this.reason = reason;
     }
 
     public String getRemark()
     {
-        return _remark;
+        return this.remark;
     }
 
     public void setRemark(String remark)
     {
-        _remark = remark;
+        this.remark = remark;
     }
 
     public Integer getProject()
     {
-        return _project;
+        return this.project;
     }
 
     public void setProject(Integer project)
     {
-        _project = project;
+        this.project = project;
     }
 
     public String getPerformedBy()
     {
-        return _performedBy;
+        return this.performedBy;
     }
 
     public void setPerformedBy(String performedBy)
     {
-        _performedBy = performedBy;
+        this.performedBy = performedBy;
     }
 
     public Boolean getEjacConfirmed()
     {
-        return _ejacConfirmed;
+        return this.ejacConfirmed;
     }
 
     public void setEjacConfirmed(Boolean ejacConfirmed)
     {
-        _ejacConfirmed = ejacConfirmed;
+        this.ejacConfirmed = ejacConfirmed;
+    }
+
+    public String getCageNew()
+    {
+        return this.cageNew;
+    }
+
+    public void setCageNew(String cageNew)
+    {
+        this.cageNew = cageNew;
+    }
+
+    public String getCondNew()
+    {
+        return condNew;
+    }
+
+    public void setCondNew(String condNew)
+    {
+        this.condNew = condNew;
     }
 }

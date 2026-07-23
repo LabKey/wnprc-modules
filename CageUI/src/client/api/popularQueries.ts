@@ -21,6 +21,7 @@ import { EHRCageMods } from '../types/homeTypes';
 import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
+import { ConditionCode } from '../types/housingFormTypes';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: Query.SelectRowsOptions = {
@@ -185,7 +186,7 @@ export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> =
     }
 }
 
-export const fetchConditionCodes = async (): Promise<Option<string>[]> => {
+export const fetchConditionCodes = async (): Promise<ConditionCode[]> => {
     const config: Query.SelectRowsOptions = {
         schemaName: 'ehr_lookups',
         queryName: 'housing_condition_codes',
@@ -198,7 +199,8 @@ export const fetchConditionCodes = async (): Promise<Option<string>[]> => {
         const res = await labkeyActionSelectWithPromise(config);
         return res.rows.map(row => ({
             label: `${row.value} - ${row.category}`,
-            value: row.value.toString()
+            value: row.value.toString(),
+            type: row.category
         }));
     } catch (e) {
         console.error('Error fetching condition codes:', e);

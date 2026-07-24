@@ -21,9 +21,9 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="adoptions" tableDbType="TABLE">
                 <tableUrl />
-                <insertUrl />
+                <insertUrl>/WNPRC/EHR/cageui-adoptionDataEntryDev.view&amp;objectid=${objectid}</insertUrl>
                 <importUrl />
-                <updateUrl />
+                <updateUrl>/WNPRC/EHR/cageui-adoptionDataEntryDev.view&amp;objectid=${objectid}</updateUrl>
                 <deleteUrl />
                 <columns>
                     <column columnName="Id">
@@ -51,6 +51,10 @@
                     </column>
                     <column columnName="dam">
                         <columnTitle>Foster Dam</columnTitle>
+                        <url>/ehr/participantView.view?participantId=${dam}</url>
+                    </column>
+                    <column columnName="sire">
+                        <columnTitle>Foster Sire</columnTitle>
                         <url>/ehr/participantView.view?participantId=${dam}</url>
                     </column>
                 </columns>

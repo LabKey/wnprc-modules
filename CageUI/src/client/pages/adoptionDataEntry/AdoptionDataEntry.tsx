@@ -29,16 +29,20 @@ import dayjs from 'dayjs';
 
 
 export const AdoptionDataEntry: FC = () => {
-    const prevFormLsid = ActionURL.getParameter('lsid');
+    const prevFormObjId = ActionURL.getParameter('objectid');
     const [prevFormData, setPrevFormData] = useState<AdoptionData>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
+        if(!prevFormData) {
+            setIsLoading(false);
+            return;
+        }
         const config: Query.SelectRowsOptions = {
             schemaName: 'study',
             queryName: 'adoptions',
-            columns: ['id', 'objectid', 'date', 'dam', 'result/value', 'result/title', 'type/value', 'type/title'],
-            filterArray: [Filter.create('lsid', prevFormLsid, Filter.Types.EQUAL)]
+            columns: ['Id', 'objectid', 'date', 'dam', 'sire', 'result/value', 'result/title', 'type/value', 'type/title'],
+            filterArray: [Filter.create('objectid', prevFormObjId, Filter.Types.EQUAL)]
         };
 
         labkeyActionSelectWithPromise(config).then(result => {

@@ -23,5 +23,6 @@
         <column name="type" />
         <column name="result" />
         <column name="dam" />
+        <column name="sire" />
     </columns>
 </customView>

@@ -376,9 +376,14 @@ public class CageUIController extends SpringActionController
 
             ArrayList<HousingForm> housingRecords = new ArrayList<HousingForm>();
             ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<HousingConditionRecordsForm>();
-            BatchValidationException batchErrors = new BatchValidationException();
-            ApiSimpleResponse response = new ApiSimpleResponse();
             String taskId = UUID.randomUUID().toString();
+            Map<String, Object> taskRecord = new HashMap<>();
+
+            taskRecord.put("taskid", taskId);
+            taskRecord.put("title", "Housing Test");
+            taskRecord.put("category", "task");
+            taskRecord.put("formType", "Housing");
+            taskRecord.put("assignedTo", getUser().getUserId());
 
             for(HousingTransferData record : getHousingTransferData()){
                 HousingForm newTransferRecord = new HousingForm();
@@ -409,48 +414,8 @@ public class CageUIController extends SpringActionController
                 housingConditionRecords.add(newConditionRecord);
             }
 
-            UserSchema studySchema = QueryService.get().getUserSchema(getUser(), getContainer(), "study");
-            UserSchema cageUISchema = QueryService.get().getUserSchema(getUser(), getContainer(), "cageui");
 
-            TableInfo studyHousingTable = studySchema.getTable("housing_test");
-            TableInfo cageUIHousingConditionTable = cageUISchema.getTable("housing_condition_records");
-
-            QueryUpdateService studyHousingQus = studyHousingTable.getUpdateService();
-            QueryUpdateService cageUIHousingConditionQus = cageUIHousingConditionTable.getUpdateService();
-
-            if (studyHousingQus == null)
-            {
-                throw new IllegalStateException(studyHousingTable.getName() + " query update service");
-            }
-
-            if (cageUIHousingConditionQus == null)
-            {
-                throw new IllegalStateException(cageUIHousingConditionTable.getName() + " query update service");
-            }
-
-            try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
-            {
-                List<Map<String, Object>> housingMapList = CageUIManager.get().convertToMapList(housingRecords);
-                List<Map<String, Object>> housingCodesMapList = CageUIManager.get().convertToMapList(housingConditionRecords);
-
-                studyHousingQus.insertRows(getUser(), getContainer(), housingMapList, batchErrors, null, null);
-                cageUIHousingConditionQus.insertRows(getUser(), getContainer(), housingCodesMapList, batchErrors, null, null);
-
-                if (batchErrors.hasErrors())
-                {
-                    response.put("success", false);
-                    response.put("errors", batchErrors);
-                    return response;
-                }
-                tx.commit();
-                response.put("success", true);
-            }
-            catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
-                   SQLException e)
-            {
-                throw new ValidationException(e.getMessage());
-            }
-            return response;
+            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer());
         }
     }
 

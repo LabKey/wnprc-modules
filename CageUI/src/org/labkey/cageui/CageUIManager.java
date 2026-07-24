@@ -49,6 +49,8 @@ import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.CagesFormWithContext;
 import org.labkey.cageui.action.GhostCagesForm;
+import org.labkey.cageui.action.HousingConditionRecordsForm;
+import org.labkey.cageui.action.HousingForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
@@ -201,6 +203,66 @@ public class CageUIManager
             {
                 qus.insertRows(user, container, convertToMapList(sessionLog), batchErrors, null, null);
             }
+
+            if (batchErrors.hasErrors())
+            {
+                response.put("success", false);
+                response.put("errors", batchErrors);
+                return response;
+            }
+            tx.commit();
+            response.put("success", true);
+        }
+        catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
+               SQLException e)
+        {
+            throw new ValidationException(e.getMessage());
+        }
+        return response;
+    }
+
+    /*
+        Helper function to submit the housing transfer
+     */
+    public ApiSimpleResponse submitHousingTransfer(ArrayList<HousingForm> housingRecords, ArrayList<HousingConditionRecordsForm> housingConditionRecords, Map<String, Object> taskRecord, User user, Container container) throws Exception {
+        BatchValidationException batchErrors = new BatchValidationException();
+        ApiSimpleResponse response = new ApiSimpleResponse();
+
+        UserSchema studySchema = QueryService.get().getUserSchema(user, container, "study");
+        UserSchema cageUISchema = QueryService.get().getUserSchema(user, container, "cageui");
+        UserSchema ehrSchema = QueryService.get().getUserSchema(user, container, "ehr");
+
+        TableInfo studyHousingTable = studySchema.getTable("housing_test");
+        TableInfo cageUIHousingConditionTable = cageUISchema.getTable("housing_condition_records");
+        TableInfo ehrTasksTable = ehrSchema.getTable("tasks");
+
+        QueryUpdateService studyHousingQus = studyHousingTable.getUpdateService();
+        QueryUpdateService cageUIHousingConditionQus = cageUIHousingConditionTable.getUpdateService();
+        QueryUpdateService ehrTasksQus = ehrTasksTable.getUpdateService();
+
+        if (studyHousingQus == null)
+        {
+            throw new IllegalStateException(studyHousingTable.getName() + " query update service");
+        }
+
+        if (ehrTasksQus == null)
+        {
+            throw new IllegalStateException(ehrTasksTable.getName() + " query update service");
+        }
+
+        if (cageUIHousingConditionQus == null)
+        {
+            throw new IllegalStateException(cageUIHousingConditionTable.getName() + " query update service");
+        }
+
+        try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+        {
+            List<Map<String, Object>> housingMapList = CageUIManager.get().convertToMapList(housingRecords);
+            List<Map<String, Object>> housingCodesMapList = CageUIManager.get().convertToMapList(housingConditionRecords);
+
+            studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, null);
+            cageUIHousingConditionQus.insertRows(user, container, housingCodesMapList, batchErrors, null, null);
+            ehrTasksQus.insertRows(user, container, convertToMapList(taskRecord), batchErrors, null, null);
 
             if (batchErrors.hasErrors())
             {

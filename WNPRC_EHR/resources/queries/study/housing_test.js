@@ -75,3 +75,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         helper.setProperty('breedingEncountersSaved', true);
     }
 }
+
+function onComplete(event, errors, helper){
+    helper.closeRecordsOnComplete(false);
+}

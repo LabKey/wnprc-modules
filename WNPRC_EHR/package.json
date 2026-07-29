@@ -5,19 +5,19 @@
   "private": true,
   "scripts": {
     "build": "npm run build-dev",
-    "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
-    "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development rspack build --config node_modules/@labkey/build/configs/dev.config.js",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production rspack build --config node_modules/@labkey/build/configs/prod.config.js",
     "clean": "rimraf resources/web/wnprc_ehr/gen && rimraf resources/web/gen && rimraf resources/views/gen",
     "setup": "npm ci",
-    "start": "cross-env NODE_ENV=development webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
+    "start": "cross-env NODE_ENV=development rspack serve --config node_modules/@labkey/build/configs/watch.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@labkey/api": "1.51.5",
-    "@labkey/components": "7.43.0",
+    "@labkey/api": "1.52.3-fb-update-nodejs.0",
+    "@labkey/components": "7.49.1-fb-update-nodejs.0",
     "dayjs": "1.11.21",
     "react": "18.3.1",
     "react-bootstrap": "1.6.8",
@@ -26,13 +26,9 @@
     "react-select": "5.10.2"
   },
   "devDependencies": {
-    "@labkey/build": "9.1.5",
-    "@types/react": "18.3.1",
+    "@labkey/build": "10.0.1-fb-update-nodejs.1",
+    "@types/react": "18.3.31",
     "@types/react-bootstrap": "0.32.37",
-    "@types/react-dom": "18.3.1",
-    "uuid": "14.0.1"
-  },
-  "overrides": {
-    "uuid": "14.0.1"
+    "@types/react-dom": "18.3.7"
   }
 }

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jre-jammy
+FROM eclipse-temurin:25-jre-focal
 
 # Set noninteractive mode for apt-get
 ENV DEBIAN_FRONTEND=noninteractive

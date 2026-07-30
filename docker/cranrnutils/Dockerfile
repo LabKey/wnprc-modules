@@ -1,4 +1,5 @@
-FROM eclipse-temurin:25
+FROM eclipse-temurin:25-jre-bullseye
+
 
 # Set noninteractive mode for apt-get
 ENV DEBIAN_FRONTEND=noninteractive

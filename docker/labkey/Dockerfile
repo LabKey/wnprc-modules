@@ -2,7 +2,7 @@
 # HELPER IMAGE (to download LabKey)
 ARG LK_VERSION
 ARG FB_NAME
-FROM alpine:latest AS download
+FROM alpine:3.19 AS download
 
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME

@@ -1,5 +1,5 @@
 # STAGE 1: Build a custom Java Runtime with jlink
-FROM eclipse-temurin:25-jdk-focal AS builder
+FROM eclipse-temurin:25 AS builder
 
 # Create a custom JRE containing only the necessary modules for jshell and common operations.
 # This makes the final image smaller and more secure.

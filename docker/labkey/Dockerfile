@@ -13,24 +13,21 @@ ARG LABKEY_TEAMCITY_BUILD=
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
-# Use secrets injected at build time via:
-#   --secret id=labkey_username,env=LABKEY_TEAMCITY_USERNAME
-#   --secret id=labkey_password,env=LABKEY_TEAMCITY_PASSWORD
-# And set them in environment for use in RUN only — not persisted!
-ENV TEAMCITY_URL=placeholder \
-    LABKEY_TEAMCITY_USERNAME_FILE=/run/secrets/labkey_username \
-    LABKEY_TEAMCITY_PASSWORD_FILE=/run/secrets/labkey_password
+# Accept TEAMCITY_URL via ARG (not secret) — safe as long as it's not a tokenized URL
+ARG TEAMCITY_URL
 
-# ✅ Secure download: secrets only available inside this RUN, never stored in image
+# Use RUN with explicit shell and minimal quoting to ensure secrets are read cleanly
 RUN --mount=type=secret,id=labkey_username \
     --mount=type=secret,id=labkey_password \
-    echo "Downloading LabKey build..." \
-    && wget -qO- \
-        --http-user="$(cat ${LABKEY_TEAMCITY_USERNAME_FILE})" \
-        --http-password="$(cat ${LABKEY_TEAMCITY_PASSWORD_FILE})" \
-        "${TEAMCITY_URL}" \
-    | tar -xz --strip-components=1
-
+    /bin/sh -c ' \
+        USERNAME=$(cat /run/secrets/labkey_username) && \
+        PASSWORD=$(cat /run/secrets/labkey_password) && \
+        echo "Downloading LabKey from ${TEAMCITY_URL}..." && \
+        wget -qO- \
+            --http-user="${USERNAME}" \
+            --http-password="${PASSWORD}" \
+            "${TEAMCITY_URL}" | tar -xz --strip-components=1 \
+    '
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION

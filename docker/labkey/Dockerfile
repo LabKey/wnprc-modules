@@ -4,9 +4,6 @@ ARG LK_VERSION
 ARG FB_NAME
 FROM alpine:3.19 AS download
 
-ARG LABKEY_TEAMCITY_PASSWORD
-ARG LABKEY_TEAMCITY_USERNAME
-ARG TEAMCITY_URL
 
 WORKDIR /tmp/labkey
 
@@ -16,9 +13,24 @@ ARG LABKEY_TEAMCITY_BUILD=
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
-RUN echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
-    && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" ${TEAMCITY_URL} \
-  | tar -xz --strip-components=1
+# Use secrets injected at build time via:
+#   --secret id=labkey_username,env=LABKEY_TEAMCITY_USERNAME
+#   --secret id=labkey_password,env=LABKEY_TEAMCITY_PASSWORD
+# And set them in environment for use in RUN only — not persisted!
+ENV TEAMCITY_URL=placeholder \
+    LABKEY_TEAMCITY_USERNAME_FILE=/run/secrets/labkey_username \
+    LABKEY_TEAMCITY_PASSWORD_FILE=/run/secrets/labkey_password
+
+# ✅ Secure download: secrets only available inside this RUN, never stored in image
+RUN --mount=type=secret,id=labkey_username \
+    --mount=type=secret,id=labkey_password \
+    echo "Downloading LabKey build..." \
+    && wget -qO- \
+        --http-user="$(cat ${LABKEY_TEAMCITY_USERNAME_FILE})" \
+        --http-password="$(cat ${LABKEY_TEAMCITY_PASSWORD_FILE})" \
+        "${TEAMCITY_URL}" \
+    | tar -xz --strip-components=1
+
 
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION

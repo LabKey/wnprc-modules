@@ -1,5 +1,5 @@
 # STAGE 1: Build a custom Java Runtime with jlink
-FROM eclipse-temurin:25 AS builder
+FROM eclipse-temurin:25-jdk-jammy AS builder
 
 # Create a custom JRE containing only the necessary modules for jshell and common operations.
 # This makes the final image smaller and more secure.
@@ -12,7 +12,7 @@ RUN jlink \
     --output /opt/jre-custom
 
 # STAGE 2: Build the final application image
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 # Copy the custom JRE from the builder stage
 COPY --from=builder /opt/jre-custom /opt/jre-custom

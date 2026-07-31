@@ -12,7 +12,7 @@ RUN jlink \
     --output /opt/jre-custom
 
 # STAGE 2: Build the final application image
-FROM ubuntu:24.04.3
+FROM ubuntu:24.04
 
 # Copy the custom JRE from the builder stage
 COPY --from=builder /opt/jre-custom /opt/jre-custom

@@ -24,5 +24,10 @@
         <column name="taskid"/>
         <column name="container"/>
         <column name="history"/>
+        <column name="groupIdFinal"/>
+        <column name="recoveryReasonFinal"/>
+        <column name="cageFinal"/>
+        <column name="locationFinal"/>
+        <column name="roomFinal"/>
     </columns>
 </customView>

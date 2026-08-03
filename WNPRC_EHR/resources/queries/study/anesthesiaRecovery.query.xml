@@ -13,7 +13,11 @@
                         <nullable>false</nullable>
                     </column>
 
-                    <column columnName="recoveryId">
+                    <column columnName="recoveryStartTime">
+                        <columnTitle>Recovery Start Time</columnTitle>
+                    </column>
+
+                    <column columnName="taskid">
                         <columnTitle>Task Id</columnTitle>
                         <fk>
                             <fkDbSchema>ehr</fkDbSchema>
@@ -38,6 +42,30 @@
                     <column columnName="submitterInitials">
                         <required>true</required>
                         <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="recoveryReasonFinal">
+                        <columnTitle>Recovery Reason Final</columnTitle>
+                    </column>
+
+                    <column columnName="groupIdFinal">
+                        <columnTitle>Group ID Final</columnTitle>
+                    </column>
+
+                    <column columnName="cageFinal">
+                        <columnTitle>Cage Final</columnTitle>
+                    </column>
+
+                    <column columnName="locationFinal">
+                        <columnTitle>Location Final</columnTitle>
+                    </column>
+
+                    <column columnName="roomFinal">
+                        <columnTitle>Room Final</columnTitle>
+                    </column>
+
+                    <column columnName="QCState">
+                        <columnTitle>Status</columnTitle>
                     </column>
 
                 </columns>

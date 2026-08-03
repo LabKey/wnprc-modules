@@ -54,6 +54,7 @@ import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
+import org.labkey.api.ehr.EHRQCState;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.exp.property.Domain;
@@ -2472,14 +2473,28 @@ public class WNPRC_EHRController extends SpringActionController
 
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
-            _log.info("INSERT CALLED: UpdateAnesthesiaRecoveryDatasetAction()");
+            _log.info("UPDATE CALLED: UpdateAnesthesiaRecoveryDatasetAction()");
 
-            // 1. Sets up environment variables.
+            // 1. Sets up environment.
+            // 1a. Sets variables.
             NotificationToolkit notificationToolkit = new NotificationToolkit();
             JSONObject response = new JSONObject();
             response.put("success",false);
             response.put("detailedResponse", "");
             response.put("rowsUpdated", 0);
+            // 1b. Gets QCState name.
+            var qcStateStarted = EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId();
+            // TODO: Ask labkey why 'started' state isn't working.
+            //  - Retrieved 'started' rowid with code below and it works.
+            //  - Then I call this later:           taskRecord.put("qcstate", qcStateStarted);
+            //  - Which throws this error:          Insufficient permissions to update: tasks to status: undefined, from: Scheduled
+            //  - Why is this so much hassle trying to use the 'started' qc state and why can't I find any usage anywhere.
+//            String[] qcStateColumns = new String[]{"rowid"};
+//            SimpleFilter qcStateFilter = new SimpleFilter("label", "Started", CompareType.EQUAL);
+//            ArrayList<HashMap<String, String>> startedQcStateResult = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "ehr", "status", qcStateFilter, null, qcStateColumns);
+//            if (startedQcStateResult != null || startedQcStateResult.isEmpty()) {
+//                qcStateStarted = Integer.parseInt(startedQcStateResult.get(0).get("rowid"));
+//            }
 
 
             // 2. Gets passed-in data.
@@ -2504,44 +2519,56 @@ public class WNPRC_EHRController extends SpringActionController
 
             // 3. Creates the object that collects errors from all failing rows, or the successful rows and tasks to upload.
             BatchValidationException batchErrors = new BatchValidationException();
-            List<Map<String, Object>> validatedRows = new ArrayList<>();
+            List<Map<String, Object>> rowsToInsert = new ArrayList<>();
+            List<Map<String, Object>> rowsToDelete = new ArrayList<>();
             List<Map<String, Object>> tasksToInsert = new ArrayList<>();
             List<Map<String, Object>> tasksToUpdate = new ArrayList<>();
 
 
             // 4. Loops through each row and validates them.
             for (int i = 0; i < rowsToValidate.size(); i++) {
-                // Retrieves the current.
+                // Retrieves the current row.
                 Map<String, Object> row = rowsToValidate.get(i);
                 // Retrieves required values.
                 String id = row.get("Id") != null ? row.get("Id").toString() : null;
-                String recoveryReason = row.get("recoveryReason") != null ? row.get("recoveryReason").toString() : "none";
                 String observer = row.get("observer") != null ? row.get("observer").toString() : null;
                 String recoveryId = row.get("recoveryId") != null ? row.get("recoveryId").toString() : null;
                 String observation = row.get("observation") != null ? row.get("observation").toString() : null;
                 String submitterInitials = row.get("submitterInitials") != null ? row.get("submitterInitials").toString() : null;
                 java.time.LocalDateTime serverDate = java.time.LocalDateTime.now();    // Explicitly import Java here, otherwise script defaults to joda time due to both being imported above.
                 // TODO: Ask users if initials should be required for deleting a row.
-                if (submitterInitials == null) {
+                if (submitterInitials == null || submitterInitials == "") {
                     submitterInitials = "empty";
                 }
-                // Retrieves optional values.
+                // Retrieves optional values (for all observations).
                 String observerComments = row.get("observerComments") != null ? row.get("observerComments").toString() : null;
-                String room = row.get("room") != null ? row.get("room").toString() : null;
                 String assignedTo = row.get("assignedTo") != null ? row.get("assignedTo").toString() : null;
                 String recoverySpeed = row.get("recoverySpeed") != null ? row.get("recoverySpeed").toString() : null;
                 String recoveryCondition = row.get("recoveryCondition") != null ? row.get("recoveryCondition").toString() : null;
-                String groupId = row.get("groupId") != null ? row.get("groupId").toString() : null;
                 String finalizeComments = row.get("finalizeComments") != null ? row.get("finalizeComments").toString() : null;
-                String location = row.get("location") != null ? row.get("location").toString() : null;
-                String cage = row.get("cage") != null ? row.get("cage").toString() : null;
                 String cageLockSecure = row.get("cageLockSecure") != null ? row.get("cageLockSecure").toString() : null;
                 String deviceId = row.get("deviceId") != null ? row.get("deviceId").toString() : null;
-
+                // Retrieves optional values (for fields that should only be updated on 'Imported' observations - customizer sets all other observation rows to reference 'Imported' row for these values).
+                String recoveryReason = null;
+                String groupId = null;
+                String cage = null;
+                String location = null;
+                String room = null;
+                if (observation.equals("Imported")) {
+                    recoveryReason = row.get("recoveryReason") != null ? row.get("recoveryReason").toString() : "none";
+                    groupId = row.get("groupId") != null ? row.get("groupId").toString() : null;
+                    cage = row.get("cage") != null ? row.get("cage").toString() : null;
+                    location = row.get("location") != null ? row.get("location").toString() : null;
+                    room = row.get("room") != null ? row.get("room").toString() : null;
+                }
+                // Gets passed-in review required status.
+                String reviewRequired = row.get("reviewRequired") != null ? row.get("reviewRequired").toString() : null;
+                Boolean reviewRequiredParsed = reviewRequired != null ? Boolean.parseBoolean(reviewRequired) : false;
+                Integer rowQcState = reviewRequiredParsed == true ? EHRService.QCSTATES.ReviewRequired.getQCState(getContainer()).getRowId() : EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId();
                 // Sets data to new row variable.
                 Map<String, Object> validatedRow = new HashMap<>();
                 validatedRow.put("Id", id);
-                validatedRow.put("date", serverDate);
+                validatedRow.put("date", Timestamp.valueOf(serverDate));
                 validatedRow.put("recoveryReason", recoveryReason);
                 validatedRow.put("observer", observer);
                 validatedRow.put("recoveryId", recoveryId);
@@ -2558,10 +2585,11 @@ public class WNPRC_EHRController extends SpringActionController
                 validatedRow.put("cage", cage);
                 validatedRow.put("cageLockSecure", cageLockSecure);
                 validatedRow.put("deviceId", deviceId);
+                validatedRow.put("QCState", rowQcState);
 
-                // 4a. Check row for required fields (doesn't require initials for a row deletion).
+                // 4a. Check row for required fields.
                 String[] requiredFields = {
-                        "Id", "recoveryReason", "observer", "recoveryId", "observation", "submitterInitials"
+                        "Id", "observer", "recoveryId", "observation", "submitterInitials"
                 };
                 boolean missingField = false;
                 for (String field : requiredFields) {
@@ -2575,22 +2603,9 @@ public class WNPRC_EHRController extends SpringActionController
                     continue;   // Invalid row; skip adding to batch update and continue checking other rows.
                 }
 
-                // 4b. Verifies animal is currently alive and exists at center.
-                SimpleFilter existsAliveAtCenterFilter = new SimpleFilter("id", id, CompareType.EQUAL);
-                String[] existsAliveAtCenterTargetColumns = new String[]{"Id", "calculated_status"};
-                ArrayList<HashMap<String, String>> existsAliveAtCenterRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", existsAliveAtCenterFilter, null, existsAliveAtCenterTargetColumns);
-                if (existsAliveAtCenterRows == null || existsAliveAtCenterRows.isEmpty()) {
-                    batchErrors.addRowError((new ValidationException("Animal does not currently exist at the center.")));
-                    continue;   // Invalid row; skip adding to batch update and continue checking other rows.
-                }
-                else if (!existsAliveAtCenterRows.get(0).get("calculated_status").equals("Alive")) {
-                    batchErrors.addRowError((new ValidationException("Animal is no longer alive.")));
-                    continue;   // Invalid row; skip adding to batch update and continue checking other rows.
-                }
-
-                // 4c. Verifies no other active recoveries exist for the current animal (only if this is an 'import' observation).
+                // 4b. Validate existing table data before updating (depending on observation being added).
                 if (observation.equals("Imported")) {
-                    // Get started & finished recoveries.
+                    // Verify no other active recoveries exist for the current animal.
                     String[] existingRecoveriesTargetColumn = new String[]{"recoveryId"};
                     SimpleFilter recoveriesStartedFilter = new SimpleFilter("id", id, CompareType.EQUAL);
                     recoveriesStartedFilter.addCondition("observation", "Imported", CompareType.EQUAL);
@@ -2603,9 +2618,74 @@ public class WNPRC_EHRController extends SpringActionController
                         batchErrors.addRowError((new ValidationException("Animal: " + id + " already has an active recovery in-progress.  Please finish this recovery before beginning a new one.")));
                         continue;   // Invalid row; skip adding to batch update and continue checking other rows.
                     }
+                    else if (recoveriesStartedRows != null && !recoveriesStartedRows.isEmpty() && recoveriesFinishedRows == null) {
+                        batchErrors.addRowError((new ValidationException("Animal: " + id + " already has an active recovery in-progress.  Please finish this recovery before beginning a new one.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                    // Verifies animal is currently alive and exists at center.
+                    SimpleFilter existsAliveAtCenterFilter = new SimpleFilter("id", id, CompareType.EQUAL);
+                    String[] existsAliveAtCenterTargetColumns = new String[]{"Id", "calculated_status"};
+                    ArrayList<HashMap<String, String>> existsAliveAtCenterRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "demographics", existsAliveAtCenterFilter, null, existsAliveAtCenterTargetColumns);
+                    if (existsAliveAtCenterRows == null || existsAliveAtCenterRows.isEmpty()) {
+                        batchErrors.addRowError((new ValidationException("Animal does not currently exist at the center.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                    else if (!existsAliveAtCenterRows.get(0).get("calculated_status").equals("Alive")) {
+                        batchErrors.addRowError((new ValidationException("Animal is no longer alive.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                }
+                else if (observation.equals("Deleted")) {
+                    // Verify only 1 row exists with this 'recoveryId' and has the status of 'Imported', then retrieve the lsid.
+                    String[] existingRecoveryLsidColumn = new String[]{"lsid"};
+                    SimpleFilter existingRecoveryFilter = new SimpleFilter("recoveryId", recoveryId, CompareType.EQUAL);
+                    ArrayList<HashMap<String, String>> existingRecoveryRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", existingRecoveryFilter, null, existingRecoveryLsidColumn);
+                    if (existingRecoveryRows == null || existingRecoveryRows.isEmpty()) {
+                        batchErrors.addRowError((new ValidationException("Recovery: " + recoveryId + " has no data to delete.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                    if (existingRecoveryRows.size() > 1) {
+                        batchErrors.addRowError((new ValidationException("Recovery: " + recoveryId + " has already had 1 or more observations after 'Imported'.  In-progress recoveries cannot be deleted.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                    else {
+                        validatedRow.put("lsid", existingRecoveryRows.get(0).get("lsid"));
+                    }
+                }
+                else if (observation.equals("Unfinalized")) {
+                    // Verify this animal has no other open recoveries currently active.
+                    String[] existingRecoveriesTargetColumn = new String[]{"recoveryId"};
+                    SimpleFilter recoveriesStartedFilter = new SimpleFilter("id", id, CompareType.EQUAL);
+                    recoveriesStartedFilter.addCondition("observation", "Imported", CompareType.EQUAL);
+                    SimpleFilter recoveriesFinishedFilter = new SimpleFilter("id", id, CompareType.EQUAL);
+                    recoveriesFinishedFilter.addCondition("observation", "Fully Recovered;Deleted", CompareType.IN);
+                    ArrayList<HashMap<String, String>> recoveriesStartedRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveriesStartedFilter, null, existingRecoveriesTargetColumn);
+                    ArrayList<HashMap<String, String>> recoveriesFinishedRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", recoveriesFinishedFilter, null, existingRecoveriesTargetColumn);
+                    // Verify counts match.
+                    if (recoveriesStartedRows != null && !recoveriesStartedRows.isEmpty() && recoveriesFinishedRows != null && !recoveriesFinishedRows.isEmpty() && recoveriesStartedRows.size() != recoveriesFinishedRows.size()) {
+                        batchErrors.addRowError((new ValidationException("Animal: " + id + " already has an active recovery in-progress.  Please finish this recovery before restoring a previous one.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                    else if (recoveriesStartedRows != null && !recoveriesStartedRows.isEmpty() && recoveriesFinishedRows == null) {
+                        batchErrors.addRowError((new ValidationException("Animal: " + id + " already has an active recovery in-progress.  Please finish this recovery before restoring a previous one.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+
+                    // Verify a row exists with this 'recoveryId' and a status of 'Fully Recovered', then retrieve the lsid.
+                    String[] existingRecoveryLsidColumn = new String[]{"lsid"};
+                    SimpleFilter existingFinalizedRecoveryFilter = new SimpleFilter("recoveryId", recoveryId, CompareType.EQUAL);
+                    existingFinalizedRecoveryFilter.addCondition("observation", "Fully Recovered", CompareType.EQUAL);
+                    ArrayList<HashMap<String, String>> existingRecoveryRows = notificationToolkit.getTableMultiRowMultiColumnWithFieldKeys(getContainer(), getUser(), "study", "anesthesiaRecovery", existingFinalizedRecoveryFilter, null, existingRecoveryLsidColumn);
+                    if (existingRecoveryRows == null || existingRecoveryRows.isEmpty()) {
+                        batchErrors.addRowError((new ValidationException("Recovery: " + recoveryId + " has no recovery data to resume.")));
+                        continue;   // Invalid row; skip adding to batch update and continue checking other rows.
+                    }
+                    else {
+                        validatedRow.put("lsid", existingRecoveryRows.get(0).get("lsid"));
+                    }
                 }
 
-                // 4d. Create or Update task into task dataset.
+                // 4c. Create or Update task into task dataset.
                 Map<String, Object> taskRecord = new HashMap<>();
                 taskRecord.put("taskid", recoveryId);
                 taskRecord.put("title", "Anesthesia Recovery");
@@ -2617,6 +2697,7 @@ public class WNPRC_EHRController extends SpringActionController
                     tasksToInsert.add(taskRecord);
                 }
                 else if (observation.equals("Sitting Upright") || observation.equals("Laying Down")) {
+//                    taskRecord.put("qcstate", qcStateStarted);
                     taskRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
                     tasksToUpdate.add(taskRecord);
                 }
@@ -2628,12 +2709,18 @@ public class WNPRC_EHRController extends SpringActionController
                     taskRecord.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
                     tasksToUpdate.add(taskRecord);
                 }
+                else if (observation.equals("Unfinalized")) {
+                    taskRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
+                    tasksToUpdate.add(taskRecord);
+                }
 
-                // 4e. Current row is valid, added to validatedRows for the batch update.
-                validatedRows.add(validatedRow);
-
+                // 4e. Current row is valid, added to rowsToInsert for the batch update.
+                if (observation.equals("Unfinalized") || observation.equals("Deleted")) {
+                    rowsToDelete.add(validatedRow);
+                } else {
+                    rowsToInsert.add(validatedRow);
+                }
             }
-
 
             // 6. Report all manual validation errors back to the user.
             if (batchErrors.hasErrors()) {
@@ -2654,31 +2741,35 @@ public class WNPRC_EHRController extends SpringActionController
                 QueryUpdateService anesthesiaTableService = anesthesiaTableInfo.getUpdateService();
                 QueryUpdateService tasksTableService = tasksTableInfo.getUpdateService();
                 BatchValidationException dbErrors = new BatchValidationException();
-                validatedRows = SimpleQueryUpdater.makeRowListCaseInsensitive(validatedRows);
+                rowsToInsert = SimpleQueryUpdater.makeRowListCaseInsensitive(rowsToInsert);
+                rowsToDelete = SimpleQueryUpdater.makeRowListCaseInsensitive(rowsToDelete);
                 tasksToInsert = SimpleQueryUpdater.makeRowListCaseInsensitive(tasksToInsert);
                 tasksToUpdate = SimpleQueryUpdater.makeRowListCaseInsensitive(tasksToUpdate);
 
                 // 7b. Creates the tasks containing all rows to be inserted.
-                List<Map<String, Object>> anesthesiaRowsToInsert = anesthesiaTableService.insertRows(getUser(), getContainer(), validatedRows, dbErrors, null, null);
+                List<Map<String, Object>> anesthesiaRowsToInsert = anesthesiaTableService.insertRows(getUser(), getContainer(), rowsToInsert, dbErrors, null, null);
+                // TODO: Check with labkey to verify there's no dbErrors to add to the anesthesiaRowsToDelete object below.  Row deletion is not done in batch so this will work regardless.
+                List<Map<String, Object>> anesthesiaRowsToDelete = anesthesiaTableService.deleteRows(getUser(), getContainer(), rowsToDelete, null, null);
                 tasksTableService.insertRows(getUser(), getContainer(), tasksToInsert, dbErrors, null, null);
                 tasksTableService.updateRows(getUser(), getContainer(), tasksToUpdate, tasksToUpdate, dbErrors, null, null);
 
-                // 7c. Checks for errors in any row and aborts the insert
+                // 7c. Checks for errors in any row and aborts the insert.
                 if (dbErrors.hasErrors()) {
                     throw dbErrors;
                 }
 
                 // 7d. Executes the Task to insert all rows via a batch transaction.
                 transaction.commit();
-                response.put("success", true);;
+                response.put("success", true);
                 response.put("detailedResponse", "Database save successful.");
-                response.put("rowsUpdated", anesthesiaRowsToInsert.size());
+                response.put("rowsInserted", anesthesiaRowsToInsert.size());
+                response.put("rowsUpdated", anesthesiaRowsToDelete.size());
                 return response;
 
             }
-            // Catches any errors
+            // Catches any errors.
             catch (Exception e) {
-                _log.info("There was an issue inserting rows into the anesthesiaRecovery dataset: " + e.getMessage());
+                _log.info("There was an issue modifying the anesthesiaRecovery dataset: " + e.getMessage());
                 response.put("success", false);
                 response.put("detailedResponse", "Database save failed: " + e.getMessage());
                 return response;

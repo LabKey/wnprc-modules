@@ -4,6 +4,7 @@
     <columns>
         <column name="Id"/>
         <column name="recoveryStartTime"/>
+        <column name="totalRecoveryTime"/>
     </columns>
     <filters>
         <filter column="observation" operator="eq" value="Fully Recovered"/>

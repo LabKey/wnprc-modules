@@ -1,0 +1,75 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="anesthesiaRecovery" tableDbType="TABLE" useColumnOrder="false">
+                <columns>
+                    <column columnName="Id">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="observer">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="recoveryStartTime">
+                        <columnTitle>Recovery Start Time</columnTitle>
+                    </column>
+
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/WNPRC/EHR/taskDetails.view?formtype=Anesthesia%20Recovery&amp;taskid=${taskid}</url>
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="observation">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="recoveryReason">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="submitterInitials">
+                        <required>true</required>
+                        <nullable>false</nullable>
+                    </column>
+
+                    <column columnName="recoveryReasonFinal">
+                        <columnTitle>Recovery Reason Final</columnTitle>
+                    </column>
+
+                    <column columnName="groupIdFinal">
+                        <columnTitle>Group ID Final</columnTitle>
+                    </column>
+
+                    <column columnName="cageFinal">
+                        <columnTitle>Cage Final</columnTitle>
+                    </column>
+
+                    <column columnName="locationFinal">
+                        <columnTitle>Location Final</columnTitle>
+                    </column>
+
+                    <column columnName="roomFinal">
+                        <columnTitle>Room Final</columnTitle>
+                    </column>
+
+                    <column columnName="QCState">
+                        <columnTitle>Status</columnTitle>
+                    </column>
+
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

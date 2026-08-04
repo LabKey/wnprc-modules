@@ -101,9 +101,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             } else if (matches(table, "wnprc", "animal_requests")) {
                 customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
+            else if (matches(table, "study", "anesthesiaRecovery")) {
+                customizeAnesthesiaRecoveryTable((AbstractTableInfo) table);
+            }
+            else if (matches(table, "wnprc_ios_app", "session_log")) {
+                customizeSessionLogTable((AbstractTableInfo) table);
+            }
             else if (table.getName().equalsIgnoreCase("waterOrders"))
                 appendEnddateFuture((AbstractTableInfo) table, "enddate");
-
         }
     }
 
@@ -313,6 +318,196 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         newCol2.setLabel("Chow Lookup");
         ti.addColumn(newCol2);
 
+    }
+
+    private void customizeAnesthesiaRecoveryTable(AbstractTableInfo ti) {
+        // Defines new 'start time' customized column and display name.
+        String recoveryStartTimeColumnName = "recoveryStartTime";
+        String recoveryStartTimeDisplayName = "Recovery Start Time";
+        String recoveryStartTimeDescription = "This column shows the calculated original start time for this specific recovery (the date/time the first observation was made).";
+        // Creates SQL script to define what to show in column.
+        SQLFragment sql = new SQLFragment("(SELECT sub.date FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation != 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId")
+                .append(" ORDER BY sub.created ASC LIMIT 1)");
+        // Compiles data and creates the new column to insert.
+        ExprColumn newCol = new ExprColumn(ti, recoveryStartTimeColumnName, sql, JdbcType.TIMESTAMP);
+        newCol.setLabel(recoveryStartTimeDisplayName);
+        newCol.setDescription(recoveryStartTimeDescription);
+        ti.addColumn(newCol);
+
+        // Defines new 'taskId' customized column and display name.
+        String taskIdColumnName = "taskid";
+        String taskIdDisplayName = "Task ID";
+        String taskIdDescription = "This column shows the task corresponding to this row's recoveryId.";
+        // Creates SQL script to define what to show.
+        SQLFragment taskIdSql = new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".recoveryId");
+        // Compiles data and creates new column to insert.
+        ExprColumn taskIdColumn = new ExprColumn(ti, taskIdColumnName, taskIdSql, JdbcType.VARCHAR);
+        taskIdColumn.setLabel(taskIdDisplayName);
+        taskIdColumn.setDescription(taskIdDescription);
+        ti.addColumn(taskIdColumn);
+
+        // Defines new 'recovery reason' customized column and display name, then sets the value so all entries match data in the 'Imported' row.
+        String recoveryReasonColumnName = "recoveryReasonFinal";
+        String recoveryReasonDisplayName = "Recovery Reason Final";
+        String recoveryReasonDescription = "This column shows the calculated original recovery reason for this specific recovery (the recoveryReason assigned when the recovery was first imported).";
+        // Creates SQL script to define what to show in column.
+        SQLFragment recoveryReasonSql = new SQLFragment("(SELECT sub.recoveryReason FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation = 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId")
+                .append(" ORDER BY sub.created ASC LIMIT 1)");
+        // Compiles data and creates the new column to insert.
+        ExprColumn recoveryReasonColumn = new ExprColumn(ti, recoveryReasonColumnName, recoveryReasonSql, JdbcType.VARCHAR);
+        recoveryReasonColumn.setLabel(recoveryReasonDisplayName);
+        recoveryReasonColumn.setDescription(recoveryReasonDescription);
+        ti.addColumn(recoveryReasonColumn);
+
+        // Defines new 'cage final' customized column and display name, then sets the value so all entries match data in the 'Imported' row.
+        String cageColumnName = "cageFinal";
+        String cageDisplayName = "Cage Final";
+        String cageDescription = "This column shows the calculated original cage for this specific recovery (the cage assigned when the recovery was first imported).";
+        // Creates SQL script to define what to show in column.
+        SQLFragment cageSql = new SQLFragment("(SELECT sub.cage FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation = 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId")
+                .append(" ORDER BY sub.created ASC LIMIT 1)");
+        // Compiles data and creates the new column to insert.
+        ExprColumn cageColumn = new ExprColumn(ti, cageColumnName, cageSql, JdbcType.VARCHAR);
+        recoveryReasonColumn.setLabel(cageDisplayName);
+        recoveryReasonColumn.setDescription(cageDescription);
+        ti.addColumn(cageColumn);
+
+        // Defines new 'location final' customized column and display name, then sets the value so all entries match data in the 'Imported' row.
+        String locationColumnName = "locationFinal";
+        String locationDisplayName = "Location Final";
+        String locationDescription = "This column shows the calculated original description for this specific recovery (the description assigned when the recovery was first imported).";
+        // Creates SQL script to define what to show in column.
+        SQLFragment locationSql = new SQLFragment("(SELECT sub.location FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation = 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId")
+                .append(" ORDER BY sub.created ASC LIMIT 1)");
+        // Compiles data and creates the new column to insert.
+        ExprColumn locationColumn = new ExprColumn(ti, locationColumnName, locationSql, JdbcType.VARCHAR);
+        recoveryReasonColumn.setLabel(locationDisplayName);
+        recoveryReasonColumn.setDescription(locationDescription);
+        ti.addColumn(locationColumn);
+
+        // Defines new 'room final' customized column and display name, then sets the value so all entries match data in the 'Imported' row.
+        String roomColumnName = "roomFinal";
+        String roomDisplayName = "Room Final";
+        String roomDescription = "This column shows the calculated original room for this specific recovery (the room assigned when the recovery was first imported).";
+        // Creates SQL script to define what to show in column.
+        SQLFragment roomSql = new SQLFragment("(SELECT sub.room FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation = 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId")
+                .append(" ORDER BY sub.created ASC LIMIT 1)");
+        // Compiles data and creates the new column to insert.
+        ExprColumn roomColumn = new ExprColumn(ti, roomColumnName, roomSql, JdbcType.VARCHAR);
+        recoveryReasonColumn.setLabel(roomDisplayName);
+        recoveryReasonColumn.setDescription(roomDescription);
+        ti.addColumn(roomColumn);
+
+
+
+
+
+        // Defines new 'group id' customized column and display name, then sets the value so all entries match data in the 'Imported' row.
+        String groupIdColumnName = "groupIdFinal";
+        String groupIdDisplayName = "Group ID Final";
+        String groupIdDescription = "This column shows the calculated original group ID for this specific recovery (the groupID assigned when the first observation was made).";
+        // Creates SQL script to define what to show in column.
+        SQLFragment groupIdSql = new SQLFragment("(SELECT sub.groupId FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation = 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId")
+                .append(" ORDER BY sub.created ASC LIMIT 1)");
+        // Compiles data and creates the new column to insert.
+        ExprColumn groupIdCol = new ExprColumn(ti, groupIdColumnName, groupIdSql, JdbcType.VARCHAR);
+        groupIdCol.setLabel(groupIdDisplayName);
+        groupIdCol.setDescription(groupIdDescription);
+        ti.addColumn(groupIdCol);
+
+        // Defines new 'total recovery time' customized column and display name.
+        String totalRecoveryTimeName = "totalRecoveryTime";
+        String totalRecoveryTimeDisplayName = "Total Recovery Time";
+        String totalRecoveryTimeDescription = "This column shows the calculated total recovery time for this specific recovery.";
+        // Creates SQL script to define what to show in column.
+        SQLFragment totalRecoveryTimeSql = new SQLFragment("EXTRACT(EPOCH FROM (")
+                // End Time: 'Fully Recovered'.
+                .append("(SELECT sub.date FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation = 'Fully Recovered' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId) - ")
+                // Start Time: First non-'Imported' observation.
+                .append("(SELECT MIN(sub.date) FROM ")
+                .append(ti.getFromSQL("sub"))
+                .append(" WHERE sub.observation != 'Imported' AND sub.recoveryId = ")
+                .append(ExprColumn.STR_TABLE_ALIAS)
+                .append(".recoveryId)")
+                .append(")) / 60");
+        // Compiles data and creates the new column.
+        ExprColumn totalRecoveryTimeCol = new ExprColumn(ti, totalRecoveryTimeName, totalRecoveryTimeSql, JdbcType.DOUBLE);
+        totalRecoveryTimeCol.setLabel(totalRecoveryTimeDisplayName);
+        totalRecoveryTimeCol.setDescription(totalRecoveryTimeDescription);
+        // Creates a display renderer.
+        totalRecoveryTimeCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo) {
+            @Override
+            public @NotNull HtmlString getFormattedHtml(RenderContext ctx) {
+                Object value = getValue(ctx);
+                if (value == null) return HtmlString.EMPTY_STRING;
+                double totalMinutes = ((Number) value).doubleValue();
+                long hours = (long) (totalMinutes / 60);
+                long minutes = Math.round(totalMinutes % 60);
+                // Handle edge case where rounding minutes up hits 60.
+                if (minutes == 60) {
+                    hours += 1;
+                    minutes = 0;
+                }
+                return HtmlString.of(String.format("%d:%02d", hours, minutes));
+            }
+        });
+
+        ti.addColumn(totalRecoveryTimeCol);
+    }
+
+    private void customizeSessionLogTable(AbstractTableInfo ti) {
+        // 1. Defines new customized column and display name.
+        String numRecordsColumnName = "numRecords";
+        String numRecordsDisplayName = "Number of Records";
+        String numRecordsDescription = "This column shows the number of records returned from the current query.";
+
+        // 2. Gets a reference to the wnprc schema's session log.
+        UserSchema wnprcSchema = getUserSchema(ti, "wnprc");
+        if (wnprcSchema != null) {
+            TableInfo ogSessionLog = wnprcSchema.getTable("session_log");
+            if (ogSessionLog != null) {
+                // 3. Creates SQL script to define what to show in our new column.
+                SQLFragment sql = new SQLFragment("(SELECT sub.number_of_records FROM ")
+                        .append(ogSessionLog.getFromSQL("sub"))
+                        .append(" WHERE sub.rowid = CAST(")
+                        .append(ExprColumn.STR_TABLE_ALIAS)
+                        .append(".original_row_id AS INTEGER) ORDER BY sub.created ASC LIMIT 1)");
+
+                // 4. Compiles and assigns our new column.
+                ExprColumn newCol = new ExprColumn(ti, numRecordsColumnName, sql, JdbcType.INTEGER);
+                newCol.setLabel(numRecordsDisplayName);
+                newCol.setDescription(numRecordsDescription);
+                ti.addColumn(newCol);
+            }
+        }
     }
 
     private void customizeBirthTable(AbstractTableInfo ti)

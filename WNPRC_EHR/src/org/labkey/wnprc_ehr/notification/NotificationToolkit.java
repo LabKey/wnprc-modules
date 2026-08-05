@@ -855,6 +855,7 @@ public class NotificationToolkit {
     //              ColonyInformationObject > getLivingAnimalsWithMultipleActiveHousingRecords
     //              ColonyInformationObject > getAllRecordsWithPotentialHousingConditionProblems
     //              ColonyInformationObject > getAllRecordsWithCalculatedStatusFieldProblems
+    //              AnesthesiaRecoveryReviewNotificationObject > getUnclosedAnesthesiaRecoveries
     /**
      * Creates a URL for a query matching user arguments.
      * WARNING: This should only be used with a SimpleFilter that has clauses containing only one field key.  You can use multiple clauses and multiple values for each, but each clause should only have one key.
@@ -888,22 +889,27 @@ public class NotificationToolkit {
                 // Gets clause key.
                 FieldKey clauseKey = currentClause.getFieldKeys().get(0);   //TODO: Add in comment that this should only be used with clauses containing one field key for each clause.
 
-                // Gets clause value.
-                StringBuilder clauseValue = new StringBuilder();
-                if (currentClause.getParamVals() != null) {
-                    for (Object paramValue : currentClause.getParamVals()) {
-                        clauseValue.append(paramValue.toString());
-//                        clauseValue.append(";");
-                    }
-                }
-
-                // Gets clause compare.
+                // Gets clause compare and value.
                 CompareType clauseCompare = null;
+                StringBuilder clauseValue = new StringBuilder();
                 if (currentClause instanceof CompareType.CompareClause) {
                     clauseCompare = ((CompareType.CompareClause)currentClause).getCompareType();
+                    // Gets clause value.
+                    if (currentClause.getParamVals() != null) {
+                        for (Object paramValue : currentClause.getParamVals()) {
+                            clauseValue.append(paramValue.toString());
+                        }
+                    }
                 }
                 else if (currentClause instanceof SimpleFilter.InClause) {
                     clauseCompare = ((SimpleFilter.InClause) currentClause).getCompareType();
+                    // Gets clause value.
+                    if (currentClause.getParamVals() != null) {
+                        for (Object paramValue : currentClause.getParamVals()) {
+                            clauseValue.append(paramValue.toString());
+                            clauseValue.append(";");
+                        }
+                    }
                 }
                 else {
                     return "";

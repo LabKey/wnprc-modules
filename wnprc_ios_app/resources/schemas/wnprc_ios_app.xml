@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="reported_issues" tableDbType="TABLE">
+        <columns>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+            <column columnName="issue_description"/>
+            <column columnName="dev_comments"/>
+            <column columnName="status"/>
+            <column columnName="rowid"/>
+        </columns>
+    </table>
+    <table tableName="user_animal_abstract_preferences" tableDbType="TABLE">
+        <columns>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+            <column columnName="target_user"/>
+            <column columnName="show_id"/>
+            <column columnName="show_gender"/>
+            <column columnName="show_availability"/>
+            <column columnName="show_room"/>
+            <column columnName="show_cage"/>
+            <column columnName="show_condition"/>
+            <column columnName="show_num_animals_in_cage"/>
+            <column columnName="show_status"/>
+            <column columnName="show_age"/>
+            <column columnName="show_birth"/>
+            <column columnName="show_dam"/>
+            <column columnName="show_sire"/>
+            <column columnName="show_tb_date"/>
+            <column columnName="show_prepaid"/>
+            <column columnName="show_mgap_ids"/>
+            <column columnName="show_most_recent_weight"/>
+            <column columnName="show_most_recent_weight_date"/>
+            <column columnName="show_hold"/>
+            <column columnName="show_medical"/>
+            <column columnName="show_current_behaviors"/>
+            <column columnName="show_most_recent_alopecia_score"/>
+            <column columnName="show_most_recent_body_condition_score"/>
+            <column columnName="show_origin"/>
+            <column columnName="show_geographic_origin"/>
+            <column columnName="show_ancestry"/>
+            <column columnName="show_most_recent_arrival"/>
+            <column columnName="show_most_recent_departure"/>
+            <column columnName="show_death"/>
+            <column columnName="show_remark"/>
+            <column columnName="show_mgap_sequence_types"/>
+        </columns>
+    </table>
+    <table tableName="session_log" tableDbType="TABLE">
+        <columns>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+            <column columnName="original_row_id"/>
+            <column columnName="query_name"/>
+            <column columnName="request_type"/>
+            <column columnName="errors_occurred"/>
+            <column columnName="dev_comments"/>
+            <column columnName="error_description"/>
+        </columns>
+    </table>
+    <table tableName="push_notifications" tableDbType="TABLE">
+        <columns>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+            <column columnName="push_token"/>
+            <column columnName="target_user"/>
+        </columns>
+    </table>
+</tables>

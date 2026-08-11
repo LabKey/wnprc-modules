@@ -6,7 +6,7 @@ WITH FiveYearsAgo AS (
 -- CTE to identify animals that are of rhesus species and have shown potential for diarrhea in the last 5 years.
 -- Potential for diarrhea is determined by specific observations, treatments, or housing conditions.
 PotentialDiarrheaAnimals AS (
-    SELECT DISTINCT sd.Id, d.gender
+    SELECT DISTINCT sd.Id, d.gender, d.birth
     FROM study.StudyData sd
     LEFT JOIN study.demographics d ON sd.Id = d.Id
     LEFT JOIN (
@@ -24,7 +24,7 @@ PotentialDiarrheaAnimals AS (
         AND sd.date >= (SELECT StartDate FROM FiveYearsAgo)
         AND (
             -- Condition 1: Single-housed animal with a cage observation of diarrhea.
-            (housing_info.NumRoommates = 0 AND sd.DataSet.Name = 'cageObs' AND sd.description LIKE '%Feces%') OR
+            (housing_info.NumRoommates = 0 AND sd.DataSet.Name = 'cageObs' AND sd.description LIKE '%Feces%' AND (sd.description LIKE '%D%' OR sd.description LIKE '%SF%' OR sd.description LIKE '%WD%')) OR
             -- Condition 2: Group-housed animal with a cage observation of diarrhea and a specific treatment.
             (housing_info.NumRoommates > 0 AND sd.DataSet.Name = 'cageObs' AND sd.description LIKE '%Feces%' AND EXISTS (
                 SELECT 1
@@ -47,8 +47,29 @@ PotentialDiarrheaAnimals AS (
                     t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR t.description LIKE '%c-52340%'
                 )
             )) OR
+            -- Condition 2.5: Animal has a diarrhea-related treatment.
+            EXISTS (
+                SELECT 1
+                FROM study.treatment_order t
+                WHERE t.Id = sd.Id AND t.date = sd.date AND (
+                    t.description LIKE '%w-10980%' OR t.description LIKE '%c-54620%' OR t.description LIKE '%w-10942%' OR
+                    t.description LIKE '%w-10944%' OR t.description LIKE '%c-54630%' OR t.description LIKE '%c-52a68%' OR
+                    t.description LIKE '%w-10044%' OR t.description LIKE '%c-52a20%' OR t.description LIKE '%c-93040%' OR
+                    t.description LIKE '%c-a0111%' OR t.description LIKE '%c-52a10%' OR t.description LIKE '%w-10226%' OR
+                    t.description LIKE '%f-61c7b%' OR t.description LIKE '%c-55020%' OR t.description LIKE '%c-d1507%' OR
+                    t.description LIKE '%c-52a00%' OR t.description LIKE '%t-59666%' OR t.description LIKE '%c-d4657%' OR
+                    t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-b0158%' OR t.description LIKE '%w-10587%' OR
+                    t.description LIKE '%w-10757%' OR t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-d3739%' OR
+                    t.description LIKE '%w-10222%' OR t.description LIKE '%c-84540%' OR t.description LIKE '%w-10975%' OR
+                    t.description LIKE '%c-52040%' OR t.description LIKE '%c-5205d%' OR t.description LIKE '%c-84232%' OR
+                    t.description LIKE '%c-56101%' OR t.description LIKE '%c-84560%' OR t.description LIKE '%c-56a50%' OR
+                    t.description LIKE '%@e-85350%' OR t.description LIKE '%c-a01b0%' OR t.description LIKE '%f-61e1f%' OR
+                    t.description LIKE '%c-84812%' OR t.description LIKE '%w-10908%' OR t.description LIKE '%w-10882%' OR
+                    t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR t.description LIKE '%c-52340%'
+                )
+            ) OR
             -- Condition 3: Irregular observation of diarrhea.
-            (sd.DataSet.Name = 'obs' AND sd.description LIKE '%Feces%') OR
+            (sd.DataSet.Name = 'obs' AND sd.description LIKE '%Feces%' AND (sd.description LIKE '%D%' OR sd.description LIKE '%SF%' OR sd.description LIKE '%WD%')) OR
             -- Condition 4: Encounter report of diarrhea.
             (sd.DataSet.Name = 'encounters' AND LOWER(sd.remark) LIKE '%diarrhea%')
         )
@@ -63,7 +84,7 @@ DateSeries AS (
         (
             SELECT
                 CAST('2021-01-01' AS TIMESTAMP) AS StartDate,
-                CAST('2026-01-01' AS TIMESTAMP) AS EndDate
+                CAST('2025-12-31' AS TIMESTAMP) AS EndDate
         ) dr
 
             JOIN
@@ -114,12 +135,18 @@ DailyDiarrheaStatus AS (
         CAST(dateOnly AS DATE) AS dateOnly,
         MAX(
             CASE
-                WHEN feces = 'SF' THEN 1
-                WHEN feces = 'SF,D' OR feces = 'D,SF' THEN 2
-                WHEN feces = 'SF,WD' OR feces = 'WD,SF' THEN 3
-                WHEN feces = 'D' THEN 4
-                WHEN feces = 'D,WD' OR feces = 'WD,D' THEN 5
-                WHEN feces = 'WD' THEN 6
+                -- D + WD = 5
+                WHEN (',' || feces || ',') LIKE '%,D,%' AND (',' || feces || ',') LIKE '%,WD,%' THEN 5
+                -- SF + WD = 3
+                WHEN (',' || feces || ',') LIKE '%,SF,%' AND (',' || feces || ',') LIKE '%,WD,%' THEN 3
+                -- SF + D = 2
+                WHEN (',' || feces || ',') LIKE '%,SF,%' AND (',' || feces || ',') LIKE '%,D,%' THEN 2
+                -- WD = 6
+                WHEN (',' || feces || ',') LIKE '%,WD,%' THEN 6
+                -- D = 4
+                WHEN (',' || feces || ',') LIKE '%,D,%' THEN 4
+                -- SF = 1
+                WHEN (',' || feces || ',') LIKE '%,SF,%' THEN 1
                 ELSE 0
             END
         ) AS diarrhea_status
@@ -141,4 +168,5 @@ CROSS JOIN DateSeries ds
 LEFT JOIN DailyHousingChanges dhc ON pda.Id = dhc.Id AND ds.date = dhc.date
 LEFT JOIN DailyTreatments dt ON pda.Id = dt.Id AND ds.date = dt.date
 LEFT JOIN DailyDiarrheaStatus dds ON pda.Id = dds.Id AND ds.date = dds.dateOnly
+WHERE ds.date >= CAST(pda.birth AS DATE)
 ORDER BY pda.Id, ds.date;

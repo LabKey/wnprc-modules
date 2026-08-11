@@ -53,7 +53,7 @@ public class wnprc_ios_appModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.001;
+        return 26.001;
     }
 
     @Override

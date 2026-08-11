@@ -1,0 +1,1 @@
+This is a module that communicates with the PrimatePal iOS app.

@@ -6,7 +6,7 @@ WITH FiveYearsAgo AS (
 -- CTE to identify animals that are of rhesus species and have shown potential for diarrhea in the last 5 years.
 -- Potential for diarrhea is determined by specific observations, treatments, or housing conditions.
 PotentialDiarrheaAnimals AS (
-    SELECT DISTINCT sd.Id
+    SELECT DISTINCT sd.Id, d.gender
     FROM study.StudyData sd
     LEFT JOIN study.demographics d ON sd.Id = d.Id
     LEFT JOIN (
@@ -131,6 +131,7 @@ DailyDiarrheaStatus AS (
 -- Final SELECT statement to assemble the daily report for each animal.
 SELECT
     pda.Id,
+    pda.gender,
     ds.date,
     COALESCE(dhc.housing_changes, 0) AS housing_changes,
     COALESCE(dt.treatments, 0) AS treatments,

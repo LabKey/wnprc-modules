@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
@@ -74,9 +75,11 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -286,16 +289,24 @@ public class CageUIController extends SpringActionController
     @RequiresPermission(CageUIAnimalEditorPermission.class)
     public static class PrepareHousingTransferAction extends MutatingApiAction<SimpleApiJsonForm>
     {
-        ArrayList<HousingTransferData> _housingTransferData;
+        ArrayList<HousingTransferData> housingTransferData;
 
+        String prevFormLsid;
+
+        public String getPrevFormLsid(){
+            return this.prevFormLsid;
+        }
+        public void setPrevFormLsid(String lsid) {
+            this.prevFormLsid = lsid;
+        }
         public ArrayList<HousingTransferData>  getHousingTransferData()
         {
-            return _housingTransferData;
+            return this.housingTransferData;
         }
 
         public void setHousingTransferData(ArrayList<HousingTransferData>  housingTransferData)
         {
-            _housingTransferData = housingTransferData;
+            this.housingTransferData = housingTransferData;
         }
 
         public static String convertOptionArrayToString(Option<String>[] options) {
@@ -354,8 +365,14 @@ public class CageUIController extends SpringActionController
             }
 
             JSONArray jsonTransferData = json.getJSONArray("transferData");
+            String prevFormLsid = null;
+            if (json.has("prevFormLsid")) {
+                prevFormLsid = json.getString("prevFormLsid");
+                setPrevFormLsid(prevFormLsid);
+            }
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
             try
             {
                 TypeReference<ArrayList<HousingTransferData>> typeRef = new TypeReference<ArrayList<HousingTransferData>>()
@@ -373,47 +390,73 @@ public class CageUIController extends SpringActionController
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
         {
-
-            ArrayList<HousingForm> housingRecords = new ArrayList<HousingForm>();
-            ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<HousingConditionRecordsForm>();
+            ArrayList<HousingForm> housingRecords = new ArrayList<>();
+            ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<>();
             String taskId = UUID.randomUUID().toString();
             Map<String, Object> taskRecord = new HashMap<>();
 
-            taskRecord.put("taskid", taskId);
-            taskRecord.put("title", "Housing Test");
-            taskRecord.put("category", "task");
-            taskRecord.put("formType", "Housing");
-            taskRecord.put("assignedTo", getUser().getUserId());
+            boolean isUpdate = getPrevFormLsid() != null;
 
-            for(HousingTransferData record : getHousingTransferData()){
+            if (!isUpdate) {
+                taskRecord = CageUIManager.get().createHousingTaskRecord(taskId, getUser());
+            } else {
+                taskId = null;
+            }
+
+            for (HousingTransferData record : getHousingTransferData()) {
                 HousingForm newTransferRecord = new HousingForm();
-                HousingConditionRecordsForm newConditionRecord = populateHousingConditionsStream(record.getCondition());
-                String recordObjectId = UUID.randomUUID().toString();
-                newConditionRecord.setObjectid(recordObjectId);
+                HousingConditionRecordsForm newConditionRecord = new HousingConditionRecordsForm();
+
+                if (isUpdate) {
+                    HousingForm prevTransferRecord = CageUIManager.getPreviousHousingForm(getPrevFormLsid(), getUser(), getContainer());
+                    HousingConditionRecordsForm prevConditionRecordForm = CageUIManager.getPreviousHousingConditionRecordForm(prevTransferRecord.getCondNew(), getUser(), getContainer());
+                    if (prevTransferRecord == null) {
+                        errors.reject(ERROR_MSG, "Previous housing form not found for lsid: " + getPrevFormLsid());
+                        return null;
+                    }
+                    if (prevConditionRecordForm == null) {
+                        errors.reject(ERROR_MSG, "Previous housing condition record form not found for objectId: " + prevTransferRecord.getCondNew());
+                        return null;
+                    }
+                    taskId = prevTransferRecord.getTaskId();
+                    newTransferRecord.setLsid(prevTransferRecord.getLsid());
+                    newTransferRecord.setCondNew(prevConditionRecordForm.getObjectId());
+                    newConditionRecord.setObjectId(prevConditionRecordForm.getObjectId());
+                } else {
+                    String recordObjectId = UUID.randomUUID().toString();
+                    newConditionRecord.setObjectId(recordObjectId);
+                    newTransferRecord.setCondNew(recordObjectId);
+                }
 
                 newTransferRecord.setId(record.getId());
                 newTransferRecord.setTaskId(taskId);
-                newTransferRecord.setDate(record.getInDate());
-                newTransferRecord.setEndDate(record.getOutDate());
+                newTransferRecord.setDate(Date.from(record.getInDate().atZone(ZoneId.systemDefault()).toInstant()));
+                newTransferRecord.setEndDate(Date.from(record.getOutDate().atZone(ZoneId.systemDefault()).toInstant()));
                 newTransferRecord.setQcState(1);
-                newTransferRecord.setCondNew(recordObjectId);
                 newTransferRecord.setReason(convertOptionArrayToString(record.getReasonForMove()));
                 newTransferRecord.setRemark(record.getRemarks());
                 newTransferRecord.setProject(record.getProject());
                 newTransferRecord.setPerformedBy(record.getPerformedBy());
                 newTransferRecord.setEjacConfirmed(record.isEjacConfirmed());
 
-                if(record.getDestinationRoom().getValue() == 0){ // No change (animal stays same room and cage)
+                if (record.getDestinationRoom().getValue() == 0) { // No change (animal stays same room and cage)
                     newTransferRecord.setRoom(record.getCurrentRoom().getLabel());
                     newTransferRecord.setCageNew(record.getCurrentCage().getValue());
-                }else{
+                } else {
                     newTransferRecord.setRoom(record.getDestinationRoom().getLabel());
                     newTransferRecord.setCageNew(record.getDestinationCage().getValue());
                 }
-                housingRecords.add(newTransferRecord);
-                housingConditionRecords.add(newConditionRecord);
-            }
 
+                HousingConditionRecordsForm populatedConditions = populateHousingConditionsStream(record.getCondition());
+                newConditionRecord.setSpecialCondition(populatedConditions.getSpecialCondition());
+                newConditionRecord.setPairCondition(populatedConditions.getPairCondition());
+                newConditionRecord.setCageCondition(populatedConditions.getCageCondition());
+                newConditionRecord.setSocialCondition(populatedConditions.getSocialCondition());
+                housingConditionRecords.add(newConditionRecord);
+
+
+                housingRecords.add(newTransferRecord);
+            }
 
             return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer());
         }

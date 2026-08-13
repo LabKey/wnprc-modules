@@ -19,16 +19,24 @@
 package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 public class HousingTransferData
 {
     private String id;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date inDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date outDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "SYSTEM")
+    private LocalDateTime inDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "SYSTEM")
+    private LocalDateTime outDate;
     private Option<Integer> destinationRoom;
     private Option<String> destinationCage;
     private ConditionCode[] condition;
@@ -51,22 +59,22 @@ public class HousingTransferData
         this.id = id;
     }
 
-    public Date getInDate()
+    public LocalDateTime getInDate()
     {
         return inDate;
     }
 
-    public void setInDate(Date inDate)
+    public void setInDate(LocalDateTime inDate)
     {
         this.inDate = inDate;
     }
 
-    public Date getOutDate()
+    public LocalDateTime getOutDate()
     {
         return outDate;
     }
 
-    public void setOutDate(Date outDate)
+    public void setOutDate(LocalDateTime outDate)
     {
         this.outDate = outDate;
     }

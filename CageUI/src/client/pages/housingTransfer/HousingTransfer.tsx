@@ -27,11 +27,14 @@ import { HousingForm } from '../../components/housingTransfer/HousingForm';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { findAnimalsInCage } from '../../api/popularQueries';
+import { HousingTransferData } from '../../types/housingFormTypes';
+import { createPrevHousingForm } from '../../utils/housingTransferHelpers';
 
 
 export const HousingTransfer: FC = () => {
     const [user, setUser] = useState<Security.GetUserPermissionsResponse>(null);
     const [firstRoom, setFirstRoom] = useState<string>();
+    const [prevForm, setPrevForm] = useState<Record<string, HousingTransferData[]>>(null);
     const [selectedAnimals, setSelectedAnimals] = useState<string[]>();
 
 
@@ -51,7 +54,13 @@ export const HousingTransfer: FC = () => {
     useEffect(() => {
         const firstRoom: string = ActionURL.getParameter('room');
         const firstCage: string = ActionURL.getParameter('cage');
-        if (firstRoom && firstCage) {
+        const prevFormId: string = ActionURL.getParameter('lsid');
+        if(prevFormId){
+            createPrevHousingForm(prevFormId).then(r => {
+                setPrevForm(r);
+            })
+        }
+        else if (firstRoom && firstCage) {
             findAnimalsInCage(firstCage).then((r) => {
                 setSelectedAnimals(r.flatMap(animal => animal.id));
             })
@@ -70,6 +79,7 @@ export const HousingTransfer: FC = () => {
                     <>
                         <HousingForm
                             user={user}
+                            prevForm={prevForm}
                             currRoom={firstRoom}
                             selectedAnimals={selectedAnimals}
                         />

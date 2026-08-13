@@ -53,6 +53,8 @@ import {
 } from '../../utils/housingTransferHelpers';
 
 interface HousingDataGridProps {
+    prevData: boolean;
+    autoConditions: boolean;
     user: Security.GetUserPermissionsResponse;
     roomLabel: string;
     animals: HousingTransferData[];
@@ -62,12 +64,12 @@ interface HousingDataGridProps {
     roomOptions: Option<number>[];
     reasonOptions: Option<string>[];
     centerAnimals: string[];
+    conditionCodes: ConditionCode[];
 }
 
 export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
-    const { user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals } = props;
+    const {prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, conditionCodes } = props;
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
-    const [conditionCodes, setConditionCodes] = useState<ConditionCode[]>([]);
     const [canEditCondition, setCanEditCondition] = useState<boolean>(false);
     const [newAnimalId, setNewAnimalId] = useState<string>(null);
     const [autoSizeOptions] = useState<GridAutosizeOptions>({
@@ -85,7 +87,6 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
 
     useEffect(() => {
-        fetchConditionCodes().then(setConditionCodes);
         setCanEditCondition(canEditConditionPermission(user));
     }, []);
 
@@ -103,6 +104,12 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     useEffect(() => {
         updateConditionCodes(animals, animals);
     }, [allAnimals]);
+
+    useEffect(() => {
+        if (autoConditions) {
+            updateConditionCodes(animals, animals);
+        }
+    }, [autoConditions]);
 
     const handleCellChange = useCallback((field: string, paramId: GridRowId, value: any)=> {
         const updatedAnimals = animals.map(a => a.id === paramId ? { ...a, [field]: value } : a);
@@ -250,6 +257,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     }, [conditionCodes]);
 
     const updateConditionCodes = useCallback(async (affectedAnimals: HousingTransferData[], currentAnimals: HousingTransferData[]) => {
+        if(!autoConditions) return;
         const cageGroups: Record<string, string[]> = {};
         const newRowMetadata: Record<string, Partial<HousingRowMetadata>> = {};
 
@@ -355,7 +363,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         if (JSON.stringify(updatedAnimals) !== JSON.stringify(currentAnimals)) {
             onAnimalsChange(updatedAnimals);
         }
-    }, [calculateConditionCodes, onAnimalsChange, allAnimals]);
+    }, [calculateConditionCodes, onAnimalsChange, allAnimals, autoConditions]);
 
     const handleAddAnimal = useCallback(() => {
         if (!newAnimalId || newAnimalId.trim() === '') return;
@@ -839,26 +847,28 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             <Typography variant="h6" gutterBottom>
                 Room: {roomLabel}
             </Typography>
-            <div className="add-animal-controls" style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
-                <Autocomplete
-                    value={filteredCenterAnimals.find(option => option === newAnimalId) || null}
-                    options={filteredCenterAnimals}
-                    getOptionLabel={(option: string) => option || ''}
-                    sx={{ width: 300 }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label={"Animals"}
-                            variant="standard"
-                            size="small"
-                        />
-                    )}
-                    onChange={(e, newValue) => setNewAnimalId(newValue)}
-                />
-                <button className="btn btn-primary" onClick={handleAddAnimal}>
-                    Add Animal
-                </button>
-            </div>
+            {!prevData &&
+                <div className="add-animal-controls" style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
+                    <Autocomplete
+                        value={filteredCenterAnimals.find(option => option === newAnimalId) || null}
+                        options={filteredCenterAnimals}
+                        getOptionLabel={(option: string) => option || ''}
+                        sx={{ width: 300 }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label={"Animals"}
+                                variant="standard"
+                                size="small"
+                            />
+                        )}
+                        onChange={(e, newValue) => setNewAnimalId(newValue)}
+                    />
+                    <button className="btn btn-primary" onClick={handleAddAnimal}>
+                        Add Animal
+                    </button>
+                </div>
+            }
 
             <Box sx={{ width: '100%' }}>
                 <DataGrid
@@ -911,11 +921,14 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     getRowHeight={() => 'auto'}
                     autosizeOptions={autoSizeOptions}
                     columnVisibilityModel={{
-                        project: !!animals.find(animal => animal.reasonForMove.find(reason => reason.value === "Breeding")),
-                        ejacConfirmed: !!animals.find(animal => animal.reasonForMove.find(reason => reason.value === 'Breeding ended')),
+                        actions: !prevData,
+                        outDate: !!(prevData && animals.find(animal => animal.outDate)), // Show outdate if the record has an outdate. (prevForm with outdate filled)
+                        project: !!animals.find(animal => animal.reasonForMove.find(reason => reason.value === "Breeding")), // Show project if a reason has breeding
+                        ejacConfirmed: !!animals.find(animal => animal.reasonForMove.find(reason => reason.value === 'Breeding ended')), // Show ejacConfirmed if a reason has breeding ended
                     }}
                     autosizeOnMount
                     disableRowSelectionOnClick
+                    hideFooter
                 />
             </Box>
         </Box>

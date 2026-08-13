@@ -18,11 +18,12 @@
 
 
 import { Option } from '@labkey/components';
-import { fetchCurrentCageMods } from '../api/popularQueries';
+import { fetchCurrentCageMods, fetchHousingForm } from '../api/popularQueries';
 import { ModTypes } from '../types/typings';
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
-import { ConditionCode } from '../types/housingFormTypes';
+import { ConditionCode, HousingTransferData } from '../types/housingFormTypes';
+import dayjs from 'dayjs';
 
 export const getCode = (code: string, options: ConditionCode[]): ConditionCode => {
     return options.find(opt => opt.value === code);
@@ -256,4 +257,57 @@ export const checkIsAdoptedFatherInDest = async (infantId: string, animalsInCage
         console.error('Error fetching adopted mother status', e);
         return false;
     }
+}
+
+export const createPrevHousingForm = async (prevFormId: string): Promise<Record<string, HousingTransferData[]>> => {
+    const prevForm = await fetchHousingForm(prevFormId);
+    const conditions: ConditionCode[] = [];
+
+    if(prevForm['condNew/special_condition']){
+        conditions.push({
+            value: prevForm['condNew/special_condition'],
+            label: prevForm['condNew/special_condition/title'],
+            type: prevForm['condNew/special_condition/category']
+        });
+    }
+
+    if(prevForm['condNew/pair_condition']){
+        conditions.push({
+            value: prevForm['condNew/pair_condition'],
+            label: prevForm['condNew/pair_condition/title'],
+            type: prevForm['condNew/pair_condition/category']
+        });
+    }
+
+    if(prevForm['condNew/cage_condition']){
+        conditions.push({
+            value: prevForm['condNew/cage_condition'],
+            label: prevForm['condNew/cage_condition/title'],
+            type: prevForm['condNew/cage_condition/category']
+        });
+    }
+
+    if(prevForm['condNew/social_condition']){
+        conditions.push({
+            value: prevForm['condNew/social_condition'],
+            label: prevForm['condNew/social_condition/title'],
+            type: prevForm['condNew/social_condition/category']
+        });
+    }
+
+    const data: HousingTransferData = {
+        id: prevForm.Id,
+        inDate: dayjs(prevForm.date),
+        outDate: prevForm.enddate ? dayjs(prevForm.enddate) : null,
+        destinationRoom: {value: prevForm['room/rowid'], label: prevForm.room},
+        destinationCage: {value: prevForm.cageNew, label: prevForm['cageNew/cage_number']},
+        condition: conditions,
+        reasonForMove: prevForm.reason.split(',').map(item => ({value: item.trim(), label: item.trim()})),
+        project: prevForm.project,
+        ejacConfirmed: prevForm.ejacConfirmed,
+        remarks: prevForm.remark,
+        performedBy: prevForm.performedby,
+        alert: false,
+    }
+    return {[prevForm.room]: [data]};
 }

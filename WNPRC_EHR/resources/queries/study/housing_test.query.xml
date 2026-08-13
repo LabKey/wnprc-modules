@@ -1,11 +1,11 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="housing" tableDbType="TABLE" useColumnOrder="true">
+            <table tableName="housing_test" tableDbType="TABLE" useColumnOrder="true">
                 <tableUrl />
-                <insertUrl />
+                <insertUrl>/cageui/housingTransferDev.view?objectid=${objectid}</insertUrl>
                 <importUrl />
-                <updateUrl />
+                <updateUrl>/cageui/housingTransferDev.view?objectid=${objectid}</updateUrl>
                 <deleteUrl />
                 <columns>
                     <column columnName="Id">

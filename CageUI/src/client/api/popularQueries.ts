@@ -21,7 +21,8 @@ import { EHRCageMods } from '../types/homeTypes';
 import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
-import { ConditionCode } from '../types/housingFormTypes';
+import { ConditionCode, HousingFormData, HousingTransferData } from '../types/housingFormTypes';
+import dayjs, { Dayjs } from 'dayjs';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: Query.SelectRowsOptions = {
@@ -225,3 +226,29 @@ export const fetchCurrentCageMods = async (cageId: string): Promise<string[]> =>
         return [];
     }
 };
+
+export const fetchHousingForm = async (lsid: string): Promise<any> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'housing_test',
+        columns: ['Id', 'date', 'enddate', 'room','room/rowid', 'cageNew', 'cageNew/cage_number',
+            'condNew', 'condNew/special_condition','condNew/pair_condition','condNew/cage_condition','condNew/social_condition',
+            'condNew/special_condition/title','condNew/pair_condition/title','condNew/cage_condition/title','condNew/social_condition/title',
+            'condNew/special_condition/category','condNew/pair_condition/category','condNew/cage_condition/category','condNew/social_condition/category',
+            'reason', 'project', 'remark', 'performedby', 'ejacConfirmed'],
+        filterArray: [
+            Filter.create('lsid', lsid, Filter.Types.EQUAL)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        console.log("Housing Res: ", res);
+        if(res.rowCount === 1){
+            return res.rows[0];
+        }
+    } catch (e) {
+        console.error('Error fetching condition codes:', e);
+        return null;
+    }
+}

@@ -19,28 +19,41 @@
 package org.labkey.cageui.action;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.cageui.model.ConditionCode;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 
 public class HousingForm
 {
     private String id;
+    @JsonProperty("taskid")
     private String taskId;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonProperty("enddate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endDate;
     private Integer qcState;
     private String room;
+    @JsonProperty("cagenew")
     private String cageNew;
+    @JsonProperty("condnew")
     private String condNew;
     private String reason;
     private String remark;
     private Integer project;
+    @JsonProperty("performedby")
     private String performedBy;
+    @JsonProperty("ejacconfirmed")
     private Boolean ejacConfirmed;
+    @JsonProperty("lsid")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String lsid;
 
     public String getId()
     {
@@ -170,5 +183,15 @@ public class HousingForm
     public void setCondNew(String condNew)
     {
         this.condNew = condNew;
+    }
+
+    public String getLsid()
+    {
+        return lsid;
+    }
+
+    public void setLsid(String lsid)
+    {
+        this.lsid = lsid;
     }
 }

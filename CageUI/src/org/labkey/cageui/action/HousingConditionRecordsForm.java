@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class HousingConditionRecordsForm
 {
-    private String objectid;
+    @JsonProperty("objectid")
+    private String objectId;
     @JsonProperty("special_condition")
     private String specialCondition;
     @JsonProperty("pair_condition")
@@ -32,14 +33,14 @@ public class HousingConditionRecordsForm
     @JsonProperty("social_condition")
     private String socialCondition;
 
-    public String getObjectid()
+    public String getObjectId()
     {
-        return objectid;
+        return objectId;
     }
 
-    public void setObjectid(String objectid)
+    public void setObjectId(String objectId)
     {
-        this.objectid = objectid;
+        this.objectId = objectId;
     }
 
     public String getSpecialCondition()

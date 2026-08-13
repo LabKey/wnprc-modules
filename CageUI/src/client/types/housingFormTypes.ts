@@ -59,3 +59,18 @@ export interface HousingTransferData {
     currentRoom?: Option<number>;
     currentCage?: Option<string>;
 }
+
+export interface HousingFormData {
+    id: string;
+    objectId: string;
+    inDate: Dayjs;
+    outDate: Dayjs;
+    room: string;
+    cage: string;
+    condition: string;
+    reasonForMove: string[];
+    project: string;
+    ejacConfirmed: boolean;
+    remarks: string;
+    performedBy: string;
+}

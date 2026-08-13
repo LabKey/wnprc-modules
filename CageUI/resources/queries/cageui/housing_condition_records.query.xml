@@ -24,9 +24,9 @@
                 <tableTitle>Housing Condition Records</tableTitle>
                 <columns>
                     <column columnName="rowid">
-                        <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="objectid">
+                        <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="special_condition">
                         <fk>

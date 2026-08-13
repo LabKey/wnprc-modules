@@ -198,7 +198,7 @@ export function updateRackConditionStatus(rack: RackSwitchOption, condition: Rac
 }
 
 // This function is for submitting a housing transfer.
-export function startHousingTransfer(animals: HousingTransferData[]): Promise<{
+export function startHousingTransfer(animals: HousingTransferData[], prevFormLsid?: string): Promise<{
     success: boolean,
     errors: any[]
 }> {
@@ -208,7 +208,14 @@ export function startHousingTransfer(animals: HousingTransferData[]): Promise<{
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {transferData: animals},
+            jsonData: {
+                transferData: animals.map(a => ({
+                    ...a,
+                    inDate: a.inDate.format('YYYY-MM-DD HH:mm:ss'),
+                    outDate: a?.outDate?.format('YYYY-MM-DD HH:mm:ss')
+                })),
+                prevFormLsid: prevFormLsid
+            },
         });
     });
 }

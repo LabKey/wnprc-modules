@@ -82,6 +82,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.Assert;
@@ -109,6 +110,17 @@ public class CageUIManager
         return _cache;
     }
 
+    public Map<String, Object> createHousingTaskRecord(String taskId, User user)
+    {
+        Map<String, Object> taskRecord = new HashMap<String, Object>();
+        taskRecord.put("taskid", taskId);
+        taskRecord.put("title", "Housing Test");
+        taskRecord.put("category", "task");
+        taskRecord.put("formType", "Housing");
+        taskRecord.put("assignedTo", user.getUserId());
+        return taskRecord;
+    }
+
     // Helper function to wrap arraylist to labkeys List<Map<String, Object>> for data submission
     public <E> List<Map<String, Object>> convertToMapList(ArrayList<E> objects)
     {
@@ -120,6 +132,7 @@ public class CageUIManager
         try
         {
             ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setTimeZone(TimeZone.getDefault());
             List<Map<String, Object>> result = new ArrayList<>();
 
             for (E object : objects)
@@ -230,24 +243,16 @@ public class CageUIManager
 
         UserSchema studySchema = QueryService.get().getUserSchema(user, container, "study");
         UserSchema cageUISchema = QueryService.get().getUserSchema(user, container, "cageui");
-        UserSchema ehrSchema = QueryService.get().getUserSchema(user, container, "ehr");
 
         TableInfo studyHousingTable = studySchema.getTable("housing_test");
         TableInfo cageUIHousingConditionTable = cageUISchema.getTable("housing_condition_records");
-        TableInfo ehrTasksTable = ehrSchema.getTable("tasks");
 
         QueryUpdateService studyHousingQus = studyHousingTable.getUpdateService();
         QueryUpdateService cageUIHousingConditionQus = cageUIHousingConditionTable.getUpdateService();
-        QueryUpdateService ehrTasksQus = ehrTasksTable.getUpdateService();
 
         if (studyHousingQus == null)
         {
             throw new IllegalStateException(studyHousingTable.getName() + " query update service");
-        }
-
-        if (ehrTasksQus == null)
-        {
-            throw new IllegalStateException(ehrTasksTable.getName() + " query update service");
         }
 
         if (cageUIHousingConditionQus == null)
@@ -255,14 +260,33 @@ public class CageUIManager
             throw new IllegalStateException(cageUIHousingConditionTable.getName() + " query update service");
         }
 
+        boolean isUpdate = (taskRecord == null || taskRecord.isEmpty());
+
         try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
         {
-            List<Map<String, Object>> housingMapList = CageUIManager.get().convertToMapList(housingRecords);
-            List<Map<String, Object>> housingCodesMapList = CageUIManager.get().convertToMapList(housingConditionRecords);
+            List<Map<String, Object>> housingMapList = convertToMapList(housingRecords);
+            List<Map<String, Object>> housingCodesMapList = convertToMapList(housingConditionRecords);
 
-            studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, null);
-            cageUIHousingConditionQus.insertRows(user, container, housingCodesMapList, batchErrors, null, null);
-            ehrTasksQus.insertRows(user, container, convertToMapList(taskRecord), batchErrors, null, null);
+            if (isUpdate) {
+                studyHousingQus.updateRows(user, container, housingMapList, null, batchErrors, null, null);
+                if (!housingCodesMapList.isEmpty()) {
+                    cageUIHousingConditionQus.updateRows(user, container, housingCodesMapList, null, batchErrors, null, null);
+                }
+            } else {
+                UserSchema ehrSchema = QueryService.get().getUserSchema(user, container, "ehr");
+                TableInfo ehrTasksTable = ehrSchema.getTable("tasks");
+                QueryUpdateService ehrTasksQus = ehrTasksTable.getUpdateService();
+                if (ehrTasksQus == null)
+                {
+                    throw new IllegalStateException(ehrTasksTable.getName() + " query update service");
+                }
+
+                studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, null);
+                if (!housingCodesMapList.isEmpty()) {
+                    cageUIHousingConditionQus.insertRows(user, container, housingCodesMapList, batchErrors, null, null);
+                }
+                ehrTasksQus.insertRows(user, container, convertToMapList(taskRecord), batchErrors, null, null);
+            }
 
             if (batchErrors.hasErrors())
             {
@@ -589,6 +613,30 @@ public class CageUIManager
         TypeReference<ArrayList<AdoptionDataForm>> typeRef = new TypeReference<ArrayList<AdoptionDataForm>>() {};
         ArrayList<AdoptionDataForm> form = mapper.convertValue(selector.getMapArray(), typeRef);
         return form;
+    }
+
+    public static HousingForm getPreviousHousingForm(String prevFormLsid, User user, Container container)
+    {
+        UserSchema studySchema = QueryService.get().getUserSchema(user, container, "study");
+        TableInfo housingTable = studySchema.getTable("housing_test");
+        SimpleFilter housingFilter = new SimpleFilter(FieldKey.fromParts("lsid"), prevFormLsid);
+        TableSelector housingSelector = new TableSelector(housingTable, housingFilter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(housingSelector.getMap(), HousingForm.class);
+    }
+
+    public static HousingConditionRecordsForm getPreviousHousingConditionRecordForm(String conditionObjectId, User user, Container container)
+    {
+        UserSchema cageUISchema = QueryService.get().getUserSchema(user, container, "cageui");
+        TableInfo conditionTable = cageUISchema.getTable("housing_condition_records");
+        SimpleFilter conditionFilter = new SimpleFilter(FieldKey.fromParts("objectid"), conditionObjectId);
+        TableSelector conditionSelector = new TableSelector(conditionTable, conditionFilter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(conditionSelector.getMap(), HousingConditionRecordsForm.class);
     }
 
 

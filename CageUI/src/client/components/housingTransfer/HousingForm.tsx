@@ -18,32 +18,47 @@
 
 import * as React from 'react';
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { HousingTransferData } from '../../types/housingFormTypes';
+import { ConditionCode, HousingTransferData } from '../../types/housingFormTypes';
 import dayjs from 'dayjs';
 import { Box } from '@mui/material';
 import { labkeyActionSelectWithPromise, startHousingTransfer } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
-import { Filter, Query, Security } from '@labkey/api';
+import { ActionURL, Filter, Query, Security } from '@labkey/api';
 import { HousingDataGrid } from './HousingDataGrid';
 import { LoadingScreen } from '../LoadingScreen';
+import { fetchConditionCodes } from '../../api/popularQueries';
+import { canEditConditionPermission } from '../../utils/homeHelpers';
 
 interface HousingFormProps {
     user: Security.GetUserPermissionsResponse;
+    prevForm?: Record<string, HousingTransferData[]>;
     currRoom?: string;
     selectedAnimals?: string[];
 }
 
 export const HousingForm: FC<HousingFormProps> = (props) => {
-    const { selectedAnimals, currRoom, user } = props;
+    const { selectedAnimals, currRoom, user, prevForm } = props;
     const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom || 'Unassigned']: [] });
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
+    const [conditionCodes, setConditionCodes] = useState<ConditionCode[]>([]);
     const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
+    const [autoConditions, setAutoConditions] = useState<boolean>(true);
     const [isSaving, setIsSaving] = useState<boolean>(false);
 
     useEffect(() => {
         console.log("Data: ", animalsByRoom);
     }, [animalsByRoom]);
+
+    useEffect(() => {
+        if(prevForm){
+            setAnimalsByRoom(prevForm);
+        }
+    }, [prevForm]);
+
+    useEffect(() => {
+        fetchConditionCodes().then(setConditionCodes);
+    }, []);
 
     useEffect(() => {
         if (selectedAnimals && selectedAnimals.length > 0) {
@@ -319,7 +334,12 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
 
     const handleSubmit = useCallback(() => {
         console.log('Submitting form...', allAnimals);
-        startHousingTransfer(allAnimals).then((res) => {
+        let prevFormId;
+        if(prevForm){
+             prevFormId = ActionURL.getParameter('lsid');
+        }
+
+        startHousingTransfer(allAnimals, prevFormId).then((res) => {
             if(res.success){
                 // Housing transfer complete
                 alert('Housing Transfer Success');
@@ -342,6 +362,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             />
             {Object.keys(animalsByRoom).map(roomLabel => (
                 <HousingDataGrid
+                    prevData={!!prevForm}
+                    autoConditions={autoConditions}
                     user={user}
                     key={roomLabel}
                     roomLabel={roomLabel}
@@ -352,11 +374,20 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     roomOptions={roomOptions || []}
                     reasonOptions={reasonOptions || []}
                     centerAnimals={centerAnimals}
+                    conditionCodes={conditionCodes}
                 />
             ))}
 
             {allAnimals.length > 0 && (
                 <div className="form-actions">
+                    {canEditConditionPermission(user) &&
+                        <button
+                            className="btn btn-info"
+                            onClick={() => setAutoConditions(prevState => !prevState)}
+                        >
+                            {autoConditions ? 'Disable Auto Conditions' : 'Enable Auto Conditions'}
+                        </button>
+                    }
                     <button className="btn btn-info" onClick={handleValidate}>Validate</button>
                     <button
                         className="btn btn-success"

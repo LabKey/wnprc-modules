@@ -21,9 +21,9 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="adoptions" tableDbType="TABLE">
                 <tableUrl />
-                <insertUrl>/cageui/adoptionDataEntryDev.view?objectid=${objectid}</insertUrl>
+                <insertUrl>/cageui/adoptionDataEntry.view?objectid=${objectid}</insertUrl>
                 <importUrl />
-                <updateUrl>/cageui/adoptionDataEntryDev.view?objectid=${objectid}</updateUrl>
+                <updateUrl>/cageui/adoptionDataEntry.view?objectid=${objectid}</updateUrl>
                 <deleteUrl />
                 <columns>
                     <column columnName="Id">

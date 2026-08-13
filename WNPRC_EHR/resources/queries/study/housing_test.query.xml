@@ -3,9 +3,9 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="housing_test" tableDbType="TABLE" useColumnOrder="true">
                 <tableUrl />
-                <insertUrl>/cageui/housingTransferDev.view?objectid=${objectid}</insertUrl>
+                <insertUrl>/cageui/housingTransfer.view?lsid=${lsid}</insertUrl>
                 <importUrl />
-                <updateUrl>/cageui/housingTransferDev.view?objectid=${objectid}</updateUrl>
+                <updateUrl>/cageui/housingTransfer.view?lsid=${lsid}</updateUrl>
                 <deleteUrl />
                 <columns>
                     <column columnName="Id">

@@ -18,7 +18,7 @@
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
-import { CageData, CageHistoryData, RackData } from '../types/typings';
+import { CageData, CageHistoryData, GhostCageData, RackData } from '../types/typings';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: Query.SelectRowsOptions = {
@@ -101,7 +101,7 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
 };
 
 export const fetchGhostCage = async (objectId: string): Promise<GhostCageData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'ghost_cages',
         filterArray: [Filter.create('cage_objectid', objectId, Filter.Types.EQUAL)]

@@ -1095,7 +1095,11 @@ public class CageUIManager
                         for (Cage cage : rack.getCages())
                         {
                             GhostCagesForm newGhostCage = new GhostCagesForm();
-                            newGhostCage.setCageObjectId(cage.getObjectId());
+                            // Always generate a new UUID for cage objects to prevent duplicates from being submitted.
+                            String newObjId = UUID.randomUUID().toString().toUpperCase();
+                            cage.setObjectId(newObjId);
+                            cage.setSvgId(RackTypes.getSvgName(rack.getType().getRackType()) + "_" + newObjId);
+                            newGhostCage.setCageObjectId(newObjId);
                             newGhostCage.setPositionId(cage.getPositionId());
                             newGhostCage.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
                             newGhostCage.setRackObjectId(rack.getObjectId());

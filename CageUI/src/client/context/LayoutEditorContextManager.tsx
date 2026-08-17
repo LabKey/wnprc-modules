@@ -1017,7 +1017,9 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     };
 
     const changeRack = async (newType: RackChangeOption): Promise<string | null> => {
-        let {value: rackChangeValue, label: rackLabel} = newType;
+        const { value: rackChangeValue } = newType;
+        const originalSelectedCage = selectedObj as Cage;
+        const selectedCagePositionId = originalSelectedCage.positionId;
 
         let prevCages: CageData[] = [];
         if (!rackChangeValue.isNew) {
@@ -1029,71 +1031,83 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 ]
             };
             const cageDataRes = await labkeyActionSelectWithPromise(cagesInRackConfig);
-            prevCages = cageDataRes.rows.map(r => ({
-                ...r,
-                positionId: r.positionid,
-                objectId: r.objectid,
-            }));
+            if(cageDataRes.rowCount !== 0){
+                prevCages = cageDataRes.rows.map(r => ({
+                    ...r,
+                    positionId: r.positionid,
+                    objectId: r.objectid,
+                }));
+            }
         }
 
-        setLocalRoom(prevRoom => {
-            const {
-                rackGroup,
-                rack,
-                cage
-            } = findCageInGroup((selectedObj as Cage).svgId as CageSvgId, prevRoom.rackGroups);
-            const roomToUpdate: Room = {
-                ...prevRoom,
-                rackGroups: prevRoom.rackGroups.map(group =>
-                    group.groupId === rackGroup.groupId
-                        ? {
-                            ...group,
-                            racks: group.racks.map((r) => r.objectId === rack.objectId ? {
-                                ...r,
-                                itemId: rackChangeValue.rackId,
-                                objectId: rackChangeValue.rackObjectId,
-                                svgId: `rack_${rackChangeValue.rackObjectId}`,
-                                isNew: rackChangeValue.isNew,
-                                type: {
-                                    ...r.type,
-                                    rowid: rackChangeValue.rackType.rowid,
-                                    displayName: rackChangeValue.rackType.displayName,
-                                    type: rackChangeValue.rackType.type,
-                                    isDefault: rackChangeValue.rackType.isDefault
-                                },
-                                cages: prevCages.length > 0 ? r.cages.map((c) => {
-                                    const prevCage = prevCages.find(pc => pc.positionId === c.positionId);
-                                    const key = roomItemToString(rackChangeValue.rackType.type);
-                                    const newSvgId = `cageSVG_${prevCage.objectId}`;
-                                    setUnitLocs((prevState) => ({
-                                        ...prevState,
-                                        [key]: prevState[key].map((loc) => {
-                                            if (loc.cageId === c.svgId) {
-                                                return {
-                                                    ...loc,
-                                                    cageId: newSvgId
-                                                };
-                                            }
-                                            return loc;
-                                        })
-                                    }));
-                                    return {
-                                        ...c,
-                                        objectId: prevCage.objectId,
-                                        svgId: newSvgId,
-                                        positionId: prevCage.positionId,
-                                    };
-                                }) : r.cages
-                            } as Rack : r)
-                        }
-                        : group
-                )
-            };
-            setReloadRoom(roomToUpdate);
-            return roomToUpdate;
+        const { rackGroup, rack } = findCageInGroup(originalSelectedCage.svgId, localRoom.rackGroups);
+        const newUnitLocs = { ...unitLocs };
+        let newSelectedCage: Cage | undefined;
+
+        const updatedCages = rack.cages.map(c => {
+            const key = roomItemToString(rackChangeValue.rackType.type);
+            let newCageData: { objectId: string, svgId: CageSvgId };
+
+            if (rackChangeValue.isNew) {
+                const newObjId = generateUUID();
+                newCageData = { objectId: newObjId, svgId: `cageSVG_${newObjId}` as CageSvgId };
+            } else {
+                const prevCage = prevCages.find(pc => pc.positionId === c.positionId);
+                newCageData = { objectId: prevCage.objectId, svgId: `cageSVG_${prevCage.objectId}` as CageSvgId };
+            }
+
+            const locIndex = newUnitLocs[key]?.findIndex(loc => loc.cageId === c.svgId);
+            if (locIndex > -1) {
+                newUnitLocs[key][locIndex] = { ...newUnitLocs[key][locIndex], cageId: newCageData.svgId };
+            }
+
+            const newCage: Cage = { ...c, ...newCageData };
+            if (c.positionId === selectedCagePositionId) {
+                newSelectedCage = newCage;
+            }
+            return newCage;
         });
+
+        const roomToUpdate: Room = {
+            ...localRoom,
+            rackGroups: localRoom.rackGroups.map(group =>
+                group.groupId === rackGroup.groupId
+                    ? {
+                        ...group,
+                        racks: group.racks.map(r =>
+                            r.objectId === rack.objectId
+                                ? {
+                                    ...r,
+                                    itemId: rackChangeValue.rackId,
+                                    objectId: rackChangeValue.rackObjectId,
+                                    svgId: `rack_${rackChangeValue.rackObjectId}`,
+                                    isNew: rackChangeValue.isNew,
+                                    type: {
+                                        ...r.type,
+                                        rowid: rackChangeValue.rackType.rowid,
+                                        displayName: rackChangeValue.rackType.displayName,
+                                        type: rackChangeValue.rackType.type,
+                                        isDefault: rackChangeValue.rackType.isDefault,
+                                    },
+                                    cages: updatedCages,
+                                }
+                                : r
+                        ),
+                    }
+                    : group
+            ),
+        };
+
+        setUnitLocs(newUnitLocs);
+        setLocalRoom(roomToUpdate);
+        if (newSelectedCage) {
+            setSelectedObj(newSelectedCage);
+        }
+        setReloadRoom(roomToUpdate);
+
         return `rack_${rackChangeValue.rackObjectId}`;
     };
+
 
     const changeCageNum = (numBefore: number, numAfter: number) => {
         const selectedCage = (selectedObj as Cage);

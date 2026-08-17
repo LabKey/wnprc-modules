@@ -23,7 +23,10 @@ import {
     generateUUID,
     getAdjLocation,
     getDefaultMod,
-    getTypeClassFromElement, isRoomCreator, isRoomModifier, isTemplateCreator,
+    getTypeClassFromElement,
+    isRoomCreator,
+    isRoomModifier,
+    isTemplateCreator,
     parseRoomItemType,
     roomItemToString
 } from './helpers';
@@ -35,7 +38,7 @@ import {
     CageMods,
     CageSvgId,
     DefaultRackTypes,
-    FullObjectHistoryData,
+    FullObjectHistoryData, GhostCageData,
     GroupId,
     LayoutHistoryData,
     LocationCoords,
@@ -64,10 +67,8 @@ import * as React from 'react';
 import { MutableRefObject } from 'react';
 import { Security } from '@labkey/api';
 import { CELL_SIZE } from './constants';
-import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
+import { fetchCage, fetchCageHistory, fetchGhostCage, fetchRack } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
-
-
 
 
 export const isTouchEvent = (event)=> {
@@ -136,16 +137,30 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
     const processItem = async (item: LayoutHistoryData): Promise<FullObjectHistoryData> => {
         if (item.cage === null) {
             return {
+                isGhost: false,
                 extraContext: item.extraContext,
                 objectType: item.objectType,
                 xCoord: item.xCoord,
                 yCoord: item.yCoord
+            };
+        }else if(item.objectType === RackTypes.GhostCage){
+            const ghostCage: GhostCageData = await fetchGhostCage(item.cage);
+            return {
+                isGhost: true,
+                extraContext: item.extraContext,
+                objectType: item.objectType,
+                xCoord: item.xCoord,
+                yCoord: item.yCoord,
+                rackGroup: ghostCage.rackGroup,
+                groupRotation: ghostCage.groupRotation,
+                cage: ghostCage
             };
         } else {
             const cageHistory: CageHistoryData = await fetchCageHistory(item.historyId, item.cage);
             const cageData: CageData = await fetchCage(cageHistory.cage);
             const rackData: RackData = await fetchRack(cageData.rack);
             return {
+                isGhost: false,
                 extraContext: item.extraContext,
                 objectType: item.objectType,
                 xCoord: item.xCoord,

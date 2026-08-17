@@ -19,32 +19,22 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="layout_history" tableDbType="TABLE">
-                <tableTitle>Layout History</tableTitle>
+            <table tableName="rooms" tableDbType="TABLE">
+                <tableUrl>/EHR/cageDetails.view?room=${room}</tableUrl>
                 <columns>
-                    <column columnName="rowid">
+                    <column columnName="room">
                         <isKeyField>true</isKeyField>
                     </column>
-                    <column columnName="historyid"/>
-                    <column columnName="cage"/>
-                    <column columnName="extra_context"/>
-                    <column columnName="object_type">
-                        <datatype>integer</datatype>
+                    <column columnName="species">
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>cageui_item_types</fkTable>
-                            <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumnName>title</fkDisplayColumnName>
+                            <fkTable>species</fkTable>
+                            <fkColumnName>common</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="x_coord"/>
-                    <column columnName="y_coord"/>
-                    <column columnName="container"/>
-                    <column columnName="createdby"/>
-                    <column columnName="created"/>
-                    <column columnName="modified"/>
-                    <column columnName="modifiedby"/>
                 </columns>
+                <titleColumn>room</titleColumn>
+                <pkColumnName>room</pkColumnName>
             </table>
         </tables>
     </metadata>

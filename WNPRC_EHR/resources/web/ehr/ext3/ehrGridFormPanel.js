@@ -1077,8 +1077,8 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                                 if (extension === 'xlsx' || extension === 'xls') {
                                     // need to get the date it was uploaded,
                                     // since 'record' only provides the date when the actual file was created
-                                    promises.push(getFileHistory(virologyResultsFolder, record.data.name).then((history) => {
-                                        files.push({"name": history[0], "uploaded": history[1][0].data.date})
+                                    promises.push(getFileHistory(virologyResultsFolder, record.data.name).then((file) => {
+                                        files.push(file)
                                     }))
 
                                 }
@@ -1113,6 +1113,10 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             importFromFileWindow.removeAll();
                             importFromFileWindow.add(selectFilePanel);
                             importFromFileWindow.doLayout();
+                        }).catch((e) => {
+                            Ext.Msg.hide();
+                            console.error(e);
+                            Ext.Msg.alert('Error', 'Unable to build the list of files to import.');
                         })
 
                     },
@@ -1130,14 +1134,17 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                     }
                 });
                 function getFileHistory(fileSystem, filename) {
+                    // Always resolves so one unreadable file still leaves the rest importable.
                     return new Promise(resolve => {
                         fileSystem.getHistory({
                             path: '/' + filename,
                             success: function(fileSystem,path,history) {
-                                resolve([filename,history]);
+                                // A file placed on the server outside of an upload has no audit record.
+                                resolve({name: filename, uploaded: history && history.length ? history[0].data.date : null});
                             },
                             failure: function(f) {
-                                reject(f);
+                                console.error('Unable to read file history for ' + filename, f);
+                                resolve({name: filename, uploaded: null});
                             }
                         })
                     });
@@ -1307,7 +1314,7 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             html: '<span>' + file.name + '</span>'
                         },
                         {
-                            html: '<span>' + new Date(file.uploaded).format("Y-m-d H:i")+ '</span>'
+                            html: '<span>' + (file.uploaded ? new Date(file.uploaded).format("Y-m-d H:i") : 'Unknown') + '</span>'
                         },
                     ];
 

@@ -414,10 +414,20 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
             ]
         };
 
-        const [prevRoomResult, borderResult, modResult] = await Promise.all([
+        const roomsConfig = {
+            schemaName: 'ehr_lookups',
+            queryName: 'rooms',
+            columns: ['species'],
+            filterArray: [
+                Filter.create('room', roomName, Filter.Types.EQUALS),
+            ]
+        };
+
+        const [prevRoomResult, borderResult, modResult, roomsResult] = await Promise.all([
             labkeyActionSelectWithPromise(prevRoomConfig, abortSignal),
             labkeyActionSelectWithPromise(prevRoomBorderConfig, abortSignal),
-            labkeyActionSelectWithPromise(modHistoryConfig, abortSignal)
+            labkeyActionSelectWithPromise(modHistoryConfig, abortSignal),
+            labkeyActionSelectWithPromise(roomsConfig, abortSignal)
         ]);
 
         let borderObj: LayoutData;
@@ -483,6 +493,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 
         prevRoomData.prevRoomData = {
             name: roomName,
+            species: roomsResult.rows[0].species,
             cagingData: cagingData,
             layoutData: borderObj,
             isDefault: isDefaultRoom,
@@ -731,6 +742,7 @@ export const addPrevRoomSvgs = async (
 export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, UnitLocations]> => {
     const newLocalRoom: Room = {
         name: prevRoom.name,
+        species: prevRoom.species,
         rackGroups: [],
         valid: false,
         objects: [],

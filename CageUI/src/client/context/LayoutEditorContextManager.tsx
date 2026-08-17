@@ -102,6 +102,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     });
     // loaded in and unchanged since start of layout editing
     const [room, setRoom] = useState<Room>({
+        species: '',
         name: 'new-layout',
         rackGroups: [],
         valid: false,
@@ -118,6 +119,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     // All changes made to room reflect here. Use room state to compare to the start of room editing vs the changes made here
     const [localRoom, setLocalRoom] = useState<Room>({
         name: 'new-layout',
+        species: '',
         rackGroups: [],
         valid: false,
         objects: [],

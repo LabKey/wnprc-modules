@@ -540,6 +540,7 @@ public class CageUIManager
     }
 
     public static Room createRoomWithReplacedRack(Room originalRoom, String prevRackObjectId, Rack newRack) {
+
         // Create new room
         Room newRoom = new Room();
 
@@ -581,12 +582,14 @@ public class CageUIManager
 
                             boolean wasOriginalRackGhost = oldType.isGhost();
 
-                            if (!wasOriginalRackGhost && isNewRackGhost) {
-                                // Transition from real to ghost - subsequent cages need to be decremented
-                                cagesToRemoveCount = originalRack.getCages() != null ? originalRack.getCages().size() : 0;
-                            } else if (wasOriginalRackGhost && !isNewRackGhost) {
-                                // Transition from ghost to real - subsequent cages need to be incremented
-                                cagesToRemoveCount = -(newRack.getCages() != null ? newRack.getCages().size() : 0);
+                            if(originalRoom.getSpecies().equals("Rhesus")){
+                                if (!wasOriginalRackGhost && isNewRackGhost) {
+                                    // Transition from real to ghost - subsequent cages need to be decremented
+                                    cagesToRemoveCount = originalRack.getCages() != null ? originalRack.getCages().size() : 0;
+                                } else if (wasOriginalRackGhost && !isNewRackGhost) {
+                                    // Transition from ghost to real - subsequent cages need to be incremented
+                                    cagesToRemoveCount = -(newRack.getCages() != null ? newRack.getCages().size() : 0);
+                                }
                             }
                         } else {
                             // Keep the original rack

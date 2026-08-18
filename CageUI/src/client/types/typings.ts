@@ -236,6 +236,7 @@ export interface CageModificationsType {
 
 export interface Room {
     name: string;
+    species: string;
     valid: boolean;
     rackGroups: RackGroup[];
     objects: RoomObject[];
@@ -365,6 +366,7 @@ export interface PrevRoom {
     layoutData: LayoutData;
     modData?: ModData[];
     isDefault: boolean;
+    species: string;
     name: string | null;
 }
 

@@ -85,8 +85,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class CageUIManager
 {
@@ -669,6 +667,7 @@ public class CageUIManager
     }
 
     public static Room createRoomWithReplacedRack(Room originalRoom, String prevRackObjectId, Rack newRack) {
+
         // Create new room
         Room newRoom = new Room();
 
@@ -710,12 +709,14 @@ public class CageUIManager
 
                             boolean wasOriginalRackGhost = oldType.isGhost();
 
-                            if (!wasOriginalRackGhost && isNewRackGhost) {
-                                // Transition from real to ghost - subsequent cages need to be decremented
-                                cagesToRemoveCount = originalRack.getCages() != null ? originalRack.getCages().size() : 0;
-                            } else if (wasOriginalRackGhost && !isNewRackGhost) {
-                                // Transition from ghost to real - subsequent cages need to be incremented
-                                cagesToRemoveCount = -(newRack.getCages() != null ? newRack.getCages().size() : 0);
+                            if(originalRoom.getSpecies().equals("Rhesus")){
+                                if (!wasOriginalRackGhost && isNewRackGhost) {
+                                    // Transition from real to ghost - subsequent cages need to be decremented
+                                    cagesToRemoveCount = originalRack.getCages() != null ? originalRack.getCages().size() : 0;
+                                } else if (wasOriginalRackGhost && !isNewRackGhost) {
+                                    // Transition from ghost to real - subsequent cages need to be incremented
+                                    cagesToRemoveCount = -(newRack.getCages() != null ? newRack.getCages().size() : 0);
+                                }
                             }
                         } else {
                             // Keep the original rack
@@ -1224,7 +1225,11 @@ public class CageUIManager
                         for (Cage cage : rack.getCages())
                         {
                             GhostCagesForm newGhostCage = new GhostCagesForm();
-                            newGhostCage.setCageObjectId(cage.getObjectId());
+                            // Always generate a new UUID for cage objects to prevent duplicates from being submitted.
+                            String newObjId = UUID.randomUUID().toString().toUpperCase();
+                            cage.setObjectId(newObjId);
+                            cage.setSvgId(RackTypes.getSvgName(rack.getType().getRackType()) + "_" + newObjId);
+                            newGhostCage.setCageObjectId(newObjId);
                             newGhostCage.setPositionId(cage.getPositionId());
                             newGhostCage.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
                             newGhostCage.setRackObjectId(rack.getObjectId());

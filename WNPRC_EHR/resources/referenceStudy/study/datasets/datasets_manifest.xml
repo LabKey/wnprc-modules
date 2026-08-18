@@ -232,5 +232,8 @@
     <dataset name="cases" id="6020" category="Clinical" type="Standard">
       <tags/>
     </dataset>
+    <dataset name="anesthesiaRecovery" id="4440" category="Clinical" type="Standard">
+      <tags/>
+    </dataset>
   </datasets>
 </datasets>

@@ -752,7 +752,7 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
             window.location.href = ActionURL.buildURL(
                 ActionURL.getController(),
                 'editLayout',
-                ActionURL.getController(),
+                ActionURL.getContainer(),
                 {room: localRoom.name}
             );
         }

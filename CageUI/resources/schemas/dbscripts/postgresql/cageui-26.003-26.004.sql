@@ -16,31 +16,6 @@
  *
  */
 
-DROP TABLE IF EXISTS cageui.ghost_cages;
-CREATE TABLE cageui.ghost_cages
-(
-    rowid SERIAL NOT NULL,
-    cage_objectid VARCHAR NOT NULL,
-    positionid INTEGER,
-    rack_group INTEGER NOT NULL,
-    rack_objectid VARCHAR NOT NULL,
-    group_rotation INTEGER NOT NULL,
-    cage INTEGER NOT NULL,
-    container         entityid NOT NULL,
-    createdby         userid,
-    created           TIMESTAMP,
-    modifiedby        userid,
-    modified          TIMESTAMP,
-    CONSTRAINT PK_ghost_cages PRIMARY KEY (rowid),
-    CONSTRAINT FK_ghost_cages_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
-);
-
-insert into ehr_lookups.lookups (set_name,container,value, category, title, description)
-select setname, container, 8 as value, 'Caging' as category, 'Ghost Cage' as title, 4 as description from ehr_lookups.lookup_sets where setname='cageui_item_types';
-
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 'ghostCage' as value, '/cageui/static/cage.svg' as title from ehr_lookups.lookup_sets where setname='cageui_svg_urls';
-
 INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
 select 'adoption_status' as setname,
        'Adoption Status Field Values' as label,

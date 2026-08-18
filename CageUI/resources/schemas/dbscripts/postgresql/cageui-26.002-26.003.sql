@@ -16,60 +16,72 @@
  *
  */
 
-DROP TABLE IF EXISTS cageui.ghost_cages;
-CREATE TABLE cageui.ghost_cages
+DROP TABLE IF EXISTS cageui.housing_condition_records;
+CREATE TABLE cageui.housing_condition_records
 (
     rowid SERIAL NOT NULL,
-    cage_objectid VARCHAR NOT NULL,
-    positionid INTEGER,
-    rack_group INTEGER NOT NULL,
-    rack_objectid VARCHAR NOT NULL,
-    group_rotation INTEGER NOT NULL,
-    cage INTEGER NOT NULL,
+    objectid VARCHAR NOT NULL,
+    special_condition VARCHAR,
+    pair_condition VARCHAR,
+    cage_condition VARCHAR,
+    social_condition VARCHAR,
     container         entityid NOT NULL,
     createdby         userid,
     created           TIMESTAMP,
     modifiedby        userid,
     modified          TIMESTAMP,
-    CONSTRAINT PK_ghost_cages PRIMARY KEY (rowid),
-    CONSTRAINT FK_ghost_cages_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
+    CONSTRAINT PK_housing_condition_records PRIMARY KEY (rowid),
+    CONSTRAINT FK_housing_condition_records_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 
-insert into ehr_lookups.lookups (set_name,container,value, category, title, description)
-select setname, container, 8 as value, 'Caging' as category, 'Ghost Cage' as title, 4 as description from ehr_lookups.lookup_sets where setname='cageui_item_types';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 'ghostCage' as value, '/cageui/static/cage.svg' as title from ehr_lookups.lookup_sets where setname='cageui_svg_urls';
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'i' as value, 'mother/dam with infant' as title, 'social' as category, 'adult' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
 
-INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
-select 'adoption_status' as setname,
-       'Adoption Status Field Values' as label,
-       'List of possible adoption progress statuses' as description,
-       'value' as keyField,
-       container from ehr_lookups.lookup_sets where setname='ancestry';
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'ia' as value, 'mother/dam with adopted infant' as title, 'social' as category, 'adult' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 0 as value, 'Start' as title from ehr_lookups.lookup_sets where setname='adoption_status';
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'bi' as value, 'mother/dam in breeding with infant' as title, 'social' as category, 'adult' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 1 as value, 'End' as title from ehr_lookups.lookup_sets where setname='adoption_status';
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'mf' as value, 'infant with the mother/dam and father/sire' as title, 'social' as category, 'infant' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 2 as value, 'Pause' as title from ehr_lookups.lookup_sets where setname='adoption_status';
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'amf' as value, 'infant with father/sire and adopted mother/dam' as title, 'social' as category, 'infant' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 3 as value, 'Resume' as title from ehr_lookups.lookup_sets where setname='adoption_status';
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'mfa' as value, 'infant with mother/dam and adopted father/sire' as title, 'social' as category, 'infant' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
+
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'mafa' as value, 'infant with adopted mother/dam and adopted father/sire' as title, 'social' as category, 'infant' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';
 
 
-INSERT INTO ehr_lookups.lookup_sets (setname, label, description, keyField, container)
-select 'adoption_results' as setname,
-       'Adoption Result Field Values' as label,
-       'List of possible adoption results' as description,
-       'value' as keyField,
-       container from ehr_lookups.lookup_sets where setname='ancestry';
+-- Update housing condition codes lookup by adding categories, these will be used in the above table to filter out which values belong where
+UPDATE ehr_lookups.lookups
+SET category = CASE
+   WHEN value IN ('c', 's', 'p', 'g') THEN 'pairing'
+   WHEN value IN ('vc') THEN 'caging'
+   WHEN value IN ('b', 'm', 'f', 'af', 'am') THEN 'social'
+   WHEN value IN ('x') THEN 'special'
+   ELSE category  -- Keep existing category for values not in lists
+END
+WHERE set_name='housing_condition_codes';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 0 as value, 'Success' as title from ehr_lookups.lookup_sets where setname='adoption_results';
+-- Update housing codes by adding description; this description determines the animal age it can be used on (infant, adult, any)
+UPDATE ehr_lookups.lookups
+SET description = CASE
+  WHEN value IN ('c', 's', 'p', 'g', 'vc', 'x') THEN 'any'
+  WHEN value IN ('b') THEN 'adult'
+  WHEN value IN ('m', 'f', 'am', 'af') THEN 'infant'
+  ELSE description  -- Keep existing description for values not in lists
+END
+WHERE set_name='housing_condition_codes';
 
-insert into ehr_lookups.lookups (set_name,container,value, title)
-select setname, container, 1 as value, 'Failure' as title from ehr_lookups.lookup_sets where setname='adoption_results';
+UPDATE ehr_lookups.lookups
+SET date_disabled = CASE
+    WHEN value IN ('gaf', 'gam', 'gamaf', 'gamf', 'gb', 'gbi', 'gbiaf', 'gf', 'gi', 'gia', 'gm', 'gma',
+                   'gmaf', 'gmafa', 'gmf', 'gmfa', 'gpc', 'pc', 'pf', 'pfa', 'pi', 'pia', 'pm', 'pma', 'xs') THEN CURRENT_DATE
+    ELSE date_disabled  -- Keep existing description for values not in lists
+END
+WHERE set_name='housing_condition_codes';

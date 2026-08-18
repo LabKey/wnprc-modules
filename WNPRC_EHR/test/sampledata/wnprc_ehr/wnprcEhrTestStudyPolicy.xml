@@ -443,5 +443,11 @@
     <ns:datasetPermission datasetName="BehaviorAbstract" groupName="EHR Full Updaters" role="org.labkey.ehr.security.EHRFullUpdaterRole"/>
     <ns:datasetPermission datasetName="BehaviorAbstract" groupName="EHR Request Admins" role="org.labkey.ehr.security.EHRRequestAdminRole"/>
     <ns:datasetPermission datasetName="BehaviorAbstract" groupName="EHR Requestors" role="org.labkey.ehr.security.EHRRequestorRole"/>
+    <ns:datasetPermission datasetName="anesthesiaRecovery" groupName="EHR Administrators" role="org.labkey.ehr.security.EHRDataAdminRole"/>
+    <ns:datasetPermission datasetName="anesthesiaRecovery" groupName="EHR Basic Submitters" role="org.labkey.ehr.security.EHRBasicSubmitterRole"/>
+    <ns:datasetPermission datasetName="anesthesiaRecovery" groupName="EHR Full Submitters" role="org.labkey.ehr.security.EHRFullSubmitterRole"/>
+    <ns:datasetPermission datasetName="anesthesiaRecovery" groupName="EHR Full Updaters" role="org.labkey.ehr.security.EHRFullUpdaterRole"/>
+    <ns:datasetPermission datasetName="anesthesiaRecovery" groupName="EHR Request Admins" role="org.labkey.ehr.security.EHRRequestAdminRole"/>
+    <ns:datasetPermission datasetName="anesthesiaRecovery" groupName="EHR Requestors" role="org.labkey.ehr.security.EHRRequestorRole"/>
   </ns:perDatasetPermissions>
 </ns:studySecurityPolicy>

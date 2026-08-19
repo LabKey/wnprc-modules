@@ -19,6 +19,7 @@
 package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.labkey.api.formSchema.Option;
 
 import java.util.Date;
 

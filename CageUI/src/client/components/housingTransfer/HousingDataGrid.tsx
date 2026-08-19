@@ -171,11 +171,6 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
         // Calculate pairing codes
         if(animalsInCage.length === 1){
-            //TODO calculate chair code here
-
-            // If destination is char return (c)
-
-            // Else
             pairingCode = 's';
         }else if(animalsInCage.length === 2){
             pairingCode = 'p';
@@ -198,7 +193,6 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const isAnimalInfant = await checkIsInfant(animalId);
 
         if(isAnimalMarm || isAnimalInfant){
-            // TODO finish this
             if(pairingCode === 'p'){
                 const socialCode = await getSocialCode(animalId, animalsInCage);
                 if(socialCode){

@@ -168,12 +168,33 @@ public class CageUIController extends SpringActionController
                 errors.reject(ERROR_MSG, e.getMessage());
             }
 
+            // Validation on each individual row
+            for (AdoptionData row : getAdoptionData()){
+
+                if(row.getDam() == null && row.getSire() == null){
+                    errors.reject(ERROR_MSG, "Animal " + row.getId() + " must have a Sire or Dam.");
+                }
+                if(row.getSire() != null && row.getId().equals(row.getSire())){
+                    errors.reject(ERROR_MSG, "Infant cannot be the Sire.");
+                }
+                if(row.getDam() != null && row.getId().equals(row.getDam())) {
+                    errors.reject(ERROR_MSG, "Infant cannot be the Dam.");
+                }
+                if(row.getSire() != null && row.getDam() != null && row.getSire().equals(row.getDam())){
+                    errors.reject(ERROR_MSG, "Sire and Dam cannot be the same.");
+                }
+            }
+
+
+
             Map<String, List<AdoptionData>> dataById = getAdoptionData().stream()
                     .collect(Collectors.groupingBy(AdoptionData::getId));
 
+            // validation cross referencing other rows
             for (Map.Entry<String, List<AdoptionData>> entry : dataById.entrySet())
             {
                 String id = entry.getKey();
+
                 List<AdoptionData> newAdoptions = entry.getValue();
                 newAdoptions.sort(Comparator.comparing(AdoptionData::getDate));
 

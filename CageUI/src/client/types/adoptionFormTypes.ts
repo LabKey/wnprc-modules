@@ -23,6 +23,7 @@ export interface AdoptionData {
     id: string;
     date: Dayjs;
     dam: string;
+    sire: string;
     type: {label: keyof typeof AdoptionStatus, value: AdoptionStatus};
     result?: {label: keyof typeof AdoptionResult, value: AdoptionResult};
 }

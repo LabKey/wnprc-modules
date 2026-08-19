@@ -34,7 +34,7 @@ export const AdoptionDataEntry: FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        if(!prevFormData) {
+        if(!prevFormObjId) {
             setIsLoading(false);
             return;
         }
@@ -50,6 +50,7 @@ export const AdoptionDataEntry: FC = () => {
                 const res = result.rows[0];
                 const adoptionData: AdoptionData = {
                     dam: res.dam,
+                    sire: res.sire,
                     date: dayjs(res.date),
                     id: res.Id,
                     objectid: res.objectid,
@@ -72,19 +73,6 @@ export const AdoptionDataEntry: FC = () => {
             setIsLoading(false);
         });
     }, []);
-
-    /*const [user, setUser] = useState<GetUserPermissionsResponse>(null);
-
-    useEffect(() => {
-        const userProfile = labkeyGetUserPermissions();
-        userProfile.then((profile: GetUserPermissionsResponse) => {
-            if (profile.user) {
-                setUser(profile);
-            }
-        }).catch((e) => {
-            console.error(e);
-        });
-    }, []);*/
 
     return(
         !isLoading &&

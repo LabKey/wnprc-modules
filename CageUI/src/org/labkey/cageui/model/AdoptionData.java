@@ -19,7 +19,6 @@
 package org.labkey.cageui.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.labkey.api.formSchema.Option;
 
 import java.util.Date;
 
@@ -30,6 +29,7 @@ public class AdoptionData
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date date;
     private String dam;
+    private String sire;
     private Option<Integer> type;
     private Option<Integer> result;
 
@@ -91,5 +91,15 @@ public class AdoptionData
     public void setResult(Option<Integer> result)
     {
         this.result = result;
+    }
+
+    public String getSire()
+    {
+        return sire;
+    }
+
+    public void setSire(String sire)
+    {
+        this.sire = sire;
     }
 }

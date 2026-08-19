@@ -16334,4 +16334,117 @@
       </index>
     </indices>
   </table>
+  <table tableName="anesthesiaRecovery" tableDbType="TABLE">
+          <columns>
+            <column columnName="Id">
+              <datatype>varchar</datatype>
+              <columnTitle>Id</columnTitle>
+              <description>Subject identifier</description>
+              <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+              <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+              <nullable>false</nullable>
+              <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+              <importAliases>
+                <importAlias>ptid</importAlias>
+                <importAlias>participantid</importAlias>
+              </importAliases>
+              <fk>
+                <fkDbSchema>study</fkDbSchema>
+                <fkTable>Animal</fkTable>
+                <fkColumnName>Id</fkColumnName>
+              </fk>
+              <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+              <scale>32</scale>
+            </column>
+            <column columnName="uniqueRowId">
+              <datatype>integer</datatype>
+            </column>
+            <column columnName="date">
+              <datatype>timestamp</datatype>
+            </column>
+            <column columnName="recoveryStart">
+              <datatype>timestamp</datatype>
+            </column>
+            <column columnName="observerComments">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="observer">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="recoveryId">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="room">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="observation">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="assignedTo">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="recoverySpeed">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="recoveryCondition">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="recoveryReason">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="submitterInitials">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="groupId">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="finalizeComments">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="location">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="cage">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="cageLockSecure">
+              <datatype>varchar</datatype>
+            </column>
+            <column columnName="deviceId">
+              <datatype>varchar</datatype>
+            </column>
+<!--            <column columnName="recoveryReasonFinal">-->
+<!--              <datatype>varchar</datatype>-->
+<!--            </column>-->
+<!--            <column columnName="groupIdFinal">-->
+<!--              <datatype>varchar</datatype>-->
+<!--            </column>-->
+<!--            <column columnName="recoveryStartTime">-->
+<!--              <datatype>timestamp</datatype>-->
+<!--            </column>-->
+<!--            <column columnName="cageFinal">-->
+<!--              <datatype>timestamp</datatype>-->
+<!--            </column>-->
+<!--            <column columnName="roomFinal">-->
+<!--              <datatype>timestamp</datatype>-->
+<!--            </column>-->
+<!--            <column columnName="taskid">-->
+<!--              <datatype>varchar</datatype>-->
+<!--              <columnTitle>Task Id</columnTitle>-->
+<!--              <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>-->
+<!--              <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>-->
+<!--              <shownInUpdateView>false</shownInUpdateView>-->
+<!--              <shownInDetailsView>false</shownInDetailsView>-->
+<!--              <dimension>false</dimension>-->
+<!--              <url replaceMissing="blankValue"><![CDATA[/ehr/taskDetails.view?formtype=${taskid/formtype}&taskid=${taskid}]]></url>-->
+<!--              <fk>-->
+<!--                <fkDbSchema>ehr</fkDbSchema>-->
+<!--                <fkTable>tasks</fkTable>-->
+<!--                <fkColumnName>taskid</fkColumnName>-->
+<!--              </fk>-->
+<!--              <facetingBehavior>ALWAYS_OFF</facetingBehavior>-->
+<!--              <scale>100</scale>-->
+<!--            </column>-->
+          </columns>
+  </table>
 </tables>

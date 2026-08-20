@@ -75,6 +75,7 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
@@ -127,7 +128,7 @@ public class CageUIController extends SpringActionController
         }
     }
 
-    @RequiresPermission(CageUIAnimalEditorPermission.class)
+    @RequiresPermission(CageUIAdoptionsPermission.class)
     public static class SubmitAdoptionFormAction extends MutatingApiAction<SimpleApiJsonForm>
     {
         ArrayList<AdoptionData> _adoptionData;

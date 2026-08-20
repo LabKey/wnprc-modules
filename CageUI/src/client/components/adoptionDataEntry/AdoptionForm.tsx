@@ -346,8 +346,11 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             }
             setIsSaving(false);
         }).catch(err => {
-            console.log(err)
-            setErrorMsg(err.errors.map(e => e.msg));
+            if(err.errors){
+                setErrorMsg(err.errors.map(e => e.msg));
+            }else{
+                setErrorMsg(err);
+            }
             setIsSaving(false);
         });
     }, [animals]);

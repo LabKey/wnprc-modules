@@ -46,7 +46,7 @@ module.exports = {
             title: "Adoption Form",
             permissionClasses: [
                 'org.labkey.api.security.permissions.ReadPermission',
-                'org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission'
+                'org.labkey.cageui.security.permissions.CageUIAdoptionsPermission'
             ],
             path: './src/client/pages/adoptionDataEntry'
         }

@@ -55,7 +55,7 @@
                     </column>
                     <column columnName="sire">
                         <columnTitle>Foster Sire</columnTitle>
-                        <url>/ehr/participantView.view?participantId=${dam}</url>
+                        <url>/ehr/participantView.view?participantId=${sire}</url>
                     </column>
                 </columns>
             </table>

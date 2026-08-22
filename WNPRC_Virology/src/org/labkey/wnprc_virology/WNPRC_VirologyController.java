@@ -346,12 +346,8 @@ public class WNPRC_VirologyController extends SpringActionController
             DbScope scope = DbScope.getLabKeyScope();
             try (DbScope.Transaction tx = schema.getDbSchema().getScope().ensureTransaction())
             {
-                SQLFragment sql;
-                if (scope.getSqlDialect().isPostgreSQL())
-                {
-                    sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96");
-                    new SqlExecutor(scope).execute(sql);
-                }
+                SQLFragment sql = new SQLFragment("ALTER SEQUENCE ehr_billing.aliases_rowid_seq RESTART WITH 96");
+                new SqlExecutor(scope).execute(sql);
                 tx.commit();
             }
             return null;
@@ -369,12 +365,8 @@ public class WNPRC_VirologyController extends SpringActionController
             DbScope scope = DbScope.getLabKeyScope();
             try (DbScope.Transaction tx = schema.getDbSchema().getScope().ensureTransaction())
             {
-                SQLFragment sql;
-                if (scope.getSqlDialect().isPostgreSQL())
-                {
-                    sql = new SQLFragment("TRUNCATE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails CASCADE;\n");
-                    new SqlExecutor(scope).execute(sql);
-                }
+                SQLFragment sql = new SQLFragment("TRUNCATE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails CASCADE;\n");
+                new SqlExecutor(scope).execute(sql);
                 tx.commit();
             }
             return null;

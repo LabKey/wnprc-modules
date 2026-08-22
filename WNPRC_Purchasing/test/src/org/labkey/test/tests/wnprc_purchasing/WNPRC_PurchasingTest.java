@@ -44,7 +44,6 @@ import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Maps;
 import org.labkey.test.util.PortalHelper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.UIPermissionsHelper;
 
@@ -69,7 +68,7 @@ import static org.labkey.test.util.PermissionsHelper.SUBMITTER_ROLE;
 
 @Category({EHR.class, WNPRC_EHR.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
-public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
+public class WNPRC_PurchasingTest extends BaseWebDriverTest
 {
     //folders
     private static final String PURCHASING_FOLDER = "WNPRC Purchasing";

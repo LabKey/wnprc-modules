@@ -23,7 +23,6 @@ import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.tests.ehr.ComplianceTrainingTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Category({EHR.class, WNPRC_EHR.class})
-public class WNPRCComplianceTrainingTest extends ComplianceTrainingTest implements PostgresOnlyTest
+public class WNPRCComplianceTrainingTest extends ComplianceTrainingTest
 {
     @Override
     protected void setUpTest()

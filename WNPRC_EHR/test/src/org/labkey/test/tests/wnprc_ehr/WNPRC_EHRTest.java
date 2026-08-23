@@ -68,7 +68,6 @@ import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.Maps;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
@@ -117,7 +116,7 @@ import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
  * or similar business logic.
  */
 @Category({EHR.class, WNPRC_EHR.class})
-public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnlyTest
+public class WNPRC_EHRTest extends AbstractGenericEHRTest
 {
     public static final String PROJECT_NAME = "WNPRC";
     public static final String EHR_FOLDER_PATH = PROJECT_NAME + "/EHR";

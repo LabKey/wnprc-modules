@@ -43,7 +43,6 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.RemoteConnectionHelper;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.di.DataIntegrationHelper;
@@ -66,7 +65,7 @@ import static org.labkey.test.util.PermissionsHelper.FOLDER_ADMIN_ROLE;
 import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 
 @Category({EHR.class, WNPRC_EHR.class})
-public class WNPRC_VirologyTest extends ViralLoadAssayTest implements PostgresOnlyTest
+public class WNPRC_VirologyTest extends ViralLoadAssayTest
 {
 
     public static final String CUSTOM_PROJECT_NAME = "LaboratoryVerifyProject";

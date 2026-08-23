@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.SimpleFilter;
@@ -36,7 +35,6 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -143,13 +141,11 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
         deadAnimalsWithActiveAssignments(c, u, msg);
         assignmentsWithoutValidProtocol(c, u, msg);
         //assignmentsWithEndedProject(c, u, msg);
-        projectsWithExpiredProtocol(c, u, msg);
         //duplicateAssignments(c, u, msg);
         protocolsWithFutureApproveDates(c, u, msg);
         // protocolsOverLimit(c, u, msg);
         assignmentsProjectedToday(c, u, msg);
         assignmentsProjectedTomorrow(c, u, msg);
-        protocolsWithAnimalsExpiringSoon(c, u, msg);
     }
 
     protected void livingAnimalsWithoutHousing(final Container c, User u, final StringBuilder msg)
@@ -238,29 +234,6 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
         }
     }
 
-    /**
-     * find any active assignment where the project lacks a valid protocol
-     */
-    protected void projectsWithExpiredProtocol(final Container c, User u, final StringBuilder msg)
-    {
-        TableInfo ti = getEHRSchema(c, u).getTable("project");
-        if (!ti.getSqlDialect().isSqlServer())
-        {
-            return;
-        }
-
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("enddateCoalesced"), "+0d", CompareType.DATE_GTE);
-        filter.addCondition(FieldKey.fromString("protocol/renewalDate"), new Date(), CompareType.DATE_LTE);
-        TableSelector ts = new TableSelector(ti, filter, null);
-        long count = ts.getRowCount();
-        if (count > 0)
-        {
-            msg.append("<b>WARNING: There are " + count + " active projects associated with an expired IACUC protocol.</b><br>\n");
-            msg.append("<p><a href='" + getExecuteQueryUrl(c, "ehr", "project", null, filter) + "'>Click here to view them</a><br>\n\n");
-            msg.append("<hr>\n\n");
-        }
-    }
-
     protected void protocolsWithFutureApproveDates(final Container c, User u, final StringBuilder msg)
     {
         Calendar cal = Calendar.getInstance();
@@ -308,37 +281,6 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
         {
             msg.append("<b>ALERT: There are " + count + " assignments with a projected release date for today or earlier that have not already been ended.</b><br>\n");
             msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "Assignment", null) + "&query.projectedRelease~datelte=" + AbstractEHRNotification._dateFormat.format(date) + "'>Click here to view them</a><br>\n\n");
-            msg.append("<hr>\n\n");
-        }
-    }
-
-    /**
-     * protocols with active animals that expire in next 30 days
-     */
-    protected void protocolsWithAnimalsExpiringSoon(final Container c, User u, final StringBuilder msg)
-    {
-        if (!DbScope.getLabKeyScope().getSqlDialect().isSqlServer())
-        {
-            return;
-        }
-
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("daysUntilRenewal"), 30, CompareType.LTE);
-        filter.addCondition(FieldKey.fromString("activeAnimals/totalActiveAnimals"), 0, CompareType.GT);
-
-        TableInfo ti = getEHRSchema(c, u).getTable("protocol");
-
-        List<FieldKey> colKeys = new ArrayList<>();
-        colKeys.add(FieldKey.fromString("displayName"));
-        colKeys.add(FieldKey.fromString("daysUntilrenewal"));
-        colKeys.add(FieldKey.fromString("activeAnimals/totalActiveAnimals"));
-        final Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(ti, colKeys);
-
-        TableSelector ts = new TableSelector(ti, columns.values(), filter, null);
-        long count = ts.getRowCount();
-        if (count > 0)
-        {
-            msg.append("<b>WARNING: There are " + count + " protocols with active assignments set to expire within the next 30 days.</b><br>\n");
-            msg.append("<p><a href='" + getExecuteQueryUrl(c, "ehr", "protocol", null) + "&query.daysUntilRenewal~lte=30&query.activeAnimals/totalActiveAnimals~gt=0'>Click here to view them</a><br>\n\n");
             msg.append("<hr>\n\n");
         }
     }

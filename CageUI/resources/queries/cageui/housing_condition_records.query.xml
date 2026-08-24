@@ -26,7 +26,6 @@
                     <column columnName="rowid">
                     </column>
                     <column columnName="objectid">
-                        <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="special_condition">
                         <fk>

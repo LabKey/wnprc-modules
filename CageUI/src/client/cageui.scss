@@ -2338,38 +2338,3 @@ Multi Dropdown Css
   width: 100%;
   overflow: hidden;
 }
-
-.MuiDataGrid-form-container {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  position: relative;
-  width: 100%;
-  gap: 10px;
-
-  .MuiDataGrid-root {
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    width: 100%;
-    overflow: hidden; // Ensure DataGrid handles its own internal overflow
-
-    .MuiDataGrid-main {
-      min-width: 0;
-    }
-
-    .MuiDataGrid-cell:focus-within {
-      outline: none;
-    }
-  }
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-  position: sticky;
-  bottom: 0;
-}

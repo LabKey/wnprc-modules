@@ -30,7 +30,7 @@ CREATE TABLE cageui.housing_condition_records
     created           TIMESTAMP,
     modifiedby        userid,
     modified          TIMESTAMP,
-    CONSTRAINT PK_housing_condition_records PRIMARY KEY (rowid),
+    CONSTRAINT PK_housing_condition_records PRIMARY KEY (objectid),
     CONSTRAINT FK_housing_condition_records_container FOREIGN KEY (container) REFERENCES core.Containers (EntityId)
 );
 

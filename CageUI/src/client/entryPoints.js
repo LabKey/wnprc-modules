@@ -40,6 +40,15 @@ module.exports = {
                 'org.labkey.api.security.permissions.ReadPermission',
             ],
             path: './src/client/pages/updateRackStatus'
+        },
+        {
+            name: "adoptionDataEntry",
+            title: "Adoption Form",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+                'org.labkey.cageui.security.permissions.CageUIAdoptionsPermission'
+            ],
+            path: './src/client/pages/adoptionDataEntry'
         }
     ]
 };

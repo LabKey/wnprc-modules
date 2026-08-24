@@ -42,6 +42,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.JsonUtil;
+import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.AllHistoryForm;
 import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CageModificationHistoryForm;
@@ -508,6 +509,24 @@ public class CageUIManager
         TypeReference<ArrayList<RacksForm>> typeRef = new TypeReference<ArrayList<RacksForm>>() {};
         ArrayList<RacksForm> racksForm = mapper.convertValue(selector.getMapArray(), typeRef);
         return racksForm;
+    }
+
+    public static ArrayList<AdoptionDataForm> getAdoptionsForId(String id, User user, Container container)
+    {
+
+        //TableInfo table = getRealTableForDataset(container, "adoptions");
+        UserSchema studySchema = QueryService.get().getUserSchema(user, container, "study");
+        TableInfo table = studySchema.getTable("adoptions");
+
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("Id"), id, CompareType.EQUAL);
+        TableSelector selector = new TableSelector(table, filter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        TypeReference<ArrayList<AdoptionDataForm>> typeRef = new TypeReference<ArrayList<AdoptionDataForm>>() {};
+        ArrayList<AdoptionDataForm> form = mapper.convertValue(selector.getMapArray(), typeRef);
+        return form;
     }
 
 

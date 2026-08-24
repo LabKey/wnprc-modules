@@ -54,10 +54,16 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.UnauthorizedException;
+import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
+import org.labkey.cageui.model.AdoptionData;
+import org.labkey.cageui.model.AdoptionType;
 import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
@@ -69,6 +75,8 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
+import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -80,15 +88,20 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CageUIController extends SpringActionController
 {
+
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(CageUIController.class);
     public static final String NAME = "cageui";
 
@@ -112,6 +125,196 @@ public class CageUIController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
+        }
+    }
+
+    @RequiresPermission(CageUIAdoptionsPermission.class)
+    public static class SubmitAdoptionFormAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        ArrayList<AdoptionData> _adoptionData;
+
+        public ArrayList<AdoptionData>  getAdoptionData()
+        {
+            return _adoptionData;
+        }
+
+        public void setAdoptionData(ArrayList<AdoptionData>  adoptionData)
+        {
+            _adoptionData = adoptionData;
+        }
+
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+
+            JSONArray jsonTransferData = json.getJSONArray("adoptionData");
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try
+            {
+                TypeReference<ArrayList<AdoptionData>> typeRef = new TypeReference<ArrayList<AdoptionData>>()
+                {
+                };
+                ArrayList<AdoptionData> adoptionDataList = mapper.readValue(jsonTransferData.toString(), typeRef);
+                setAdoptionData(adoptionDataList);
+            }catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+
+            // Validation on each individual row
+            for (AdoptionData row : getAdoptionData()){
+
+                if(row.getDam() == null && row.getSire() == null){
+                    errors.reject(ERROR_MSG, "Animal " + row.getId() + " must have a Sire or Dam.");
+                }
+                if(row.getSire() != null && row.getId().equals(row.getSire())){
+                    errors.reject(ERROR_MSG, "Infant cannot be the Sire.");
+                }
+                if(row.getDam() != null && row.getId().equals(row.getDam())) {
+                    errors.reject(ERROR_MSG, "Infant cannot be the Dam.");
+                }
+                if(row.getSire() != null && row.getDam() != null && row.getSire().equals(row.getDam())){
+                    errors.reject(ERROR_MSG, "Sire and Dam cannot be the same.");
+                }
+            }
+
+
+
+            Map<String, List<AdoptionData>> dataById = getAdoptionData().stream()
+                    .collect(Collectors.groupingBy(AdoptionData::getId));
+
+            // validation cross referencing other rows
+            for (Map.Entry<String, List<AdoptionData>> entry : dataById.entrySet())
+            {
+                String id = entry.getKey();
+
+                List<AdoptionData> newAdoptions = entry.getValue();
+                newAdoptions.sort(Comparator.comparing(AdoptionData::getDate));
+
+                List<AdoptionDataForm> existingAdoptions = CageUIManager.getAdoptionsForId(id, getUser(), getContainer());
+                existingAdoptions.sort(Comparator.comparing(AdoptionDataForm::getDate));
+
+                AdoptionDataForm lastAdoption = existingAdoptions.isEmpty() ? null : existingAdoptions.get(existingAdoptions.size() - 1);
+                String expectedDam = lastAdoption != null ? lastAdoption.getDam() : null;
+
+                for (AdoptionData newAdoption : newAdoptions)
+                {
+                    AdoptionType newType = AdoptionType.fromInt(newAdoption.getType().getValue());
+                    AdoptionType lastType = lastAdoption != null ? AdoptionType.fromInt(lastAdoption.getType()) : null;
+
+                    // Type validation
+                    if (newType == AdoptionType.START)
+                    {
+                        if (lastType != null && lastType != AdoptionType.END)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " already has an ongoing adoption. Must end previous adoption before starting a new one.");
+                        }
+                    }
+                    else if (newType == AdoptionType.PAUSE)
+                    {
+                        if (lastType != AdoptionType.START && lastType != AdoptionType.RESUME)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " can only be paused if it is currently started or resumed.");
+                        }
+                    }
+                    else if (newType == AdoptionType.RESUME)
+                    {
+                        if (lastType != AdoptionType.PAUSE)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " can only be resumed if it is currently paused.");
+                        }
+                    }
+                    else if (newType == AdoptionType.END)
+                    {
+                        if (lastType == AdoptionType.END)
+                        {
+                            errors.reject(ERROR_MSG, "Animal " + id + " adoption has already ended.");
+                        }
+                    }
+
+                    // Dam validation
+                    if (expectedDam == null)
+                    {
+                        expectedDam = newAdoption.getDam();
+                    }
+                    else if (!expectedDam.equals(newAdoption.getDam()))
+                    {
+                        errors.reject(ERROR_MSG, "Dam ID for animal " + id + " must be consistent across adoptions. Expected: " + expectedDam + ", Found: " + newAdoption.getDam());
+                    }
+
+                    // Date validation
+                    if (lastAdoption != null && !newAdoption.getDate().after(lastAdoption.getDate()))
+                    {
+                        errors.reject(ERROR_MSG, "Date for animal " + id + " must be after the previous adoption entry's date.");
+                    }
+
+                    // Update last adoption for next iteration
+                    AdoptionDataForm currentAsForm = new AdoptionDataForm();
+                    currentAsForm.setId(newAdoption.getId());
+                    currentAsForm.setType(newAdoption.getType().getValue());
+                    currentAsForm.setDate(newAdoption.getDate());
+                    currentAsForm.setDam(newAdoption.getDam());
+                    lastAdoption = currentAsForm;
+                }
+            }
+        }
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            BatchValidationException batchErrors = new BatchValidationException();
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            UserSchema studySchema = QueryService.get().getUserSchema(getUser(), getContainer(), "study");
+            ArrayList<AdoptionDataForm> finalForm = new ArrayList<AdoptionDataForm>();
+
+            for(AdoptionData row : getAdoptionData()){
+                AdoptionDataForm finalRow = new AdoptionDataForm();
+                finalRow.setId(row.getId());
+                finalRow.setDate(row.getDate());
+                finalRow.setDam(row.getDam());
+                finalRow.setType(row.getType().getValue());
+                if(row.getResult() != null){
+                    finalRow.setResult(row.getResult().getValue());
+                }
+                finalForm.add(finalRow);
+            }
+
+            TableInfo studyAdoptionsTable = studySchema.getTable("adoptions");
+            QueryUpdateService studyAdoptionsQus = studyAdoptionsTable.getUpdateService();
+            if (studyAdoptionsQus == null)
+            {
+                throw new IllegalStateException(studyAdoptionsTable.getName() + " query update service");
+            }
+
+            try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
+            {
+                List<Map<String, Object>> adoptionMapList = CageUIManager.get().convertToMapList(finalForm);
+
+                studyAdoptionsQus.insertRows(getUser(), getContainer(), adoptionMapList, batchErrors, null, null);
+
+                if (batchErrors.hasErrors())
+                {
+                    response.put("success", false);
+                    response.put("errors", batchErrors);
+                    return response;
+                }
+                tx.commit();
+                response.put("success", true);
+            }
+            catch (QueryUpdateServiceException | BatchValidationException | DuplicateKeyException | RuntimeException |
+                   SQLException e)
+            {
+                throw new ValidationException(e.getMessage());
+            }
+            return response;
         }
     }
 

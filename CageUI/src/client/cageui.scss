@@ -673,7 +673,7 @@
 }
 
 .loading-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -681,22 +681,18 @@
   background-color: rgba(0, 0, 0, 0.30);
   display: flex;
   justify-content: center;
-  align-items: start;
+  align-items: center;
   border-radius: 8px;
   z-index: 9999;
   backdrop-filter: blur(5px);
 }
 
 .loading-content {
-  position: sticky;
-  top: 25%;
-  left: 50%;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding-top: 20px;
 }
 
 .spinner {
@@ -1711,9 +1707,6 @@ margin-top: 0px;
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-
-
-
 .modification-editor {
 
 }
@@ -1724,22 +1717,12 @@ margin-top: 0px;
   border-bottom: lightgrey 5px solid;
 }
 
-.modification-editor-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
 .modification-editor-content {
   margin-bottom: 20px;
   display: flex;
   gap: 10px;
   flex-direction: row;
 }
-
-
-
 
 @keyframes fadeIn {
   from {
@@ -1752,8 +1735,7 @@ margin-top: 0px;
   }
 }
 
-
-.animal-editor{
+.animal-editor {
 
 }
 
@@ -1761,6 +1743,7 @@ margin-top: 0px;
   padding-top: 5px;
   border-bottom: lightgrey 5px solid;
 }
+
 
 
 /*
@@ -2216,4 +2199,40 @@ Multi Dropdown Css
   width: 100% !important;
   height: 100% !important;
   overflow: hidden !important;
+}
+
+
+.MuiDataGrid-form-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  width: 100%;
+  gap: 10px;
+
+  .MuiDataGrid-root {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    overflow: hidden; // Ensure DataGrid handles its own internal overflow
+
+    .MuiDataGrid-main {
+      min-width: 0;
+    }
+
+    .MuiDataGrid-cell:focus-within {
+      outline: none;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  bottom: 0;
 }

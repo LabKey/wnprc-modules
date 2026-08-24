@@ -21,7 +21,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="adoptions" tableDbType="TABLE">
                 <tableUrl />
-                <insertUrl>/cageui/adoptionDataEntry.view?objectid=${objectid}</insertUrl>
+                <insertUrl>/cageui/adoptionDataEntry.view</insertUrl>
                 <importUrl />
                 <updateUrl>/cageui/adoptionDataEntry.view?objectid=${objectid}</updateUrl>
                 <deleteUrl />
@@ -55,7 +55,7 @@
                     </column>
                     <column columnName="sire">
                         <columnTitle>Foster Sire</columnTitle>
-                        <url>/ehr/participantView.view?participantId=${dam}</url>
+                        <url>/ehr/participantView.view?participantId=${sire}</url>
                     </column>
                 </columns>
             </table>

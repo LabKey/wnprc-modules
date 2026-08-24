@@ -45,17 +45,22 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.HousingConditionRecordsForm;
 import org.labkey.cageui.action.RackTypesForm;
-import org.labkey.cageui.model.AdoptionData;
-import org.labkey.cageui.model.AdoptionType;
 import org.labkey.cageui.action.HousingForm;
 import org.labkey.cageui.model.ConditionCode;
 import org.labkey.cageui.model.ConditionType;
 import org.labkey.cageui.model.HousingTransferData;
+import org.labkey.cageui.action.RacksForm;
+import org.labkey.cageui.model.AdoptionData;
+import org.labkey.cageui.model.AdoptionType;
+import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.Option;
@@ -65,6 +70,7 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
@@ -77,6 +83,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -117,7 +124,7 @@ public class CageUIController extends SpringActionController
         }
     }
 
-    @RequiresPermission(CageUIAnimalEditorPermission.class)
+    @RequiresPermission(CageUIAdoptionsPermission.class)
     public static class SubmitAdoptionFormAction extends MutatingApiAction<SimpleApiJsonForm>
     {
         ArrayList<AdoptionData> _adoptionData;
@@ -158,12 +165,33 @@ public class CageUIController extends SpringActionController
                 errors.reject(ERROR_MSG, e.getMessage());
             }
 
+            // Validation on each individual row
+            for (AdoptionData row : getAdoptionData()){
+
+                if(row.getDam() == null && row.getSire() == null){
+                    errors.reject(ERROR_MSG, "Animal " + row.getId() + " must have a Sire or Dam.");
+                }
+                if(row.getSire() != null && row.getId().equals(row.getSire())){
+                    errors.reject(ERROR_MSG, "Infant cannot be the Sire.");
+                }
+                if(row.getDam() != null && row.getId().equals(row.getDam())) {
+                    errors.reject(ERROR_MSG, "Infant cannot be the Dam.");
+                }
+                if(row.getSire() != null && row.getDam() != null && row.getSire().equals(row.getDam())){
+                    errors.reject(ERROR_MSG, "Sire and Dam cannot be the same.");
+                }
+            }
+
+
+
             Map<String, List<AdoptionData>> dataById = getAdoptionData().stream()
                     .collect(Collectors.groupingBy(AdoptionData::getId));
 
+            // validation cross referencing other rows
             for (Map.Entry<String, List<AdoptionData>> entry : dataById.entrySet())
             {
                 String id = entry.getKey();
+
                 List<AdoptionData> newAdoptions = entry.getValue();
                 newAdoptions.sort(Comparator.comparing(AdoptionData::getDate));
 

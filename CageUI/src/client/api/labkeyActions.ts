@@ -197,6 +197,22 @@ export function updateRackConditionStatus(rack: RackSwitchOption, condition: Rac
     });
 }
 
+// This function is for submitting a adoption form.
+export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'submitAdoptionForm.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {adoptionData: animals},
+        });
+    });
+}
+
 // This function is for submitting a housing transfer.
 export function startHousingTransfer(animals: HousingTransferData[], prevFormLsid?: string): Promise<{
     success: boolean,
@@ -216,23 +232,6 @@ export function startHousingTransfer(animals: HousingTransferData[], prevFormLsi
                 })),
                 prevFormLsid: prevFormLsid
             },
-        });
-    });
-}
-
-
-// This function is for submitting a adoption form.
-export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
-    success: boolean,
-    errors: any[]
-}> {
-    return new Promise((resolve, reject) => {
-        Ajax.request({
-            url: buildURL('cageui', 'submitAdoptionForm.api'),
-            method: 'POST',
-            success: (res) => resolve(JSON.parse(res.response)),
-            failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {adoptionData: animals},
         });
     });
 }

@@ -16,26 +16,26 @@
  *
  */
 
-import { Dayjs } from 'dayjs';
+package org.labkey.cageui.security.roles;
 
-export interface AdoptionData {
-    objectid: string;
-    id: string;
-    date: Dayjs;
-    dam: string | null;
-    sire: string | null;
-    type: {label: keyof typeof AdoptionStatus, value: AdoptionStatus};
-    result?: {label: keyof typeof AdoptionResult, value: AdoptionResult};
-}
+import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.security.roles.AbstractRole;
+import org.labkey.cageui.CageUIModule;
+import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 
-export enum AdoptionStatus {
-    Start,
-    End,
-    Pause,
-    Resume
-}
+public class CageUIAdoptionsRole extends AbstractRole
+{
 
-export enum AdoptionResult {
-    Success,
-    Failure
+    public CageUIAdoptionsRole()
+    {
+        this("Cage UI Adoptions",
+                "Adoptions role for Cage UI",
+                CageUIAdoptionsPermission.class
+        );
+    }
+
+    protected CageUIAdoptionsRole(String name, String description, Class<? extends Permission>... perms)
+    {
+        super(name, description, CageUIModule.class, perms);
+    }
 }

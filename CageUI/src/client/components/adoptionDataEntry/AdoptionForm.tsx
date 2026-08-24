@@ -35,10 +35,10 @@ import dayjs from 'dayjs';
 import { AdoptionData, AdoptionResult, AdoptionStatus } from '../../types/adoptionFormTypes';
 import { dateTimeColumnType } from '../DateTimeGridField';
 import { generateUUID } from '../../utils/helpers';
+import { ActionURL, Filter, Query } from '@labkey/api';
+import { labkeyActionSelectWithPromise, startAdoptionSubmission } from '../../api/labkeyActions';
 import { HousingTransferData } from '../../types/housingFormTypes';
 import { Option } from '@labkey/components';
-import { Filter, Query } from '@labkey/api';
-import { labkeyActionSelectWithPromise, startAdoptionSubmission, startHousingTransfer } from '../../api/labkeyActions';
 import { AutoCompleteEditCell } from '../AutoCompleteEditCell';
 import { LoadingScreen } from '../LoadingScreen';
 import { LayoutErrors } from '../LayoutErrors';
@@ -96,7 +96,8 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             objectid: generateUUID(),
             id: '',
             date: dayjs(),
-            dam: '',
+            dam: null,
+            sire: null,
             type: {
                 label: AdoptionStatus[AdoptionStatus.Start] as keyof typeof AdoptionStatus,
                 value: AdoptionStatus.Start
@@ -208,7 +209,27 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
             renderEditCell: (params) => (
                 <AutoCompleteEditCell
                     {...params}
-                    required={true}
+                    required={false}
+                    options={centerAnimalsOptions}
+                    returnValueOnly={true}
+                />
+            ),
+            valueFormatter: (value) => {
+                if (value === undefined || value === null) return '';
+                return value;
+            }
+        },
+        {
+            field: 'sire',
+            headerName: 'Foster Sire',
+            minWidth: 120,
+            flex: 1,
+            display: 'flex',
+            editable: true,
+            renderEditCell: (params) => (
+                <AutoCompleteEditCell
+                    {...params}
+                    required={false}
                     options={centerAnimalsOptions}
                     returnValueOnly={true}
                 />
@@ -279,13 +300,12 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
     ], [adoptionStatusOptions, adoptionResultOptions, centerAnimalsOptions, handleDeleteRow]);
 
     const isRowValid = useCallback((row: AdoptionData) => {
-        const { id, date, dam, type, result } = row;
+        const { id, date, type, result } = row;
         const isTypeEnd = type?.value === AdoptionStatus.End;
 
         return (
             id !== '' && id !== null && id !== undefined &&
             date !== null && date !== undefined &&
-            dam !== '' && dam !== null && dam !== undefined &&
             type !== null && type !== undefined &&
             (!isTypeEnd || (result !== null && result !== undefined))
         );
@@ -301,7 +321,6 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
         const isRequired =
             field === 'id' ||
             field === 'date' ||
-            field === 'dam' ||
             field === 'type' ||
             (field === 'result' && row.type?.value === AdoptionStatus.End);
 
@@ -317,14 +336,23 @@ export const AdoptionForm: FC<AdoptionFormProps> = (props) => {
         startAdoptionSubmission(animals).then((res) => {
             if(res.success){
                 // Housing transfer complete
-                alert('Adoption Form Submission Complete');
+                window.location.href = ActionURL.buildURL(
+                    "query",
+                    'executeQuery',
+                    ActionURL.getContainer(),
+                {schemaName: "study", queryName: "adoptions"});
             }else{
-                alert('Adoption Form Submission Error');
+                // If this happens, the issue is likely related to a faulty submission in the java portion that didn't throw
+                // an error correctly. Otherwise, it would have gotten caught in the catch below.
+                setErrorMsg(["Unknown Error Occurred"]);
             }
             setIsSaving(false);
         }).catch(err => {
-            console.log(err)
-            setErrorMsg(err.errors.map(e => e.msg));
+            if(err.errors){
+                setErrorMsg(err.errors.map(e => e.msg));
+            }else{
+                setErrorMsg(err);
+            }
             setIsSaving(false);
         });
     }, [animals]);

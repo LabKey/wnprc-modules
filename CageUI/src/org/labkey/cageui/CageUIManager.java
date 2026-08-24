@@ -597,8 +597,6 @@ public class CageUIManager
 
     public static ArrayList<AdoptionDataForm> getAdoptionsForId(String id, User user, Container container)
     {
-
-        //TableInfo table = getRealTableForDataset(container, "adoptions");
         UserSchema studySchema = QueryService.get().getUserSchema(user, container, "study");
         TableInfo table = studySchema.getTable("adoptions");
 

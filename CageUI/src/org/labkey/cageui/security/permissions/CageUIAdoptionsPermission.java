@@ -16,26 +16,15 @@
  *
  */
 
-import { Dayjs } from 'dayjs';
+package org.labkey.cageui.security.permissions;
 
-export interface AdoptionData {
-    objectid: string;
-    id: string;
-    date: Dayjs;
-    dam: string | null;
-    sire: string | null;
-    type: {label: keyof typeof AdoptionStatus, value: AdoptionStatus};
-    result?: {label: keyof typeof AdoptionResult, value: AdoptionResult};
-}
+import org.labkey.api.security.permissions.AbstractPermission;
 
-export enum AdoptionStatus {
-    Start,
-    End,
-    Pause,
-    Resume
-}
-
-export enum AdoptionResult {
-    Success,
-    Failure
+public class CageUIAdoptionsPermission extends AbstractPermission
+{
+    public CageUIAdoptionsPermission()
+    {
+        super("Cage UI Adoptions",
+                "This permission allows the user access to adoptions table and submitted/editing data");
+    }
 }

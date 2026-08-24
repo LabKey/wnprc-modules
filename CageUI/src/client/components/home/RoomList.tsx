@@ -112,7 +112,7 @@ export const RoomList: FC = () => {
                                     } else {
                                         tempRacks.push({
                                             id: r.svgId,
-                                            name: `Rack-${r.itemId}`,
+                                            name: r.itemId === 0 ? 'Ghost Rack' : `Rack-${r.itemId}`,
                                             cages: [{
                                                 name: c.cageNum,
                                                 id: c.svgId

@@ -276,6 +276,7 @@ public class CageUIController extends SpringActionController
                 errors.reject(ERROR_MSG, e.getMessage());
             }
 
+
             RackTypesForm newRackType = CageUIManager.getRackType(getOption().getValue().getTypeRowId());
             // Cages within new rack, ensure there is same number as in prev rack to be able to make a valid switch
             ArrayList<CagesForm> newCagesForm = CageUIManager.getCagesInRack(getOption().getValue().getObjectId());
@@ -284,7 +285,10 @@ public class CageUIController extends SpringActionController
             Manufacturer newManufacturer = CageUIManager.getRackManufacturer(newRackType.getManufacturer());
             if (newRackType.getType() != getPrevRack().getType().getRackType().getNumericValue())
             {
-                errors.reject(ERROR_MSG, "Racks have different types, cannot switch cages with pens, etc");
+                // Ghost cages are exceptions to this rule
+                if(newRackType.getType() != RackTypes.GHOSTCAGE.getNumericValue() && getPrevRack().getType().getRackType().getNumericValue() != RackTypes.GHOSTCAGE.getNumericValue()){
+                    errors.reject(ERROR_MSG, "Racks have different types, cannot switch cages with pens, etc");
+                }
             }
             Rack newRack = new Rack();
             Rack.UnitType newType = new Rack.UnitType(

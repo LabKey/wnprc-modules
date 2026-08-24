@@ -198,4 +198,20 @@
             <column columnName="modifiedby"/>
         </columns>
     </table>
+    <table tableName="ghost_cages" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="cage_objectid"/>
+            <column columnName="positionid"/>
+            <column columnName="rack_group"/>
+            <column columnName="rack_objectid"/>
+            <column columnName="group_rotation"/>
+            <column columnName="cage"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
 </tables>

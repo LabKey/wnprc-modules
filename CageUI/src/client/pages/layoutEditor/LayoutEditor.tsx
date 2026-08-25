@@ -35,6 +35,7 @@ export const LayoutEditor: FC<any> = () => {
     const roomName: string = ActionURL.getParameter('room');
     const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({
         name: null,
+        species: '',
         cagingData: [],
         layoutData: null,
         isDefault: true
@@ -127,6 +128,7 @@ export const LayoutEditor: FC<any> = () => {
                 // Don't use template name instead treat the template as an empty room with objects already placed
                 newLocalRoom = {
                     name: isTemplate ? 'new-layout' : prevRoomData.name,
+                    species: '',
                     rackGroups: [],
                     valid: false,
                     objects: [],

@@ -132,6 +132,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 });
                 // Add no change to the options
                 rowOptions.splice(0,0,{label: "No Change", value: 0});
+                rowOptions.splice(0,0,{label: "Special Housing", value: -1});
                 setRoomOptions(rowOptions);
             }
         }).catch(err => {
@@ -314,8 +315,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 if (!animal.project) return false;
             }
 
-            // 6. remarks (required if Other or Behavior)
-            if (reasonValues.includes('Other (write reason in remarks section)') || reasonValues.includes('Behavior')) {
+            // 6. remarks (required if Other, Behavior, or if Room is Special Housing)
+            if (reasonValues.includes('Other (write reason in remarks section)') || reasonValues.includes('Behavior') || animal.destinationRoom?.label === 'Special Housing') {
                 if (!animal.remarks || animal.remarks.trim() === '') return false;
             }
 

@@ -406,8 +406,14 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const selectedRoom = newValue.label;
         let cageOptions: Option<string>[] = [];
 
-        if (newValue.label === 'No Change' || newValue.value === 0) {
-            const noChangeCage = { label: 'No Change', value: '0' };
+        if (newValue.value <= 0) {
+            let specialCageOption;
+            if(newValue.label === 'No Change'){
+                specialCageOption = { label: 'No Change', value: '0' };
+
+            }else{
+                specialCageOption = { label: 'Special Housing', value: '-1' };
+            }
             setRowMetadata(prev => ({
                 ...prev,
                 [paramId]: {
@@ -418,7 +424,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             }));
             updatedAnimalsState = animals.map(a =>
                 a.id === paramId
-                    ? { ...a, destinationRoom: newValue, destinationCage: noChangeCage }
+                    ? { ...a, destinationRoom: newValue, destinationCage: specialCageOption }
                     : a
             );
             onAnimalsChange(updatedAnimalsState);
@@ -551,7 +557,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         } else if (field === 'remarks') {
             const reasonForMoveValues = (row.reasonForMove || []).map((r: Option<string>) => r.value);
             isRequired = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
-                reasonForMoveValues.includes("Behavior");
+                reasonForMoveValues.includes("Behavior") ||
+                row.destinationRoom?.label === 'Special Housing';
         } else if (field === 'performedBy') {
             isRequired = true;
         } else if (field === 'project') {
@@ -720,7 +727,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, editable: true, renderCell: (params: GridRenderCellParams) => {
             const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
             const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
-                reasonForMoveValues.includes("Behavior");
+                reasonForMoveValues.includes("Behavior") ||
+                params.row.destinationRoom?.label === 'Special Housing';
             const isMissing = requiresRemarks && (!params.row.remarks || params.row.remarks.trim() === '');
             
             return (
@@ -738,7 +746,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             renderEditCell: (params) => {
                 const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
                 const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
-                    reasonForMoveValues.includes("Behavior");
+                    reasonForMoveValues.includes("Behavior") ||
+                    params.row.destinationRoom?.label === 'Special Housing';
                 const isMissing = requiresRemarks && (!params.value || params.value.trim() === '');
                 
                 return (

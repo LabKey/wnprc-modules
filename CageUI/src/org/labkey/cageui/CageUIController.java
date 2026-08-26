@@ -459,7 +459,9 @@ public class CageUIController extends SpringActionController
                 newTransferRecord.setId(record.getId());
                 newTransferRecord.setTaskId(taskId);
                 newTransferRecord.setDate(Date.from(record.getInDate().atZone(ZoneId.systemDefault()).toInstant()));
-                newTransferRecord.setEndDate(Date.from(record.getOutDate().atZone(ZoneId.systemDefault()).toInstant()));
+                if(record.getOutDate() != null){
+                    newTransferRecord.setEndDate(Date.from(record.getOutDate().atZone(ZoneId.systemDefault()).toInstant()));
+                }
                 newTransferRecord.setQcState(1);
                 newTransferRecord.setReason(convertOptionArrayToString(record.getReasonForMove()));
                 newTransferRecord.setRemark(record.getRemarks());
@@ -470,7 +472,10 @@ public class CageUIController extends SpringActionController
                 if (record.getDestinationRoom().getValue() == 0) { // No change (animal stays same room and cage)
                     newTransferRecord.setRoom(record.getCurrentRoom().getLabel());
                     newTransferRecord.setCageNew(record.getCurrentCage().getValue());
-                } else {
+                }else if (record.getDestinationRoom().getValue() == -1){ // Special housing, we should remove animal from current room and cage
+                    newTransferRecord.setRoom(null);
+                    newTransferRecord.setCageNew(null);
+                }else {
                     newTransferRecord.setRoom(record.getDestinationRoom().getLabel());
                     newTransferRecord.setCageNew(record.getDestinationCage().getValue());
                 }

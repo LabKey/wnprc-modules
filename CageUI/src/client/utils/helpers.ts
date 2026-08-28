@@ -1457,6 +1457,14 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 };
 
+/*
+    Helper to prepare data before saving the room layout.
+
+    @param room The room layout to save
+    @param sessionLog Session log metadata to save to session log table
+    @param oldTemplateName Previous template name to overwrite. Used when saving templates with updated names
+    @param prevRackCondition The condition of the previous rack to save. Used when changing racks within a room.
+ */
 export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 

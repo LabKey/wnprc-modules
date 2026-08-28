@@ -101,15 +101,8 @@ export const CagePopup: FC<CagePopupProps> = (props) => {
     // This submission updates the room mods with the current selections.
     const handleSaveMods = () => {
         validateAndApplyDefaults(currCageMods).then((res) => {
-            const result = saveCageMods(prevCage, res);
-
-            if (result) {
-                if (result.status === 'Success') {
-                    handleCleanup();
-                } else {
-                    setShowError(result.reason.map((err, index) => `${index + 1}. ${err}`).join('\n'));
-                }
-            }
+            saveCageMods(prevCage, res);
+            handleCleanup();
         });
     };
 

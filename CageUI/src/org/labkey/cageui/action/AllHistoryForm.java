@@ -38,6 +38,8 @@ public class AllHistoryForm
     private Date _endDate;
     @JsonProperty("historyid")
     private String _historyId;
+    @JsonProperty("QCState")
+    private Integer _qcState;
 
     public String getRoom()
     {
@@ -107,5 +109,15 @@ public class AllHistoryForm
     public void setHistoryId(String historyId)
     {
         _historyId = historyId;
+    }
+
+    public Integer getQcState()
+    {
+        return _qcState;
+    }
+
+    public void setQcState(Integer qcState)
+    {
+        _qcState = qcState;
     }
 }

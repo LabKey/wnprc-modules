@@ -153,6 +153,7 @@
             <column columnName="start_date"/>
             <column columnName="end_date"/>
             <column columnName="historyid"/>
+            <column columnName="QCState"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>

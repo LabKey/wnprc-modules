@@ -809,7 +809,6 @@ public class CageUIController extends SpringActionController
             JSONObject jsonRoom = json.getJSONObject("room");
             JSONArray jsonModsArray = json.getJSONArray("mods");
             JSONObject jsonSessionLog = json.getJSONObject("sessionLog");
-            String prevRoomName = json.get("prevRoomName").toString();
 
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -892,6 +891,7 @@ public class CageUIController extends SpringActionController
             boolean isDefaultSave = json.get("isDefault").toString().equals("true");
             boolean isTemplateSave = savingTemplate || isDefaultSave;
             RackCondition prevRackCondition = null;
+            Integer status = 1; // Completed
 
             if (json.has("prevRackCondition") && json.get("prevRackCondition") != null) {
                 JSONObject prevRackConditionJson = json.getJSONObject("prevRackCondition");
@@ -901,6 +901,10 @@ public class CageUIController extends SpringActionController
                 );
             }
 
+            if(json.has("status") && json.get("status") != null){
+                status = json.getInt("status");
+            }
+
             CageUIManager.RoomSubmissionService submissionService = new CageUIManager.RoomSubmissionService(
                 getContainer(),
                 getUser(),
@@ -908,7 +912,8 @@ public class CageUIController extends SpringActionController
                 prevRoomName,
                 getRoom(),
                 getRoomDefaultMods(),
-                prevRackCondition
+                prevRackCondition,
+                status
             );
             BundledForms newSubmissionForms = submissionService.submitRoom();
 

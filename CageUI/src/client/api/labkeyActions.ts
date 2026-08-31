@@ -138,9 +138,10 @@ export const labkeyGetUserPermissions = (config?: Security.GetUserPermissionsOpt
     });
 };
 
-export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string, sessionLog: SessionLog, prevRackCondition?: RackConditionOption): Promise<{
+export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string, sessionLog: SessionLog, prevRackCondition?: RackConditionOption, status?: number): Promise<{
     success: boolean,
-    errors: any[]
+    errors: any[],
+    historyid?: string
 }> {
     const newPrevRoomName = prevRoomName || room.name;
     let isDefault = false;
@@ -160,7 +161,7 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault, prevRackCondition: prevRackCondition, sessionLog: sessionLog},
+            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault, prevRackCondition: prevRackCondition, sessionLog: sessionLog, status: status},
         });
     });
 }

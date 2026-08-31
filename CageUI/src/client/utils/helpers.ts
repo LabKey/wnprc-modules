@@ -1462,10 +1462,11 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
 
     @param room The room layout to save
     @param sessionLog Session log metadata to save to session log table
+    @param status QCState of the layout being submitted. Defaults to Completed (1). Used by mod changes paired with animal transfers.
     @param oldTemplateName Previous template name to overwrite. Used when saving templates with updated names
     @param prevRackCondition The condition of the previous rack to save. Used when changing racks within a room.
  */
-export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
+export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption, status?: number): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 
     const roomName = room.name;
@@ -1558,7 +1559,7 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
     let result: LayoutSaveResult;
 
     try {
-        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition);
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition, status);
         let errors;
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];

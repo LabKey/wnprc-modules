@@ -31,7 +31,7 @@
                     <column columnName="cage">
                         <!--<nullable>false</nullable>-->
                         <columnTitle>Cage</columnTitle>
-                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
+                        <url>/wnprc_ehr/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
                     </column>
                     <column columnName="cageNew">
                         <!--<nullable>false</nullable>-->

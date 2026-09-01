@@ -20,7 +20,7 @@ import * as React from 'react';
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { ConditionCode, HousingTransferData } from '../../types/housingFormTypes';
 import dayjs from 'dayjs';
-import { Box } from '@mui/material';
+import { Autocomplete, Box, TextField } from '@mui/material';
 import { labkeyActionSelectWithPromise, startHousingTransfer } from '../../api/labkeyActions';
 import { Option } from '@labkey/components';
 import { ActionURL, Filter, Query, Security } from '@labkey/api';
@@ -40,8 +40,11 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     const { selectedAnimals, currRoom, user, prevForm } = props;
     const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom || 'Unassigned']: [] });
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
+    const [animalLocations, setAnimalLocations] = useState<Record<string, { room: Option<string>, cage: Option<string> }>>({});
+    const [animalsByCurRoom, setAnimalsByCurRoom] = useState<Record<string, string[]>>({});
+    const [topAnimalId, setTopAnimalId] = useState<string | null>(null);
     const [conditionCodes, setConditionCodes] = useState<ConditionCode[]>([]);
-    const [roomOptions, setRoomOptions] = useState<Option<number>[]>(null);
+    const [roomOptions, setRoomOptions] = useState<Option<string>[]>(null);
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
     const [autoConditions, setAutoConditions] = useState<boolean>(true);
     const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -82,7 +85,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     id,
                     inDate: dayjs(),
                     outDate: null,
-                    destinationRoom: {value: null, label: ''},
+                    destinationRoom: {value: '', label: ''},
                     destinationCage: {value: '', label: ''},
                     condition: [],
                     reasonForMove: [],
@@ -90,7 +93,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     remarks: '',
                     performedBy: '',
                     alert: false,
-                    currentRoom: currentLocations[id]?.room || { value: null, label: '' },
+                    currentRoom: currentLocations[id]?.room || { value: '', label: '' },
                     currentCage: currentLocations[id]?.cage || { value: '', label: '' }
                 } as HousingTransferData));
                 setAnimalsByRoom({ [currRoom || 'Unassigned']: initialAnimals });
@@ -126,13 +129,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
 
         labkeyActionSelectWithPromise(config).then(result => {
             if (result.rows.length !== 0) {
-                const rowOptions: Option<number>[] = [];
+                const rowOptions: Option<string>[] = [];
                 result.rows.forEach(row => {
-                    rowOptions.push({label: row.room, value: row.rowid});
+                    rowOptions.push({label: row.room, value: row.room});
                 });
                 // Add no change to the options
-                rowOptions.splice(0,0,{label: "No Change", value: 0});
-                rowOptions.splice(0,0,{label: "Special Housing", value: -1});
+                rowOptions.splice(0,0,{label: "No Change", value: 'No Change'});
+                rowOptions.splice(0,0,{label: "Special Housing", value: 'Special Housing'});
                 setRoomOptions(rowOptions);
             }
         }).catch(err => {
@@ -143,21 +146,42 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     useEffect(() => {
         const config: Query.SelectRowsOptions = {
             schemaName: 'study',
-            queryName: 'demographics',
-            viewName: 'Alive, at Center',
-            columns: ['Id']
+            queryName: 'demographicsCurLocationNew',
+            columns: ['id', 'room', 'room/rowid', 'cage', 'cage/cage_number'],
         };
 
         labkeyActionSelectWithPromise(config).then(result => {
-            if (result.rows.length !== 0) {
-                const rowOptions: string[] = [];
+            if (result.rows && result.rows.length > 0) {
+                const locations: Record<string, { room: Option<string>, cage: Option<string> }> = {};
+                const animalsList: string[] = [];
+                const curRoomMap: Record<string, string[]> = {};
+
                 result.rows.forEach(row => {
-                    rowOptions.push(row.Id);
+                    const animalId = row.id || row.Id;
+                    if (!animalId) return;
+                    animalsList.push(animalId);
+                    const roomLabel = row.room || 'Unassigned';
+                    const roomRowId = row['room/rowid'] || -1;
+                    const cageLabel = row['cage/cage_number'] || null;
+                    const cageValue = row.cage || null;
+
+                    locations[animalId] = {
+                        room: { label: roomLabel, value: roomRowId },
+                        cage: { label: cageLabel, value: cageValue }
+                    };
+
+                    if (!curRoomMap[roomLabel]) {
+                        curRoomMap[roomLabel] = [];
+                    }
+                    curRoomMap[roomLabel].push(animalId);
                 });
-                setCenterAnimals(rowOptions);
+
+                setAnimalLocations(locations);
+                setCenterAnimals(animalsList);
+                setAnimalsByCurRoom(curRoomMap);
             }
         }).catch(err => {
-            console.error('Error fetching alive at center animals', err);
+            console.error('Error fetching alive at center animals with locations', err);
         });
     }, []);
 
@@ -231,10 +255,10 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         };
 
         labkeyActionSelectWithPromise(config).then(result => {
-            const currentLocations: Record<string, {room: Option<number>, cage: Option<string>}> = {};
+            const currentLocations: Record<string, {room: Option<string>, cage: Option<string>}> = {};
             result.rows.forEach(row => {
                 currentLocations[row.id] = {
-                    room: { label: row.room, value: row['room/rowid'] },
+                    room: { label: row.room, value: row.room },
                     cage: { label: row.cage?.cage_number?.toString() || '', value: row.cage?.toString() || '' }
                 };
             });
@@ -249,9 +273,9 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     .filter(a => !existingIds.has(a.id))
                     .map(a => ({
                         ...a,
-                        currentRoom: currentLocations[a.id]?.room || { value: null, label: '' },
+                        currentRoom: currentLocations[a.id]?.room || { value: '', label: '' },
                         currentCage: currentLocations[a.id]?.cage || { value: '', label: '' },
-                        destinationRoom: { label: 'No Change', value: 0 },
+                        destinationRoom: { label: 'No Change', value: 'No Change' },
                         destinationCage: { label: 'No Change', value: '0' }
                     }));
 
@@ -271,7 +295,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 const existingIds = new Set(existingInTarget.map(a => a.id));
                 const uniqueNew = foundAnimals.filter(a => !existingIds.has(a.id)).map(a => ({
                     ...a,
-                    destinationRoom: { label: 'No Change', value: 0 },
+                    destinationRoom: { label: 'No Change', value: 'No Change' },
                     destinationCage: { label: 'No Change', value: '0' }
                 }));
 
@@ -354,6 +378,49 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         });
     }, [allAnimals]);
 
+    const availableCenterAnimals = useMemo(() => {
+        const addedAnimalIds = new Set(allAnimals.map(a => a.id));
+        return centerAnimals.filter(id => !addedAnimalIds.has(id));
+    }, [centerAnimals, allAnimals]);
+
+    const handleAddTopAnimal = useCallback(() => {
+        if (!topAnimalId || topAnimalId.trim() === '') return;
+
+        const location = animalLocations[topAnimalId];
+        const targetRoom = location?.room?.label || currRoom || 'Unassigned';
+        const currentRoomOption = location?.room || { value: null, label: targetRoom };
+        const currentCageOption = location?.cage || { value: '', label: '' };
+
+        const newAnimal: HousingTransferData = {
+            id: topAnimalId,
+            inDate: dayjs(),
+            outDate: null,
+            destinationRoom: { value: null, label: '' },
+            destinationCage: { value: '', label: '' },
+            condition: [],
+            reasonForMove: [],
+            project: null,
+            remarks: '',
+            performedBy: '',
+            alert: false,
+            currentRoom: currentRoomOption,
+            currentCage: currentCageOption
+        };
+
+        setAnimalsByRoom(prev => {
+            const next = { ...prev };
+            // Clean up empty Unassigned room if targetRoom is different and currRoom was not specified
+            if (next['Unassigned'] && next['Unassigned'].length === 0 && targetRoom !== 'Unassigned' && !currRoom) {
+                delete next['Unassigned'];
+            }
+            const existingInTarget = next[targetRoom] || [];
+            next[targetRoom] = [...existingInTarget, newAnimal];
+            return next;
+        });
+
+        setTopAnimalId(null);
+    }, [topAnimalId, animalLocations, currRoom]);
+
     return (
         <div className="MuiDataGrid-form-container">
             <LoadingScreen
@@ -361,6 +428,28 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 message={"Saving..."}
                 targetElement={document.getElementById("housing-transfer-root")}
             />
+            {!prevForm && (
+                <div className="add-animal-controls" style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <Autocomplete
+                        value={availableCenterAnimals.find(option => option === topAnimalId) || null}
+                        options={availableCenterAnimals}
+                        getOptionLabel={(option: string) => option || ''}
+                        sx={{ width: 300 }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label={"Add Animal from Center"}
+                                variant="standard"
+                                size="small"
+                            />
+                        )}
+                        onChange={(e, newValue) => setTopAnimalId(newValue)}
+                    />
+                    <button className="btn btn-primary" onClick={handleAddTopAnimal}>
+                        Add Animal
+                    </button>
+                </div>
+            )}
             {Object.keys(animalsByRoom).map(roomLabel => (
                 <HousingDataGrid
                     prevData={!!prevForm}
@@ -374,7 +463,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     onAnimalsFound={handleAnimalsFound}
                     roomOptions={roomOptions || []}
                     reasonOptions={reasonOptions || []}
-                    centerAnimals={centerAnimals}
+                    roomAnimals={animalsByCurRoom[roomLabel] || []}
+                    animalLocations={animalLocations}
                     conditionCodes={conditionCodes}
                 />
             ))}

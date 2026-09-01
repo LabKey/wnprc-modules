@@ -469,10 +469,10 @@ public class CageUIController extends SpringActionController
                 newTransferRecord.setPerformedBy(record.getPerformedBy());
                 newTransferRecord.setEjacConfirmed(record.isEjacConfirmed());
 
-                if (record.getDestinationRoom().getValue() == 0) { // No change (animal stays same room and cage)
+                if (record.getDestinationRoom().getValue().equals("No Change")) { // No change (animal stays same room and cage)
                     newTransferRecord.setRoom(record.getCurrentRoom().getLabel());
                     newTransferRecord.setCageNew(record.getCurrentCage().getValue());
-                }else if (record.getDestinationRoom().getValue() == -1){ // Special housing, we should remove animal from current room and cage
+                }else if (record.getDestinationRoom().getValue().equals("Special Housing")){ // Special housing, we should remove animal from current room and cage
                     newTransferRecord.setRoom(null);
                     newTransferRecord.setCageNew(null);
                 }else {

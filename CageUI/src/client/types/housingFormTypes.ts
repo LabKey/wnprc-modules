@@ -46,7 +46,7 @@ export interface HousingTransferData {
     id: string;
     inDate: Dayjs;
     outDate: Dayjs;
-    destinationRoom: Option<number>;
+    destinationRoom: Option<string>;
     destinationCage: Option<string>;
     condition: ConditionCode[];
     reasonForMove: Option<string>[];
@@ -56,7 +56,7 @@ export interface HousingTransferData {
     alert: boolean;
     ejacConfirmed?: boolean;
     triggeredBy?: string; // ID of the animal that triggered this animal's addition to the grid
-    currentRoom?: Option<number>;
+    currentRoom?: Option<string>;
     currentCage?: Option<string>;
 }
 

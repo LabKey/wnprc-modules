@@ -61,14 +61,16 @@ interface HousingDataGridProps {
     allAnimals: HousingTransferData[];
     onAnimalsChange: (animals: HousingTransferData[]) => void;
     onAnimalsFound: (room: string, cage: Option<string>, animals: HousingTransferData[], triggeredBy: string) => void;
-    roomOptions: Option<number>[];
+    roomOptions: Option<string>[];
     reasonOptions: Option<string>[];
-    centerAnimals: string[];
+    centerAnimals?: string[];
+    roomAnimals?: string[];
+    animalLocations?: Record<string, { room: Option<string>, cage: Option<string> }>;
     conditionCodes: ConditionCode[];
 }
 
 export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
-    const {prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, conditionCodes } = props;
+    const {prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, roomAnimals, animalLocations, conditionCodes } = props;
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
     const [canEditCondition, setCanEditCondition] = useState<boolean>(false);
     const [newAnimalId, setNewAnimalId] = useState<string>(null);
@@ -80,10 +82,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     });
     const apiRef = useGridApiRef();
 
-    const filteredCenterAnimals = useMemo(() => {
-        const addedAnimalIds = new Set(animals.map(a => a.id));
-        return centerAnimals.filter(id => !addedAnimalIds.has(id));
-    }, [centerAnimals, animals]);
+    const filteredRoomAnimals = useMemo(() => {
+        const addedAnimalIds = new Set(allAnimals.map(a => a.id));
+        const candidateAnimals = roomAnimals || [];
+        return candidateAnimals.filter(id => !addedAnimalIds.has(id));
+    }, [roomAnimals, allAnimals]);
 
 
     useEffect(() => {
@@ -362,6 +365,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     const handleAddAnimal = useCallback(() => {
         if (!newAnimalId || newAnimalId.trim() === '') return;
 
+        const location = animalLocations?.[newAnimalId];
         const newAnimal: HousingTransferData = {
             id: newAnimalId,
             inDate: dayjs(),
@@ -373,7 +377,9 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             project: null,
             remarks: '',
             performedBy: '',
-            alert: false
+            alert: false,
+            currentRoom: location?.room || { value: null, label: roomLabel },
+            currentCage: location?.cage || { value: '', label: '' }
         };
         const updatedAnimals = [...animals, newAnimal];
         onAnimalsChange(updatedAnimals);
@@ -381,9 +387,9 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
         // Potential recalculation if needed, though room/cage are empty for new animal
         updateConditionCodes(updatedAnimals, updatedAnimals);
-    }, [newAnimalId, animals, onAnimalsChange, updateConditionCodes]);
+    }, [newAnimalId, animals, onAnimalsChange, updateConditionCodes, animalLocations, roomLabel]);
 
-    const handleRoomChange = useCallback(async (paramId: GridRowId, newValue: Option<number>) => {
+    const handleRoomChange = useCallback(async (paramId: GridRowId, newValue: Option<string>) => {
         let updatedAnimalsState = animals;
         if (!newValue || newValue.value === null || (typeof newValue === 'object' && Object.keys(newValue).length === 0)) {
             setRowMetadata(prev => ({
@@ -406,7 +412,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const selectedRoom = newValue.label;
         let cageOptions: Option<string>[] = [];
 
-        if (newValue.value <= 0) {
+        if (newValue.value === 'No Change' || newValue.value === 'Special Housing') {
             let specialCageOption;
             if(newValue.label === 'No Change'){
                 specialCageOption = { label: 'No Change', value: '0' };
@@ -628,7 +634,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                         {...params}
                         required={true}
                         options={metadata?.cageOptions || []}
-                        disableClearable={currentRow.destinationRoom?.value === 0 && currentRow.destinationCage?.value === '0'}
+                        disableClearable={currentRow.destinationRoom?.value === 'No Change' && currentRow.destinationCage?.value === '0'}
                     />
                 );
             },
@@ -853,14 +859,14 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             {!prevData &&
                 <div className="add-animal-controls" style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
                     <Autocomplete
-                        value={filteredCenterAnimals.find(option => option === newAnimalId) || null}
-                        options={filteredCenterAnimals}
+                        value={filteredRoomAnimals.find(option => option === newAnimalId) || null}
+                        options={filteredRoomAnimals}
                         getOptionLabel={(option: string) => option || ''}
                         sx={{ width: 300 }}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                label={"Animals"}
+                                label={"Animals in Room"}
                                 variant="standard"
                                 size="small"
                             />

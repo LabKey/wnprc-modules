@@ -37,7 +37,7 @@ public class HousingTransferData
     private LocalDateTime inDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "SYSTEM")
     private LocalDateTime outDate;
-    private Option<Integer> destinationRoom;
+    private Option<String> destinationRoom;
     private Option<String> destinationCage;
     private ConditionCode[] condition;
     private Option<String>[] reasonForMove;
@@ -46,7 +46,7 @@ public class HousingTransferData
     private String performedBy;
     private boolean alert;
     private boolean ejacConfirmed;
-    private Option<Integer> currentRoom;
+    private Option<String> currentRoom;
     private Option<String> currentCage;
 
     public String getId()
@@ -79,12 +79,12 @@ public class HousingTransferData
         this.outDate = outDate;
     }
 
-    public Option<Integer> getDestinationRoom()
+    public Option<String> getDestinationRoom()
     {
         return destinationRoom;
     }
 
-    public void setDestinationRoom(Option<Integer> destinationRoom)
+    public void setDestinationRoom(Option<String> destinationRoom)
     {
         this.destinationRoom = destinationRoom;
     }
@@ -169,12 +169,12 @@ public class HousingTransferData
         this.ejacConfirmed = ejacConfirmed;
     }
 
-    public Option<Integer> getCurrentRoom()
+    public Option<String> getCurrentRoom()
     {
         return currentRoom;
     }
 
-    public void setCurrentRoom(Option<Integer> currentRoom)
+    public void setCurrentRoom(Option<String> currentRoom)
     {
         this.currentRoom = currentRoom;
     }

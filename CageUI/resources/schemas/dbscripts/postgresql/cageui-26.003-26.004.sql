@@ -18,3 +18,7 @@
 
 
 ALTER TABLE cageui.all_history ADD COLUMN QCState INTEGER DEFAULT 1;
+
+ALTER TABLE cageui.all_history ALTER COLUMN end_date TYPE TIMESTAMP;
+
+ALTER TABLE cageui.all_history ALTER COLUMN start_date TYPE TIMESTAMP;

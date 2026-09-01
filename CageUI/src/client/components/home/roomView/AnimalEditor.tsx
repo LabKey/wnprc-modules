@@ -35,7 +35,7 @@ export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
     const startHousingTransfer = () => {
         window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
             room: selectedRoom.name,
-            cage: currCage.objectId,
+            cages: currCage.objectId,
             returnUrl: window.location.href
         });
     }

@@ -99,7 +99,10 @@ export type ConnectedCages = {
 };
 
 export interface ModificationSaveResult {
-    status: 'Success' | 'Failure';
+    success: boolean;
+    transferToHousing: boolean;
+    historyid?: string;
+    cages?: string[];
     reason?: string[];
 }
 

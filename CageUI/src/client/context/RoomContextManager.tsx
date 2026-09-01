@@ -20,17 +20,17 @@ import * as React from 'react';
 import { createContext, useContext, useState } from 'react';
 
 import { RoomContextType } from '../types/roomContextTypes';
-import { getAdjLocation, saveRoomHelper, toLabKeyDate } from '../utils/helpers';
+import { saveRoomHelper, toLabKeyDate } from '../utils/helpers';
 import {
     Cage,
-    CageModification,
-    CageModificationsType,
     CurrCageMods,
     ModLocations,
+    ModTypes,
     Rack,
     RackConditionOption,
     Room,
-    RoomMods, RoomObject, SessionLog
+    RoomObject,
+    SessionLog
 } from '../types/typings';
 import { ModificationSaveResult, RackSwitchOption } from '../types/homeTypes';
 import { LayoutSaveResult, RackChangeSaveResult } from '../types/layoutEditorTypes';
@@ -107,12 +107,107 @@ export const RoomContextProvider = ({children}) => {
     };
 
 
-    const submitLayoutMods = async (): Promise<LayoutSaveResult> => {
+    const submitLayoutMods = async (): Promise<ModificationSaveResult> => {
         const newSessionLog: SessionLog = {...sessionLog, queryName: 'cage_modifications_history'};
 
+        // Helper to extract mods of type ModTypes.NoDivider or ModTypes.NoFloor on a cage
+        const getCageTargetMods = (cage: Cage, room: Room) => {
+            const list: { location: ModLocations; subId: number; value: ModTypes }[] = [];
+            if (!cage.mods || !room.mods) return list;
 
+            Object.keys(cage.mods).forEach(dirStr => {
+                const loc = parseInt(dirStr) as ModLocations;
+                const sections = cage.mods[loc];
+                if (!sections) return;
 
-        return saveRoomHelper(selectedLocalRoom, newSessionLog);
+                sections.forEach(section => {
+                    if (!section.modKeys) return;
+                    section.modKeys.forEach(key => {
+                        const modObj = room.mods?.[key.modId];
+                        if (modObj && (modObj.value === ModTypes.NoDivider || modObj.value === ModTypes.NoFloor)) {
+                            list.push({
+                                location: loc,
+                                subId: section.subId,
+                                value: modObj.value
+                            });
+                        }
+                    });
+                });
+            });
+            return list;
+        };
+
+        // Helper to find the corresponding cage in the other room
+        const findCorrespondingCage = (targetCage: Cage, sourceRoom: Room): Cage | undefined => {
+            if (!sourceRoom || !sourceRoom.rackGroups) return undefined;
+            for (const group of sourceRoom.rackGroups) {
+                if (!group.racks) continue;
+                for (const rack of group.racks) {
+                    if (!rack.cages) continue;
+                    const found = rack.cages.find(c => 
+                        (targetCage.objectId && c.objectId === targetCage.objectId) || 
+                        (c.cageNum === targetCage.cageNum)
+                    );
+                    if (found) return found;
+                }
+            }
+            return undefined;
+        };
+
+        const differentCages: Cage[] = [];
+
+        if (selectedLocalRoom) {
+            selectedLocalRoom.rackGroups?.forEach(group => {
+                group.racks?.forEach(rack => {
+                    rack.cages?.forEach(cage => {
+                        const localTargetMods = getCageTargetMods(cage, selectedLocalRoom);
+                        if (localTargetMods.length === 0) return;
+
+                        if (!selectedRoom) {
+                            differentCages.push(cage);
+                            return;
+                        }
+
+                        const prevCage = findCorrespondingCage(cage, selectedRoom);
+                        if (!prevCage) {
+                            differentCages.push(cage);
+                            return;
+                        }
+
+                        const prevTargetMods = getCageTargetMods(prevCage, selectedRoom);
+
+                        // Check if any mod in localTargetMods is not present in prevTargetMods
+                        const hasDifferentMod = localTargetMods.some(localMod => {
+                            return !prevTargetMods.some(prevMod => 
+                                prevMod.location === localMod.location &&
+                                prevMod.subId === localMod.subId &&
+                                prevMod.value === localMod.value
+                            );
+                        });
+
+                        if (hasDifferentMod) {
+                            differentCages.push(cage);
+                        }
+                    });
+                });
+            });
+        }
+
+        console.log('Cages with different NoDivider or NoFloor mods:', differentCages);
+        let layoutRes: LayoutSaveResult;
+        const transferToHousing: boolean = differentCages.length > 0;
+        if(transferToHousing){
+            layoutRes = await saveRoomHelper(selectedLocalRoom, newSessionLog, null, null, 2);
+        }else{
+            layoutRes = await saveRoomHelper(selectedLocalRoom, newSessionLog);
+        }
+        return {
+            success: layoutRes.success,
+            transferToHousing: transferToHousing,
+            reason: layoutRes.reason,
+            historyid: layoutRes.historyid,
+            cages: differentCages.map(c => c.objectId),
+        };
     };
 
     const submitRackChange = async (newRackOption: RackSwitchOption, prevRack: Rack, prevRackCondition: RackConditionOption): Promise<RackChangeSaveResult> => {

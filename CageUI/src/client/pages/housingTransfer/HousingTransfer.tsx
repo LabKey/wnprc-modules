@@ -29,6 +29,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { findAnimalsInCage } from '../../api/popularQueries';
 import { HousingTransferData } from '../../types/housingFormTypes';
 import { createPrevHousingForm } from '../../utils/housingTransferHelpers';
+import { LayoutErrors } from '../../components/LayoutErrors';
+import { LoadingScreen } from '../../components/LoadingScreen';
 
 
 export const HousingTransfer: FC = () => {
@@ -36,6 +38,8 @@ export const HousingTransfer: FC = () => {
     const [firstRoom, setFirstRoom] = useState<string>();
     const [prevForm, setPrevForm] = useState<Record<string, HousingTransferData[]>>(null);
     const [selectedAnimals, setSelectedAnimals] = useState<string[]>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [errors, setErrors] = useState<string[]>([]);
 
 
     useEffect(() => {
@@ -53,18 +57,46 @@ export const HousingTransfer: FC = () => {
 
     useEffect(() => {
         const firstRoom: string = ActionURL.getParameter('room');
-        const firstCage: string = ActionURL.getParameter('cage');
+        const firstCages: string[] = ActionURL.getParameterArray('cages');
         const prevFormId: string = ActionURL.getParameter('lsid');
-        if(prevFormId){
-            createPrevHousingForm(prevFormId).then(r => {
-                setPrevForm(r);
-            })
+        const housingTransferId: string = ActionURL.getParameter('historyId');
+        if (prevFormId) {
+            setIsLoading(true);
+            createPrevHousingForm(prevFormId)
+                .then(r => {
+                    setPrevForm(r);
+                })
+                .catch(e => {
+                    setErrors([e?.message || 'Error loading previous housing form.']);
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
         }
-        else if (firstRoom && firstCage) {
-            findAnimalsInCage(firstCage).then((r) => {
-                setSelectedAnimals(r.flatMap(animal => animal.id));
-            })
-            setFirstRoom(firstRoom);
+        else if (firstRoom && firstCages) {
+            setIsLoading(true);
+            const allInitialAnimals: string[] = [];
+            const newErrors: string[] = [];
+            const promises = firstCages.map(cage => findAnimalsInCage(cage));
+            
+            Promise.allSettled(promises).then(res => {
+                res.forEach((result, idx) => {
+                    if (result.status === 'fulfilled') {
+                        allInitialAnimals.push(...result.value.flatMap(animal => animal.id));
+                    } else {
+                        const errMsg = result.reason?.message || `Error fetching animal data in cage ${firstCages[idx]}`;
+                        newErrors.push(errMsg);
+                    }
+                });
+
+                if (newErrors.length > 0) {
+                    setErrors(newErrors);
+                } else {
+                    setSelectedAnimals(allInitialAnimals);
+                    setFirstRoom(firstRoom);
+                }
+                setIsLoading(false);
+            });
         }
     }, []);
 
@@ -75,7 +107,17 @@ export const HousingTransfer: FC = () => {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <div className="housing-transfer-page" id={"housing-transfer-root"}>
-                {user &&
+                <LoadingScreen
+                    isVisible={isLoading}
+                    message="Loading..."
+                    targetElement={document.getElementById("housing-transfer-root")}
+                />
+
+                {errors.length > 0 && (
+                    <LayoutErrors errors={errors} />
+                )}
+
+                {user && errors.length === 0 &&
                     <>
                         <HousingForm
                             user={user}

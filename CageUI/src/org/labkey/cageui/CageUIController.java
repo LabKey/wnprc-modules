@@ -893,7 +893,7 @@ public class CageUIController extends SpringActionController
             RackCondition prevRackCondition = null;
             Integer status = 1; // Completed
 
-            if (json.has("prevRackCondition") && json.get("prevRackCondition") != null) {
+            if (json.has("prevRackCondition") && !json.isNull("prevRackCondition")) {
                 JSONObject prevRackConditionJson = json.getJSONObject("prevRackCondition");
                 prevRackCondition = new RackCondition(
                         prevRackConditionJson.getInt("value"),
@@ -901,7 +901,7 @@ public class CageUIController extends SpringActionController
                 );
             }
 
-            if(json.has("status") && json.get("status") != null){
+            if(json.has("status") && !json.isNull("status")){
                 status = json.getInt("status");
             }
 

@@ -35,6 +35,7 @@ import { CagePopup } from './CagePopup';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 import { RoomObjectPopup } from './RoomObjectPopup';
 import { availRoomObjPopups } from '../../../utils/homeHelpers';
+import { ModificationSaveResult } from '../../../types/homeTypes';
 
 interface RoomLayoutProps {
 }
@@ -112,9 +113,16 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
 
     const saveLayout = async () => {
 
-        let res: LayoutSaveResult = await submitLayoutMods();
+        let res: ModificationSaveResult = await submitLayoutMods();
 
-        if (res.success) {
+        if(res.success && res.transferToHousing){
+            window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
+                room: selectedLocalRoom.name,
+                cages: res.cages,
+                historyId: res.historyid,
+                returnUrl: window.location.href
+            });
+        }else if (res.success) {
             // succssesful save
             setIsSaving(false);
             navigateTo({selected: 'Room', room: selectedLocalRoom.name});

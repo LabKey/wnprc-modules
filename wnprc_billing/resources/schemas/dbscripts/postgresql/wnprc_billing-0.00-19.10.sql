@@ -503,7 +503,7 @@ ALTER Table wnprc_billing.procedureFeeDefinition ADD chargetype varchar(100);
 
 ALTER TABLE wnprc_billing.invoiceRuns ALTER COLUMN objectid SET NOT NULL;
 
-SELECT core.fn_dropifexists('invoiceRuns', 'wnprc_billing', 'CONSTRAINT', 'pk_invoiceRuns');
+ALTER TABLE wnprc_billing.invoiceRuns DROP CONSTRAINT IF EXISTS pk_invoiceRuns;
 
 ALTER TABLE wnprc_billing.invoiceRuns ADD CONSTRAINT pk_invoiceRuns PRIMARY KEY (objectid);
 
@@ -544,7 +544,7 @@ ALTER TABLE wnprc_billing.invoicedItems ADD transactionNumber varchar(100);
 
 ALTER TABLE wnprc_billing.miscCharges ADD objectid entityid NOT NULL;
 
-SELECT core.fn_dropifexists('miscCharges', 'wnprc_billing', 'CONSTRAINT', 'pk_miscCharges');
+ALTER TABLE wnprc_billing.miscCharges DROP CONSTRAINT IF EXISTS pk_miscCharges;
 
 ALTER TABLE wnprc_billing.miscCharges ADD CONSTRAINT pk_miscCharges PRIMARY KEY (objectid);
 

@@ -3,76 +3,100 @@ WITH FiveYearsAgo AS (
     SELECT TIMESTAMPADD('SQL_TSI_YEAR', -5, NOW()) AS StartDate
 ),
 
+-- CTE for animals with diarrhea-related treatments in the last 5 years (Condition 2.5 and for Condition 2 matching)
+DiarrheaTreatmentAnimals AS (
+    SELECT DISTINCT
+        t.Id,
+        CAST(t.date AS DATE) AS dateOnly
+    FROM study.treatment_order t
+    WHERE t.date >= (SELECT StartDate FROM FiveYearsAgo)
+      AND (
+          t.description LIKE '%w-10980%' OR t.description LIKE '%c-54620%' OR t.description LIKE '%w-10942%' OR
+          t.description LIKE '%w-10944%' OR t.description LIKE '%c-54630%' OR t.description LIKE '%c-52a68%' OR
+          t.description LIKE '%w-10044%' OR t.description LIKE '%c-52a20%' OR t.description LIKE '%c-93040%' OR
+          t.description LIKE '%c-a0111%' OR t.description LIKE '%c-52a10%' OR t.description LIKE '%w-10226%' OR
+          t.description LIKE '%f-61c7b%' OR t.description LIKE '%c-55020%' OR t.description LIKE '%c-d1507%' OR
+          t.description LIKE '%c-52a00%' OR t.description LIKE '%t-59666%' OR t.description LIKE '%c-d4657%' OR
+          t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-b0158%' OR t.description LIKE '%w-10587%' OR
+          t.description LIKE '%w-10757%' OR t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-d3739%' OR
+          t.description LIKE '%w-10222%' OR t.description LIKE '%c-84540%' OR t.description LIKE '%w-10975%' OR
+          t.description LIKE '%c-52040%' OR t.description LIKE '%c-5205d%' OR t.description LIKE '%c-84232%' OR
+          t.description LIKE '%c-56101%' OR t.description LIKE '%c-84560%' OR t.description LIKE '%c-56a50%' OR
+          t.description LIKE '%@e-85350%' OR t.description LIKE '%c-a01b0%' OR t.description LIKE '%f-61e1f%' OR
+          t.description LIKE '%c-84812%' OR t.description LIKE '%w-10908%' OR t.description LIKE '%w-10882%' OR
+          t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR t.description LIKE '%c-52340%'
+      )
+),
+
+-- CTE to determine the current number of roommates for each animal
+HousingRoommates AS (
+    SELECT
+        h.id,
+        COUNT(h2.id) AS NumRoommates
+    FROM study.housing h
+    LEFT JOIN study.housing h2 ON h.room = h2.room AND h.cage = h2.cage AND h.id != h2.id AND h.enddate IS NULL AND h2.enddate IS NULL
+    WHERE h.enddate IS NULL
+    GROUP BY h.id
+),
+
+-- CTE to filter cage observations with diarrhea in the last 5 years
+DiarrheaCageObs AS (
+    SELECT
+        co.room,
+        co.cage,
+        co.date,
+        CAST(co.date AS DATE) AS dateOnly
+    FROM ehr.cage_observations co
+    WHERE co.date >= (SELECT StartDate FROM FiveYearsAgo)
+      AND co.feces IS NOT NULL
+      AND (co.feces LIKE '%D%' OR co.feces LIKE '%SF%' OR co.feces LIKE '%WD%')
+),
+
+-- CTE to identify animals matching Condition 1 (single-housed) or Condition 2 (group-housed with treatment)
+CageObsAnimals AS (
+    SELECT DISTINCT
+        h.id AS Id
+    FROM DiarrheaCageObs dco
+    JOIN study.housing h ON h.room = dco.room AND h.cage = dco.cage AND h.date <= dco.date AND (h.enddate >= dco.date OR h.enddate IS NULL)
+    LEFT JOIN HousingRoommates hr ON h.id = hr.id
+    LEFT JOIN DiarrheaTreatmentAnimals dta ON h.id = dta.Id AND dco.dateOnly = dta.dateOnly
+    WHERE (hr.NumRoommates = 0) OR (hr.NumRoommates > 0 AND dta.Id IS NOT NULL)
+),
+
+-- CTE combining all potential diarrhea animal IDs across all conditions
+AllDiarrheaAnimals AS (
+    -- Condition 1 & 2: Cage observations
+    SELECT Id, 1 AS is_cage_obs FROM CageObsAnimals
+    UNION ALL
+    -- Condition 2.5: Treatments
+    SELECT DISTINCT Id, 0 AS is_cage_obs FROM DiarrheaTreatmentAnimals
+    UNION ALL
+    -- Condition 3: Irregular observations
+    SELECT DISTINCT obs.Id, 0 AS is_cage_obs
+    FROM study.obs obs
+    WHERE obs.date >= (SELECT StartDate FROM FiveYearsAgo)
+      AND obs.feces IS NOT NULL
+      AND (obs.feces LIKE '%D%' OR obs.feces LIKE '%SF%' OR obs.feces LIKE '%WD%')
+    UNION ALL
+    -- Condition 4: Encounters
+    SELECT DISTINCT enc.Id, 0 AS is_cage_obs
+    FROM study.encounters enc
+    WHERE enc.date >= (SELECT StartDate FROM FiveYearsAgo)
+      AND LOWER(enc.remark) LIKE '%diarrhea%'
+),
+
 -- CTE to identify animals that are of rhesus species and have shown potential for diarrhea in the last 5 years.
--- Potential for diarrhea is determined by specific observations, treatments, or housing conditions.
 PotentialDiarrheaAnimals AS (
-    SELECT DISTINCT sd.Id, d.gender, d.birth, d.death
-    FROM study.StudyData sd
-    LEFT JOIN study.demographics d ON sd.Id = d.Id
-    LEFT JOIN (
-        -- Subquery to determine the number of roommates for each animal.
-        SELECT
-            h.id,
-            COUNT(h2.id) AS NumRoommates
-        FROM study.housing h
-        LEFT JOIN study.housing h2 ON h.room = h2.room AND h.cage = h2.cage AND h.id != h2.id AND h.enddate IS NULL AND h2.enddate IS NULL
-        WHERE h.enddate IS NULL
-        GROUP BY h.id
-    ) AS housing_info ON sd.Id = housing_info.id
-    WHERE
-        d.species = 'Rhesus'
-        AND sd.date >= (SELECT StartDate FROM FiveYearsAgo)
-        AND (
-            -- Condition 1: Single-housed animal with a cage observation of diarrhea.
-            (housing_info.NumRoommates = 0 AND sd.DataSet.Name = 'cageObs' AND sd.description LIKE '%Feces%' AND (sd.description LIKE '%D%' OR sd.description LIKE '%SF%' OR sd.description LIKE '%WD%')) OR
-            -- Condition 2: Group-housed animal with a cage observation of diarrhea and a specific treatment.
-            (housing_info.NumRoommates > 0 AND sd.DataSet.Name = 'cageObs' AND sd.description LIKE '%Feces%' AND (sd.description LIKE '%D%' OR sd.description LIKE '%SF%' OR sd.description LIKE '%WD%') AND EXISTS (
-                SELECT 1
-                FROM study.treatment_order t
-                WHERE t.Id = sd.Id AND t.date = sd.date AND (
-                    -- List of treatments indicating diarrhea.
-                    t.description LIKE '%w-10980%' OR t.description LIKE '%c-54620%' OR t.description LIKE '%w-10942%' OR
-                    t.description LIKE '%w-10944%' OR t.description LIKE '%c-54630%' OR t.description LIKE '%c-52a68%' OR
-                    t.description LIKE '%w-10044%' OR t.description LIKE '%c-52a20%' OR t.description LIKE '%c-93040%' OR
-                    t.description LIKE '%c-a0111%' OR t.description LIKE '%c-52a10%' OR t.description LIKE '%w-10226%' OR
-                    t.description LIKE '%f-61c7b%' OR t.description LIKE '%c-55020%' OR t.description LIKE '%c-d1507%' OR
-                    t.description LIKE '%c-52a00%' OR t.description LIKE '%t-59666%' OR t.description LIKE '%c-d4657%' OR
-                    t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-b0158%' OR t.description LIKE '%w-10587%' OR
-                    t.description LIKE '%w-10757%' OR t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-d3739%' OR
-                    t.description LIKE '%w-10222%' OR t.description LIKE '%c-84540%' OR t.description LIKE '%w-10975%' OR
-                    t.description LIKE '%c-52040%' OR t.description LIKE '%c-5205d%' OR t.description LIKE '%c-84232%' OR
-                    t.description LIKE '%c-56101%' OR t.description LIKE '%c-84560%' OR t.description LIKE '%c-56a50%' OR
-                    t.description LIKE '%@e-85350%' OR t.description LIKE '%c-a01b0%' OR t.description LIKE '%f-61e1f%' OR
-                    t.description LIKE '%c-84812%' OR t.description LIKE '%w-10908%' OR t.description LIKE '%w-10882%' OR
-                    t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR t.description LIKE '%c-52340%'
-                )
-            )) OR
-            -- Condition 2.5: Animal has a diarrhea-related treatment.
-            EXISTS (
-                SELECT 1
-                FROM study.treatment_order t
-                WHERE t.Id = sd.Id AND t.date = sd.date AND (
-                    t.description LIKE '%w-10980%' OR t.description LIKE '%c-54620%' OR t.description LIKE '%w-10942%' OR
-                    t.description LIKE '%w-10944%' OR t.description LIKE '%c-54630%' OR t.description LIKE '%c-52a68%' OR
-                    t.description LIKE '%w-10044%' OR t.description LIKE '%c-52a20%' OR t.description LIKE '%c-93040%' OR
-                    t.description LIKE '%c-a0111%' OR t.description LIKE '%c-52a10%' OR t.description LIKE '%w-10226%' OR
-                    t.description LIKE '%f-61c7b%' OR t.description LIKE '%c-55020%' OR t.description LIKE '%c-d1507%' OR
-                    t.description LIKE '%c-52a00%' OR t.description LIKE '%t-59666%' OR t.description LIKE '%c-d4657%' OR
-                    t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-b0158%' OR t.description LIKE '%w-10587%' OR
-                    t.description LIKE '%w-10757%' OR t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-d3739%' OR
-                    t.description LIKE '%w-10222%' OR t.description LIKE '%c-84540%' OR t.description LIKE '%w-10975%' OR
-                    t.description LIKE '%c-52040%' OR t.description LIKE '%c-5205d%' OR t.description LIKE '%c-84232%' OR
-                    t.description LIKE '%c-56101%' OR t.description LIKE '%c-84560%' OR t.description LIKE '%c-56a50%' OR
-                    t.description LIKE '%@e-85350%' OR t.description LIKE '%c-a01b0%' OR t.description LIKE '%f-61e1f%' OR
-                    t.description LIKE '%c-84812%' OR t.description LIKE '%w-10908%' OR t.description LIKE '%w-10882%' OR
-                    t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR t.description LIKE '%c-52340%'
-                )
-            ) OR
-            -- Condition 3: Irregular observation of diarrhea.
-            (sd.DataSet.Name = 'obs' AND sd.description LIKE '%Feces%' AND (sd.description LIKE '%D%' OR sd.description LIKE '%SF%' OR sd.description LIKE '%WD%')) OR
-            -- Condition 4: Encounter report of diarrhea.
-            (sd.DataSet.Name = 'encounters' AND LOWER(sd.remark) LIKE '%diarrhea%')
-        )
+    SELECT
+        d.Id,
+        d.gender,
+        d.birth,
+        d.death,
+        MAX(a.is_cage_obs) AS is_cage_obs
+    FROM AllDiarrheaAnimals a
+    JOIN study.demographics d ON a.Id = d.Id
+    WHERE d.species = 'Rhesus'
+    GROUP BY d.Id, d.gender, d.birth, d.death
 ),
 
 -- CTE to generate a series of dates for the last 5 years.
@@ -80,7 +104,6 @@ DateSeries AS (
     SELECT
         CAST(TIMESTAMPADD('SQL_TSI_DAY', num_series.n, dr.StartDate) AS DATE) AS date
     FROM
-        -- 1. Replace this section with your actual source table or parameterized dates
         (
             SELECT
                 (SELECT StartDate FROM FiveYearsAgo) AS StartDate,
@@ -88,7 +111,6 @@ DateSeries AS (
         ) dr
 
             JOIN
-        -- 2. Generate a sequential list of numbers (0-999) using a cross join
             (
                 SELECT (ones.v + tens.v * 10 + hundreds.v * 100 + thousands.v * 1000) AS n
                 FROM
@@ -98,10 +120,8 @@ DateSeries AS (
                         CROSS JOIN
                     (SELECT 0 AS v UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) hundreds
                         CROSS JOIN
-                    -- Added this block to increase maximum range from 999 to 9999
-                        (SELECT 0 AS v UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) thousands
+                    (SELECT 0 AS v UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) thousands
             ) num_series
-        -- 3. Only keep dates that fall within your defined range
         ON
             TIMESTAMPADD('SQL_TSI_DAY', num_series.n, dr.StartDate) <= dr.EndDate
 ),
@@ -128,92 +148,6 @@ DailyTreatments AS (
     GROUP BY Id, CAST(date AS DATE)
 ),
 
--- This query extends the DiarrheaObs report by including cage observations for diarrhea,
--- with specific conditions for single-housed and group-housed animals.
-
--- CTE for current number of roommates for each animal
-CurrentRoommates AS (
-    SELECT
-        h.id,
-        COUNT(h2.id) AS NumRoommates
-    FROM study.housing h
-    LEFT JOIN study.housing h2 ON h.room = h2.room AND h.cage = h2.cage AND h.id != h2.id AND h.enddate IS NULL AND h2.enddate IS NULL
-    WHERE h.enddate IS NULL
-    GROUP BY h.id
-),
-
--- CTE for diarrhea-related treatments
-DiarrheaTreatments AS (
-    SELECT
-        t.Id,
-        t.date
-    FROM study.treatment_order t
-    WHERE
-        t.description LIKE '%w-10980%' OR t.description LIKE '%c-54620%' OR t.description LIKE '%w-10942%' OR
-        t.description LIKE '%w-10944%' OR t.description LIKE '%c-54630%' OR t.description LIKE '%c-52a68%' OR
-        t.description LIKE '%w-10044%' OR t.description LIKE '%c-52a20%' OR t.description LIKE '%c-93040%' OR
-        t.description LIKE '%c-a0111%' OR t.description LIKE '%c-52a10%' OR t.description LIKE '%w-10226%' OR
-        t.description LIKE '%f-61c7b%' OR t.description LIKE '%c-55020%' OR t.description LIKE '%c-d1507%' OR
-        t.description LIKE '%c-52a00%' OR t.description LIKE '%t-59666%' OR t.description LIKE '%c-d4657%' OR
-        t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-b0158%' OR t.description LIKE '%w-10587%' OR
-        t.description LIKE '%w-10757%' OR t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-d3739%' OR
-        t.description LIKE '%w-10222%' OR t.description LIKE '%c-84540%' OR t.description LIKE '%w-10975%' OR
-        t.description LIKE '%c-52040%' OR t.description LIKE '%c-5205d%' OR t.description LIKE '%c-84232%' OR
-        t.description LIKE '%c-56101%' OR t.description LIKE '%c-84560%' OR t.description LIKE '%c-56a50%' OR
-        t.description LIKE '%@e-85350%' OR t.description LIKE '%c-a01b0%' OR t.description LIKE '%f-61e1f%' OR
-        t.description LIKE '%c-84812%' OR t.description LIKE '%w-10908%' OR t.description LIKE '%w-10882%' OR
-        t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR t.description LIKE '%c-52340%'
-),
-
--- Combined and filtered observations
-CombinedObs AS (
-    -- Observations from obs table
-    SELECT
-        obs.Id,
-        obs.dateOnly AS obs_date,
-        obs.feces,
-        1 AS priority
-    FROM study."Irregular Obs No Okays" obs
-    WHERE obs.feces IS NOT NULL
-
-    UNION ALL
-
-    -- Filtered cage observations
-    SELECT
-        co.Id,
-        co.date AS obs_date,
-        co.feces,
-        2 AS priority
-    FROM study.cageObs co
-    LEFT JOIN CurrentRoommates cr ON co.Id = cr.id
-    LEFT JOIN DiarrheaTreatments dt ON co.Id = dt.Id AND co.date = dt.date
-    WHERE
-        co.feces IS NOT NULL AND
-        (
-            -- Single-housed animals
-            cr.NumRoommates = 0 OR
-            -- Group-housed animals with a diarrhea-related treatment
-            (cr.NumRoommates > 0 AND dt.Id IS NOT NULL)
-        )
-),
-
--- Final selection with deduplication, prioritizing 'obs' over 'cageObs'
-FinalObs as ( SELECT
-    t1.Id,
-    t1.obs_date AS dateOnly,
-    t1.feces
-FROM CombinedObs t1
-INNER JOIN (
-    SELECT
-        Id,
-        obs_date,
-        MIN(priority) AS min_priority
-    FROM CombinedObs
-    GROUP BY Id, obs_date
-) t2 ON t1.Id = t2.Id AND t1.obs_date = t2.obs_date AND t1.priority = t2.min_priority
-),
-
-
 -- CTE to calculate a diarrhea score for each animal on each day based on observations.
 DailyDiarrheaStatus AS (
     SELECT
@@ -236,7 +170,7 @@ DailyDiarrheaStatus AS (
                 ELSE 0
             END
         ) AS diarrhea_status
-    FROM FinalObs
+    FROM study.DiarrheaObs
     WHERE Id IN (SELECT Id FROM PotentialDiarrheaAnimals)
     GROUP BY Id, CAST(dateOnly AS DATE)
 )
@@ -248,7 +182,8 @@ SELECT
     ds.date,
     COALESCE(dhc.housing_changes, 0) AS housing_changes,
     COALESCE(dt.treatments, 0) AS treatments,
-    COALESCE(dds.diarrhea_status, 0) AS diarrhea_status
+    COALESCE(dds.diarrhea_status, 0) AS diarrhea_status,
+    pda.is_cage_obs AS "Cage Obs"
 FROM PotentialDiarrheaAnimals pda
 CROSS JOIN DateSeries ds
 LEFT JOIN DailyHousingChanges dhc ON pda.Id = dhc.Id AND ds.date = dhc.date

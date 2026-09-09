@@ -16447,4 +16447,57 @@
 <!--            </column>-->
           </columns>
   </table>
+  <table tableName="adoptions" tableDbType="TABLE">
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+        <nullable>false</nullable>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>32</scale>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+      </column>
+      <column columnName="type">
+        <datatype>integer</datatype>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>adoption_status</fkTable>
+          <fkColumnName>value</fkColumnName>
+          <fkDisplayColumnName>title</fkDisplayColumnName>
+        </fk>
+      </column>
+      <column columnName="result">
+        <datatype>integer</datatype>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>adoption_results</fkTable>
+          <fkColumnName>value</fkColumnName>
+          <fkDisplayColumnName>title</fkDisplayColumnName>
+        </fk>
+      </column>
+      <column columnName="dam">
+        <datatype>varchar</datatype>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${dam}</url>
+      </column>
+      <column columnName="sire">
+        <datatype>varchar</datatype>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire}</url>
+      </column>
+    </columns>
+  </table>
 </tables>

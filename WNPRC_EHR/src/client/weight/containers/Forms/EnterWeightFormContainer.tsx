@@ -15,7 +15,7 @@ import {
   getQCStateMap,
   labkeyActionSelectWithPromise
 } from "../../query/actions";
-import { lookupAnimalInfo, saveRowsDirect } from '../../../query/helpers';
+import { lookupAnimalStatuses, saveRowsDirect } from '../../../query/helpers';
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 import EnterWeightForm from "./EnterWeightForm";
 import {
@@ -161,29 +161,42 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormIds();
   }, [ids]);
 
+  // Keyed on the id list rather than formdata: liftUpVal hands back a new array on every
+  // keystroke, so depending on formdata re-checks every animal in the room on each edit.
+  const animalIdKey = formdata.map((entry) => entry.animalid.value).join(";");
+
   useEffect(() => {
-    (async () => {
-      try {
-        const results = await Promise.all(
-            formdata.map(async (entry) => {
-              try {
-                const info = await lookupAnimalInfo(entry.animalid.value);
-                return info["calculated_status"] === "Alive";
-              } catch (error) {
-                return false;
-              }
-            })
-        );
-        if (results.length === 0 || results.includes(false)) {
-          setEnableSave(false);
-        } else {
-          setEnableSave(true);
-        }
-      } catch (error) {
-        return;
-      }
-    })();
-  }, [formdata]);
+    const animalIds = formdata
+      .map((entry) => entry.animalid.value)
+      .filter((id) => id !== "" && id !== undefined);
+    // A short list means some row has no animal yet, which is not saveable.
+    if (animalIds.length === 0 || animalIds.length !== formdata.length) {
+      setEnableSave(false);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      lookupAnimalStatuses(animalIds)
+        .then((statuses) => {
+          if (!cancelled) {
+            setEnableSave(
+              animalIds.every(
+                (id) => statuses.get(String(id).toLowerCase()) === "Alive"
+              )
+            );
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setEnableSave(false);
+          }
+        });
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [animalIdKey]);
 
   useEffect(() => {
     let check = false;

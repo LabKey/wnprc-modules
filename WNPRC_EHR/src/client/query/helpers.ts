@@ -165,6 +165,30 @@ export const lookupAnimalInfo = (id:string) => {
   });
 };
 
+export const lookupAnimalStatuses = (
+  ids: Array<string>
+): Promise<Map<string, string>> => {
+  if (ids.length === 0) {
+    return Promise.resolve(new Map<string, string>());
+  }
+  return labkeyActionSelectWithPromise({
+    schemaName: "study",
+    queryName: "demographics",
+    columns: "Id,calculated_status",
+    filterArray: [Filter.create("Id", ids.join(";"), Filter.Types.IN)],
+  }).then(
+    (data) =>
+      // Keyed lower-case: the forms lower-case the ids they submit. An id with no row is
+      // absent from the map, which is how callers detect an animal that does not exist.
+      new Map<string, string>(
+        (data["rows"] || []).map((row) => [
+          String(row["Id"]).toLowerCase(),
+          row["calculated_status"],
+        ])
+      )
+  );
+};
+
 export const insertTaskCommand = (taskid, title) => {
   let taskObject = {
 

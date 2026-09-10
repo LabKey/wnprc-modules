@@ -175,23 +175,26 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       return;
     }
     let cancelled = false;
-    lookupAnimalStatuses(animalIds)
-      .then((statuses) => {
-        if (!cancelled) {
-          setEnableSave(
-            animalIds.every(
-              (id) => statuses.get(String(id).toLowerCase()) === "Alive"
-            )
-          );
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setEnableSave(false);
-        }
-      });
+    const timer = setTimeout(() => {
+      lookupAnimalStatuses(animalIds)
+        .then((statuses) => {
+          if (!cancelled) {
+            setEnableSave(
+              animalIds.every(
+                (id) => statuses.get(String(id).toLowerCase()) === "Alive"
+              )
+            );
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setEnableSave(false);
+          }
+        });
+    }, 500);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [animalIdKey]);
 

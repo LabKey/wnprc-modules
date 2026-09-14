@@ -30,11 +30,12 @@ public class BundledForms
     ArrayList<CageModificationHistoryForm> _cageModificationHistoryForm;
     ArrayList<TemplateLayoutHistoryForm> _templateLayoutHistoryForm;
     ArrayList<LayoutHistoryForm> _layoutHistoryForm;
-    ArrayList<CageHistoryForm> _cageHistoryForm;
-    ArrayList<RacksForm> _newRacksForm;
+    CageHistoryFormWithContext _cageHistoryFormWithContext;
+    RackHistoryFormWithContext _rackHistoryFormWithContext;
+/*    ArrayList<RacksForm> _newRacksForm;
     ArrayList<RacksForm> _prevRacksForm;
     CagesFormWithContext _newCagesForm;
-    CagesFormWithContext _prevCagesForm;
+    CagesFormWithContext _prevCagesForm;*/
     ArrayList<GhostCagesForm> _newGhostCagesForm;
 
     public AllHistoryForm getNewAllHistoryForm()
@@ -97,17 +98,27 @@ public class BundledForms
         _layoutHistoryForm = layoutHistoryForm;
     }
 
-    public ArrayList<CageHistoryForm> getCageHistoryForm()
+    public CageHistoryFormWithContext getCageHistoryFormWithContext()
     {
-        return _cageHistoryForm;
+        return _cageHistoryFormWithContext;
     }
 
-    public void setCageHistoryForm(ArrayList<CageHistoryForm> cageHistoryForm)
+    public void setCageHistoryFormWithContext(CageHistoryFormWithContext cageHistoryFormWithContext)
     {
-        _cageHistoryForm = cageHistoryForm;
+        _cageHistoryFormWithContext = cageHistoryFormWithContext;
     }
 
-    public ArrayList<RacksForm> getNewRacksForm()
+    public RackHistoryFormWithContext getRackHistoryFormWithContext()
+    {
+        return _rackHistoryFormWithContext;
+    }
+
+    public void setRackHistoryFormWithContext(RackHistoryFormWithContext rackHistoryFormWithContext)
+    {
+        _rackHistoryFormWithContext = rackHistoryFormWithContext;
+    }
+
+/*    public ArrayList<RacksForm> getNewRacksForm()
     {
         return _newRacksForm;
     }
@@ -145,7 +156,7 @@ public class BundledForms
     public void setPrevCagesForm(CagesFormWithContext prevCagesForm)
     {
         _prevCagesForm = prevCagesForm;
-    }
+    }*/
 
     public Map<String, Object> getEhrRoomsForm()
     {

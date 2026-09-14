@@ -31,10 +31,12 @@ import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.cageui.action.CageHistoryForm;
+import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.RackHistoryForm;
 import org.labkey.cageui.action.RacksForm;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
@@ -78,6 +80,11 @@ public class TriggerScriptHelper
     {
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schema, table);
         queryUpdater.insert(insertRows);
+    }
+    public void updateRows(List<Map<String, Object>> updateRows, String schema, String table) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException, InvalidKeyException
+    {
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schema, table);
+        queryUpdater.update(updateRows);
     }
 
     private Map<String, String> getError(String field, String message, String severity) {
@@ -148,44 +155,100 @@ public class TriggerScriptHelper
         return container;
     }
 
-    public List<Map<String, String>> updateRackHistory(final Map<String, Object> rackRow, final String historyId) {
+    public List<Map<String, String>> removeRacksFromRoom(final ArrayList<Map<String, Object>> racksToRemove) {
         List<Map<String, String>> errorStrings = new ArrayList<>();
-        RackHistoryForm form = new RackHistoryForm();
-        form.setObjectId(rackRow.get("objectid").toString());
-        form.setHistoryId(historyId);
-        if(rackRow.get("room") != null){
-            form.setRoom(rackRow.get("room").toString());
+        ArrayList<RacksForm> rackFormsToRemove = new ArrayList<>();
+
+        for(Map<String, Object> rack : racksToRemove){
+            RacksForm prevRack = CageUIManager.getRackForm((String) rack.get("objectid"));
+            prevRack.setRoom(null);
+            if(rack.containsKey("prevCondition")){
+                prevRack.setCondition((Integer) rack.get("prevCondition"));
+            }
+            rackFormsToRemove.add(prevRack);
         }
-        form.setCondition((int) rackRow.get("condition"));
 
         try {
-            insertRows(convertToMapList(form), "cageui", "rack_history");
+            updateRows(CageUIManager.get().convertToMapList(rackFormsToRemove), "cageui", "racks");
         } catch (Exception e) {
-            errorStrings.add(getError("rack_history", e.getMessage(), "error"));
+            errorStrings.add(getError("racks", e.getMessage(), "error"));
+        }
+
+        return errorStrings;
+    }
+    /*
+        TODO on updateRacks.
+
+        1. Check if rack is new/should be inserted into racks table
+            1. Insert if new
+            2. Update if old
+        2. If updating, determine the scope of the update.
+            1. Update all rack specific properties
+        3. extra context might contain racks that are not in the history row. For example, racks that were removed from the room won't be in the history.
+            1. We will need to do a cleanup of these racks. Potentially in a finally of the trigger script.
+     */
+
+    public List<Map<String, String>> updateRacks(final Map<String, Object> rackHistoryRow, final Map<String,Map<String, Object>> extraRacksContext) {
+        List<Map<String, String>> errorStrings = new ArrayList<>();
+        RacksForm prevRack = CageUIManager.getRackForm((String) rackHistoryRow.get("objectid"));
+        RacksForm newRack = new RacksForm();
+        Map<String, Object> rackContext = extraRacksContext.get(rackHistoryRow.get("objectid"));
+        // Add rack
+        if(prevRack == null){
+            newRack.setObjectId((String) rackHistoryRow.get("objectid"));
+            newRack.setRackId((Integer) rackContext.get("rackId"));
+            newRack.setRoom((String) rackHistoryRow.get("room"));
+            newRack.setCondition(0); // Set condition to operational "0"
+            newRack.setRackType((Integer) rackContext.get("rackType"));
+        }else{
+            prevRack.setRoom((String) rackHistoryRow.get("room"));
+            /*else{ // rack exists
+            if(rackContext.containsKey("removeRackFromRoom")){ // If it has the key it is true
+                prevRack.setRoom(null);
+            }
+            if(rackContext.containsKey("prevCondition")){
+                prevRack.setCondition((Integer) rackContext.get("prevCondition"));
+            }
+        }*/
+        }
+
+        try {
+            if(prevRack != null){
+                updateRows(convertToMapList(prevRack), "cageui", "racks");
+            }else{
+                insertRows(convertToMapList(newRack), "cageui", "racks");
+            }
+        } catch (Exception e) {
+            errorStrings.add(getError("racks", e.getMessage(), "error"));
         }
 
         return errorStrings;
     }
 
-    public List<Map<String, String>> updateCageHistory(final Map<String, Object> cageRow, final String historyId, final Map<String, Object> extraContext) {
+    public List<Map<String, String>> updateCages(final Map<String, Object> cageHistoryRow, final Map<String, Object> extraContext) {
         List<Map<String, String>> errorStrings = new ArrayList<>();
-        CageHistoryForm form = new CageHistoryForm();
-        form.setHistoryId(historyId);
-        form.setRackGroup(findLastNumberAfterDash(extraContext.get("rackGroup").toString()));
-        form.setGroupRotation((int)extraContext.get("groupRotation"));
-        form.setCage(cageRow.get("objectid").toString());
-        form.setCageNumber((int)cageRow.get("cage_number"));
-        form.setLength(((BigDecimal)cageRow.get("length")).doubleValue());
-        form.setWidth(((BigDecimal)cageRow.get("width")).doubleValue());
-        form.setHeight(((BigDecimal)cageRow.get("height")).doubleValue());
-        form.setSqft(((BigDecimal)cageRow.get("sqft")).doubleValue());
+
+        CagesForm prevCageForm = CageUIManager.getCageForm((String) cageHistoryRow.get("cage"));
+        CagesForm newCageForm = new CagesForm();
+
+        newCageForm.setObjectId((String) cageHistoryRow.get("cage"));
+        newCageForm.setRack((String) extraContext.get("rack"));
+        newCageForm.setPositionId((int)extraContext.get("positionId"));
+        newCageForm.setCageNumber((int)cageHistoryRow.get("cage_number"));
+        newCageForm.setLength(((BigDecimal)cageHistoryRow.get("length")).doubleValue());
+        newCageForm.setWidth(((BigDecimal)cageHistoryRow.get("width")).doubleValue());
+        newCageForm.setHeight(((BigDecimal)cageHistoryRow.get("height")).doubleValue());
+        newCageForm.setSqft(((BigDecimal)cageHistoryRow.get("sqft")).doubleValue());
 
         try {
-            insertRows(convertToMapList(form), "cageui", "cage_history");
+            if(prevCageForm != null){
+                updateRows(convertToMapList(newCageForm), "cageui", "cages");
+            }else{
+                insertRows(convertToMapList(newCageForm), "cageui", "cages");
+            }
         } catch (Exception e) {
-            errorStrings.add(getError("cage_history", e.getMessage(), "error"));
+            errorStrings.add(getError("cages", e.getMessage(), "error"));
         }
         return errorStrings;
     }
-
 }

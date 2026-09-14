@@ -23,10 +23,9 @@ var CageUI = require("cageui/CageUI").CageUI;
 function onUpsert(helper, scriptErrors, row){
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
 
-    if (this.extraContext['history_id'] != null) {
-
+    if (this.extraContext['QCState'] === 1 && this.extraContext['racksExtraContext']) {
         //add any errors that are returned to the page
-        let javaErrors = CageUI.Utils.getJavaHelper().updateRackHistory(row, this.extraContext['history_id']);
+        let javaErrors = CageUI.Utils.getJavaHelper().updateRacks(row, this.extraContext['racksExtraContext']);
         if (javaErrors) {
             for (let i = 0; i < javaErrors.length; i++) {
                 let error = javaErrors[i];
@@ -35,5 +34,21 @@ function onUpsert(helper, scriptErrors, row){
             }
         }
     }
+}
 
+function onComplete(event, errors, helper){
+    var racksToRemove = this.extraContext["racksExtraContext"] &&
+            this.extraContext["racksExtraContext"]["racksToRemove"] &&
+            this.extraContext["racksExtraContext"]["racksToRemove"]["racksToRemove"] || [];
+
+    if(racksToRemove.length > 0){
+        let javaErrors = CageUI.Utils.getJavaHelper().removeRacksFromRoom(racksToRemove);
+        if (javaErrors) {
+            for (let i = 0; i < javaErrors.length; i++) {
+                let error = javaErrors[i];
+                console.log('Field: ' + error.field + ', Message: ' + error.message + ', Severity: ' + error.severity);
+                EHR.Server.Utils.addError(scriptErrors, error.field, error.message, error.severity);
+            }
+        }
+    }
 }

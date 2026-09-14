@@ -21,19 +21,19 @@ package org.labkey.cageui.action;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class CagesFormWithContext
+public class RackHistoryFormWithContext
 {
-    private ArrayList<CagesForm> _cagesForm;
-    private Map<String,Map<String, Object>> _extraContext;
+    private ArrayList<RackHistoryForm> _rackHistoryForms;
+    private Map<String, Map<String, Object>> _extraContext;
 
-    public ArrayList<CagesForm> getCagesForm()
+    public ArrayList<RackHistoryForm> getRackHistoryForms()
     {
-        return _cagesForm;
+        return _rackHistoryForms;
     }
 
-    public void setCagesForm(ArrayList<CagesForm> cagesForm)
+    public void setRackHistoryForms(ArrayList<RackHistoryForm> rackHistoryForms)
     {
-        _cagesForm = cagesForm;
+        _rackHistoryForms = rackHistoryForms;
     }
 
     public Map<String,Map<String, Object>> getExtraContext()

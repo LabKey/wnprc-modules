@@ -45,13 +45,16 @@ import org.labkey.api.util.JsonUtil;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.AllHistoryForm;
 import org.labkey.cageui.action.BundledForms;
+import org.labkey.cageui.action.CageHistoryForm;
+import org.labkey.cageui.action.CageHistoryFormWithContext;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.CagesForm;
-import org.labkey.cageui.action.CagesFormWithContext;
 import org.labkey.cageui.action.GhostCagesForm;
 import org.labkey.cageui.action.HousingConditionRecordsForm;
 import org.labkey.cageui.action.HousingForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
+import org.labkey.cageui.action.RackHistoryForm;
+import org.labkey.cageui.action.RackHistoryFormWithContext;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.action.RoomHistoryForm;
@@ -317,8 +320,13 @@ public class CageUIManager
         ApiSimpleResponse response = new ApiSimpleResponse();
         UserSchema cageUISchema = QueryService.get().getUserSchema(user, container, "cageui");
         UserSchema ehrLookupsSchema = QueryService.get().getUserSchema(user, container, "ehr_lookups");
-        Map<String, Object> extraContext = new HashMap<>();
-        extraContext.put("history_id", newForms.getNewAllHistoryForm().getHistoryId());
+        Map<String, Object> cagesExtraContext = new HashMap<>();
+        Map<String, Object> racksExtraContext = new HashMap<>();
+
+        cagesExtraContext.put("history_id", newForms.getNewAllHistoryForm().getHistoryId());
+        cagesExtraContext.put("QCState", newForms.getNewAllHistoryForm().getQcState());
+        racksExtraContext.put("history_id", newForms.getNewAllHistoryForm().getHistoryId());
+        racksExtraContext.put("QCState", newForms.getNewAllHistoryForm().getQcState());
 
 
         TableInfo ehrLookupsRoomsTable = ehrLookupsSchema.getTable("rooms");
@@ -363,18 +371,18 @@ public class CageUIManager
             throw new IllegalStateException(cageModHistoryTable.getName() + " query update service");
         }
 
-        TableInfo cagesTable = cageUISchema.getTable("cages");
-        QueryUpdateService cagesQus = cagesTable.getUpdateService();
-        if (cagesQus == null)
+        TableInfo cageHistoryTable = cageUISchema.getTable("cage_history");
+        QueryUpdateService cageHistoryQus = cageHistoryTable.getUpdateService();
+        if (cageHistoryQus == null)
         {
-            throw new IllegalStateException(cagesTable.getName() + " query update service");
+            throw new IllegalStateException(cageHistoryTable.getName() + " query update service");
         }
 
-        TableInfo racksTable = cageUISchema.getTable("racks");
-        QueryUpdateService racksQus = racksTable.getUpdateService();
-        if (racksQus == null)
+        TableInfo rackHistoryTable = cageUISchema.getTable("rack_history");
+        QueryUpdateService rackHistoryQus = rackHistoryTable.getUpdateService();
+        if (rackHistoryQus == null)
         {
-            throw new IllegalStateException(racksTable.getName() + " query update service");
+            throw new IllegalStateException(rackHistoryTable.getName() + " query update service");
         }
 
         TableInfo ghostCagesTable = cageUISchema.getTable("ghost_cages");
@@ -423,7 +431,17 @@ public class CageUIManager
                 cageModHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageModificationHistoryForm()), batchErrors, null, null);
             }
 
-            if (newForms.getNewCagesForm() != null)
+            if(newForms.getCageHistoryFormWithContext() != null){
+                cagesExtraContext.put("cagesExtraContext", newForms.getCageHistoryFormWithContext().getExtraContext());
+                cageHistoryQus.insertRows(user, container, convertToMapList(newForms.getCageHistoryFormWithContext().getCageHistoryForm()), batchErrors, null, cagesExtraContext);
+            }
+
+            if(newForms.getRackHistoryFormWithContext() != null){
+                racksExtraContext.put("racksExtraContext", newForms.getRackHistoryFormWithContext().getExtraContext());
+                rackHistoryQus.insertRows(user, container, convertToMapList(newForms.getRackHistoryFormWithContext().getRackHistoryForms()), batchErrors, null, racksExtraContext);
+            }
+
+/*            if (newForms.getNewCagesForm() != null)
             {
                 extraContext.put("cagesExtraContext", newForms.getNewCagesForm().getExtraContext());
                 cagesQus.insertRows(user, container, convertToMapList(newForms.getNewCagesForm().getCagesForm()), batchErrors, null, extraContext);
@@ -443,11 +461,11 @@ public class CageUIManager
             if (newForms.getPrevRacksForm() != null)
             {
                 racksQus.updateRows(user, container, convertToMapList(newForms.getPrevRacksForm()), null, batchErrors, null, extraContext);
-            }
+            }*/
 
             if (newForms.getNewGhostCagesForm() != null)
             {
-                ghostCagesQus.insertRows(user, container, convertToMapList(newForms.getNewGhostCagesForm()), batchErrors, null, extraContext);
+                ghostCagesQus.insertRows(user, container, convertToMapList(newForms.getNewGhostCagesForm()), batchErrors, null, null);
             }
 
             if (batchErrors.hasErrors())
@@ -1198,15 +1216,18 @@ public class CageUIManager
 
             // Handle layout history
             ArrayList<LayoutHistoryForm> layoutForms = new ArrayList<>();
-            ArrayList<RacksForm> racksToInsertList = new ArrayList<>();
-            ArrayList<CagesForm> cagesToInsertList = new ArrayList<>();
+            //ArrayList<RacksForm> racksToInsertList = new ArrayList<>();
+            //ArrayList<CagesForm> cagesToInsertList = new ArrayList<>();
             ArrayList<GhostCagesForm> ghostCagesToInsertList = new ArrayList<>();
             Map<String,Map<String, Object>> cagesExtraContextMap = new HashMap<>();
-            ArrayList<RacksForm> racksToUpdateList = new ArrayList<>();
-            ArrayList<CagesForm> cagesToUpdateList = new ArrayList<>();
+            //ArrayList<RacksForm> racksToUpdateList = new ArrayList<>();
+            //ArrayList<CagesForm> cagesToUpdateList = new ArrayList<>();
             Map<String,Map<String, Object>> prevCagesExtraContextMap = new HashMap<>();
-            CagesFormWithContext cagesFormWithContext = new CagesFormWithContext();
-            CagesFormWithContext prevCagesFormWithContext = new CagesFormWithContext();
+            CageHistoryFormWithContext cageHistoryFormWithContext = new CageHistoryFormWithContext();
+            RackHistoryFormWithContext rackHistoryFormWithContext = new RackHistoryFormWithContext();
+            ArrayList<RackHistoryForm> rackHistoryToInsertList = new ArrayList<>();
+            Map<String,Map<String, Object>> racksExtraContextMap = new HashMap<>();
+            ArrayList<CageHistoryForm> cageHistoryToInsertList = new ArrayList<>();
 
             // Gets a list of racks in room before this save, compare with new racks,
             // set old racks to null room since they were taken out.
@@ -1242,13 +1263,19 @@ public class CageUIManager
                     if (rack.getIsNew() && !rack.getType().isDefault())
                     {
                         // This is a new real rack - add to racks table
-                        RacksForm racksForm = new RacksForm();
-                        racksForm.setRackId(rack.getItemId());
-                        racksForm.setRackType(rack.getType().getRowId());
-                        racksForm.setRoom(this.room.getName());
-                        racksForm.setObjectId(UUID.randomUUID().toString().toUpperCase());
+                        RackHistoryForm rackHistoryForm = new RackHistoryForm();
+                        String newRackObjId = UUID.randomUUID().toString().toUpperCase();
+                        Map<String, Object> racksExtraContext = new HashMap<>();
 
-                        racksToInsertList.add(racksForm);
+                        rackHistoryForm.setHistoryId(historyId);
+                        rackHistoryForm.setRoom(this.room.getName());
+                        rackHistoryForm.setObjectId(newRackObjId);
+
+                        racksExtraContext.put("rackId", rack.getItemId());
+                        racksExtraContext.put("rackType", rack.getType().getRowId());
+
+                        racksExtraContextMap.put(newRackObjId, racksExtraContext);
+                        rackHistoryToInsertList.add(rackHistoryForm);
 
                         // Get cage dimensions from rack_types table
                         RackTypesForm rackType = getRackType(rack.getType().getRowId());
@@ -1257,24 +1284,24 @@ public class CageUIManager
                             // Add cages to cages table
                             for (Cage cage : rack.getCages())
                             {
-                                CagesForm cagesForm = new CagesForm();
-                                Map<String, Object> extraContextMap = new HashMap<>();
-
+                                CageHistoryForm newCageHistory = new CageHistoryForm();
+                                Map<String, Object> cageExtraContext = new HashMap<>();
                                 Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
-                                cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
-                                cagesForm.setRack(racksForm.getObjectId());
-                                cagesForm.setObjectId(cage.getObjectId());
-                                cagesForm.setPositionId(cage.getPositionId());
-                                cagesForm.setLength(cageDims.get("length"));
-                                cagesForm.setWidth(cageDims.get("width"));
-                                cagesForm.setHeight(cageDims.get("height"));
-                                cagesForm.setSqft(cageDims.get("sqft"));
 
-                                extraContextMap.put("groupRotation", rackGroup.getRotation());
-                                extraContextMap.put("rackGroup", rackGroup.getGroupId());
+                                newCageHistory.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
+                                newCageHistory.setCage(cage.getObjectId());
+                                newCageHistory.setGroupRotation(rackGroup.getRotation());
+                                newCageHistory.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
+                                newCageHistory.setLength(cageDims.get("length"));
+                                newCageHistory.setWidth(cageDims.get("width"));
+                                newCageHistory.setHeight(cageDims.get("height"));
+                                newCageHistory.setSqft(cageDims.get("sqft"));
 
-                                cagesToInsertList.add(cagesForm);
-                                cagesExtraContextMap.put(cage.getObjectId(),extraContextMap);
+                                cageExtraContext.put("rack", newRackObjId);
+                                cageExtraContext.put("positionId", cage.getPositionId());
+
+                                cagesExtraContextMap.put(cage.getObjectId(), cageExtraContext);
+                                cageHistoryToInsertList.add(newCageHistory);
                             }
                         }
                     }
@@ -1282,15 +1309,16 @@ public class CageUIManager
                     {
                         // This is an existing real rack that needs to be updated
                         // Fetch previous rack data
-                        RacksForm rackUpdateForm = getRackForm(rack.getObjectId());
-                        rackUpdateForm.setRoom(this.room.getName());
+                        RackHistoryForm newRackHistory = new RackHistoryForm();
+
+                        newRackHistory.setObjectId(rack.getObjectId());
+                        newRackHistory.setRoom(this.room.getName());
+                        newRackHistory.setHistoryId(historyId);
+                        rackHistoryToInsertList.add(newRackHistory);
 
                         // Remove the racks in the before list if they appear in the current room. This will give a final list
                         // of racks that were removed. (appears in before but not in new)
                         racksInRoomBeforeList.removeIf(rackBefore -> rackBefore.getObjectId().equals(rack.getObjectId()));
-
-                        // Add to previous racks forms list
-                        racksToUpdateList.add(rackUpdateForm);
 
                         // Get cage dimensions from rack_types table for existing rack
                         RackTypesForm rackType = getRackType(rack.getType().getRowId());
@@ -1299,20 +1327,37 @@ public class CageUIManager
                             // Update existing cages with new data
                             for (Cage cage : rack.getCages())
                             {
-                                Map<String, Object> extraContextMap = new HashMap<>();
-                                CagesForm prevCagesForm = getCageForm(cage.getObjectId());
+                                Map<String, Object> cageExtraContext = new HashMap<>();
+                                CageHistoryForm newCageHistory = new CageHistoryForm();
+                                //CagesForm prevCagesForm = getCageForm(cage.getObjectId());
                                 Map<String, Double> cageDims = this.cageDims.get(cage.getCageNum());
 
-                                if(prevCagesForm != null) {
+                                newCageHistory.setHistoryId(historyId);
+                                newCageHistory.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
+                                newCageHistory.setCage(cage.getObjectId());
+                                newCageHistory.setGroupRotation(rackGroup.getRotation());
+                                newCageHistory.setRackGroup(findLastNumberAfterDash(rackGroup.getGroupId()));
+                                newCageHistory.setLength(cageDims.get("length"));
+                                newCageHistory.setWidth(cageDims.get("width"));
+                                newCageHistory.setHeight(cageDims.get("height"));
+                                newCageHistory.setSqft(cageDims.get("sqft"));
+
+                                cageExtraContext.put("rack", rack.getObjectId());
+                                cageExtraContext.put("positionId", cage.getPositionId());
+
+                                cagesExtraContextMap.put(cage.getObjectId(), cageExtraContext);
+                                cageHistoryToInsertList.add(newCageHistory);
+
+                                /*if(prevCagesForm != null) {
                                     prevCagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
                                     prevCagesForm.setHeight(cageDims.get("height"));
                                     prevCagesForm.setWidth(cageDims.get("width"));
                                     prevCagesForm.setLength(cageDims.get("length"));
                                     prevCagesForm.setSqft(cageDims.get("sqft"));
 
-                                    extraContextMap.put("groupRotation", rackGroup.getRotation());
-                                    extraContextMap.put("rackGroup", rackGroup.getGroupId());
-                                    prevCagesExtraContextMap.put(cage.getObjectId(),extraContextMap);
+                                    cageExtraContextMap.put("groupRotation", rackGroup.getRotation());
+                                    cageExtraContextMap.put("rackGroup", rackGroup.getGroupId());
+                                    prevCagesExtraContextMap.put(cage.getObjectId(),cageExtraContextMap);
                                     cagesToUpdateList.add(prevCagesForm);
                                 }else{
                                     // If rack was created in table without cages (creating rack outside of editor)
@@ -1330,23 +1375,29 @@ public class CageUIManager
                                     extraContextMap.put("rackGroup", rackGroup.getGroupId());
 
                                     cagesToInsertList.add(cagesForm);
-                                    cagesExtraContextMap.put(cage.getObjectId(),extraContextMap);
-                                }
+                                    cagesExtraContextMap.put(cage.getObjectId(), extraContextMap);
+                                }*/
                             }
                         }
                     }
                 }
             }
 
-            // if we have racks to remove.
+            // if we have racks to remove. Prepare cleanup for trigger script on rack_history.
             if(!racksInRoomBeforeList.isEmpty()){
+                Map<String, Object> racksExtraContext = new HashMap<>();
+                ArrayList<Map<String, Object>> racksToRemove = new ArrayList<>();
                 racksInRoomBeforeList.forEach(racksForm -> {
-                    racksForm.setRoom(null);
+                    Map<String, Object> rackToRemove = new HashMap<>();
+                    rackToRemove.put("objectid", racksForm.getObjectId());
                     if(this.prevRackCondition != null){
-                        racksForm.setCondition(this.prevRackCondition.getValue());
+                        rackToRemove.put("prevCondition", this.prevRackCondition.getValue());
                     }
-                    racksToUpdateList.add(racksForm);
+                    racksToRemove.add(rackToRemove);
                 });
+                racksExtraContext.put("racksToRemoveFromRoom", racksToRemove);
+                racksExtraContextMap.put("racksToRemoveFromRoom", racksExtraContext);
+
             }
 
             // Process cages in this rack for layout history
@@ -1389,15 +1440,18 @@ public class CageUIManager
                     layoutForms.add(form);
                 }
             }
-            cagesFormWithContext.setCagesForm(cagesToInsertList);
-            cagesFormWithContext.setExtraContext(cagesExtraContextMap);
-            prevCagesFormWithContext.setCagesForm(cagesToUpdateList);
-            prevCagesFormWithContext.setExtraContext(prevCagesExtraContextMap);
-
+            cageHistoryFormWithContext.setCageHistoryForm(cageHistoryToInsertList);
+            cageHistoryFormWithContext.setExtraContext(cagesExtraContextMap);
+            rackHistoryFormWithContext.setRackHistoryForms(rackHistoryToInsertList);
+            rackHistoryFormWithContext.setExtraContext(racksExtraContextMap);
+/*
             bundledForms.setNewRacksForm(racksToInsertList);
-            bundledForms.setNewCagesForm(cagesFormWithContext);
+            bundledForms.setCageHistoryForm(cagesFormWithContext);
             bundledForms.setPrevRacksForm(racksToUpdateList);
-            bundledForms.setPrevCagesForm(prevCagesFormWithContext);
+            bundledForms.setPrevCagesForm(prevCagesFormWithContext);*/
+            bundledForms.setCageHistoryFormWithContext(cageHistoryFormWithContext);
+            bundledForms.setRackHistoryFormWithContext(rackHistoryFormWithContext);
+
             bundledForms.setLayoutHistoryForm(layoutForms);
             bundledForms.setNewGhostCagesForm(ghostCagesToInsertList);
 

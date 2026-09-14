@@ -23,13 +23,10 @@ var CageUI = require("cageui/CageUI").CageUI;
 function onUpsert(helper, scriptErrors, row){
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
 
-    console.log("helper: ", helper);
-
-    if (this.extraContext['history_id'] != null && this.extraContext['cagesExtraContext'][row.objectid]) {
-        console.log("extraContext: ", this.extraContext);
+    if (this.extraContext['cagesExtraContext'][row.cage] && this.extraContext['QCState'] === 1) {
 
         //add any errors that are returned to the page
-        let javaErrors = CageUI.Utils.getJavaHelper().updateCageHistory(row, this.extraContext['history_id'], this.extraContext['cagesExtraContext'][row.objectid]);
+        let javaErrors = CageUI.Utils.getJavaHelper().updateCages(row, this.extraContext['cagesExtraContext'][row.cage]);
         if (javaErrors) {
             for (let i = 0; i < javaErrors.length; i++) {
                 let error = javaErrors[i];
@@ -38,5 +35,4 @@ function onUpsert(helper, scriptErrors, row){
             }
         }
     }
-
 }

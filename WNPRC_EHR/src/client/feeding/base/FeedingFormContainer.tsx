@@ -25,7 +25,7 @@ import SubmitModal from "../../components/SubmitModal";
 import {
   getAnimalIdsFromLocation,
   groupCommands,
-  lookupAnimalInfo,
+  lookupAnimalStatuses,
   saveRowsDirect,
   setupJsonData,
   sleep,
@@ -142,7 +142,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
 
   const validate = () => {
     return new Promise((resolve, reject) => {
-      let promises = [];
+      let idsToLookUp = [];
       try
       {
         for (let record of formData)
@@ -161,34 +161,32 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           }
           else
           {
-            promises.push(lookupAnimalInfo(record["Id"]["value"]));
+            idsToLookUp.push(record["Id"]["value"]);
           }
         }
       } catch(err) {
            console.log(JSON.stringify(err));
         }
-      Promise.all(promises).then((results) => {
-
-        try
-        {
-          for (let result of results)
-          {
-            if (result["calculated_status"] == "Dead")
-            {
-              setErrorTextExternal("Cannot update dead animal record: " + result["Id"]);
-              resolve(false);
-            }
-          }
-        } catch (err) {
-          console.log(JSON.stringify(err));
+      lookupAnimalStatuses(idsToLookUp).then((statuses) => {
+        const missing = idsToLookUp.filter(
+          (id) => !statuses.has(String(id).toLowerCase())
+        );
+        if (missing.length > 0) {
+          setErrorTextExternal("One or more animals not found. Unable to submit records.")
+          resolve(false);
+          return;
+        }
+        const dead = idsToLookUp.find(
+          (id) => statuses.get(String(id).toLowerCase()) == "Dead"
+        );
+        if (dead !== undefined) {
+          setErrorTextExternal("Cannot update dead animal record: " + dead);
+          resolve(false);
+          return;
         }
         resolve(true);
       }).catch((d)=>{
-        if (d.rows.length == 0){
-          setErrorTextExternal("One or more animals not found. Unable to submit records.")
-        } else {
-          setErrorTextExternal("Unknown error. Unable to submit records.")
-        }
+        setErrorTextExternal("Unknown error. Unable to submit records.")
         console.log(d);
         resolve(false);
       });

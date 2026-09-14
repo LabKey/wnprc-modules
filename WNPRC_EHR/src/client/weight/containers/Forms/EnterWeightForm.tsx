@@ -123,6 +123,18 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
 
 
+  const idTimerRef = useRef<any>(null);
+  const currentAnimalIdRef = useRef<string>(animalid);
+  currentAnimalIdRef.current = animalid;
+
+  useEffect(() => {
+    return () => {
+      if (idTimerRef.current) {
+        clearTimeout(idTimerRef.current);
+      }
+    };
+  }, []);
+
   const startSessionTimer = () => {
     if (isRecording)
       return;
@@ -130,11 +142,96 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     setStartTimeInAppContext(new Date());
   }
 
+  const fetchAnimalInfo = (idToFetch: string): void => {
+    const trimmedId = idToFetch ? idToFetch.trim() : "";
+    if (trimmedId === "") {
+      setAnimalError("Required");
+      setAnyErrors(true);
+      setAnimalInfo(null);
+      setAnimalInfoState("waiting");
+      return;
+    }
+
+    if (animalInfo != null && trimmedId.toLowerCase() === animalInfo.Id?.toLowerCase()) {
+      liftUpAnimalInfo(animalInfo);
+      setAnimalInfoState("loading-success");
+      setAnimalError("");
+      return;
+    }
+
+    //need to show loading spinner
+    setAnimalInfoState("loading");
+
+    let config: ConfigProps = {
+      schemaName: "study",
+      queryName: "demographics",
+      sort: "-date",
+      filterArray: [
+        Filter.create("Id", trimmedId, Filter.Types.EQUAL)
+      ]
+    };
+    labkeyActionSelectWithPromise(config).then(data => {
+      if (currentAnimalIdRef.current?.toLowerCase() !== trimmedId.toLowerCase()) {
+        return;
+      }
+      //cache animal info
+      if (data["rows"] && data["rows"][0]) {
+        setAnimalInfo({...data["rows"][0]});
+        setPrevWeight(data["rows"][0]["Id/MostRecentWeight/MostRecentWeight"]);
+        setAnimalInfoState("loading-success");
+        validateItems("animalid", trimmedId);
+        setAnimalError("");
+      } else {
+        //TODO propagate up animal not found issue?
+        setAnimalInfoState("loading-unsuccess");
+        setAnimalError("Animal Not Found");
+        validateItems("animalid", trimmedId);
+      }
+    }).catch(() => {
+      if (currentAnimalIdRef.current?.toLowerCase() !== trimmedId.toLowerCase()) {
+        return;
+      }
+      setAnimalInfoState("loading-unsuccess");
+      setAnimalError("Animal Not Found");
+    });
+  };
+
   const handleChange = (e: any) => {
     let target = e.target as HTMLInputElement;
     liftUpVal(target.name, target.value, index);
     startSessionTimer();
-    validateItems(e.target.name, e.target.value);
+    validateItems(target.name, target.value);
+
+    if (target.name === "animalid") {
+      if (idTimerRef.current) {
+        clearTimeout(idTimerRef.current);
+      }
+      const val = target.value;
+      if (!val || val.trim() === "") {
+        setAnimalError("Required");
+        setAnimalInfo(null);
+        setAnimalInfoState("waiting");
+      } else {
+        idTimerRef.current = setTimeout(() => {
+          fetchAnimalInfo(val);
+        }, 500);
+      }
+    }
+  };
+
+  const handleAnimalIdBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (idTimerRef.current) {
+      clearTimeout(idTimerRef.current);
+    }
+    const val = e.target.value;
+    if (!val || val.trim() === "") {
+      setAnimalError("Required");
+      setAnyErrors(true);
+      setAnimalInfo(null);
+      setAnimalInfoState("waiting");
+    } else {
+      fetchAnimalInfo(val);
+    }
   };
 
   const handleRestraintChange = (val: number) => {
@@ -154,60 +251,20 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     }
   };
 
-  const getAnimalInfo = (e: React.FormEvent<EventTarget>): void => {
-    let target = e.target as HTMLInputElement;
-    if (target.name == "animalid" && e.nativeEvent.type != "focusin") {
-      if (target.value == "") {
-        setAnimalError("Required");
-        setAnyErrors(true);
-        return;
-      } else {
-        setAnimalError("");
-        return;
-      }
-    }
-    if (target.value == "" && e.nativeEvent.type == "blur" && target.name=="animalid") {
-      setAnimalError("Required");
-      return;
-    }
-
-    if (target.value == "" && target.name=="animalid") {
-      return;
-    }
-
-    //issue when cacheing this... if animalId is diff than prev
-    if (animalInfo != null && animalid === animalInfo.Id) {
-      liftUpAnimalInfo(animalInfo);
-      setAnimalInfoState("loading-success");
-      return;
-    }
-
-    //need to show loading spinner
-    setAnimalInfoState("loading");
-
-    let config: ConfigProps = {
-      schemaName: "study",
-      queryName: "demographics",
-      sort: "-date",
-      filterArray: [
-        Filter.create("Id", animalid, Filter.Types.EQUAL)
-      ]
-    };
-    labkeyActionSelectWithPromise(config).then(data => {
-      //cache animal info
-      if (data["rows"][0]) {
-        setAnimalInfo({...data["rows"][0]});
-        setPrevWeight(data["rows"][0]["Id/MostRecentWeight/MostRecentWeight"]);
+  const getAnimalInfo = (e?: React.FormEvent<EventTarget>): void => {
+    if (animalid && animalid.trim() !== "") {
+      if (animalInfo != null && animalid.toLowerCase() === animalInfo.Id?.toLowerCase()) {
+        liftUpAnimalInfo(animalInfo);
         setAnimalInfoState("loading-success");
-        validateItems("animalid", animalid);
-        setAnimalError("");
       } else {
-        //TODO propagate up animal not found issue?
-        setAnimalInfoState("loading-unsuccess");
-        setAnimalError("Animal Not Found");
-        validateItems("animalid", animalid)
+        if (idTimerRef.current) {
+          clearTimeout(idTimerRef.current);
+        }
+        fetchAnimalInfo(animalid);
       }
-    });
+    } else if (animalInfo) {
+      liftUpAnimalInfo(animalInfo);
+    }
   };
 
   const checkWeights = (e: React.FormEvent<HTMLInputElement>) => {
@@ -249,7 +306,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
             className="form-control"
             value={animalid.toLowerCase()}
             onChange={handleChange}
-            onBlur={getAnimalInfo}
+            onBlur={handleAnimalIdBlur}
             onFocus={getAnimalInfo}
             required
             autoFocus

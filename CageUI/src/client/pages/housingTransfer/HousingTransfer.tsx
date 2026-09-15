@@ -59,7 +59,7 @@ export const HousingTransfer: FC = () => {
         const firstRoom: string = ActionURL.getParameter('room');
         const firstCages: string[] = ActionURL.getParameterArray('cages');
         const prevFormId: string = ActionURL.getParameter('lsid');
-        const housingTransferId: string = ActionURL.getParameter('historyId');
+        const layoutChangeId: string = ActionURL.getParameter('historyId'); // did the housing transfer come from a layout change?
         if (prevFormId) {
             setIsLoading(true);
             createPrevHousingForm(prevFormId)

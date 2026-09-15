@@ -1564,7 +1564,7 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];
         }
-        result = {success: layoutSave.success, roomName: roomName, reason: errors};
+        result = {success: layoutSave.success, roomName: roomName, reason: errors, historyid: layoutSave.historyid};
     }
     catch (e) {
         const errors = Array.isArray(e.errors) ? e.errors : [e.errors];

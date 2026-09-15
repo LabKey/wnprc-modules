@@ -28,6 +28,7 @@ import { HousingDataGrid } from './HousingDataGrid';
 import { LoadingScreen } from '../LoadingScreen';
 import { fetchConditionCodes } from '../../api/popularQueries';
 import { canEditConditionPermission } from '../../utils/homeHelpers';
+import { LayoutErrors } from '../LayoutErrors';
 
 interface HousingFormProps {
     user: Security.GetUserPermissionsResponse;
@@ -49,6 +50,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     const [reasonOptions, setReasonOptions] = useState<Option<string>[]>(null);
     const [autoConditions, setAutoConditions] = useState<boolean>(true);
     const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [errors, setErrors] = useState<string[]>([]);
 
     useEffect(() => {
         console.log("Data: ", animalsByRoom);
@@ -359,6 +361,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [allAnimals]);
 
     const handleSubmit = useCallback(() => {
+        setErrors([]);
+        setIsSaving(true);
         let prevFormId;
         if(prevForm){
              prevFormId = ActionURL.getParameter('lsid');
@@ -372,14 +376,33 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     window.location.href = ActionURL.buildURL(ActionURL.getController(), 'home', ActionURL.getContainer());
                 }
             }else{
-                alert('Housing Transfer Error');
+                const resData = res as any;
+                if (resData?.errors && Array.isArray(resData.errors) && resData.errors.length > 0) {
+                    setErrors(resData.errors.map((e: any) => (typeof e === 'string' ? e : e.msg || e.message || JSON.stringify(e))));
+                } else if (resData?.reason) {
+                    setErrors(Array.isArray(resData.reason) ? resData.reason : [resData.reason]);
+                } else if (resData?.message) {
+                    setErrors([resData.message]);
+                } else {
+                    setErrors(['Housing Transfer Error']);
+                }
             }
             setIsSaving(false);
         }).catch(err => {
-            alert(`Error saving form: ${err}`);
+            if (err?.errors && Array.isArray(err.errors) && err.errors.length > 0) {
+                setErrors(err.errors.map((e: any) => (typeof e === 'string' ? e : e.msg || e.message || JSON.stringify(e))));
+            } else if (err?.exception) {
+                setErrors([err.exception]);
+            } else if (err?.message) {
+                setErrors([err.message]);
+            } else if (typeof err === 'string') {
+                setErrors([err]);
+            } else {
+                setErrors([`Error saving form: ${err}`]);
+            }
             setIsSaving(false);
         });
-    }, [allAnimals]);
+    }, [allAnimals, prevForm, layoutChangeId]);
 
     const availableCenterAnimals = useMemo(() => {
         const addedAnimalIds = new Set(allAnimals.map(a => a.id));
@@ -486,12 +509,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     <button
                         className="btn btn-success"
                         disabled={!isFormValid || isSaving}
-                        onClick={() => {setIsSaving(true); handleSubmit();}}
+                        onClick={() => {setErrors([]); setIsSaving(true); handleSubmit();}}
                     >
                         Submit
                     </button>
                 </div>
             )}
+            {errors.length > 0 && <LayoutErrors errors={errors} />}
         </div>
     );
 }

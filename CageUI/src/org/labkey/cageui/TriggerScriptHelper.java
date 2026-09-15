@@ -155,7 +155,7 @@ public class TriggerScriptHelper
         return container;
     }
 
-    public List<Map<String, String>> removeRacksFromRoom(final ArrayList<Map<String, Object>> racksToRemove) {
+    public List<Map<String, String>> removeRacksFromRoom(final List<Map<String, Object>> racksToRemove) {
         List<Map<String, String>> errorStrings = new ArrayList<>();
         ArrayList<RacksForm> rackFormsToRemove = new ArrayList<>();
 
@@ -176,6 +176,8 @@ public class TriggerScriptHelper
 
         return errorStrings;
     }
+
+
     /*
         TODO on updateRacks.
 

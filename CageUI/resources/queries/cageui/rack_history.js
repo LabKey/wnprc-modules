@@ -38,11 +38,19 @@ function onUpsert(helper, scriptErrors, row){
 
 function onComplete(event, errors, helper){
     var racksToRemove = this.extraContext["racksExtraContext"] &&
-            this.extraContext["racksExtraContext"]["racksToRemove"] &&
-            this.extraContext["racksExtraContext"]["racksToRemove"]["racksToRemove"] || [];
+            this.extraContext["racksExtraContext"]["racksToRemoveFromRoom"] &&
+            this.extraContext["racksExtraContext"]["racksToRemoveFromRoom"]["racksToRemoveFromRoom"] || {};
 
-    if(racksToRemove.length > 0){
-        let javaErrors = CageUI.Utils.getJavaHelper().removeRacksFromRoom(racksToRemove);
+    console.log("Remove Racks: ", racksToRemove, this.extraContext);
+
+    if(Object.keys(racksToRemove).length > 0){
+        let racksToRemoveArray = [];
+        for (let key in racksToRemove) {
+            if (racksToRemove.hasOwnProperty(key)) {
+                racksToRemoveArray.push(racksToRemove[key]);
+            }
+        }
+        let javaErrors = CageUI.Utils.getJavaHelper().removeRacksFromRoom(racksToRemoveArray);
         if (javaErrors) {
             for (let i = 0; i < javaErrors.length; i++) {
                 let error = javaErrors[i];

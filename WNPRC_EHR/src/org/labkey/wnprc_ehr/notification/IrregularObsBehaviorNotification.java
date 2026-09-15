@@ -204,11 +204,12 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                 String behaviorCode = behaviorCodesArray[i] != null ? behaviorCodesArray[i].trim() : null;
                 filter.addCondition(FieldKey.fromString("value"), behaviorCode, CompareType.EQUAL);
                 TableSelector behaviorCodesTableSelector = new TableSelector(behaviorCodesTableInfo, filter, null);
-                Results results = behaviorCodesTableSelector.getResults();
-                if (results.next()) {
-                    behaviorTitles.append((String) results.getRowMap().get("title"));
-                    if (i + 1 < behaviorCodesArray.length) {
-                        behaviorTitles.append(", ");
+                try (Results results = behaviorCodesTableSelector.getResults()) {
+                    if (results.next()) {
+                        behaviorTitles.append((String) results.getRowMap().get("title"));
+                        if (i + 1 < behaviorCodesArray.length) {
+                            behaviorTitles.append(", ");
+                        }
                     }
                 }
             }

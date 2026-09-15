@@ -319,13 +319,20 @@ public class CageUIController extends SpringActionController
     {
         ArrayList<HousingTransferData> housingTransferData;
 
-        String prevFormLsid;
+        String prevFormLsid = null;
+        String layoutChangeId = null;
 
         public String getPrevFormLsid(){
             return this.prevFormLsid;
         }
         public void setPrevFormLsid(String lsid) {
             this.prevFormLsid = lsid;
+        }
+        public String getLayoutChangeId(){
+            return this.layoutChangeId;
+        }
+        public void setLayoutChangeId(String layoutChangeId) {
+            this.layoutChangeId = layoutChangeId;
         }
         public ArrayList<HousingTransferData>  getHousingTransferData()
         {
@@ -397,6 +404,11 @@ public class CageUIController extends SpringActionController
             if (json.has("prevFormLsid")) {
                 prevFormLsid = json.getString("prevFormLsid");
                 setPrevFormLsid(prevFormLsid);
+            }
+            String layoutChangeId = null;
+            if (json.has("layoutChangeId")) {
+                layoutChangeId = json.getString("layoutChangeId");
+                setLayoutChangeId(layoutChangeId);
             }
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -491,7 +503,7 @@ public class CageUIController extends SpringActionController
                 housingRecords.add(newTransferRecord);
             }
 
-            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer());
+            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), layoutChangeId);
         }
     }
 

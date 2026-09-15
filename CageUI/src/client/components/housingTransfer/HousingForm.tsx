@@ -31,13 +31,14 @@ import { canEditConditionPermission } from '../../utils/homeHelpers';
 
 interface HousingFormProps {
     user: Security.GetUserPermissionsResponse;
+    layoutChangeId?: string;
     prevForm?: Record<string, HousingTransferData[]>;
     currRoom?: string;
     selectedAnimals?: string[];
 }
 
 export const HousingForm: FC<HousingFormProps> = (props) => {
-    const { selectedAnimals, currRoom, user, prevForm } = props;
+    const { selectedAnimals, currRoom, user, prevForm, layoutChangeId } = props;
     const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom || 'Unassigned']: [] });
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [animalLocations, setAnimalLocations] = useState<Record<string, { room: Option<string>, cage: Option<string> }>>({});
@@ -358,16 +359,18 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [allAnimals]);
 
     const handleSubmit = useCallback(() => {
-        console.log('Submitting form...', allAnimals);
         let prevFormId;
         if(prevForm){
              prevFormId = ActionURL.getParameter('lsid');
         }
-
-        startHousingTransfer(allAnimals, prevFormId).then((res) => {
+        startHousingTransfer(allAnimals, prevFormId, layoutChangeId).then((res) => {
             if(res.success){
                 // Housing transfer complete
-                alert('Housing Transfer Success');
+                if(ActionURL.getReturnUrl()){
+                    window.location.href = ActionURL.getReturnUrl();
+                }else{
+                    window.location.href = ActionURL.buildURL(ActionURL.getController(), 'home', ActionURL.getContainer());
+                }
             }else{
                 alert('Housing Transfer Error');
             }

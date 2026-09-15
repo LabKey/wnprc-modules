@@ -238,7 +238,7 @@ public class CageUIManager
     /*
         Helper function to submit the housing transfer
      */
-    public ApiSimpleResponse submitHousingTransfer(ArrayList<HousingForm> housingRecords, ArrayList<HousingConditionRecordsForm> housingConditionRecords, Map<String, Object> taskRecord, User user, Container container) throws Exception {
+    public ApiSimpleResponse submitHousingTransfer(ArrayList<HousingForm> housingRecords, ArrayList<HousingConditionRecordsForm> housingConditionRecords, Map<String, Object> taskRecord, User user, Container container, String layoutChangeId) throws Exception {
         BatchValidationException batchErrors = new BatchValidationException();
         ApiSimpleResponse response = new ApiSimpleResponse();
 
@@ -247,9 +247,11 @@ public class CageUIManager
 
         TableInfo studyHousingTable = studySchema.getTable("housing_test");
         TableInfo cageUIHousingConditionTable = cageUISchema.getTable("housing_condition_records");
+        TableInfo cageUIAllHistoryTable = cageUISchema.getTable("all_history");
 
         QueryUpdateService studyHousingQus = studyHousingTable.getUpdateService();
         QueryUpdateService cageUIHousingConditionQus = cageUIHousingConditionTable.getUpdateService();
+        QueryUpdateService cageUIAllHistoryQus = cageUIAllHistoryTable.getUpdateService();
 
         if (studyHousingQus == null)
         {
@@ -261,12 +263,23 @@ public class CageUIManager
             throw new IllegalStateException(cageUIHousingConditionTable.getName() + " query update service");
         }
 
+        if (cageUIAllHistoryQus == null)
+        {
+            throw new IllegalStateException(cageUIAllHistoryTable.getName() + " query update service");
+        }
+
         boolean isUpdate = (taskRecord == null || taskRecord.isEmpty());
 
         try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
         {
             List<Map<String, Object>> housingMapList = convertToMapList(housingRecords);
             List<Map<String, Object>> housingCodesMapList = convertToMapList(housingConditionRecords);
+
+            if(layoutChangeId != null){
+                AllHistoryForm formToClose = getAllHistoryFromId(layoutChangeId);
+                formToClose.setQcState(1); // mark as completed
+                cageUIAllHistoryQus.updateRows(user, container, convertToMapList(formToClose), null, batchErrors, null, null);
+            }
 
             if (isUpdate) {
                 studyHousingQus.updateRows(user, container, housingMapList, null, batchErrors, null, null);
@@ -519,6 +532,19 @@ public class CageUIManager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromString("room"), room, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("end_date"), null, CompareType.ISBLANK);
+        TableSelector selector = new TableSelector(table, filter, null);
+
+        ObjectMapper mapper = JsonUtil.createDefaultMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        AllHistoryForm allHistory = mapper.convertValue(selector.getMap(), AllHistoryForm.class);
+        return allHistory;
+    }
+
+    public static AllHistoryForm getAllHistoryFromId(String historyid)
+    {
+        TableInfo table = CageUISchema.getInstance().getAllHistoryTable();
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromString("historyid"), historyid, CompareType.EQUAL);
         TableSelector selector = new TableSelector(table, filter, null);
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();

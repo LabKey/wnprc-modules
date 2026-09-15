@@ -3,7 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="housing_test" tableDbType="TABLE" useColumnOrder="true">
                 <tableUrl />
-                <insertUrl>/cageui/housingTransfer.view?lsid=${lsid}</insertUrl>
+                <insertUrl>/cageui/housingTransfer.view</insertUrl>
                 <importUrl />
                 <updateUrl>/cageui/housingTransfer.view?lsid=${lsid}</updateUrl>
                 <deleteUrl />

@@ -37,6 +37,7 @@ export const HousingTransfer: FC = () => {
     const [user, setUser] = useState<Security.GetUserPermissionsResponse>(null);
     const [firstRoom, setFirstRoom] = useState<string>();
     const [prevForm, setPrevForm] = useState<Record<string, HousingTransferData[]>>(null);
+    const [layoutId, setLayoutId] = useState<string>(null);
     const [selectedAnimals, setSelectedAnimals] = useState<string[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errors, setErrors] = useState<string[]>([]);
@@ -60,6 +61,7 @@ export const HousingTransfer: FC = () => {
         const firstCages: string[] = ActionURL.getParameterArray('cages');
         const prevFormId: string = ActionURL.getParameter('lsid');
         const layoutChangeId: string = ActionURL.getParameter('historyId'); // did the housing transfer come from a layout change?
+        setLayoutId(layoutChangeId);
         if (prevFormId) {
             setIsLoading(true);
             createPrevHousingForm(prevFormId)
@@ -120,6 +122,7 @@ export const HousingTransfer: FC = () => {
                 {user && errors.length === 0 &&
                     <>
                         <HousingForm
+                            layoutChangeId={layoutId}
                             user={user}
                             prevForm={prevForm}
                             currRoom={firstRoom}

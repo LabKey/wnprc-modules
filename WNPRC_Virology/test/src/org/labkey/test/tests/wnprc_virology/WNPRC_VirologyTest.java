@@ -31,7 +31,6 @@ import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.components.ext4.Window;
@@ -64,7 +63,7 @@ import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.util.PermissionsHelper.FOLDER_ADMIN_ROLE;
 import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 
-@Category({EHR.class, WNPRC_EHR.class})
+@Category({WNPRC_EHR.class})
 public class WNPRC_VirologyTest extends ViralLoadAssayTest
 {
 

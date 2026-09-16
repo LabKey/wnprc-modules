@@ -1,15 +1,5 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "jsx": "react",
-    "sourceMap": false,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "types": [] // don't implicitly include any @types, only those included via import
-  },
-  "exclude": [
-    "node_modules",
-    "resources"
-  ]
+  "extends": "./node_modules/@labkey/build/webpack/tsconfig.json",
+  "include": ["src/client/**/*"],
+  "exclude": ["node_modules"],
 }

@@ -21,6 +21,7 @@ package org.labkey.cageui;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
@@ -29,9 +30,13 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
@@ -41,7 +46,10 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
+import org.labkey.api.security.ValidEmail;
 import org.labkey.api.util.JsonUtil;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.AllHistoryForm;
 import org.labkey.cageui.action.BundledForms;
@@ -92,8 +100,12 @@ import java.util.stream.Collectors;
 public class CageUIManager
 {
     private static final CageUIManager _instance = new CageUIManager();
+    public static final String EHRAdminUserPropName = "EHRAdminUser";
 
     private final Cache<String, Map<String, Map<String, Map<String, Object>>>> _cache;
+
+    private static final Logger _log = LogHelper.getLogger(CageUIManager.class, "Details of comparing data types with expectations, DB status");
+
 
     private CageUIManager()
     {
@@ -109,6 +121,35 @@ public class CageUIManager
     public Cache<String, Map<String, Map<String, Map<String, Object>>>> getCache()
     {
         return _cache;
+    }
+
+    public User getEHRUser(Container c)
+    {
+        return getEHRUser(c, true);
+    }
+
+
+    public User getEHRUser(Container c, boolean logOnError)
+    {
+        try
+        {
+            Module ehr = ModuleLoader.getInstance().getModule(CageUIModule.NAME);
+            ModuleProperty mp = ehr.getModuleProperties().get(CageUIManager.EHRAdminUserPropName);
+            String emailAddress = PropertyManager.getCoalescedProperty(PropertyManager.SHARED_USER, c, mp.getCategory(), CageUIManager.EHRAdminUserPropName);
+            if (emailAddress == null)
+            {
+                if (logOnError)
+                    _log.warn("Attempted to access EHR email module property from container: " + (c == null ? null : c.getPath()) + ", but it was null.  Some code may not work as expected.", new Exception());
+                return null;
+            }
+
+            ValidEmail email = new ValidEmail(emailAddress);
+            return UserManager.getUser(email);
+        }
+        catch (ValidEmail.InvalidEmailException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     public Map<String, Object> createHousingTaskRecord(String taskId, User user)

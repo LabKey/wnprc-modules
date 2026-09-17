@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RoomHistoryForm
 {
+    private int _rowid;
     private int _scale;
     @JsonProperty("border_width")
     private int _borderWidth;
@@ -68,5 +69,15 @@ public class RoomHistoryForm
     public void setHistoryId(String historyId)
     {
         _historyId = historyId;
+    }
+
+    public int getRowid()
+    {
+        return _rowid;
+    }
+
+    public void setRowid(int rowid)
+    {
+        _rowid = rowid;
     }
 }

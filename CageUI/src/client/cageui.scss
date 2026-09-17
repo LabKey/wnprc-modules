@@ -2338,3 +2338,306 @@ Multi Dropdown Css
   width: 100%;
   overflow: hidden;
 }
+
+/* CageUI Admin Settings Page */
+.cageui-admin-container {
+  max-width: 960px;
+  margin: 0;
+  padding: 10px 0 60px 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1e293b;
+
+  .cageui-admin-header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .header-title-group {
+      h1 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      p {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0;
+      }
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+  }
+
+  .admin-errors-container {
+    margin-bottom: 20px;
+  }
+
+  .cageui-admin-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+    overflow: hidden;
+
+    .card-header {
+      padding: 16px 24px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      h2 {
+        font-size: 17px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+      }
+    }
+
+    .card-body {
+      padding: 12px 24px;
+    }
+  }
+
+  .admin-settings-list {
+    display: flex;
+    flex-direction: column;
+
+    .admin-setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #f1f5f9;
+      gap: 24px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .admin-setting-info {
+        flex: 1;
+
+        .setting-title-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 6px;
+
+          .setting-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+          }
+
+          .setting-tag {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #475569;
+          }
+        }
+
+        .setting-description {
+          font-size: 14px;
+          color: #64748b;
+          line-height: 1.5;
+          margin: 0;
+        }
+      }
+
+      .admin-setting-control {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+
+        .control-status-label {
+          font-size: 13px;
+          font-weight: 600;
+          min-width: 58px;
+          text-align: right;
+          color: #64748b;
+
+          &.active {
+            color: #16a34a;
+          }
+        }
+      }
+    }
+  }
+
+  /* Modern Switch Toggle */
+  .switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+
+    input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+
+      &:checked + .slider {
+        background-color: #10b981;
+      }
+
+      &:focus + .slider {
+        box-shadow: 0 0 1px #10b981;
+      }
+
+      &:checked + .slider:before {
+        transform: translateX(24px);
+      }
+
+      &:disabled + .slider {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 28px;
+
+      &:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+
+  /* Action Bar */
+  .admin-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .unsaved-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #b45309;
+      font-weight: 500;
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #f59e0b;
+        animation: pulse 2s infinite;
+      }
+    }
+
+    .actions-group {
+      display: flex;
+      gap: 12px;
+      margin-left: auto;
+
+      .btn-save-admin {
+        background-color: #0284c7;
+        color: #ffffff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        &:hover:not(:disabled) {
+          background-color: #0369a1;
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(1px);
+        }
+
+        &:disabled {
+          background-color: #94a3b8;
+          cursor: not-allowed;
+        }
+      }
+
+      .btn-reset-admin {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover:not(:disabled) {
+          background-color: #e2e8f0;
+          color: #1e293b;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

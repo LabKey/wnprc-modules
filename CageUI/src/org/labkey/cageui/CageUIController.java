@@ -25,8 +25,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONString;
+import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -41,6 +43,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.JspView;
@@ -50,10 +53,12 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
+import org.labkey.cageui.action.CageUIRecordDeleteForm;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.HousingConditionRecordsForm;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.HousingForm;
+import org.labkey.cageui.dataentry.CageUIRecordDeleteRunner;
 import org.labkey.cageui.model.ConditionCode;
 import org.labkey.cageui.model.ConditionType;
 import org.labkey.cageui.model.HousingTransferData;
@@ -121,6 +126,75 @@ public class CageUIController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public static class SetRecordDeleteSettingsAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        private CageUIRecordDeleteForm _recordDeleteForm;
+
+        public CageUIRecordDeleteForm getRecordDeleteForm()
+        {
+            return _recordDeleteForm;
+        }
+
+        public void setRecordDeleteForm(CageUIRecordDeleteForm recordDeleteForm)
+        {
+            _recordDeleteForm = recordDeleteForm;
+        }
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try
+            {
+                CageUIRecordDeleteForm deleteForm = mapper.readValue(json.toString(), CageUIRecordDeleteForm.class);
+                if (deleteForm != null)
+                {
+                    setRecordDeleteForm(deleteForm);
+                }
+                else
+                {
+                    errors.reject(ERROR_MSG, "Invalid record delete settings format.");
+                }
+            }
+            catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+        }
+
+        @Override
+        public ApiResponse execute(SimpleApiJsonForm form, BindException errors)
+        {
+            CageUIRecordDeleteRunner.setProperties(getContainer(), getRecordDeleteForm().isEnabled());
+
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public static class GetRecordDeleteSettingsAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public ApiResponse execute(Object form, BindException errors)
+        {
+            Map<String, Object> ret = new HashMap<>();
+
+            ret.put("enabled", CageUIRecordDeleteRunner.isEnabled(getContainer()));
+            ret.put("success", true);
+
+            return new ApiSimpleResponse(ret);
         }
     }
 

@@ -237,3 +237,34 @@ export function startHousingTransfer(animals: HousingTransferData[], prevFormLsi
         });
     });
 }
+
+// This function fetches the record cleanup admin settings.
+export function getRecordDeleteSettings(): Promise<{
+    enabled: boolean,
+    success?: boolean
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'getRecordDeleteSettings.api'),
+            method: 'GET',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+        });
+    });
+}
+
+// This function submits the updated record cleanup admin settings.
+export function setRecordDeleteSettings(enabled: boolean): Promise<{
+    success: boolean,
+    errors?: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'setRecordDeleteSettings.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: { enabled: enabled, isEnabled: enabled },
+        });
+    });
+}

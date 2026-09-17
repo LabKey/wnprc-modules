@@ -58,6 +58,14 @@ module.exports = {
                 'org.labkey.cageui.security.permissions.CageUIAdoptionsPermission'
             ],
             path: './src/client/pages/adoptionDataEntry'
+        },
+        {
+            name: "cageUIAdmin",
+            title: "CageUI Admin Settings",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.AdminPermission',
+            ],
+            path: './src/client/pages/cageUIAdmin'
         }
     ]
 };

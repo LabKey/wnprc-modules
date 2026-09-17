@@ -23,10 +23,12 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleContext;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.cageui.dataentry.CageUIRecordDeleteRunner;
 import org.labkey.cageui.query.CageUIUserSchema;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
@@ -75,6 +77,12 @@ public class CageUIModule extends ExtendedSimpleModule
         addController(CageUIController.NAME, CageUIController.class);
         registerRoles();
         registerPermissions();
+    }
+
+    @Override
+    protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
+    {
+        CageUIRecordDeleteRunner.schedule();
     }
 
     private void registerPermissions()

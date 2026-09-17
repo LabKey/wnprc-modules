@@ -40,7 +40,7 @@ interface HousingFormProps {
 
 export const HousingForm: FC<HousingFormProps> = (props) => {
     const { selectedAnimals, currRoom, user, prevForm, layoutChangeId } = props;
-    const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>({[currRoom || 'Unassigned']: [] });
+    const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>(currRoom ? {[currRoom]: [] } : null);
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [animalLocations, setAnimalLocations] = useState<Record<string, { room: Option<string>, cage: Option<string> }>>({});
     const [animalsByCurRoom, setAnimalsByCurRoom] = useState<Record<string, string[]>>({});
@@ -312,7 +312,11 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, []);
 
     const allAnimals = useMemo(() => {
-        return Object.values(animalsByRoom).flat();
+        if(animalsByRoom){
+            return Object.values(animalsByRoom).flat();
+        }else{
+            return [];
+        }
     }, [animalsByRoom]);
 
     const isFormValid = useMemo(() => {
@@ -476,7 +480,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     </button>
                 </div>
             )}
-            {Object.keys(animalsByRoom).map(roomLabel => (
+            {animalsByRoom && Object.keys(animalsByRoom).map(roomLabel => (
                 <HousingDataGrid
                     prevData={!!prevForm}
                     autoConditions={autoConditions}

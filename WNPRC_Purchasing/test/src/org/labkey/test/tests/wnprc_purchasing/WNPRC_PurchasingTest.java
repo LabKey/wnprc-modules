@@ -31,7 +31,6 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.dumbster.EmailRecordTable;
@@ -66,7 +65,7 @@ import static org.labkey.test.util.PermissionsHelper.PROJECT_ADMIN_ROLE;
 import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 import static org.labkey.test.util.PermissionsHelper.SUBMITTER_ROLE;
 
-@Category({EHR.class, WNPRC_EHR.class})
+@Category({WNPRC_EHR.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
 public class WNPRC_PurchasingTest extends BaseWebDriverTest
 {

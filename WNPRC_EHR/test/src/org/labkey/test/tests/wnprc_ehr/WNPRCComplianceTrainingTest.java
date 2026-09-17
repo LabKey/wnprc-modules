@@ -18,7 +18,6 @@ package org.labkey.test.tests.wnprc_ehr;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
-import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.tests.ehr.ComplianceTrainingTest;
 import org.labkey.test.util.DataRegionTable;
@@ -29,7 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@Category({EHR.class, WNPRC_EHR.class})
+@Category({WNPRC_EHR.class})
 public class WNPRCComplianceTrainingTest extends ComplianceTrainingTest
 {
     @Override

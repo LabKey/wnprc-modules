@@ -2057,19 +2057,17 @@ public class WNPRC_EHRController extends SpringActionController
         columns.add(FieldKey.fromString("taskid"));
         columns.add(FieldKey.fromString("date"));
 
-
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("objectid"), objectId);
         QueryHelper waterOrderQuery = new QueryHelper(getContainer(), getUser(), "study","waterAmount");
-        Results rs = waterOrderQuery.select(columns, filter);
-
-        List<Map<String, Object>> woRows = new ArrayList<>();
-        while (rs.next())
+        try (Results rs = waterOrderQuery.select(columns, filter))
         {
-            woRows.add(rs.getRowMap());
+            List<Map<String, Object>> woRows = new ArrayList<>();
+            while (rs.next())
+            {
+                woRows.add(rs.getRowMap());
+            }
+            return woRows;
         }
-        rs.close();
-        return woRows;
-
     }
 
     /* TODO: This is an API to clean up an inconsistency in the performed by column of study.obs dataset. Once the

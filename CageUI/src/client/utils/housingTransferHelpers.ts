@@ -295,14 +295,19 @@ export const createPrevHousingForm = async (prevFormId: string): Promise<Record<
         });
     }
 
+    const isSpecial = prevForm['condNew/special_condition'] === 'x' || !prevForm.cageNew;
+    const destCageOption = isSpecial
+        ? { value: 'Special Housing', label: 'Special Housing' }
+        : { value: prevForm.cageNew, label: prevForm['cageNew/cage_number'] };
+
     const data: HousingTransferData = {
         id: prevForm.Id,
         inDate: dayjs(prevForm.date),
         outDate: prevForm.enddate ? dayjs(prevForm.enddate) : null,
-        destinationRoom: {value: prevForm['room/rowid'], label: prevForm.room},
-        destinationCage: {value: prevForm.cageNew, label: prevForm['cageNew/cage_number']},
+        destinationRoom: { value: prevForm['room/rowid'] || prevForm.room, label: prevForm.room },
+        destinationCage: destCageOption,
         condition: conditions,
-        reasonForMove: prevForm.reason.split(',').map(item => ({value: item.trim(), label: item.trim()})),
+        reasonForMove: prevForm.reason ? prevForm.reason.split(',').map(item => ({value: item.trim(), label: item.trim()})) : [],
         project: prevForm.project,
         ejacConfirmed: prevForm.ejacConfirmed,
         remarks: prevForm.remark,

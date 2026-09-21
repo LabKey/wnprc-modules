@@ -555,15 +555,21 @@ public class CageUIController extends SpringActionController
                 newTransferRecord.setPerformedBy(record.getPerformedBy());
                 newTransferRecord.setEjacConfirmed(record.isEjacConfirmed());
 
-                if (record.getDestinationRoom().getValue().equals("No Change")) { // No change (animal stays same room and cage)
-                    newTransferRecord.setRoom(record.getCurrentRoom().getLabel());
-                    newTransferRecord.setCageNew(record.getCurrentCage().getValue());
-                }else if (record.getDestinationRoom().getValue().equals("Special Housing")){ // Special housing, we should remove animal from current room and cage
-                    newTransferRecord.setRoom(null);
+                boolean isSpecialHousing = (record.getDestinationRoom() != null && "Special Housing".equals(record.getDestinationRoom().getValue()))
+                        || (record.getDestinationRoom() != null && "Special Housing".equals(record.getDestinationRoom().getLabel()))
+                        || (record.getDestinationCage() != null && "Special Housing".equals(record.getDestinationCage().getLabel()))
+                        || (record.getDestinationCage() != null && "Special Housing".equals(record.getDestinationCage().getValue()))
+                        || (record.getDestinationCage() != null && "-1".equals(record.getDestinationCage().getValue()));
+
+                if (record.getDestinationRoom() != null && "No Change".equals(record.getDestinationRoom().getValue())) { // No change (animal stays same room and cage)
+                    newTransferRecord.setRoom(record.getCurrentRoom() != null ? record.getCurrentRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(record.getCurrentCage() != null ? record.getCurrentCage().getValue() : null);
+                } else if (isSpecialHousing) { // Special housing
+                    newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
                     newTransferRecord.setCageNew(null);
-                }else {
-                    newTransferRecord.setRoom(record.getDestinationRoom().getLabel());
-                    newTransferRecord.setCageNew(record.getDestinationCage().getValue());
+                } else {
+                    newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(record.getDestinationCage() != null ? record.getDestinationCage().getValue() : null);
                 }
 
                 HousingConditionRecordsForm populatedConditions = populateHousingConditionsStream(record.getCondition());

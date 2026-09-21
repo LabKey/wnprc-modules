@@ -32,7 +32,6 @@ import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-//import org.labkey.api.ehr.EHRService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
@@ -72,7 +71,7 @@ import java.util.stream.Collectors;
 
 public class CageUIRecordDeleteRunner implements Job
 {
-    public static final String PROPERTY_DOMAIN = "org.labkey.ehr.recorddeletion";
+    public static final String PROPERTY_DOMAIN = "org.labkey.wnprc_ehr.cageui.recorddeletion";
     public static final String ENABLED_PROP = "isEnabled";
     private static final Logger _log = LogManager.getLogger(CageUIRecordDeleteRunner.class);
     private static final int _hour = 23;
@@ -255,7 +254,6 @@ public class CageUIRecordDeleteRunner implements Job
         {
             _log.error(e.getMessage(), e);
         }
-
     }
 
     public static synchronized void schedule()

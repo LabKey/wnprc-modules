@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { ConditionCode, HousingRowMetadata, HousingTransferData } from '../../types/housingFormTypes';
+import { ConditionCode, ConditionTypes, HousingRowMetadata, HousingTransferData } from '../../types/housingFormTypes';
 import {
     DataGrid,
     GridAutosizeOptions,
@@ -30,7 +30,7 @@ import {
     useGridApiRef
 } from '@mui/x-data-grid';
 import dayjs from 'dayjs';
-import { Autocomplete, Box, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -74,6 +74,10 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
     const [canEditCondition, setCanEditCondition] = useState<boolean>(false);
     const [newAnimalId, setNewAnimalId] = useState<string>(null);
+    const [specialHousingDialogOpen, setSpecialHousingDialogOpen] = useState<boolean>(false);
+    const [specialHousingAnimalId, setSpecialHousingAnimalId] = useState<string | null>(null);
+    const [specialHousingRoomInput, setSpecialHousingRoomInput] = useState<string>('');
+    const [specialHousingPrevAnimal, setSpecialHousingPrevAnimal] = useState<HousingTransferData | null>(null);
     const [autoSizeOptions] = useState<GridAutosizeOptions>({
         includeHeaders: true,
         includeOutliers: true,
@@ -81,6 +85,60 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         outliersFactor: 1.5,
     });
     const apiRef = useGridApiRef();
+
+    const isSpecialHousing = useCallback((animal: HousingTransferData) => {
+        if (!animal) return false;
+        return animal.destinationCage?.label === 'Special Housing' || 
+               animal.destinationCage?.value === 'Special Housing' || 
+               animal.destinationRoom?.label === 'Special Housing' || 
+               animal.destinationRoom?.value === 'Special Housing' ||
+               (animal.condition && animal.condition.some(c => c.value === 'x'));
+    }, []);
+
+    const handleSpecialHousingConfirm = useCallback(() => {
+        const trimmedRoom = specialHousingRoomInput.trim();
+        if (!trimmedRoom || !specialHousingAnimalId) return;
+
+        const xCode = getCode('x', conditionCodes) || { value: 'x', label: 'x - special', type: ConditionTypes.special };
+
+        const updatedAnimals = animals.map(a => {
+            if (a.id === specialHousingAnimalId) {
+                return {
+                    ...a,
+                    destinationRoom: { label: trimmedRoom, value: trimmedRoom },
+                    destinationCage: { label: 'Special Housing', value: 'Special Housing' },
+                    condition: [xCode]
+                };
+            }
+            return a;
+        });
+
+        setRowMetadata(prev => ({
+            ...prev,
+            [specialHousingAnimalId]: {
+                ...prev[specialHousingAnimalId],
+                cageOptions: [],
+                animalsInDestinationCage: []
+            }
+        }));
+
+        onAnimalsChange(updatedAnimals);
+        setSpecialHousingDialogOpen(false);
+        setSpecialHousingAnimalId(null);
+        setSpecialHousingRoomInput('');
+        setSpecialHousingPrevAnimal(null);
+    }, [animals, conditionCodes, onAnimalsChange, specialHousingAnimalId, specialHousingRoomInput]);
+
+    const handleSpecialHousingCancel = useCallback(() => {
+        if (specialHousingPrevAnimal && specialHousingAnimalId) {
+            const updatedAnimals = animals.map(a => a.id === specialHousingAnimalId ? specialHousingPrevAnimal : a);
+            onAnimalsChange(updatedAnimals);
+        }
+        setSpecialHousingDialogOpen(false);
+        setSpecialHousingAnimalId(null);
+        setSpecialHousingRoomInput('');
+        setSpecialHousingPrevAnimal(null);
+    }, [animals, onAnimalsChange, specialHousingAnimalId, specialHousingPrevAnimal]);
 
     const filteredRoomAnimals = useMemo(() => {
         const addedAnimalIds = new Set(allAnimals.map(a => a.id));
@@ -159,18 +217,21 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
 
     /**
-     * Placeholder function for calculating condition codes based on flow chart.
+     * Function for calculating condition codes based on flow chart.
      * @param animalId The ID of the animal to calculate for
      * @param animalsInCage List of all animals (IDs) that will be in the destination cage, this includes animalId above
      */
     const calculateConditionCodes = useCallback(async (animalId: string, animalsInCage: string[], destCageId: string, reasonForMove: Option<string>[]): Promise<ConditionCode[]> => {
+        if (destCageId === 'Special Housing' || destCageId === '-1') {
+            const xCode = getCode('x', conditionCodes) || { value: 'x', label: 'x - special', type: ConditionTypes.special };
+            return [xCode];
+        }
+
         // TODO: Implement the actual flow chart logic here
         const newCond: ConditionCode[] = [];
         let pairingCode;
         // The user will finish this function.
         // For now, return a placeholder or keep existing if any.
-        console.log(`Calculating condition for ${animalId} with cage mates: ${animalsInCage.join(', ')}`);
-        //TODO calculate special housing code (x) here
 
         // Calculate pairing codes
         if(animalsInCage.length === 1){
@@ -259,6 +320,9 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const newRowMetadata: Record<string, Partial<HousingRowMetadata>> = {};
 
         const getEffectiveCageId = (animal: HousingTransferData): string | null => {
+            if (isSpecialHousing(animal)) {
+                return null;
+            }
             if (animal.destinationRoom?.label === 'No Change') {
                 return animal.currentCage?.value || null;
             }
@@ -313,6 +377,14 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         }
 
         const updatedAnimals = await Promise.all(currentAnimals.map(async (a) => {
+            if (isSpecialHousing(a)) {
+                newRowMetadata[a.id] = {
+                    animalsInDestinationCage: []
+                };
+                const xCode = getCode('x', conditionCodes) || { value: 'x', label: 'x - special', type: ConditionTypes.special };
+                return { ...a, condition: [xCode] };
+            }
+
             const cageId = getEffectiveCageId(a);
             if (cageId && cageGroups[cageId]) {
                 const cageMates = cageGroups[cageId];
@@ -360,7 +432,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         if (JSON.stringify(updatedAnimals) !== JSON.stringify(currentAnimals)) {
             onAnimalsChange(updatedAnimals);
         }
-    }, [calculateConditionCodes, onAnimalsChange, allAnimals, autoConditions]);
+    }, [calculateConditionCodes, onAnimalsChange, allAnimals, autoConditions, isSpecialHousing, conditionCodes, roomLabel]);
 
     const handleAddAnimal = useCallback(() => {
         if (!newAnimalId || newAnimalId.trim() === '') return;
@@ -409,17 +481,20 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             return updatedAnimalsState;
         }
 
-        const selectedRoom = newValue.label;
-        let cageOptions: Option<string>[] = [];
+        if (newValue.value === 'Special Housing' || newValue.label === 'Special Housing') {
+            const targetAnimal = animals.find(a => a.id === paramId);
+            const initialRoom = (targetAnimal && targetAnimal.destinationRoom?.label && targetAnimal.destinationRoom.label !== 'Special Housing')
+                ? targetAnimal.destinationRoom.label
+                : '';
+            setSpecialHousingAnimalId(paramId as string);
+            setSpecialHousingPrevAnimal(targetAnimal || null);
+            setSpecialHousingRoomInput(initialRoom);
+            setSpecialHousingDialogOpen(true);
+            return animals;
+        }
 
-        if (newValue.value === 'No Change' || newValue.value === 'Special Housing') {
-            let specialCageOption;
-            if(newValue.label === 'No Change'){
-                specialCageOption = { label: 'No Change', value: '0' };
-
-            }else{
-                specialCageOption = { label: 'Special Housing', value: '-1' };
-            }
+        if (newValue.value === 'No Change') {
+            const specialCageOption = { label: 'No Change', value: '0' };
             setRowMetadata(prev => ({
                 ...prev,
                 [paramId]: {
@@ -436,6 +511,9 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             onAnimalsChange(updatedAnimalsState);
             return updatedAnimalsState;
         }
+
+        const selectedRoom = newValue.label;
+        let cageOptions: Option<string>[] = [];
 
         if (selectedRoom) {
             const config: Query.SelectRowsOptions = {
@@ -482,7 +560,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         return updatedAnimalsState;
 
         // Update condition codes as destination cage was cleared
-    }, [animals, onAnimalsChange, updateConditionCodes]);
+    }, [animals, onAnimalsChange]);
 
     const handleRemoveAnimal = useCallback((id: string) => {
         const updatedAnimals = animals.filter(a => a.id !== id);
@@ -532,7 +610,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             updatedAnimals = await handleRoomChange(newRow.id, newRow.destinationRoom);
             finalRow = updatedAnimals.find(a => a.id === newRow.id) || newRow;
         } else if (newRow.destinationCage?.value !== oldRow.destinationCage?.value) {
-            if (newRow.destinationCage && newRow.destinationRoom?.label) {
+            if (newRow.destinationCage && newRow.destinationRoom?.label &&
+                newRow.destinationCage.value !== 'Special Housing' && 
+                newRow.destinationCage.label !== 'Special Housing' && 
+                newRow.destinationCage.value !== '0' && 
+                newRow.destinationCage.value !== '-1') {
                 fetchAnimalsInCage(newRow.destinationRoom.label, newRow.destinationCage, newRow.id);
             }
         }
@@ -562,9 +644,10 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             isRequired = true;
         } else if (field === 'remarks') {
             const reasonForMoveValues = (row.reasonForMove || []).map((r: Option<string>) => r.value);
+            const isSpecial = isSpecialHousing(row);
             isRequired = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
                 reasonForMoveValues.includes("Behavior") ||
-                row.destinationRoom?.label === 'Special Housing';
+                isSpecial;
         } else if (field === 'performedBy') {
             isRequired = true;
         } else if (field === 'project') {
@@ -585,7 +668,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         }
 
         return '';
-    }, []);
+    }, [isSpecialHousing]);
 
     const columns: GridColDef[] = useMemo<GridColDef[]>(() => [
         { field: 'id', headerName: 'ID', minWidth: 100, editable: false, display: 'flex' },
@@ -611,13 +694,20 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             flex: 1,
             minWidth: 150,
             editable: true,
-            renderEditCell: (params) => (
-                <AutoCompleteEditCell
-                    {...params}
-                    required={true}
-                    options={roomOptions}
-                />
-            ),
+            renderEditCell: (params) => {
+                const currentRow = params.row as HousingTransferData;
+                const rowRoomOptions = [...roomOptions];
+                if (currentRow.destinationRoom?.label && !rowRoomOptions.some(opt => opt.label === currentRow.destinationRoom.label)) {
+                    rowRoomOptions.splice(1, 0, { label: currentRow.destinationRoom.label, value: currentRow.destinationRoom.value || currentRow.destinationRoom.label });
+                }
+                return (
+                    <AutoCompleteEditCell
+                        {...params}
+                        required={true}
+                        options={rowRoomOptions}
+                    />
+                );
+            },
             valueFormatter: (value: Option<number>) => value?.label || '',
         },
         {
@@ -626,6 +716,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             flex: 1,
             minWidth: 100,
             editable: true,
+            isCellEditable: (params) => {
+                const isSpecial = params.row.destinationCage?.label === 'Special Housing' || params.row.destinationCage?.value === 'Special Housing';
+                const isNoChange = params.row.destinationRoom?.value === 'No Change' || params.row.destinationRoom?.label === 'No Change';
+                return !isSpecial && !isNoChange;
+            },
             renderEditCell: (params) => {
                 const metadata = rowMetadata[params.id as string];
                 const currentRow = params.row as HousingTransferData;
@@ -732,9 +827,10 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         },
         { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, editable: true, renderCell: (params: GridRenderCellParams) => {
             const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
+            const isSpecial = isSpecialHousing(params.row);
             const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
                 reasonForMoveValues.includes("Behavior") ||
-                params.row.destinationRoom?.label === 'Special Housing';
+                isSpecial;
             const isMissing = requiresRemarks && (!params.row.remarks || params.row.remarks.trim() === '');
             
             return (
@@ -751,9 +847,10 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             )},
             renderEditCell: (params) => {
                 const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
+                const isSpecial = isSpecialHousing(params.row);
                 const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
                     reasonForMoveValues.includes("Behavior") ||
-                    params.row.destinationRoom?.label === 'Special Housing';
+                    isSpecial;
                 const isMissing = requiresRemarks && (!params.value || params.value.trim() === '');
                 
                 return (
@@ -843,7 +940,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 </IconButton>
             ),
         },
-    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal, fetchAnimalsInCage, handleRoomChange, fetchProjectOptions, animals, onAnimalsChange]);
+    ], [reasonOptions, rowMetadata, roomOptions, handleCellChange, handleRemoveAnimal, fetchAnimalsInCage, handleRoomChange, fetchProjectOptions, animals, onAnimalsChange, isSpecialHousing]);
 
     const handleCellClick = useCallback((params: GridCellParams) => {
         if (params.isEditable && params.cellMode === 'view') {
@@ -940,6 +1037,48 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     hideFooter
                 />
             </Box>
+
+            <Dialog
+                open={specialHousingDialogOpen}
+                onClose={handleSpecialHousingCancel}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Special Housing Room</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                        Please enter the room for Special Housing:
+                    </Typography>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Room"
+                        fullWidth
+                        variant="standard"
+                        value={specialHousingRoomInput}
+                        onChange={(e) => setSpecialHousingRoomInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && specialHousingRoomInput.trim()) {
+                                e.preventDefault();
+                                handleSpecialHousingConfirm();
+                            }
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleSpecialHousingCancel} color="inherit">
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSpecialHousingConfirm}
+                        color="primary"
+                        variant="contained"
+                        disabled={!specialHousingRoomInput.trim()}
+                    >
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

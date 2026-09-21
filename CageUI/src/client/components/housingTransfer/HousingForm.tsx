@@ -346,8 +346,13 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 if (!animal.project) return false;
             }
 
-            // 6. remarks (required if Other, Behavior, or if Room is Special Housing)
-            if (reasonValues.includes('Other (write reason in remarks section)') || reasonValues.includes('Behavior') || animal.destinationRoom?.label === 'Special Housing') {
+            // 6. remarks (required if Other, Behavior, or if Special Housing)
+            const isSpecial = animal.destinationCage?.label === 'Special Housing' || 
+                              animal.destinationCage?.value === 'Special Housing' || 
+                              animal.destinationRoom?.label === 'Special Housing' || 
+                              animal.destinationRoom?.value === 'Special Housing' ||
+                              (animal.condition && animal.condition.some(c => c.value === 'x'));
+            if (reasonValues.includes('Other (write reason in remarks section)') || reasonValues.includes('Behavior') || isSpecial) {
                 if (!animal.remarks || animal.remarks.trim() === '') return false;
             }
 

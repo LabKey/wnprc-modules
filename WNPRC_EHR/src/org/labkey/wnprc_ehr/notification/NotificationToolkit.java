@@ -52,13 +52,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -254,6 +253,12 @@ public class NotificationToolkit {
         String emailSubject = currentNotification.getEmailSubject(currentContainer);
         String notificationLogName = currentNotification.getName();
         String emailBody = currentNotification.getMessageBodyHTML(currentContainer, currentUser);
+
+        if (emailBody == null)
+        {
+            _log.info(notificationLogName + ": Empty email body, nothing to send");
+            return;
+        }
 
         //Logs email notification attempt.
         _log.info(notificationLogName + ": sending email...");

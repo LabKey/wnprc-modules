@@ -22,3 +22,6 @@ ALTER TABLE cageui.all_history ADD COLUMN QCState INTEGER DEFAULT 1;
 ALTER TABLE cageui.all_history ALTER COLUMN end_date TYPE TIMESTAMP;
 
 ALTER TABLE cageui.all_history ALTER COLUMN start_date TYPE TIMESTAMP;
+
+insert into ehr_lookups.lookups (set_name,container,value,title,category,description)
+select setname, container, 'it' as value, 'In Transit' as title, 'special' as category, 'any' as description from ehr_lookups.lookup_sets where setname='housing_condition_codes';

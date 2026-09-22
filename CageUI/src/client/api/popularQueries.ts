@@ -21,7 +21,7 @@ import { EHRCageMods } from '../types/homeTypes';
 import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
-import { ConditionCode, HousingFormData, HousingTransferData } from '../types/housingFormTypes';
+import { ConditionCode, ConditionTypes, HousingFormData, HousingTransferData } from '../types/housingFormTypes';
 import dayjs, { Dayjs } from 'dayjs';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
@@ -198,14 +198,31 @@ export const fetchConditionCodes = async (): Promise<ConditionCode[]> => {
 
     try {
         const res = await labkeyActionSelectWithPromise(config);
-        return res.rows.map(row => ({
-            label: `${row.value} - ${row.category}`,
-            value: row.value.toString(),
-            type: row.category
-        }));
+        const codes: ConditionCode[] = res.rows.map(row => {
+            const isIT = row.value?.toString().toLowerCase() === 'it';
+            return {
+                label: isIT ? 'In Transit' : `${row.value} - ${row.category}`,
+                value: row.value.toString(),
+                type: row.category || (isIT ? ConditionTypes.special : undefined)
+            };
+        });
+        if (!codes.some(c => c.value === 'it')) {
+            codes.push({
+                label: 'In Transit',
+                value: 'it',
+                type: ConditionTypes.special
+            });
+        }
+        return codes;
     } catch (e) {
         console.error('Error fetching condition codes:', e);
-        return [];
+        return [
+            {
+                label: 'In Transit',
+                value: 'it',
+                type: ConditionTypes.special
+            }
+        ];
     }
 };
 

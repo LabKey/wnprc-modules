@@ -95,6 +95,15 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                (animal.condition && animal.condition.some(c => c.value === 'x'));
     }, []);
 
+    const isInTransit = useCallback((animal: HousingTransferData) => {
+        if (!animal) return false;
+        return animal.destinationCage?.label === 'In Transit' || 
+               animal.destinationCage?.value === 'In Transit' || 
+               animal.destinationRoom?.label === 'In Transit' || 
+               animal.destinationRoom?.value === 'In Transit' ||
+               (animal.condition && animal.condition.some(c => c.value === 'it'));
+    }, []);
+
     const handleSpecialHousingConfirm = useCallback(() => {
         const trimmedRoom = specialHousingRoomInput.trim();
         if (!trimmedRoom || !specialHousingAnimalId) return;
@@ -227,7 +236,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             return [xCode];
         }
 
-        // TODO: Implement the actual flow chart logic here
+        if (destCageId === 'In Transit') {
+            const itCode = getCode('it', conditionCodes) || { value: 'it', label: 'it - In Transit', type: ConditionTypes.special };
+            return [itCode];
+        }
+
         const newCond: ConditionCode[] = [];
         let pairingCode;
         // The user will finish this function.
@@ -320,7 +333,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const newRowMetadata: Record<string, Partial<HousingRowMetadata>> = {};
 
         const getEffectiveCageId = (animal: HousingTransferData): string | null => {
-            if (isSpecialHousing(animal)) {
+            if (isSpecialHousing(animal) || isInTransit(animal)) {
                 return null;
             }
             if (animal.destinationRoom?.label === 'No Change') {
@@ -385,6 +398,14 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 return { ...a, condition: [xCode] };
             }
 
+            if (isInTransit(a)) {
+                newRowMetadata[a.id] = {
+                    animalsInDestinationCage: []
+                };
+                const itCode = getCode('it', conditionCodes) || { value: 'it', label: 'In Transit', type: ConditionTypes.special };
+                return { ...a, condition: [itCode] };
+            }
+
             const cageId = getEffectiveCageId(a);
             if (cageId && cageGroups[cageId]) {
                 const cageMates = cageGroups[cageId];
@@ -432,7 +453,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         if (JSON.stringify(updatedAnimals) !== JSON.stringify(currentAnimals)) {
             onAnimalsChange(updatedAnimals);
         }
-    }, [calculateConditionCodes, onAnimalsChange, allAnimals, autoConditions, isSpecialHousing, conditionCodes, roomLabel]);
+    }, [calculateConditionCodes, onAnimalsChange, allAnimals, autoConditions, isSpecialHousing, isInTransit, conditionCodes, roomLabel]);
 
     const handleAddAnimal = useCallback(() => {
         if (!newAnimalId || newAnimalId.trim() === '') return;
@@ -491,6 +512,26 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             setSpecialHousingRoomInput(initialRoom);
             setSpecialHousingDialogOpen(true);
             return animals;
+        }
+
+        if (newValue.value === 'In Transit' || newValue.label === 'In Transit') {
+            const inTransitCageOption = { label: 'In Transit', value: 'In Transit' };
+            const itCode = getCode('it', conditionCodes) || { value: 'it', label: 'In Transit', type: ConditionTypes.special };
+            setRowMetadata(prev => ({
+                ...prev,
+                [paramId]: {
+                    ...prev[paramId],
+                    cageOptions: [],
+                    animalsInDestinationCage: []
+                }
+            }));
+            updatedAnimalsState = animals.map(a =>
+                a.id === paramId
+                    ? { ...a, destinationRoom: newValue, destinationCage: inTransitCageOption, condition: [itCode] }
+                    : a
+            );
+            onAnimalsChange(updatedAnimalsState);
+            return updatedAnimalsState;
         }
 
         if (newValue.value === 'No Change') {
@@ -560,7 +601,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         return updatedAnimalsState;
 
         // Update condition codes as destination cage was cleared
-    }, [animals, onAnimalsChange]);
+    }, [animals, conditionCodes, onAnimalsChange]);
 
     const handleRemoveAnimal = useCallback((id: string) => {
         const updatedAnimals = animals.filter(a => a.id !== id);
@@ -613,9 +654,34 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             if (newRow.destinationCage && newRow.destinationRoom?.label &&
                 newRow.destinationCage.value !== 'Special Housing' && 
                 newRow.destinationCage.label !== 'Special Housing' && 
+                newRow.destinationCage.value !== 'In Transit' && 
+                newRow.destinationCage.label !== 'In Transit' && 
                 newRow.destinationCage.value !== '0' && 
                 newRow.destinationCage.value !== '-1') {
                 fetchAnimalsInCage(newRow.destinationRoom.label, newRow.destinationCage, newRow.id);
+            }
+        }
+
+        if (JSON.stringify(newRow.condition) !== JSON.stringify(oldRow.condition)) {
+            const newConds = (newRow.condition || []) as ConditionCode[];
+            const oldConds = (oldRow.condition || []) as ConditionCode[];
+
+            const isSpecialCondition = (c: ConditionCode) => c?.value === 'x' || c?.value === 'it' || c?.type === ConditionTypes.special;
+
+            const hasSpecialNew = newConds.some(isSpecialCondition);
+            const hadSpecialOld = oldConds.some(isSpecialCondition);
+
+            if (hasSpecialNew) {
+                const addedSpecial = newConds.find(c => isSpecialCondition(c) && !oldConds.some(oc => oc.value === c.value));
+                if (addedSpecial) {
+                    finalRow.condition = [addedSpecial];
+                } else if (hadSpecialOld && newConds.length > 1) {
+                    finalRow.condition = newConds.filter(c => !isSpecialCondition(c));
+                } else if (newConds.length > 1) {
+                    const firstSpecial = newConds.find(isSpecialCondition);
+                    finalRow.condition = [firstSpecial];
+                }
+                updatedAnimals = updatedAnimals.map(a => a.id === finalRow.id ? finalRow : a);
             }
         }
 
@@ -719,17 +785,21 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             isCellEditable: (params) => {
                 const isSpecial = params.row.destinationCage?.label === 'Special Housing' || params.row.destinationCage?.value === 'Special Housing';
                 const isNoChange = params.row.destinationRoom?.value === 'No Change' || params.row.destinationRoom?.label === 'No Change';
-                return !isSpecial && !isNoChange;
+                const inTransit = params.row.destinationRoom?.value === 'In Transit' || params.row.destinationRoom?.label === 'In Transit' ||
+                    params.row.destinationCage?.label === 'In Transit' || params.row.destinationCage?.value === 'In Transit';
+                return !isSpecial && !isNoChange && !inTransit;
             },
             renderEditCell: (params) => {
                 const metadata = rowMetadata[params.id as string];
                 const currentRow = params.row as HousingTransferData;
+                const disableClear = (currentRow.destinationRoom?.value === 'No Change' && currentRow.destinationCage?.value === '0') ||
+                    currentRow.destinationRoom?.value === 'In Transit' || currentRow.destinationCage?.value === 'In Transit';
                 return (
                     <AutoCompleteEditCell
                         {...params}
                         required={true}
                         options={metadata?.cageOptions || []}
-                        disableClearable={currentRow.destinationRoom?.value === 'No Change' && currentRow.destinationCage?.value === '0'}
+                        disableClearable={disableClear}
                     />
                 );
             },

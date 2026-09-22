@@ -295,9 +295,11 @@ export const createPrevHousingForm = async (prevFormId: string): Promise<Record<
         });
     }
 
-    const isSpecial = prevForm['condNew/special_condition'] === 'x' || !prevForm.cageNew;
+    const isSpecial = prevForm['condNew/special_condition'] === 'x';
+    const inTransit = prevForm['condNew/special_condition'] === 'it';
     const destCageOption = isSpecial
-        ? { value: 'Special Housing', label: 'Special Housing' }
+        ? { value: 'Special Housing', label: 'Special Housing' } :
+        inTransit ? {value: 'In Transit', label: 'In Transit'}
         : { value: prevForm.cageNew, label: prevForm['cageNew/cage_number'] };
 
     const data: HousingTransferData = {

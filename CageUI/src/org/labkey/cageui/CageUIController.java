@@ -561,13 +561,21 @@ public class CageUIController extends SpringActionController
                         || (record.getDestinationCage() != null && "Special Housing".equals(record.getDestinationCage().getValue()))
                         || (record.getDestinationCage() != null && "-1".equals(record.getDestinationCage().getValue()));
 
+                boolean inTransit = (record.getDestinationRoom() != null && "In Transit".equals(record.getDestinationRoom().getValue()))
+                        || (record.getDestinationRoom() != null && "In Transit".equals(record.getDestinationRoom().getLabel()))
+                        || (record.getDestinationCage() != null && "In Transit".equals(record.getDestinationCage().getLabel()))
+                        || (record.getDestinationCage() != null && "In Transit".equals(record.getDestinationCage().getValue()));
+
                 if (record.getDestinationRoom() != null && "No Change".equals(record.getDestinationRoom().getValue())) { // No change (animal stays same room and cage)
                     newTransferRecord.setRoom(record.getCurrentRoom() != null ? record.getCurrentRoom().getLabel() : null);
                     newTransferRecord.setCageNew(record.getCurrentCage() != null ? record.getCurrentCage().getValue() : null);
                 } else if (isSpecialHousing) { // Special housing
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
                     newTransferRecord.setCageNew(null);
-                } else {
+                }else if(inTransit){
+                    newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(null);
+                }else {
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
                     newTransferRecord.setCageNew(record.getDestinationCage() != null ? record.getDestinationCage().getValue() : null);
                 }

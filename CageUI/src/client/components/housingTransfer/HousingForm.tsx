@@ -136,9 +136,10 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 result.rows.forEach(row => {
                     rowOptions.push({label: row.room, value: row.room});
                 });
-                // Add no change to the options
-                rowOptions.splice(0,0,{label: "No Change", value: 'No Change'});
-                rowOptions.splice(0,0,{label: "Special Housing", value: 'Special Housing'});
+                // Add special options to the room list
+                rowOptions.splice(0, 0, { label: "No Change", value: 'No Change' });
+                rowOptions.splice(0, 0, { label: "In Transit", value: 'In Transit' });
+                rowOptions.splice(0, 0, { label: "Special Housing", value: 'Special Housing' });
                 setRoomOptions(rowOptions);
             }
         }).catch(err => {

@@ -201,6 +201,16 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 value: row.project.toString()
             }));
 
+            // default projectOptions, every animal has these.
+            projectOptions.push({
+                label: "300901",
+                value: "00300901"
+            },
+            {
+                label: "400901",
+                value: "00400901"
+            });
+
             setRowMetadata(prev => ({
                 ...prev,
                 [animalId]: {

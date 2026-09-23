@@ -2616,29 +2616,6 @@ public class TriggerScriptHelper {
         return requests.length() > 0;
     }
 
-    public Boolean checkIfUserIsWaterAdmin(int userId, int project, User currentUser)
-    {
-        boolean returnCondition = false;
-
-        TableInfo waterOrdersAccess = getTableInfo("wnprc","watermonitoring_access");
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("alloweduser/UserId"), userId);
-        filter.addCondition(FieldKey.fromString("project"), project,CompareType.EQUAL);
-
-        TableSelector userList = new TableSelector(waterOrdersAccess, PageFlowUtil.set("date", "alloweduser", "project"),filter, null);
-        userList.setMaxRows(1);
-        Map<String, Object>[] userFromServer = userList.getMapArray();
-
-        //updating and adding waters from server, objectid will take are of any duplicates
-
-        if (userFromServer.length>0){
-            EHRSecurityEscalator.beginEscalation(currentUser,container,"Allowing user to modify Water Orders");
-
-            returnCondition = true;
-
-        }
-        return  returnCondition;
-    }
-
     public void setAliasRow(JSONArray alias)
     {
         _aliasRow = alias;

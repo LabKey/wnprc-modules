@@ -334,57 +334,84 @@
         var necropsySuiteLookup = <%=necropsySuiteLookup%>;
         WebUtils.VM.necropsySuiteLookup = necropsySuiteLookup;
 
+        // Fetch every necropsy once: a query per calendar view let rapid paging pile up concurrent DB queries.
+        // Reads the dataset directly for just what the calendar renders; the detail panel queries "Necropsy Schedule" on click.
+        var necropsyEventsPromise = null;
+        var loadNecropsyEvents = function() {
+            if (necropsyEventsPromise === null) {
+                necropsyEventsPromise = WebUtils.API.selectRows("study", "necropsy", {
+                    columns: ['taskid', 'Id', 'date', 'location', 'QCState/Label'],
+                    'taskid~isnonblank': '',
+                    maxRows: -1
+                }).then(function(data) {
+                    return data.rows.map(function(row) {
+                        var eventObj = {
+                            title: row.Id,
+                            start: row.date,
+                            startDate: new Date(row.date),
+                            lsid: row.taskid,
+                            display: 'block'
+                        };
+
+                        if (row.location in necropsySuiteLookup) {
+                            eventObj.color = necropsySuiteLookup[row.location].color;
+                        }
+
+                        if (row['QCState/Label'] == "Request: On Hold"){
+                            eventObj.color = "purple"
+                        }
+
+                        return eventObj;
+                    });
+                });
+                necropsyEventsPromise.catch(function() {
+                    necropsyEventsPromise = null;
+                });
+            }
+            return necropsyEventsPromise;
+        };
+
+        var selectedLsid = null;
+
         $(document).ready(function() {
             let calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 themeSystem: 'bootstrap',
                 height: 800,
                 initialView: 'dayGridMonth',
+                navLinks: true,
                 headerToolbar: {
-                    left: 'prev,next,today',
+                    left: 'prevYear,prev,next,nextYear today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 eventSources: [{
-                events:  function (fetchInfo, callback) {
-                    console.log(" startStr " + fetchInfo.startStr);
-                    console.log(" endtStr " + moment(fetchInfo.startStr).format( "YYYY-MM-DD"));
-
-                    WebUtils.API.selectRows("study", "Necropsy Schedule", {
-                        "date~gte":  moment(fetchInfo.startStr).format( "YYYY-MM-DD"),
-                        "date~lte": moment(fetchInfo.endStr).format( "YYYY-MM-DD")
-                    }).then(function(data) {
-                        var events = data.rows;
-
-                        callback(events.map(function(row) {
-                            var eventObj = {
-                                title: row.animalid,
-                                start: row.date,
-                                rawRowData: row,
-                                display: 'block'
-                            };
-
-                            if (row.location in necropsySuiteLookup) {
-                                eventObj.color = necropsySuiteLookup[row.location].color;
-                            }
-                            debugger;
-
-                            if (row.qcstate == "Request: On Hold"){
-                                eventObj.color = "purple"
-                            }
-
-                            return eventObj;
-                        }))
-                    })
+                events:  function (fetchInfo, successCallback, failureCallback) {
+                    loadNecropsyEvents().then(function(events) {
+                        successCallback(events.filter(function(eventObj) {
+                            return eventObj.startDate >= fetchInfo.start && eventObj.startDate < fetchInfo.end;
+                        }));
+                    }, failureCallback);
                 }}],
                 eventClick: function(calEvent, jsEvent, view) {
-                    jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
-                        if (key in WebUtils.VM.taskDetails) {
-                            if (key == "date") {
-                                value = displayDate(value);
-                            }
-                            WebUtils.VM.taskDetails[key](value);
+                    var lsid = calEvent.event.extendedProps.lsid;
+                    selectedLsid = lsid;
+
+                    WebUtils.API.selectRows("study", "Necropsy Schedule", {
+                        "lsid~eq": lsid
+                    }).then(function(data) {
+                        if (selectedLsid !== lsid || data.rows.length === 0) {
+                            return;
                         }
+
+                        jQuery.each(data.rows[0], function(key, value) {
+                            if (key in WebUtils.VM.taskDetails) {
+                                if (key == "date") {
+                                    value = displayDate(value);
+                                }
+                                WebUtils.VM.taskDetails[key](value);
+                            }
+                        });
                     });
                 }
         },);
@@ -704,6 +731,7 @@
                     ]);
                 }).then(function() {
                     // Refresh the calendar view.
+                    necropsyEventsPromise = null;
                     calendar.refetchEvents();
 
                     WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
